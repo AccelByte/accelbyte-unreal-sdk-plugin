@@ -23,6 +23,21 @@ namespace SessionTopic
 const FString UserInvited = TEXT("OnPartyInvited");
 }
 
+namespace SessionJoinType
+{
+const FString Open = TEXT("open");
+const FString Closed = TEXT("closed");
+const FString InviteOnly = TEXT("inviteOnly");
+}
+
+namespace SessionMemberStatus
+{
+const FString Invited  = TEXT("invited");
+const FString Active   = TEXT("active");
+const FString Inactive = TEXT("inactive");
+const FString Timeout  = TEXT("timeout");
+}
+
 class ACCELBYTEUE4SDK_API Session
 {
 public:
@@ -48,36 +63,36 @@ public:
 	void GetPartyDetails(FString const& PartyID, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
-     * @brief Update a party 
-     *
-     * @param PartyID The ID of the party session to update.
-     * @param UpdateRequest The request body to update the party with.
-     * @param OnSuccess This will be called if the operation succeeded.
-     * @param OnError This will be called if the operation failed.
-     */
+	 * @brief Update a party 
+	 *
+	 * @param PartyID The ID of the party session to update.
+	 * @param UpdateRequest The request body to update the party with.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
 	void UpdateParty(FString const& PartyID, FAccelByteModelsV2PartyUpdateRequest const& UpdateRequest, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
-     * @brief Send a party invite to the given user. 
-     *
-     * @param PartyID The ID of the party session for which the invite will be created.
-     * @param UserID The ID of the user to invite.
-     * @param OnSuccess This will be called if the operation succeeded.
-     * @param OnError This will be called if the operation failed.
-     */
+	 * @brief Send a party invite to the given user.
+	 *
+	 * @param PartyID The ID of the party session for which the invite will be created.
+	 * @param UserID The ID of the user to invite.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
 	void SendPartyInvite(FString const& PartyID, FString const& UserID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
-     * @brief Reject an invite to a party 
-     *
-     * @param PartyID The ID of the party session containing the invite to reject.
-     * @param OnSuccess This will be called if the operation succeeded.
-     * @param OnError This will be called if the operation failed.
-     */
+	 * @brief Reject an invite to a party 
+	 *
+	 * @param PartyID The ID of the party session containing the invite to reject.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
 	void RejectPartyInvite(FString const& PartyID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
-	 * @brief Join a party on behalf of the user. 
+	 * @brief Join a party on behalf of the user.
 	 *
 	 * @param PartyID The ID of the party session which will be joined.
 	 * @param OnSuccess This will be called if the operation succeeded.
@@ -86,7 +101,7 @@ public:
 	void JoinParty(FString const& PartyID, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Leave a party on behalf of the user. 
+	 * @brief Leave a party on behalf of the user.
 	 *
 	 * @param PartyID The ID of the party session which will be joined.
 	 * @param OnSuccess This will be called if the operation succeeded.
@@ -95,14 +110,24 @@ public:
 	void LeaveParty(FString const& PartyID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
-     * @brief Kick another user from a party. 
-     *
-     * @param PartyID The ID of the party session which the user will be kicked from.
-     * @param UserID The ID of the user to kick 
-     * @param OnSuccess This will be called if the operation succeeded.
-     * @param OnError This will be called if the operation failed.
-     */
+	 * @brief Kick another user from a party.
+	 *
+	 * @param PartyID The ID of the party session which the user will be kicked from.
+	 * @param UserID The ID of the user to kick 
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
 	void KickUserFromParty(FString const& PartyID, FString const& UserID, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get a list of parties matching the given query. 
+	 *
+	 * @param Query The object containing fields to query on - empty fields are omitted. 
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void QueryParties(FAccelByteModelsV2PartyQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
+
 	
 private:
 	FHttpRetryScheduler& HttpRef;

@@ -117,7 +117,7 @@ bool PartyCreate::RunTest(const FString& Parameters)
 	bool bCreatePartySuccess = false;
 	FAccelByteModelsV2PartySession Response;
 	FAccelByteModelsV2PartyCreateRequest Request;
-	Request.JoinType = TEXT("inviteOnly");
+	Request.JoinType = Api::SessionJoinType::InviteOnly;
 	FRegistry::Session.CreateParty(Request, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bCreatePartySuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
 	{
 		bCreatePartySuccess = true;
@@ -161,7 +161,7 @@ bool PartyUpdate::RunTest(const FString& Parameters)
 	FAccelByteModelsV2PartySession Response;
 	FAccelByteModelsV2PartyUpdateRequest Request;
 
-	Request.JoinType = TEXT("open");
+	Request.JoinType = Api::SessionJoinType::Open;
 	Request.Version = Party.Version;
 	
 	FRegistry::Session.UpdateParty(Party.ID, Request, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bUpdateSuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
@@ -174,7 +174,7 @@ bool PartyUpdate::RunTest(const FString& Parameters)
 	
 	AB_TEST_TRUE(bUpdateSuccess);
 	AB_TEST_EQUAL(Response.ID, Party.ID);
-	AB_TEST_EQUAL(Request.JoinType, TEXT("open"));
+	AB_TEST_EQUAL(Request.JoinType, Api::SessionJoinType::Open);
 
 	Party = Response;
 	
@@ -353,5 +353,59 @@ bool PartyInviteReject::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bRejectInviteSuccess);
 	AB_TEST_TRUE(!TestPartyMembership(Party, InviteeUserID));
 	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyQuery, "AccelByte.Tests.Party.E.Query", AutomationFlagMaskParty);
+bool PartyQuery::RunTest(const FString& Parameters)
+{
+	bool bQueryPartiesSuccess = false;
+
+	FAccelByteModelsV2PartyQueryRequest Query1;
+	Query1.LeaderID = FRegistry::Credentials.GetUserId();
+
+	FAccelByteModelsV2PaginatedPartyQueryResult Response;
+	FRegistry::Session.QueryParties(Query1, THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bQueryPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
+	{
+		bQueryPartiesSuccess = true;
+		Response = QueryResponse;
+	}), PartyErrorHandler);
+	WaitUntil(bQueryPartiesSuccess, "Waiting for party query...");
+
+	AB_TEST_TRUE(bQueryPartiesSuccess);
+	AB_TEST_TRUE(Response.Data.Num() > 0);
+	for(auto& PartyResponse : Response.Data)
+	{
+		AB_TEST_EQUAL(PartyResponse.LeaderID, FRegistry::Credentials.GetUserId());
+	}
+
+	bQueryPartiesSuccess = false;
+
+	FAccelByteModelsV2PartyQueryRequest Query2;
+	Query2.MemberID = InviteeUserID;
+	FRegistry::Session.QueryParties(Query2, THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bQueryPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
+	{
+		bQueryPartiesSuccess = true;
+		Response = QueryResponse;
+	}), PartyErrorHandler);
+	WaitUntil(bQueryPartiesSuccess, "Waiting for party query...");
+
+	AB_TEST_TRUE(bQueryPartiesSuccess);
+	AB_TEST_EQUAL(Response.Data.Num(), 0);
+
+	bQueryPartiesSuccess = false;
+
+	FAccelByteModelsV2PartyQueryRequest Query3;
+	Query3.JoinType = Api::SessionJoinType::Closed;
+	FRegistry::Session.QueryParties(Query3, THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bQueryPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
+	{
+		bQueryPartiesSuccess = true;
+		Response = QueryResponse;
+	}), PartyErrorHandler);
+	WaitUntil(bQueryPartiesSuccess, "Waiting for party query...");
+
+	AB_TEST_TRUE(bQueryPartiesSuccess);
+	AB_TEST_EQUAL(Response.Data.Num(), 0);
+
 	return true;
 }
