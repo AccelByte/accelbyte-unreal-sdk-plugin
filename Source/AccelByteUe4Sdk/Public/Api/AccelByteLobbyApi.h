@@ -568,6 +568,17 @@ public:
 	 */
 	FString SendPartyPromoteLeaderRequest(const FString& UserId);
 
+	/**
+	* @brief Set the party's member limit.
+	* 
+	* @param PartyId The party id to be set.
+	* @param Limit The party member limit, should be above 0 and below the configured limit in admin portal.
+	* @param OnSuccess The callback triggered when operation is successfull
+	* @param OnError the callback triggered when operation failed.
+	*/
+	void SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FVoidHandler& OnSuccess,
+						const FErrorHandler& OnError) const;
+
 	//------------------------
 	// Notification
 	//------------------------

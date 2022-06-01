@@ -82,6 +82,7 @@ FAccelByteModelsPartyRejectResponse rejectPartyResponse;
 FAccelByteModelsPartyDataNotif partyDataNotif;
 FAccelByteModelsKickPartyMemberResponse kickMemberFromPartyResponse;
 FAccelByteModelsPartyInviteResponse partyInviteResponse;
+FAccelByteModelsCreatePartyResponse partyCreateResponse;
 
 FAccelByteModelsGetOnlineUsersResponse onlineUserResponse;
 FAccelByteModelsGetOnlineUsersResponse onlineFriendResponse;
@@ -472,6 +473,7 @@ const auto CreatePartyDelegate = Api::Lobby::FPartyCreateResponse::CreateLambda(
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Party Success!"));
 	bCreatePartySuccess = true;
+	partyCreateResponse = result;
 	if (result.PartyId.IsEmpty())
 	{
 		bCreatePartyError = true;
@@ -547,7 +549,7 @@ const auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](F
 	bJoinPartySuccess = true;
 	if (result.Code != "0")
 	{
-		bJoinPartyError = false;
+		bJoinPartyError = true;
 	}
 });
 
@@ -2171,6 +2173,101 @@ bool LobbyTestJoinParty_Via_PartyCodeInvalid::RunTest(const FString& Parameters)
 
 	LobbyDisconnect(1);
 	ResetResponses();
+	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTest_SetPartyLimit_Success, "AccelByte.Tests.Lobby.B.PartySetLimit", AutomationFlagMaskLobby);
+bool LobbyTest_SetPartyLimit_Success::RunTest(const FString& Parameters)
+{
+	constexpr int UserNum {2};
+	LobbyConnect(UserNum);
+
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInvitePartyResponseDelegate(InvitePartyDelegate);
+
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
+
+	// lobby 0 leave party
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
+	WaitUntil(bLeavePartySuccess, "waiting lobby 0 leave party");
+	
+	// lobby 1 leave party
+	bLeavePartySuccess = false;
+	LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
+	WaitUntil(bLeavePartySuccess, "waiting lobby 1 leave party");
+	
+	// lobby 0 create party
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
+	WaitUntil(bCreatePartySuccess);
+	FString PartyId = partyCreateResponse.PartyId;
+	
+	// lobby 0 set party limit to 1, save response A to assert
+	bool bSetPartyLimitDone {false};
+	const auto OnSetPartyLimitSuccess = FVoidHandler::CreateLambda(
+		[&bSetPartyLimitDone]()
+		{
+			bSetPartyLimitDone = true;
+		});
+	
+	LobbyApiClients[0]->Lobby.SetPartySizeLimit(PartyId, 1, OnSetPartyLimitSuccess, LobbyTestErrorHandler);
+	WaitUntil(bSetPartyLimitDone, "Waiting set party limit to 1");
+	const bool bSetPartyLimitSuccess = bSetPartyLimitDone;
+	
+	DelaySeconds(1, "delay 1 sec");
+
+	// lobby 0 invite lobby 1
+	LobbyApiClients[0]->Lobby.SendInviteToPartyRequest(LobbyApiClients[1]->CredentialsRef->GetUserId());
+	WaitUntil(bGetInvitedNotifSuccess, "Waiting get invitation notif when party limit 1");
+
+	// wait lobby 1 join response, expected to fail
+	LobbyApiClients[1]->Lobby.SendAcceptInvitationRequest(invitedToPartyResponse.PartyId, invitedToPartyResponse.InvitationToken);
+	WaitUntil(bJoinPartySuccess, "waiting invite party limited");
+	const bool bJoinPartyLimitedError {bJoinPartyError};
+
+	// lobby 0 set party limit to 2
+	bSetPartyLimitDone = false;
+	LobbyApiClients[0]->Lobby.SetPartySizeLimit(PartyId, 2, OnSetPartyLimitSuccess, LobbyTestErrorHandler);
+	WaitUntil(bSetPartyLimitDone, "Waiting set party limit to 2");
+
+	DelaySeconds(1, "waiting 1 sec");
+
+	// lobby 1 accept invitation, expected to succeed
+	bJoinPartySuccess = false;
+	bJoinPartyError = false;
+	LobbyApiClients[1]->Lobby.SendAcceptInvitationRequest(invitedToPartyResponse.PartyId, invitedToPartyResponse.InvitationToken);
+	WaitUntil(bJoinPartySuccess, "Waiting join party success");
+	const bool bJoinPartyNotLimitedSuccess {!bJoinPartyError};
+
+	// lobby 1 tries set party limit, failed, save response D to assert
+	bSetPartyLimitDone = false;
+	bool bSetPartyLimitError = false;
+	const auto OnSetPartyLimitError = FErrorHandler::CreateLambda([&bSetPartyLimitError](const int32 Code, const FString& Message)
+	{
+		bSetPartyLimitError = true;
+	});
+	
+	LobbyApiClients[1]->Lobby.SetPartySizeLimit(PartyId, 3, OnSetPartyLimitSuccess, OnSetPartyLimitError);
+	WaitUntil([&](){return bSetPartyLimitDone || bSetPartyLimitError;}, "Waiting non leader set party limit");
+	const bool bNonPartyLeaderSetLimitError {bSetPartyLimitError};
+	
+	LobbyDisconnect(UserNum);
+	ResetResponses();
+
+	// assert A is ok
+	AB_TEST_TRUE(bSetPartyLimitSuccess);
+
+	// assert B is fail
+	AB_TEST_TRUE(bJoinPartyLimitedError);
+	
+	// assert c is ok
+	AB_TEST_TRUE(bJoinPartyNotLimitedSuccess);
+	
+	// assert d is fail
+	AB_TEST_TRUE(bNonPartyLeaderSetLimitError);
 	
 	return true;
 }

@@ -639,6 +639,37 @@ FString Lobby::SendPartyPromoteLeaderRequest(const FString& UserId)
 		, FString::Printf(TEXT("newLeaderUserId: %s\n"), *UserId))
 }
 
+void Lobby::SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
+{
+	if(Limit <= 0)
+	{
+		FReport::Log("Party size limit should be above 0");
+		return;
+	}
+	
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/limit"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *PartyId);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FAccelByteModelsPartySetLimitRequest Content;
+	Content.Limit = Limit;
+	
+	FString ContentString;
+	FJsonObjectConverter::UStructToJsonObjectString(Content, ContentString);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(ContentString);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 //-------------------------------------------------------------------------------------------------
 // Presence
 //-------------------------------------------------------------------------------------------------
