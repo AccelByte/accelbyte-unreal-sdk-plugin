@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Http.h"
 #include "JsonUtilities.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 #include <unordered_map>
 
