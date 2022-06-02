@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Dom/JsonObject.h"
+#include "Templates/SharedPointer.h"
 #include "AccelByteJwtWrapper.generated.h"
 
 USTRUCT(BlueprintType)
