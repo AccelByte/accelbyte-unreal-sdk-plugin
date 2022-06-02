@@ -7,7 +7,6 @@
 
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Models/AccelByteCloudSaveModels.h"
 #include "Models/AccelByteSessionModels.h"
 
 namespace AccelByte
@@ -43,6 +42,52 @@ class ACCELBYTEUE4SDK_API Session
 public:
 	Session(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Session();
+
+	/**
+	 * @brief Create a new game session.
+	 *
+	 * @param CreateRequest The game session creation request body.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get details for a game session by ID
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GetGameSessionDetails(FString const& GameSessionID, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Update a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param UpdateRequest The game session update request body.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void UpdateGameSession(FString const& GameSessionID, FAccelByteModelsV2GameSessionUpdateRequest const& UpdateRequest, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void DeleteGameSession(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Join a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void JoinGameSession(FString const& GameSessionID, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Create a new party with the calling user as the sole member.
@@ -120,9 +165,9 @@ public:
 	void KickUserFromParty(FString const& PartyID, FString const& UserID, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Get a list of parties matching the given query. 
+	 * @brief Get a list of parties matching the given query.
 	 *
-	 * @param Query The object containing fields to query on - empty fields are omitted. 
+	 * @param Query The object containing fields to query on - empty fields are omitted.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 */
