@@ -23,11 +23,11 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API ServerUser
 		{
 		public:
-			ServerUser(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+			ServerUser(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 			~ServerUser();
 		private:
-			const ServerCredentials& Credentials;
-			const ServerSettings& Settings;
+			ServerCredentials const& CredentialsRef;
+			ServerSettings const& SettingsRef;
 			FHttpRetryScheduler& HttpRef;
 		public:
 			/**

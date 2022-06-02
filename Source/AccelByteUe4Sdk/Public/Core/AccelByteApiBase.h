@@ -16,10 +16,9 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API FApiBase
 {
 public:
-	FApiBase(
-		Credentials const& CredentialsRef,
-		Settings const& SettingsRef,
-		FHttpRetryScheduler& HttpRef);
+	FApiBase(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef);
 	
 protected:
 	Credentials const& CredentialsRef;

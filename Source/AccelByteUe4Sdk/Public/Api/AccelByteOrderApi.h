@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Order
 {
 public:
-	Order(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Order(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Order();
 private:
 	FHttpRetryScheduler& HttpRef;

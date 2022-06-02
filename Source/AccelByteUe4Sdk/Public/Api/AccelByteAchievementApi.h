@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Achievement
 {
 public:
-	Achievement(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Achievement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Achievement();
 
 	/**

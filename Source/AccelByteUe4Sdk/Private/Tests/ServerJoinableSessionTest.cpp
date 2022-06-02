@@ -5,6 +5,7 @@
 #include "Misc/AutomationTest.h"
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "Api/AccelByteLobbyApi.h"
 #include "Api/AccelByteQos.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
@@ -39,10 +40,8 @@ const auto JoinableSessionTestErrorHandler = FErrorHandler::CreateLambda([](int3
 
 const int ActiveUserCount = 2;
 const float DSNotifWaitTime = 130;
-FString ActiveUserIds[ActiveUserCount];
-Credentials ActiveUserCreds[ActiveUserCount];
-TArray<TSharedPtr<Api::User>> ActiveUsers;
-TArray<TSharedPtr<Api::Lobby>> ActiveLobbies;
+TArray<FTestUser> ActiveUsers;
+TArray<FApiClientPtr> ActiveApiClients;
 FString JoinableChannelName = "";
 FString NonJoinableChannelName = "";
 FString LocalDSPodName = "";
@@ -50,27 +49,62 @@ bool isDSRegistered = false;
 bool isSessionQueued = false;
 FAccelByteModelsMatchmakingResult DSGetMatchData;
 
-TSharedPtr<Api::Lobby> CreateLobby(Credentials Creds)
+void ActiveLobbyConnect(int UserCount)
 {
-	TSharedPtr<Api::Lobby> lobby =  MakeShared<Api::Lobby>(Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-	lobby->Connect();
-	ActiveLobbies.Add(lobby);
-	return lobby;
+	if (UserCount > ActiveUserCount)
+	{
+		UserCount = ActiveUserCount;
+	}
+	if (UserCount <= 0)
+	{
+		UserCount = 1;
+	}
+	for (int Index = 0; Index < UserCount; Index++)
+	{
+		FApiClientPtr ApiClient = ActiveApiClients[Index];
+		if (!ApiClient->Lobby.IsConnected())
+		{
+			ApiClient->Lobby.Connect();
+		}
+		
+		while (!ApiClient->Lobby.IsConnected())
+		{
+			FPlatformProcess::Sleep(.5f);
+			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("LobbyConnect: Wait user %s to connect")
+				, *ApiClient->CredentialsRef->GetUserId());
+			FTicker::GetCoreTicker().Tick(.5f);
+		}
+	}
+}
+
+void ActiveLobbyDisconnect(int UserCount)
+{
+	if (UserCount > ActiveUserCount)
+	{
+		UserCount = ActiveUserCount;
+	}
+	if (UserCount <= 0)
+	{
+		UserCount = 1;
+	}
+	for (int Index = 0; Index < UserCount; Index++)
+	{
+		FApiClientPtr ApiClient = ActiveApiClients[Index];
+		ApiClient->Lobby.UnbindEvent();
+		ApiClient->Lobby.Disconnect();
+		while (ApiClient->Lobby.IsConnected())
+		{
+			FPlatformProcess::Sleep(.5f);
+			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Lobby Disconnect: Waiting user %s to disconnect")
+				, *ApiClient->CredentialsRef->GetUserId());
+			FTicker::GetCoreTicker().Tick(.5f);
+		}
+	}
 }
 
 bool TestCleanUp()
 {
-	for(auto lobby : ActiveLobbies)
-	{
-
-		if (lobby->IsConnected())
-		{
-			UE_LOG(LogAccelByteJoinableSessionTest, Warning, TEXT("[LOBBY] Dangling websocket connection, previous test are not closing WS connection, please disconnect it at the of of the tests, disconnecting..."));
-			lobby->Disconnect();
-		}
-
-	}
-	ActiveLobbies.Empty();
+	ActiveLobbyDisconnect(ActiveUserCount);
 
 	if (isSessionQueued && !DSGetMatchData.Match_id.IsEmpty())
 	{
@@ -103,7 +137,7 @@ bool TestCleanUp()
 		DSGetMatchData = FAccelByteModelsMatchmakingResult();
 	}
 
-	return ((ActiveLobbies.Num() == 0) && !isSessionQueued && !isDSRegistered);
+	return !isSessionQueued && !isDSRegistered;
 }
 
 bool RegisterDS()
@@ -111,12 +145,11 @@ bool RegisterDS()
 	//GameServer SDK / Local DS
 	LocalDSPodName = "ue4SdkTestJoinableServerName" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	bool bServerLoginWithClientCredentialsDone = false;
-	FRegistry::ServerOauth2.LoginWithClientCredentials(
-		FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
-	{
-		bServerLoginWithClientCredentialsDone = true;
-	}),
-		JoinableSessionTestErrorHandler);
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
+			{
+				bServerLoginWithClientCredentialsDone = true;
+			})
+		, JoinableSessionTestErrorHandler);
 
 	WaitUntil(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
@@ -125,15 +158,14 @@ bool RegisterDS()
 	FString LocalIPStr = LocalIp->IsValid() ? LocalIp->ToString(false) : "";
 
 	bool bRegisterLocalServerToDSMDone = false;
-	FRegistry::ServerDSM.RegisterLocalServerToDSM(
-		LocalIPStr,
-		7777,
-		LocalDSPodName,
-		FVoidHandler::CreateLambda([&bRegisterLocalServerToDSMDone]()
-	{
-		bRegisterLocalServerToDSMDone = true;
-	}),
-		JoinableSessionTestErrorHandler);
+	FRegistry::ServerDSM.RegisterLocalServerToDSM(LocalIPStr
+		, 7777
+		, LocalDSPodName
+		, FVoidHandler::CreateLambda([&bRegisterLocalServerToDSMDone]()
+			{
+				bRegisterLocalServerToDSMDone = true;
+			})
+		, JoinableSessionTestErrorHandler);
 
 	WaitUntil(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
 
@@ -202,60 +234,23 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 	{
 		UsersCreationSuccess[i] = false;
 		UsersLoginSuccess[i] = false;
-		bClientLoginSuccess = false;
 
-		ActiveUsers.Add(MakeShared<Api::User>(ActiveUserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
-
-		FString Email = FString::Printf(TEXT("joinablelobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
-		Email.ToLowerInline();
-		FString Password = TEXT("123Password123");
-		FString DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
-		FString Country = "US";
+		FTestUser TestUser{i};
+		TestUser.Email = FString::Printf(TEXT("joinablelobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
+		TestUser.Email.ToLowerInline();
+		TestUser.Password = TEXT("123Password123");
+		TestUser.DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
+		TestUser.Country = "US";
 		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 35));
-		const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+		TestUser.DateOfBirth = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-		ActiveUsers[i]->Register(
-			Email, 
-			Password, 
-			DisplayName, 
-			Country, 
-			format, 
-			THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
-			{
-				UsersCreationSuccess[i] = true;
-				UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Test Lobby User %d/%d is Created"), i, ActiveUserCount);
+		UsersCreationSuccess[i] = RegisterTestUser(TestUser);
 
-			}), 
-			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-			{
-				UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Code=%d"), Code);
-				if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException || (ErrorCodes)Code == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
-				{
-					UsersCreationSuccess[i] = true;
-					UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Test Lobby User %d/%d is already"), i, ActiveUserCount);
-				}
-				else
-				{
-					UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Test Lobby User %d/%d can't be created"), i, ActiveUserCount);
-				}
-			}));
-		
-		WaitUntil(UsersCreationSuccess[i],"Waiting for user created...");
+		UsersLoginSuccess[i] = LoginTestUser(TestUser);
 
-		ActiveUsers[i]->LoginWithUsername(
-			Email,
-			Password,
-			FVoidHandler::CreateLambda([&]()
-			{
-				UsersLoginSuccess[i] = true;
-				ActiveUserIds[i] = ActiveUserCreds[i].GetUserId();
-			}), 
-			FCustomErrorHandler::CreateLambda([](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
-			{
-				UE_LOG(LogAccelByteJoinableSessionTest, Error, TEXT("Login Failed..! Error: %d | Message: %s"), Code, *Message);
-			}));
-		
-		WaitUntil(UsersLoginSuccess[i],"Waiting for Login...");
+		ActiveUsers.Add(TestUser);
+
+		ActiveApiClients.Add(FMultiRegistry::GetApiClient(TestUser.Email));
 	}
 	
 	for (int i = 0; i < ActiveUserCount; i++)
@@ -273,11 +268,15 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 	JoinableChannelName = "ue4sdktestjoinable" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	AdminCreateMatchmakingChannel(JoinableChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-	{
-		bCreateMatchmakingChannelSuccess = true;
-		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-	}), JoinableSessionTestErrorHandler, true);
+	AdminCreateMatchmakingChannel(JoinableChannelName
+		, AllianceRule
+		, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+		{
+			bCreateMatchmakingChannelSuccess = true;
+			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+		})
+		, JoinableSessionTestErrorHandler
+		, true);
 	WaitUntil([&]()
 	{
 		return bCreateMatchmakingChannelSuccess;
@@ -287,16 +286,21 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 	NonJoinableChannelName = "ue4sdktestnonjoinable" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bCreateMatchmakingChannelSuccess = false;
-	AdminCreateMatchmakingChannel(NonJoinableChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-	{
-		bCreateMatchmakingChannelSuccess = true;
-		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-	}), JoinableSessionTestErrorHandler);
+	AdminCreateMatchmakingChannel(NonJoinableChannelName
+		, AllianceRule
+		, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+		{
+			bCreateMatchmakingChannelSuccess = true;
+			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+		})
+		, JoinableSessionTestErrorHandler);
 	WaitUntil([&]()
 	{
 		return bCreateMatchmakingChannelSuccess;
 	}, "Create NonJoinable Matchmaking channel...", 60);
 	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+
+	DelaySeconds(60.0f, TEXT("Waiting 60s for lobby service to refresh matchmaking game mode cache from MM service"));
 
 	return true;
 }
@@ -305,24 +309,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestTeardown, "AccelByte.Tests.J
 bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 {
 	//Delete Users
-	bool bDeleteUsersSuccessful[ActiveUserCount];
-	ActiveLobbies.Reset(0);
+	ActiveLobbyDisconnect(ActiveUserCount);
 
-	for (int i = 0; i < ActiveUserCount; i++)
-	{
-		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("DeleteUserById (%d/%d)"), i + 1, ActiveUserCount);
-		AdminDeleteUser(ActiveUserCreds[i].GetUserId(), FSimpleDelegate::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Success"));
-			bDeleteUsersSuccessful[i] = true;
-		}), JoinableSessionTestErrorHandler);
-		WaitUntil(bDeleteUsersSuccessful[i],"Waiting for user deletion...");
-	}
-
-	for (int i = 0; i < ActiveUserCount; i++)
-	{
-		AB_TEST_TRUE(bDeleteUsersSuccessful[i]);
-	}
+	AB_TEST_TRUE(TeardownTestUsers(ActiveUsers));
 
 	//Delete Matchmaking Channel
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -350,48 +339,42 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestTwoPartyMatchmake, "AccelByt
 bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 {
 	//Arrange
-	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
-	TSharedPtr<Lobby> lobbyB = CreateLobby(ActiveUserCreds[1]);
-
-	WaitUntil([&lobbyA]()
-	{
-		return lobbyA->IsConnected();
-	}, "Lobby Connect...", 10);
+	ActiveLobbyConnect(2);
 
 	FString AMatchId = "";
 	FString BMatchId = "";
 
-	lobbyA->SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
+	ActiveApiClients[0]->Lobby.SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
 	{
 		AMatchId = Result.MatchId;
 	}));
 
-	lobbyA->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&lobbyA](const FAccelByteModelsMatchmakingNotice& Result)
+	ActiveApiClients[0]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([](const FAccelByteModelsMatchmakingNotice& Result)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
-		lobbyA->SendReadyConsentRequest(Result.MatchId);
+		ActiveApiClients[0]->Lobby.SendReadyConsentRequest(Result.MatchId);
 	}));
 
-	lobbyB->SetDsNotifDelegate(THandler<FAccelByteModelsDsNotice>::CreateLambda([&BMatchId](const FAccelByteModelsDsNotice& Result)
+	ActiveApiClients[1]->Lobby.SetDsNotifDelegate(THandler<FAccelByteModelsDsNotice>::CreateLambda([&BMatchId](const FAccelByteModelsDsNotice& Result)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("B Received DS Update, MatchID %s"),  *Result.MatchId);
 		BMatchId = Result.MatchId;
 	}));
 
 	bool leavePartyDoneA = false;
-	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
+	ActiveApiClients[0]->Lobby.SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
 	{
 		leavePartyDoneA = true;
 	}));
-	lobbyA->SendLeavePartyRequest();
+	ActiveApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(leavePartyDoneA, "wait leaving party A");
 
 	bool leavePartyDoneB = false;
-	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
+	ActiveApiClients[1]->Lobby.SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
 	{
 		leavePartyDoneB = true;
 	}));
-	lobbyB->SendLeavePartyRequest();
+	ActiveApiClients[1]->Lobby.SendLeavePartyRequest();
 	WaitUntil(leavePartyDoneB, "wait leaving party B");
 
 	// register local DS
@@ -400,38 +383,40 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 
 	bool bGetServerInfoDone = false;
 	FAccelByteModelsServerInfo ServerInfo;
-	FRegistry::ServerDSM.GetServerInfo(THandler<FAccelByteModelsServerInfo>::CreateLambda([&bGetServerInfoDone, &ServerInfo](const FAccelByteModelsServerInfo& result)
-		{
-			ServerInfo = result;
-			bGetServerInfoDone = true;
-			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Server Info Found, Pod Name %s"), *result.Pod_name);
-		}),
-		FErrorHandler::CreateLambda([&bGetServerInfoDone](int32 ErrorCode, FString ErrorMessage)
+	FRegistry::ServerDSM.GetServerInfo(THandler<FAccelByteModelsServerInfo>::CreateLambda(
+			[&bGetServerInfoDone, &ServerInfo](const FAccelByteModelsServerInfo& result)
+			{
+				ServerInfo = result;
+				bGetServerInfoDone = true;
+				UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Server Info Found, Pod Name %s"), *result.Pod_name);
+			})
+		, FErrorHandler::CreateLambda([&bGetServerInfoDone](int32 ErrorCode, FString ErrorMessage)
 			{
 				bGetServerInfoDone = true;
 				UE_LOG(LogAccelByteJoinableSessionTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-			}));
+			})
+		);
 	WaitUntil(bGetServerInfoDone, "Waiting Get Server Info");
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
 	bool bIsCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	ActiveApiClients[0]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
 		bIsCreatePartySuccess = true;
 	}));
-	lobbyA->SendCreatePartyRequest();
+	ActiveApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	ActiveApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
 		bIsStartMatchmakingSuccess = true;
 	}));
-	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
+	ActiveApiClients[0]->Lobby.SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
 	WaitUntil(bIsStartMatchmakingSuccess, "A Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
@@ -454,22 +439,22 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
 	bIsCreatePartySuccess = false;
-	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	ActiveApiClients[1]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		BCreatePartyResult = Result;
 		bIsCreatePartySuccess = true;
 	}));
-	lobbyB->SendCreatePartyRequest();
+	ActiveApiClients[1]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bIsCreatePartySuccess, "Lobby B creating party");
 
 	FAccelByteModelsMatchmakingResponse BMatchmakingResult;
 	bIsStartMatchmakingSuccess = false;
-	lobbyB->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&BMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	ActiveApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&BMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		BMatchmakingResult = Result;
 		bIsStartMatchmakingSuccess = true;
 	}));
-	lobbyB->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
+	ActiveApiClients[1]->Lobby.SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
 	WaitUntil(bIsStartMatchmakingSuccess, "B Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
@@ -478,12 +463,10 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		return !BMatchId.IsEmpty();
 	}, "", 20);
 
-
-	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
+	for (int i = ActiveApiClients.Num() - 1; i >= 0; i--)
 	{
-		ActiveLobbies[i]->SendLeavePartyRequest();
-		ActiveLobbies[i]->Disconnect();
-		ActiveLobbies.RemoveAt(i);
+		ActiveApiClients[i]->Lobby.SendLeavePartyRequest();
+		ActiveApiClients[i]->Lobby.Disconnect();
 	}
 
 	AB_TEST_FALSE(ServerInfo.Pod_name.IsEmpty());
@@ -498,32 +481,27 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestAddRemovePlayerManual, "Acce
 bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters)
 {
 	//Arrange
-	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
-
-	WaitUntil([&lobbyA]()
-	{
-		return lobbyA->IsConnected();
-	}, "Lobby Connect...", 10);
+	ActiveLobbyConnect(1);
 
 	FString AMatchId = "";
 
-	lobbyA->SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
+	ActiveApiClients[0]->Lobby.SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
 	{
 		AMatchId = Result.MatchId;
 	}));
 
-	lobbyA->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&lobbyA](const FAccelByteModelsMatchmakingNotice& Result)
+	ActiveApiClients[0]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([](const FAccelByteModelsMatchmakingNotice& Result)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
-		lobbyA->SendReadyConsentRequest(Result.MatchId);
+		ActiveApiClients[0]->Lobby.SendReadyConsentRequest(Result.MatchId);
 	}));
 
 	bool leavePartyDoneA = false;
-	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
+	ActiveApiClients[0]->Lobby.SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
 	{
 		leavePartyDoneA = true;
 	}));
-	lobbyA->SendLeavePartyRequest();
+	ActiveApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(leavePartyDoneA, "wait leaving party A");
 
 	// register local DS
@@ -532,38 +510,40 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	
 	bool bGetServerInfoDone = false;
 	FAccelByteModelsServerInfo ServerInfo;
-	FRegistry::ServerDSM.GetServerInfo(THandler<FAccelByteModelsServerInfo>::CreateLambda([&bGetServerInfoDone, &ServerInfo](const FAccelByteModelsServerInfo& result)
-		{
-			ServerInfo = result;
-			bGetServerInfoDone = true;
-			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Server Info Found, Pod Name %s"), *result.Pod_name);
-		}),
-		FErrorHandler::CreateLambda([&bGetServerInfoDone](int32 ErrorCode, FString ErrorMessage)
+	FRegistry::ServerDSM.GetServerInfo(THandler<FAccelByteModelsServerInfo>::CreateLambda(
+			[&bGetServerInfoDone, &ServerInfo](const FAccelByteModelsServerInfo& result)
+			{
+				ServerInfo = result;
+				bGetServerInfoDone = true;
+				UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Server Info Found, Pod Name %s"), *result.Pod_name);
+			})
+		, FErrorHandler::CreateLambda([&bGetServerInfoDone](int32 ErrorCode, FString ErrorMessage)
 			{
 				bGetServerInfoDone = true;
 				UE_LOG(LogAccelByteJoinableSessionTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-			}));
+			})
+		);
 	WaitUntil(bGetServerInfoDone, "Waiting Get Server Info");
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
 	bool bIsCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	ActiveApiClients[0]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
 		bIsCreatePartySuccess = true;
 	}));
-	lobbyA->SendCreatePartyRequest();
+	ActiveApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	ActiveApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
 		bIsStartMatchmakingSuccess = true;
 	}));
-	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
+	ActiveApiClients[0]->Lobby.SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
 	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
@@ -584,7 +564,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	DelaySeconds(3, "Waiting backend syncing session");
 
 	bool bAddUserSuccess = false;
-	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bAddUserSuccess]()
+	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUsers[1].UserId, FVoidHandler::CreateLambda([&bAddUserSuccess]()
 	{
 		bAddUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
@@ -600,7 +580,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
-	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
+	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUsers[1].UserId, FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
@@ -616,11 +596,10 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	}), JoinableSessionTestErrorHandler);
 	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 	
-	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
+	for (int i = ActiveApiClients.Num() - 1; i >= 0; i--)
 	{
-		ActiveLobbies[i]->SendLeavePartyRequest();
-		ActiveLobbies[i]->Disconnect();
-		ActiveLobbies.RemoveAt(i);
+		ActiveApiClients[i]->Lobby.SendLeavePartyRequest();
+		ActiveApiClients[i]->Lobby.Disconnect();
 	}
 
 	// Assertions
@@ -635,7 +614,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		{
 			for(auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[1].GetUserId())
+				if (member.User_id == ActiveUsers[1].UserId)
 				{
 					userIdExist = true;
 					break;
@@ -656,7 +635,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		{
 			for (auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[1].GetUserId())
+				if (member.User_id == ActiveUsers[1].UserId)
 				{
 					userIdExist = true;
 					break;
@@ -677,7 +656,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		{
 			for (auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[1].GetUserId())
+				if (member.User_id == ActiveUsers[1].UserId)
 				{
 					userIdExist = true;
 					break;
@@ -696,41 +675,35 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestAddRemovePlayerPartyParam, "
 bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parameters)
 {
 	//Arrange
-	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
-	TSharedPtr<Lobby> lobbyB = CreateLobby(ActiveUserCreds[1]);
-
-	WaitUntil([&lobbyA]()
-	{
-		return lobbyA->IsConnected();
-	}, "Lobby Connect...", 10);
+	ActiveLobbyConnect(2);
 
 	FString AMatchId = "";
 
-	lobbyA->SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
+	ActiveApiClients[0]->Lobby.SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
 	{
 		AMatchId = Result.MatchId;
 	}));
 
-	lobbyA->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&lobbyA](const FAccelByteModelsMatchmakingNotice& Result)
+	ActiveApiClients[0]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([](const FAccelByteModelsMatchmakingNotice& Result)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
-		lobbyA->SendReadyConsentRequest(Result.MatchId);
+		ActiveApiClients[0]->Lobby.SendReadyConsentRequest(Result.MatchId);
 	}));
 
 	bool leavePartyDoneA = false;
-	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
+	ActiveApiClients[0]->Lobby.SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
 	{
 		leavePartyDoneA = true;
 	}));
-	lobbyA->SendLeavePartyRequest();
+	ActiveApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(leavePartyDoneA, "wait leaving party A");
 
 	bool leavePartyDoneB = false;
-	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
+	ActiveApiClients[1]->Lobby.SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
 	{
 		leavePartyDoneB = true;
 	}));
-	lobbyB->SendLeavePartyRequest();
+	ActiveApiClients[1]->Lobby.SendLeavePartyRequest();
 	WaitUntil(leavePartyDoneB, "wait leaving party B");
 
 	// register local DS
@@ -740,22 +713,22 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
 	bool bIsCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	ActiveApiClients[0]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
 		bIsCreatePartySuccess = true;
 	}));
-	lobbyA->SendCreatePartyRequest();
+	ActiveApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	ActiveApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
 		bIsStartMatchmakingSuccess = true;
 	}));
-	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
+	ActiveApiClients[0]->Lobby.SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
 	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
@@ -778,16 +751,16 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
 	bIsCreatePartySuccess = false;
-	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	ActiveApiClients[1]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		BCreatePartyResult = Result;
 		bIsCreatePartySuccess = true;
 	}));
-	lobbyB->SendCreatePartyRequest();
+	ActiveApiClients[1]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bIsCreatePartySuccess, "Lobby B creating party");
 
 	bool bAddUserSuccess = false;
-	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bAddUserSuccess]()
+	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUsers[1].UserId, FVoidHandler::CreateLambda([&bAddUserSuccess]()
 	{
 		bAddUserSuccess = true;
 	}), JoinableSessionTestErrorHandler, BCreatePartyResult.PartyId);
@@ -803,7 +776,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
-	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
+	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUsers[1].UserId, FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
@@ -819,11 +792,10 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	}), JoinableSessionTestErrorHandler);
 	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
-	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
+	for (int i = ActiveApiClients.Num() - 1; i >= 0; i--)
 	{
-		ActiveLobbies[i]->SendLeavePartyRequest();
-		ActiveLobbies[i]->Disconnect();
-		ActiveLobbies.RemoveAt(i);
+		ActiveApiClients[i]->Lobby.SendLeavePartyRequest();
+		ActiveApiClients[i]->Lobby.Disconnect();
 	}
 
 	// Assertions
@@ -841,7 +813,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 			}
 			for(auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[1].GetUserId())
+				if (member.User_id == ActiveUsers[1].UserId)
 				{
 					userIdExist = true;
 					break;
@@ -868,7 +840,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 			}
 			for(auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[1].GetUserId())
+				if (member.User_id == ActiveUsers[1].UserId)
 				{
 					userIdExist = true;
 				}
@@ -895,7 +867,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 			}
 			for(auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[1].GetUserId())
+				if (member.User_id == ActiveUsers[1].UserId)
 				{
 					userIdExist = true;
 					break;
@@ -915,54 +887,48 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestNonJoinable, "AccelByte.Test
 bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 {
 	//Arrange
-	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
-	TSharedPtr<Lobby> lobbyB = CreateLobby(ActiveUserCreds[1]);
-
-	WaitUntil([&lobbyA, &lobbyB]()
-	{
-		return lobbyA->IsConnected() && lobbyB->IsConnected();
-	}, "Lobby Connect...", 10);
+	ActiveLobbyConnect(ActiveUserCount);
 
 	FString AMatchId = "";
 	FString BMatchId = "";
 
-	lobbyA->SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
+	ActiveApiClients[0]->Lobby.SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
 	{
 		AMatchId = Result.MatchId;
 	}));
 
-	lobbyA->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&lobbyA](const FAccelByteModelsMatchmakingNotice& Result)
+	ActiveApiClients[0]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([](const FAccelByteModelsMatchmakingNotice& Result)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
-		lobbyA->SendReadyConsentRequest(Result.MatchId);
+		ActiveApiClients[0]->Lobby.SendReadyConsentRequest(Result.MatchId);
 	}));
 
-	lobbyB->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&lobbyB](const FAccelByteModelsMatchmakingNotice& Result)
+	ActiveApiClients[1]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([](const FAccelByteModelsMatchmakingNotice& Result)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
-		lobbyB->SendReadyConsentRequest(Result.MatchId);
+		ActiveApiClients[1]->Lobby.SendReadyConsentRequest(Result.MatchId);
 	}));
 
-	lobbyB->SetDsNotifDelegate(THandler<FAccelByteModelsDsNotice>::CreateLambda([&BMatchId](const FAccelByteModelsDsNotice& Result)
+	ActiveApiClients[1]->Lobby.SetDsNotifDelegate(THandler<FAccelByteModelsDsNotice>::CreateLambda([&BMatchId](const FAccelByteModelsDsNotice& Result)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("B Received DS Update, MatchID %s"), *Result.MatchId);
 		BMatchId = Result.MatchId;
 	}));
 
 	bool leavePartyDoneA = false;
-	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
+	ActiveApiClients[0]->Lobby.SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
 	{
 		leavePartyDoneA = true;
 	}));
-	lobbyA->SendLeavePartyRequest();
+	ActiveApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(leavePartyDoneA, "wait leaving party A");
 
 	bool leavePartyDoneB = false;
-	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
+	ActiveApiClients[1]->Lobby.SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
 	{
 		leavePartyDoneB = true;
 	}));
-	lobbyB->SendLeavePartyRequest();
+	ActiveApiClients[1]->Lobby.SendLeavePartyRequest();
 	WaitUntil(leavePartyDoneB, "wait leaving party B");
 
 	// register local DS
@@ -972,22 +938,22 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
 	bool bIsCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	ActiveApiClients[0]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
 		bIsCreatePartySuccess = true;
 	}));
-	lobbyA->SendCreatePartyRequest();
+	ActiveApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	ActiveApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
 		bIsStartMatchmakingSuccess = true;
 	}));
-	lobbyA->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
+	ActiveApiClients[0]->Lobby.SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
 	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
@@ -1010,22 +976,22 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
 	bIsCreatePartySuccess = false;
-	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	ActiveApiClients[1]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		BCreatePartyResult = Result;
 		bIsCreatePartySuccess = true;
 	}));
-	lobbyB->SendCreatePartyRequest();
+	ActiveApiClients[1]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bIsCreatePartySuccess, "Lobby B creating party");
 
 	FAccelByteModelsMatchmakingResponse BMatchmakingResult;
 	bIsStartMatchmakingSuccess = false;
-	lobbyB->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&BMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	ActiveApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&BMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		BMatchmakingResult = Result;
 		bIsStartMatchmakingSuccess = true;
 	}));
-	lobbyB->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
+	ActiveApiClients[1]->Lobby.SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
 	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
@@ -1035,11 +1001,10 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	}, "", 20);
 
 
-	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
+	for (int i = ActiveApiClients.Num() - 1; i >= 0; i--)
 	{
-		ActiveLobbies[i]->SendLeavePartyRequest();
-		ActiveLobbies[i]->Disconnect();
-		ActiveLobbies.RemoveAt(i);
+		ActiveApiClients[i]->Lobby.SendLeavePartyRequest();
+		ActiveApiClients[i]->Lobby.Disconnect();
 	}
 
 	AB_TEST_FALSE(AMatchId.IsEmpty());
@@ -1053,32 +1018,27 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestAddRemovePlayerNonJoinable, 
 bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Parameters)
 {
 	//Arrange
-	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
-
-	WaitUntil([&lobbyA]()
-	{
-		return lobbyA->IsConnected();
-	}, "Lobby Connect...", 10);
+	ActiveLobbyConnect(1);
 
 	FString AMatchId = "";
 
-	lobbyA->SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
+	ActiveApiClients[0]->Lobby.SetReadyConsentNotifDelegate(THandler<FAccelByteModelsReadyConsentNotice>::CreateLambda([&AMatchId](const FAccelByteModelsReadyConsentNotice& Result)
 	{
 		AMatchId = Result.MatchId;
 	}));
 
-	lobbyA->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&lobbyA](const FAccelByteModelsMatchmakingNotice& Result)
+	ActiveApiClients[0]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([](const FAccelByteModelsMatchmakingNotice& Result)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
-		lobbyA->SendReadyConsentRequest(Result.MatchId);
+		ActiveApiClients[0]->Lobby.SendReadyConsentRequest(Result.MatchId);
 	}));
 
 	bool leavePartyDone = false;
-	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDone](const FAccelByteModelsLeavePartyResponse& result)
+	ActiveApiClients[0]->Lobby.SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDone](const FAccelByteModelsLeavePartyResponse& result)
 	{
 		leavePartyDone = true;
 	}));
-	lobbyA->SendLeavePartyRequest();
+	ActiveApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(leavePartyDone, "wait leaving party");
 
 	// register local DS
@@ -1088,22 +1048,22 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
 	bool bIsCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	ActiveApiClients[0]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
 		bIsCreatePartySuccess = true;
 	}));
-	lobbyA->SendCreatePartyRequest();
+	ActiveApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	ActiveApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
 		bIsStartMatchmakingSuccess = true;
 	}));
-	lobbyA->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
+	ActiveApiClients[0]->Lobby.SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
 	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
@@ -1125,7 +1085,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 
 	bool bAddUserSuccess = false;
 	bool bAddUserDone = false;
-	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bAddUserSuccess, &bAddUserDone]()
+	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUsers[1].UserId, FVoidHandler::CreateLambda([&bAddUserSuccess, &bAddUserDone]()
 	{
 		bAddUserSuccess = true;
 		bAddUserDone = true;
@@ -1146,7 +1106,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
-	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[0].GetUserId(), FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
+	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUsers[0].UserId, FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
@@ -1162,11 +1122,10 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	}), JoinableSessionTestErrorHandler);
 	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
-	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
+	for (int i = ActiveApiClients.Num() - 1; i >= 0; i--)
 	{
-		ActiveLobbies[i]->SendLeavePartyRequest();
-		ActiveLobbies[i]->Disconnect();
-		ActiveLobbies.RemoveAt(i);
+		ActiveApiClients[i]->Lobby.SendLeavePartyRequest();
+		ActiveApiClients[i]->Lobby.Disconnect();
 	}
 
 	// Assertions
@@ -1180,7 +1139,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		{
 			for (auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[1].GetUserId())
+				if (member.User_id == ActiveUsers[1].UserId)
 				{
 					userIdExist = true;
 					break;
@@ -1202,7 +1161,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		{
 			for (auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[1].GetUserId())
+				if (member.User_id == ActiveUsers[1].UserId)
 				{
 					userIdExist = true;
 					break;
@@ -1223,7 +1182,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		{
 			for (auto member : party.Party_members)
 			{
-				if (member.User_id == ActiveUserCreds[0].GetUserId())
+				if (member.User_id == ActiveUsers[0].UserId)
 				{
 					userIdExist = true;
 					break;

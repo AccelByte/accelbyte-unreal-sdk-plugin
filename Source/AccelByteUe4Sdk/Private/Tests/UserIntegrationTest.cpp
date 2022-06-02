@@ -45,6 +45,68 @@ enum class EVerificationCode : uint8
 
 FString GetVerificationCode(const FString& userId, EVerificationCode code);
 
+bool CreateUserProfileTest(const FTestUser& InUser)
+{
+	bool bIsDone = false;
+	bool bIsOk = false;
+	FAccelByteModelsUserProfileCreateRequest UserProfileCreateRequest;
+	UserProfileCreateRequest.FirstName = InUser.FirstName;
+	UserProfileCreateRequest.LastName = InUser.LastName;
+	UserProfileCreateRequest.Language = InUser.Language;
+	UserProfileCreateRequest.Timezone = InUser.Timezone;
+	UserProfileCreateRequest.DateOfBirth = InUser.DateOfBirth;
+	UserProfileCreateRequest.AvatarSmallUrl = InUser.AvatarSmallUrl;
+	UserProfileCreateRequest.AvatarUrl = InUser.AvatarUrl;
+	UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
+	FAccelByteModelsUserProfileInfo UserProfileInfo;
+	
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(InUser.Email);
+	ApiClient->UserProfile.CreateUserProfile(UserProfileCreateRequest
+		, THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
+			{
+				bIsOk = true;
+				bIsDone = true;
+				UserProfileInfo = Result;
+			})
+		, FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+			{
+				if (Code == 11441) // Unable to createUserProfile: User profile already exists
+				{
+					bIsOk = true;
+				}
+				bIsDone = true;
+			})
+		);
+
+	WaitUntil(bIsDone, TEXT("Waiting ..."));
+	return bIsOk;
+}
+
+bool BatchGetPublicUserProfileInfos(const FTestUser & InUser
+	, const FString& InUserIds
+	, TArray<FAccelByteModelsPublicUserProfileInfo>& OutResult)
+{
+	bool bIsDone = false;
+	bool bIsOk = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *InUserIds);
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(InUser.Email);
+	ApiClient->UserProfile.BatchGetPublicUserProfileInfos(InUserIds
+		, THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
+			{
+				OutResult = Result;
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				bIsDone = true;
+			})
+		);
+	WaitUntil(bIsDone, TEXT("Waiting ..."));
+	return bIsOk;
+}
+
 const auto UserTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
@@ -2509,66 +2571,6 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBatchGetPublicUserProfileInfos, "AccelByte.Tests.AUserProfile.BatchGetPublicUserProfileInfos", AutomationFlagMaskUser);
 bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 {
-#pragma region Test definitions
-
-	const auto CreateUserProfile = [this](const FTestUser& InUser, const Credentials& InCredentials)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		FAccelByteModelsUserProfileCreateRequest UserProfileCreateRequest;
-		UserProfileCreateRequest.FirstName = InUser.FirstName;
-		UserProfileCreateRequest.LastName = InUser.LastName;
-		UserProfileCreateRequest.Language = InUser.Language;
-		UserProfileCreateRequest.Timezone = InUser.Timezone;
-		UserProfileCreateRequest.DateOfBirth = InUser.DateOfBirth;
-		UserProfileCreateRequest.AvatarSmallUrl = InUser.AvatarSmallUrl;
-		UserProfileCreateRequest.AvatarUrl = InUser.AvatarUrl;
-		UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
-		FAccelByteModelsUserProfileInfo UserProfileInfo;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-		UserProfileApi.CreateUserProfile(UserProfileCreateRequest,
-			THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
-				{
-					bIsOk = true;
-					bIsDone = true;
-					UserProfileInfo = Result;
-				}),
-			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-				{
-					if (Code == 11441) // Unable to createUserProfile: User profile already exists
-					{
-						bIsOk = true;
-					}
-					bIsDone = true;
-				}));
-
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-	const auto BatchGetPublicUserProfileInfos = [this](const Credentials& InCredentials, const FString& InUserIds, TArray<FAccelByteModelsPublicUserProfileInfo>& OutResult) {
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *InUserIds);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-		UserProfileApi.BatchGetPublicUserProfileInfos(InUserIds,
-			THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
-				{
-					OutResult = Result;
-					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					bIsDone = true;
-				}));
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-#pragma endregion
-	
 	TArray<FTestUser> TestUsers;
 
 	// Setup
@@ -2577,9 +2579,9 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 
 	// Create user profiles
 
-	for (int i = 0; i < TestUsers.Num(); i++)
+	for (auto& TestUser : TestUsers)
 	{
-		AB_TEST_TRUE(CreateUserProfile(TestUsers[i], TestUsers[i].Credentials));
+		AB_TEST_TRUE(CreateUserProfileTest(TestUser));
 	}
 
 	// Batch get public user profile infos
@@ -2588,12 +2590,12 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 
 	for (const auto& TestUser : TestUsers)
 	{
-		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *TestUser.Credentials.GetUserId()));
+		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *TestUser.UserId));
 	}
 
 	TArray<FAccelByteModelsPublicUserProfileInfo> UserPublicProfiles;
 
-	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(TestUsers[0].Credentials, UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
+	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(TestUsers[0], UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
 	AB_TEST_EQUAL(UserPublicProfiles.Num(), TestUsers.Num());
 	AB_TEST_FALSE(UserPublicProfiles[0].PublicId.IsEmpty());
 	AB_TEST_FALSE(UserPublicProfiles[1].PublicId.IsEmpty());
@@ -6010,17 +6012,19 @@ bool FGetInputValidationForNotExistLocalLanguage::RunTest(const FString& Paramet
 	bool bGetInputValidationSuccess = false;
 	FInputValidation InputValidationData;
 	const FString& LanguageInput = TEXT("id");
-	FRegistry::User.GetInputValidations( LanguageInput,
-		THandler<FInputValidation>::CreateLambda([&bGetInputValidationDone, &InputValidationData, &bGetInputValidationSuccess](const FInputValidation& Result)
+	FRegistry::User.GetInputValidations(LanguageInput
+		, THandler<FInputValidation>::CreateLambda([&bGetInputValidationDone, &InputValidationData, &bGetInputValidationSuccess](const FInputValidation& Result)
 			{
 				InputValidationData = Result;
 				bGetInputValidationDone = bGetInputValidationSuccess =true;
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			}), FErrorHandler::CreateLambda([&bGetInputValidationDone](int ErrorCode, const FString& Message)
+			})
+		, FErrorHandler::CreateLambda([&bGetInputValidationDone](int ErrorCode, const FString& Message)
 			{
 				bGetInputValidationDone = true;
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("Fail get input validation: Error Code : %d, Message: %s"), ErrorCode, *Message);
-			}));
+			})
+		);
 
 	WaitUntil(bGetInputValidationDone, "Waiting for Search Users...");
 	AB_TEST_TRUE(bGetInputValidationSuccess);
@@ -6085,16 +6089,23 @@ bool FGetInputValidationForLocalLanguage::RunTest(const FString& Parameter)
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-			bRegisterSuccessful = true;
-			bRegisterDone = true;
-		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	FRegistry::User.Register(EmailAddress
+		, Password
+		, DisplayName
+		, Country
+		, format
+		, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				bRegisterSuccessful = true;
+				bRegisterDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bRegisterDone = true;
-			}));
+			})
+		);
 
 	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
@@ -6105,11 +6116,14 @@ bool FGetInputValidationForLocalLanguage::RunTest(const FString& Parameter)
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bLoginSuccessful = true;
-		}), UserTestErrorHandler);
+	FRegistry::User.LoginWithUsername(EmailAddress
+		, Password
+		, FVoidHandler::CreateLambda([&]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bLoginSuccessful = true;
+			})
+		, UserTestErrorHandler);
 
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 	AB_TEST_TRUE(bLoginSuccessful);
@@ -6119,18 +6133,20 @@ bool FGetInputValidationForLocalLanguage::RunTest(const FString& Parameter)
 	bool bGetInputValidationSuccess = false;
 	FInputValidation InputValidationData;
 	const FString& LanguageInput = TEXT("es");
-	FRegistry::User.GetInputValidations( LanguageInput,
-		THandler<FInputValidation>::CreateLambda([&bGetInputValidationDone, &InputValidationData, &bGetInputValidationSuccess](const FInputValidation& Result)
+	FRegistry::User.GetInputValidations(LanguageInput
+		, THandler<FInputValidation>::CreateLambda([&bGetInputValidationDone, &InputValidationData, &bGetInputValidationSuccess](const FInputValidation& Result)
 			{
 				InputValidationData = Result;
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));			
 			
 				bGetInputValidationDone = bGetInputValidationSuccess = true;
-			}), FErrorHandler::CreateLambda([&bGetInputValidationDone](int ErrorCode, const FString& Message)
+			})
+		, FErrorHandler::CreateLambda([&bGetInputValidationDone](int ErrorCode, const FString& Message)
 			{
 				bGetInputValidationDone = true;
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("Fail get input validation: Error Code : %d, Message: %s"), ErrorCode, *Message);
-			}));
+			})
+		);
 
 	WaitUntil(bGetInputValidationDone, "Waiting for Search Users...");
 	AB_TEST_TRUE(bGetInputValidationSuccess);
@@ -6192,16 +6208,23 @@ bool FGetInputValidationWhenRegexTrue::RunTest(const FString& Parameter)
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-			bRegisterSuccessful = true;
-			bRegisterDone = true;
-		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	FRegistry::User.Register(EmailAddress
+		, Password
+		, DisplayName
+		, Country
+		, format
+		, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				bRegisterSuccessful = true;
+				bRegisterDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bRegisterDone = true;
-			}));
+			})
+		);
 
 	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
@@ -6212,11 +6235,14 @@ bool FGetInputValidationWhenRegexTrue::RunTest(const FString& Parameter)
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bLoginSuccessful = true;
-		}), UserTestErrorHandler);
+	FRegistry::User.LoginWithUsername(EmailAddress
+		, Password
+		, FVoidHandler::CreateLambda([&]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bLoginSuccessful = true;
+			})
+		, UserTestErrorHandler);
 
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 	AB_TEST_TRUE(bLoginSuccessful);
@@ -6224,14 +6250,14 @@ bool FGetInputValidationWhenRegexTrue::RunTest(const FString& Parameter)
 	// Complete DisplayName.
 	bool bGetValidationDataDone = false;
 	FInputValidation ReceivedValidationData;
-	FRegistry::User.GetInputValidations( TEXT("es-ES"),
-		THandler<FInputValidation>::CreateLambda([&bGetValidationDataDone, &ReceivedValidationData](const FInputValidation& Result)
+	FRegistry::User.GetInputValidations( TEXT("es-ES")
+		, THandler<FInputValidation>::CreateLambda([&bGetValidationDataDone, &ReceivedValidationData](const FInputValidation& Result)
 			{
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 				ReceivedValidationData = Result; 
 				bGetValidationDataDone = true;
-			}),
-		UserTestErrorHandler);
+			})
+		, UserTestErrorHandler);
 
 	WaitUntil(bGetValidationDataDone, "Waiting for Search Users...");
 	AB_TEST_TRUE(bGetValidationDataDone);
@@ -6260,12 +6286,14 @@ bool FGetInputValidationWhenRegexTrue::RunTest(const FString& Parameter)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
-	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bDeleteSuccessful = true;
-			bDeleteDone = true;
-		}), UserTestErrorHandler);
+	AdminDeleteUser(FRegistry::Credentials.GetUserId()
+		, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bDeleteSuccessful = true;
+				bDeleteDone = true;
+			})
+		, UserTestErrorHandler);
 
 	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
@@ -6289,20 +6317,26 @@ bool FUserGetDataTest::RunTest(const FString& Parameter)
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-			bRegisterSuccessful = true;
-			bRegisterDone = true;
-		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	FRegistry::User.Register(EmailAddress
+		, Password
+		, DisplayName
+		, Country
+		, format
+		, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				bRegisterSuccessful = true;
+				bRegisterDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bRegisterDone = true;
-			}));
+			})
+		);
 
 	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
@@ -6313,22 +6347,27 @@ bool FUserGetDataTest::RunTest(const FString& Parameter)
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bLoginSuccessful = true;
-		}), UserTestErrorHandler);
+	FRegistry::User.LoginWithUsername(EmailAddress
+		, Password
+		, FVoidHandler::CreateLambda([&]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bLoginSuccessful = true;
+			})
+		, UserTestErrorHandler);
 
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
 	FAccountUserData UserData;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetData"));
-	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData](const FAccountUserData& Result)
-		{
-			UserData = Result;
-			bGetUserData = true;
-		}), UserTestErrorHandler);
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda(
+			[&bGetUserData, &UserData](const FAccountUserData& Result)
+			{
+				UserData = Result;
+				bGetUserData = true;
+			})
+		, UserTestErrorHandler);
 
 	WaitUntil(bGetUserData, "Waiting for Get User Data...");
 
@@ -6363,12 +6402,13 @@ bool FSearchUserWithQueryParam::RunTest(const FString& Parameter)
 	bool bDeviceLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bDeviceLoginSuccessful]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    User ID: %s"), *FRegistry::Credentials.GetUserId());
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    User ID: %s"), *FRegistry::Credentials.GetUserId());
 
-			bDeviceLoginSuccessful = true;
-		}), UserTestErrorHandler);
+				bDeviceLoginSuccessful = true;
+			})
+		, UserTestErrorHandler);
 
 	WaitUntil(bDeviceLoginSuccessful, "Waiting for Login...");
 	
@@ -6379,21 +6419,24 @@ bool FSearchUserWithQueryParam::RunTest(const FString& Parameter)
 	bool bSearchUserError;
 	int32 Limit = 8;
 	
-	FRegistry::User.SearchUsers(TEXT("test"), EAccelByteSearchType::ALL,
-	THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-			bSearchUserSuccessful = true;
-			bSearchUserDone = true;
-			GetDataResult = Result;
-		}),
-	FErrorHandler::CreateLambda([&bSearchUserDone, &bSearchUserError, &ErrorCode](int Code, const FString& Message)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
-			ErrorCode = Code;
-			bSearchUserError = true;
-			bSearchUserDone = true;
-		}), 0, Limit);
+	FRegistry::User.SearchUsers(TEXT("test")
+		, EAccelByteSearchType::ALL
+		, THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				bSearchUserSuccessful = true;
+				bSearchUserDone = true;
+				GetDataResult = Result;
+			})
+		, FErrorHandler::CreateLambda([&bSearchUserDone, &bSearchUserError, &ErrorCode](int Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				ErrorCode = Code;
+				bSearchUserError = true;
+				bSearchUserDone = true;
+			})
+		, 0
+		, Limit);
 
 	WaitUntil(bSearchUserDone, "Waiting for Search Users...");
 
@@ -6407,66 +6450,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserProfilePublicInfoByPublicId, "AccelByte
 bool FGetUserProfilePublicInfoByPublicId::RunTest(const FString& Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-
- #pragma region Test definitions
-
-	const auto CreateUserProfile = [this](const FTestUser& InUser, const Credentials& InCredentials)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		FAccelByteModelsUserProfileCreateRequest UserProfileCreateRequest;
-		UserProfileCreateRequest.FirstName = InUser.FirstName;
-		UserProfileCreateRequest.LastName = InUser.LastName;
-		UserProfileCreateRequest.Language = InUser.Language;
-		UserProfileCreateRequest.Timezone = InUser.Timezone;
-		UserProfileCreateRequest.DateOfBirth = InUser.DateOfBirth;
-		UserProfileCreateRequest.AvatarSmallUrl = InUser.AvatarSmallUrl;
-		UserProfileCreateRequest.AvatarUrl = InUser.AvatarUrl;
-		UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
-		FAccelByteModelsUserProfileInfo UserProfileInfo;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-		UserProfileApi.CreateUserProfile(UserProfileCreateRequest,
-			THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
-				{
-					bIsOk = true;
-					bIsDone = true;
-					UserProfileInfo = Result;
-				}),
-			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-				{
-					if (Code == 11441) // Unable to createUserProfile: User profile already exists
-					{
-						bIsOk = true;
-					}
-					bIsDone = true;
-				}));
-
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-	const auto BatchGetPublicUserProfileInfos = [this](const Credentials& InCredentials, const FString& InUserIds, TArray<FAccelByteModelsPublicUserProfileInfo>& OutResult) {
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *InUserIds);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-		UserProfileApi.BatchGetPublicUserProfileInfos(InUserIds,
-			THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
-				{
-					OutResult = Result;
-					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					bIsDone = true;
-				}));
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-#pragma endregion
 	
 	TArray<FTestUser> TestUsers;
 
@@ -6477,18 +6460,18 @@ bool FGetUserProfilePublicInfoByPublicId::RunTest(const FString& Parameter)
 	// Create user profiles
 	for (int i = 0; i < TestUsers.Num(); i++)
 	{
-		AB_TEST_TRUE(CreateUserProfile(TestUsers[i], TestUsers[i].Credentials));
+		AB_TEST_TRUE(CreateUserProfileTest(TestUsers[i]));
 	}
 
 	// Batch get public user profile infos
 	FString UserIdsCsv;
 	for (const auto& TestUser : TestUsers)
 	{
-		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *TestUser.Credentials.GetUserId()));
+		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *TestUser.UserId));
 	}
 	TArray<FAccelByteModelsPublicUserProfileInfo> UserPublicProfiles;
 
-	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(TestUsers[0].Credentials, UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
+	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(TestUsers[0], UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
 	AB_TEST_EQUAL(UserPublicProfiles.Num(), TestUsers.Num());
 	AB_TEST_FALSE(UserPublicProfiles[0].PublicId.IsEmpty());
  
@@ -6499,22 +6482,24 @@ bool FGetUserProfilePublicInfoByPublicId::RunTest(const FString& Parameter)
 
 	FAccelByteModelsPublicUserProfileInfo GetUserProfilePublicInfoResult2{};
 	const FString publicId = UserPublicProfiles[0].PublicId; 
-	FRegistry::UserProfile.GetUserProfilePublicInfoByPublicId(publicId,
-		THandler<FAccelByteModelsPublicUserProfileInfo>::CreateLambda([&bGetUserProfilePublicInfoSuccessful, &bGetUserProfilePublicInfoDone, &GetUserProfilePublicInfoResult2]
+	FRegistry::UserProfile.GetUserProfilePublicInfoByPublicId(publicId
+		, THandler<FAccelByteModelsPublicUserProfileInfo>::CreateLambda(
+			[&bGetUserProfilePublicInfoSuccessful, &bGetUserProfilePublicInfoDone, &GetUserProfilePublicInfoResult2]
 			(const FAccelByteModelsPublicUserProfileInfo& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-			bGetUserProfilePublicInfoSuccessful = true;
-			bGetUserProfilePublicInfoDone = true;
-			GetUserProfilePublicInfoResult2 = Result;
-		}),
-	FCustomErrorHandler::CreateLambda([&bGetUserProfilePublicInfoDone, &bGetUserProfilePublicInfoError, &ErrorCode](int Code, const FString& Message, const FJsonObject& JsonObject)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
-			ErrorCode = Code;
-			bGetUserProfilePublicInfoError = true;
-			bGetUserProfilePublicInfoDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				bGetUserProfilePublicInfoSuccessful = true;
+				bGetUserProfilePublicInfoDone = true;
+				GetUserProfilePublicInfoResult2 = Result;
+			})
+		, FCustomErrorHandler::CreateLambda([&bGetUserProfilePublicInfoDone, &bGetUserProfilePublicInfoError, &ErrorCode](int Code, const FString& Message, const FJsonObject& JsonObject)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				ErrorCode = Code;
+				bGetUserProfilePublicInfoError = true;
+				bGetUserProfilePublicInfoDone = true;
+			})
+		);
 
 	WaitUntil(bGetUserProfilePublicInfoDone, "Waiting for Search Users...");
 
@@ -6541,16 +6526,20 @@ bool FAccountLinking_CreateHeadlessAccount::RunTest(const FString& Parameter)
 	bool bLoginPlatformSuccessful = false;
 	bool bSteamLoginDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bLoginPlatformSuccessful = true;
-			bSteamLoginDone = true;
-		}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam
+		, GetSteamTicket()
+		, FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bLoginPlatformSuccessful = true;
+				bSteamLoginDone = true;
+			})
+		, FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bSteamLoginDone = true;			
-			}), false);
+			})
+		, false);
 	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	// if the login success then make it unlink first 
@@ -6558,16 +6547,19 @@ bool FAccountLinking_CreateHeadlessAccount::RunTest(const FString& Parameter)
 	{
 		bool bUnlinkOtherPlatformDone = false;
 		bool bUnlinkOtherPlatformSuccess = false;
-		FRegistry::User.UnlinkOtherPlatform(EAccelBytePlatformType::Steam, FVoidHandler::CreateLambda([&bUnlinkOtherPlatformSuccess, &bUnlinkOtherPlatformDone]()
-			{
-				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-				bUnlinkOtherPlatformSuccess = true;
-				bUnlinkOtherPlatformDone = true;
-			}), FErrorHandler::CreateLambda([&bUnlinkOtherPlatformDone](int32 ErrorCode, const FString& ErrorMessage)
+		FRegistry::User.UnlinkOtherPlatform(EAccelBytePlatformType::Steam
+			, FVoidHandler::CreateLambda([&bUnlinkOtherPlatformSuccess, &bUnlinkOtherPlatformDone]()
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+					bUnlinkOtherPlatformSuccess = true;
+					bUnlinkOtherPlatformDone = true;
+				})
+			, FErrorHandler::CreateLambda([&bUnlinkOtherPlatformDone](int32 ErrorCode, const FString& ErrorMessage)
 				{
 					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 					bUnlinkOtherPlatformDone = true;
-				}));
+				})
+			);
 		WaitUntil(bUnlinkOtherPlatformDone, "Waiting for Unlink...");
 
 		FRegistry::User.ForgetAllCredentials();
@@ -6576,16 +6568,20 @@ bool FAccountLinking_CreateHeadlessAccount::RunTest(const FString& Parameter)
 		bLoginPlatformSuccessful = false;
 		bSteamLoginDone = false;
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-		FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
-			{
-				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-				bLoginPlatformSuccessful = true;
-				bSteamLoginDone = true;
-			}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam
+			, GetSteamTicket()
+			, FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+					bLoginPlatformSuccessful = true;
+					bSteamLoginDone = true;
+				})
+			, FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 				{
 					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 					bSteamLoginDone = true;
-				}), false);
+				})
+			, false);
 		WaitUntil(bSteamLoginDone, "Waiting for Login...");
 		AB_TEST_FALSE(bLoginPlatformSuccessful); 
 	}
@@ -6593,16 +6589,19 @@ bool FAccountLinking_CreateHeadlessAccount::RunTest(const FString& Parameter)
 	FRegistry::User.ForgetAllCredentials();
 	bool bCreateHeadlessAccountAndLoginDone = false;
 	bool bCreateHeadlessAccountAndLoginSuccess = false;
-	FRegistry::User.CreateHeadlessAccountAndLogin(FVoidHandler::CreateLambda([&bCreateHeadlessAccountAndLoginDone, &bCreateHeadlessAccountAndLoginSuccess]()
-			{
-				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-				bCreateHeadlessAccountAndLoginSuccess = true;
-				bCreateHeadlessAccountAndLoginDone = true;
-			}), FCustomErrorHandler::CreateLambda([&bCreateHeadlessAccountAndLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	FRegistry::User.CreateHeadlessAccountAndLogin(FVoidHandler::CreateLambda(
+			[&bCreateHeadlessAccountAndLoginDone, &bCreateHeadlessAccountAndLoginSuccess]()
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+					bCreateHeadlessAccountAndLoginSuccess = true;
+					bCreateHeadlessAccountAndLoginDone = true;
+				})
+			, FCustomErrorHandler::CreateLambda([&bCreateHeadlessAccountAndLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 				{
 					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 					bCreateHeadlessAccountAndLoginDone = true;
-				}));
+				})
+			);
 
 	WaitUntil(bCreateHeadlessAccountAndLoginDone, "Waiting for Login...");
 
@@ -6615,16 +6614,20 @@ bool FAccountLinking_CreateHeadlessAccount::RunTest(const FString& Parameter)
 	bLoginPlatformSuccessful = false;
 	bSteamLoginDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bLoginPlatformSuccessful = true;
-			bSteamLoginDone = true;
-		}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam
+		, GetSteamTicket()
+		, FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bLoginPlatformSuccessful = true;
+				bSteamLoginDone = true;
+			})
+		, FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bSteamLoginDone = true;
-			}), false);
+			})
+		, false);
 	WaitUntil(bSteamLoginDone, "Waiting for Login..."); 
 	AB_TEST_TRUE(bLoginPlatformSuccessful);	
 	if (!bLoginPlatformSuccessful)
@@ -6661,18 +6664,25 @@ bool FAccountLinking_AuthenticationWithPlatformLink::RunTest(const FString& Para
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Registerv2(EmailAddress, Username, Password, DisplayName, Country, format,
-		THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &TemporaryUserId](const FRegisterResponse& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-			TemporaryUserId = Result.UserId;
-			bRegisterSuccessful = true;
-			bRegisterDone = true;
-		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	FRegistry::User.Registerv2(EmailAddress
+		, Username
+		, Password
+		, DisplayName
+		, Country
+		, format
+		, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &TemporaryUserId](const FRegisterResponse& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				TemporaryUserId = Result.UserId;
+				bRegisterSuccessful = true;
+				bRegisterDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bRegisterDone = true;
-			}));
+			})
+		);
 	WaitUntil(bRegisterDone, "Waiting for Registered...");
 	if (!bRegisterSuccessful)
 	{
@@ -6687,16 +6697,20 @@ bool FAccountLinking_AuthenticationWithPlatformLink::RunTest(const FString& Para
 	bool bLoginPlatformSuccessful = false;
 	bool bSteamLoginDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bLoginPlatformSuccessful = true;
-			bSteamLoginDone = true;
-		}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam
+		, GetSteamTicket()
+		, FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bLoginPlatformSuccessful = true;
+				bSteamLoginDone = true;
+			})
+		, FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bSteamLoginDone = true;
-			}), false);
+			})
+		, false);
 	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	// if the login success then make it unlink first 
@@ -6704,16 +6718,19 @@ bool FAccountLinking_AuthenticationWithPlatformLink::RunTest(const FString& Para
 	{
 		bool bUnlinkOtherPlatformDone = false;
 		bool bUnlinkOtherPlatformSuccess = false;
-		FRegistry::User.UnlinkOtherPlatform(EAccelBytePlatformType::Steam, FVoidHandler::CreateLambda([&bUnlinkOtherPlatformSuccess, &bUnlinkOtherPlatformDone]()
-			{
-				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-				bUnlinkOtherPlatformSuccess = true;
-				bUnlinkOtherPlatformDone = true;
-			}), FErrorHandler::CreateLambda([&bUnlinkOtherPlatformDone](int32 ErrorCode, const FString& ErrorMessage)
+		FRegistry::User.UnlinkOtherPlatform(EAccelBytePlatformType::Steam
+			, FVoidHandler::CreateLambda([&bUnlinkOtherPlatformSuccess, &bUnlinkOtherPlatformDone]()
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+					bUnlinkOtherPlatformSuccess = true;
+					bUnlinkOtherPlatformDone = true;
+				})
+			, FErrorHandler::CreateLambda([&bUnlinkOtherPlatformDone](int32 ErrorCode, const FString& ErrorMessage)
 				{
 					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 					bUnlinkOtherPlatformDone = true;
-				}));
+				})
+			);
 		WaitUntil(bUnlinkOtherPlatformDone, "Waiting for Unlink...");
 
 		FRegistry::User.ForgetAllCredentials();
@@ -6722,16 +6739,20 @@ bool FAccountLinking_AuthenticationWithPlatformLink::RunTest(const FString& Para
 		bLoginPlatformSuccessful = false;
 		bSteamLoginDone = false;
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-		FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
-			{
-				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-				bLoginPlatformSuccessful = true;
-				bSteamLoginDone = true;
-			}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam
+			, GetSteamTicket()
+			, FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+					bLoginPlatformSuccessful = true;
+					bSteamLoginDone = true;
+				})
+			, FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 				{
 					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 					bSteamLoginDone = true;
-				}), false);
+				})
+			, false);
 		WaitUntil(bSteamLoginDone, "Waiting for Login...");
 		AB_TEST_FALSE(bLoginPlatformSuccessful); 
 	}
@@ -6739,17 +6760,20 @@ bool FAccountLinking_AuthenticationWithPlatformLink::RunTest(const FString& Para
 	// Attempt to linking account with platform link 
 	bool bCreateHeadlessAccountAndLoginDone = false;
 	bool bCreateHeadlessAccountAndLoginSuccess = false;
-	FRegistry::User.AuthenticationWithPlatformLinkAndLogin(Username, Password, 
-		FVoidHandler::CreateLambda([&bCreateHeadlessAccountAndLoginDone, &bCreateHeadlessAccountAndLoginSuccess]()
+	FRegistry::User.AuthenticationWithPlatformLinkAndLogin(Username
+		, Password
+		, FVoidHandler::CreateLambda([&bCreateHeadlessAccountAndLoginDone, &bCreateHeadlessAccountAndLoginSuccess]()
 			{
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 				bCreateHeadlessAccountAndLoginDone = true;
 				bCreateHeadlessAccountAndLoginSuccess = true;
-			}), FCustomErrorHandler::CreateLambda([&bCreateHeadlessAccountAndLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-				{
-					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-					bCreateHeadlessAccountAndLoginDone = true;
-				}));
+			})
+		, FCustomErrorHandler::CreateLambda([&bCreateHeadlessAccountAndLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bCreateHeadlessAccountAndLoginDone = true;
+			})
+		);
 	WaitUntil(bCreateHeadlessAccountAndLoginDone, "Waiting for Login..."); 
 	
 	FRegistry::User.ForgetAllCredentials();
@@ -6758,16 +6782,20 @@ bool FAccountLinking_AuthenticationWithPlatformLink::RunTest(const FString& Para
 	bool bReLoginPlatformSuccessful = false;
 	bool bSteamReLoginDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bReLoginPlatformSuccessful, &bSteamReLoginDone]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bReLoginPlatformSuccessful = true;
-			bSteamReLoginDone = true;
-		}), FCustomErrorHandler::CreateLambda([&bSteamReLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam
+		, GetSteamTicket()
+		, FVoidHandler::CreateLambda([&bReLoginPlatformSuccessful, &bSteamReLoginDone]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bReLoginPlatformSuccessful = true;
+				bSteamReLoginDone = true;
+			})
+		, FCustomErrorHandler::CreateLambda([&bSteamReLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bSteamReLoginDone = true;
-			}), false);
+			})
+		, false);
 	WaitUntil(bSteamReLoginDone, "Waiting for Login..."); 	
 	AB_TEST_TRUE(bReLoginPlatformSuccessful);
 	
@@ -6815,18 +6843,25 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Registerv2(EmailAddress, Username, Password, DisplayName, Country, format,
-		THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &TemporaryUserId](const FRegisterResponse& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-			TemporaryUserId = Result.UserId;
-			bRegisterSuccessful = true;
-			bRegisterDone = true;
-		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	FRegistry::User.Registerv2(EmailAddress
+		, Username
+		, Password
+		, DisplayName
+		, Country
+		, format
+		, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &TemporaryUserId](const FRegisterResponse& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				TemporaryUserId = Result.UserId;
+				bRegisterSuccessful = true;
+				bRegisterDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bRegisterDone = true;
-			}));
+			})
+		);
 	WaitUntil(bRegisterDone, "Waiting for Registered...");
 	if (!bRegisterSuccessful)
 	{
@@ -6838,16 +6873,20 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	bool bLoginSuccessful = false;
 	bool bLoginDone = false; 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&bLoginSuccessful, &bLoginDone]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bLoginSuccessful = true;
-		bLoginDone = true;
-	}), FCustomErrorHandler::CreateLambda([&bLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	FRegistry::User.LoginWithUsername(EmailAddress
+		, Password
+		, FVoidHandler::CreateLambda([&bLoginSuccessful, &bLoginDone]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bLoginSuccessful = true;
+				bLoginDone = true;
+			})
+		, FCustomErrorHandler::CreateLambda([&bLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bLoginDone = true;
-			}));
+			})
+		);
 
 	WaitUntil(bLoginDone, "Waiting for Login...");
 	AB_TEST_TRUE(bLoginSuccessful);
@@ -6855,10 +6894,11 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	
 	bool bSuccessSendVerifCode = false;
 	FRegistry::User.SendVerificationCode(FVoidHandler::CreateLambda([&bSuccessSendVerifCode]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Send Request Verification Code"));
-			bSuccessSendVerifCode = true;
-		}), UserTestErrorHandler);
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Send Request Verification Code"));
+				bSuccessSendVerifCode = true;
+			})
+		, UserTestErrorHandler);
 
 	WaitUntil(bSuccessSendVerifCode, "Waiting send verification code");
 	AB_TEST_TRUE(bSuccessSendVerifCode);
@@ -6867,11 +6907,13 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	AB_TEST_FALSE(VerificationCode.IsEmpty());
 
 	bool bSuccessVerifyUser = false;
-	FRegistry::User.Verify(VerificationCode, FVoidHandler::CreateLambda([&bSuccessVerifyUser]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Verify User"));
-			bSuccessVerifyUser = true;
-		}), UserTestErrorHandler);
+	FRegistry::User.Verify(VerificationCode
+		, FVoidHandler::CreateLambda([&bSuccessVerifyUser]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Verify User"));
+				bSuccessVerifyUser = true;
+			})
+		, UserTestErrorHandler);
 	WaitUntil(bSuccessVerifyUser, "Waiting verify user");
 	AB_TEST_TRUE(bSuccessVerifyUser);
 
@@ -6879,22 +6921,28 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	//enable 2fa with backupCode, save temporary
 	FUser2FaBackupCode BackupCode;
 	bool bEnable2FaBackupCodeSuccess = false;
-	FRegistry::User.Enable2FaBackupCode(THandler<FUser2FaBackupCode>::CreateLambda([&bEnable2FaBackupCodeSuccess, &BackupCode](const FUser2FaBackupCode& Result)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		BackupCode = Result;
-		bEnable2FaBackupCodeSuccess = true;
-	}), UserTestErrorHandler);
+	FRegistry::User.Enable2FaBackupCode(THandler<FUser2FaBackupCode>::CreateLambda(
+			[&bEnable2FaBackupCodeSuccess, &BackupCode](const FUser2FaBackupCode& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				BackupCode = Result;
+				bEnable2FaBackupCodeSuccess = true;
+			})
+		, UserTestErrorHandler);
 	WaitUntil(bEnable2FaBackupCodeSuccess, "waiting for enabling 2fa with backup code");
 	AB_TEST_TRUE(bEnable2FaBackupCodeSuccess);
 
 
 	bool bRevokeUserSuccess = false;
-	Oauth2::RevokeUserToken(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret, FRegistry::Credentials.GetAccessToken(), FVoidHandler::CreateLambda([&bRevokeUserSuccess]()
-	{
-		bRevokeUserSuccess = true;
-		FRegistry::Credentials.ForgetAll();
-	}), UserTestErrorHandler);
+	Oauth2::RevokeUserToken(FRegistry::Settings.ClientId
+		, FRegistry::Settings.ClientSecret
+		, FRegistry::Credentials.GetAccessToken()
+		, FVoidHandler::CreateLambda([&bRevokeUserSuccess]()
+			{
+				bRevokeUserSuccess = true;
+				FRegistry::Credentials.ForgetAll();
+			})
+		, UserTestErrorHandler);
 	WaitUntil(bRevokeUserSuccess, "Waiting for logout...");
 	AB_TEST_TRUE(bRevokeUserSuccess);
 	
@@ -6904,16 +6952,20 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	bool bLoginPlatformSuccessful = false;
 	bool bSteamLoginDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bLoginPlatformSuccessful = true;
-			bSteamLoginDone = true;
-		}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam
+		, GetSteamTicket()
+		, FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bLoginPlatformSuccessful = true;
+				bSteamLoginDone = true;
+			})
+		, FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bSteamLoginDone = true;
-			}), false);
+			})
+		, false);
 	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	// if the login success then make it unlink first 
@@ -6921,16 +6973,19 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	{
 		bool bUnlinkOtherPlatformDone = false;
 		bool bUnlinkOtherPlatformSuccess = false;
-		FRegistry::User.UnlinkOtherPlatform(EAccelBytePlatformType::Steam, FVoidHandler::CreateLambda([&bUnlinkOtherPlatformSuccess, &bUnlinkOtherPlatformDone]()
-			{
-				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-				bUnlinkOtherPlatformSuccess = true;
-				bUnlinkOtherPlatformDone = true;
-			}), FErrorHandler::CreateLambda([&bUnlinkOtherPlatformDone](int32 ErrorCode, const FString& ErrorMessage)
+		FRegistry::User.UnlinkOtherPlatform(EAccelBytePlatformType::Steam
+			, FVoidHandler::CreateLambda([&bUnlinkOtherPlatformSuccess, &bUnlinkOtherPlatformDone]()
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+					bUnlinkOtherPlatformSuccess = true;
+					bUnlinkOtherPlatformDone = true;
+				})
+			, FErrorHandler::CreateLambda([&bUnlinkOtherPlatformDone](int32 ErrorCode, const FString& ErrorMessage)
 				{
 					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 					bUnlinkOtherPlatformDone = true;
-				}));
+				})
+			);
 		WaitUntil(bUnlinkOtherPlatformDone, "Waiting for Unlink...");
 
 		FRegistry::User.ForgetAllCredentials();
@@ -6939,16 +6994,20 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 		bLoginPlatformSuccessful = false;
 		bSteamLoginDone = false;
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-		FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
-			{
-				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-				bLoginPlatformSuccessful = true;
-				bSteamLoginDone = true;
-			}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam
+			, GetSteamTicket()
+			, FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+					bLoginPlatformSuccessful = true;
+					bSteamLoginDone = true;
+				})
+			, FCustomErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 				{
 					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 					bSteamLoginDone = true;
-				}), false);
+				})
+			, false);
 		WaitUntil(bSteamLoginDone, "Waiting for Login...");
 		AB_TEST_FALSE(bLoginPlatformSuccessful); 
 	}
@@ -6958,19 +7017,22 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	bool bAuthenticationWithPlatformLinkSuccess = false;
 	FString ErrorMsg{};
 	FString MfaToken{}; 
-	FRegistry::User.AuthenticationWithPlatformLinkAndLogin(Username, Password, 
-		FVoidHandler::CreateLambda([&bAuthenticationWithPlatformLinkDone, &bAuthenticationWithPlatformLinkSuccess]()
+	FRegistry::User.AuthenticationWithPlatformLinkAndLogin(Username
+		, Password 
+		, FVoidHandler::CreateLambda([&bAuthenticationWithPlatformLinkDone, &bAuthenticationWithPlatformLinkSuccess]()
 			{
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 				bAuthenticationWithPlatformLinkSuccess = true;
 				bAuthenticationWithPlatformLinkDone = true;
-			}), FCustomErrorHandler::CreateLambda([&bAuthenticationWithPlatformLinkDone, &ErrorMsg, &MfaToken](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-				{
-					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-					ErrorMsg = *ErrorJson.GetStringField("error");
-					MfaToken = *ErrorJson.GetStringField("mfa_token");
-					bAuthenticationWithPlatformLinkDone = true;
-				}));
+			})
+		, FCustomErrorHandler::CreateLambda([&bAuthenticationWithPlatformLinkDone, &ErrorMsg, &MfaToken](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				ErrorMsg = *ErrorJson.GetStringField("error");
+				MfaToken = *ErrorJson.GetStringField("mfa_token");
+				bAuthenticationWithPlatformLinkDone = true;
+			})
+		);
 	WaitUntil(bAuthenticationWithPlatformLinkDone, "Waiting for Login..."); 
 	AB_TEST_EQUAL(TEXT("mfa_required"), ErrorMsg);
 	AB_TEST_FALSE(MfaToken.IsEmpty());
@@ -6978,18 +7040,22 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	TArray<FString> MfaCode = BackupCode.ValidCodes;
 	bool bVerifyLoginWithNewDevice2FAEnabledSuccess = false; 
 	bool bVerifyLoginWithNewDevice2FAEnabledDone = false; 
-	FRegistry::User.VerifyLoginWithNewDevice2FAEnabled(MfaToken, EAccelByteLoginAuthFactorType::BackupCode, BackupCode.ValidCodes[0],
-		FVoidHandler::CreateLambda([&bVerifyLoginWithNewDevice2FAEnabledSuccess, &bVerifyLoginWithNewDevice2FAEnabledDone]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bVerifyLoginWithNewDevice2FAEnabledSuccess = true;
-			bVerifyLoginWithNewDevice2FAEnabledDone = true;
-		}), FCustomErrorHandler::CreateLambda([&bVerifyLoginWithNewDevice2FAEnabledDone](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
-		{
-			FString Error = *ErrorJson.GetStringField("error");
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Verify 2FA Failed. Error Code: %d, Message: %s, Error: %s"), Code, *Message, *Error);
-			bVerifyLoginWithNewDevice2FAEnabledDone = true;
-		}));
+	FRegistry::User.VerifyLoginWithNewDevice2FAEnabled(MfaToken
+		, EAccelByteLoginAuthFactorType::BackupCode
+		, BackupCode.ValidCodes[0]
+		, FVoidHandler::CreateLambda([&bVerifyLoginWithNewDevice2FAEnabledSuccess, &bVerifyLoginWithNewDevice2FAEnabledDone]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bVerifyLoginWithNewDevice2FAEnabledSuccess = true;
+				bVerifyLoginWithNewDevice2FAEnabledDone = true;
+			})
+		, FCustomErrorHandler::CreateLambda([&bVerifyLoginWithNewDevice2FAEnabledDone](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				FString Error = *ErrorJson.GetStringField("error");
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Verify 2FA Failed. Error Code: %d, Message: %s, Error: %s"), Code, *Message, *Error);
+				bVerifyLoginWithNewDevice2FAEnabledDone = true;
+			})
+		);
 	WaitUntil(bVerifyLoginWithNewDevice2FAEnabledDone, "Waiting for Login..."); 
 	AB_TEST_TRUE(bVerifyLoginWithNewDevice2FAEnabledSuccess);
 
@@ -7012,12 +7078,14 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
-	AdminDeleteUser(TemporaryUserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bDeleteSuccessful = true;
-			bDeleteDone = true;
-		}), UserTestErrorHandler);
+	AdminDeleteUser(TemporaryUserId
+		, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bDeleteSuccessful = true;
+				bDeleteDone = true;
+			})
+		, UserTestErrorHandler);
 	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById

@@ -14,15 +14,13 @@ namespace AccelByte
 {
 namespace Api
 {
-GameTelemetry::GameTelemetry(
-	AccelByte::Credentials const& CredentialsRef,
-	AccelByte::Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	Credentials(CredentialsRef),
-	Settings(SettingsRef),
-	ShuttingDown(false)
+GameTelemetry::GameTelemetry(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+	, ShuttingDown(false)
 {
 }
 
@@ -155,8 +153,8 @@ void GameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Ev
 
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/protected/events"), *Settings.GameTelemetryServerUrl);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/protected/events"), *SettingsRef.GameTelemetryServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

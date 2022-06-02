@@ -25,7 +25,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API GameTelemetry
 {
 public:
-	GameTelemetry(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	GameTelemetry(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~GameTelemetry();
 
 	/**
@@ -78,8 +78,8 @@ private:
 	GameTelemetry(GameTelemetry&&) = delete;
 
 	FHttpRetryScheduler& HttpRef;
-	Credentials const& Credentials;
-	Settings const& Settings;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;

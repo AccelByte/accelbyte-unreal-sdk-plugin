@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Reward
 {
 public:
-	Reward(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Reward(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Reward();
 private:
 	FHttpRetryScheduler& HttpRef;

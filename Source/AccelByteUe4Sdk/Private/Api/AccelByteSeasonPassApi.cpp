@@ -14,20 +14,16 @@ namespace AccelByte
 	namespace Api
 	{
 
-	SeasonPass::SeasonPass(
-		Credentials const& CredentialsRef,
-		Settings const& SettingsRef,
-		FHttpRetryScheduler& HttpRef)
-		:
-		HttpRef{HttpRef},
-		CredentialsRef{CredentialsRef},
-		SettingsRef{SettingsRef}
-	{
-	}
+	SeasonPass::SeasonPass(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: HttpRef{InHttpRef}
+		, CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
+	{}
 
 		SeasonPass::~SeasonPass()
-		{
-		}
+		{}
 
 		void SeasonPass::GetCurrentSeason(FString const& Language, THandler<FAccelByteModelsSeasonInfo> const& OnSuccess, FErrorHandler const& OnError)
 		{

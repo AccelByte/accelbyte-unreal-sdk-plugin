@@ -22,10 +22,9 @@ namespace Api
 class ACCELBYTEUE4SDK_API Group : public FApiBase
 {
 public:
-	Group(
-		Credentials const& CredentialsRef,
-		Settings const& SettingsRef,
-		FHttpRetryScheduler& HttpRef);
+	Group(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef);
 	
 	~Group();
 
