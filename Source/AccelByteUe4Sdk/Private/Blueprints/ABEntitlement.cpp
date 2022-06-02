@@ -285,6 +285,25 @@ void UABEntitlement::SyncMobilePlatformPurchaseGoogle(
 			}));
 }
 
+void UABEntitlement::SyncMobilePlatformPurchaseGooglePlay(
+	FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest,
+	FDAccelByteModelsPlatformSyncMobileGoogleResponse OnSuccess,
+	FDErrorHandler OnError)
+{
+	ApiClientPtr->Entitlement.SyncMobilePlatformPurchaseGooglePlay(
+		SyncRequest,
+		THandler<FAccelByteModelsPlatformSyncMobileGoogleResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsPlatformSyncMobileGoogleResponse& Result)
+			{
+				OnSuccess.ExecuteIfBound(Result);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
 void UABEntitlement::SyncMobilePlatformPurchaseApple(
 	FAccelByteModelsPlatformSyncMobileApple const& SyncRequest, 
 	FDHandler OnSuccess, 
