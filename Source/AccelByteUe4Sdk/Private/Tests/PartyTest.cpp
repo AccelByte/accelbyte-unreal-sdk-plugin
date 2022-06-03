@@ -8,11 +8,8 @@
 #include "Api/AccelByteLobbyApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
-#include "UserTestAdmin.h"
 #include "TestUtilities.h"
-#include "NVIDIA/CUDA/cuda.h"
 #include "Api/AccelByteQos.h"
-#include "Core/AccelByteReport.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
@@ -361,7 +358,7 @@ bool PartyQuery::RunTest(const FString& Parameters)
 {
 	bool bQueryPartiesSuccess = false;
 
-	FAccelByteModelsV2PartyQueryRequest Query1;
+	FAccelByteModelsV2SessionQueryRequest Query1;
 	Query1.LeaderID = FRegistry::Credentials.GetUserId();
 
 	FAccelByteModelsV2PaginatedPartyQueryResult Response;
@@ -381,7 +378,7 @@ bool PartyQuery::RunTest(const FString& Parameters)
 
 	bQueryPartiesSuccess = false;
 
-	FAccelByteModelsV2PartyQueryRequest Query2;
+	FAccelByteModelsV2SessionQueryRequest Query2;
 	Query2.MemberID = InviteeUserID;
 	FRegistry::Session.QueryParties(Query2, THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bQueryPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
 	{
@@ -395,7 +392,7 @@ bool PartyQuery::RunTest(const FString& Parameters)
 
 	bQueryPartiesSuccess = false;
 
-	FAccelByteModelsV2PartyQueryRequest Query3;
+	FAccelByteModelsV2SessionQueryRequest Query3;
 	Query3.JoinType = Api::SessionJoinType::Closed;
 	FRegistry::Session.QueryParties(Query3, THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bQueryPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
 	{

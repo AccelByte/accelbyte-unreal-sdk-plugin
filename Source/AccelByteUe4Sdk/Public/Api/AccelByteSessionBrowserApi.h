@@ -178,7 +178,35 @@ public:
 		FAccelByteModelsSessionBrowserUpdateRequest const& UpdateSessionRequest,
 		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
 		FErrorHandler const& OnError);
-	
+
+	/**
+	* @brief Update the session to Session Browser.
+	*
+	* @param SessionId id of the session want to update.
+	* @param Settings update settings parameters.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void UpdateGameSettings(
+		FString const& SessionId,
+		TMap<FString, FString> Settings,
+		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
+		FErrorHandler const& OnError);
+
+	/**
+	* @brief Update the session to Session Browser.
+	*
+	* @param SessionId id of the session want to update.
+	* @param Settings update settings parameters.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void UpdateGameSettings(
+		FString const& SessionId,
+		TSharedPtr<FJsonObject> Settings,
+		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
+		FErrorHandler const& OnError);
+
 	/**
 	* @brief Remove the session to Session Browser.
 	*

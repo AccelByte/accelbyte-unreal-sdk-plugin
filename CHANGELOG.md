@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [12.1.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.1.2%0D12.1.1) (2022-05-31)
+
+
+### Features
+
+* **DSM:** Add register game session in DSM ([ef0d18e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ef0d18edc61a0c6a9f0ff06312dea4a6a51818b4))
+* **entitlement:** add SyncMobilePlatformPurchaseGooglePlay blueprint ([90545bb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/90545bb50e99af86861df968f702e209aa563645))
+
+
+### Bug Fixes
+
+* change the source of truth for OAuth client Id and Secret to Credentials class ([76da937](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/76da93736ab2f1d3efc1e14f75cd38c3eddc5224))
+* compile errors when targeting Linux platform due to incorrect code implementation ([4bd2dd5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4bd2dd5a8fb799a98c412bfcf3f79e3128fa97f9))
+
+
+### Tests
+
+* update test cases to handle the changes on source of truth for OAuth client credentials ([0334121](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0334121698468d57e21ebcdcd8ac65ab1438393f))
+
+
+### Refactors
+
+* rename parameters in the constructor to use different name with the class fields ([e1be08a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e1be08ab210ad5ba54d5b4d64154ca432af65f32))
+
 ### [12.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.1.1%0D12.1.0) (2022-05-23)
 
 

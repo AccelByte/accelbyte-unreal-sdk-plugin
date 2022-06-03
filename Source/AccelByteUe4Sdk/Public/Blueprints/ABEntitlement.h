@@ -31,6 +31,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsEntitlementOwnershipResponse,
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayModelsDistributionReceiverResponse, FArrayModelsDistributionReceiver, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsPlatformSyncMobileGoogleResponse, FAccelByteModelsPlatformSyncMobileGoogleResponse, Response);
+
 #pragma endregion 
 
 UCLASS(Blueprintable, BlueprintType)
@@ -79,6 +81,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
 	void SyncMobilePlatformPurchaseGoogle(const FAccelByteModelsPlatformSyncMobileGoogle& SyncRequest, FDHandler OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	void SyncMobilePlatformPurchaseGooglePlay(const FAccelByteModelsPlatformSyncMobileGoogle& SyncRequest, FDAccelByteModelsPlatformSyncMobileGoogleResponse OnSuccess, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
 	void SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest, FDHandler OnSuccess, FDErrorHandler OnError);

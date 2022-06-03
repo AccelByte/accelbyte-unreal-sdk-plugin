@@ -184,6 +184,16 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	
+	/**
+	 * @brief Sync entitlement from 3rd party platform purchase.
+	 *
+	 * @param PlatformType The platform type identifier for sync entitlement.
+	 * @param PSSyncModel Contains ServiceLabel needed for PlayStation DLC sync
+	 * @param OnSuccess This will be called when the operation success.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FAccelByteModelsPlayStationDLCSync const& PSSyncModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Sync (Verify and fulfil) item entitlement from Google Play platform purchase.

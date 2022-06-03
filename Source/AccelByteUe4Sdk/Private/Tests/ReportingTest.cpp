@@ -403,7 +403,7 @@ void FReportingTestSpec::Define()
 				SubmitData.Category = EAccelByteReportingCategory::UGC;
 				SubmitData.Comment = "AdditionalComment";
 				SubmitData.ObjectId = "d2cedbbd8751442bb7077fb5c4940dba"; //picked from UUID Generator Online
-				SubmitData.ObjectType = "";
+				SubmitData.ObjectType = "Content";
 				SubmitData.Reason = ReasonsResponse.Data[0].Title;
 				SubmitData.UserID = TestUser.UserId;
 				FRegistry::Reporting.SubmitReport(SubmitData
