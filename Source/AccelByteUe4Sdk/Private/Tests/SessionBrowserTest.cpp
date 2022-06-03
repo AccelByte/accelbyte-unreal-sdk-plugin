@@ -234,18 +234,34 @@ bool SessionBrowserCreateAndQueryP2PSession::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bCreated);
 
 	//update game session
-	bool bUpdated = false;
+	bool bUpdatedSession = false;
 	FAccelByteModelsSessionBrowserData ResultUpdated;
 	TestSessionBrowserApiClients[0]->SessionBrowser.UpdateGameSession(GameSession.Session_id, UpdatedMaxPlayer, UpdatedPlayerCount,
-        THandler<FAccelByteModelsSessionBrowserData>::CreateLambda([&bUpdated, &ResultUpdated](const FAccelByteModelsSessionBrowserData &Data)
+        THandler<FAccelByteModelsSessionBrowserData>::CreateLambda([&bUpdatedSession, &ResultUpdated](const FAccelByteModelsSessionBrowserData &Data)
     {
-        bUpdated = true;
+		bUpdatedSession = true;
         ResultUpdated = Data;
     }), SessionBrowserTestErrorHandler);
-	WaitUntil(bUpdated, TEXT("Waiting for updating P2P game session ..."));
-	AB_TEST_TRUE(bUpdated);
+	WaitUntil(bUpdatedSession, TEXT("Waiting for updating P2P game session ..."));
+	AB_TEST_TRUE(bUpdatedSession);
 	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Max_player, UpdatedMaxPlayer);
 	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Current_player, UpdatedPlayerCount);
+
+	//update game setting
+	bool bUpdatedSettings = false;
+	FAccelByteModelsSessionBrowserData ResultUpdated2;
+	SettingJson->SetStringField(TEXT("CUSTOM3"), TEXT("CUSTOM3"));
+	SettingJson->SetNumberField(TEXT("CUSTOM2"), 40);
+	TestSessionBrowserApiClients[0]->SessionBrowser.UpdateGameSettings(GameSession.Session_id, SettingJson,
+		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda([&bUpdatedSettings, &ResultUpdated2](const FAccelByteModelsSessionBrowserData& Data)
+			{
+				bUpdatedSettings = true;
+				ResultUpdated2 = Data;
+			}), SessionBrowserTestErrorHandler);
+	WaitUntil(bUpdatedSettings, TEXT("Waiting for updating P2P game settings ..."));
+	AB_TEST_TRUE(bUpdatedSettings);
+	AB_TEST_TRUE(ResultUpdated2.Game_session_setting.Settings.JsonObject->GetStringField("CUSTOM3").Equals(TEXT("CUSTOM3")));
+	AB_TEST_EQUAL(ResultUpdated2.Game_session_setting.Settings.JsonObject->GetIntegerField("CUSTOM2"), 40);
 
 	//Query game session
 	bool bQueried = false;
@@ -272,7 +288,8 @@ bool SessionBrowserCreateAndQueryP2PSession::RunTest(const FString& Parameters)
 		}
 	}
 	AB_TEST_TRUE(Founded.Game_session_setting.Settings.JsonObject->GetStringField("CUSTOM1").Equals(TEXT("CUSTOM1")));
-	AB_TEST_EQUAL(Founded.Game_session_setting.Settings.JsonObject->GetIntegerField("CUSTOM2"), 20);
+	AB_TEST_EQUAL(Founded.Game_session_setting.Settings.JsonObject->GetIntegerField("CUSTOM2"), 40);
+	AB_TEST_TRUE(Founded.Game_session_setting.Settings.JsonObject->GetStringField("CUSTOM3").Equals(TEXT("CUSTOM3")));
 	AB_TEST_TRUE(bFounded);
 	AB_TEST_EQUAL(Founded.Game_session_setting.Current_player, ResultUpdated.Game_session_setting.Current_player);
 
