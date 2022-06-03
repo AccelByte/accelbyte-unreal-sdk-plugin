@@ -114,6 +114,22 @@ public:
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser")
+	void UpdateGameSettings(
+		FString const& SessionId,
+		TMap<FString, FString> Settings,
+		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser")
+	void UpdateGameSettingsByJsonObject(
+		FString const& SessionId,
+		FJsonObjectWrapper Settings,
+		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser")
 	void RemoveGameSession(
 		FString const& SessionId,
 		FDModelsSessionBrowserDataResponse const& OnSuccess,

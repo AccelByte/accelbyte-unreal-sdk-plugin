@@ -238,6 +238,57 @@ void UABSessionBrowser::UpdateGameSessionByStruct(
 	);
 }
 
+void UABSessionBrowser::UpdateGameSettings(
+	FString const& SessionId,
+	TMap<FString, FString> Settings,
+	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDErrorHandler const& OnError
+)
+{
+	ApiClientPtr->SessionBrowser.UpdateGameSettings(
+		SessionId,
+		Settings,
+		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
+void UABSessionBrowser::UpdateGameSettingsByJsonObject(
+	FString const& SessionId,
+	FJsonObjectWrapper Settings,
+	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDErrorHandler const& OnError
+)
+{
+	Settings.JsonObjectFromString(Settings.JsonString);
+	ApiClientPtr->SessionBrowser.UpdateGameSettings(
+		SessionId,
+		Settings.JsonObject,
+		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
 void UABSessionBrowser::RemoveGameSession(
 	FString const& SessionId,
 	FDModelsSessionBrowserDataResponse const& OnSuccess,
