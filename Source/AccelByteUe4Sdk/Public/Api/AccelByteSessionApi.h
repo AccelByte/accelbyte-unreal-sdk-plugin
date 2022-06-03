@@ -62,6 +62,15 @@ public:
 	void GetGameSessionDetails(FString const& GameSessionID, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Query game sessions.
+	 *
+	 * @param QueryRequest The query object with fields to query on.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void QueryGameSessions(FAccelByteModelsV2SessionQueryRequest const& QueryRequest, THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
+
+	/**
 	 * @brief Update a game session by ID.
 	 *
 	 * @param GameSessionID The ID of the session.
