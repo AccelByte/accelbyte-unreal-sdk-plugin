@@ -14,30 +14,30 @@ struct FAgreementBasePolicyCreate
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
-		FString TypeId;
+	FString TypeId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
-		FString BasePolicyName;
+	FString BasePolicyName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
-		FString Description;
+	FString Description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
-		TArray<FString> AffectedCountries;
+	TArray<FString> AffectedCountries{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
-		TArray<FString> AffectedClientIds;
+	TArray<FString> AffectedClientIds{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
-		TArray<FString> Tags;
+	TArray<FString> Tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
-		bool IsMandatory;
+	bool IsMandatory{};
 };
 USTRUCT(BlueprintType)
 struct FAgreementPolicyTypeObject
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyTypeObject")
-		FString Id;
+	FString Id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyTypeObject")
-		FString PolicyTypeName;
+	FString PolicyTypeName{};
 	// contains more fields but unused for test
 };
 USTRUCT(BlueprintType)
@@ -45,11 +45,11 @@ struct FAgreementPolicyObject
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyObject")
-		FString Id;
+	FString Id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyObject")
-		FString CountryCode;
+	FString CountryCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyObject")
-		FString PolicyName;
+	FString PolicyName{};
 	// contains more fields but unused for test
 };
 USTRUCT(BlueprintType)
@@ -57,13 +57,13 @@ struct FAgreementBasePolicy
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicy")
-		FString Id;
+	FString Id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicy")
-		FString BasePolicyName;
+	FString BasePolicyName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicy")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicy")
-		TArray<FAgreementPolicyObject> Policies;
+	TArray<FAgreementPolicyObject> Policies{};
 	// contains more fields but unused for test
 };
 USTRUCT(BlueprintType)
@@ -71,28 +71,28 @@ struct FAgreementPolicyVersionCreate
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		FString DisplayVersion;
+	FString DisplayVersion{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		FString Description;
+	FString Description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		bool IsCrucial;
+	bool IsCrucial{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		bool IsCommitted;
+	bool IsCommitted{};
 };
 USTRUCT(BlueprintType)
 struct FAgreementPolicyVersion
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		FString Id;
+	FString Id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		FString DisplayVersion;
+	FString DisplayVersion{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		FString BasePolicyId;
+	FString BasePolicyId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		bool IsCrucial;
+	bool IsCrucial{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
-		bool IsInEffect;
+	bool IsInEffect{};
 	// contains more fields but unused for test
 };
 USTRUCT(BlueprintType)
@@ -100,15 +100,15 @@ struct FAgreementCountryPolicy
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
-		FString Id;
+	FString Id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
-		FString CountryCode;
+	FString CountryCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
-		FString PolicyName;
+	FString PolicyName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
-		bool IsCrucial;
+	bool IsCrucial{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
-		TArray<FAgreementPolicyVersion> PolicyVersions;
+	TArray<FAgreementPolicyVersion> PolicyVersions{};
 	// contains more fields but unused for test
 };
 USTRUCT(BlueprintType)
@@ -116,26 +116,26 @@ struct FAgreementLocalizedPolicyCreate
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicyCreate")
-		FString LocaleCode;
+	FString LocaleCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicyCreate")
-		FString ContentType;
+	FString ContentType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicyCreate")
-		FString Description;
+	FString Description{};
 };
 USTRUCT(BlueprintType)
 struct FAgreementLocalizedPolicy
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
-		FString Id;
+	FString Id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
-		FString LocaleCode;
+	FString LocaleCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
-		FString ContentType;
+	FString ContentType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
-		FString Description;
+	FString Description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
-		FString AttachmentLocation;
+	FString AttachmentLocation{};
 };
 
 #pragma endregion AGREEMENT_MODEL

@@ -14,37 +14,37 @@ struct FTestGrandChildModel
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int I = -5;
+	int I{-5};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int32 I32 = -2;
+	int32 I32{-2};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int64 I64 = -1;
+	int64 I64{-1};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		uint8 UI8 = 0;
+	uint8 UI8{0};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		bool b = true;
+	bool b{true};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		float f = 0.5;
+	float f{0.5};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FString S = TEXT("String");
+	FString S {TEXT("String")};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FJsonObjectWrapper JO = FJsonObjectWrapper{};
+	FJsonObjectWrapper JO{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int> AI = TArray<int>{ -5, -4 };
+	TArray<int> AI{ -5, -4 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int32> AI32 = TArray<int32>{ -2, -1 };
+	TArray<int32> AI32{ -2, -1 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int64> AI64 = TArray<int64>{ -1, 0 };
+	TArray<int64> AI64{ -1, 0 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<uint8> AUI8 = TArray < uint8>{ 0, 1 };
+	TArray<uint8> AUI8{ 0, 1 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<bool> Ab = TArray<bool>{ true, false };
+	TArray<bool> Ab{ true, false };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<float> Af = TArray<float>{ 0.5, 0.05 };
+	TArray<float> Af{ 0.5, 0.05 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FString> AS = TArray<FString>{ TEXT("String"), TEXT("AString") };
+	TArray<FString> AS{ TEXT("String"), TEXT("AString") };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FJsonObjectWrapper> AJO = TArray<FJsonObjectWrapper>{};
+	TArray<FJsonObjectWrapper> AJO{};
 };
 
 USTRUCT(BlueprintType)
@@ -52,41 +52,41 @@ struct FTestChildModel
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int I = -5;
+	int I{-5};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int32 I32 = -2;
+	int32 I32{-2};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int64 I64 = -1;
+	int64 I64{-1};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		uint8 UI8 = 0;
+	uint8 UI8{0};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		bool b = true;
+	bool b{true};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		float f = 0.5;
+	float f{0.5};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FString S = TEXT("String");
+	FString S {TEXT("String")};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FJsonObjectWrapper JO = FJsonObjectWrapper{};
+	FJsonObjectWrapper JO{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int> AI = TArray<int>{ -5, -4 };
+	TArray<int> AI{ -5, -4 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int32> AI32 = TArray<int32>{ -2, -1 };
+	TArray<int32> AI32{ -2, -1 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int64> AI64 = TArray<int64>{ -1, 0 };
+	TArray<int64> AI64{ -1, 0 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<uint8> AUI8 = TArray < uint8>{ 0, 1 };
+	TArray<uint8> AUI8{ 0, 1 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<bool> Ab = TArray<bool>{ true, false };
+	TArray<bool> Ab{ true, false };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<float> Af = TArray<float>{ 0.5, 0.05 };
+	TArray<float> Af{ 0.5, 0.05 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FString> AS = TArray<FString>{ TEXT("String"), TEXT("AString") };
+	TArray<FString> AS{ TEXT("String"), TEXT("AString") };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FJsonObjectWrapper> AJO = TArray<FJsonObjectWrapper>{};
+	TArray<FJsonObjectWrapper> AJO{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FTestGrandChildModel CM = FTestGrandChildModel{};
+	FTestGrandChildModel CM{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FTestGrandChildModel> CAM = TArray<FTestGrandChildModel>{};
+	TArray<FTestGrandChildModel> CAM{};
 };
 
 USTRUCT(BlueprintType)
@@ -94,45 +94,45 @@ struct FTestModel
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int I = -5;
+	int I{-5};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int32 I32 = -2;
+	int32 I32{-2};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		int64 I64 = -1;
+	int64 I64{-1};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		uint8 UI8 = 0;
+	uint8 UI8{0};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		bool b = true;
+	bool b{true};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		float f = 0.5;
+	float f{0.5};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FString S = TEXT("String");
+	FString S {TEXT("String")};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FJsonObjectWrapper JO = FJsonObjectWrapper{};
+	FJsonObjectWrapper JO{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int> AI = TArray<int>{ -5, -4 };
+	TArray<int> AI{ -5, -4 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int32> AI32 = TArray<int32>{ -2, -1 };
+	TArray<int32> AI32{ -2, -1 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<int64> AI64 = TArray<int64>{ -1, 0 };
+	TArray<int64> AI64{ -1, 0 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<uint8> AUI8 = TArray < uint8>{ 0, 1 };
+	TArray<uint8> AUI8{ 0, 1 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<bool> Ab = TArray<bool>{ true, false };
+	TArray<bool> Ab{ true, false };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<float> Af = TArray<float>{ 0.5, 0.05 };
+	TArray<float> Af{ 0.5, 0.05 };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FString> AS = TArray<FString>{ TEXT("String"), TEXT("AString") };
+	TArray<FString> AS{ TEXT("String"), TEXT("AString") };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FJsonObjectWrapper> AJO = TArray<FJsonObjectWrapper>{};
+	TArray<FJsonObjectWrapper> AJO{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FTestGrandChildModel CM = FTestGrandChildModel{};
+	FTestGrandChildModel CM{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FTestGrandChildModel> CAM = TArray<FTestGrandChildModel>{};
+	TArray<FTestGrandChildModel> CAM{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FTestChildModel M = FTestChildModel{};
+	FTestChildModel M{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		TArray<FTestChildModel> AM = TArray<FTestChildModel>{};
+	TArray<FTestChildModel> AM{};
 };
 
 USTRUCT(BlueprintType)
@@ -140,5 +140,5 @@ struct FWrongTestModel
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | TestModel")
-		FString WrongField;
+	FString WrongField{};
 };

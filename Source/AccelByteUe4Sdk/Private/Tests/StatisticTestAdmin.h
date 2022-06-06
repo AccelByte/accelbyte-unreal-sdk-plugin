@@ -13,25 +13,25 @@ struct FStatCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	float defaultValue;
+	float defaultValue{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	FString description;
+	FString description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	bool incrementOnly;
+	bool incrementOnly{false};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	float maximum;
+	float maximum{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	float minimum;
+	float minimum{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	FString name;
+	FString name{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	bool setAsGlobal;
+	bool setAsGlobal{false};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	EAccelByteStatisticSetBy setBy;
+	EAccelByteStatisticSetBy setBy{EAccelByteStatisticSetBy::CLIENT};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	FString statCode;
+	FString statCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
-	TArray<FString> tags;
+	TArray<FString> tags{};
 };
 
 void AdminGetStatisticByStatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);

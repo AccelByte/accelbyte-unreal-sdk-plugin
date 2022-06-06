@@ -111,11 +111,6 @@ FAccelByteModelsDsNotice dsNotice;
 
 FLobbyModelConfig OriginalLobbyConfig;
 
-static bool LatenciesPredicate(const TPair<FString, float>& left, const TPair<FString, float>& right)
-{
-	return left.Value < right.Value;
-}
-
 void LobbyConnect(int UserCount)
 {
 	if (UserCount > TestUserCount)
@@ -855,6 +850,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	
 	for (int i = 0; i < TestUserCount; i++)
 	{
+		AB_TEST_TRUE(UsersCreationSuccess[i]);
 		AB_TEST_TRUE(UsersLoginSuccess[i]);
 	}
 
@@ -1739,7 +1735,7 @@ bool MessageIdCachedResponse::RunTest(const FString& Parameters)
 
 		for (uint8 i = 0; i < MaxRequestCount;i++)
 		{
-			const auto GetInfoPartyDelegate_Unique = Api::Lobby::FPartyInfoResponse::CreateLambda([i, &MessageIdResponseMap, &UniqueResponseChecker](FAccelByteModelsInfoPartyResponse result)
+			const auto GetInfoPartyDelegate_Unique = Api::Lobby::FPartyInfoResponse::CreateLambda([i, &UniqueResponseChecker](const FAccelByteModelsInfoPartyResponse&)
 				{
 					UniqueResponseChecker.Add(i);
 				});
@@ -3696,7 +3692,6 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 		}
 	}
 	AB_TEST_TRUE(bFound);
-	bFound = false;
 
 	bool bRequestFriendAttemptDone = false;
 	bool bBlockedFriendRequestPassed = false;
@@ -4794,7 +4789,6 @@ bool FLobbyTestFeatureBan::RunTest(const FString& Parameter)
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
@@ -5044,7 +5038,6 @@ bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;

@@ -15,11 +15,11 @@ class FMockResponse : public IHttpResponse
 
 private:
 
-	int32 ResponseCode;
+	int32 ResponseCode{};
 
-	FString Content;
+	FString Content{};
 
-	TArray<uint8> rawContent;
+	TArray<uint8> rawContent{};
 
 public:
 

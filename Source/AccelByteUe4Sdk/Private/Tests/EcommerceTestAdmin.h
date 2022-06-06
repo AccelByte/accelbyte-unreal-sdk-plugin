@@ -15,21 +15,21 @@ struct FCurrencyCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		FString currencyCode;
+	FString currencyCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		TMap<FString, FString> localizationDescriptions; // "Language" : "Description"
+	TMap<FString, FString> localizationDescriptions{}; // "Language" : "Description"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		FString currencySymbol;
+	FString currencySymbol{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		EAccelByteItemCurrencyType currencyType;
+	EAccelByteItemCurrencyType currencyType{EAccelByteItemCurrencyType::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		int decimals;
+	int decimals{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		int maxAmountPerTransaction;
+	int maxAmountPerTransaction{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		int maxTransactionAmountPerDay;
+	int maxTransactionAmountPerDay{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		int maxBalanceAmount;
+	int maxBalanceAmount{};
 };
 
 USTRUCT(BlueprintType)
@@ -37,17 +37,17 @@ struct FStoreCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString title;
+	FString title{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString description;
+	FString description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		TArray<FString> supportedLanguages;
+	TArray<FString> supportedLanguages{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		TArray<FString> supportedRegions;
+	TArray<FString> supportedRegions{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString defaultLanguage;
+	FString defaultLanguage{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString defaultRegion;
+	FString defaultRegion{};
 };
 
 USTRUCT(BlueprintType)
@@ -55,27 +55,27 @@ struct FStoreInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString storeId;
+	FString storeId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString title;
+	FString title{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString description;
+	FString description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		bool published;
+	bool published{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		TArray<FString> supportedLanguages;
+	TArray<FString> supportedLanguages{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		TArray<FString> supportedRegions;
+	TArray<FString> supportedRegions{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString defaultRegion;
+	FString defaultRegion{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString defaultLanguage;
+	FString defaultLanguage{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString createdAt;
+	FString createdAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Store")
-		FString updatedAt;
+	FString updatedAt{};
 };
 
 USTRUCT(BlueprintType)
@@ -83,19 +83,19 @@ struct FCategoryInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		FString parentCategoryPath;
+	FString parentCategoryPath{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		FString categoryPath;
+	FString categoryPath{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		FString createdAt;
+	FString createdAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		FString updatedAt;
+	FString updatedAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		TMap<FString, FString> localizationDisplayNames; // "Language" : "Description"
+	TMap<FString, FString> localizationDisplayNames{}; // "Language" : "Description"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		bool root;
+	bool root{};
 };
 
 USTRUCT(BlueprintType)
@@ -103,9 +103,9 @@ struct FCategoryCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		FString categoryPath;
+	FString categoryPath{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Category")
-		TMap<FString, FString> localizationDisplayNames; // "Language" : "Description"
+	TMap<FString, FString> localizationDisplayNames{}; // "Language" : "Description"
 };
 
 USTRUCT(BlueprintType)
@@ -113,9 +113,9 @@ struct FLocalExt
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FString> properties;
+	TArray<FString> properties{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FString> functions;
+	TArray<FString> functions{};
 };
 
 USTRUCT(BlueprintType)
@@ -123,39 +123,39 @@ struct FLocalization
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString title;
+	FString title{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString description;
+	FString description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString longDescription;
+	FString longDescription{};
 };
 
 USTRUCT(BlueprintType)
 struct FCreateRegionDataItem
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		int32 Price;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		int32 DiscountPercentage;
+	int32 Price{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		int32 DiscountAmount;
+	int32 DiscountPercentage{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		int32 DiscountedPrice;
+	int32 DiscountAmount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		FString CurrencyCode;
+	int32 DiscountedPrice{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		EAccelByteItemCurrencyType CurrencyType;
+	FString CurrencyCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		FString CurrencyNamespace;
+	EAccelByteItemCurrencyType CurrencyType{EAccelByteItemCurrencyType::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		FString PurchaseAt;
+	FString CurrencyNamespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		FString ExpireAt;
+	FString PurchaseAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		FString DiscountPurchaseAt;
+	FString ExpireAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
-		FString DiscountExpireAt;
+	FString DiscountPurchaseAt{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+	FString DiscountExpireAt{};
 };
 
 USTRUCT(BlueprintType)
@@ -163,21 +163,21 @@ struct FRegionDataUS
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FCreateRegionDataItem> US;
+	TArray<FCreateRegionDataItem> US{};
 };
 
 USTRUCT(BlueprintType)
 struct FRecurring
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteSubscriptionCycle cycle = EAccelByteSubscriptionCycle::WEEKLY;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int fixedFreeDays = 0;
+	EAccelByteSubscriptionCycle cycle{EAccelByteSubscriptionCycle::WEEKLY};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int fixedTrialCycles = 0;
+	int fixedFreeDays{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int graceDays = 1; // min val = 1
+	int fixedTrialCycles{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+	int graceDays{1}; // min val = 1
 };
 
 USTRUCT(BlueprintType)
@@ -185,59 +185,59 @@ struct FItemCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteItemType itemType;
+	EAccelByteItemType itemType{EAccelByteItemType::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteSeasonType SeasonType;
+	EAccelByteSeasonType SeasonType{EAccelByteSeasonType::PASS};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString name;
+	FString name{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteEntitlementType entitlementType; // "Language" : "Description"
+	EAccelByteEntitlementType entitlementType{EAccelByteEntitlementType::NONE}; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int useCount;
+	int useCount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		bool stackable;
+	bool stackable{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString appId;
+	FString appId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteAppType appType;
+	EAccelByteAppType appType{EAccelByteAppType::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString baseAppId;
+	FString baseAppId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString targetCurrencyCode;
+	FString targetCurrencyCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString targetNamespace;
+	FString targetNamespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString categoryPath;
+	FString categoryPath{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TMap<FString, FLocalization> localizations;
+	TMap<FString, FLocalization> localizations{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteItemStatus status;
+	EAccelByteItemStatus status{EAccelByteItemStatus::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString sku;
+	FString sku{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FAccelByteModelsItemImage> images;
+	TArray<FAccelByteModelsItemImage> images{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString thumbnailUrl;
+	FString thumbnailUrl{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FRegionDataUS regionData;
+	FRegionDataUS regionData{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FString> itemIds;
+	TArray<FString> itemIds{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FString> tags;
+	TArray<FString> tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int maxCountPerUser;
+	int maxCountPerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int maxCount;
+	int maxCount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString boothName;
+	FString boothName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int displayOrder;
+	int displayOrder{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString clazz;
+	FString clazz{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FRecurring recurring;
+	FRecurring recurring{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-		TMap<FString, int32> ItemQty;
+	TMap<FString, int32> ItemQty{};
 };
 
 USTRUCT(BlueprintType)
@@ -245,55 +245,55 @@ struct FItemFullInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString itemId;
+	FString itemId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString appId;
+	FString appId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteAppType appType;
+	EAccelByteAppType appType{EAccelByteAppType::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString sku;
+	FString sku{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString name;
+	FString name{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteEntitlementType entitlementType; // "Language" : "Description"
+	EAccelByteEntitlementType entitlementType{EAccelByteEntitlementType::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int useCount;
+	int useCount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString categoryPath;
+	FString categoryPath{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TMap<FString, FLocalization> localizations;
+	TMap<FString, FLocalization> localizations{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteItemStatus status;
+	EAccelByteItemStatus status{EAccelByteItemStatus::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAccelByteItemType itemType;
+	EAccelByteItemType itemType{EAccelByteItemType::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString targetCurrencyCode;
+	FString targetCurrencyCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString targetNamespace;
+	FString targetNamespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FAccelByteModelsItemRegionDataItem regionData;
+	FAccelByteModelsItemRegionDataItem regionData{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FString> itemIds;
+	TArray<FString> itemIds{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FString> tags;
+	TArray<FString> tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int maxCountPerUser;
+	int maxCountPerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		int maxCount;
+	int maxCount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString clazz;
+	FString clazz{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString ext;
+	FString ext{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FString> codeFiles;
+	TArray<FString> codeFiles{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString createdAt;
+	FString createdAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString updatedAt;
+	FString updatedAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-		TMap<FString, int32> ItemQty;
+	TMap<FString, int32> ItemQty{};
 };
 
 USTRUCT(BlueprintType)
@@ -301,11 +301,11 @@ struct FRedeemableItem
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | RedeemableItem")
-		FString itemId;
+	FString itemId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | RedeemableItem")
-		FString itemName;
+	FString itemName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | RedeemableItem")
-		int32 quantity;
+	int32 quantity{};
 };
 
 USTRUCT(BlueprintType)
@@ -313,29 +313,29 @@ struct FCampaignCreateModel
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		FString name;
+	FString name{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		FString description;
+	FString description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		TArray<FString> tags;
+	TArray<FString> tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		FString status; // ACTIVE/ INACTIVE
+	FString status{}; // ACTIVE/ INACTIVE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		int32 maxRedeemCountPerCode;
+	int32 maxRedeemCountPerCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		int32 maxRedeemCountPerCodePerUser;
+	int32 maxRedeemCountPerCodePerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		int32 maxRedeemCountPerCampaignPerUser;
+	int32 maxRedeemCountPerCampaignPerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		int32 maxSaleCount;
+	int32 maxSaleCount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		FString redeemStart;
+	FString redeemStart{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		FString redeemEnd;
+	FString redeemEnd{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		FString redeemType; // ITEM
+	FString redeemType{}; // ITEM
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCreateModel")
-		TArray<FRedeemableItem> items;
+	TArray<FRedeemableItem> items{};
 };
 
 USTRUCT(BlueprintType)
@@ -343,29 +343,29 @@ struct FCampaignUpdateModel
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		FString name;
+	FString name{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		FString description;
+	FString description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		TArray<FString> tags;
+	TArray<FString> tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		FString status; // ACTIVE/ INACTIVE
+	FString status{}; // ACTIVE/ INACTIVE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		int32 maxRedeemCountPerCode;
+	int32 maxRedeemCountPerCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		int32 maxRedeemCountPerCodePerUser;
+	int32 maxRedeemCountPerCodePerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		int32 maxRedeemCountPerCampaignPerUser;
+	int32 maxRedeemCountPerCampaignPerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		int32 maxSaleCount;
+	int32 maxSaleCount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		FString redeemStart;
+	FString redeemStart{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		FString redeemEnd;
+	FString redeemEnd{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		FString redeemType; // ITEM
+	FString redeemType{}; // ITEM
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignUpdateModel")
-		TArray<FRedeemableItem> items;
+	TArray<FRedeemableItem> items{};
 };
 
 USTRUCT(BlueprintType)
@@ -373,41 +373,41 @@ struct FCampaignInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FString id;
+	FString id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FString type;
+	FString type{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FString name;
+	FString name{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FString description;
+	FString description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		TArray<FString> tags;
+	TArray<FString> tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FString status; // ACTIVE/ INACTIVE
+	FString status{}; // ACTIVE/ INACTIVE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FDateTime redeemStart;
+	FDateTime redeemStart{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FDateTime redeemEnd;
+	FDateTime redeemEnd{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		int32 maxRedeemCountPerCode;
+	int32 maxRedeemCountPerCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		int32 maxRedeemCountPerCodePerUser;
+	int32 maxRedeemCountPerCodePerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		int32 maxRedeemCountPerCampaignPerUser;
+	int32 maxRedeemCountPerCampaignPerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		int32 maxSaleCount;
+	int32 maxSaleCount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FString redeemType; // ITEM
+	FString redeemType{}; // ITEM
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		TArray<FRedeemableItem> items;
+	TArray<FRedeemableItem> items{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FString boothName;
+	FString boothName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FDateTime createdAt;
+	FDateTime createdAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignInfo")
-		FDateTime updatedAt;
+	FDateTime updatedAt{};
 };
 
 USTRUCT(BlueprintType)
@@ -415,9 +415,9 @@ struct FCampaignPagingSlicedResult
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignPaging")
-		TArray<FCampaignInfo> data;
+	TArray<FCampaignInfo> data{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignPaging")
-		FAccelByteModelsPaging paging;
+	FAccelByteModelsPaging paging{};
 };
 
 USTRUCT(BlueprintType)
@@ -425,7 +425,7 @@ struct FCampaignCodeCreateModel
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCodeCreateModel")
-		int32 quantity;
+	int32 quantity{};
 };
 
 USTRUCT(BlueprintType)
@@ -433,7 +433,7 @@ struct FCampaignCodeCreateResult
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CampaignCodeCreateResult")
-		int32 numCreated;
+	int32 numCreated{};
 };
 
 USTRUCT(BlueprintType)
@@ -441,45 +441,45 @@ struct FCodeInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString id;
+	FString id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString type; // REDEMPTION
+	FString type{}; // REDEMPTION
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString campaignId;
+	FString campaignId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString value;
+	FString value{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		int32 maxRedeemCountPerCode;
+	int32 maxRedeemCountPerCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		int32 maxRedeemCountPerCodePerUser;
+	int32 maxRedeemCountPerCodePerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		int32 maxRedeemCountPerCampaignPerUser;
+	int32 maxRedeemCountPerCampaignPerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		int32 remainder;
+	int32 remainder{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		int32 redeemedCount;
+	int32 redeemedCount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString status; // ACTIVE / INACTIVE
+	FString status{}; // ACTIVE / INACTIVE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FDateTime redeemStart;
+	FDateTime redeemStart{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FDateTime redeemEnd;
+	FDateTime redeemEnd{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString redeemType; // ITEM
+	FString redeemType{}; // ITEM
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		TArray<FRedeemableItem> items;
+	TArray<FRedeemableItem> items{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		int32 batchNo;
+	int32 batchNo{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString acquireOrderNo;
+	FString acquireOrderNo{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FString acquireUserId;
+	FString acquireUserId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FDateTime createdAt;
+	FDateTime createdAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfo")
-		FDateTime updatedAt;
+	FDateTime updatedAt{};
 };
 
 USTRUCT(BlueprintType)
@@ -487,9 +487,9 @@ struct FCodeInfoPagingSlicedResult
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfoPaging")
-		TArray<FCodeInfo> data;
+	TArray<FCodeInfo> data{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | CodeInfoPaging")
-		FAccelByteModelsPaging paging;
+	FAccelByteModelsPaging paging{};
 };
 
 USTRUCT(BlueprintType)
@@ -498,9 +498,9 @@ struct FRewardItemRequest
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString ItemId;
+	FString ItemId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	int32 Quantity;
+	int32 Quantity{};
 };
 
 USTRUCT(BlueprintType)
@@ -509,13 +509,13 @@ struct FRewardConditionRequest
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString ConditionName;
+	FString ConditionName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString Condition;
+	FString Condition{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString EventName;
+	FString EventName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	TArray<FRewardItemRequest> RewardItems;
+	TArray<FRewardItemRequest> RewardItems{};
 };
 
 USTRUCT(BlueprintType)
@@ -524,17 +524,17 @@ struct FRewardCreateRequest
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString RewardCode;
+	FString RewardCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString Description;
+	FString Description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString EventTopic;
+	FString EventTopic{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	TArray<FRewardConditionRequest> RewardConditions;
+	TArray<FRewardConditionRequest> RewardConditions{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	int32 MaxAwarded;
+	int32 MaxAwarded{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	int32 MaxAwardedPerUser;
+	int32 MaxAwardedPerUser{};
 };
 
 USTRUCT(BlueprintType)
@@ -543,25 +543,25 @@ struct FRewardCreateInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString RewardId;
+	FString RewardId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString RewardCode;
+	FString RewardCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString Description;
+	FString Description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString EventTopic;
+	FString EventTopic{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	TArray<FRewardConditionRequest> RewardConditions;
+	TArray<FRewardConditionRequest> RewardConditions{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	int32 MaxAwarded;
+	int32 MaxAwarded{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	int32 MaxAwardedPerUser;
+	int32 MaxAwardedPerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{};
 };
 
 USTRUCT(BlueprintType)
@@ -570,25 +570,25 @@ struct FQueryRewardDataInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString RewardId;
+	FString RewardId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString RewardCode;
+	FString RewardCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString Description;
+	FString Description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString EventTopic;
+	FString EventTopic{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	TArray<FRewardConditionRequest> RewardConditions;
+	TArray<FRewardConditionRequest> RewardConditions{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	int32 MaxAwarded;
+	int32 MaxAwarded{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	int32 MaxAwardedPerUser;
+	int32 MaxAwardedPerUser{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{};
 };
 
 USTRUCT(BlueprintType)
@@ -597,9 +597,9 @@ struct FQueryRewardPagingInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString Previous;
+	FString Previous{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FString Next;
+	FString Next{};
 };
 
 USTRUCT(BlueprintType)
@@ -608,9 +608,9 @@ struct FQueryRewardInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	TArray<FQueryRewardDataInfo> Data;
+	TArray<FQueryRewardDataInfo> Data{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
-	FQueryRewardPagingInfo Paging;
+	FQueryRewardPagingInfo Paging{};
 };
 
 USTRUCT(BlueprintType)
@@ -618,11 +618,11 @@ struct FAppleIAPConfig
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
-	FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
-	FString BundleId;
+	FString BundleId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
-	FString Password;
+	FString Password{};
 };
 
 USTRUCT(BlueprintType)
@@ -630,13 +630,13 @@ struct FGoogleIAPConfig
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
-	FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
-	FString ApplicationName;
+	FString ApplicationName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
-	FString ServiceAccountId;
+	FString ServiceAccountId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
-	FString P12FileName;
+	FString P12FileName{};
 };
 
 USTRUCT(BlueprintType)
@@ -644,52 +644,52 @@ struct FFulfillmentRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Fulfillment")
-	FString ItemId;
+	FString ItemId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Fulfillment")
 	int32 Quantity {0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Fulfillment")
-	FString EndDate; // in ISO8601 format
+	FString EndDate{}; // in ISO8601 format
 };
 
 struct EcommerceExpectedVariable
 {
-	FString ExpectedRootCategoryPath;
-	FString ExpectedChildCategoryPath;
-	FString ExpectedGrandChildCategoryPath;
-	FString ExpectedMediaCategoryPath;
-	FCurrencyCreateRequest ExpectedCurrency;
-	FString campaignCode;
-	FString campaignName;
-	FString expiredCampaignName;
-	FString notStartedCampaignName;
-	FString redeemableItemTitle;
-	FString mediaItemTitle;
-	FString ExpectedRootItemTitle;
-	FString ExpectedChildItemTitle;
-	FString ExpectedGrandChildItemTitle;
-	FString ExpectedPurchasingItemTitle;
-	FString ExpectedRootItemAppId;
-	FString ExpectedChildItemAppId;
-	FString ExpectedGrandChildItemAppId;
-	FString ExpectedRootItemSku;
-	FString ExpectedChildItemSku;
-	FString ExpectedGrandChildItemSku;
-	FStoreCreateRequest ExpectedStoreArchive;
-	FStoreCreateRequest ExpectedStoreTemporary;
-	int32 LootCoinQuantity;
-	FItemFullInfo redeemableItem;
-	FItemFullInfo mediaItem;
-	FItemFullInfo LootItem;
-	FItemFullInfo LootCoin;
-	FItemFullInfo LootResult;
-	FItemFullInfo BundleResult;
-	FCampaignInfo campaignResult;
-	FCampaignInfo expiredCampaignResult;
-	FCampaignInfo notStartedCampaignResult;
-	FCodeInfo codeInfo;
-	FCodeInfo expiredCodeInfo;
-	FCodeInfo notStartedCodeInfo;
-	FRewardCreateInfo RewardCreateInfo;
+	FString ExpectedRootCategoryPath{};
+	FString ExpectedChildCategoryPath{};
+	FString ExpectedGrandChildCategoryPath{};
+	FString ExpectedMediaCategoryPath{};
+	FCurrencyCreateRequest ExpectedCurrency{};
+	FString campaignCode{};
+	FString campaignName{};
+	FString expiredCampaignName{};
+	FString notStartedCampaignName{};
+	FString redeemableItemTitle{};
+	FString mediaItemTitle{};
+	FString ExpectedRootItemTitle{};
+	FString ExpectedChildItemTitle{};
+	FString ExpectedGrandChildItemTitle{};
+	FString ExpectedPurchasingItemTitle{};
+	FString ExpectedRootItemAppId{};
+	FString ExpectedChildItemAppId{};
+	FString ExpectedGrandChildItemAppId{};
+	FString ExpectedRootItemSku{};
+	FString ExpectedChildItemSku{};
+	FString ExpectedGrandChildItemSku{};
+	FStoreCreateRequest ExpectedStoreArchive{};
+	FStoreCreateRequest ExpectedStoreTemporary{};
+	int32 LootCoinQuantity{};
+	FItemFullInfo redeemableItem{};
+	FItemFullInfo mediaItem{};
+	FItemFullInfo LootItem{};
+	FItemFullInfo LootCoin{};
+	FItemFullInfo LootResult{};
+	FItemFullInfo BundleResult{};
+	FCampaignInfo campaignResult{};
+	FCampaignInfo expiredCampaignResult{};
+	FCampaignInfo notStartedCampaignResult{};
+	FCodeInfo codeInfo{};
+	FCodeInfo expiredCodeInfo{};
+	FCodeInfo notStartedCodeInfo{};
+	FRewardCreateInfo RewardCreateInfo{};
 };
 
 #pragma endregion ECOMMERCE_MODEL

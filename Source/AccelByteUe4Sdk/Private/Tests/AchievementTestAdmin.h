@@ -13,27 +13,27 @@ struct FAchievementRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		FString AchievementCode;
+	FString AchievementCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		FString DefaultLanguage;
+	FString DefaultLanguage{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		TMap<FString, FString> Name; // "Language" : "Name"
+	TMap<FString, FString> Name{}; // "Language" : "Name"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		TMap<FString, FString> Description; // "Language" : "Description"
+	TMap<FString, FString> Description{}; // "Language" : "Description"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		TArray<FAccelByteModelsAchievementIcon> LockedIcons;
+	TArray<FAccelByteModelsAchievementIcon> LockedIcons{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		TArray<FAccelByteModelsAchievementIcon> UnlockedIcons;
+	TArray<FAccelByteModelsAchievementIcon> UnlockedIcons{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		bool Hidden;
+	bool Hidden{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		TArray<FString> Tags;
+	TArray<FString> Tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		bool Incremental;
+	bool Incremental{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		float GoalValue;
+	float GoalValue{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		FString StatCode;
+	FString StatCode{};
 };
 
 USTRUCT(BlueprintType)
@@ -41,35 +41,35 @@ struct FAchievementResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		FString AchievementCode;
+	FString AchievementCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		FString DefaultLanguage;
+	FString DefaultLanguage{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		TMap<FString, FString> Name; // "Language" : "Name"
+	TMap<FString, FString> Name{}; // "Language" : "Name"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		TMap<FString, FString> Description; // "Language" : "Description"
+	TMap<FString, FString> Description{}; // "Language" : "Description"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		TArray<FAccelByteModelsAchievementIcon> LockedIcons;
+	TArray<FAccelByteModelsAchievementIcon> LockedIcons{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		TArray<FAccelByteModelsAchievementIcon> UnlockedIcons;
+	TArray<FAccelByteModelsAchievementIcon> UnlockedIcons{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		bool Hidden;
+	bool Hidden{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		int32 ListOrder;
+	int32 ListOrder{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		TArray<FString> Tags;
+	TArray<FString> Tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		bool Incremental;
+	bool Incremental{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		float GoalValue;
+	float GoalValue{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		FString StatCode;
+	FString StatCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		FString CreatedAt;
+	FString CreatedAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		FString UpdatedAt;
+	FString UpdatedAt{};
 };
 
 void AdminCreateAchievement(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError);
