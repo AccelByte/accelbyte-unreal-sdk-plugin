@@ -200,5 +200,27 @@ void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateReque
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void UserProfile::GetUserProfilePublicInfoByPublicId(const FString& PublicId, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public/byPublicId"), *SettingsRef.BasicServerUrl, *SettingsRef.Namespace);
+	FString Verb			= TEXT("GET");
+	FString ContentType		= TEXT("application/json");
+	FString Accept			= TEXT("application/json");
+
+	Url.Append(FString::Printf(TEXT("?publicId=%s"), *PublicId));
+	
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+  
 } // Namespace Api
 } // Namespace AccelByte

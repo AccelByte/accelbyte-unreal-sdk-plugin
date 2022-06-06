@@ -110,8 +110,10 @@ public:
 	* @param PlatformToken The Token.
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	* @param OnError This will be called when the operation failed.
+	* @param bCreateHeadless This will create new account if needed, default value is true 
 	*/
-	static void GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError);
+	static void GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken,
+		const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool bCreateHeadless = true);
 	
 	/**
 	* @brief Refresh user session.
@@ -156,9 +158,9 @@ public:
 	* @param Password The password.
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	* @param OnError This will be called when the operation failed.
-	* @param RememberMe This will use for refresh token expiration extension, default value is false.
+	* @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	*/
-	static void GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError, bool RememberMe = false);
+	static void GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError, bool bRememberMe = false);
 
 	/**
 	* @brief Log user in with their username and password using V3 endpoint with 2FA enabled
@@ -169,9 +171,9 @@ public:
 	* @param Password The password.
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	* @param OnError This will be called when the operation failed.
-	* @param RememberMe This will use for refresh token expiration extension, default value is false.
+	* @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	*/
-	static void GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool RememberMe = false);
+	static void GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberMe = false);
 	
 	/**
 	* @brief Verify and Remember new device when user enabled 2FA.
@@ -183,10 +185,36 @@ public:
 	* @param Code Code to verify new device, could be obtain by 3rd party authenticator app or back up code depend on what type of AuthFactor user set as default
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	* @param OnError This will be called when the operation failed.
-	* @param RememberDevice This will use for refresh token expiration extension, default value is false.
+	* @param bRememberDevice This will use for refresh token expiration extension, default value is false.
 	*/
 	static void VerifyAndRememberNewDevice(const FString& ClientId, const FString& ClientSecret, const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code, 
-		const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool RememberDevice = false);
+		const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberDevice = false);
+
+	/**
+	* @brief Log user in with create headless account after 3rd platform authenticated
+	* Will return a "user" session id.
+	* 
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param LinkingToken Platform Linking Token.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	* @param OnError This will be called when the operation failed.
+	*/
+	static void CreateHeadlessAccountAndResponseToken(const FString& ClientId, const FString& ClientSecret, const FString& LinkingToken,
+		const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError);
+	
+	/**
+	* @brief Log user in with authenticate a user account and perform platform link. It validates user's email / username and password.
+	* Will return a "user" session id.
+	*
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param LinkingToken Platform Linking Token.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	* @param OnError This will be called when the operation failed.
+	*/
+	static void AuthenticationWithPlatformLink(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const FString& LinkingToken,
+		const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError);
 	
 private:
 	Oauth2() = delete; // static class can't have instance

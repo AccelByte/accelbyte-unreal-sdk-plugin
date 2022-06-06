@@ -29,7 +29,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsReportingSubmitData
 	FString Comment{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	FString ObjectId{};
+	FString ObjectId{};//in the future this objectId value will be taken from UGC Content (ContentId) 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
 	FString ObjectType{};

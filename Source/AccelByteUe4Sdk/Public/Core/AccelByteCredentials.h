@@ -53,6 +53,7 @@ public:
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
+	void SetErrorOAuth(const FErrorOauthInfo ErrorOAuthInfo);
 
 	FTokenRefreshedEvent& OnTokenRefreshed();
 
@@ -67,6 +68,7 @@ public:
 	const FString& GetUserDisplayName() const;
 	const FString& GetNamespace() const;
 	const FString& GetUserEmailAddress() const;
+	const FString& GetLinkingToken() const; 
 	
 	ESessionState GetSessionState() const;
 	bool IsSessionValid() const;
@@ -78,6 +80,7 @@ private:
 	FString ClientId;
 	FString ClientSecret;
 	FOauth2Token AuthToken;
+	FErrorOauthInfo ErrorOAuth; 
 	
 	double UserSessionExpire;
 	FString UserEmailAddress;

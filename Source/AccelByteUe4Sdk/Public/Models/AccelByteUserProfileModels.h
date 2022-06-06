@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonObjectWrapper.h"
 #include "AccelByteUserProfileModels.generated.h"
 
 USTRUCT(BlueprintType)
@@ -44,6 +45,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString DateOfBirth{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	TMap<FString, FJsonObjectWrapper> CustomAttributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	FString ZipCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	FString PublicId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	TMap<FString, FJsonObjectWrapper> PrivateCustomAttributes{};
 };
 
 USTRUCT(BlueprintType)
@@ -65,9 +78,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicUserProfileInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString AvatarLargeUrl{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	TMap<FString, FJsonObjectWrapper> CustomAttributes{}; 
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	FString PublicId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
-	FString Timezone{};
+	FString TimeZone{};
 };
 
 USTRUCT(BlueprintType)

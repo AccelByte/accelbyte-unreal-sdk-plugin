@@ -43,6 +43,7 @@ UABApiClient::UABApiClient()
 	Message = NewObject<UABMessage>();
 	SessionAttribute = NewObject<UABSessionAttribute>();
 	Signaling = NewObject<UABSignaling>();
+	Group = NewObject<UABGroup>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -76,6 +77,7 @@ void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Message->SetApiClient(ApiClientPtr);
 	SessionAttribute->SetApiClient(ApiClientPtr);
 	Signaling->SetApiClient(ApiClientPtr);
+	Group->SetApiClient(ApiClientPtr);
 }
 
 UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)

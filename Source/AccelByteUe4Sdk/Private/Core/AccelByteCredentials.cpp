@@ -172,6 +172,11 @@ const FString& Credentials::GetUserEmailAddress() const
 	return UserEmailAddress;
 }
 
+const FString& Credentials::GetLinkingToken() const
+{
+	return ErrorOAuth.LinkingToken;
+}
+
 void Credentials::PollRefreshToken(double CurrentTime)
 {
 	switch (UserSessionState)
@@ -241,6 +246,11 @@ void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 			{
 				BearerAuthRejectedRefreshToken(HttpRef);
 			}));
+}
+
+void Credentials::SetErrorOAuth(const FErrorOauthInfo NewErrorOAuthInfo)
+{
+	ErrorOAuth = NewErrorOAuthInfo;
 }
 	
 Credentials::FOnLoginSuccessDelegate& Credentials::OnLoginSuccess()

@@ -90,7 +90,8 @@ void User::LoginWithOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	const FString& PlatformToken,
 	const FVoidHandler& OnSuccess,
-	const FCustomErrorHandler& OnError) const
+	const FCustomErrorHandler& OnError,
+	bool bCreateHeadless) const
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -107,10 +108,17 @@ void User::LoginWithOtherPlatform(
 			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
 			OnSuccess.ExecuteIfBound();
 					
-		}), FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		}), FCustomErrorHandler::CreateLambda([this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 		{
+			FErrorOauthInfo ErrorOauthInfo;
+			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
+			if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
+			{
+				FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
+			}
+			CredentialsRef.SetErrorOAuth(ErrorOauthInfo);
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-		}));
+		}), bCreateHeadless);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -181,7 +189,7 @@ void User::LoginWithUsernameV3(
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
 	const FErrorHandler& OnError,
-	const bool RememberMe) const
+	const bool bRememberMe) const
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
@@ -204,7 +212,7 @@ void User::LoginWithUsernameV3(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}),
-		RememberMe);
+		bRememberMe);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -214,7 +222,7 @@ void User::LoginWithUsernameV3(
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
 	const FCustomErrorHandler& OnError,
-	const bool RememberMe) const
+	const bool bRememberMe) const
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -234,7 +242,7 @@ void User::LoginWithUsernameV3(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
 		}),
-		RememberMe);
+		bRememberMe);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -261,7 +269,7 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 }
 
 void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code,
-	const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool RememberDevice) const
+	const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberDevice) const
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -279,7 +287,7 @@ void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByt
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
 		}),
-		RememberDevice);
+		bRememberDevice);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -324,6 +332,44 @@ void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHand
 		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const
+{
+	FReport::Log(FString(__FUNCTION__)); 
+	
+	Oauth2::CreateHeadlessAccountAndResponseToken(
+		SettingsRef.ClientId,
+		SettingsRef.ClientSecret, 
+		CredentialsRef.GetLinkingToken(),
+		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
+		{
+			OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+		}),		
+		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+		})); 
+}
+
+void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	Oauth2::AuthenticationWithPlatformLink(
+		SettingsRef.ClientId,
+		SettingsRef.ClientSecret,
+		Username,
+		Password,
+		CredentialsRef.GetLinkingToken(),
+		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
+		{
+			OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+		}),		
+		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
 		}));
 }
 #pragma endregion /Login Methods
@@ -901,22 +947,43 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
+void User::SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError,
+	const int32& Offset, const int32& Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users?query=%s"), *SettingsRef.IamServerUrl, *CredentialsRef.GetNamespace(), *FGenericPlatformHttp::UrlEncode(Query));
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users"), *SettingsRef.IamServerUrl, *CredentialsRef.GetNamespace());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
 	FString Content;
 
+	TMap<FString, FString> QueryParams = {};
+	QueryParams.Add("query", *FGenericPlatformHttp::UrlEncode(Query));
 	if (By != EAccelByteSearchType::ALL)
 	{
 		FString SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
-		Url.Append(FString::Printf(TEXT("&by=%s"), *SearchId));
+		QueryParams.Add("by", *SearchId);
 	}
+	if (Limit >= 0)
+	{
+		QueryParams.Add("limit", FString::FromInt(Limit));
+	}
+	if (Offset >= 0)
+	{
+		QueryParams.Add("offset", FString::FromInt(Offset));
+	}
+	
+	// Converting TMap QueryParams as one line QueryString 
+	FString QueryString;
+	int i = 0;
+	for (const auto& Kvp : QueryParams)
+	{
+		QueryString.Append(FString::Printf(TEXT("%s%s=%s"), (i++ == 0 ? TEXT("?") : TEXT("&")),
+				*FGenericPlatformHttp::UrlEncode(Kvp.Key), *FGenericPlatformHttp::UrlEncode(Kvp.Value)));
+	}
+	Url.Append(QueryString);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -934,6 +1001,11 @@ void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInf
 	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError);
 }
 
+void User::SearchUsers(const FString& Query, int32 Offset, int32 Limit, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError, Offset, Limit);
+}
+	
 void User::GetUserByUserId(const FString& UserID, const THandler<FSimpleUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1048,12 +1120,12 @@ void User::BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListB
 }
 
 void User::GetInputValidations(const FString& LanguageCode, THandler<FInputValidation> const& OnSuccess, FErrorHandler const& OnError,
-	bool DefaultOnEmpty)
+	bool bDefaultOnEmpty)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
 	FString Url = FString::Printf(TEXT("%s/v3/public/inputValidations"), *SettingsRef.IamServerUrl);	 
-	const TMap<FString, FString> Params ({{"languageCode", *LanguageCode}, {"defaultOnEmpty", DefaultOnEmpty ? TEXT("true") : TEXT("false")}});
+	const TMap<FString, FString> Params ({{"languageCode", *LanguageCode}, {"defaultOnEmpty", bDefaultOnEmpty ? TEXT("true") : TEXT("false")}});
 	FString Content = TEXT("");  
 
 	// Api Request 

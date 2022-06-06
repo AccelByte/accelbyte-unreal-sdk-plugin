@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [12.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.2.0%0D12.1.2) (2022-06-06)
+
+
+### Features
+
+* **iam:** Account linking handling ([3bd4bb7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3bd4bb78bfbd794413e7d5710db5606f50b2a7ef))
+* **iam:** Include platformUserIds field when bulk gets users' basic info ([9bcf223](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9bcf22340432a9c88b06a248c540b735cc518927))
+* **iam:** Need an adjustment to the SDK for the updated Public Search User V3 API, adding offset and limit. ([7609c93](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7609c93c04597faca6b19e7b26b6b6db9ba275f0))
+* **lobby:** implement add friend with public id ([9dc358e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9dc358e0e53154285079ebf2ba0a2b9aab77b77b))
+* **lobby:** implement set party size limit ([80fa3d0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/80fa3d04d2ccc19f1e96ef433ccf3011a52a5302))
+
+
+### Bug Fixes
+
+* **blueprint:** missing Group blueprint object initialization in the ApiClient Blueprint ([a71e5ad](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a71e5adc3f88ddc398a7d329ba8c2de0767680fa))
+* **blueprints:** resolve conflict for hotfix 12.1.1 ([8462e83](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8462e8328f5cde82cfa694d02ef3bac97a8214fa))
+* Fix ambiguous function overloads ([c988024](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c98802461cd005779d22b3450020eaf97a28873a))
+* remove pragma once from cpp files ([20ead97](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/20ead97b32b434017a7f6f2b8a99e15cb4c6b41d))
+* **test:** add wait 60s for lobby to refresh mm game mode cache ([b504617](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b5046170711241be6ec3632c3e9468832c8ff9d6))
+* **websocket:** properly clean up websocket object on destroy ([ba56887](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ba568873f6b2827dab83ac0eae93ae71172e855b))
+
+
+### Tests
+
+* **lobby:** commented lobby channel chat tests ([b40d5e4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b40d5e4097036c92854f7d24fdd865bb75608d11))
+* **reporting:** make exception if objectId was empty and use dummy objectId following the UUID v4 without hyphen format ([a70a3f4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a70a3f48453023121b93df280539741b8a990239))
+
 ### [12.1.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.1.2%0D12.1.1) (2022-05-31)
 
 

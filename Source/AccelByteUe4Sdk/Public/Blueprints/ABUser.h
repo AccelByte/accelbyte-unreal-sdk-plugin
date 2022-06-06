@@ -43,7 +43,7 @@ public:
 	void LoginWithUsername(FString const& Username, FString const& Password, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformToken, FDHandler OnSuccess, FDErrorHandler OnError);
+	void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformToken, FDHandler OnSuccess, FDErrorHandler OnError, bool bCreateHeadless = true);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
 	void LoginWithDeviceId(FDHandler OnSuccess, FDErrorHandler OnError);

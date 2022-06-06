@@ -100,6 +100,15 @@ public:
 	 */
 	void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	 * @brief Get User Profile Public Info By PublicId.
+	 *
+	 * @param PublicId The Public Id of user used to get user profile 
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserProfilePublicInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetUserProfilePublicInfoByPublicId(const FString& PublicId, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FCustomErrorHandler& OnError);
+ 
 private:
 	UserProfile() = delete;
 	UserProfile(UserProfile const&) = delete;
