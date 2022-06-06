@@ -61,6 +61,7 @@ namespace Api
 
 		// Friends
 		const FString RequestFriends = TEXT("requestFriendsRequest");
+		const FString RequestFriendsByPublicId = TEXT("requestFriendsByPublicIDRequest");
 		const FString Unfriend = TEXT("unfriendRequest");
 		const FString ListOutgoingFriends = TEXT("listOutgoingFriendsRequest");
 		const FString CancelFriends = TEXT("cancelFriendsRequest");
@@ -146,6 +147,7 @@ namespace Api
 
 		// Friends
 		const FString RequestFriends = TEXT("requestFriendsResponse");
+		const FString RequestFriendsByPublicId = TEXT("requestFriendsByPublicIDResponse");
 		const FString Unfriend = TEXT("unfriendResponse");
 		const FString ListOutgoingFriends = TEXT("listOutgoingFriendsResponse");
 		const FString CancelFriends = TEXT("cancelFriendsResponse");
@@ -243,6 +245,7 @@ namespace Api
 
 		// Friends
 		RequestFriends,
+		RequestFriendsByPublicId,
 		Unfriend,
 		ListOutgoingFriends,
 		CancelFriends,
@@ -352,6 +355,7 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Response,MatchmakingCancel),
 		FORM_STRING_ENUM_PAIR(Response,ReadyConsent),
 		FORM_STRING_ENUM_PAIR(Response,RequestFriends),
+		FORM_STRING_ENUM_PAIR(Response,RequestFriendsByPublicId),
 		FORM_STRING_ENUM_PAIR(Response,Unfriend),
 		FORM_STRING_ENUM_PAIR(Response,ListOutgoingFriends),
 		FORM_STRING_ENUM_PAIR(Response,CancelFriends),
@@ -639,6 +643,37 @@ FString Lobby::SendPartyPromoteLeaderRequest(const FString& UserId)
 		, FString::Printf(TEXT("newLeaderUserId: %s\n"), *UserId))
 }
 
+void Lobby::SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
+{
+	if(Limit <= 0)
+	{
+		FReport::Log("Party size limit should be above 0");
+		return;
+	}
+	
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/limit"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *PartyId);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FAccelByteModelsPartySetLimitRequest Content;
+	Content.Limit = Limit;
+	
+	FString ContentString;
+	FJsonObjectConverter::UStructToJsonObjectString(Content, ContentString);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(ContentString);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 //-------------------------------------------------------------------------------------------------
 // Presence
 //-------------------------------------------------------------------------------------------------
@@ -874,6 +909,14 @@ void Lobby::RequestFriend(FString UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(RequestFriends, Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
+}
+
+void Lobby::RequestFriendByPublicId(FString PublicId)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	SEND_RAW_REQUEST_CACHED_RESPONSE(RequestFriendsByPublicId, Friends,
+		FString::Printf(TEXT("friendPublicId: %s"), *PublicId));
 }
 
 void Lobby::Unfriend(FString UserId)
@@ -1272,6 +1315,7 @@ void Lobby::UnbindFriendResponseEvents()
 	SetUserPresenceResponse.Unbind();
 	GetAllFriendsStatusResponse.Unbind();
 	RequestFriendsResponse.Unbind();
+	RequestFriendsByPublicIdResponse.Unbind();
 	UnfriendResponse.Unbind();
 	ListOutgoingFriendsResponse.Unbind();
 	CancelFriendsResponse.Unbind();
@@ -1751,6 +1795,7 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(CreateDS			, FAccelByteModelsLobbyBaseResponse, FBaseResponse);
 		// Friends
 		CASE_RESPONSE_MESSAGE_ID(RequestFriends		, FAccelByteModelsRequestFriendsResponse);
+		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(RequestFriendsByPublicId		, FAccelByteModelsRequestFriendsResponse, FRequestFriendsResponse);
 		CASE_RESPONSE_MESSAGE_ID(Unfriend			, FAccelByteModelsUnfriendResponse);
 		CASE_RESPONSE_MESSAGE_ID(ListOutgoingFriends, FAccelByteModelsListOutgoingFriendsResponse);
 		CASE_RESPONSE_MESSAGE_ID(CancelFriends		, FAccelByteModelsCancelFriendsResponse);

@@ -377,6 +377,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyPromoteLeaderResponse
 	FString Code{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartySetLimitRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	int32 Limit {0};
+};
+
 // ------------------------------------------------------------------------------------------------
 // Chat 
 // ------------------------------------------------------------------------------------------------
