@@ -180,7 +180,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyUserInvitedEvent
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyQueryRequest
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionQueryRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyQueryRequest")

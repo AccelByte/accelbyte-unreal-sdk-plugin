@@ -228,7 +228,7 @@ static void AppendQueryParam(FString& QueryString, const FString& ParamName, con
 	}
 }
 
-void Session::QueryParties(FAccelByteModelsV2PartyQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset, int32 const& Limit)
+void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset, int32 const& Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 

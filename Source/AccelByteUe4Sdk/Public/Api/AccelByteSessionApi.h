@@ -7,7 +7,6 @@
 
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Models/AccelByteCloudSaveModels.h"
 #include "Models/AccelByteSessionModels.h"
 
 namespace AccelByte
@@ -120,13 +119,13 @@ public:
 	void KickUserFromParty(FString const& PartyID, FString const& UserID, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Get a list of parties matching the given query. 
+	 * @brief Get a list of parties matching the given query.
 	 *
-	 * @param Query The object containing fields to query on - empty fields are omitted. 
+	 * @param Query The object containing fields to query on - empty fields are omitted.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 */
-	void QueryParties(FAccelByteModelsV2PartyQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
+	void QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
 
 	
 private:
