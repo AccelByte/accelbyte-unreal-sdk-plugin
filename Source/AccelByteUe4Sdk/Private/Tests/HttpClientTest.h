@@ -12,9 +12,9 @@ struct ACCELBYTEUE4SDK_API FHttpClientTestAnythingRequest
 {
 	GENERATED_BODY()
 	UPROPERTY()
-		FString Name;
+	FString Name{};
 	UPROPERTY()
-		int32 Age;
+	int32 Age{};
 };
 
 USTRUCT()

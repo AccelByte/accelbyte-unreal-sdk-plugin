@@ -58,15 +58,15 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE(FSendNotificationSuccess);
 	//UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
-		static void SendNotification(FString Message, bool bAsync, const FSendNotificationSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void SendNotification(FString Message, bool bAsync, const FSendNotificationSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	static void SendNotif(FString UserId, FString Message, bool bAsync, const AccelByte::FVoidHandler & OnSuccess, const FErrorHandler & OnError);
 
 	//UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
-		static FString BytesToFString(TArray<uint8> Input);
+	static FString BytesToFString(TArray<uint8> Input);
 
 	//(BlueprintCallable, Category = "AccelByte | Test ")
-		static TArray<uint8> FStringToBytes(FString Input);
+	static TArray<uint8> FStringToBytes(FString Input);
 };
 
 FString GetPublisherNamespace();
@@ -85,18 +85,29 @@ FString GetAdminUserAccessToken();
 
 void FlushHttpRequests();
 
-void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds);
+void WaitUntilInternal(const TFunction<bool()> Condition
+	, const FString Message
+	, const double TimeoutSeconds
+	, const double DeltaTime);
 
 template<class T, typename std::enable_if_t<std::is_integral<T>::value>* = nullptr>
-void WaitUntil(const T& bCondition, const FString Message = "", const double TimeoutSeconds = 60.0)
+void WaitUntil(const T& bCondition
+	, const FString Message = ""
+	, const double TimeoutSeconds = 60.0
+	, const double DeltaTime = .2f)
 {
-	WaitUntilInternal([&](){ return bCondition; }, Message, TimeoutSeconds);
+	WaitUntilInternal([&](){ return bCondition; }, Message, TimeoutSeconds, DeltaTime);
 }
 
 template<typename T, typename = decltype(std::declval<T&>()())>
-void WaitUntil(const T& Condition, const FString Message = "", const double TimeoutSeconds = 60.0)
+void WaitUntil(const T& Condition
+	, const FString Message = ""
+	, const double TimeoutSeconds = 60.0
+	, const double DeltaTime = .2f)
 {
-	WaitUntilInternal(Condition, Message, TimeoutSeconds);
+	WaitUntilInternal(Condition, Message, TimeoutSeconds, DeltaTime);
 }
 
-void DelaySeconds(double Seconds, FString Message = "");
+void DelaySeconds(double Seconds
+	, const FString& Message = ""
+	, const double DeltaTime = .2f);

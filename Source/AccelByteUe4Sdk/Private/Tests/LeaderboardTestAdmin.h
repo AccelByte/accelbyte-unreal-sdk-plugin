@@ -14,8 +14,8 @@ struct FLeaderboardDailyConfig
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | DailyConfig")
-		// FORMAT = hours:minutes EXAMPLE = ["01:30", "10:30", "15:30", "23:15" DEFAULT = "00:00"
-		FString resetTime = "00:00";
+	// FORMAT = hours:minutes EXAMPLE = ["01:30", "10:30", "15:30", "23:15" DEFAULT = "00:00"
+	FString resetTime{"00:00"};
 };
 
 USTRUCT(BlueprintType)
@@ -23,12 +23,12 @@ struct FLeaderboardMonthlyConfig
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | MonthlyConfig")
-		// RANGE = 1-31 DEFAULT = 1
-		int resetDate = 1;
+	// RANGE = 1-31 DEFAULT = 1
+	int resetDate{1};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | MonthlyConfig")
-		// FORMAT = hours:minutes EXAMPLE = ["01:30", "10:30", "15:30", "23:15" DEFAULT = "00:00
-		FString resetTime = "00:00";
+	// FORMAT = hours:minutes EXAMPLE = ["01:30", "10:30", "15:30", "23:15" DEFAULT = "00:00
+	FString resetTime{"00:00"};
 };
 
 USTRUCT(BlueprintType)
@@ -36,12 +36,12 @@ struct FLeaderboardWeeklyConfig
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | WeeklyConfig")
-		// RANGE = 0-6 DEFAULT = 0 (sunday)
-		int resetDay = 0;
+	// RANGE = 0-6 DEFAULT = 0 (sunday)
+	int resetDay{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | WeeklyConfig")
-		// FORMAT = hours:minutes EXAMPLE = ["01:30", "10:30", "15:30", "23:15" DEFAULT = "00:00
-		FString resetTime = "00:00";
+	// FORMAT = hours:minutes EXAMPLE = ["01:30", "10:30", "15:30", "23:15" DEFAULT = "00:00
+	FString resetTime{"00:00"};
 };
 
 USTRUCT(BlueprintType)
@@ -49,25 +49,25 @@ struct FLeaderboardConfigRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		FLeaderboardDailyConfig daily; // OPTIONAL
+	FLeaderboardDailyConfig daily{}; // OPTIONAL
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		FLeaderboardMonthlyConfig monthly; // OPTIONAL
+	FLeaderboardMonthlyConfig monthly{}; // OPTIONAL
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		FLeaderboardWeeklyConfig weekly; // OPTIONAL
+	FLeaderboardWeeklyConfig weekly{}; // OPTIONAL
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		bool descending = true; // OPTIONAL
+	bool descending{true}; // OPTIONAL
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		FString iconURL = ""; // OPTIONAL
+	FString iconURL{}; // OPTIONAL
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		FString leaderboardCode; // lowercase and maximum length is 32 
+	FString leaderboardCode{}; // lowercase and maximum length is 32 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		FString name; // Max 128 characters
+	FString name{}; // Max 128 characters
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		int seasonPeriod = 32; // OPTIONAL. Must be greater than 31 days. Will trigger seasonal leaderboard
+	int seasonPeriod{32}; // OPTIONAL. Must be greater than 31 days. Will trigger seasonal leaderboard
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-		FString startTime; // RFC3339 e.g. "2020-10-02T15:00:00.05Z"
+	FString startTime{}; // RFC3339 e.g. "2020-10-02T15:00:00.05Z"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Leaderboard | ConfigRequest")
-	FString statCode; // Statistic's service
+	FString statCode{}; // Statistic's service
 };
 using FLeaderboardConfigResponse = FLeaderboardConfigRequest;
 

@@ -8,6 +8,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteDefines.h"
 #include "Api/AccelByteUserApi.h"
 #include "Misc/Base64.h"
 
@@ -20,7 +21,10 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
-void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds)
+void WaitUntilInternal(const TFunction<bool()> Condition
+	, const FString Message
+	, const double TimeoutSeconds
+	, const double DeltaTime)
 {
 	const double StartSeconds = FPlatformTime::Seconds();
 	const double LimitSeconds = StartSeconds + TimeoutSeconds;
@@ -30,10 +34,10 @@ void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message,
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("%s\t%s Elapsed %f s"),
 			*Message, *FString(__FUNCTION__), FPlatformTime::Seconds() - StartSeconds);
-		FTicker::GetCoreTicker().Tick(.2f);
-		FHttpModule::Get().GetHttpManager().Tick(.2f);
+		FTickerAlias::GetCoreTicker().Tick(DeltaTime);
+		FHttpModule::Get().GetHttpManager().Tick(DeltaTime);
 		LastTickSeconds = FPlatformTime::Seconds();
-		FPlatformProcess::Sleep(.2f);
+		FPlatformProcess::Sleep(DeltaTime);
 	}
 
 	if (Condition && !Condition() && (FPlatformTime::Seconds() > LimitSeconds))
@@ -42,7 +46,9 @@ void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message,
 	}
 }
 
-void DelaySeconds(double Seconds, const FString Message)
+void DelaySeconds(double Seconds
+	, const FString& Message
+	, const double DeltaTime)
 {
 	const double StartTime = FPlatformTime::Seconds();
 	const double LimitSeconds = StartTime + Seconds;
@@ -52,10 +58,10 @@ void DelaySeconds(double Seconds, const FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("%s\t%s Elapsed %f s"),
 			*Message, *FString(__FUNCTION__), FPlatformTime::Seconds() - StartTime);
-		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
+		FTickerAlias::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
 		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
 		LastTickTime = FPlatformTime::Seconds();
-		FPlatformProcess::Sleep(.2f);
+		FPlatformProcess::Sleep(DeltaTime);
 	}
 }
 
@@ -277,6 +283,10 @@ void FlushHttpRequests()
 		FPlatformProcess::Sleep(0.5);
 	};
 
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+	FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Default);
+#else
 	FHttpModule::Get().GetHttpManager().Flush(false);
+#endif
 }
 

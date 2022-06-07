@@ -8,6 +8,7 @@
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteDefines.h"
 #include "Models/AccelByteDSMModels.h"
 #include "TestUtilities.h"
 
@@ -107,7 +108,7 @@ bool DSMAutoShutdown::RunTest(const FString& Parameters)
 	{
 		FPlatformProcess::Sleep(.5f);
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Waiting for lobby connection..."));
-		FTicker::GetCoreTicker().Tick(.5f);
+		FTickerAlias::GetCoreTicker().Tick(.5f);
 	}
 
 	bool bCreatePartySuccess = false;

@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include "AccelByteCredentials.h"
+#include "Core/AccelByteCredentials.h"
+#include "Core/IWebSocketFactory.h"
+#include "Core/AccelByteDefines.h"
 #include "IWebSocket.h"
-#include "IWebSocketFactory.h"
 
 namespace AccelByte
 {
@@ -68,7 +69,7 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	void Reconnect();
 
 	FTickerDelegate TickerDelegate;
-	FDelegateHandle TickerDelegateHandle;
+	FDelegateHandleAlias TickerDelegateHandle;
 
 	static TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> Create(
 		const FString& Url,
