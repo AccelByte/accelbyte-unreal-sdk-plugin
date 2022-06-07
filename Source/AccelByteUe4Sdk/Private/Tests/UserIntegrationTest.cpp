@@ -145,7 +145,6 @@ bool FUserRegisterTest::RunTest(const FString& Parameter)
 	{
 		return false;
 	}
-
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
@@ -155,6 +154,35 @@ bool FUserRegisterTest::RunTest(const FString& Parameter)
 	}), UserTestErrorHandler);
 
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	FRegisterResponse RegisterResult;
+	const FString NewCountry = RegisterResult.Country;
+	const FDateTime NewDateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 23));
+	const FString NewFormatDOB = FString::Printf(TEXT("%04d-%02d-%02d"), NewDateOfBirth.GetYear(), NewDateOfBirth.GetMonth(), NewDateOfBirth.GetDay());
+	FString NewDisplayName = RegisterResult.DisplayName;
+	FString AvatarUrl = "http://testimage/file.png";
+
+	FUserUpdateRequest UpdateUserRequest;
+	UpdateUserRequest.Country = NewCountry;
+	UpdateUserRequest.DateOfBirth = NewFormatDOB;
+	UpdateUserRequest.DisplayName = NewDisplayName;
+	UpdateUserRequest.AvatarUrl = AvatarUrl;
+	bool bUpdateUserSuccess = false;
+	FAccountUserData UpdateUserResult;
+	FRegistry::User.UpdateUser(UpdateUserRequest, THandler<FAccountUserData>::CreateLambda([&bUpdateUserSuccess, &UpdateUserResult](const FAccountUserData& Response)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Update User Data"));
+		UpdateUserResult = Response;
+		bUpdateUserSuccess = true;
+	}), 
+	FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+	}));
+
+	WaitUntil(bUpdateUserSuccess, "Waiting for update User Datas");
+	AB_TEST_TRUE(bUpdateUserSuccess);
+	AB_TEST_EQUAL(UpdateUserResult.AvatarUrl, AvatarUrl);
 
 #pragma region DeleteUserById
 
@@ -3831,11 +3859,13 @@ bool FUpdateUserMultiFields::RunTest(const FString& Parameter)
 	const FDateTime NewDateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 23));
 	const FString NewFormatDOB = FString::Printf(TEXT("%04d-%02d-%02d"), NewDateOfBirth.GetYear(), NewDateOfBirth.GetMonth(), NewDateOfBirth.GetDay());
 	FString NewDisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString AvatarUrl = "http://imagetest/file.png";
 
 	FUserUpdateRequest UpdateUserRequest;
 	UpdateUserRequest.Country = NewCountry;
 	UpdateUserRequest.DateOfBirth = NewFormatDOB;
 	UpdateUserRequest.DisplayName = NewDisplayName;
+	UpdateUserRequest.AvatarUrl = AvatarUrl;
 	bool bUpdateUserSuccess = false;
 	FAccountUserData UpdateUserResult;
 	FRegistry::User.UpdateUser(UpdateUserRequest, THandler<FAccountUserData>::CreateLambda([&bUpdateUserSuccess, &UpdateUserResult](const FAccountUserData& Response)
@@ -3851,6 +3881,7 @@ bool FUpdateUserMultiFields::RunTest(const FString& Parameter)
 
 	WaitUntil(bUpdateUserSuccess, "Waiting for update User Datas");
 	AB_TEST_TRUE(bUpdateUserSuccess);
+	AB_TEST_EQUAL(UpdateUserResult.AvatarUrl, AvatarUrl);
 
 	bool bGetDataSuccessful = false;
 	FAccountUserData GetDataResult;

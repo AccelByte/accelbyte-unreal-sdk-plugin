@@ -610,6 +610,15 @@ namespace AccelByte
 			*/
 			void MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType ,const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
+			/**
+			 * @brief This function for update user account info within the game.
+			 *
+			 * @param UpdateRequest The data you want to update. for DateOfBirth, the format is YYYY-MM-DD.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void UpdateUserV3(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
+
 		private:
 			User() = delete;
 			User(User const&) = delete;
