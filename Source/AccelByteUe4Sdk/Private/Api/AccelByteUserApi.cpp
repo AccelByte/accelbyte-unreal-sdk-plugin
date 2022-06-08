@@ -122,6 +122,43 @@ void User::LoginWithOtherPlatform(
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
+
+void User::LoginWithOtherPlatformId(
+	const FString& PlatformId,
+	const FString& PlatformToken,
+	const FVoidHandler& OnSuccess,
+	const FCustomErrorHandler& OnError,
+	bool bCreateHeadless) const
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithOtherPlatformToken(
+		CredentialsRef.GetOAuthClientId(),
+		CredentialsRef.GetOAuthClientSecret(),
+		PlatformId,
+		PlatformToken,
+		THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
+		{
+			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
+			OnSuccess.ExecuteIfBound();
+					
+		}), FCustomErrorHandler::CreateLambda([this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		{
+			FErrorOauthInfo ErrorOauthInfo;
+			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
+			if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
+			{
+				FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
+			}
+			CredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+		}), bCreateHeadless);
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
 	
 void User::LoginWithUsername(
 	const FString& Username,

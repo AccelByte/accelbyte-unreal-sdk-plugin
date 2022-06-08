@@ -7092,3 +7092,44 @@ bool FAccountLinking_AuthenticationWithPlatformLink2FA::RunTest(const FString& P
 	
 	return true;
 }
+
+#if 0 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginOIDCAccount_ManualTestOnly, "AccelByte.Tests.AUser.LoginOIDCAccount_ManualTestOnly", AutomationFlagMaskUser);
+bool FLoginOIDCAccount_ManualTestOnly::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials(); 
+	
+	// In this unit test we will do login via OIDC
+	// Note that OIDC PlatformId value should be defined before in Admin Portal
+	
+	// Get some platform token, we use Epic Game Token (that support OIDC) thru this URL 
+	// https://www.epicgames.com/id/authorize/?client_id=xyza7891xIXGmeRkAP9ROxdftlXT5qdy&response_type=code&scope=basic_profile%20presence%20friends_list&redirect_uri=https://development.accelbyte.io/
+
+	// Call the OAuth to get access token
+	// in Epic we use https://api.epicgames.dev/epic/oauth/v1/token
+	// then server will response and giving access_token value
+	FString Access_token = TEXT("some-epic-token-value");
+	 
+	// Defined on AP 
+	const FString SdkTestPlatformId = TEXT("sdktest");
+	
+	bool bLoginSuccessful = false;
+	bool bLoginDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithOtherPlatform(SdkTestPlatformId, Access_token, 
+		FVoidHandler::CreateLambda([&bLoginSuccessful, &bLoginDone]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bLoginSuccessful = bLoginDone = true;
+		}), FCustomErrorHandler::CreateLambda([&bLoginDone](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+			bLoginDone = true;
+		}));
+	WaitUntil(bLoginDone, "Waiting for Login...");
+	  
+	AB_TEST_TRUE(bLoginSuccessful); 
+	return true;
+}
+
+#endif 
