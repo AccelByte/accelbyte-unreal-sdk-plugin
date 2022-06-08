@@ -51,7 +51,7 @@ struct FInitGroupConfigRequest
 	
 	/** @brief Set internally: No need to set this while testing. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | InitGroupConfigRequest")
-	FString Namespace;
+	FString Namespace{};
 };
 
 /**
@@ -64,7 +64,7 @@ struct FGroupConfigResponse
 	GENERATED_BODY()
 	/** @brief Used as a param for CreateGroup */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | GroupConfigResponse")
-	FString ConfigurationCode;
+	FString ConfigurationCode{};
 };
 
 /** @brief Contains `configurationCode` for CreateGroup. */
@@ -74,8 +74,8 @@ struct FGetGroupConfigListResponse
 	GENERATED_BODY()
 	/** @brief Used as a param for CreateGroup */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | GetGroupConfigListResponse")
-	TArray<FGroupConfigResponse> Data;
-	FAccelByteModelsPaging Paging;
+	TArray<FGroupConfigResponse> Data{};
+	FAccelByteModelsPaging Paging{};
 };
 
 /**
@@ -90,15 +90,15 @@ struct FGetGroupConfigListRequest
 	
 	/** @brief Set internally: No need to set this while testing. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | GetGroupConfigListRequest")
-	FString Namespace;
+	FString Namespace{};
 	
 	/** @brief Optional: Size of displayed data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | GetGroupConfigListRequest")
-	int32 Limit = {1};
+	int32 Limit{1};
 	
 	/** @brief Optional: Start position that points to query data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | GetGroupConfigListRequest")
-	int32 Offset = {0};
+	int32 Offset{0};
 };
 
 /**
@@ -115,9 +115,10 @@ struct FDeleteGroupConfigRequest
 	
 	/** @brief Set internally: No need to set this while testing. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | DeleteGroupConfigRequest")
-	FString Namespace;
+	FString Namespace{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | DeleteGroupConfigRequest")
-	FString ConfigurationCode;
+	FString ConfigurationCode{};
 };
 
 /** @brief for FCreateMemberRoleRequest */
@@ -133,7 +134,7 @@ struct FRolePermission
 	 * - Use SetAction() to set via the EAccelByteRoleAction enum
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | RolePermission")
-	uint8 Action;
+	uint8 Action{};
 	
 	/**
 	 * @brief "Required Member Role Permission" mentions from api docs.
@@ -142,7 +143,7 @@ struct FRolePermission
 	 	 * - Requires ResourceName "GROUP:INVITE" (where CREATE is action 
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | RolePermission")
-	FString ResourceName;
+	FString ResourceName{};
 
 	/**
 	 * @brief The same as setting Action manually, but with more context (via enum).
@@ -162,10 +163,10 @@ struct FCreateMemberRoleRequest
 	
 	/** @brief Arbitrary name */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | CreateMemberRoleRequest")
-	FString MemberRoleName;
+	FString MemberRoleName{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | CreateMemberRoleRequest")
-	TArray<FRolePermission> MemberRolePermissions;
+	TArray<FRolePermission> MemberRolePermissions{};
 };
 
 USTRUCT(BlueprintType)
@@ -174,13 +175,13 @@ struct ACCELBYTEUE4SDK_API FCreateMemberRoleResponse
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | CreateMemberRoleResponse")
-	FString MemberRoleId;
+	FString MemberRoleId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | CreateMemberRoleResponse")
-	FString MemberRoleName;
+	FString MemberRoleName{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Group | CreateMemberRoleResponse")
-	TArray<FRolePermission> MemberRolePermissions;
+	TArray<FRolePermission> MemberRolePermissions{};
 };
 #pragma endregion /Models
 

@@ -181,36 +181,14 @@ bool PartyUpdate::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyInviteJoinFlow, "AccelByte.Tests.Party.C.InviteJoinFlow", AutomationFlagMaskParty);
 bool PartyInviteJoinFlow::RunTest(const FString& Parameters)
 {	
-	Api::Lobby Lobby(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-	Lobby.Connect();
-	WaitUntil([&Lobby] { return Lobby.IsConnected(); }, "", 5);
-
-	FAccelByteModelsV2PartyUserInvitedEvent InvitePayload;
-	
-	// TODO: probably need to have a delegate for v2 party invite. backend will need to be reworked to not use freeform notifs
-	bool bGetInviteSuccess = false;
-	const auto MessageNotifDelegate = Api::Lobby::FMessageNotif::CreateLambda([&bGetInviteSuccess, &InvitePayload](FAccelByteModelsNotificationMessage Message)
-	{
-		if(Message.Topic.Equals(Api::SessionTopic::UserInvited))
-		{
-			FJsonObjectConverter::JsonObjectStringToUStruct(Message.Payload, &InvitePayload, 0, 0);
-			bGetInviteSuccess = true;
-		}
-	});
-
-	Lobby.SetMessageNotifDelegate(MessageNotifDelegate);
-	
 	bool bSendInviteSuccess = false;
 	FRegistry::Session.SendPartyInvite(Party.ID, InviteeUserID, FVoidHandler::CreateLambda([&bSendInviteSuccess]
 	{
 		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Send party invite success"));
 		bSendInviteSuccess = true;
 	}), PartyErrorHandler);
-	WaitUntil(bGetInviteSuccess, "Waiting for party invite notif...", 30);
+	WaitUntil(bSendInviteSuccess, "Waiting for party invite send...", 30);
 	
-	AB_TEST_TRUE(InvitePayload.PartyID.Equals(Party.ID));
-	AB_TEST_TRUE(InvitePayload.SenderID.Equals(FRegistry::Credentials.GetUserId()));
-
 	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	
 	bool bJoinPartySuccess = false;
@@ -222,14 +200,9 @@ bool PartyInviteJoinFlow::RunTest(const FString& Parameters)
 		JoinedParty = PartyResponse;
 	}), PartyErrorHandler);
 	WaitUntil(bJoinPartySuccess, "Waiting for party join...");
-
-	Lobby.Disconnect();
-	WaitUntil([&Lobby] { return !Lobby.IsConnected(); }, "", 5);
 	
 	Party = JoinedParty;
 	
-	AB_TEST_TRUE(bSendInviteSuccess);
-	AB_TEST_TRUE(bGetInviteSuccess);
 	AB_TEST_TRUE(bJoinPartySuccess);
 	AB_TEST_TRUE(TestPartyMembership(Party, InviteeUserID));
 	

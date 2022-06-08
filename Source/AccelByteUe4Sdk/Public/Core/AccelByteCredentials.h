@@ -9,6 +9,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteDefines.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
 #include "AccelByteCredentials.generated.h"
@@ -91,7 +92,7 @@ private:
 	double UserExpiredTime;
 	double UserRefreshBackoff;
 
-	FDelegateHandle PollRefreshTokenHandle;
+	FDelegateHandleAlias PollRefreshTokenHandle;
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FTokenRefreshedEvent TokenRefreshedEvent;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;

@@ -12,9 +12,9 @@ struct FUserMapResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-		FString userId;
+	FString userId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-		FString Namespace;
+	FString Namespace{};
 };
 
 USTRUCT(BlueprintType)
@@ -22,13 +22,13 @@ struct FVerificationCode
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
-		FString accountRegistration;
+	FString accountRegistration{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
-		FString accountUpgrade;
+	FString accountUpgrade{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
-		FString passwordReset;
+	FString passwordReset{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
-		FString updateEmail;
+	FString updateEmail{};
 };
 
 USTRUCT(BlueprintType)
@@ -36,27 +36,27 @@ struct FUserResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		FString Country;
+	FString Country{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		FString CreatedAt;
+	FString CreatedAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		FString DateOfBirth;
+	FString DateOfBirth{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		bool DeletionStatus;
+	bool DeletionStatus{false};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		FString DisplayName;
+	FString DisplayName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		FString EmailAddress; 
+	FString EmailAddress{}; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		bool EmailVerified;
+	bool EmailVerified{false};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		bool Enabled;
+	bool Enabled{false};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		TArray<FString> Roles;
+	TArray<FString> Roles{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
-		FString UserId;
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
@@ -64,9 +64,9 @@ struct FUserSearchResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserSearchResponse")
-		TArray<FUserResponse> Data;
+	TArray<FUserResponse> Data{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserSearchResponse")
-		FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 struct FTestUser
@@ -77,13 +77,13 @@ struct FTestUser
 	FString Country = TEXT("US");
 	FString Language = TEXT("en");
 	FString Timezone = TEXT("Etc/UTC");
-	FString DisplayName;
-	FString Email;
+	FString DisplayName{};
+	FString Email{};
 	FString Password = TEXT("Password123!");
 	FString AvatarSmallUrl = TEXT("http://example.com/avatar/small.jpg");
 	FString AvatarUrl = TEXT("http://example.com/avatar/normal.jpg");
 	FString AvatarLargeUrl = TEXT("http://example.com/avatar/large.jpg");
-	FString UserId;
+	FString UserId{};
 
 	FTestUser(const int32 UserIndex = 0) : FTestUser(FGuid::NewGuid().ToString(EGuidFormats::Digits).Left(8) // Random unique ID
 		, UserIndex)
@@ -136,7 +136,7 @@ struct FTestUserV4
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Username{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Verified{};
+	bool Verified{false};
 };
 
 USTRUCT(BlueprintType)
