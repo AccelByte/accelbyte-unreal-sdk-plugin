@@ -26,7 +26,7 @@ struct FVersionInfo
 };
 
 
-struct FVersion
+struct ACCELBYTEUE4SDK_API FVersion
 {
 	int32 Major{0};
 	int32 Minor{0};
@@ -55,7 +55,7 @@ struct FResult
 };
 
 
-class FServiceCompatibilityMap
+class ACCELBYTEUE4SDK_API FServiceCompatibilityMap
 {
 public:
 	static FServiceCompatibilityMap FromJson(FString JsonString);
