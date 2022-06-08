@@ -211,7 +211,7 @@ bool FHttpRetryScheduler::PollRetry(double Time)
 
 void FHttpRetryScheduler::Startup()
 {
-	PollRetryHandle = FTicker::GetCoreTicker().AddTicker(
+	PollRetryHandle = FTickerAlias::GetCoreTicker().AddTicker(
         FTickerDelegate::CreateLambda([this](float DeltaTime)
         {
             PollRetry(FPlatformTime::Seconds());
@@ -230,7 +230,7 @@ void FHttpRetryScheduler::Shutdown()
 
 	if (PollRetryHandle.IsValid())
 	{
-		FTicker::GetCoreTicker().RemoveTicker(PollRetryHandle);
+		FTickerAlias::GetCoreTicker().RemoveTicker(PollRetryHandle);
 		PollRetryHandle.Reset();
 	}
 
@@ -246,7 +246,11 @@ void FHttpRetryScheduler::Shutdown()
 		}
 
 		// try flush once
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+		FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Shutdown);
+#else
 		FHttpModule::Get().GetHttpManager().Flush(true);
+#endif
 		FHttpModule::Get().GetHttpManager().Tick(0);
 
 		// cancel unfinished http requests, so don't hinder the shutdown

@@ -19,24 +19,24 @@ USTRUCT(BlueprintType)
 struct FArrayAgreementBasePolicy
 {
 	GENERATED_BODY()
-		UPROPERTY(BlueprintReadWrite)
-		TArray<FAgreementBasePolicy> Content;
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FAgreementBasePolicy> Content{};
 };
 
 USTRUCT(BlueprintType)
 struct FArrayAgreementPolicyTypeObject
 {
 	GENERATED_BODY()
-		UPROPERTY(BlueprintReadWrite)
-		TArray<FAgreementPolicyTypeObject> Content;
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FAgreementPolicyTypeObject> Content{};
 };
 
 USTRUCT(BlueprintType)
 struct FArrayAgreementLocalizedPolicy
 {
 	GENERATED_BODY()
-		UPROPERTY(BlueprintReadWrite)
-		TArray<FAgreementLocalizedPolicy> Content;
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FAgreementLocalizedPolicy> Content{};
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAgreementBasePolicyResponse, FAgreementBasePolicy, Response);

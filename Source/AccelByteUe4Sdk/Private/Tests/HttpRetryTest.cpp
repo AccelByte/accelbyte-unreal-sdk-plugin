@@ -9,11 +9,11 @@
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "TestUtilities.h"
-#include "Containers/Ticker.h"
 #include "ParseErrorTest.h"
 #include "GenericPlatform/GenericPlatformProcess.h"
 
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteDefines.h"
 #include "Api/AccelByteOrderApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteUserApi.h"
@@ -47,7 +47,7 @@ public:
 		FHttpRetryScheduler::Startup();
 	}
 	
-	void Startup(const FDelegateHandle& InTickDelegate)
+	void Startup(const FDelegateHandleAlias& InTickDelegate)
 	{
 		PollRetryHandle = InTickDelegate;
 		State = EState::Initialized;
@@ -121,36 +121,32 @@ DECLARE_DELEGATE_FiveParams(FHttpRetryTestDelegate, const FString& /*Url*/, bool
 BEGIN_DEFINE_SPEC(FHttpRetryTestSpec, "AccelByte.Tests.Core.HttpRetry",
 	EAutomationTestFlags::ProductFilter | EAutomationTestFlags::ApplicationContextMask |
 	EAutomationTestFlags::CriticalPriority)
-	FTicker Ticker = FTicker::GetCoreTicker();
 	FHttpRetrySchedulerTestingMode Scheduler;
-	FDelegateHandle TickDelegate;
 	double CurrentTime = 0.0f;
 	int Timeout = FHttpRetryScheduler::TotalTimeout;
 	float SpecifiedDeltaTime = 0.2f;
 	FString BaseUrl = TEXT("https://httpbin.org");
 	FHttpRetryTestDelegate TestDelegate;
+	TDelegate<bool(float)> TickDelegate;
 END_DEFINE_SPEC(FHttpRetryTestSpec)
 
 void FHttpRetryTestSpec::Define()
 {
 	int32 StatusCode = 0;
 
-	TickDelegate = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([this](float)->bool
-			{
-				CurrentTime = FPlatformTime::Seconds();
-				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Poll Retry"), CurrentTime);
-				Scheduler.PollRetry(CurrentTime);
+	TickDelegate = FTickerDelegate::CreateLambda([this](float)->bool
+		{
+			CurrentTime = FPlatformTime::Seconds();
+			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Poll Retry"), CurrentTime);
+			Scheduler.PollRetry(CurrentTime);
 
-				return true;
-			}),
-		SpecifiedDeltaTime);
+			return true;
+		});
 
 	TestDelegate = FHttpRetryTestDelegate::CreateLambda(
 		[this](const FString& Url, bool& bRequestCompleted, bool& bRequestSucceeded, int& NumRequestRetry, FAccelByteTaskPtr& AccelByteTask)
 		{
 			double Timer = 0.0f;
-
 			{
 				auto Request = FHttpModule::Get().CreateRequest();
 				Request->SetURL(Url);
@@ -175,12 +171,10 @@ void FHttpRetryTestSpec::Define()
 				AccelByteTask = Scheduler.ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 			}
 
-			while (!bRequestCompleted && Timer <= Timeout + 1)
-			{
-				Timer += SpecifiedDeltaTime;
-				Ticker.Tick(SpecifiedDeltaTime);
-				FPlatformProcess::Sleep(SpecifiedDeltaTime);
-			}
+			WaitUntil(bRequestCompleted
+				, TEXT("Waiting...")
+				, Timeout + 1
+				, SpecifiedDeltaTime);
 		});
 
 	Describe("while sending a single request", [this]()
@@ -192,7 +186,8 @@ void FHttpRetryTestSpec::Define()
 					FHttpRetryScheduler::TotalTimeout = Timeout;
 					FHttpRetryScheduler::PauseTimeout = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
 					CurrentTime = FPlatformTime::Seconds();
-					Scheduler.Startup(TickDelegate);
+					const FDelegateHandleAlias DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickDelegate, SpecifiedDeltaTime);
+					Scheduler.Startup(DelegateHandle);
 					Done.Execute();
 				});
 
@@ -315,7 +310,8 @@ void FHttpRetryTestSpec::Define()
 					FHttpRetryScheduler::TotalTimeout = Timeout;
 					FHttpRetryScheduler::PauseTimeout = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
 					CurrentTime = FPlatformTime::Seconds();
-					Scheduler.Startup(TickDelegate);
+					const FDelegateHandleAlias DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickDelegate, SpecifiedDeltaTime);
+					Scheduler.Startup(DelegateHandle);
 					Done.Execute();
 				});
 
@@ -559,7 +555,8 @@ void FHttpRetryTestSpec::Define()
 					FHttpRetryScheduler::TotalTimeout = Timeout;
 					FHttpRetryScheduler::PauseTimeout = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
 					CurrentTime = FPlatformTime::Seconds();
-					Scheduler.Startup(TickDelegate);
+					const FDelegateHandleAlias DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickDelegate, SpecifiedDeltaTime);
+					Scheduler.Startup(DelegateHandle);
 					Done.Execute();
 				});
 
@@ -825,7 +822,8 @@ void FHttpRetryTestSpec::Define()
 					FHttpRetryScheduler::TotalTimeout = Timeout;
 					FHttpRetryScheduler::PauseTimeout = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
 					CurrentTime = FPlatformTime::Seconds();
-					Scheduler.Startup(TickDelegate);
+					const FDelegateHandleAlias DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickDelegate, SpecifiedDeltaTime);
+					Scheduler.Startup(DelegateHandle);
 					Done.Execute();
 				});
 
@@ -860,12 +858,13 @@ void FHttpRetryTestSpec::Define()
 
 					double Timer = 0.0f;
 
-					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
-					{
-						Timer += SpecifiedDeltaTime;
-						Ticker.Tick(SpecifiedDeltaTime);
-						FPlatformProcess::Sleep(SpecifiedDeltaTime);
-					}
+					WaitUntil([&RequestCompleted, &RequestCount]()->bool
+							{
+								return RequestCompleted >= RequestCount;
+							}
+						, TEXT("Waiting...")
+						, Timeout + 1
+						, SpecifiedDeltaTime);
 
 					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent %d Requests and %d Completed"), CurrentTime, RequestCount, RequestCompleted);
 					Done.Execute();
@@ -936,12 +935,13 @@ void FHttpRetryTestSpec::Define()
 
 					double Timer = 0.0f;
 
-					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
-					{
-						Timer += SpecifiedDeltaTime;
-						Ticker.Tick(SpecifiedDeltaTime);
-						FPlatformProcess::Sleep(SpecifiedDeltaTime);
-					}
+					WaitUntil([&RequestCompleted, &RequestCount]()->bool
+							{
+								return RequestCompleted >= RequestCount;
+							}
+						, TEXT("Waiting...")
+						, Timeout + 1
+						, SpecifiedDeltaTime);
 
 					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent %d Requests and %d Completed"), CurrentTime, RequestCount, RequestCompleted);
 					Done.Execute();
@@ -993,12 +993,13 @@ void FHttpRetryTestSpec::Define()
 
 					double Timer = 0.0f;
 
-					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
-					{
-						Timer += SpecifiedDeltaTime;
-						Ticker.Tick(SpecifiedDeltaTime);
-						FPlatformProcess::Sleep(SpecifiedDeltaTime);
-					}
+					WaitUntil([&RequestCompleted, &RequestCount]()->bool
+							{
+								return RequestCompleted >= RequestCount;
+							}
+						, TEXT("Waiting...")
+						, Timeout + 1
+						, SpecifiedDeltaTime);
 
 					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent %d Requests and %d Completed"), CurrentTime, RequestCount, RequestCompleted);
 					Done.Execute();
@@ -1087,12 +1088,13 @@ void FHttpRetryTestSpec::Define()
 
 					double Timer = 0.0f;
 
-					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
-					{
-						Timer += SpecifiedDeltaTime;
-						Ticker.Tick(SpecifiedDeltaTime);
-						FPlatformProcess::Sleep(SpecifiedDeltaTime);
-					}
+					WaitUntil([&RequestCompleted, &RequestCount]()->bool
+							{
+								return RequestCompleted >= RequestCount;
+							}
+						, TEXT("Waiting...")
+						, Timeout + 1
+						, SpecifiedDeltaTime);
 
 					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent %d Requests and %d Completed"), CurrentTime, RequestCount, RequestCompleted);
 					Done.Execute();
@@ -1121,10 +1123,14 @@ void FHttpRetryTestSpec::Define()
 						Request->SetVerb(TEXT("GET"));
 
 						Scheduler.ProcessRequest(Request, OnCompleted, CurrentTime);
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+						FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Default);
+#else
 						FHttpModule::Get().GetHttpManager().Flush(false);
+#endif
 					};
 
-					auto TickerDelegate = Ticker.AddTicker(
+					auto TickerDelegate = FTickerAlias::GetCoreTicker().AddTicker(
 						FTickerDelegate::CreateLambda([this](float DeltaTime)
 							{
 								UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Poll Http Module"), CurrentTime);
@@ -1163,13 +1169,21 @@ void FHttpRetryTestSpec::Define()
 										}));
 								}));
 						}));
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+					FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Default);
+#else
 					FHttpModule::Get().GetHttpManager().Flush(false);
+#endif
 
 					SendMockRequest(5, Del::CreateLambda([&RequestCompleted](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 						{
 							RequestCompleted++;
 						}));
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+					FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Default);
+#else
 					FHttpModule::Get().GetHttpManager().Flush(false);
+#endif
 
 					SendMockRequest(6, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 						{
@@ -1183,29 +1197,38 @@ void FHttpRetryTestSpec::Define()
 										}));
 								}));
 						}));
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+					FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Default);
+#else
 					FHttpModule::Get().GetHttpManager().Flush(false);
+#endif
 
 					SendMockRequest(9, Del::CreateLambda([&RequestCompleted](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 						{
 							RequestCompleted++;
 						}));
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+					FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Default);
+#else
 					FHttpModule::Get().GetHttpManager().Flush(false);
+#endif
 
 					double Timer = 0.0f;
 
-					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
-					{
-						Timer += SpecifiedDeltaTime;
-						Ticker.Tick(SpecifiedDeltaTime);
-						FPlatformProcess::Sleep(SpecifiedDeltaTime);
-					}
+					WaitUntil([&RequestCompleted, &RequestCount]()->bool
+							{
+								return RequestCompleted >= RequestCount;
+							}
+						, TEXT("Waiting...")
+						, Timeout + 1
+						, SpecifiedDeltaTime);
 
 					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Request Completed %d"), CurrentTime, RequestCompleted);
 					Done.Execute();
 
 					AB_TEST_EQUAL(RequestCompleted, RequestCount);
 
-					Ticker.RemoveTicker(TickerDelegate);
+					FTickerAlias::GetCoreTicker().RemoveTicker(TickerDelegate);
 
 					return true;
 				});

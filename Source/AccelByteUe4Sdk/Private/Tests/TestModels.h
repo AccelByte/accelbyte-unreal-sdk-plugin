@@ -7,17 +7,17 @@ struct ACCELBYTEUE4SDK_API FStringFields
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString FieldA;
+	FString FieldA{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString FieldB;
+	FString FieldB{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString FieldC;
+	FString FieldC{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString FieldD;
+	FString FieldD{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString FieldE;
+	FString FieldE{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString FieldF;
+	FString FieldF{};
 };
         
 USTRUCT(BlueprintType)
@@ -25,9 +25,9 @@ struct ACCELBYTEUE4SDK_API FParent
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FStringFields ChildA;
+	FStringFields ChildA{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FStringFields ChildB;
+	FStringFields ChildB{};
 };
 
 USTRUCT(BlueprintType)
@@ -35,9 +35,9 @@ struct ACCELBYTEUE4SDK_API FGrandParent
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FParent ParentA;
+	FParent ParentA{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FParent ParentB;
+	FParent ParentB{};
 };
 
 #pragma region AWS
@@ -47,15 +47,15 @@ struct FAwsAuthenticationResult
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
-	FString AccessToken;
+	FString AccessToken{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
-	int ExpiresIn;
+	int ExpiresIn{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
-	FString IdToken;
+	FString IdToken{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
-	FString RefreshToken;
+	FString RefreshToken{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
-	FString TokenType;
+	FString TokenType{};
 };
 
 USTRUCT(BlueprintType)
@@ -63,7 +63,7 @@ struct FAwsCognitoAuthResult
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
-	FAwsAuthenticationResult AuthenticationResult;
+	FAwsAuthenticationResult AuthenticationResult{};
 };
 
 USTRUCT(BlueprintType)
@@ -71,9 +71,9 @@ struct FAwsErrorResult
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
-	FString __type;
+	FString __type{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
-	FString Message;
+	FString Message{};
 };
 
 #pragma endregion AWS

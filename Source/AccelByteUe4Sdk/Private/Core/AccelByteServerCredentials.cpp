@@ -90,7 +90,7 @@ void ServerCredentials::SetClientToken(const FString& AccessToken, double Expire
 	ClientSessionState = ESessionState::Valid;
 
 	if (!PollRefreshTokenHandle.IsValid()) {
-		PollRefreshTokenHandle = FTicker::GetCoreTicker().AddTicker(
+		PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
 			FTickerDelegate::CreateLambda([this](float DeltaTime)
 				{
 					PollRefreshToken(FPlatformTime::Seconds());
@@ -109,11 +109,11 @@ void ServerCredentials::Shutdown()
 	RemoveFromTicker(PollRefreshTokenHandle);
 }
 
-void ServerCredentials::RemoveFromTicker(FDelegateHandle& handle)
+void ServerCredentials::RemoveFromTicker(FDelegateHandleAlias& handle)
 {
 	if (handle.IsValid())
 	{
-		FTicker::GetCoreTicker().RemoveTicker(handle);
+		FTickerAlias::GetCoreTicker().RemoveTicker(handle);
 		handle.Reset();
 	}
 }

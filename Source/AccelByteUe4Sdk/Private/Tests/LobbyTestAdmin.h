@@ -17,26 +17,26 @@ using AccelByte::FVoidHandler;
 USTRUCT(BlueprintType)
 struct FLobbyModelConfig
 {
-	GENERATED_BODY();
+	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
 	bool AutoKickOnDisconnect{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	int32 ChatRateLimitBurst;
+	int32 ChatRateLimitBurst{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	int32 ChatRateLimitDuration;
+	int32 ChatRateLimitDuration{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
 	bool EnableChat{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
 	bool EntitlementCheck{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	FString EntitlementItemID;
+	FString EntitlementItemID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	int32 GeneralRateLimitBurst;
+	int32 GeneralRateLimitBurst{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	int32 GeneralRateLimitDuration;
+	int32 GeneralRateLimitDuration{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	int32 MaxPartyMember;
+	int32 MaxPartyMember{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
 	bool ProfanityFilter{ false };
 };
@@ -46,11 +46,11 @@ struct FPodConfig
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Cpu_limit;
+	int32 Cpu_limit{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Mem_limit;
+	int32 Mem_limit{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Params;
+	FString Params{};
 };
 
 USTRUCT(BlueprintType)
@@ -58,17 +58,17 @@ struct FDeploymentConfig
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Buffer_count;
+	int32 Buffer_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Configuration;
+	FString Configuration{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Game_version;
+	FString Game_version{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Max_count;
+	int32 Max_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Min_count;
+	int32 Min_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TArray<FString> Regions;
+	TArray<FString> Regions{};
 };
 
 USTRUCT(BlueprintType)
@@ -76,21 +76,21 @@ struct FDeploymentWithOverride
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	bool Allow_version_override;
+	bool Allow_version_override{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Buffer_count;
+	int32 Buffer_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Configuration;
+	FString Configuration{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Game_version;
+	FString Game_version{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Max_count;
+	int32 Max_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Min_count;
+	int32 Min_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FDeploymentConfig> Overrides;
+	TMap<FString, FDeploymentConfig> Overrides{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TArray<FString> Regions;
+	TArray<FString> Regions{};
 };
 
 USTRUCT(BlueprintType)
@@ -98,51 +98,51 @@ struct FDsmConfig
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	bool Allow_version_override;
+	bool Allow_version_override{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Buffer_count;
+	int32 Buffer_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Claim_timeout;
+	int32 Claim_timeout{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FPodConfig> Configurations;
+	TMap<FString, FPodConfig> Configurations{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Cpu_limit;
+	int32 Cpu_limit{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Mem_limit;
+	int32 Mem_limit{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Params;
+	FString Params{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Creation_timeout;
+	int32 Creation_timeout{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Default_version;
+	FString Default_version{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FDeploymentWithOverride> Deployments;
+	TMap<FString, FDeploymentWithOverride> Deployments{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Heartbeat_timeout;
+	int32 Heartbeat_timeout{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FString> Image_version_mapping;
+	TMap<FString, FString> Image_version_mapping{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Max_count;
+	int32 Max_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Min_count;
+	int32 Min_count{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FDeploymentConfig> Overrides;
+	TMap<FString, FDeploymentConfig> Overrides{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Port;
+	int32 Port{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, int32> Ports;
+	TMap<FString, int32> Ports{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Protocol;
+	FString Protocol{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TArray<FString> Providers;
+	TArray<FString> Providers{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Session_timeout;
+	int32 Session_timeout{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Unreachable_timeout;
+	int32 Unreachable_timeout{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, int32> Version_image_size_mapping;
+	TMap<FString, int32> Version_image_size_mapping{};
 };
 
 void AdminGetLobbyConfig(const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError);

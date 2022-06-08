@@ -11,6 +11,7 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "Core/AccelByteServerCredentials.h"
+#include "Core/AccelByteDefines.h"
 #include "Models/AccelByteLobbyModels.h"
 #include "TestUtilities.h"
 #include "UserTestAdmin.h"
@@ -60,7 +61,7 @@ void SLobbyConnect(int UserCount)
 			FPlatformProcess::Sleep(.5f);
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("LobbyConnect: Wait user %s to connect")
 				, *ApiClient->CredentialsRef->GetUserId());
-			FTicker::GetCoreTicker().Tick(.5f);
+			FTickerAlias::GetCoreTicker().Tick(.5f);
 		}
 	}
 }
@@ -85,7 +86,7 @@ void SLobbyDisconnect(int UserCount)
 			FPlatformProcess::Sleep(.5f);
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Lobby Disconnect: Waiting user %s to disconnect")
 				, *ApiClient->CredentialsRef->GetUserId());
-			FTicker::GetCoreTicker().Tick(.5f);
+			FTickerAlias::GetCoreTicker().Tick(.5f);
 		}
 	}
 }

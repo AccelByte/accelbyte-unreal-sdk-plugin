@@ -19,27 +19,27 @@ struct FSeasonPassCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	FString Name;
+	FString Name{};
 	UPROPERTY()
-	FString Start;
+	FString Start{};
 	UPROPERTY()
-	FString End;
+	FString End{};
 	UPROPERTY()
-	FString DefaultLanguage;
+	FString DefaultLanguage{};
 	UPROPERTY()
-	int32 DefaultRequiredExp;
+	int32 DefaultRequiredExp{};
 	UPROPERTY()
-	FString DraftStoreId;
+	FString DraftStoreId{};
 	UPROPERTY()
-	FString TierItemId;
+	FString TierItemId{};
 	UPROPERTY()
-	bool AutoClaim;
+	bool AutoClaim{};
 	UPROPERTY()
-	FAccelByteSeasonPassExcessStrategy ExcessStrategy;
+	FAccelByteSeasonPassExcessStrategy ExcessStrategy{};
 	UPROPERTY()
-	TMap<FString, FLocalization> Localizations;
+	TMap<FString, FLocalization> Localizations{};
 	UPROPERTY()
-	TArray<FAccelByteModelsItemImage> Images;
+	TArray<FAccelByteModelsItemImage> Images{};
 };
 
 USTRUCT()
@@ -47,21 +47,21 @@ struct FSeasonPassCreateSeasonResponse : public FSeasonPassCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	FString Id;
+	FString Id{};
 	UPROPERTY()
-	FString Namespace;
+	FString Namespace{};
 	UPROPERTY()
-	FString TierItemName;
+	FString TierItemName{};
 	UPROPERTY()
-	TArray<FString> PassCodes;
+	TArray<FString> PassCodes{};
 	UPROPERTY()
-	EAccelByteSeasonPassStatus Status;
+	EAccelByteSeasonPassStatus Status{};
 	UPROPERTY()
-	FDateTime PublishedAt;
+	FDateTime PublishedAt{};
 	UPROPERTY()
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{};
 	UPROPERTY()
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{};
 };
 
 USTRUCT()
@@ -69,27 +69,27 @@ struct FSeasonPassCreateGetSeasonResponse
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	FString Id;
+	FString Id{};
 	UPROPERTY()
-	FString Namespace;
+	FString Namespace{};
 	UPROPERTY()
-	FString Name;
+	FString Name{};
 	UPROPERTY()
-	FDateTime Start;
+	FDateTime Start{};
 	UPROPERTY()
-	FDateTime End;
+	FDateTime End{};
 	UPROPERTY()
-	FString DefaultLanguage;
+	FString DefaultLanguage{};
 	UPROPERTY()
-	TArray<FString> PassCodes;
+	TArray<FString> PassCodes{};
 	UPROPERTY()
-	EAccelByteSeasonPassStatus Status;
+	EAccelByteSeasonPassStatus Status{EAccelByteSeasonPassStatus::DRAFT};
 	UPROPERTY()
-	FDateTime PublishedAt;
+	FDateTime PublishedAt{};
 	UPROPERTY()
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{};
 	UPROPERTY()
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{};
 };
 
 USTRUCT()
@@ -97,9 +97,9 @@ struct FSeasonPassCreateGetSeasonsPagingResponse
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	TArray<FSeasonPassCreateGetSeasonResponse> Data;
+	TArray<FSeasonPassCreateGetSeasonResponse> Data{};
 	UPROPERTY()
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 USTRUCT()
@@ -107,17 +107,17 @@ struct FSeasonPassCreatePassRequest
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	FString Code;
+	FString Code{};
 	UPROPERTY()
-	int32 DisplayOrder;
+	int32 DisplayOrder{};
 	UPROPERTY()
-	bool AutoEnroll;
+	bool AutoEnroll{};
 	UPROPERTY()
-	FString PassItemId;
+	FString PassItemId{};
 	UPROPERTY()
-	TMap<FString, FLocalization> Localizations;
+	TMap<FString, FLocalization> Localizations{};
 	UPROPERTY()
-	TArray<FAccelByteModelsItemImage> Images;
+	TArray<FAccelByteModelsItemImage> Images{};
 };
 
 USTRUCT()
@@ -125,13 +125,13 @@ struct FSeasonPassCreatePassResponse : public FSeasonPassCreatePassRequest
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	FString SeasonId;
+	FString SeasonId{};
 	UPROPERTY()
-	FString PassItemName;
+	FString PassItemName{};
 	UPROPERTY()
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{};
 	UPROPERTY()
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{};
 };
 
 USTRUCT()
@@ -139,17 +139,17 @@ struct FSeasonPassCreateReward
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	FString Code;
+	FString Code{};
 	UPROPERTY()
-	FString Type; // this should be enum, but backend currently supported only ITEM
+	FString Type{}; // this should be enum, but backend currently supported only ITEM
 	UPROPERTY()
-	FString ItemId;
+	FString ItemId{};
 	UPROPERTY()
-	FAccelByteModelsSeasonPassRewardCurrency Currency;
+	FAccelByteModelsSeasonPassRewardCurrency Currency{};
 	UPROPERTY()
-	int32 Quantity;
+	int32 Quantity{};
 	UPROPERTY()
-	FAccelByteModelsItemImage Image;
+	FAccelByteModelsItemImage Image{};
 };
 
 USTRUCT()
@@ -157,11 +157,11 @@ struct FSeasonPassRewardResponse : public FSeasonPassCreateReward
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	FString Namespace;
+	FString Namespace{};
 	UPROPERTY()
-	FString SeasonId;
+	FString SeasonId{};
 	UPROPERTY()
-	FString ItemName;
+	FString ItemName{};
 };
 
 USTRUCT()
@@ -169,9 +169,9 @@ struct FSeasonPassTierRequest
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	int32 RequiredExp;
+	int32 RequiredExp{};
 	UPROPERTY()
-	FJsonObjectWrapper Rewards;
+	FJsonObjectWrapper Rewards{};
 };
 
 USTRUCT()
@@ -179,11 +179,11 @@ struct FSeasonPassCreateTierRequest
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	int32 Index;
+	int32 Index{};
 	UPROPERTY()
-	int32 Quantity;
+	int32 Quantity{};
 	UPROPERTY()
-	FSeasonPassTierRequest Tier;
+	FSeasonPassTierRequest Tier{};
 };
 
 void AdminCreateSeason(const FSeasonPassCreateRequest& Req, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess,

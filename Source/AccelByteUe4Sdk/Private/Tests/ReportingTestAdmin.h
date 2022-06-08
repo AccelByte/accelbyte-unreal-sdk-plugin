@@ -16,9 +16,9 @@ struct FReportingAddReasonRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonRequest")
-		FString Title;
+	FString Title{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonRequest")
-		FString Description;
+	FString Description{};
 };
 
 USTRUCT(BlueprintType)
@@ -26,9 +26,9 @@ struct FReportingAddReasonGroupRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonGroupRequest")
-		TArray<FString> ReasonIds;
+	TArray<FString> ReasonIds{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonGroupRequest")
-		FString Title;
+	FString Title{};
 };
 
 USTRUCT(BlueprintType)
@@ -36,17 +36,17 @@ struct FReportingAddReasonResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonResponse")
-		FString CreatedAt;
+	FString CreatedAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonResponse")
-		int32 Description;
+	int32 Description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonResponse")
-		FString ID;
+	FString ID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonResponse")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonResponse")
-		FString Title;
+	FString Title{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonResponse")
-		FString UpdatedAt;
+	FString UpdatedAt{};
 };
 
 USTRUCT(BlueprintType)
@@ -54,17 +54,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAdminReasonItem
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test | Reporting | AdminReasonItem")
-		FString ID;
+	FString ID{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test | Reporting | AdminReasonItem")
-		FString Title;
+	FString Title{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test | Reporting | AdminReasonItem")
-		FString Description;
+	FString Description{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test | Reporting | AdminReasonItem")
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test | Reporting | AdminReasonItem")
-		FString CreatedAt;
+	FString CreatedAt{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test | Reporting | AdminReasonItem")
-		FString UpdatedAt;
+	FString UpdatedAt{};
 };
 
 USTRUCT(BlueprintType)
@@ -72,10 +72,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAdminReasonsResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test | Reporting | AdminReasonsResponse")
-		TArray<FAccelByteModelsAdminReasonItem> Data;
+	TArray<FAccelByteModelsAdminReasonItem> Data{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Test | Reporting | AdminReasonsResponse")
-		FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 
 };
 
@@ -84,11 +84,11 @@ struct FReportingAddReasonGroupResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonGroupResponse")
-		FString ID;
+	FString ID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonGroupResponse")
-		TArray<FAccelByteModelsReasonItem> Reasons;
+	TArray<FAccelByteModelsReasonItem> Reasons{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Reporting | AddReasonGroupResponse")
-		FString Title;
+	FString Title{};
 };
 
 void ReportingAddReason(const FReportingAddReasonRequest& BodyRequest, const THandler<FReportingAddReasonResponse>& OnSuccess, const FErrorHandler& OnError);

@@ -16,6 +16,7 @@
 #include "ParseErrorTest.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteOauth2Api.h"
+#include "Core/AccelByteDefines.h"
 
 using namespace std;
 
@@ -4121,7 +4122,7 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 			UserTestErrorHandler);
 
 		FPlatformProcess::Sleep(0.2f);
-		FTicker::GetCoreTicker().Tick(0.2f);
+		FTickerAlias::GetCoreTicker().Tick(0.2f);
 	}
 
 	// wait session to refresh
@@ -4129,7 +4130,7 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 	for (int i = 0; i < 20; i++)
 	{
 		FPlatformProcess::Sleep(0.5f);
-		FTicker::GetCoreTicker().Tick(0.5f);
+		FTickerAlias::GetCoreTicker().Tick(0.5f);
 
 		NewSessionId = FRegistry::Credentials.GetAccessToken();
 
@@ -4170,7 +4171,7 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 			UserTestErrorHandler);
 
 		FPlatformProcess::Sleep(0.2f);
-		FTicker::GetCoreTicker().Tick(0.2f);
+		FTickerAlias::GetCoreTicker().Tick(0.2f);
 	}
 
 	// wait session to refresh
@@ -4178,7 +4179,7 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 	for (int i = 0; i < 20; i++)
 	{
 		FPlatformProcess::Sleep(0.5f);
-		FTicker::GetCoreTicker().Tick(0.5f);
+		FTickerAlias::GetCoreTicker().Tick(0.5f);
 
 		NewSessionIdAfter = FRegistry::Credentials.GetAccessToken();
 
@@ -4219,7 +4220,7 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 			UserTestErrorHandler);
 
 		FPlatformProcess::Sleep(0.2f);
-		FTicker::GetCoreTicker().Tick(0.2f);
+		FTickerAlias::GetCoreTicker().Tick(0.2f);
 	}
 
 	// wait session to refresh
@@ -4227,7 +4228,7 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 	for (int i = 0; i < 20; i++)
 	{
 		FPlatformProcess::Sleep(0.5f);
-		FTicker::GetCoreTicker().Tick(0.5f);
+		FTickerAlias::GetCoreTicker().Tick(0.5f);
 
 		NewSessionIdAfterEnable = FRegistry::Credentials.GetAccessToken();
 
@@ -4386,7 +4387,7 @@ bool FBan_AccountBan::RunTest(const FString& Parameter)
 	for (int i = 0; i < 20; i++)
 	{
 		FPlatformProcess::Sleep(0.5f);
-		FTicker::GetCoreTicker().Tick(0.5f);
+		FTickerAlias::GetCoreTicker().Tick(0.5f);
 
 		NewSessionId = FRegistry::Credentials.GetAccessToken();
 
@@ -4477,7 +4478,7 @@ bool FBan_AccountBan::RunTest(const FString& Parameter)
 	for (int i = 0; i < 20; i++)
 	{
 		FPlatformProcess::Sleep(0.5f);
-		FTicker::GetCoreTicker().Tick(0.5f);
+		FTickerAlias::GetCoreTicker().Tick(0.5f);
 
 		NewSessionIdAfter = FRegistry::Credentials.GetAccessToken();
 
@@ -4528,7 +4529,7 @@ bool FBan_AccountBan::RunTest(const FString& Parameter)
 	for (int i = 0; i < 20; i++)
 	{
 		FPlatformProcess::Sleep(0.5f);
-		FTicker::GetCoreTicker().Tick(0.5f);
+		FTickerAlias::GetCoreTicker().Tick(0.5f);
 
 		NewSessionIdAfterEnable = FRegistry::Credentials.GetAccessToken();
 
