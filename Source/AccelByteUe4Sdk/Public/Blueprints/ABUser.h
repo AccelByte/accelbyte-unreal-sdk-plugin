@@ -46,6 +46,9 @@ public:
 	void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformToken, FDHandler OnSuccess, FDErrorHandler OnError, bool bCreateHeadless = true);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
+	void LoginWithOtherPlatformId(FString const& PlatformId, FString const& PlatformToken, FDHandler OnSuccess, FDErrorHandler OnError, bool bCreateHeadless = true);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
 	void LoginWithDeviceId(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")

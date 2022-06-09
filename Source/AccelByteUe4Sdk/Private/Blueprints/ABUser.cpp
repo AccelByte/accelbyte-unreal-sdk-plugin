@@ -51,6 +51,28 @@ void UABUser::LoginWithOtherPlatform(
 			}), bCreateHeadless);
 }
 
+void UABUser::LoginWithOtherPlatformId(
+	FString const& PlatformId,
+	FString const& PlatformToken,
+	FDHandler OnSuccess,
+	FDErrorHandler OnError,
+	bool bCreateHeadless)
+{
+	ApiClientPtr->User.LoginWithOtherPlatformId(
+		PlatformId,
+		PlatformToken,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			}),
+		FCustomErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FJsonObject& ErrorJson)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}), bCreateHeadless);
+}
+
 void UABUser::LoginWithDeviceId(
 	FDHandler OnSuccess,
 	FDErrorHandler OnError) 

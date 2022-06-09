@@ -122,6 +122,43 @@ void User::LoginWithOtherPlatform(
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
+
+void User::LoginWithOtherPlatformId(
+	const FString& PlatformId,
+	const FString& PlatformToken,
+	const FVoidHandler& OnSuccess,
+	const FCustomErrorHandler& OnError,
+	bool bCreateHeadless) const
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithOtherPlatformToken(
+		CredentialsRef.GetOAuthClientId(),
+		CredentialsRef.GetOAuthClientSecret(),
+		PlatformId,
+		PlatformToken,
+		THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
+		{
+			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
+			OnSuccess.ExecuteIfBound();
+					
+		}), FCustomErrorHandler::CreateLambda([this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		{
+			FErrorOauthInfo ErrorOauthInfo;
+			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
+			if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
+			{
+				FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
+			}
+			CredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+		}), bCreateHeadless);
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
 	
 void User::LoginWithUsername(
 	const FString& Username,
@@ -1294,6 +1331,35 @@ void User::MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType ,c
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 	Request->SetVerb(Verb);
 	Request->SetContentAsString(FString::Printf(TEXT("factor=%s"), *Factor));
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::UpdateUserV3(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!UpdateRequest.EmailAddress.IsEmpty())
+	{
+		OnError.ExecuteIfBound(400, TEXT("Cannot update user email using this function. Use UpdateEmail instead."));
+		return;
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb = TEXT("PATCH");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(UpdateRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }

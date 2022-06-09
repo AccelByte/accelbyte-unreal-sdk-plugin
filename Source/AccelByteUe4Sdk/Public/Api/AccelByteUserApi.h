@@ -135,6 +135,22 @@ namespace AccelByte
 				bool bCreateHeadless = true) const;
 
 			/**
+			* @brief Log in with another platform Id account e.g. Steam, Google, Twitch, etc especially to support OIDC (with 2FA enable)
+			*
+			* @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC)  
+			* @param PlatformToken Authentication code that provided by another platform.
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			* @param bCreateHeadless If directly create new account when not linked yet, default value is true 
+			*/
+			void LoginWithOtherPlatformId(
+				const FString& PlatformId,
+				const FString& PlatformToken,
+				const FVoidHandler& OnSuccess,
+				const FCustomErrorHandler& OnError,
+				bool bCreateHeadless = true) const;
+			
+			/**
 			 * @brief Log in with device ID (anonymous log in).
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded.
@@ -593,6 +609,15 @@ namespace AccelByte
 			* @param OnError This will be called when the operation failed.
 			*/
 			void MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType ,const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function for update user account info within the game.
+			 *
+			 * @param UpdateRequest The data you want to update. for DateOfBirth, the format is YYYY-MM-DD.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void UpdateUserV3(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 		private:
 			User() = delete;
