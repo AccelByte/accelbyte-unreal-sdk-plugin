@@ -260,7 +260,7 @@ void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, T
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
+	FString Url           = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/parties"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
 	FString Verb          = TEXT("GET");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");
