@@ -15,7 +15,6 @@ namespace AccelByte
 {
 namespace Api
 {
-
 static void AppendQueryParam(FString& QueryString, const FString& ParamName, const FString& ParamValue)
 {
 	if(!ParamValue.IsEmpty())
@@ -226,9 +225,9 @@ void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQ
 	AppendQueryParam(QueryString, TEXT("status"), Status);
 
 	if(!QueryString.IsEmpty())
-    {
+	{
 		Url.Appendf(TEXT("?%s"), *QueryString);
-    }
+	}
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -435,8 +434,7 @@ void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, T
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");
 	FString Content       = TEXT("");
-	FString QueryString   = TEXT("");
-	
+
 	AppendQueryParams(Url, Query, Offset, Limit);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -449,6 +447,37 @@ void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, T
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, const FString& Status)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/parties"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
+	FString Verb          = TEXT("GET");
+	FString ContentType   = TEXT("application/json");
+	FString Accept        = TEXT("application/json");
+	FString Content       = TEXT("");
+	FString QueryString   = TEXT("");
+
+	AppendQueryParam(QueryString, TEXT("status"), Status);
+
+	if(!QueryString.IsEmpty())
+	{
+		Url.Appendf(TEXT("?%s"), *QueryString);
+	}
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
+    Request->SetContentAsString(Content);
+
+    HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 
 }
 }
