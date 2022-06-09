@@ -15,6 +15,49 @@ namespace AccelByte
 {
 namespace Api
 {
+static void AppendQueryParam(FString& QueryString, const FString& ParamName, const FString& ParamValue)
+{
+	if(!ParamValue.IsEmpty())
+	{
+		if(!QueryString.IsEmpty())
+		{
+			QueryString.Append(TEXT("&"));
+		}
+
+		const FString EncodedName = FGenericPlatformHttp::UrlEncode(ParamName);
+		const FString EncodedValue = FGenericPlatformHttp::UrlEncode(ParamValue);
+
+		QueryString.Appendf(TEXT("%s=%s"), *EncodedName, *EncodedValue);
+	}
+}
+
+static void AppendQueryParams(FString& Url, FAccelByteModelsV2SessionQueryRequest const& Query, int32 const& Offset, int32 const& Limit)
+{
+	FString QueryString   = TEXT("");
+
+	if(Offset >= 0)
+	{
+		QueryString.Append(FString::Printf(TEXT("offset=%d"), Offset));
+	}
+	if(Limit >= 0)
+	{
+		QueryString.Append(QueryString.IsEmpty() ? TEXT("") : TEXT("&"));
+		QueryString.Append(FString::Printf(TEXT("limit=%d"), Limit));
+	}
+
+	AppendQueryParam(QueryString, TEXT("key"), Query.Key);
+	AppendQueryParam(QueryString, TEXT("value"), Query.Value);
+	AppendQueryParam(QueryString, TEXT("joinType"), Query.JoinType);
+	AppendQueryParam(QueryString, TEXT("memberStatus"), Query.MemberStatus);
+	AppendQueryParam(QueryString, TEXT("leaderID"), Query.LeaderID);
+	AppendQueryParam(QueryString, TEXT("memberID"), Query.MemberID);
+
+	if(!QueryString.IsEmpty())
+    {
+		Url.Appendf(TEXT("?%s"), *QueryString);
+    }
+}
+
 Session::Session(
 	AccelByte::Credentials const& CredentialsRef,
 	AccelByte::Settings const& SettingsRef,
@@ -212,22 +255,6 @@ void Session::KickUserFromParty(FString const& PartyID, FString const& UserID, T
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-static void AppendQueryParam(FString& QueryString, const FString& ParamName, const FString& ParamValue)
-{
-	if(!ParamValue.IsEmpty())
-	{
-		if(!QueryString.IsEmpty())
-		{
-			QueryString.Append(TEXT("&"));
-		}
-
-		const FString EncodedName = FGenericPlatformHttp::UrlEncode(ParamName);
-		const FString EncodedValue = FGenericPlatformHttp::UrlEncode(ParamValue);
-
-		QueryString.Appendf(TEXT("%s=%s"), *EncodedName, *EncodedValue);
-	}
-}
-
 void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset, int32 const& Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -239,28 +266,8 @@ void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, T
 	FString Accept        = TEXT("application/json");
 	FString Content       = TEXT("");
 	FString QueryString   = TEXT("");
-	
-	if(Offset >= 0)
-	{
-		QueryString.Append(FString::Printf(TEXT("offset=%d"), Offset));
-	}
-	if(Limit >= 0)
-	{
-		QueryString.Append(QueryString.IsEmpty() ? TEXT("") : TEXT("&"));
-		QueryString.Append(FString::Printf(TEXT("limit=%d"), Limit));
-	}
 
-	AppendQueryParam(QueryString, TEXT("key"), Query.Key);
-	AppendQueryParam(QueryString, TEXT("value"), Query.Value);
-	AppendQueryParam(QueryString, TEXT("joinType"), Query.JoinType);
-	AppendQueryParam(QueryString, TEXT("memberStatus"), Query.MemberStatus);
-	AppendQueryParam(QueryString, TEXT("leaderID"), Query.LeaderID);
-	AppendQueryParam(QueryString, TEXT("memberID"), Query.MemberID);
-
-	if(!QueryString.IsEmpty())
-	{
-		Url.Appendf(TEXT("?%s"), *QueryString);
-	}
+	AppendQueryParams(Url, Query, Offset, Limit);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -272,6 +279,32 @@ void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, T
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, const FString& Status)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/parties"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
+	FString Verb          = TEXT("GET");
+	FString ContentType   = TEXT("application/json");
+	FString Accept        = TEXT("application/json");
+	FString Content       = TEXT("");
+	FString QueryString   = TEXT("");
+
+	AppendQueryParam(QueryString, TEXT("status"), Status);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
+    Request->SetContentAsString(Content);
+
+    HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 
 }
 }

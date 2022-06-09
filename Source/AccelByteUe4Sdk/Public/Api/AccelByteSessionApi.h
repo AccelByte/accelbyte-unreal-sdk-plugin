@@ -124,9 +124,19 @@ public:
 	 * @param Query The object containing fields to query on - empty fields are omitted.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * @param Offset The pagination offset.
+	 * @param Limit The pagination limit.
 	 */
 	void QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
 
+	/**
+	 * @brief Get a list of parties matching the given query.
+	 *
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Status Optional membership status to query for - either active or invited.
+	 */
+	void GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, const FString& Status = TEXT(""));
 	
 private:
 	FHttpRetryScheduler& HttpRef;
