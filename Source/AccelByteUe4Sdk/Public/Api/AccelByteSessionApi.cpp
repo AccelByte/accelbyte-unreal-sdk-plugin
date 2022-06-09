@@ -77,7 +77,7 @@ void Session::CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/namespaces/%s/gamesession"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesession"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
 	FString Verb          = TEXT("POST");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");
@@ -101,7 +101,7 @@ void Session::GetGameSessionDetails(FString const& GameSessionID, THandler<FAcce
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/namespaces/%s/gamesessions/%s"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *GameSessionID);
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *GameSessionID);
 	FString Verb          = TEXT("GET");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");
@@ -123,7 +123,7 @@ void Session::QueryGameSessions(FAccelByteModelsV2SessionQueryRequest const& Que
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/namespaces/%s/gamesessions"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
+	FString Url           = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
 	FString Verb          = TEXT("GET");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");
@@ -148,7 +148,7 @@ void Session::UpdateGameSession(FString const& GameSessionID, FAccelByteModelsV2
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/namespaces/%s/gamesessions/%s"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *GameSessionID);
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *GameSessionID);
 	FString Verb          = TEXT("PUT");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");
@@ -172,7 +172,7 @@ void Session::DeleteGameSession(FString const& GameSessionID, FVoidHandler const
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/namespaces/%s/gamesessions/%s"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *GameSessionID);
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *GameSessionID);
 	FString Verb          = TEXT("DELETE");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");
@@ -194,7 +194,7 @@ void Session::JoinGameSession(FString const& GameSessionID, THandler<FAccelByteM
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/namespaces/%s/gamesessions/%s/join"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *GameSessionID);
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/join"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *GameSessionID);
 	FString Verb          = TEXT("POST");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");
@@ -400,7 +400,7 @@ void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, T
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
+	FString Url           = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/parties"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
 	FString Verb          = TEXT("GET");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");

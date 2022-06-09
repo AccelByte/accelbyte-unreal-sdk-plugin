@@ -53,8 +53,12 @@ bool GameSessionCreate::RunTest(const FString& Parameters)
 
 	// These should be the required fields for creation
 	Request.JoinType = Api::SessionJoinType::Closed;
-	Request.DSRequest.GameMode = "test";
-	Request.DSRequest.MinPlayer = 0;
+	Request.DSRequest.MinPlayer = 1;
+	Request.DSRequest.RequestedRegions.Add({});
+	Request.DSRequest.GameMode =
+		Request.DSRequest.ServerName =
+		Request.DSRequest.ClientVersion =
+		Request.DSRequest.Deployment = "test";
 	
 	bool bSessionCreateSuccess = false;
 	FAccelByteModelsV2GameSession GameSessionResponse;
