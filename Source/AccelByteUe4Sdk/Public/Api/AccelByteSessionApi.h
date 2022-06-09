@@ -99,6 +99,15 @@ public:
 	void JoinGameSession(FString const& GameSessionID, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Get a list of the logged in user's game sessions.
+	 *
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Status Optional membership status to query for - either active or invited.
+	 */
+	void GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, FString const& Status=TEXT(""));
+
+	/**
 	 * @brief Create a new party with the calling user as the sole member.
 	 *
 	 * @param CreateRequest The party creation request with attributes, join type, and members.

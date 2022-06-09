@@ -211,6 +211,36 @@ void Session::JoinGameSession(FString const& GameSessionID, THandler<FAccelByteM
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, FString const& Status)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/gamesessions"), *Settings.SessionServerUrl, *Credentials.GetNamespace());
+	FString Verb          = TEXT("GET");
+	FString ContentType   = TEXT("application/json");
+	FString Accept        = TEXT("application/json");
+	FString Content       = TEXT("");
+	FString QueryString   = TEXT("");
+
+	AppendQueryParam(QueryString, TEXT("status"), Status);
+
+	if(!QueryString.IsEmpty())
+    {
+		Url.Appendf(TEXT("?%s"), *QueryString);
+    }
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Session::CreateParty(FAccelByteModelsV2PartyCreateRequest const& CreateRequest, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));

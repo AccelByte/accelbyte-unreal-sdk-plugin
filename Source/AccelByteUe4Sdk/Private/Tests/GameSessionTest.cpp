@@ -104,6 +104,11 @@ bool GameSessionUpdate::RunTest(const FString& Parameters)
 
 	// These should be the required fields for creation
 	Request.JoinType = Api::SessionJoinType::Open;
+	Request.Version = GameSession.Version;
+	Request.DSRequest.GameMode =
+		Request.DSRequest.ServerName =
+		Request.DSRequest.ClientVersion =
+		Request.DSRequest.Deployment = "test";
 	
 	bool bSessionUpdateSuccess = false;
 	FAccelByteModelsV2GameSession GameSessionResponse;
@@ -114,7 +119,10 @@ bool GameSessionUpdate::RunTest(const FString& Parameters)
 	}), GameSessionErrorHandler);
 	WaitUntil(bSessionUpdateSuccess, "Waiting for game session update...");
 
-	GameSession = GameSessionResponse;
+	if(bSessionUpdateSuccess)
+	{
+		GameSession = GameSessionResponse;
+	}
 	
 	AB_TEST_TRUE(bSessionUpdateSuccess);
 	AB_TEST_EQUAL(GameSession.JoinType, Request.JoinType);
@@ -137,7 +145,10 @@ bool GameSessionJoin::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bSessionJoinSuccess);
 
-	GameSession = GameSessionResponse;
+	if(bSessionJoinSuccess)
+	{
+		GameSession = GameSessionResponse;
+	}
 
 	bool bMemberFound = false;
 	for(auto& Member : GameSession.Members)
@@ -171,6 +182,23 @@ bool GameSessionQuery::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bSessionQuerySuccess);
 	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(GameSessionGetMyGameSessions, "AccelByte.Tests.GameSession.D.GetMyGameSessions", AutomationFlagMaskParty);
+bool GameSessionGetMyGameSessions::RunTest(const FString& Parameters)
+{
+	bool bGetSessionsSuccess = false;
+	FAccelByteModelsV2PaginatedGameSessionQueryResult GameSessions;
+	FRegistry::Session.GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult>::CreateLambda([&bGetSessionsSuccess, &GameSessions](FAccelByteModelsV2PaginatedGameSessionQueryResult Response)
+	{
+		bGetSessionsSuccess = true;
+		GameSessions = Response;
+	}), GameSessionErrorHandler);
+	WaitUntil(bGetSessionsSuccess, "Waiting for get my game sessions...");
+
+	AB_TEST_TRUE(bGetSessionsSuccess);
+
 	return true;
 }
 
