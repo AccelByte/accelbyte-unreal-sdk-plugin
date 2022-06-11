@@ -10,6 +10,7 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteLobbyModels.h"
+#include "Models/AccelByteSessionModels.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 
@@ -418,6 +419,36 @@ public:
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_OneParam(FDisconnectNotif, const FAccelByteModelsDisconnectNotif&)
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
+
+	/**
+	 * @brief Delegate for user kicked from party event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyKicked, void);
+
+	/**
+	 * @brief Delegate for party members changed event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyMembersChanged, void);
+
+	/**
+	 * @brief Delegate for user invited to party event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyInvited, FAccelByteModelsV2PartyInvitedEvent);
+
+	/**
+	 * @brief Delegate for user rejected invitation event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyRejected, void);
+
+	/**
+	 * @brief Delegate for user joined party event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyJoined, void);
+
+	/**
+	 * @brief Delegate for party changed event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyUpdated, void);
 	
 public:
     /**
@@ -935,6 +966,11 @@ public:
 	void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
 	{
 		MessageNotif = OnNotificationMessage;
+	}
+	// todo: unbinds
+	void SetV2PartyInvitedDelegate(const FV2PartyInvited& OnPartyInvited)
+	{
+		V2PartyInvited = OnPartyInvited;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1803,6 +1839,9 @@ private:
 	FMessageNotif MessageNotif;
 	FUserBannedNotification UserBannedNotification;
 	FUserUnbannedNotification UserUnbannedNotification;
+
+	// session v2
+	FV2PartyInvited V2PartyInvited;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;

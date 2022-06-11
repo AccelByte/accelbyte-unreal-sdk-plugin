@@ -206,3 +206,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PaginatedPartyQueryResult
 		FAccelByteModelsPaging Paging{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyInvitedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyInvitedEvent")
+		FString SenderID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyInvitedEvent")
+		FString PartyID;
+};

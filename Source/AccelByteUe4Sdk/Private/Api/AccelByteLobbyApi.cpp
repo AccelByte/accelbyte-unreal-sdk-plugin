@@ -16,6 +16,9 @@
 #include "Core/FUnrealWebSocketFactory.h"
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
+#include "google/protobuf/util/json_util.h"
+#include "Api/notification.pb.h"
+#include "Models/AccelByteSessionModels.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -325,6 +328,24 @@ namespace Api
 
 		MAX_Notif,
 	};
+
+	namespace SessionTopic
+	{
+		const FString PartyKicked         = TEXT("OnPartyKicked");
+		const FString PartyMembersChanged = TEXT("OnPartyMembersChanged");
+		const FString PartyInvited        = TEXT("OnPartyInvited");
+		const FString PartyRejected       = TEXT("OnPartyRejected");
+		const FString PartyJoined         = TEXT("OnPartyJoined");
+		const FString PartyUpdated        = TEXT("OnPartyUpdated");
+
+		const FString SessionUserInvited    = TEXT("OnSessionInvited");
+		const FString SessionUserJoined     = TEXT("OnSessionJoined");
+		const FString SessionMembersChanged = TEXT("OnSessionMembersChanged");
+		const FString SessionUpdated        = TEXT("OnGameSessionUpdated");
+
+		const FString Session = TEXT("Session");
+		const FString Party = TEXT("Party");
+	}
 
 /**
 * Helper macro to enforce uniform naming, easier pair initialization, and readibility
@@ -1868,6 +1889,19 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 			break; \
 		} \
 
+template <typename DataStruct, typename PayloadType, typename ResponseCallbackType>
+void HandleSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCallback)
+{
+	std::string JsonPayloadUTF8;
+	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
+	FString JsonPayload = UTF8_TO_TCHAR(JsonPayloadUTF8.c_str());
+	DataStruct Result;
+	if(FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Result, 0, 0))
+	{
+		ResponseCallback.ExecuteIfBound(Result);
+	}
+}
+
 void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
 {
 	Notif NotifEnum = Notif::Invalid_Notif;
@@ -1937,6 +1971,37 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 				if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &NotificationMessage, 0, 0) == false)
 				{
 					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the whole MessageNotif to the struct\nNotification: %s"), *ParsedJsonString);
+					return;
+				}
+
+				// TODO: This will be unnecessary when we have a dedicated sessionMessageNotif
+				if(NotificationMessage.Topic.Contains(SessionTopic::Party) || NotificationMessage.Topic.Contains(SessionTopic::Session))
+				{
+					FString ProtobufPayloadString;
+					FBase64::Decode(NotificationMessage.Payload, ProtobufPayloadString);
+
+					session::NotificationEventEnvelope EventEnvelope;
+					if(!EventEnvelope.ParseFromString(TCHAR_TO_UTF8(*ProtobufPayloadString)))
+					{
+						UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize protobuf payload\nNotification: %s"), *ParsedJsonString);
+						return;
+					}
+
+					switch(EventEnvelope.payload_case())
+					{
+						case session::NotificationEventEnvelope::kPartyNotificationUserInvitedV1:
+						{
+							auto Payload = EventEnvelope.partynotificationuserinvitedv1();
+							HandleSessionNotif<FAccelByteModelsV2PartyInvitedEvent>(Payload, V2PartyInvited);
+							break;
+						}
+						// todo: handle other cases
+						default: break;
+					}
+				}
+				else
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
 					return;
 				}
 			}
