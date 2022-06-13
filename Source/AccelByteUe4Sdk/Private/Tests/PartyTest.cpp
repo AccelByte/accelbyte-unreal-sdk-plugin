@@ -9,8 +9,6 @@
 #include "Core/AccelByteCredentials.h"
 #include "TestUtilities.h"
 #include "Api/AccelByteLobbyApi.h"
-#include "Api/notification.pb.h"
-#include "google/protobuf/util/json_util.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
@@ -33,13 +31,13 @@ const auto PartyErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, F
 	UE_LOG(LogAccelBytePartyTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-static bool TestPartyMembership(const FAccelByteModelsV2PartySession& TestParty, const FString& MemberID, const FString& Status=TEXT("active"))
+static bool TestPartyMembership(const FAccelByteModelsV2PartySession& TestParty, const FString& MemberID, const EAccelByteV2SessionMemberStatus& Status=EAccelByteV2SessionMemberStatus::ACTIVE)
 {
 	for(auto& Member : TestParty.Members)
 	{
 		if(Member.ID.Equals(MemberID))
 		{
-			return Member.Status.Equals(Status);
+			return Member.Status == Status;
 		}
 	}
 
@@ -115,7 +113,7 @@ bool PartyCreate::RunTest(const FString& Parameters)
 	bool bCreatePartySuccess = false;
 	FAccelByteModelsV2PartySession Response;
 	FAccelByteModelsV2PartyCreateRequest Request;
-	Request.JoinType = Api::SessionJoinType::InviteOnly;
+	Request.JoinType = EAccelByteV2SessionJoinability::INVITE_ONLY;
 	FRegistry::Session.CreateParty(Request, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bCreatePartySuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
 	{
 		bCreatePartySuccess = true;
@@ -159,7 +157,7 @@ bool PartyUpdate::RunTest(const FString& Parameters)
 	FAccelByteModelsV2PartySession Response;
 	FAccelByteModelsV2PartyUpdateRequest Request;
 
-	Request.JoinType = Api::SessionJoinType::Open;
+	Request.JoinType = EAccelByteV2SessionJoinability::OPEN;
 	Request.Version = Party.Version;
 	
 	FRegistry::Session.UpdateParty(Party.ID, Request, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bUpdateSuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
@@ -172,7 +170,7 @@ bool PartyUpdate::RunTest(const FString& Parameters)
 	
 	AB_TEST_TRUE(bUpdateSuccess);
 	AB_TEST_EQUAL(Response.ID, Party.ID);
-	AB_TEST_EQUAL(Request.JoinType, Api::SessionJoinType::Open);
+	AB_TEST_EQUAL(Request.JoinType, EAccelByteV2SessionJoinability::OPEN);
 
 	Party = Response;
 	
@@ -353,10 +351,28 @@ bool PartyInviteReject::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyQuery, "AccelByte.Tests.Party.I.Query", AutomationFlagMaskParty);
 bool PartyQuery::RunTest(const FString& Parameters)
 {
+	bool bInviteSuccess = false;
+	FRegistry::Session.SendPartyInvite(Party.ID, InviteeUserID, FVoidHandler::CreateLambda([&bInviteSuccess]
+	{
+		bInviteSuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bInviteSuccess, "Waiting for party invite...");
+
+	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+
+	// rejoin the party after leaving in the last test
+	bool bJoinPartySuccess = false;
+	InviteeSession.JoinParty(Party.ID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bJoinPartySuccess](FAccelByteModelsV2PartySession const)
+	{
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Join party success"));
+		bJoinPartySuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bJoinPartySuccess, "Waiting for party join...");
+
 	bool bQueryPartiesSuccess = false;
 
 	FAccelByteModelsV2SessionQueryRequest Query1;
-	Query1.LeaderID = FRegistry::Credentials.GetUserId();
+	Query1.MemberID = InviteeUserID;
 
 	FAccelByteModelsV2PaginatedPartyQueryResult Response;
 	FRegistry::Session.QueryParties(Query1, THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bQueryPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
@@ -376,22 +392,8 @@ bool PartyQuery::RunTest(const FString& Parameters)
 	bQueryPartiesSuccess = false;
 
 	FAccelByteModelsV2SessionQueryRequest Query2;
-	Query2.MemberID = InviteeUserID;
+	Query2.JoinType = EAccelByteV2SessionJoinability::CLOSED;
 	FRegistry::Session.QueryParties(Query2, THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bQueryPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
-	{
-		bQueryPartiesSuccess = true;
-		Response = QueryResponse;
-	}), PartyErrorHandler);
-	WaitUntil(bQueryPartiesSuccess, "Waiting for party query...");
-
-	AB_TEST_TRUE(bQueryPartiesSuccess);
-	AB_TEST_EQUAL(Response.Data.Num(), 0);
-
-	bQueryPartiesSuccess = false;
-
-	FAccelByteModelsV2SessionQueryRequest Query3;
-	Query3.JoinType = Api::SessionJoinType::Closed;
-	FRegistry::Session.QueryParties(Query3, THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bQueryPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
 	{
 		bQueryPartiesSuccess = true;
 		Response = QueryResponse;
@@ -404,25 +406,54 @@ bool PartyQuery::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyGetMyParties, "AccelByte.Tests.Party.I.GetMyParties", AutomationFlagMaskParty);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyGetMyParties, "AccelByte.Tests.Party.J.GetMyParties", AutomationFlagMaskParty);
 bool PartyGetMyParties::RunTest(const FString& Parameters)
 {
+	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+
 	bool bGetPartiesSuccess = false;
 
 	FAccelByteModelsV2PaginatedPartyQueryResult Response;
-	FRegistry::Session.GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bGetPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
+	InviteeSession.GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([&bGetPartiesSuccess, &Response](FAccelByteModelsV2PaginatedPartyQueryResult const QueryResponse)
 	{
 		bGetPartiesSuccess = true;
 		Response = QueryResponse;
-	}), PartyErrorHandler);
+	}), PartyErrorHandler, EAccelByteV2SessionMemberStatus::ACTIVE);
 	WaitUntil(bGetPartiesSuccess, "Waiting for parties get...");
 
 	AB_TEST_TRUE(bGetPartiesSuccess);
 	AB_TEST_TRUE(Response.Data.Num() > 0);
 	for(auto& PartyResponse : Response.Data)
 	{
-		AB_TEST_EQUAL(PartyResponse.LeaderID, FRegistry::Credentials.GetUserId());
+		AB_TEST_TRUE(TestPartyMembership(PartyResponse, InviteeUserID));
 	}
+
+	return true;
+}
+
+// This will trigger a party delete
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyCleanup, "AccelByte.Tests.Party.Z.Cleanup", AutomationFlagMaskParty);
+bool PartyCleanup::RunTest(const FString& Parameters)
+{
+	bool bLeaveSuccess = false;
+	FRegistry::Session.LeaveParty(Party.ID, FVoidHandler::CreateLambda([&bLeaveSuccess]
+	{
+		bLeaveSuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bLeaveSuccess, "Waiting for party leave...");
+
+	AB_TEST_TRUE(bLeaveSuccess);
+
+	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+
+	bLeaveSuccess = false;
+	InviteeSession.LeaveParty(Party.ID, FVoidHandler::CreateLambda([&bLeaveSuccess]
+	{
+		bLeaveSuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bLeaveSuccess, "Waiting for party leave...");
+
+	AB_TEST_TRUE(bLeaveSuccess);
 
 	return true;
 }

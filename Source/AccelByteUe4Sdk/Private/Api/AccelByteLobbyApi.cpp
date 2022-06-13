@@ -16,8 +16,8 @@
 #include "Core/FUnrealWebSocketFactory.h"
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
-#include "google/protobuf/util/json_util.h"
 #include "Api/notification.pb.h"
+#include "google/protobuf/util/json_util.h"
 #include "Models/AccelByteSessionModels.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
