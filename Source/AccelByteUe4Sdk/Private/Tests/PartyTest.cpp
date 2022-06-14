@@ -186,22 +186,21 @@ bool PartyInviteJoinFlow::RunTest(const FString& Parameters)
 
 	FAccelByteModelsV2PartyInvitedEvent InvitePayload;
 	
-	bool bGetInviteSuccess = false;
-	const auto NotifDelegate = Api::Lobby::FV2PartyInvited::CreateLambda([&bGetInviteSuccess, &InvitePayload](FAccelByteModelsV2PartyInvitedEvent Payload)
+	bool bInviteReceived = false;
+	const auto InviteNotifDelegate = Api::Lobby::FV2PartyInvitedNotif::CreateLambda([&bInviteReceived, &InvitePayload](FAccelByteModelsV2PartyInvitedEvent Payload)
 	{
 		InvitePayload = Payload;
-		bGetInviteSuccess = true;
+		bInviteReceived = true;
 	});
 
-	Lobby.SetV2PartyInvitedDelegate(NotifDelegate);
+	Lobby.SetV2PartyInvitedNotifDelegate(InviteNotifDelegate);
 	
 	bool bSendInviteSuccess = false;
 	FRegistry::Session.SendPartyInvite(Party.ID, InviteeUserID, FVoidHandler::CreateLambda([&bSendInviteSuccess]
 	{
-		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Send party invite success"));
 		bSendInviteSuccess = true;
 	}), PartyErrorHandler);
-	WaitUntil(bGetInviteSuccess, "Waiting for party invite notif...", 30);
+	WaitUntil(bInviteReceived, "Waiting for party invite notif...", 30);
 	
 	AB_TEST_TRUE(InvitePayload.PartyID.Equals(Party.ID));
 	AB_TEST_TRUE(InvitePayload.SenderID.Equals(FRegistry::Credentials.GetUserId()));
@@ -224,7 +223,7 @@ bool PartyInviteJoinFlow::RunTest(const FString& Parameters)
 	Party = JoinedParty;
 	
 	AB_TEST_TRUE(bSendInviteSuccess);
-	AB_TEST_TRUE(bGetInviteSuccess);
+	AB_TEST_TRUE(bInviteReceived);
 	AB_TEST_TRUE(bJoinPartySuccess);
 	AB_TEST_TRUE(TestPartyMembership(Party, InviteeUserID));
 	

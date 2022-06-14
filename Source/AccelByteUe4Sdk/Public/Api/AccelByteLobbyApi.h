@@ -421,34 +421,34 @@ public:
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 
 	/**
-	 * @brief Delegate for user kicked from party event.
-	 */
-	DECLARE_DELEGATE_OneParam(FV2PartyKicked, void);
-
-	/**
 	 * @brief Delegate for party members changed event.
 	 */
-	DECLARE_DELEGATE_OneParam(FV2PartyMembersChanged, void);
+	DECLARE_DELEGATE_OneParam(FV2PartyMembersChangedNotif, FAccelByteModelsV2PartyMembersChangedEvent);
 
 	/**
 	 * @brief Delegate for user invited to party event.
 	 */
-	DECLARE_DELEGATE_OneParam(FV2PartyInvited, FAccelByteModelsV2PartyInvitedEvent);
+	DECLARE_DELEGATE_OneParam(FV2PartyInvitedNotif, FAccelByteModelsV2PartyInvitedEvent);
 
 	/**
 	 * @brief Delegate for user rejected invitation event.
 	 */
-	DECLARE_DELEGATE_OneParam(FV2PartyRejected, void);
+	DECLARE_DELEGATE_OneParam(FV2PartyRejectedNotif, FAccelByteModelsV2PartyUserRejectedEvent);
 
 	/**
 	 * @brief Delegate for user joined party event.
 	 */
-	DECLARE_DELEGATE_OneParam(FV2PartyJoined, void);
+	DECLARE_DELEGATE_OneParam(FV2PartyJoinedNotif, FAccelByteModelsV2PartyUserJoinedEvent);
 
 	/**
-	 * @brief Delegate for party changed event.
+	 * @brief Delegate for user kicked from party event.
 	 */
-	DECLARE_DELEGATE_OneParam(FV2PartyUpdated, void);
+	DECLARE_DELEGATE_OneParam(FV2PartyKickedNotif, FAccelByteModelsV2PartyUserKickedEvent);
+
+	/**
+	 * @brief Delegate for user rejected party invite event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyRejectedNotif, FAccelByteModelsV2PartyUserRejectedEvent);
 	
 public:
     /**
@@ -911,6 +911,11 @@ public:
 	*/
 	void UnbindSessionAttributeEvents();
 
+	/**
+	 * @brief Unbind all V2 party delegates set previously.
+	 */
+	void UnbindV2PartyEvents();
+
 	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
 	{
 		ConnectSuccess = OnConnectSuccess;
@@ -967,10 +972,25 @@ public:
 	{
 		MessageNotif = OnNotificationMessage;
 	}
-	// todo: unbinds
-	void SetV2PartyInvitedDelegate(const FV2PartyInvited& OnPartyInvited)
+	void SetV2PartyInvitedNotifDelegate(const FV2PartyInvitedNotif& OnPartyInvitedNotif)
 	{
-		V2PartyInvited = OnPartyInvited;
+		V2PartyInvitedNotif = OnPartyInvitedNotif;
+	}
+	void SetV2PartyMembersChangedDelegate(const FV2PartyMembersChangedNotif& OnPartyMembersChanged)
+	{
+		V2PartyMembersChangedNotif = OnPartyMembersChanged;
+	}
+	void SetV2PartyJoinedNotifDelegate(const FV2PartyJoinedNotif& OnPartyJoinedNotif)
+	{
+		V2PartyJoinedNotif = OnPartyJoinedNotif;
+	}
+	void SetV2PartyRejectedNotifDelegate(const FV2PartyRejectedNotif& OnPartyRejectedNotif)
+	{
+		V2PartyRejectedNotif = OnPartyRejectedNotif;
+	}
+	void SetV2PartyKickedNotifDelegate(const FV2PartyKickedNotif& OnPartyKickedNotif)
+	{
+		V2PartyKickedNotif = OnPartyKickedNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1841,7 +1861,11 @@ private:
 	FUserUnbannedNotification UserUnbannedNotification;
 
 	// session v2
-	FV2PartyInvited V2PartyInvited;
+	FV2PartyInvitedNotif V2PartyInvitedNotif;
+	FV2PartyMembersChangedNotif V2PartyMembersChangedNotif;
+	FV2PartyJoinedNotif V2PartyJoinedNotif;
+	FV2PartyRejectedNotif V2PartyRejectedNotif;
+	FV2PartyKickedNotif V2PartyKickedNotif;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;
