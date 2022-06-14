@@ -7,6 +7,7 @@
 #include "Core/AccelByteOauth2Api.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
+#include "AccelByteUe4SdkModule.h"
 
 using namespace AccelByte::Api;
 
@@ -102,6 +103,8 @@ void ServerCredentials::SetClientToken(const FString& AccessToken, double Expire
 
 void ServerCredentials::Startup()
 {
+	IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
+	SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 }
 
 void ServerCredentials::Shutdown()
