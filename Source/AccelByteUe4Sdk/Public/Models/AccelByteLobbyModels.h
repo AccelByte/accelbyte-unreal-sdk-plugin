@@ -11,6 +11,16 @@
 #include "Models/AccelByteDSMModels.h"
 #include "AccelByteLobbyModels.generated.h"
 
+/** @brief presence enumeration. */
+UENUM(BlueprintType)
+enum class EAvailability : uint8
+{
+	Offline = 0,
+	Online = 1,
+	Busy = 2,
+	Invisible = 3
+};
+
 // Emulate namespace with long class names
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyType
@@ -555,7 +565,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUsersPresenceNotice
     FString UserID{};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-    FString Availability{};
+    EAvailability Availability{};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
     FString Activity{};
@@ -579,7 +589,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetOnlineUsersResponse
 	TArray<FString> friendsId{};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-    TArray<FString> availability{};
+    TArray<EAvailability> availability{};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
     TArray<FString> activity{};
@@ -896,26 +906,6 @@ struct FAccelByteModelsGetFriendshipStatusStringResponse
 	FString friendshipStatus{};
 };
 
-/** @brief presence enumeration. */
-UENUM(BlueprintType)
-enum class Availability : uint8
-{
-	Offline = 0,
-	Availabe = 1,
-	Busy = 2,
-	Invisible = 3
-};
-
-/** @brief general presence enumeration. */
-UENUM(BlueprintType)
-enum class EAccelByteGeneralUserStatus : uint8
-{
-	Offline UMETA(DisplayName = "offline"),
-	Online UMETA(DisplayName = "online"),
-	Busy UMETA(DisplayName = "busy"),
-	Invisible UMETA(DisplayName = "invisible")
-};
-
 USTRUCT(BlueprintType)
 struct FAccelByteModelsAcceptFriendsNotif
 {
@@ -979,7 +969,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatusNotif
 	FString UserID{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
-	EAccelByteGeneralUserStatus Availability{};
+	EAvailability Availability{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
 	FString Activity{};

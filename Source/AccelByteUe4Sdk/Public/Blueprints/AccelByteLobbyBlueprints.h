@@ -181,7 +181,7 @@ public:
 
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	static void SetPresenceStatus(Availability State, FString Activity);
+	static void SetPresenceStatus(EAvailability State, FString Activity);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetGetAllUserPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetAllUserPresenceResponse);
