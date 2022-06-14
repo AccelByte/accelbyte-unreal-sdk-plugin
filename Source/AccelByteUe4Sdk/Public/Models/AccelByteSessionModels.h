@@ -230,9 +230,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyInvitedEvent
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyInvitedEvent")
-		FString SenderID;
+		FString SenderID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyInvitedEvent")
-		FString PartyID;
+		FString PartyID{};
 };
 
 USTRUCT(BlueprintType)
@@ -240,10 +240,41 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyMembersChangedEvent
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyMembersChangedEvent")
-		FString PartyID;
+		FString PartyID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyMembersChangedEvent")
-		FString JoinerID;
+		FString JoinerID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyMembersChangedEvent")
-		FString LeaderID;
+		FString LeaderID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyMembersChangedEvent")
+		TArray<FAccelByteModelsV2SessionUser> Members{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyUserRejectedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUserRejectedEvent")
+		FString PartyID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUserRejectedEvent")
+		FString RejectedID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUserRejectedEvent")
+		TArray<FAccelByteModelsV2SessionUser> Members{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyUserJoinedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUserJoinedEvent")
+		FString PartyID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUserJoinedEvent")
+		TArray<FAccelByteModelsV2SessionUser> Members{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyUserKickedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUserJoinedEvent")
+		FString PartyID{};
+};
