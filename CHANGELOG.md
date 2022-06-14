@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [12.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.2.1%0D12.2.0) (2022-06-14)
+
+
+### Bug Fixes
+
+* OAuth client credentials not set when ApiClient is created without the MultiRegistry ([c727808](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c727808dd097f529fc336226c80b81bb20fafc7e))
+
 ## [12.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.2.0%0D12.1.2) (2022-06-06)
 
 

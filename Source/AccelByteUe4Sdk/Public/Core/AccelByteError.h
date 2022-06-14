@@ -412,7 +412,7 @@ namespace AccelByte
 
 
 
-	class ErrorMessages
+	class ACCELBYTEUE4SDK_API ErrorMessages
 	{
 	public:
 		/**

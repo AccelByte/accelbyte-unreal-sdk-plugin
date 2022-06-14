@@ -329,20 +329,9 @@ namespace Api
 		MAX_Notif,
 	};
 
+	// NOTE: temporary until dedicated session message notif is implemented on the backend
 	namespace SessionTopic
 	{
-		const FString PartyKicked		 = TEXT("OnPartyKicked");
-		const FString PartyMembersChanged = TEXT("OnPartyMembersChanged");
-		const FString PartyInvited		= TEXT("OnPartyInvited");
-		const FString PartyRejected	   = TEXT("OnPartyRejected");
-		const FString PartyJoined		 = TEXT("OnPartyJoined");
-		const FString PartyUpdated		= TEXT("OnPartyUpdated");
-
-		const FString SessionUserInvited	= TEXT("OnSessionInvited");
-		const FString SessionUserJoined	 = TEXT("OnSessionJoined");
-		const FString SessionMembersChanged = TEXT("OnSessionMembersChanged");
-		const FString SessionUpdated		= TEXT("OnGameSessionUpdated");
-
 		const FString Session = TEXT("Session");
 		const FString Party = TEXT("Party");
 	}
@@ -2005,14 +1994,14 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 							HandleSessionNotif<FAccelByteModelsV2PartyInvitedEvent>(EventEnvelope.partynotificationuserinvitedv1(), V2PartyInvitedNotif);
 							break;
 						}
-						case session::NotificationEventEnvelope::kPartyNotificationMembersChangedV1:
-						{
-							HandleSessionNotif<FAccelByteModelsV2PartyMembersChangedEvent>(EventEnvelope.partynotificationmemberschangedv1(), V2PartyMembersChangedNotif);
-							break;
-						}
 						case session::NotificationEventEnvelope::kPartyNotificationUserJoinedV1:
 						{
 							HandleSessionNotif<FAccelByteModelsV2PartyUserJoinedEvent>(EventEnvelope.partynotificationuserjoinedv1(), V2PartyJoinedNotif);
+							break;
+						}
+						case session::NotificationEventEnvelope::kPartyNotificationMembersChangedV1:
+						{
+							HandleSessionNotif<FAccelByteModelsV2PartyMembersChangedEvent>(EventEnvelope.partynotificationmemberschangedv1(), V2PartyMembersChangedNotif);
 							break;
 						}
 						case session::NotificationEventEnvelope::kPartyNotificationUserRejectV1:

@@ -190,7 +190,7 @@ public:
  * @brief Get or update settings via blueprint.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UAccelByteBlueprintsSettings : public UBlueprintFunctionLibrary
+class ACCELBYTEUE4SDK_API UAccelByteBlueprintsSettings : public UBlueprintFunctionLibrary
 {
 public:
 	GENERATED_BODY()
