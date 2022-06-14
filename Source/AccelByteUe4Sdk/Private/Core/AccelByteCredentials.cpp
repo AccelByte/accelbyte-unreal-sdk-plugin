@@ -6,6 +6,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
+#include "AccelByteUe4SdkModule.h"
 
 using namespace AccelByte::Api;
 
@@ -151,6 +152,8 @@ void Credentials::Startup()
             return true;
         }),
         0.2f);
+	IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
+	SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 }
 
 void Credentials::Shutdown()

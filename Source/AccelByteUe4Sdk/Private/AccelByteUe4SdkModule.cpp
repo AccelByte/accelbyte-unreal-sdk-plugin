@@ -31,10 +31,10 @@ public:
 	virtual ESettingsEnvironment const& GetSettingsEnvironment() const override;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() override;
 private:
-	AccelByte::Settings ClientSettings;
-	AccelByte::ServerSettings ServerSettings;
-	ESettingsEnvironment SettingsEnvironment;
-	FEnvironmentChangedDelegate EnvironmentChangedDelegate;
+	AccelByte::Settings ClientSettings{};
+	AccelByte::ServerSettings ServerSettings{};
+	ESettingsEnvironment SettingsEnvironment{ESettingsEnvironment::Default};
+	FEnvironmentChangedDelegate EnvironmentChangedDelegate{};
 	
 	// For registering settings in UE4 editor
 	void RegisterSettings();
@@ -198,7 +198,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 
 bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUObject()
 {
-	return LoadClientSettings(ESettingsEnvironment::Default);
+	return LoadClientSettings(SettingsEnvironment);
 }
 
 bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUObject()
@@ -216,7 +216,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUObject()
 
 	if (bEnableSettings)
 	{
-		bResult = LoadServerSettings(ESettingsEnvironment::Default);
+		bResult = LoadServerSettings(SettingsEnvironment);
 	}
 		
 	return bResult;
