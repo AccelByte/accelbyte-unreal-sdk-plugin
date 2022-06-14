@@ -1,7 +1,7 @@
 {
   "iam": {
-    "minVersion": "5.10.0",
-    "maxVersion": "5.10.0"
+    "minVersion": "5.10.1",
+    "maxVersion": "5.10.1"
   },
   "agreement": {
     "minVersion": "1.22.2",
@@ -36,8 +36,8 @@
     "maxVersion": "2.1.0"
   },
   "lobby": {
-    "minVersion": "3.10.0",
-    "maxVersion": "3.10.0"
+    "minVersion": "3.10.3",
+    "maxVersion": "3.10.3"
   },
   "group": {
     "minVersion": "2.11.5",
@@ -48,8 +48,8 @@
     "maxVersion": "1.14.0"
   },
   "dsmcontroller": {
-    "minVersion": "3.2.0",
-    "maxVersion": "3.2.0"
+    "minVersion": "3.2.1",
+    "maxVersion": "3.2.1"
   },
   "game-telemetry": {
     "minVersion": "1.7.1",
