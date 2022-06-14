@@ -47,10 +47,20 @@ static void AppendQueryParams(FString& Url, FAccelByteModelsV2SessionQueryReques
 
 	AppendQueryParam(QueryString, TEXT("key"), Query.Key);
 	AppendQueryParam(QueryString, TEXT("value"), Query.Value);
-	AppendQueryParam(QueryString, TEXT("joinType"), Query.JoinType);
-	AppendQueryParam(QueryString, TEXT("memberStatus"), Query.MemberStatus);
 	AppendQueryParam(QueryString, TEXT("leaderID"), Query.LeaderID);
 	AppendQueryParam(QueryString, TEXT("memberID"), Query.MemberID);
+
+	if(Query.JoinType != EAccelByteV2SessionJoinability::EMPTY)
+	{
+		const FString JoinType = StaticEnum<EAccelByteV2SessionJoinability>()->GetNameStringByValue(static_cast<int64>(Query.JoinType));
+		AppendQueryParam(QueryString, TEXT("joinType"), JoinType);
+	}
+
+	if(Query.MemberStatus != EAccelByteV2SessionMemberStatus::EMPTY)
+	{
+		const FString MemberStatus = StaticEnum<EAccelByteV2SessionMemberStatus>()->GetNameStringByValue(static_cast<int64>(Query.MemberStatus));
+		AppendQueryParam(QueryString, TEXT("memberStatus"), MemberStatus);
+	}
 
 	if(!QueryString.IsEmpty())
     {
@@ -448,7 +458,7 @@ void Session::QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, T
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, const FString& Status)
+void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -460,7 +470,16 @@ void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>
 	FString Content       = TEXT("");
 	FString QueryString   = TEXT("");
 
-	AppendQueryParam(QueryString, TEXT("status"), Status);
+	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
+	{
+		const FString StatusString = StaticEnum<EAccelByteV2SessionMemberStatus>()->GetNameStringByValue(static_cast<int64>(Status));
+		AppendQueryParam(QueryString, TEXT("status"), StatusString);
+
+		if(!QueryString.IsEmpty())
+		{
+			Url.Appendf(TEXT("?%s"), *QueryString);
+		}
+	}
 
 	if(!QueryString.IsEmpty())
 	{

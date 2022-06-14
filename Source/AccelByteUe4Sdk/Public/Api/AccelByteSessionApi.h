@@ -16,26 +16,6 @@ class Settings;
 
 namespace Api
 {
-namespace SessionTopic
-{
-// Temp solution while using freeform notifs
-const FString UserInvited = TEXT("OnPartyInvited");
-}
-
-namespace SessionJoinType
-{
-const FString Open = TEXT("open");
-const FString Closed = TEXT("closed");
-const FString InviteOnly = TEXT("inviteOnly");
-}
-
-namespace SessionMemberStatus
-{
-const FString Invited  = TEXT("invited");
-const FString Active   = TEXT("active");
-const FString Inactive = TEXT("inactive");
-const FString Timeout  = TEXT("timeout");
-}
 
 class ACCELBYTEUE4SDK_API Session
 {
@@ -200,7 +180,7 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 * @param Status Optional membership status to query for - either active or invited.
 	 */
-	void GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, const FString& Status = TEXT(""));
+	void GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::ACTIVE);
 	
 private:
 	FHttpRetryScheduler& HttpRef;
