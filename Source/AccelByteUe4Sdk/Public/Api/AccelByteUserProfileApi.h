@@ -108,7 +108,40 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetUserProfilePublicInfoByPublicId(const FString& PublicId, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FCustomErrorHandler& OnError);
- 
+
+	/**
+	 * @brief Create complete player profile. If it already exist, that will be an error.
+	 *
+	 *	@param UserId The id of the user.
+	 * @param ProfileCreateRequest Request object.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CreateUserProfile(const FString& UserId, FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest,
+	                       const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
+	 *
+	 * @param UserId The id of the user.
+	 * @param ProfileUpdateRequest Request object.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateUserProfile(const FString& UserId, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest,
+	                       const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
+	 *
+	 * @param UserId The id of the user.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetUserProfile(const FString& UserId, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess,
+	                    const FErrorHandler& OnError);
+
+
 private:
 	UserProfile() = delete;
 	UserProfile(UserProfile const&) = delete;
