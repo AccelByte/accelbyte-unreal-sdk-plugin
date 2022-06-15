@@ -132,7 +132,7 @@ void Session::CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const
 	FString Accept        = TEXT("application/json");
 	FString Content       = TEXT("");
 
-	FJsonObjectConverter::UStructToJsonObjectString(CreateRequest, Content);
+	SerializeAndRemoveEmptyEnumValues(CreateRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -203,7 +203,7 @@ void Session::UpdateGameSession(FString const& GameSessionID, FAccelByteModelsV2
 	FString Accept        = TEXT("application/json");
 	FString Content       = TEXT("");
 
-	FJsonObjectConverter::UStructToJsonObjectString(UpdateRequest, Content);
+	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -260,7 +260,7 @@ void Session::JoinGameSession(FString const& GameSessionID, THandler<FAccelByteM
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, FString const& Status)
+void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -272,10 +272,10 @@ void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQ
 	FString Content       = TEXT("");
 	FString QueryString   = TEXT("");
 
-	AppendQueryParam(QueryString, TEXT("status"), Status);
-
-	if(!QueryString.IsEmpty())
+	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
 	{
+		const FString StatusString = StaticEnum<EAccelByteV2SessionMemberStatus>()->GetNameStringByValue(static_cast<int64>(Status));
+		AppendQueryParam(QueryString, TEXT("status"), StatusString);
 		Url.Appendf(TEXT("?%s"), *QueryString);
 	}
 
@@ -514,15 +514,6 @@ void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>
 	{
 		const FString StatusString = StaticEnum<EAccelByteV2SessionMemberStatus>()->GetNameStringByValue(static_cast<int64>(Status));
 		AppendQueryParam(QueryString, TEXT("status"), StatusString);
-
-		if(!QueryString.IsEmpty())
-		{
-			Url.Appendf(TEXT("?%s"), *QueryString);
-		}
-	}
-
-	if(!QueryString.IsEmpty())
-	{
 		Url.Appendf(TEXT("?%s"), *QueryString);
 	}
 

@@ -85,7 +85,7 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 * @param Status Optional membership status to query for - either active or invited.
 	 */
-	void GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, FString const& Status=TEXT(""));
+	void GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
 
 	/**
 	 * @brief Create a new party with the calling user as the sole member.

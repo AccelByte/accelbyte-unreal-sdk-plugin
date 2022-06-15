@@ -449,6 +449,21 @@ public:
 	 * @brief Delegate for user rejected party invite event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2PartyRejectedNotif, FAccelByteModelsV2PartyUserRejectedEvent);
+
+	/**
+	 * @brief Delegate for user invited to game session event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionInvitedNotif, FAccelByteModelsV2GameSessionUserInvitedEvent);
+
+	/**
+	 * @brief Delegate for user joined game session event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionJoinedNotif, FAccelByteModelsV2GameSessionUserJoinedEvent);
+
+	/**
+	 * @brief Delegate for game session members changed event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionMembersChangedNotif, FAccelByteModelsV2GameSessionMembersChangedEvent);
 	
 public:
     /**
@@ -916,6 +931,11 @@ public:
 	 */
 	void UnbindV2PartyEvents();
 
+	/**
+	 * @brief Unbind all V2 party delegates set previously.
+	 */
+	void UnbindV2GameSessionEvents();
+
 	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
 	{
 		ConnectSuccess = OnConnectSuccess;
@@ -991,6 +1011,18 @@ public:
 	void SetV2PartyKickedNotifDelegate(const FV2PartyKickedNotif& OnPartyKickedNotif)
 	{
 		V2PartyKickedNotif = OnPartyKickedNotif;
+	}
+	void SetV2GameSessionInvitedNotifDelegate(const FV2GameSessionInvitedNotif& OnGameSessionInvitedNotif)
+	{
+		V2GameSessionInvitedNotif = OnGameSessionInvitedNotif;
+	}
+	void SetV2GameSessionJoinedNotifDelegate(const FV2GameSessionJoinedNotif& OnGameSessionJoinedNotif)
+	{
+		V2GameSessionJoinedNotif = OnGameSessionJoinedNotif;
+	}
+	void SetV2GameSessionMembersChangedNotifDelegate(const FV2GameSessionMembersChangedNotif& OnGameSessionMembersChangedNotif)
+	{
+		V2GameSessionMembersChangedNotif = OnGameSessionMembersChangedNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1866,6 +1898,10 @@ private:
 	FV2PartyJoinedNotif V2PartyJoinedNotif;
 	FV2PartyRejectedNotif V2PartyRejectedNotif;
 	FV2PartyKickedNotif V2PartyKickedNotif;
+
+	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
+	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
+	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;

@@ -1303,6 +1303,7 @@ void Lobby::UnbindEvent()
 	UnbindSessionAttributeEvents();
 
 	UnbindV2PartyEvents();
+	UnbindV2GameSessionEvents();
 	
 	UserBannedNotification.Unbind();
 	UserUnbannedNotification.Unbind();
@@ -1466,6 +1467,13 @@ void Lobby::UnbindV2PartyEvents()
 	V2PartyKickedNotif.Unbind();
 	V2PartyRejectedNotif.Unbind();
 	V2PartyMembersChangedNotif.Unbind();
+}
+
+void Lobby::UnbindV2GameSessionEvents()
+{
+	V2GameSessionInvitedNotif.Unbind();
+	V2GameSessionJoinedNotif.Unbind();
+	V2GameSessionMembersChangedNotif.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -2012,6 +2020,21 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 						case session::NotificationEventEnvelope::kPartyNotificationUserKickedV1:
 						{
 							HandleSessionNotif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope.partynotificationuserkickedv1(), V2PartyKickedNotif);
+							break;
+						}
+						case session::NotificationEventEnvelope::kGameSessionNotificationUserInvitedV1:
+						{
+							HandleSessionNotif<FAccelByteModelsV2GameSessionUserInvitedEvent>(EventEnvelope.gamesessionnotificationuserinvitedv1(), V2GameSessionInvitedNotif);
+							break;
+						}
+						case session::NotificationEventEnvelope::kGameSessionNotificationUserJoinedV1:
+						{
+							HandleSessionNotif<FAccelByteModelsV2GameSessionUserJoinedEvent>(EventEnvelope.gamesessionnotificationuserjoinedv1(), V2GameSessionJoinedNotif);
+							break;
+						}
+						case session::NotificationEventEnvelope::kGameSessionNotificationMembersChangedV1:
+						{
+							HandleSessionNotif<FAccelByteModelsV2GameSessionMembersChangedEvent>(EventEnvelope.gamesessionnotificationmemberschangedv1(), V2GameSessionMembersChangedNotif);
 							break;
 						}
 						default:
