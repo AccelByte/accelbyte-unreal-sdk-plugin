@@ -63,9 +63,49 @@ static void AppendQueryParams(FString& Url, FAccelByteModelsV2SessionQueryReques
 	}
 
 	if(!QueryString.IsEmpty())
-    {
+	{
 		Url.Appendf(TEXT("?%s"), *QueryString);
-    }
+	}
+}
+
+static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName)
+{
+	FString FieldValue;
+	if(JsonObjectPtr->TryGetStringField(FieldName, FieldValue))
+	{
+		if(FieldValue.Equals(TEXT("EMPTY")))
+		{
+			JsonObjectPtr->SetStringField(FieldName, TEXT(""));
+		}
+	}
+}
+
+static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName)
+{
+	if(JsonObjectPtr->HasTypedField<EJson::Array>(FieldName))
+	{
+		TArray<TSharedPtr<FJsonValue>> Array = JsonObjectPtr->GetArrayField(FieldName);
+		for(auto& Item : Array)
+		{
+			if(Item->Type == EJson::Object)
+			{
+				TSharedPtr<FJsonObject> Child = Item->AsObject();
+				RemoveEmptyEnumValue(Child, TEXT("status"));
+			}
+		}
+	}
+}
+
+template <typename DataStruct>
+static void SerializeAndRemoveEmptyEnumValues(DataStruct Model, FString& OutputString)
+{
+	auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
+
+	RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinType"));
+	RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));
+
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
 }
 
 Session::Session(
@@ -92,7 +132,7 @@ void Session::CreateParty(FAccelByteModelsV2PartyCreateRequest const& CreateRequ
 	FString Accept        = TEXT("application/json");
 	FString Content       = TEXT("");
 	
-	FJsonObjectConverter::UStructToJsonObjectString(CreateRequest, Content);
+	SerializeAndRemoveEmptyEnumValues(CreateRequest, Content);
 	
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -129,32 +169,32 @@ void Session::GetPartyDetails(FString const& PartyID, THandler<FAccelByteModelsV
 
 void Session::UpdateParty(const FString& PartyID, FAccelByteModelsV2PartyUpdateRequest const& UpdateRequest, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError)
 {
-    FReport::Log(FString(__FUNCTION__));
-    
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-    FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *PartyID);
-    FString Verb          = TEXT("PUT");
-    FString ContentType   = TEXT("application/json");
-    FString Accept        = TEXT("application/json");
-    FString Content       = TEXT("");
-    
-    FJsonObjectConverter::UStructToJsonObjectString(UpdateRequest, Content);
-    
-    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-    Request->SetURL(Url);
-    Request->SetHeader(TEXT("Authorization"), Authorization);
-    Request->SetVerb(Verb);
-    Request->SetHeader(TEXT("Content-Type"), ContentType);
-    Request->SetHeader(TEXT("Accept"), Accept);
-    Request->SetContentAsString(Content);
+	FReport::Log(FString(__FUNCTION__));
 
-    HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *PartyID);
+	FString Verb          = TEXT("PUT");
+	FString ContentType   = TEXT("application/json");
+	FString Accept        = TEXT("application/json");
+	FString Content       = TEXT("");
+
+	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	
 void Session::SendPartyInvite(FString const& PartyID, FString const& InviteeID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/invite"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *PartyID);
 	FString Verb          = TEXT("POST");
@@ -314,14 +354,14 @@ void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>
 	}
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-    Request->SetURL(Url);
-    Request->SetHeader(TEXT("Authorization"), Authorization);
-    Request->SetVerb(Verb);
-    Request->SetHeader(TEXT("Content-Type"), ContentType);
-    Request->SetHeader(TEXT("Accept"), Accept);
-    Request->SetContentAsString(Content);
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
 
-    HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 
