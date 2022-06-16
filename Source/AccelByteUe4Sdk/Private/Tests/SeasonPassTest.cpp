@@ -1018,13 +1018,13 @@ bool SeasonGainExp::RunTest(const FString& Parameters)
 	bool bGrantExpSuccess = false;
 	FAccelByteModelsUserSeasonInfoWithoutReward UserSeasonAfterGrantedExp; 
 	TArray<FString> Tags = { "Game 1"};
-	FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp * 0.5, EAccelByteSeasonPassSource::SWEAT, Tags, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+	FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp * 0.5, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
 	[&](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant exp to user"));
 		bGrantExpSuccess = true;
 		UserSeasonAfterGrantedExp = Result;
-	}), SeasonPassOnError);
+	}), SeasonPassOnError, EAccelByteSeasonPassSource::SWEAT, Tags);
 	WaitUntil(bGrantExpSuccess, "Waiting to grant exp using server api...");
 	AB_TEST_TRUE(bGrantExpSuccess);
 	AB_TEST_EQUAL(ExpectedExp, UserSeasonAfterGrantedExp.CurrentExp);
@@ -1077,9 +1077,8 @@ bool SeasonGainExpLevelUp::RunTest(const FString& Parameters)
 	// Gain exp by one level
 	// Using the ServerApi
 	bool bGrantExpSuccess = false; 
-	TArray<FString> Tags{};
 	FAccelByteModelsUserSeasonInfoWithoutReward UserSeasonAfterGrantedExp;
-	FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp, EAccelByteSeasonPassSource::SWEAT, Tags, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+	FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
 	[&](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log,	TEXT("Grant exp to user"));
@@ -1249,13 +1248,13 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 		// Gain exp by one level
 		// Using the ServerApi
 		bool bGrantTierSuccess = false; 
-		TArray<FString> Tags{};
-		FRegistry::ServerSeasonPass.GrantTierToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp, EAccelByteSeasonPassSource::SWEAT, Tags, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+		TArray<FString> Tags{ "Game 2" };
+		FRegistry::ServerSeasonPass.GrantTierToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
 		[&](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
 		{
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant tier to user"));
 			bGrantTierSuccess = true;
-		}), SeasonPassOnError);
+		}), SeasonPassOnError, EAccelByteSeasonPassSource::SWEAT, Tags);
 		WaitUntil(bGrantTierSuccess, "Waiting to grant tier using server api...");
 		AB_TEST_TRUE(bGrantTierSuccess);
 
@@ -1429,8 +1428,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 		// Gain exp by one level
 		// Using the ServerApi
 		bool bGrantExpSuccess = false;
-		TArray<FString> Tags{};
-		FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp * LevelUp, EAccelByteSeasonPassSource::SWEAT, Tags, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+		FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp * LevelUp, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
 		[&](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
 		{
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant exp to user"));
