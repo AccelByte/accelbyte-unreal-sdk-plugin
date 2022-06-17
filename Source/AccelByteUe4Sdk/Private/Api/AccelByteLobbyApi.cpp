@@ -686,11 +686,11 @@ void Lobby::SetPartySizeLimit(const FString& PartyId, const int32 Limit, const F
 //-------------------------------------------------------------------------------------------------
 // Presence
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendSetPresenceStatus(const Availability Availability, const FString& Activity)
+FString Lobby::SendSetPresenceStatus(const EAvailability Availability, const FString& Activity)
 {
 	FReport::Log(FString(__FUNCTION__));
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(SetUserPresence, Presence
-		, FString::Printf(TEXT("availability: %d\nactivity: %s\n"), (int)Availability, *Activity))
+		, FString::Printf(TEXT("availability: %s\nactivity: %s\n"), *FAccelByteUtilities::GetUEnumValueAsString(Availability).ToLower(), *Activity))
 }
 
 FString Lobby::SendGetOnlineUsersRequest()

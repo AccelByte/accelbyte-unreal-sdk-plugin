@@ -532,7 +532,7 @@ public:
      * @param State the presence state that you want to use. State is Presence type
      * @param GameName the game name that you play
      */
-	FString SendSetPresenceStatus(const Availability Availability, const FString& Activity);
+	FString SendSetPresenceStatus(const EAvailability Availability, const FString& Activity);
 
 	/**
 	 * @brief Accept a party invitation.
