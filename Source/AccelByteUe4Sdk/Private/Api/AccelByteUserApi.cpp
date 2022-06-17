@@ -960,7 +960,7 @@ void User::SearchUsers(const FString& Query, EAccelByteSearchType By, const THan
 	FString Content;
 
 	TMap<FString, FString> QueryParams = {};
-	QueryParams.Add("query", *FGenericPlatformHttp::UrlEncode(Query));
+	QueryParams.Add("query", Query);
 	if (By != EAccelByteSearchType::ALL)
 	{
 		FString SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
