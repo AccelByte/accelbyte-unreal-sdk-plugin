@@ -39,7 +39,8 @@ enum class EAccelBytePlatformType : uint8
 	Stadia,
 	AwsCognito,
 	Discord,
-	Nintendo
+	Nintendo,
+	SnapChat
 };
 
 UENUM(BlueprintType)
