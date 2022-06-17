@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteSessionModels.h"
@@ -17,10 +18,10 @@ class Settings;
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API Session
+class ACCELBYTEUE4SDK_API Session : public FApiBase
 {
 public:
-	Session(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Session(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Session();
 
 	/**
@@ -119,13 +120,25 @@ public:
 	void GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::ACTIVE);
 	
 private:
-	FHttpRetryScheduler& HttpRef;
-	Credentials const& Credentials;
-	Settings const& Settings;
-
 	Session() = delete;
 	Session(Session const&) = delete;
 	Session(Session&&) = delete;
+
+	static void AppendQueryParams(FAccelByteModelsV2SessionQueryRequest const& Query, int32 const& Offset, int32 const& Limit,	TMap<FString, FString>& OutParams);
+	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
+	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
+
+	template <typename DataStruct>
+	static void SerializeAndRemoveEmptyEnumValues(DataStruct Model, FString& OutputString)
+	{
+		auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
+
+		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinType"));
+		RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));
+
+		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
+	}
 };
 }
 }
