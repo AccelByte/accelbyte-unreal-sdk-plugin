@@ -319,16 +319,21 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 
 void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
 {
+	LoginWithRefreshToken(CredentialsRef.GetRefreshToken(), OnSuccess, OnError);
+}
+
+void AccelByte::Api::User::LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
+{
 	FReport::Log(FString(__FUNCTION__));
 
 	Oauth2::GetTokenWithRefreshToken(
 		CredentialsRef.GetOAuthClientId(),
 		CredentialsRef.GetOAuthClientSecret(),
-		CredentialsRef.GetRefreshToken(),
+		RefreshToken,
 		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
 		{
 			OnLoginSuccess(OnSuccess, Result); // Curry to general handler
-		}),		
+		}),
 		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
