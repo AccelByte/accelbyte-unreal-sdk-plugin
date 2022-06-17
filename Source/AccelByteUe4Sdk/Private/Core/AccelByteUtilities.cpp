@@ -298,6 +298,8 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 		return "awscognito";
 	case EAccelBytePlatformType::Nintendo:
 		return "nintendo";	
+	case EAccelBytePlatformType::SnapChat:
+		return "snapchat";
 	default:
 		return "unknown";
 	}

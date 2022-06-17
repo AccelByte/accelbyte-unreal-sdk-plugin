@@ -39,7 +39,8 @@ enum class EAccelBytePlatformType : uint8
 	Stadia,
 	AwsCognito,
 	Discord,
-	Nintendo
+	Nintendo,
+	SnapChat
 };
 
 UENUM(BlueprintType)
@@ -682,6 +683,9 @@ struct ACCELBYTEUE4SDK_API FBaseUserInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
 	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+	FString PublisherAvatarUrl{};
 };
 
 USTRUCT(BlueprintType)
