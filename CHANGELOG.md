@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [13.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/13.0.0%0D12.2.1) (2022-06-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* new param Source and tags in GrantExpToUser method
+
+### Features
+
+* **credentials:** add function to get IsComply ([b84625e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b84625e79e6cad8b517385eefdc3d9bb1ebf6af9))
+* **precompileHeader:** Resolve compile when set BuildConfiguration UsePchFiles as false ([025fa48](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/025fa486b77e1d933b889c3b504ee3c58f684fc0))
+* **seasonpass:** make new params (source & tags) as optional. ([7f46ba7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7f46ba7ecb1f025f27e28341c3e6fbe09a4a4a50))
+* **user:** add login with refresh token param ([dffdaff](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dffdaff6bf405b47d4474809355e37f0634c469d))
+* **user:** fix query search users encode twice ([8c53ae1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8c53ae1e92a29e01a02044a0b8c049c95215542d))
+* **user:** fix query search users encode twice ([1411838](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/14118389d1f5f5fe5600830780ed6f74d6da71be))
+
+
+### Bug Fixes
+
+* create ticker alias to support both UE4 FTicker and UE5 FTSTicker ([e4dca48](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e4dca4802d0055f7dc348270b4f186f5b7dae35f))
+* wrong implementation causing errors ([a3242e5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a3242e56da934fe58e458308f1a6cedf879b24c3))
+
+
+### seasonpass
+
+* Granted Season Pass EXP Tracking ([4afa10c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4afa10c70e9c7b23809c84ab2a14ad1b998a2f78))
+
+
+### Tests
+
+* **reporting:** add missing object type when submitting report ([41295ec](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/41295ecc8d50246d6b227129863a135bacdacb99))
+
 ### [12.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.2.1%0D12.2.0) (2022-06-14)
 
 
