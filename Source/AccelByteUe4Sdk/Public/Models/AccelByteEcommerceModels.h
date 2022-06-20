@@ -1627,7 +1627,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyList
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
 	FDateTime UpdateAt{0};
-};
+}; 
 
 #pragma endregion CurrencyModelsField
 
