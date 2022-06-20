@@ -36,7 +36,8 @@ void UAccelByteBlueprintsItem::GetItemByAppId(const FString& AppId, const FStrin
 	}));
 }
 
-void UAccelByteBlueprintsItem::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+void UAccelByteBlueprintsItem::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, TArray<EAccelByteItemListSortBy> SortBy,
+	const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	FRegistry::Item.GetItemsByCriteria(ItemCriteria, Offset, Limit, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
@@ -44,7 +45,7 @@ void UAccelByteBlueprintsItem::GetItemsByCriteria(const FAccelByteModelsItemCrit
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
+	}), SortBy);
 }
 
 void UAccelByteBlueprintsItem::SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const FSearchItemSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)

@@ -210,6 +210,23 @@ enum class EAccelByteWalletTable :uint8
 	Other
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteItemListSortBy : uint8
+{
+	NONE = 0,
+	NAME,
+	NAME_DESC,
+	CREATEDAT,
+	CREATEDAT_ASC,
+	CREATEDAT_DESC,
+	UPDATEDAT,
+	UPDATEDAT_ASC,
+	UPDATEDAT_DESC,
+	DISPLAYORDER,
+	DISPLAYORDER_ASC,
+	DISPLAYORDER_DESC
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField

@@ -150,6 +150,7 @@ void UABCatalog::GetItemsByCriteria(
 	FAccelByteModelsItemCriteria const& ItemCriteria,
 	int32 const& Offset,
 	int32 const& Limit,
+	TArray<EAccelByteItemListSortBy> SortBy,
 	FDModelsItemPagingSlicedResultResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
@@ -166,7 +167,7 @@ void UABCatalog::GetItemsByCriteria(
 			[OnError](int Code, FString const& Message)
 			{
 				OnError.ExecuteIfBound(Code, Message);
-			}));
+			}), SortBy);
 }
 
 void UABCatalog::SearchItem(
