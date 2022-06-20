@@ -336,6 +336,12 @@ void Entitlement::UpdateDistributionReceiver(FString const& ExtUserId, FAccelByt
 
 void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
+	FAccelByteModelsPlayStationDLCSync PSSyncModel;
+	SyncPlatformPurchase(PlatformType, PSSyncModel, OnSuccess, OnError);
+}
+
+void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FAccelByteModelsPlayStationDLCSync const& PSSyncModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
 	FReport::Log(FString(__FUNCTION__));
 
 	FString PlatformText = TEXT("");
@@ -357,6 +363,7 @@ void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoi
 		break;
 	case EAccelBytePlatformSync::PLAYSTATION:
 		PlatformText = TEXT("psn");
+		Content = FString::Printf(TEXT("{\"serviceLabel\": \"%d\"}"), PSSyncModel.ServiceLabel);
 		break;
 	case EAccelBytePlatformSync::EPIC_GAMES:
 		PlatformText = TEXT("epicgames");

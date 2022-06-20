@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Http.h"
 #include "JsonUtilities.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 #include <unordered_map>
 
@@ -411,7 +412,7 @@ namespace AccelByte
 
 
 
-	class ErrorMessages
+	class ACCELBYTEUE4SDK_API ErrorMessages
 	{
 	public:
 		/**

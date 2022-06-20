@@ -3,6 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteQos.h"
+#include "Icmp.h"
+#include "Networking.h"
 #include "Api/AccelByteQosManagerApi.h"
 #include "Core/AccelByteRegistry.h"
 
@@ -12,8 +14,8 @@ namespace Api
 {
 	FAccelByteModelsQosServerList Qos::QosServers = {};
 	TArray<TPair<FString, float>> Qos::Latencies = {};
-	FDelegateHandle Qos::PollLatenciesHandle;
-	FDelegateHandle Qos::PollServerLatenciesHandle;
+	FDelegateHandleAlias Qos::PollLatenciesHandle;
+	FDelegateHandleAlias Qos::PollServerLatenciesHandle;
 
 	Qos::Qos(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef)
@@ -156,10 +158,8 @@ namespace Api
 
 		// -----------------------------------
 		// Schedule a Latencies refresh poller
-		auto& Ticker = FTicker::GetCoreTicker();
-
 		// Loop infinitely, every x seconds, until we tell the delegate to stop via RemoveFromTicker()
-		Qos::PollLatenciesHandle = Ticker.AddTicker(FTickerDelegate::CreateLambda(
+		Qos::PollLatenciesHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
 			[this](float DeltaTime)
 			{
 				PingRegionsSetLatencies(Qos::QosServers, nullptr,  nullptr);
@@ -189,10 +189,8 @@ namespace Api
 
 		// -----------------------------------
 		// Schedule a Latencies refresh poller
-		auto& Ticker = FTicker::GetCoreTicker();
-
 		// Loop infinitely, every x seconds, until we tell the delegate to stop via RemoveFromTicker()
-		Qos::PollServerLatenciesHandle = Ticker.AddTicker(FTickerDelegate::CreateLambda(
+		Qos::PollServerLatenciesHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
 			[this](float DeltaTime)
 			{
 				constexpr bool bPingRegionsOnSuccess = false;
@@ -202,12 +200,12 @@ namespace Api
 			}), AdjustedSecondsPerTick);
 	}
 
-	void Qos::RemoveFromTicker(FDelegateHandle& Handle)
+	void Qos::RemoveFromTicker(FDelegateHandleAlias& Handle)
 	{
 		if (!Handle.IsValid())
 			return;
 		
-		FTicker::GetCoreTicker().RemoveTicker(Handle);
+		FTickerAlias::GetCoreTicker().RemoveTicker(Handle);
 		Handle.Reset();
 	}
 

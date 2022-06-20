@@ -236,6 +236,40 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
+	void SessionBrowser::UpdateGameSettings(FString const& SessionId, TMap<FString, FString> Settings, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError)
+	{
+		auto SettingJson = MakeShared<FJsonObject>();
+		for (const auto& Set : Settings)
+		{
+			SettingJson->SetStringField(Set.Key, Set.Value);
+		}
+
+		UpdateGameSettings(SessionId, SettingJson, OnSuccess, OnError);
+	}
+
+	void SessionBrowser::UpdateGameSettings(FString const& SessionId, TSharedPtr<FJsonObject> Settings, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError)
+	{
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/settings"), *SettingsRef.SessionBrowserServerUrl, *CredentialsRef.GetNamespace(), *SessionId);
+		FString Verb = TEXT("PUT");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+
+		FString Content;
+		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&Content);
+		FJsonSerializer::Serialize(Settings.ToSharedRef(), Writer);
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
 	void SessionBrowser::RemoveGameSession(FString const& SessionId
 		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 		, FErrorHandler const& OnError)

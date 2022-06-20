@@ -11,6 +11,7 @@
 #include "Models/AccelByteGameTelemetryModels.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteDefines.h"
 
 namespace AccelByte
 {
@@ -91,7 +92,7 @@ private:
 	bool bTelemetryJobStarted = false;
 	const FTimespan MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;
-	FDelegateHandle GameTelemetryTickDelegateHandle;
+	FDelegateHandleAlias GameTelemetryTickDelegateHandle;
 };
 
 } // Namespace Api

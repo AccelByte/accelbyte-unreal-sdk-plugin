@@ -5,12 +5,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
-#include "Icmp.h"
-#include "Networking.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteDefines.h"
 #include "Models/AccelByteQosModels.h"
 
 namespace AccelByte
@@ -75,16 +73,16 @@ private:
 	 * @brief Get Latencies from cached regions, every x seconds.
 	 * - Default 0 (off).
 	 */
-	static FDelegateHandle PollLatenciesHandle;
+	static FDelegateHandleAlias PollLatenciesHandle;
 
 	/**
 	 * @brief Get Server region latency targets and cache for Latencies object/handle, every x seconds.
 	 * - Default 0 (off).
 	 */
-	static FDelegateHandle PollServerLatenciesHandle;
+	static FDelegateHandleAlias PollServerLatenciesHandle;
 
 	/** @brief Static cleanup handler for Tickers (Latencies Pollers) */
-	static void RemoveFromTicker(FDelegateHandle& Handle);
+	static void RemoveFromTicker(FDelegateHandleAlias& Handle);
 
 	/**
 	 * @brief The user was just authenticated:

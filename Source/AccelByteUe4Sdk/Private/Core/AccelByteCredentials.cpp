@@ -137,9 +137,14 @@ bool Credentials::IsSessionValid() const
 	return UserSessionState == ESessionState::Valid;
 }
 
+bool Credentials::IsComply() const
+{
+	return AuthToken.Is_comply;
+}
+
 void Credentials::Startup()
 {
-	PollRefreshTokenHandle = FTicker::GetCoreTicker().AddTicker(
+	PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
         FTickerDelegate::CreateLambda([this](float DeltaTime)
         {
             PollRefreshToken(FPlatformTime::Seconds());
@@ -155,7 +160,7 @@ void Credentials::Shutdown()
 {
 	if (PollRefreshTokenHandle.IsValid())
 	{
-		FTicker::GetCoreTicker().RemoveTicker(PollRefreshTokenHandle);
+		FTickerAlias::GetCoreTicker().RemoveTicker(PollRefreshTokenHandle);
 		PollRefreshTokenHandle.Reset();
 	}
 }

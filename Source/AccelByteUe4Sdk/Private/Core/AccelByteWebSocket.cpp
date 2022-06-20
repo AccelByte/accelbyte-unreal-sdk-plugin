@@ -144,11 +144,11 @@ void AccelByteWebSocket::Connect()
 
 	if(TickerDelegateHandle.IsValid())
 	{
-		FTicker::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
+		FTickerAlias::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
 		TickerDelegateHandle.Reset();
 	}
 
-	TickerDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickerDelegate, TickPeriod);
+	TickerDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickerDelegate, TickPeriod);
 
 	WebSocket->Connect();
 	WsEvents |= EWebSocketEvent::Connect;
@@ -169,7 +169,7 @@ void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 		
 		if (TickerDelegateHandle.IsValid())
 		{
-			FTicker::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
+			FTickerAlias::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
 			TickerDelegateHandle.Reset();
 		}
 

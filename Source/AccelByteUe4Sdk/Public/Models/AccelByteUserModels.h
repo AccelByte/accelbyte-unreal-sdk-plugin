@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteUserModels.generated.h"
 

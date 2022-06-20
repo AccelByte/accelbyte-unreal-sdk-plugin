@@ -60,7 +60,7 @@ namespace AccelByte
 				{
 					if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 					{
-						FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+						FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 						FAccelByteModelsServerInfo Result;
 						if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
 						{
@@ -69,7 +69,7 @@ namespace AccelByte
 						}
 						if (CountdownTimeStart != -1)
 						{
-							AutoShutdownDelegateHandle = FTicker::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
+							AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
 						}
 						SetServerType(EServerType::CLOUDSERVER);
 						HandleHttpResultOk(Response, OnSuccess);
@@ -116,7 +116,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Accept"), Accept);
 				Request->SetContentAsString(Contents);
 				FReport::Log(TEXT("Starting DSM Shutdown Request..."));
-				FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+				FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 				ServerType = EServerType::NONE;
 				HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 
@@ -160,7 +160,7 @@ namespace AccelByte
 				{
 					if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 					{
-						FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+						FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 						FAccelByteModelsServerInfo Result;
 						if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
 						{
@@ -168,7 +168,7 @@ namespace AccelByte
 						}
 						if (CountdownTimeStart != -1)
 						{
-							AutoShutdownDelegateHandle = FTicker::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
+							AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
 						}
 						SetServerType(EServerType::LOCALSERVER);
 						HandleHttpResultOk(Response, OnSuccess);
@@ -227,7 +227,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Accept"), Accept);
 				Request->SetContentAsString(Contents);
 				FReport::Log(TEXT("Starting DSM Deregister Request..."));
-				FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+				FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 				ServerType = EServerType::NONE;
 				HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 

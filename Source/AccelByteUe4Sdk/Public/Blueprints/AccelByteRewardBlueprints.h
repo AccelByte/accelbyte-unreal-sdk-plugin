@@ -5,6 +5,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "Models/AccelByteEcommerceModels.h"
 #include "AccelByteRewardBlueprints.generated.h"
 

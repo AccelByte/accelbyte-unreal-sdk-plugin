@@ -11,6 +11,7 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteTask.h"
 #include "Core/AccelByteHttpCache.h"
+#include "Core/AccelByteDefines.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpRetry, Log, All);
 
@@ -60,7 +61,7 @@ protected:
 	static TMap<EHttpResponseCodes::Type, FHttpResponseCodeHandler> ResponseCodeDelegates;
 
 	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue{};
-	FDelegateHandle PollRetryHandle{};
+	FDelegateHandleAlias PollRetryHandle{};
 
 	Core::FAccelByteHttpCache HttpCache{};
 

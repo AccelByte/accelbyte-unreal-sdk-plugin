@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteReport.h"
+#include "UObject/UObjectBase.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByte);
 
