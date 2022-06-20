@@ -34,24 +34,26 @@ namespace AccelByte
 			 *
 			 * @param UserId The User ID will be granted the exp
 			 * @param Exp Total of the exp will be granted to user.
-			 * @param Source Granted exp source
-			 * @param Tags Grant reason
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfo.
 			 * @param OnError This will be called when the operation failed.
+			 * @param Source Granted exp source, default value SWEAT
+			 * @param Tags Grant reason, default value Empty 
 			 */
-			void GrantExpToUser(const FString& UserId, int32 Exp, EAccelByteSeasonPassSource Source, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError);
+			void GrantExpToUser(const FString& UserId, int32 Exp, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError,
+				EAccelByteSeasonPassSource Source = EAccelByteSeasonPassSource::SWEAT, const TArray<FString>& Tags = {});
 
 			/** @brief Grant tier to user by UserId. It will auto enroll if there's no user season but active published season exist,
 			 * season only located in non-publisher namespace, otherwise ignore.
 			 *
 			 * @param UserId The User ID will be granted the exp
 			 * @param Count Total of the exp will be granted to user.
-			 * @param Source Granted tier source
-			 * @param Tags Grant reason
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfo.
 			 * @param OnError This will be called when the operation failed.
+			 * @param Source Granted tier source, default value SWEAT
+			 * @param Tags Grant reason, default value Empty 
 			 */
-			void GrantTierToUser(const FString& UserId, int32 Count, EAccelByteSeasonPassSource Source, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError);
+			void GrantTierToUser(const FString& UserId, int32 Count, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError,
+				EAccelByteSeasonPassSource Source = EAccelByteSeasonPassSource::SWEAT, const TArray<FString>& Tags = {});
 			
 			/** @brief Get current user season progression, season only located in non-publisher namespace.
 			*
