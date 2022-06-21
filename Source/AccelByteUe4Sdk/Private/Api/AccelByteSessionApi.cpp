@@ -4,7 +4,7 @@
 
 #include "Api/AccelByteSessionApi.h"
 
-#include "AccelByteUserApi.h"
+#include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"

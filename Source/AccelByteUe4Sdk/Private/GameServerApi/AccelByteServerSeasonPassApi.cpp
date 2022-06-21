@@ -31,7 +31,8 @@ namespace AccelByte
 		{
 		}
 
-		void ServerSeasonPass::GrantExpToUser(const FString& UserId, int32 Exp, EAccelByteSeasonPassSource Source, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError)
+		void ServerSeasonPass::GrantExpToUser(const FString& UserId, int32 Exp, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError,
+			EAccelByteSeasonPassSource Source,  const TArray<FString>& Tags)
 		{
 			FReport::Log(FString(__FUNCTION__));
 
@@ -66,7 +67,8 @@ namespace AccelByte
 			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 
-		void ServerSeasonPass::GrantTierToUser(const FString& UserId, int32 Count, EAccelByteSeasonPassSource Source, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError)
+		void ServerSeasonPass::GrantTierToUser(const FString& UserId, int32 Count, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError,
+			EAccelByteSeasonPassSource Source, const TArray<FString>& Tags)
 		{
 			FReport::Log(FString(__FUNCTION__));
 
