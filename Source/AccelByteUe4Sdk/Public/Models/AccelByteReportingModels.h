@@ -11,7 +11,8 @@
 UENUM(BlueprintType)
 enum class EAccelByteReportingCategory : uint8
 {
-	UGC 		UMETA(DisplayName = "UGC")
+	UGC 		UMETA(DisplayName = "UGC"),
+	USER 		UMETA(DisplayName = "USER")
 };
 
 USTRUCT(BlueprintType)

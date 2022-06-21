@@ -188,6 +188,15 @@ namespace AccelByte
 			void LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
 
 			/**
+			 * @brief login with refresh token
+			 *
+			 * @param RefreshToken the refresh token for login.
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+
+			/**
 			 * @brief Create Headless Account And Login
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded.
