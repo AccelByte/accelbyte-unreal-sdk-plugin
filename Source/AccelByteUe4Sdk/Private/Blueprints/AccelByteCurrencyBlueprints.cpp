@@ -14,7 +14,7 @@ using AccelByte::THandler;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
-void UAccelByteBlueprintsCurrency::GetCurrencyList(const FString& Namespace, const FGetCurrencyListSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+void UAccelByteBlueprintsCurrency::GetCurrencyList(const FString& Namespace, EAccelByteCurrencyType CurrencyType, const FGetCurrencyListSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	FRegistry::Currency.GetCurrencyList(Namespace, THandler<TArray<FAccelByteModelsCurrencyList>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsCurrencyList>& Result)
 	{
@@ -23,5 +23,6 @@ void UAccelByteBlueprintsCurrency::GetCurrencyList(const FString& Namespace, con
 	FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
+	}),
+	CurrencyType);
 }

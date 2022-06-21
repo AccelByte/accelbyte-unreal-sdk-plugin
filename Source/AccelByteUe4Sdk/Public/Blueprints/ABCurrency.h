@@ -29,7 +29,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Currency")
-	void GetCurrencyList(FDArrayModelsCurrencyListResponse OnSuccess, FDErrorHandler OnError);
+	void GetCurrencyList(EAccelByteCurrencyType CurrencyType, FDArrayModelsCurrencyListResponse OnSuccess, FDErrorHandler OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;

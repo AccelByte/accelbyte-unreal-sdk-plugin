@@ -11,7 +11,7 @@ void UABCurrency::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-void UABCurrency::GetCurrencyList(
+void UABCurrency::GetCurrencyList( EAccelByteCurrencyType CurrencyType,
 	FDArrayModelsCurrencyListResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
@@ -28,5 +28,5 @@ void UABCurrency::GetCurrencyList(
 			[OnError](int Code, FString const& Message)
 			{
 				OnError.ExecuteIfBound(Code, Message);
-			}));
+			}), CurrencyType);
 }
