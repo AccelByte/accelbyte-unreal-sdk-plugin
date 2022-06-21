@@ -466,6 +466,9 @@ void CloudSave::GetGameRecord(FString const& Key, THandler<FAccelByteModelsGameR
 					FString UpdatedAt;
 					JSONObject.TryGetStringField("updated_at", UpdatedAt);
 					FDateTime::ParseIso8601(*UpdatedAt, GameRecord.UpdatedAt);
+					FString SetByString;
+					JSONObject.TryGetStringField("set_by", SetByString); 
+					GameRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 					TSharedPtr<FJsonObject> const* value;
 					JSONObject.TryGetObjectField("value", value);
 					GameRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
