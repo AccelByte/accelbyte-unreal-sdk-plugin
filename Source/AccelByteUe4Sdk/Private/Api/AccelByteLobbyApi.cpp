@@ -187,6 +187,9 @@ namespace Api
 		
 		// Refresh Token
 		const FString RefreshToken = TEXT("refreshTokenResponse");
+
+		// V2 session notif
+		const FString SessionNotif = TEXT("messageSessionNotif");
 	}
 
 	namespace Prefix
@@ -327,13 +330,6 @@ namespace Api
 
 		MAX_Notif,
 	};
-
-	// NOTE: temporary until dedicated session message notif is implemented on the backend
-	namespace SessionTopic
-	{
-		const FString Session = TEXT("Session");
-		const FString Party = TEXT("Party");
-	}
 
 /**
 * Helper macro to enforce uniform naming, easier pair initialization, and readibility
@@ -1889,7 +1885,7 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 		} \
 
 template <typename DataStruct, typename PayloadType, typename ResponseCallbackType>
-void HandleSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCallback)
+void DispatchSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCallback)
 {
 	std::string JsonPayloadUTF8;
 	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
@@ -1898,6 +1894,56 @@ void HandleSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCallba
 	if(FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Result, 0, 0))
 	{
 		ResponseCallback.ExecuteIfBound(Result);
+	}
+}
+
+void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
+{
+	FAccelByteModelsSessionNotificationMessage Notif;
+	if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif, 0, 0) == false)
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
+		return;
+	}
+
+	FString ProtobufPayloadString;
+	FBase64::Decode(Notif.Payload, ProtobufPayloadString);
+
+	session::NotificationEventEnvelope EventEnvelope;
+	if(!EventEnvelope.ParseFromString(TCHAR_TO_UTF8(*ProtobufPayloadString)))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize protobuf payload\nNotification: %s"), *ParsedJsonString);
+		return;
+	}
+
+	switch(EventEnvelope.payload_case())
+	{
+	case session::NotificationEventEnvelope::kPartyNotificationUserInvitedV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2PartyInvitedEvent>(EventEnvelope.partynotificationuserinvitedv1(), V2PartyInvitedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartyNotificationMembersChangedV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2PartyMembersChangedEvent>(EventEnvelope.partynotificationmemberschangedv1(), V2PartyMembersChangedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartyNotificationUserJoinedV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2PartyUserJoinedEvent>(EventEnvelope.partynotificationuserjoinedv1(), V2PartyJoinedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartyNotificationUserRejectV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2PartyUserRejectedEvent>(EventEnvelope.partynotificationuserrejectv1(), V2PartyRejectedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartyNotificationUserKickedV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope.partynotificationuserkickedv1(), V2PartyKickedNotif);
+		break;
+	}
+	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
 	}
 }
 
@@ -1970,56 +2016,6 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 				if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &NotificationMessage, 0, 0) == false)
 				{
 					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the whole MessageNotif to the struct\nNotification: %s"), *ParsedJsonString);
-					return;
-				}
-
-				// TODO: This will be unnecessary when we have a dedicated sessionMessageNotif
-				if(NotificationMessage.Topic.Contains(SessionTopic::Party) || NotificationMessage.Topic.Contains(SessionTopic::Session))
-				{
-					FString ProtobufPayloadString;
-					FBase64::Decode(NotificationMessage.Payload, ProtobufPayloadString);
-
-					session::NotificationEventEnvelope EventEnvelope;
-					if(!EventEnvelope.ParseFromString(TCHAR_TO_UTF8(*ProtobufPayloadString)))
-					{
-						UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize protobuf payload\nNotification: %s"), *ParsedJsonString);
-						return;
-					}
-
-					switch(EventEnvelope.payload_case())
-					{
-						case session::NotificationEventEnvelope::kPartyNotificationUserInvitedV1:
-						{
-							HandleSessionNotif<FAccelByteModelsV2PartyInvitedEvent>(EventEnvelope.partynotificationuserinvitedv1(), V2PartyInvitedNotif);
-							break;
-						}
-						case session::NotificationEventEnvelope::kPartyNotificationMembersChangedV1:
-						{
-							HandleSessionNotif<FAccelByteModelsV2PartyMembersChangedEvent>(EventEnvelope.partynotificationmemberschangedv1(), V2PartyMembersChangedNotif);
-							break;
-						}
-						case session::NotificationEventEnvelope::kPartyNotificationUserJoinedV1:
-						{
-							HandleSessionNotif<FAccelByteModelsV2PartyUserJoinedEvent>(EventEnvelope.partynotificationuserjoinedv1(), V2PartyJoinedNotif);
-							break;
-						}
-						case session::NotificationEventEnvelope::kPartyNotificationUserRejectV1:
-						{
-							HandleSessionNotif<FAccelByteModelsV2PartyUserRejectedEvent>(EventEnvelope.partynotificationuserrejectv1(), V2PartyRejectedNotif);
-							break;
-						}
-						case session::NotificationEventEnvelope::kPartyNotificationUserKickedV1:
-						{
-							HandleSessionNotif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope.partynotificationuserkickedv1(), V2PartyKickedNotif);
-							break;
-						}
-						default:
-						{
-							UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
-							return;
-						}
-					}
-
 					return;
 				}
 			}
@@ -2153,7 +2149,11 @@ void Lobby::OnMessage(const FString& Message)
 	const FString ReceivedMessageType = ParsedJsonObj->GetStringField(JsonTypeIdentifier);
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Type: %s"), *ReceivedMessageType);
 
-	if (ReceivedMessageType.Contains(Suffix::Response))
+	if (ReceivedMessageType.Equals(LobbyResponse::SessionNotif))
+	{
+		HandleV2SessionNotif(ParsedJsonString);
+	}
+	else if (ReceivedMessageType.Contains(Suffix::Response))
 	{
 		HandleMessageResponse(ReceivedMessageType, ParsedJsonString, ParsedJsonObj);
 	}
