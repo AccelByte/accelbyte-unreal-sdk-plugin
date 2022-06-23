@@ -11,9 +11,10 @@ void UABCurrency::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-void UABCurrency::GetCurrencyList(
+void UABCurrency::GetCurrencyList( 
 	FDArrayModelsCurrencyListResponse OnSuccess,
-	FDErrorHandler OnError) 
+	FDErrorHandler OnError,
+	EAccelByteCurrencyType CurrencyType) 
 {
 	ApiClientPtr->Currency.GetCurrencyList(
 		FRegistry::Settings.Namespace,
@@ -28,5 +29,5 @@ void UABCurrency::GetCurrencyList(
 			[OnError](int Code, FString const& Message)
 			{
 				OnError.ExecuteIfBound(Code, Message);
-			}));
+			}), CurrencyType);
 }

@@ -19,5 +19,6 @@ public:
 	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetCurrencyListSuccess, const TArray<FAccelByteModelsCurrencyList>&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Currency | Api")
-	static void GetCurrencyList(const FString& Namespace, const FGetCurrencyListSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void GetCurrencyList(const FString& Namespace, const FGetCurrencyListSuccess& OnSuccess, const FBlueprintErrorHandler& OnError,
+		EAccelByteCurrencyType CurrencyType);
 };
