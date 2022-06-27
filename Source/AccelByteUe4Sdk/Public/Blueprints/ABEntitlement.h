@@ -33,6 +33,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayModelsDistributionReceiverResponse, FAr
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsPlatformSyncMobileGoogleResponse, FAccelByteModelsPlatformSyncMobileGoogleResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsPlatformValidateUserItemPurchaseResponse, TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>, Response);
+
 #pragma endregion 
 
 UCLASS(Blueprintable, BlueprintType)
@@ -91,6 +93,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
 	void SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, FDHandler OnSuccess, FDErrorHandler OnError);
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	void ValidateUserItemPurchaseCondition(TArray<FString> const& Items, FDAccelByteModelsPlatformValidateUserItemPurchaseResponse OnSuccess, FDErrorHandler OnError);
+ 
 private:
 	FApiClientPtr ApiClientPtr;
 };

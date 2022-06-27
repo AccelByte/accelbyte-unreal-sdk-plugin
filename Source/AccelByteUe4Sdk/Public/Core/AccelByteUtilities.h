@@ -172,6 +172,40 @@ public:
 	static FString GetPlatformString(EAccelBytePlatformType Platform);
 
 	static FString GetAuthenticatorString(EAccelByteLoginAuthFactorType Authenticator);
+	
+	static FString CreateQueryParams(TMap<FString, FString> Map)
+	{
+		FString Query = TEXT("");
+		for (auto kvp : Map)
+		{
+			AppendQueryParam(Query, kvp.Key, kvp.Value);
+		}
+		return Query;
+	}
+
+	static FString CreateQueryParamValueFromArray(TArray<FString> Array)
+	{
+		FString QueryParamValue = TEXT("");
+		if (Array.Num() > 0)
+		{ 
+			for (int i = 0; i < Array.Num(); i++)
+			{
+				FString ItemAppended = FString::Printf(TEXT(",%s"), *Array[i]);
+				QueryParamValue.Append( i == 0 ? Array[i] : ItemAppended);
+			}
+		}
+		return QueryParamValue;	
+	}
+
+private:
+	static void AppendQueryParam(FString& Query, FString const& Param, FString const& Value)
+	{
+		if (!Param.IsEmpty() && !Value.IsEmpty())
+		{			
+			Query.Append(Query.IsEmpty() ? TEXT("?") : TEXT("&"));
+			Query.Append(FString::Printf(TEXT("%s=%s"), *Param, *Value));
+		}		
+	}
 };
 
 USTRUCT(BlueprintType)

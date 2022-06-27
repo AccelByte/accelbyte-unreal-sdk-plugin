@@ -513,5 +513,33 @@ void Entitlement::SyncEpicGameDurableItems(FString const& EpicGamesJwtToken, FVo
 	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError); 
 }
 
+void Entitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items, THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	// Url 
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/purchase/conditions/validate"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace());
+	const TMap<FString, FString> QueryParams
+	{
+		{"userId", CredentialsRef.GetUserId()}
+	}; 
+	
+	// Content Body 
+	FString Content = TEXT("");
+	FJsonObject DataJson;
+	TArray<TSharedPtr<FJsonValue>> ItemArray{};
+	for (FString Item : Items)
+	{
+		ItemArray.Add(MakeShareable(new FJsonValueString(Item)));
+	}
+	DataJson.SetArrayField("itemIds", ItemArray);
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer); 
+	
+	// Api Request 
+	HttpClient.ApiRequest("POST", Url, QueryParams, Content, OnSuccess, OnError); 
+}
+
 } // Namespace Api
 }
