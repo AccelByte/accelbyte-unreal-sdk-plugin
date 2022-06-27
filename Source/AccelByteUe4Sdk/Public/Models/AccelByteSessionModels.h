@@ -145,6 +145,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSession : public FAccelByteMode
 		FAccelByteModelsV2GameSessionDSInformation DSInformation{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSession")
 		FString BackfillTicketID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSession")
+		FString MatchPool{};
 };
 
 USTRUCT(BlueprintType)
