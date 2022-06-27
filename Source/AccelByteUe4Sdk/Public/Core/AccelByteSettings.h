@@ -41,6 +41,7 @@ public:
 	FString SeasonPassServerUrl;
 	FString ReportingServerUrl;
 	FString SessionServerUrl;
+	FString MatchmakingV2ServerUrl;
 	FString AppId;
 	float QosLatencyPollIntervalSecs{0};
 	float QosServerLatencyPollIntervalSecs{0};
@@ -259,6 +260,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetSessionServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetMatchmakingV2ServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetAppId();

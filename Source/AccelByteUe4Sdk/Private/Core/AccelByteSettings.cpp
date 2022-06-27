@@ -111,6 +111,9 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 	GConfig->GetString(*SectionPath, TEXT("SessionServerUrl"), SessionServerUrl, GEngineIni);
 	SessionServerUrl = GetDefaultClientAPIUrl(SessionServerUrl, BaseUrl, TEXT("session"));
+	
+	GConfig->GetString(*SectionPath, TEXT("MatchmakingV2ServerUrl"), MatchmakingV2ServerUrl, GEngineIni);
+	MatchmakingV2ServerUrl = GetDefaultClientAPIUrl(MatchmakingV2ServerUrl, BaseUrl, TEXT("match2"));
 
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 
@@ -276,6 +279,11 @@ FString UAccelByteBlueprintsSettings::GetReportingServerUrl()
 FString UAccelByteBlueprintsSettings::GetSessionServerUrl()
 {
 	return FRegistry::Settings.SessionServerUrl;
+}
+
+FString UAccelByteBlueprintsSettings::GetMatchmakingV2ServerUrl()
+{
+	return FRegistry::Settings.MatchmakingV2ServerUrl;
 }
 
 FString UAccelByteBlueprintsSettings::GetAppId()
