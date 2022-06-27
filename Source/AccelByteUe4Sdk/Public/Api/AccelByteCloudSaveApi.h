@@ -128,7 +128,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void DeleteUserRecord(FString const& Key, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
- 
+	
 	/**
 	 * @brief Save a namespace-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
 	 *

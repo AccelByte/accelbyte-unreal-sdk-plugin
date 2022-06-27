@@ -11,7 +11,17 @@
 UENUM(BlueprintType)
 enum class EAccelByteReportingCategory : uint8
 {
-	UGC 		UMETA(DisplayName = "UGC")
+	UGC 		UMETA(DisplayName = "UGC"),
+	USER 		UMETA(DisplayName = "USER")
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsReportingAdditionalInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
+	TArray<FString> Screenshots{};
 };
 
 USTRUCT(BlueprintType)
@@ -20,8 +30,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsReportingSubmitData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	TMap<FString, FString> AdditionalInfo{};
-
+	FAccelByteModelsReportingAdditionalInfo  AdditionalInfo{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
 	EAccelByteReportingCategory Category{};
 
