@@ -141,6 +141,25 @@ public:
 	void GetUserProfile(const FString& UserId, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess,
 	                    const FErrorHandler& OnError);
 
+	/**
+	 * @brief Generate an upload URL. It's valid for 10 minutes..
+	 *
+	 * @param Folder The name of folder where the file will be uploaded, must be between 1-256 characters, all characters allowed no whitespace.
+	 * @param FileType One of the these types: jpeg, jpg, png, bmp, gif, mp3, bin, webp.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GenerateUploadURL(const FString& Folder, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Generate an upload URL for user content. It's valid for 10 minutes. There are 2 kinds of storage limitation per user : maximum file count and maximum file size.
+	 *
+	 * @param UserId User's id, should follow UUID version 4 without hyphen.
+	 * @param FileType One of the these types: jpeg, jpg, png, bmp, gif, mp3, bin, webp.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError);
 
 private:
 	UserProfile() = delete;

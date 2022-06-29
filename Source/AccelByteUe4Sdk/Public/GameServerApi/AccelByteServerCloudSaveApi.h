@@ -31,10 +31,11 @@ namespace GameServerApi
 		 *
 		 * @param OnSuccess This will be called when the operation succeeded. The result is in const FAccelByteModelsPaginatedRecordsKey&.
 		 * @param OnError This will be called when the operation failed.
-		 * @param Offset The offset of the achievements result. Default value is 0.
-		 * @param Limit The limit of the achievements result. Default value is 20.
+		 * @param Offset The offset of GameRecord result. Default value is 0.
+		 * @param Limit The limit of the GameRecord result. Default value is 20.
 		 */
-		void RetrieveGameRecordsKey(const THandler<FAccelByteModelsPaginatedRecordsKey>& OnSuccess, const FErrorHandler& OnError, int32 Offset = 0, int32 Limit = 20);
+		void RetrieveGameRecordsKey(const THandler<FAccelByteModelsPaginatedRecordsKey>& OnSuccess, const FErrorHandler& OnError, const FString& Query = TEXT("{}"), int32
+		                            Offset = 0, int32 Limit = 20);
 
 		/**
 		 * @brief Save a namespace-level game record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.

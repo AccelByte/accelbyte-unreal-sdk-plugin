@@ -25,7 +25,7 @@ namespace GameServerApi
 	ServerCloudSave::~ServerCloudSave()
 	{}
 
-	void ServerCloudSave::RetrieveGameRecordsKey(const THandler<FAccelByteModelsPaginatedRecordsKey>& OnSuccess, const FErrorHandler& OnError, int32 Offset, int32 Limit)
+	void ServerCloudSave::RetrieveGameRecordsKey(const THandler<FAccelByteModelsPaginatedRecordsKey>& OnSuccess, const FErrorHandler& OnError, const FString& Query, int32 Offset, int32 Limit)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -35,19 +35,24 @@ namespace GameServerApi
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
 		FString Content = TEXT("");
-		FString Query = TEXT("");
+		FString QueryField = TEXT("");
 
+		if(!Query.IsEmpty())
+		{
+			QueryField.Append(QueryField.IsEmpty() ? TEXT("") : TEXT("&"));
+			QueryField.Append(FString::Printf(TEXT("query=%s"), *Query));
+		}
 		if (Offset >= 0)
 		{
-			Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-			Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+			QueryField.Append(QueryField.IsEmpty() ? TEXT("") : TEXT("&"));
+			QueryField.Append(FString::Printf(TEXT("offset=%d"), Offset));
 		}
 		if (Limit >= 0)
 		{
-			Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-			Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+			QueryField.Append(QueryField.IsEmpty() ? TEXT("") : TEXT("&"));
+			QueryField.Append(FString::Printf(TEXT("limit=%d"), Limit));
 		}
-		Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *Query));
+		Url.Append(QueryField.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *QueryField));
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
