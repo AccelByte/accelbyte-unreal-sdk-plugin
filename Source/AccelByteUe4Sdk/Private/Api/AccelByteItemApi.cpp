@@ -18,106 +18,11 @@ namespace Api
 Item::Item(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {
 }
 
 Item::~Item(){}
-
-FString EAccelByteItemTypeToString(EAccelByteItemType const& EnumValue) {
-	UEnum const* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteItemType"), true);
-
-	if (!EnumPtr)
-	{
-		return "Invalid";
-	}
-
-	return EnumPtr->GetNameStringByValue(static_cast<int64>(EnumValue));
-}
-
-FString EAccelByteItemStatusToString(EAccelByteItemStatus const& EnumValue) {
-	UEnum const* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteItemStatus"), true);
-
-	if (!EnumPtr)
-	{
-		return "Invalid";
-	}
-
-	return EnumPtr->GetNameStringByValue(static_cast<int64>(EnumValue));
-}
-
-FString EAccelByteAppTypeToString(EAccelByteAppType const& EnumValue)
-{
-	UEnum const* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true);
-
-	if (!EnumPtr)
-	{
-		return "Invalid";
-	}
-
-	return EnumPtr->GetNameStringByValue(static_cast<int64>(EnumValue));
-}
-
-void Item::GetItemById(FString const& ItemId, FString const& Language, FString const& Region, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess,
-	FErrorHandler const& OnError, const FString& StoreId, bool PopulateBundle)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *ItemId);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{TEXT("region"), Region},
-		{TEXT("language"), Language},
-		{TEXT("storeId"), StoreId},
-		{TEXT("populateBundle"), PopulateBundle ? "true" : "false"}
-	});
-	Url.Append(QueryParams);
-
-	FString Verb            = TEXT("GET");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Content;
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void Item::GetItemByAppId(FString const& AppId, FString const& Language, FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byAppId"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{TEXT("appId"), AppId},
-		{TEXT("region"), Region},
-		{TEXT("language"), Language}, 
-	});
-	Url.Append(QueryParams); 
-
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
 
 FString Item::ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy)
 { 
@@ -148,148 +53,335 @@ FString Item::ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy)
 	}
 	return TEXT("");
 }
-	
-void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit,
-	THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, TArray<EAccelByteItemListSortBy> SortBy)
+
+void Item::GetItemById(FString const& ItemId
+	, FString const& Language
+	, FString const& Region
+	, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& StoreId
+	, bool bPopulateBundle)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString SortByQueryParamValue = TEXT("");
-	if (SortBy.Num() > 0 )
-	{ 
-		for (int i = 0; i < SortBy.Num(); i++)
-		{
-			FString sortByString = ConvertItemSortByToString(SortBy[i]);
-			FString sortByStringAppend = FString::Printf(TEXT(",%s"), *ConvertItemSortByToString(SortBy[i]));
-			SortByQueryParamValue.Append((i == 0) ? sortByString : sortByStringAppend);
-		}
-	} 
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	}
 	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-    FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("categoryPath"), FGenericPlatformHttp::UrlEncode(ItemCriteria.CategoryPath) },
-		{ TEXT("region"), ItemCriteria.Region },
-		{ TEXT("language"), ItemCriteria.Language },
-		{ TEXT("itemType"), ItemCriteria.ItemType != EAccelByteItemType::NONE ? EAccelByteItemTypeToString(ItemCriteria.ItemType) : TEXT("") },
-		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ? EAccelByteAppTypeToString(ItemCriteria.AppType) : TEXT("") },
-		{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemCriteria.Tags)  },
-		{ TEXT("features"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemCriteria.Features) },
-		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
-		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("sortBy"), SortByQueryParamValue },
-	});
-	Url.Append(QueryParams);
- 
-	FString Verb            = TEXT("GET");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Content         = TEXT("");
+	if (ItemId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemId can not be empty."));
+		return;
+	}
+	
+	const FString Verb            = TEXT("GET");
+	const FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ItemId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> Params;
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	if (!Region.IsEmpty())
+	{
+		Params.Add(TEXT("region"), *Region);
+	}
+	if (!Language.IsEmpty())
+	{
+		Params.Add(TEXT("language"), Language);
+	}
+	if (!StoreId.IsEmpty())
+	{
+		Params.Add(TEXT("storeId"), *StoreId);
+	}
+	if (bPopulateBundle)
+	{
+		Params.Add(TEXT("populateBundle"), TEXT("true"));
+	}
+	
+	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
 }
 
-void Item::SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError)
+void Item::GetItemByAppId(FString const& AppId
+	, FString const& Language
+	, FString const& Region
+	, THandler<FAccelByteModelsItemInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/search"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-	FString QueryParams (FAccelByteUtilities::CreateQueryParams({
-		{TEXT("language"), Language},
-		{TEXT("keyword"), FGenericPlatformHttp::UrlEncode(Keyword)},
-		{TEXT("region"), Region},
-		{TEXT("offset"), FString::FromInt(Offset)},
-		{TEXT("limit"), FString::FromInt(Limit)}
-	}));
-	Url.Append(QueryParams);
+	if (SettingsRef.PublisherNamespace.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Publisher Namespace isn't specified in the configuration file."));
+		return;
+	}
 	
-	FString Verb            = TEXT("GET");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Content         = TEXT("");
+	if (AppId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, AppId can not be empty."));
+		return;
+	}
+	
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byAppId")
+		, *SettingsRef.PlatformServerUrl
+		, *SettingsRef.PublisherNamespace);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> Params;
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	Params.Add(TEXT("appId"), AppId);
+
+	if (!Region.IsEmpty())
+	{
+		Params.Add(TEXT("region"), *Region);
+	}
+	if (!Language.IsEmpty())
+	{
+		Params.Add(TEXT("language"), Language);
+	}
+
+	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+}
+
+void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
+	, int32 const& Offset
+	, int32 const& Limit
+	, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, TArray<EAccelByteItemListSortBy> SortBy)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	}
+	
+	const FString Verb = TEXT("GET");
+    const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria")
+    	, *SettingsRef.PlatformServerUrl
+    	, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> Params;
+
+	if (!ItemCriteria.CategoryPath.IsEmpty())
+	{
+		Params.Add(TEXT("categoryPath"), ItemCriteria.CategoryPath);
+	}
+	if (!ItemCriteria.Region.IsEmpty())
+	{
+		Params.Add(TEXT("region"), *ItemCriteria.Region);
+	}
+	if (!ItemCriteria.Language.IsEmpty())
+	{
+		Params.Add(TEXT("language"), ItemCriteria.Language);
+	}
+	if (ItemCriteria.ItemType != EAccelByteItemType::NONE)
+	{
+		Params.Add(TEXT("itemType"), FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType));
+	}
+	if (ItemCriteria.AppType != EAccelByteAppType::NONE)
+	{
+		Params.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType));
+	}
+	if (ItemCriteria.Tags.Num() > 0)
+	{
+		TArray<FString> Tags;
+		for (auto& Tag : ItemCriteria.Tags)
+		{
+			Tags.Add(Tag);
+		}
+		Params.Add(TEXT("tags"), FString::Join(Tags, TEXT(",")));
+	}
+	if (ItemCriteria.Features.Num() > 0)
+	{
+		TArray<FString> Features;
+		for (auto& Feature : ItemCriteria.Features)
+		{
+			Features.Add(Feature);
+		}
+		Params.Add(TEXT("features"), FString::Join(Features, TEXT(",")));
+	}
+	if (Offset > 0)
+	{
+		Params.Add(TEXT("offset"), FString::Printf(TEXT("%d"), Offset));
+	}
+	if (Limit > 0)
+	{
+		Params.Add(TEXT("limit"), FString::Printf(TEXT("%d"), Limit));
+	}
+	if (SortBy.Num() > 0 )
+	{
+		TArray<FString> SortByStrings;
+		for (auto SortByEnum : SortBy)
+		{
+			SortByStrings.Add(ConvertItemSortByToString(SortByEnum));
+		}
+		Params.Add(TEXT("sortBy"), FString::Join(SortByStrings, TEXT(",")));
+	} 
+
+	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+}
+
+void Item::SearchItem(FString const& Language
+	, FString const& Keyword
+	, int32 const& Offset
+	, int32 const& Limit
+	, FString const& Region
+	, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	}
+	
+	if (Language.IsEmpty() || Keyword.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Language and Keyword can not be empty"));
+		return;
+	}
+	
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/search")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace());
+	
+	TMap<FString, FString> Params;
+	
+	Params.Add(TEXT("language"), Language);
+	Params.Add(TEXT("keyword"), Keyword);
+	
+	if (!Region.IsEmpty())
+	{
+		Params.Add(TEXT("region"), *Region);
+	}
+	if (Offset > 0)
+	{
+		Params.Add(TEXT("offset"), FString::Printf(TEXT("%d"), Offset));
+	}
+	if (Limit > 0)
+	{
+		Params.Add(TEXT("limit"), FString::Printf(TEXT("%d"), Limit));
+	}
+
+	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
 }
 
 void Item::GetItemBySku(FString const& Sku, FString const& Language, FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	}
+	
 	if(Sku.IsEmpty())
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::StatusBadRequest), TEXT("Bad request, Sku number can not empty"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Sku number can not be empty."));
+		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/bySku"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{TEXT("sku"), Sku},
-		{TEXT("language"), Language},
-		{TEXT("region"), Region}
-	}); 
-	Url.Append(QueryParams); 
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/bySku")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace());
 
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	TMap<FString, FString> Params;
+	
+	Params.Add(TEXT("sku"), Sku);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	if (!Region.IsEmpty())
+	{
+		Params.Add(TEXT("region"), *Region);
+	}
+	if (!Language.IsEmpty())
+	{
+		Params.Add(TEXT("language"), Language);
+	}
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
 }
 
-void Item::BulkGetLocaleItems(const TArray<FString>& ItemIds, const FString& Region, const FString& Language, THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess,
-	FErrorHandler const& OnError, const FString& StoreId)
+void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
+	, FString const& Region
+	, FString const& Language
+	, THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& StoreId)
 {
-	FReport::Log(FString(__FUNCTION__)); 
+	FReport::Log(FString(__FUNCTION__));
 	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-    FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/locale/byIds"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("storeId"), StoreId },
-		{ TEXT("itemIds"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemIds) },
-		{ TEXT("region"), Region },
-		{ TEXT("language"), Language }, 
-	});
-	Url.Append(QueryParams);
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	}
+
+	if (ItemIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemIds can not be empty"));
+		return;
+	}
+	
+	FString Verb = TEXT("GET");
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/locale/byIds")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> Params;
+
+	Params.Add(TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")));
+
+	if (!Region.IsEmpty())
+	{
+		Params.Add(TEXT("region"), *Region);
+	}
+	if (!Language.IsEmpty())
+	{
+		Params.Add(TEXT("language"), Language);
+	}
+	if (!StoreId.IsEmpty())
+	{
+		Params.Add(TEXT("storeId"), *StoreId);
+	}
  
-	FString Verb            = TEXT("GET");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Content         = TEXT("");
+	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+}
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+void Item::GetItemDynamicData(FString const& ItemId
+	, THandler<FAccelByteModelsItemDynamicData> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	}
+	
+	if(ItemId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemId can not be empty."));
+		return;
+	}
+
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/dynamic")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ItemId);
+
+	HttpClient.ApiRequest(Verb, Url, OnSuccess, OnError);
 }
 	
 } // Namespace Api
