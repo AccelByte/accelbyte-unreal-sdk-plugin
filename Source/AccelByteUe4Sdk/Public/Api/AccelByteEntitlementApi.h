@@ -266,16 +266,6 @@ public:
 	*/
 	void SyncEpicGameDurableItems(FString const& EpicGamesJwtToken, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	
-	/**
-	* @brief Validate user item purchase condition.
-	*
-	* @param Items Items to be validated.
-	* @param OnSuccess This will be called when the operation succeeded.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void ValidateUserItemPurchaseCondition(TArray<FString> const& Items, THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>> const& OnSuccess, FErrorHandler const& OnError);
-
-	
 private:
 	Entitlement() = delete;
 	Entitlement(Entitlement const&) = delete;

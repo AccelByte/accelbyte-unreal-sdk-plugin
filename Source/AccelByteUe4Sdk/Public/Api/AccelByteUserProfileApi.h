@@ -158,8 +158,10 @@ public:
 	 * @param FileType One of the these types: jpeg, jpg, png, bmp, gif, mp3, bin, webp.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * @param Category Upload category. Supported categories: default, reporting. Default value : default.
 	 */
-	void GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError);
+	void GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError,
+		EAccelByteUploadCategory Category = EAccelByteUploadCategory::DEFAULT);
 
 private:
 	UserProfile() = delete;

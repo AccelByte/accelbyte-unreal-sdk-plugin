@@ -302,8 +302,10 @@ void UserProfile::GenerateUploadURL(const FString& Folder, EAccelByteFileType Fi
 	FString Accept			= TEXT("application/json");
 	FString Content			= TEXT("");
 	
-	FString Query = FString::Printf(TEXT("fileType=%s"), *FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+	FString QueryParam = FAccelByteUtilities::CreateQueryParams({
+		{ TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()},
+	});
+	Url.Append(QueryParam);
 	
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -316,7 +318,8 @@ void UserProfile::GenerateUploadURL(const FString& Folder, EAccelByteFileType Fi
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UserProfile::GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError)
+void UserProfile::GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError,
+	EAccelByteUploadCategory Category)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -327,8 +330,11 @@ void UserProfile::GenerateUploadURLForUserContent(const FString& UserId, EAccelB
 	FString Accept			= TEXT("application/json");
 	FString Content			= TEXT("");
 	
-	FString Query = FString::Printf(TEXT("fileType=%s"), *FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+	FString QueryParam = FAccelByteUtilities::CreateQueryParams({
+		{ TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()},
+		{ TEXT("category"), FAccelByteUtilities::GetUEnumValueAsString(Category).ToLower()}, 
+	});
+	Url.Append(QueryParam); 
 	
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);

@@ -21,6 +21,13 @@ enum class EAccelByteFileType : uint8
 	WEBP
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteUploadCategory : uint8
+{
+	DEFAULT,
+	REPORTING
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileInfo
 {

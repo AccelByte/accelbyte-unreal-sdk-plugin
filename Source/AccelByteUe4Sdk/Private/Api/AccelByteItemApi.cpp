@@ -9,7 +9,6 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
-#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
@@ -60,20 +59,28 @@ FString EAccelByteAppTypeToString(EAccelByteAppType const& EnumValue)
 	return EnumPtr->GetNameStringByValue(static_cast<int64>(EnumValue));
 }
 
-void Item::GetItemById(FString const& ItemId, FString const& Language, FString const& Region, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess,
-	FErrorHandler const& OnError, const FString& StoreId, bool PopulateBundle)
+void Item::GetItemById(FString const& ItemId, FString const& Language, FString const& Region, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *ItemId);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{TEXT("region"), Region},
-		{TEXT("language"), Language},
-		{TEXT("storeId"), StoreId},
-		{TEXT("populateBundle"), PopulateBundle ? "true" : "false"}
-	});
-	Url.Append(QueryParams);
+	if (!Region.IsEmpty() || !Language.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("?")));
+		if (!Region.IsEmpty())
+		{
+			Url.Append(FString::Printf(TEXT("region=%s"), *Region));
+			if (!Language.IsEmpty())
+			{
+				Url.Append(FString::Printf(TEXT("&language=%s"), *Language));
+			}
+		}
+		else if (!Language.IsEmpty())
+		{
+			Url.Append(FString::Printf(TEXT("language=%s"), *Language));
+		}
+	}
 
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
@@ -96,13 +103,23 @@ void Item::GetItemByAppId(FString const& AppId, FString const& Language, FString
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byAppId"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{TEXT("appId"), AppId},
-		{TEXT("region"), Region},
-		{TEXT("language"), Language}, 
-	});
-	Url.Append(QueryParams); 
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byAppId?appId=%s"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace, *AppId);
+	if (!Region.IsEmpty() || !Language.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&")));
+		if (!Region.IsEmpty())
+		{
+			Url.Append(FString::Printf(TEXT("region=%s"), *Region));
+			if (!Language.IsEmpty())
+			{
+				Url.Append(FString::Printf(TEXT("&language=%s"), *Language));
+			}
+		}
+		else if (!Language.IsEmpty())
+		{
+			Url.Append(FString::Printf(TEXT("language=%s"), *Language));
+		}
+	}
 
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
@@ -154,33 +171,75 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, 
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString SortByQueryParamValue = TEXT("");
-	if (SortBy.Num() > 0 )
-	{ 
-		for (int i = 0; i < SortBy.Num(); i++)
-		{
-			FString sortByString = ConvertItemSortByToString(SortBy[i]);
-			FString sortByStringAppend = FString::Printf(TEXT(",%s"), *ConvertItemSortByToString(SortBy[i]));
-			SortByQueryParamValue.Append((i == 0) ? sortByString : sortByStringAppend);
-		}
-	} 
-	
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
     FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("categoryPath"), FGenericPlatformHttp::UrlEncode(ItemCriteria.CategoryPath) },
-		{ TEXT("region"), ItemCriteria.Region },
-		{ TEXT("language"), ItemCriteria.Language },
-		{ TEXT("itemType"), ItemCriteria.ItemType != EAccelByteItemType::NONE ? EAccelByteItemTypeToString(ItemCriteria.ItemType) : TEXT("") },
-		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ? EAccelByteAppTypeToString(ItemCriteria.AppType) : TEXT("") },
-		{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemCriteria.Tags)  },
-		{ TEXT("features"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemCriteria.Features) },
-		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
-		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("sortBy"), SortByQueryParamValue },
-	});
-	Url.Append(QueryParams);
- 
+
+	FString Query = TEXT("");
+	if (!ItemCriteria.CategoryPath.IsEmpty())
+    { 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("categoryPath=%s"), *FGenericPlatformHttp::UrlEncode(ItemCriteria.CategoryPath))); 
+    }
+    if (!ItemCriteria.Region.IsEmpty())
+    { 
+    	Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+        Query.Append(FString::Printf(TEXT("region=%s"), *ItemCriteria.Region));
+    }
+    if (!ItemCriteria.Language.IsEmpty())
+	{ 
+    	Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&")); 
+		Query.Append(FString::Printf(TEXT("language=%s"), *ItemCriteria.Language));
+	}	
+	if (ItemCriteria.ItemType != EAccelByteItemType::NONE)
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("itemType=%s"), *EAccelByteItemTypeToString(ItemCriteria.ItemType)));
+	}
+	if (ItemCriteria.AppType != EAccelByteAppType::NONE)
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&")); 
+		Query.Append(FString::Printf(TEXT("appType=%s"), *EAccelByteAppTypeToString(ItemCriteria.AppType)));
+	}
+	if (ItemCriteria.Tags.Num() > 0)
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		for (int i = 0; i < ItemCriteria.Tags.Num(); i++)
+		{
+			FString ItemCriteriaTag = FString::Printf(TEXT(",%s"), *ItemCriteria.Tags[i]);
+			Query.Append((i == 0) ? TEXT("tags=") : ItemCriteriaTag);
+		}
+	}
+	if (ItemCriteria.Features.Num() > 0)
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		for (int i = 0; i < ItemCriteria.Features.Num(); i++)
+		{
+			FString ItemCriteriaFeature = FString::Printf(TEXT(",%s"), *ItemCriteria.Features[i]);
+			Query.Append((i == 0) ? TEXT("features=") : ItemCriteriaFeature);
+		}
+	}
+	if (Offset > 0)
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+	}
+	if (Limit > 0)
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+	}	
+	if (SortBy.Num() > 0 )
+	{
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		for (int i = 0; i < SortBy.Num(); i++)
+		{
+			FString sortByString = FString::Printf(TEXT("sortBy=%s"), *ConvertItemSortByToString(SortBy[i]));
+			FString sortByStringAppend = FString::Printf(TEXT(",%s"), *ConvertItemSortByToString(SortBy[i]));
+			Query.Append((i == 0) ? sortByString : sortByStringAppend);
+		}
+	}
+	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+	
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -202,16 +261,19 @@ void Item::SearchItem(FString const& Language, FString const& Keyword, int32 con
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/search"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-	FString QueryParams (FAccelByteUtilities::CreateQueryParams({
-		{TEXT("language"), Language},
-		{TEXT("keyword"), FGenericPlatformHttp::UrlEncode(Keyword)},
-		{TEXT("region"), Region},
-		{TEXT("offset"), FString::FromInt(Offset)},
-		{TEXT("limit"), FString::FromInt(Limit)}
-	}));
-	Url.Append(QueryParams);
-	
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/search?language=%s&keyword=%s"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace, *Language, *FGenericPlatformHttp::UrlEncode(Keyword));
+	if (!Region.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&region=%s"), *Region));
+	}
+	if (Offset > 0)
+	{
+		Url.Append(FString::Printf(TEXT("&offset=%d"), Offset));
+	}
+	if (Limit > 0)
+	{
+		Url.Append(FString::Printf(TEXT("&limit=%d"), Limit));
+	}
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -238,13 +300,15 @@ void Item::GetItemBySku(FString const& Sku, FString const& Language, FString con
 	}
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/bySku"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{TEXT("sku"), Sku},
-		{TEXT("language"), Language},
-		{TEXT("region"), Region}
-	}); 
-	Url.Append(QueryParams); 
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/bySku?sku=%s"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace, *Sku);
+	if (!Language.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&language=%s"), *Language));
+	}
+	if (!Region.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&region=%s"), *Region));
+	}
 
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
@@ -253,37 +317,6 @@ void Item::GetItemBySku(FString const& Sku, FString const& Language, FString con
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void Item::BulkGetLocaleItems(const TArray<FString>& ItemIds, const FString& Region, const FString& Language, THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess,
-	FErrorHandler const& OnError, const FString& StoreId)
-{
-	FReport::Log(FString(__FUNCTION__)); 
-	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-    FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/locale/byIds"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("storeId"), StoreId },
-		{ TEXT("itemIds"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemIds) },
-		{ TEXT("region"), Region },
-		{ TEXT("language"), Language }, 
-	});
-	Url.Append(QueryParams);
- 
-	FString Verb            = TEXT("GET");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Content         = TEXT("");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);

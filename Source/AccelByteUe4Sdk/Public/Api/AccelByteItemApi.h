@@ -35,11 +35,8 @@ public:
 	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN". 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPopulatedItemInfo&.
 	 * @param OnError This will be called when the operation failed.
-	 * @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
-	 * @param PopulateBundle Whether populate bundled items if it's a bundle, default value is false.
 	 */
-	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess, FErrorHandler const& OnError,
-		const FString& StoreId = TEXT(""), bool PopulateBundle = false);
+	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get one item information from an online store.
@@ -91,19 +88,6 @@ public:
 	*/
 	void GetItemBySku(FString const& Sku, FString const& Language,FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError);
 	
-	/**
-	* @brief Get Item information by SKU number from an online store.
-	*
-	* @param ItemIds ItemId array.
-	* @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
-	* @param Language ISO 639-1 language tag, e.g., "en, "zh".
-	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
-	* @param OnError This will be called when the operation failed.
-	* @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
-	*/
-	void BulkGetLocaleItems(const TArray<FString>& ItemIds, const FString& Region, const FString& Language,
-		THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess, FErrorHandler const& OnError, const FString& StoreId = TEXT(""));
-
 private:
 	Item() = delete;
 	Item(Item const&) = delete;
