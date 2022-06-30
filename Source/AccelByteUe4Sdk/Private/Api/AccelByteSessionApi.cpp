@@ -122,7 +122,7 @@ void Session::GetGameSessionDetails(
 }
 
 void Session::QueryGameSessions(
-	FAccelByteModelsV2SessionQueryRequest const& Query,
+	TSharedRef<FJsonObject> const& QueryObject,
 	THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess,
 	FErrorHandler const& OnError,
 	int32 const& Offset,
@@ -130,13 +130,23 @@ void Session::QueryGameSessions(
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions"),
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
-	AppendQueryParams(Query, Offset, Limit, QueryParams);
-	
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	// Add pagination information to query object
+	QueryObject->SetNumberField(TEXT("offset"), Offset);
+	QueryObject->SetNumberField(TEXT("limit"), Limit);
+
+	// Convert query object to JSON string
+	FString RequestString;
+	TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&RequestString);
+	if (!FJsonSerializer::Serialize(QueryObject, JsonWriter))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to send query game session request as our query JSON object failed to serialize to string!"));
+		return;
+	}
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestString, OnSuccess, OnError);
 }
 
 void Session::UpdateGameSession(
@@ -180,6 +190,19 @@ void Session::JoinGameSession(
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Session::LeaveGameSession(
+	FString const& GameSessionID,
+	FVoidHandler const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/leave"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void Session::GetMyGameSessions(
