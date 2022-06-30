@@ -5,6 +5,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonObjectWrapper.h"
+#include "AccelByteDSMModels.h"
+#include "AccelByteGeneralModels.h"
 #include "AccelByteSessionModels.generated.h"
 
 UENUM(BlueprintType)
