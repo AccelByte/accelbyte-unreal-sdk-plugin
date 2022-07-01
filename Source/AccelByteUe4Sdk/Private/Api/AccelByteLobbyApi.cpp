@@ -1898,6 +1898,7 @@ void DispatchSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCall
 	std::string JsonPayloadUTF8;
 	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
 	FString JsonPayload = UTF8_TO_TCHAR(JsonPayloadUTF8.c_str());
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Received MPv2 lobby notification\n%s"), *JsonPayload);
 	DataStruct Result;
 	if(FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Result, 0, 0))
 	{
@@ -1964,6 +1965,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	case session::NotificationEventEnvelope::kGameSessionNotificationMembersChangedV1:
 	{
 		DispatchSessionNotif<FAccelByteModelsV2GameSessionMembersChangedEvent>(EventEnvelope.gamesessionnotificationmemberschangedv1(), V2GameSessionMembersChangedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope.dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
 		break;
 	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);

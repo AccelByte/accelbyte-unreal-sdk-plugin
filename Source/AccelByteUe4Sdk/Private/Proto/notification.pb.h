@@ -51,7 +51,7 @@ struct TableStruct_notification_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[17]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[18]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -62,6 +62,9 @@ namespace session {
 class DSInformationV1;
 struct DSInformationV1DefaultTypeInternal;
 extern DSInformationV1DefaultTypeInternal _DSInformationV1_default_instance_;
+class DSStatusChangedNotificationV1;
+struct DSStatusChangedNotificationV1DefaultTypeInternal;
+extern DSStatusChangedNotificationV1DefaultTypeInternal _DSStatusChangedNotificationV1_default_instance_;
 class GameServerV1;
 struct GameServerV1DefaultTypeInternal;
 extern GameServerV1DefaultTypeInternal _GameServerV1_default_instance_;
@@ -113,6 +116,7 @@ extern UserV1DefaultTypeInternal _UserV1_default_instance_;
 }  // namespace session
 PROTOBUF_NAMESPACE_OPEN
 template<> ::session::DSInformationV1* Arena::CreateMaybeMessage<::session::DSInformationV1>(Arena*);
+template<> ::session::DSStatusChangedNotificationV1* Arena::CreateMaybeMessage<::session::DSStatusChangedNotificationV1>(Arena*);
 template<> ::session::GameServerV1* Arena::CreateMaybeMessage<::session::GameServerV1>(Arena*);
 template<> ::session::GameSessionNotificationMembersChangedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationMembersChangedV1>(Arena*);
 template<> ::session::GameSessionNotificationUserInvitedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationUserInvitedV1>(Arena*);
@@ -188,6 +192,7 @@ class NotificationEventEnvelope final :
     kGameSessionNotificationUserJoinedV1 = 8,
     kGameSessionNotificationMembersChangedV1 = 9,
     kGameSessionV1 = 10,
+    kDSStatusChangedNotificationV1 = 11,
     PAYLOAD_NOT_SET = 0,
   };
 
@@ -280,6 +285,7 @@ class NotificationEventEnvelope final :
     kGameSessionNotificationUserJoinedV1FieldNumber = 8,
     kGameSessionNotificationMembersChangedV1FieldNumber = 9,
     kGameSessionV1FieldNumber = 10,
+    kDSStatusChangedNotificationV1FieldNumber = 11,
   };
   // .session.PartyNotificationUserInvitedV1 PartyNotificationUserInvitedV1 = 1 [json_name = "OnPartyInvited"];
   bool has_partynotificationuserinvitedv1() const;
@@ -461,6 +467,24 @@ class NotificationEventEnvelope final :
       ::session::GameSessionV1* gamesessionv1);
   ::session::GameSessionV1* unsafe_arena_release_gamesessionv1();
 
+  // .session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
+  bool has_dsstatuschangednotificationv1() const;
+  private:
+  bool _internal_has_dsstatuschangednotificationv1() const;
+  public:
+  void clear_dsstatuschangednotificationv1();
+  const ::session::DSStatusChangedNotificationV1& dsstatuschangednotificationv1() const;
+  PROTOBUF_NODISCARD ::session::DSStatusChangedNotificationV1* release_dsstatuschangednotificationv1();
+  ::session::DSStatusChangedNotificationV1* mutable_dsstatuschangednotificationv1();
+  void set_allocated_dsstatuschangednotificationv1(::session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1);
+  private:
+  const ::session::DSStatusChangedNotificationV1& _internal_dsstatuschangednotificationv1() const;
+  ::session::DSStatusChangedNotificationV1* _internal_mutable_dsstatuschangednotificationv1();
+  public:
+  void unsafe_arena_set_allocated_dsstatuschangednotificationv1(
+      ::session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1);
+  ::session::DSStatusChangedNotificationV1* unsafe_arena_release_dsstatuschangednotificationv1();
+
   void clear_payload();
   PayloadCase payload_case() const;
   // @@protoc_insertion_point(class_scope:session.NotificationEventEnvelope)
@@ -476,6 +500,7 @@ class NotificationEventEnvelope final :
   void set_has_gamesessionnotificationuserjoinedv1();
   void set_has_gamesessionnotificationmemberschangedv1();
   void set_has_gamesessionv1();
+  void set_has_dsstatuschangednotificationv1();
 
   inline bool has_payload() const;
   inline void clear_has_payload();
@@ -496,6 +521,7 @@ class NotificationEventEnvelope final :
     ::session::GameSessionNotificationUserJoinedV1* gamesessionnotificationuserjoinedv1_;
     ::session::GameSessionNotificationMembersChangedV1* gamesessionnotificationmemberschangedv1_;
     ::session::GameSessionV1* gamesessionv1_;
+    ::session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1_;
   } payload_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   uint32_t _oneof_case_[1];
@@ -2573,6 +2599,193 @@ class GameSessionNotificationMembersChangedV1 final :
 };
 // -------------------------------------------------------------------
 
+class DSStatusChangedNotificationV1 final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:session.DSStatusChangedNotificationV1) */ {
+ public:
+  inline DSStatusChangedNotificationV1() : DSStatusChangedNotificationV1(nullptr) {}
+  ~DSStatusChangedNotificationV1() override;
+  explicit constexpr DSStatusChangedNotificationV1(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DSStatusChangedNotificationV1(const DSStatusChangedNotificationV1& from);
+  DSStatusChangedNotificationV1(DSStatusChangedNotificationV1&& from) noexcept
+    : DSStatusChangedNotificationV1() {
+    *this = ::std::move(from);
+  }
+
+  inline DSStatusChangedNotificationV1& operator=(const DSStatusChangedNotificationV1& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DSStatusChangedNotificationV1& operator=(DSStatusChangedNotificationV1&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const DSStatusChangedNotificationV1& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DSStatusChangedNotificationV1* internal_default_instance() {
+    return reinterpret_cast<const DSStatusChangedNotificationV1*>(
+               &_DSStatusChangedNotificationV1_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(DSStatusChangedNotificationV1& a, DSStatusChangedNotificationV1& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DSStatusChangedNotificationV1* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DSStatusChangedNotificationV1* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  DSStatusChangedNotificationV1* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<DSStatusChangedNotificationV1>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const DSStatusChangedNotificationV1& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const DSStatusChangedNotificationV1& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DSStatusChangedNotificationV1* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "session.DSStatusChangedNotificationV1";
+  }
+  protected:
+  explicit DSStatusChangedNotificationV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSessionIDFieldNumber = 2,
+    kErrorFieldNumber = 3,
+    kGameServerFieldNumber = 1,
+  };
+  // string SessionID = 2 [json_name = "sessionID"];
+  void clear_sessionid();
+  const std::string& sessionid() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_sessionid(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_sessionid();
+  PROTOBUF_NODISCARD std::string* release_sessionid();
+  void set_allocated_sessionid(std::string* sessionid);
+  private:
+  const std::string& _internal_sessionid() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_sessionid(const std::string& value);
+  std::string* _internal_mutable_sessionid();
+  public:
+
+  // string Error = 3 [json_name = "error"];
+  void clear_error();
+  const std::string& error() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_error(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_error();
+  PROTOBUF_NODISCARD std::string* release_error();
+  void set_allocated_error(std::string* error);
+  private:
+  const std::string& _internal_error() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_error(const std::string& value);
+  std::string* _internal_mutable_error();
+  public:
+
+  // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+  bool has_gameserver() const;
+  private:
+  bool _internal_has_gameserver() const;
+  public:
+  void clear_gameserver();
+  const ::session::GameServerV1& gameserver() const;
+  PROTOBUF_NODISCARD ::session::GameServerV1* release_gameserver();
+  ::session::GameServerV1* mutable_gameserver();
+  void set_allocated_gameserver(::session::GameServerV1* gameserver);
+  private:
+  const ::session::GameServerV1& _internal_gameserver() const;
+  ::session::GameServerV1* _internal_mutable_gameserver();
+  public:
+  void unsafe_arena_set_allocated_gameserver(
+      ::session::GameServerV1* gameserver);
+  ::session::GameServerV1* unsafe_arena_release_gameserver();
+
+  // @@protoc_insertion_point(class_scope:session.DSStatusChangedNotificationV1)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sessionid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr error_;
+  ::session::GameServerV1* gameserver_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_notification_2eproto;
+};
+// -------------------------------------------------------------------
+
 class UserIDs final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:session.UserIDs) */ {
  public:
@@ -2621,7 +2834,7 @@ class UserIDs final :
                &_UserIDs_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    13;
 
   friend void swap(UserIDs& a, UserIDs& b) {
     a.Swap(&b);
@@ -2782,7 +2995,7 @@ class Team final :
                &_Team_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    14;
 
   friend void swap(Team& a, Team& b) {
     a.Swap(&b);
@@ -2943,7 +3156,7 @@ class GameSessionV1 final :
                &_GameSessionV1_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    15;
 
   friend void swap(GameSessionV1& a, GameSessionV1& b) {
     a.Swap(&b);
@@ -3313,7 +3526,7 @@ class DSInformationV1 final :
                &_DSInformationV1_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    16;
 
   friend void swap(DSInformationV1& a, DSInformationV1& b) {
     a.Swap(&b);
@@ -3569,7 +3782,7 @@ class GameServerV1 final :
                &_GameServerV1_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    17;
 
   friend void swap(GameServerV1& a, GameServerV1& b) {
     a.Swap(&b);
@@ -4674,6 +4887,80 @@ inline ::session::GameSessionV1* NotificationEventEnvelope::_internal_mutable_ga
 inline ::session::GameSessionV1* NotificationEventEnvelope::mutable_gamesessionv1() {
   ::session::GameSessionV1* _msg = _internal_mutable_gamesessionv1();
   // @@protoc_insertion_point(field_mutable:session.NotificationEventEnvelope.GameSessionV1)
+  return _msg;
+}
+
+// .session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
+inline bool NotificationEventEnvelope::_internal_has_dsstatuschangednotificationv1() const {
+  return payload_case() == kDSStatusChangedNotificationV1;
+}
+inline bool NotificationEventEnvelope::has_dsstatuschangednotificationv1() const {
+  return _internal_has_dsstatuschangednotificationv1();
+}
+inline void NotificationEventEnvelope::set_has_dsstatuschangednotificationv1() {
+  _oneof_case_[0] = kDSStatusChangedNotificationV1;
+}
+inline void NotificationEventEnvelope::clear_dsstatuschangednotificationv1() {
+  if (_internal_has_dsstatuschangednotificationv1()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete payload_.dsstatuschangednotificationv1_;
+    }
+    clear_has_payload();
+  }
+}
+inline ::session::DSStatusChangedNotificationV1* NotificationEventEnvelope::release_dsstatuschangednotificationv1() {
+  // @@protoc_insertion_point(field_release:session.NotificationEventEnvelope.DSStatusChangedNotificationV1)
+  if (_internal_has_dsstatuschangednotificationv1()) {
+    clear_has_payload();
+      ::session::DSStatusChangedNotificationV1* temp = payload_.dsstatuschangednotificationv1_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    payload_.dsstatuschangednotificationv1_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::session::DSStatusChangedNotificationV1& NotificationEventEnvelope::_internal_dsstatuschangednotificationv1() const {
+  return _internal_has_dsstatuschangednotificationv1()
+      ? *payload_.dsstatuschangednotificationv1_
+      : reinterpret_cast< ::session::DSStatusChangedNotificationV1&>(::session::_DSStatusChangedNotificationV1_default_instance_);
+}
+inline const ::session::DSStatusChangedNotificationV1& NotificationEventEnvelope::dsstatuschangednotificationv1() const {
+  // @@protoc_insertion_point(field_get:session.NotificationEventEnvelope.DSStatusChangedNotificationV1)
+  return _internal_dsstatuschangednotificationv1();
+}
+inline ::session::DSStatusChangedNotificationV1* NotificationEventEnvelope::unsafe_arena_release_dsstatuschangednotificationv1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:session.NotificationEventEnvelope.DSStatusChangedNotificationV1)
+  if (_internal_has_dsstatuschangednotificationv1()) {
+    clear_has_payload();
+    ::session::DSStatusChangedNotificationV1* temp = payload_.dsstatuschangednotificationv1_;
+    payload_.dsstatuschangednotificationv1_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NotificationEventEnvelope::unsafe_arena_set_allocated_dsstatuschangednotificationv1(::session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1) {
+  clear_payload();
+  if (dsstatuschangednotificationv1) {
+    set_has_dsstatuschangednotificationv1();
+    payload_.dsstatuschangednotificationv1_ = dsstatuschangednotificationv1;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:session.NotificationEventEnvelope.DSStatusChangedNotificationV1)
+}
+inline ::session::DSStatusChangedNotificationV1* NotificationEventEnvelope::_internal_mutable_dsstatuschangednotificationv1() {
+  if (!_internal_has_dsstatuschangednotificationv1()) {
+    clear_payload();
+    set_has_dsstatuschangednotificationv1();
+    payload_.dsstatuschangednotificationv1_ = CreateMaybeMessage< ::session::DSStatusChangedNotificationV1 >(GetArenaForAllocation());
+  }
+  return payload_.dsstatuschangednotificationv1_;
+}
+inline ::session::DSStatusChangedNotificationV1* NotificationEventEnvelope::mutable_dsstatuschangednotificationv1() {
+  ::session::DSStatusChangedNotificationV1* _msg = _internal_mutable_dsstatuschangednotificationv1();
+  // @@protoc_insertion_point(field_mutable:session.NotificationEventEnvelope.DSStatusChangedNotificationV1)
   return _msg;
 }
 
@@ -6413,6 +6700,202 @@ inline void GameSessionNotificationMembersChangedV1::set_allocated_joinerid(std:
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:session.GameSessionNotificationMembersChangedV1.JoinerID)
+}
+
+// -------------------------------------------------------------------
+
+// DSStatusChangedNotificationV1
+
+// .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+inline bool DSStatusChangedNotificationV1::_internal_has_gameserver() const {
+  return this != internal_default_instance() && gameserver_ != nullptr;
+}
+inline bool DSStatusChangedNotificationV1::has_gameserver() const {
+  return _internal_has_gameserver();
+}
+inline void DSStatusChangedNotificationV1::clear_gameserver() {
+  if (GetArenaForAllocation() == nullptr && gameserver_ != nullptr) {
+    delete gameserver_;
+  }
+  gameserver_ = nullptr;
+}
+inline const ::session::GameServerV1& DSStatusChangedNotificationV1::_internal_gameserver() const {
+  const ::session::GameServerV1* p = gameserver_;
+  return p != nullptr ? *p : reinterpret_cast<const ::session::GameServerV1&>(
+      ::session::_GameServerV1_default_instance_);
+}
+inline const ::session::GameServerV1& DSStatusChangedNotificationV1::gameserver() const {
+  // @@protoc_insertion_point(field_get:session.DSStatusChangedNotificationV1.GameServer)
+  return _internal_gameserver();
+}
+inline void DSStatusChangedNotificationV1::unsafe_arena_set_allocated_gameserver(
+    ::session::GameServerV1* gameserver) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(gameserver_);
+  }
+  gameserver_ = gameserver;
+  if (gameserver) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:session.DSStatusChangedNotificationV1.GameServer)
+}
+inline ::session::GameServerV1* DSStatusChangedNotificationV1::release_gameserver() {
+  
+  ::session::GameServerV1* temp = gameserver_;
+  gameserver_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::session::GameServerV1* DSStatusChangedNotificationV1::unsafe_arena_release_gameserver() {
+  // @@protoc_insertion_point(field_release:session.DSStatusChangedNotificationV1.GameServer)
+  
+  ::session::GameServerV1* temp = gameserver_;
+  gameserver_ = nullptr;
+  return temp;
+}
+inline ::session::GameServerV1* DSStatusChangedNotificationV1::_internal_mutable_gameserver() {
+  
+  if (gameserver_ == nullptr) {
+    auto* p = CreateMaybeMessage<::session::GameServerV1>(GetArenaForAllocation());
+    gameserver_ = p;
+  }
+  return gameserver_;
+}
+inline ::session::GameServerV1* DSStatusChangedNotificationV1::mutable_gameserver() {
+  ::session::GameServerV1* _msg = _internal_mutable_gameserver();
+  // @@protoc_insertion_point(field_mutable:session.DSStatusChangedNotificationV1.GameServer)
+  return _msg;
+}
+inline void DSStatusChangedNotificationV1::set_allocated_gameserver(::session::GameServerV1* gameserver) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete gameserver_;
+  }
+  if (gameserver) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::GameServerV1>::GetOwningArena(gameserver);
+    if (message_arena != submessage_arena) {
+      gameserver = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, gameserver, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  gameserver_ = gameserver;
+  // @@protoc_insertion_point(field_set_allocated:session.DSStatusChangedNotificationV1.GameServer)
+}
+
+// string SessionID = 2 [json_name = "sessionID"];
+inline void DSStatusChangedNotificationV1::clear_sessionid() {
+  sessionid_.ClearToEmpty();
+}
+inline const std::string& DSStatusChangedNotificationV1::sessionid() const {
+  // @@protoc_insertion_point(field_get:session.DSStatusChangedNotificationV1.SessionID)
+  return _internal_sessionid();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void DSStatusChangedNotificationV1::set_sessionid(ArgT0&& arg0, ArgT... args) {
+ 
+ sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:session.DSStatusChangedNotificationV1.SessionID)
+}
+inline std::string* DSStatusChangedNotificationV1::mutable_sessionid() {
+  std::string* _s = _internal_mutable_sessionid();
+  // @@protoc_insertion_point(field_mutable:session.DSStatusChangedNotificationV1.SessionID)
+  return _s;
+}
+inline const std::string& DSStatusChangedNotificationV1::_internal_sessionid() const {
+  return sessionid_.Get();
+}
+inline void DSStatusChangedNotificationV1::_internal_set_sessionid(const std::string& value) {
+  
+  sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* DSStatusChangedNotificationV1::_internal_mutable_sessionid() {
+  
+  return sessionid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* DSStatusChangedNotificationV1::release_sessionid() {
+  // @@protoc_insertion_point(field_release:session.DSStatusChangedNotificationV1.SessionID)
+  return sessionid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void DSStatusChangedNotificationV1::set_allocated_sessionid(std::string* sessionid) {
+  if (sessionid != nullptr) {
+    
+  } else {
+    
+  }
+  sessionid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), sessionid,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (sessionid_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    sessionid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:session.DSStatusChangedNotificationV1.SessionID)
+}
+
+// string Error = 3 [json_name = "error"];
+inline void DSStatusChangedNotificationV1::clear_error() {
+  error_.ClearToEmpty();
+}
+inline const std::string& DSStatusChangedNotificationV1::error() const {
+  // @@protoc_insertion_point(field_get:session.DSStatusChangedNotificationV1.Error)
+  return _internal_error();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void DSStatusChangedNotificationV1::set_error(ArgT0&& arg0, ArgT... args) {
+ 
+ error_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:session.DSStatusChangedNotificationV1.Error)
+}
+inline std::string* DSStatusChangedNotificationV1::mutable_error() {
+  std::string* _s = _internal_mutable_error();
+  // @@protoc_insertion_point(field_mutable:session.DSStatusChangedNotificationV1.Error)
+  return _s;
+}
+inline const std::string& DSStatusChangedNotificationV1::_internal_error() const {
+  return error_.Get();
+}
+inline void DSStatusChangedNotificationV1::_internal_set_error(const std::string& value) {
+  
+  error_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* DSStatusChangedNotificationV1::_internal_mutable_error() {
+  
+  return error_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* DSStatusChangedNotificationV1::release_error() {
+  // @@protoc_insertion_point(field_release:session.DSStatusChangedNotificationV1.Error)
+  return error_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void DSStatusChangedNotificationV1::set_allocated_error(std::string* error) {
+  if (error != nullptr) {
+    
+  } else {
+    
+  }
+  error_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), error,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (error_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:session.DSStatusChangedNotificationV1.Error)
 }
 
 // -------------------------------------------------------------------
@@ -8545,6 +9028,8 @@ inline void GameServerV1::set_allocated_last_update(std::string* last_update) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

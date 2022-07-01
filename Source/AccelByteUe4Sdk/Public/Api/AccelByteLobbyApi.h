@@ -465,6 +465,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FV2GameSessionMembersChangedNotif, FAccelByteModelsV2GameSessionMembersChangedEvent);
 	
+	/**
+	* @brief Delegate for game session when DS status is changed.
+	*/
+	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif)
+	
 public:
     /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
@@ -1023,6 +1028,10 @@ public:
 	void SetV2GameSessionMembersChangedNotifDelegate(const FV2GameSessionMembersChangedNotif& OnGameSessionMembersChangedNotif)
 	{
 		V2GameSessionMembersChangedNotif = OnGameSessionMembersChangedNotif;
+	}
+	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
+	{
+		V2DSStatusChangedNotif = OnDSStatusChangedNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1903,6 +1912,9 @@ private:
 	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
 	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
+
+	// Matchmaking v2
+	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;

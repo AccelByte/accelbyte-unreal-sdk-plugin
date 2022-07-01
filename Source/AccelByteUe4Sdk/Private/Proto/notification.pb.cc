@@ -205,6 +205,20 @@ struct GameSessionNotificationMembersChangedV1DefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GameSessionNotificationMembersChangedV1DefaultTypeInternal _GameSessionNotificationMembersChangedV1_default_instance_;
+constexpr DSStatusChangedNotificationV1::DSStatusChangedNotificationV1(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : sessionid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , error_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , gameserver_(nullptr){}
+struct DSStatusChangedNotificationV1DefaultTypeInternal {
+  constexpr DSStatusChangedNotificationV1DefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~DSStatusChangedNotificationV1DefaultTypeInternal() {}
+  union {
+    DSStatusChangedNotificationV1 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DSStatusChangedNotificationV1DefaultTypeInternal _DSStatusChangedNotificationV1_default_instance_;
 constexpr UserIDs::UserIDs(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : userid_(){}
@@ -301,7 +315,7 @@ struct GameServerV1DefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GameServerV1DefaultTypeInternal _GameServerV1_default_instance_;
 }  // namespace session
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_notification_2eproto[17];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_notification_2eproto[18];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_notification_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_notification_2eproto = nullptr;
 
@@ -312,6 +326,7 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::session::NotificationEventEnvelope, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
@@ -426,6 +441,15 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationMembersChangedV1, sessionid_),
   PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationMembersChangedV1, joinerid_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::session::DSStatusChangedNotificationV1, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::session::DSStatusChangedNotificationV1, gameserver_),
+  PROTOBUF_FIELD_OFFSET(::session::DSStatusChangedNotificationV1, sessionid_),
+  PROTOBUF_FIELD_OFFSET(::session::DSStatusChangedNotificationV1, error_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::session::UserIDs, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -498,22 +522,23 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::session::NotificationEventEnvelope)},
-  { 17, -1, -1, sizeof(::session::UserV1)},
-  { 28, -1, -1, sizeof(::session::SessionConfigV1)},
-  { 37, -1, -1, sizeof(::session::PartySessionV1)},
-  { 53, -1, -1, sizeof(::session::PartyNotificationUserJoinedV1)},
-  { 61, -1, -1, sizeof(::session::PartyNotificationMembersChangedV1)},
-  { 71, -1, -1, sizeof(::session::PartyNotificationUserInvitedV1)},
-  { 79, -1, -1, sizeof(::session::PartyNotificationUserRejectV1)},
-  { 88, -1, -1, sizeof(::session::PartyNotificationUserKickedV1)},
-  { 95, -1, -1, sizeof(::session::GameSessionNotificationUserInvitedV1)},
-  { 102, -1, -1, sizeof(::session::GameSessionNotificationUserJoinedV1)},
-  { 110, -1, -1, sizeof(::session::GameSessionNotificationMembersChangedV1)},
-  { 119, -1, -1, sizeof(::session::UserIDs)},
-  { 126, -1, -1, sizeof(::session::Team)},
-  { 133, -1, -1, sizeof(::session::GameSessionV1)},
-  { 153, -1, -1, sizeof(::session::DSInformationV1)},
-  { 166, -1, -1, sizeof(::session::GameServerV1)},
+  { 18, -1, -1, sizeof(::session::UserV1)},
+  { 29, -1, -1, sizeof(::session::SessionConfigV1)},
+  { 38, -1, -1, sizeof(::session::PartySessionV1)},
+  { 54, -1, -1, sizeof(::session::PartyNotificationUserJoinedV1)},
+  { 62, -1, -1, sizeof(::session::PartyNotificationMembersChangedV1)},
+  { 72, -1, -1, sizeof(::session::PartyNotificationUserInvitedV1)},
+  { 80, -1, -1, sizeof(::session::PartyNotificationUserRejectV1)},
+  { 89, -1, -1, sizeof(::session::PartyNotificationUserKickedV1)},
+  { 96, -1, -1, sizeof(::session::GameSessionNotificationUserInvitedV1)},
+  { 103, -1, -1, sizeof(::session::GameSessionNotificationUserJoinedV1)},
+  { 111, -1, -1, sizeof(::session::GameSessionNotificationMembersChangedV1)},
+  { 120, -1, -1, sizeof(::session::DSStatusChangedNotificationV1)},
+  { 129, -1, -1, sizeof(::session::UserIDs)},
+  { 136, -1, -1, sizeof(::session::Team)},
+  { 143, -1, -1, sizeof(::session::GameSessionV1)},
+  { 163, -1, -1, sizeof(::session::DSInformationV1)},
+  { 176, -1, -1, sizeof(::session::GameServerV1)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -529,6 +554,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionNotificationUserInvitedV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionNotificationUserJoinedV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionNotificationMembersChangedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_DSStatusChangedNotificationV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_UserIDs_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_Team_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionV1_default_instance_),
@@ -537,7 +563,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_notification_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\022notification.proto\022\007session\"\202\010\n\031Notifi"
+  "\n\022notification.proto\022\007session\"\353\010\n\031Notifi"
   "cationEventEnvelope\022a\n\036PartyNotification"
   "UserInvitedV1\030\001 \001(\0132\'.session.PartyNotif"
   "icationUserInvitedV1H\000R\016OnPartyInvited\022^"
@@ -563,86 +589,92 @@ const char descriptor_table_protodef_notification_2eproto[] PROTOBUF_SECTION_VAR
   "nNotificationMembersChangedV1H\000R\027OnSessi"
   "onMembersChanged\022E\n\rGameSessionV1\030\n \001(\0132"
   "\026.session.GameSessionV1H\000R\024OnGameSession"
-  "UpdatedB\t\n\007payload\"\232\001\n\006UserV1\022\017\n\002id\030\001 \001("
-  "\tR\003_id\022\026\n\006status\030\002 \001(\tR\006status\022\034\n\tupdate"
-  "dAt\030\003 \001(\tR\tupdatedAt\022\037\n\013platform_id\030\004 \001("
-  "\tR\nplatformID\022(\n\020platform_user_id\030\005 \001(\tR"
-  "\016platformUserID\"\205\001\n\017SessionConfigV1\022\031\n\010m"
-  "ax_size\030\001 \001(\005R\007maxSize\0220\n\024initial_join_t"
-  "imeout\030\002 \001(\005R\022initialJoinTimeout\022%\n\016rejo"
-  "in_timeout\030\003 \001(\005R\rrejoinTimeout\"\317\002\n\016Part"
-  "ySessionV1\022\017\n\002id\030\001 \001(\tR\003_id\022\034\n\tnamespace"
-  "\030\002 \001(\tR\tnamespace\022)\n\007members\030\003 \003(\0132\017.ses"
-  "sion.UserV1R\007members\022\036\n\nattributes\030\004 \001(\014"
-  "R\nattributes\022\033\n\tjoin_type\030\005 \001(\tR\010joinTyp"
-  "e\022\035\n\ncreated_at\030\006 \001(\tR\tcreatedAt\022\035\n\nupda"
-  "ted_at\030\007 \001(\tR\tupdatedAt\0220\n\006config\030\010 \001(\0132"
-  "\030.session.SessionConfigV1R\006config\022\031\n\007ver"
-  "sion\030\t \001(\005R\010_version\022\033\n\tleader_id\030\n \001(\tR"
-  "\010leaderID\"d\n\035PartyNotificationUserJoined"
-  "V1\022)\n\007members\030\001 \003(\0132\017.session.UserV1R\007me"
-  "mbers\022\030\n\007PartyID\030\002 \001(\tR\007partyID\"\240\001\n!Part"
-  "yNotificationMembersChangedV1\022)\n\007members"
-  "\030\001 \003(\0132\017.session.UserV1R\007members\022\030\n\007Part"
-  "yID\030\002 \001(\tR\007partyID\022\032\n\010JoinerID\030\003 \001(\tR\010jo"
-  "inerID\022\032\n\010LeaderID\030\004 \001(\tR\010leaderID\"V\n\036Pa"
-  "rtyNotificationUserInvitedV1\022\032\n\010senderID"
-  "\030\001 \001(\tR\010senderID\022\030\n\007PartyID\030\002 \001(\tR\007party"
-  "ID\"\204\001\n\035PartyNotificationUserRejectV1\022)\n\007"
-  "members\030\001 \003(\0132\017.session.UserV1R\007members\022"
-  "\030\n\007PartyID\030\002 \001(\tR\007partyID\022\036\n\nRejectedID\030"
-  "\003 \001(\tR\nrejectedID\"9\n\035PartyNotificationUs"
-  "erKickedV1\022\030\n\007PartyID\030\001 \001(\tR\007partyID\"D\n$"
-  "GameSessionNotificationUserInvitedV1\022\034\n\t"
-  "SessionID\030\001 \001(\tR\tSessionID\"n\n#GameSessio"
-  "nNotificationUserJoinedV1\022\034\n\tSessionID\030\001"
-  " \001(\tR\tSessionID\022)\n\007members\030\002 \003(\0132\017.sessi"
-  "on.UserV1R\007members\"\216\001\n\'GameSessionNotifi"
-  "cationMembersChangedV1\022)\n\007members\030\001 \003(\0132"
-  "\017.session.UserV1R\007members\022\034\n\tSessionID\030\002"
-  " \001(\tR\tsessionID\022\032\n\010JoinerID\030\003 \001(\tR\010joine"
-  "rID\"#\n\007UserIDs\022\030\n\006userID\030\001 \003(\tR\010user_ids"
-  "\"\"\n\004Team\022\032\n\010user_ids\030\001 \003(\tR\010user_ids\"\207\004\n"
-  "\rGameSessionV1\022\017\n\002id\030\001 \001(\tR\003_id\022\034\n\tnames"
-  "pace\030\002 \001(\tR\tnamespace\022)\n\007members\030\003 \003(\0132\017"
-  ".session.UserV1R\007members\022\036\n\nattributes\030\004"
-  " \001(\014R\nattributes\022\033\n\tjoin_type\030\005 \001(\tR\010joi"
-  "nType\022\035\n\ncreated_at\030\006 \001(\tR\tcreatedAt\022\035\n\n"
-  "updated_at\030\007 \001(\tR\tupdatedAt\0220\n\006config\030\010 "
-  "\001(\0132\030.session.SessionConfigV1R\006config\022\031\n"
-  "\007version\030\t \001(\005R\010_version\022\036\n\nmatch_pool\030\n"
-  " \001(\tR\nmatch_pool\022\034\n\tgame_mode\030\013 \001(\tR\tgam"
-  "e_mode\022.\n\022backfill_ticket_id\030\014 \001(\tR\022back"
-  "fill_ticket_id\022#\n\005teams\030\r \003(\0132\r.session."
-  "TeamR\005teams\022A\n\017DSInformationV1\030\016 \001(\0132\030.s"
-  "ession.DSInformationV1R\016ds_information\"\235"
-  "\002\n\017DSInformationV1\0226\n\nGameServer\030\001 \001(\0132\025"
-  ".session.GameServerV1R\013game_server\022,\n\021re"
-  "quested_regions\030\002 \003(\tR\021requested_regions"
-  "\022\"\n\014requested_at\030\003 \001(\tR\014requested_at\022 \n\013"
-  "min_players\030\004 \001(\005R\013min_players\022\026\n\006status"
-  "\030\005 \001(\tR\006status\022&\n\016client_version\030\006 \001(\tR\016"
-  "client_version\022\036\n\ndeployment\030\007 \001(\tR\ndepl"
-  "oyment\"\244\004\n\014GameServerV1\022\032\n\010pod_name\030\001 \001("
-  "\tR\010pod_name\022$\n\rimage_version\030\002 \001(\tR\rimag"
-  "e_version\022\034\n\tnamespace\030\003 \001(\tR\tnamespace\022"
-  "\016\n\002ip\030\004 \001(\tR\002ip\022$\n\ralternate_ips\030\005 \003(\tR\r"
-  "alternate_ips\022\022\n\004port\030\006 \001(\005R\004port\022\032\n\010pro"
-  "tocol\030\007 \001(\tR\010protocol\022\024\n\005ports\030\010 \001(\014R\005po"
-  "rts\022\032\n\010provider\030\t \001(\tR\010provider\022\"\n\014game_"
-  "version\030\n \001(\tR\014game_version\022\026\n\006status\030\013 "
-  "\001(\tR\006status\022\036\n\nsession_id\030\014 \001(\tR\nsession"
-  "_id\022\036\n\ndeployment\030\r \001(\tR\ndeployment\022\026\n\006r"
-  "egion\030\016 \001(\tR\006region\022*\n\020custom_attribute\030"
-  "\017 \001(\tR\020custom_attribute\022:\n\030is_override_g"
-  "ame_version\030\020 \001(\010R\030is_override_game_vers"
-  "ion\022 \n\013last_update\030\021 \001(\tR\013last_updateB\016Z"
-  "\014/event;eventb\006proto3"
+  "Updated\022g\n\035DSStatusChangedNotificationV1"
+  "\030\013 \001(\0132&.session.DSStatusChangedNotifica"
+  "tionV1H\000R\026OnDSStatusChangedNotifB\t\n\007payl"
+  "oad\"\232\001\n\006UserV1\022\017\n\002id\030\001 \001(\tR\003_id\022\026\n\006statu"
+  "s\030\002 \001(\tR\006status\022\034\n\tupdatedAt\030\003 \001(\tR\tupda"
+  "tedAt\022\037\n\013platform_id\030\004 \001(\tR\nplatformID\022("
+  "\n\020platform_user_id\030\005 \001(\tR\016platformUserID"
+  "\"\205\001\n\017SessionConfigV1\022\031\n\010max_size\030\001 \001(\005R\007"
+  "maxSize\0220\n\024initial_join_timeout\030\002 \001(\005R\022i"
+  "nitialJoinTimeout\022%\n\016rejoin_timeout\030\003 \001("
+  "\005R\rrejoinTimeout\"\317\002\n\016PartySessionV1\022\017\n\002i"
+  "d\030\001 \001(\tR\003_id\022\034\n\tnamespace\030\002 \001(\tR\tnamespa"
+  "ce\022)\n\007members\030\003 \003(\0132\017.session.UserV1R\007me"
+  "mbers\022\036\n\nattributes\030\004 \001(\014R\nattributes\022\033\n"
+  "\tjoin_type\030\005 \001(\tR\010joinType\022\035\n\ncreated_at"
+  "\030\006 \001(\tR\tcreatedAt\022\035\n\nupdated_at\030\007 \001(\tR\tu"
+  "pdatedAt\0220\n\006config\030\010 \001(\0132\030.session.Sessi"
+  "onConfigV1R\006config\022\031\n\007version\030\t \001(\005R\010_ve"
+  "rsion\022\033\n\tleader_id\030\n \001(\tR\010leaderID\"d\n\035Pa"
+  "rtyNotificationUserJoinedV1\022)\n\007members\030\001"
+  " \003(\0132\017.session.UserV1R\007members\022\030\n\007PartyI"
+  "D\030\002 \001(\tR\007partyID\"\240\001\n!PartyNotificationMe"
+  "mbersChangedV1\022)\n\007members\030\001 \003(\0132\017.sessio"
+  "n.UserV1R\007members\022\030\n\007PartyID\030\002 \001(\tR\007part"
+  "yID\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\022\032\n\010Leade"
+  "rID\030\004 \001(\tR\010leaderID\"V\n\036PartyNotification"
+  "UserInvitedV1\022\032\n\010senderID\030\001 \001(\tR\010senderI"
+  "D\022\030\n\007PartyID\030\002 \001(\tR\007partyID\"\204\001\n\035PartyNot"
+  "ificationUserRejectV1\022)\n\007members\030\001 \003(\0132\017"
+  ".session.UserV1R\007members\022\030\n\007PartyID\030\002 \001("
+  "\tR\007partyID\022\036\n\nRejectedID\030\003 \001(\tR\nrejected"
+  "ID\"9\n\035PartyNotificationUserKickedV1\022\030\n\007P"
+  "artyID\030\001 \001(\tR\007partyID\"D\n$GameSessionNoti"
+  "ficationUserInvitedV1\022\034\n\tSessionID\030\001 \001(\t"
+  "R\tSessionID\"n\n#GameSessionNotificationUs"
+  "erJoinedV1\022\034\n\tSessionID\030\001 \001(\tR\tSessionID"
+  "\022)\n\007members\030\002 \003(\0132\017.session.UserV1R\007memb"
+  "ers\"\216\001\n\'GameSessionNotificationMembersCh"
+  "angedV1\022)\n\007members\030\001 \003(\0132\017.session.UserV"
+  "1R\007members\022\034\n\tSessionID\030\002 \001(\tR\tsessionID"
+  "\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\"\213\001\n\035DSStatu"
+  "sChangedNotificationV1\0226\n\nGameServer\030\001 \001"
+  "(\0132\025.session.GameServerV1R\013game_server\022\034"
+  "\n\tSessionID\030\002 \001(\tR\tsessionID\022\024\n\005Error\030\003 "
+  "\001(\tR\005error\"#\n\007UserIDs\022\030\n\006userID\030\001 \003(\tR\010u"
+  "ser_ids\"\"\n\004Team\022\032\n\010user_ids\030\001 \003(\tR\010user_"
+  "ids\"\207\004\n\rGameSessionV1\022\017\n\002id\030\001 \001(\tR\003_id\022\034"
+  "\n\tnamespace\030\002 \001(\tR\tnamespace\022)\n\007members\030"
+  "\003 \003(\0132\017.session.UserV1R\007members\022\036\n\nattri"
+  "butes\030\004 \001(\014R\nattributes\022\033\n\tjoin_type\030\005 \001"
+  "(\tR\010joinType\022\035\n\ncreated_at\030\006 \001(\tR\tcreate"
+  "dAt\022\035\n\nupdated_at\030\007 \001(\tR\tupdatedAt\0220\n\006co"
+  "nfig\030\010 \001(\0132\030.session.SessionConfigV1R\006co"
+  "nfig\022\031\n\007version\030\t \001(\005R\010_version\022\036\n\nmatch"
+  "_pool\030\n \001(\tR\nmatch_pool\022\034\n\tgame_mode\030\013 \001"
+  "(\tR\tgame_mode\022.\n\022backfill_ticket_id\030\014 \001("
+  "\tR\022backfill_ticket_id\022#\n\005teams\030\r \003(\0132\r.s"
+  "ession.TeamR\005teams\022A\n\017DSInformationV1\030\016 "
+  "\001(\0132\030.session.DSInformationV1R\016ds_inform"
+  "ation\"\235\002\n\017DSInformationV1\0226\n\nGameServer\030"
+  "\001 \001(\0132\025.session.GameServerV1R\013game_serve"
+  "r\022,\n\021requested_regions\030\002 \003(\tR\021requested_"
+  "regions\022\"\n\014requested_at\030\003 \001(\tR\014requested"
+  "_at\022 \n\013min_players\030\004 \001(\005R\013min_players\022\026\n"
+  "\006status\030\005 \001(\tR\006status\022&\n\016client_version\030"
+  "\006 \001(\tR\016client_version\022\036\n\ndeployment\030\007 \001("
+  "\tR\ndeployment\"\244\004\n\014GameServerV1\022\032\n\010pod_na"
+  "me\030\001 \001(\tR\010pod_name\022$\n\rimage_version\030\002 \001("
+  "\tR\rimage_version\022\034\n\tnamespace\030\003 \001(\tR\tnam"
+  "espace\022\016\n\002ip\030\004 \001(\tR\002ip\022$\n\ralternate_ips\030"
+  "\005 \003(\tR\ralternate_ips\022\022\n\004port\030\006 \001(\005R\004port"
+  "\022\032\n\010protocol\030\007 \001(\tR\010protocol\022\024\n\005ports\030\010 "
+  "\001(\014R\005ports\022\032\n\010provider\030\t \001(\tR\010provider\022\""
+  "\n\014game_version\030\n \001(\tR\014game_version\022\026\n\006st"
+  "atus\030\013 \001(\tR\006status\022\036\n\nsession_id\030\014 \001(\tR\n"
+  "session_id\022\036\n\ndeployment\030\r \001(\tR\ndeployme"
+  "nt\022\026\n\006region\030\016 \001(\tR\006region\022*\n\020custom_att"
+  "ribute\030\017 \001(\tR\020custom_attribute\022:\n\030is_ove"
+  "rride_game_version\030\020 \001(\010R\030is_override_ga"
+  "me_version\022 \n\013last_update\030\021 \001(\tR\013last_up"
+  "dateB\016Z\014/event;eventb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_notification_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_notification_2eproto = {
-  false, false, 4021, descriptor_table_protodef_notification_2eproto, "notification.proto", 
-  &descriptor_table_notification_2eproto_once, nullptr, 0, 17,
+  false, false, 4268, descriptor_table_protodef_notification_2eproto, "notification.proto", 
+  &descriptor_table_notification_2eproto_once, nullptr, 0, 18,
   schemas, file_default_instances, TableStruct_notification_2eproto::offsets,
   file_level_metadata_notification_2eproto, file_level_enum_descriptors_notification_2eproto, file_level_service_descriptors_notification_2eproto,
 };
@@ -668,6 +700,7 @@ class NotificationEventEnvelope::_Internal {
   static const ::session::GameSessionNotificationUserJoinedV1& gamesessionnotificationuserjoinedv1(const NotificationEventEnvelope* msg);
   static const ::session::GameSessionNotificationMembersChangedV1& gamesessionnotificationmemberschangedv1(const NotificationEventEnvelope* msg);
   static const ::session::GameSessionV1& gamesessionv1(const NotificationEventEnvelope* msg);
+  static const ::session::DSStatusChangedNotificationV1& dsstatuschangednotificationv1(const NotificationEventEnvelope* msg);
 };
 
 const ::session::PartyNotificationUserInvitedV1&
@@ -709,6 +742,10 @@ NotificationEventEnvelope::_Internal::gamesessionnotificationmemberschangedv1(co
 const ::session::GameSessionV1&
 NotificationEventEnvelope::_Internal::gamesessionv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.gamesessionv1_;
+}
+const ::session::DSStatusChangedNotificationV1&
+NotificationEventEnvelope::_Internal::dsstatuschangednotificationv1(const NotificationEventEnvelope* msg) {
+  return *msg->payload_.dsstatuschangednotificationv1_;
 }
 void NotificationEventEnvelope::set_allocated_partynotificationuserinvitedv1(::session::PartyNotificationUserInvitedV1* partynotificationuserinvitedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -860,6 +897,21 @@ void NotificationEventEnvelope::set_allocated_gamesessionv1(::session::GameSessi
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionV1)
 }
+void NotificationEventEnvelope::set_allocated_dsstatuschangednotificationv1(::session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_payload();
+  if (dsstatuschangednotificationv1) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::DSStatusChangedNotificationV1>::GetOwningArena(dsstatuschangednotificationv1);
+    if (message_arena != submessage_arena) {
+      dsstatuschangednotificationv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, dsstatuschangednotificationv1, submessage_arena);
+    }
+    set_has_dsstatuschangednotificationv1();
+    payload_.dsstatuschangednotificationv1_ = dsstatuschangednotificationv1;
+  }
+  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.DSStatusChangedNotificationV1)
+}
 NotificationEventEnvelope::NotificationEventEnvelope(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
@@ -912,6 +964,10 @@ NotificationEventEnvelope::NotificationEventEnvelope(const NotificationEventEnve
     }
     case kGameSessionV1: {
       _internal_mutable_gamesessionv1()->::session::GameSessionV1::MergeFrom(from._internal_gamesessionv1());
+      break;
+    }
+    case kDSStatusChangedNotificationV1: {
+      _internal_mutable_dsstatuschangednotificationv1()->::session::DSStatusChangedNotificationV1::MergeFrom(from._internal_dsstatuschangednotificationv1());
       break;
     }
     case PAYLOAD_NOT_SET: {
@@ -1009,6 +1065,12 @@ void NotificationEventEnvelope::clear_payload() {
     case kGameSessionV1: {
       if (GetArenaForAllocation() == nullptr) {
         delete payload_.gamesessionv1_;
+      }
+      break;
+    }
+    case kDSStatusChangedNotificationV1: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete payload_.dsstatuschangednotificationv1_;
       }
       break;
     }
@@ -1112,6 +1174,14 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           ptr = ctx->ParseMessage(_internal_mutable_gamesessionv1(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 90)) {
+          ptr = ctx->ParseMessage(_internal_mutable_dsstatuschangednotificationv1(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1225,6 +1295,14 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         10, _Internal::gamesessionv1(this), target, stream);
   }
 
+  // .session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
+  if (_internal_has_dsstatuschangednotificationv1()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        11, _Internal::dsstatuschangednotificationv1(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -1312,6 +1390,13 @@ size_t NotificationEventEnvelope::ByteSizeLong() const {
           *payload_.gamesessionv1_);
       break;
     }
+    // .session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
+    case kDSStatusChangedNotificationV1: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *payload_.dsstatuschangednotificationv1_);
+      break;
+    }
     case PAYLOAD_NOT_SET: {
       break;
     }
@@ -1377,6 +1462,10 @@ void NotificationEventEnvelope::MergeFrom(const NotificationEventEnvelope& from)
     }
     case kGameSessionV1: {
       _internal_mutable_gamesessionv1()->::session::GameSessionV1::MergeFrom(from._internal_gamesessionv1());
+      break;
+    }
+    case kDSStatusChangedNotificationV1: {
+      _internal_mutable_dsstatuschangednotificationv1()->::session::DSStatusChangedNotificationV1::MergeFrom(from._internal_dsstatuschangednotificationv1());
       break;
     }
     case PAYLOAD_NOT_SET: {
@@ -4679,6 +4768,301 @@ void GameSessionNotificationMembersChangedV1::InternalSwap(GameSessionNotificati
 
 // ===================================================================
 
+class DSStatusChangedNotificationV1::_Internal {
+ public:
+  static const ::session::GameServerV1& gameserver(const DSStatusChangedNotificationV1* msg);
+};
+
+const ::session::GameServerV1&
+DSStatusChangedNotificationV1::_Internal::gameserver(const DSStatusChangedNotificationV1* msg) {
+  return *msg->gameserver_;
+}
+DSStatusChangedNotificationV1::DSStatusChangedNotificationV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:session.DSStatusChangedNotificationV1)
+}
+DSStatusChangedNotificationV1::DSStatusChangedNotificationV1(const DSStatusChangedNotificationV1& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  sessionid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    sessionid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_sessionid().empty()) {
+    sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_sessionid(), 
+      GetArenaForAllocation());
+  }
+  error_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_error().empty()) {
+    error_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_error(), 
+      GetArenaForAllocation());
+  }
+  if (from._internal_has_gameserver()) {
+    gameserver_ = new ::session::GameServerV1(*from.gameserver_);
+  } else {
+    gameserver_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:session.DSStatusChangedNotificationV1)
+}
+
+inline void DSStatusChangedNotificationV1::SharedCtor() {
+sessionid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  sessionid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+error_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  error_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+gameserver_ = nullptr;
+}
+
+DSStatusChangedNotificationV1::~DSStatusChangedNotificationV1() {
+  // @@protoc_insertion_point(destructor:session.DSStatusChangedNotificationV1)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void DSStatusChangedNotificationV1::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  sessionid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  error_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete gameserver_;
+}
+
+void DSStatusChangedNotificationV1::ArenaDtor(void* object) {
+  DSStatusChangedNotificationV1* _this = reinterpret_cast< DSStatusChangedNotificationV1* >(object);
+  (void)_this;
+}
+void DSStatusChangedNotificationV1::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void DSStatusChangedNotificationV1::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void DSStatusChangedNotificationV1::Clear() {
+// @@protoc_insertion_point(message_clear_start:session.DSStatusChangedNotificationV1)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  sessionid_.ClearToEmpty();
+  error_.ClearToEmpty();
+  if (GetArenaForAllocation() == nullptr && gameserver_ != nullptr) {
+    delete gameserver_;
+  }
+  gameserver_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DSStatusChangedNotificationV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_gameserver(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string SessionID = 2 [json_name = "sessionID"];
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_sessionid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSStatusChangedNotificationV1.SessionID"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string Error = 3 [json_name = "error"];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          auto str = _internal_mutable_error();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSStatusChangedNotificationV1.Error"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* DSStatusChangedNotificationV1::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:session.DSStatusChangedNotificationV1)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+  if (this->_internal_has_gameserver()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::gameserver(this), target, stream);
+  }
+
+  // string SessionID = 2 [json_name = "sessionID"];
+  if (!this->_internal_sessionid().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_sessionid().data(), static_cast<int>(this->_internal_sessionid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "session.DSStatusChangedNotificationV1.SessionID");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_sessionid(), target);
+  }
+
+  // string Error = 3 [json_name = "error"];
+  if (!this->_internal_error().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_error().data(), static_cast<int>(this->_internal_error().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "session.DSStatusChangedNotificationV1.Error");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_error(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:session.DSStatusChangedNotificationV1)
+  return target;
+}
+
+size_t DSStatusChangedNotificationV1::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:session.DSStatusChangedNotificationV1)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string SessionID = 2 [json_name = "sessionID"];
+  if (!this->_internal_sessionid().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_sessionid());
+  }
+
+  // string Error = 3 [json_name = "error"];
+  if (!this->_internal_error().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_error());
+  }
+
+  // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+  if (this->_internal_has_gameserver()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *gameserver_);
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData DSStatusChangedNotificationV1::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    DSStatusChangedNotificationV1::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DSStatusChangedNotificationV1::GetClassData() const { return &_class_data_; }
+
+void DSStatusChangedNotificationV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<DSStatusChangedNotificationV1 *>(to)->MergeFrom(
+      static_cast<const DSStatusChangedNotificationV1 &>(from));
+}
+
+
+void DSStatusChangedNotificationV1::MergeFrom(const DSStatusChangedNotificationV1& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:session.DSStatusChangedNotificationV1)
+  GOOGLE_DCHECK_NE(&from, this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_sessionid().empty()) {
+    _internal_set_sessionid(from._internal_sessionid());
+  }
+  if (!from._internal_error().empty()) {
+    _internal_set_error(from._internal_error());
+  }
+  if (from._internal_has_gameserver()) {
+    _internal_mutable_gameserver()->::session::GameServerV1::MergeFrom(from._internal_gameserver());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void DSStatusChangedNotificationV1::CopyFrom(const DSStatusChangedNotificationV1& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:session.DSStatusChangedNotificationV1)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DSStatusChangedNotificationV1::IsInitialized() const {
+  return true;
+}
+
+void DSStatusChangedNotificationV1::InternalSwap(DSStatusChangedNotificationV1* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &sessionid_, lhs_arena,
+      &other->sessionid_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &error_, lhs_arena,
+      &other->error_, rhs_arena
+  );
+  swap(gameserver_, other->gameserver_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DSStatusChangedNotificationV1::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
+      file_level_metadata_notification_2eproto[12]);
+}
+
+// ===================================================================
+
 class UserIDs::_Internal {
  public:
 };
@@ -4864,7 +5248,7 @@ void UserIDs::InternalSwap(UserIDs* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata UserIDs::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[12]);
+      file_level_metadata_notification_2eproto[13]);
 }
 
 // ===================================================================
@@ -5054,7 +5438,7 @@ void Team::InternalSwap(Team* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Team::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[13]);
+      file_level_metadata_notification_2eproto[14]);
 }
 
 // ===================================================================
@@ -5826,7 +6210,7 @@ void GameSessionV1::InternalSwap(GameSessionV1* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata GameSessionV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[14]);
+      file_level_metadata_notification_2eproto[15]);
 }
 
 // ===================================================================
@@ -6289,7 +6673,7 @@ void DSInformationV1::InternalSwap(DSInformationV1* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata DSInformationV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[15]);
+      file_level_metadata_notification_2eproto[16]);
 }
 
 // ===================================================================
@@ -7222,7 +7606,7 @@ void GameServerV1::InternalSwap(GameServerV1* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata GameServerV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[16]);
+      file_level_metadata_notification_2eproto[17]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -7263,6 +7647,9 @@ template<> PROTOBUF_NOINLINE ::session::GameSessionNotificationUserJoinedV1* Are
 }
 template<> PROTOBUF_NOINLINE ::session::GameSessionNotificationMembersChangedV1* Arena::CreateMaybeMessage< ::session::GameSessionNotificationMembersChangedV1 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::session::GameSessionNotificationMembersChangedV1 >(arena);
+}
+template<> PROTOBUF_NOINLINE ::session::DSStatusChangedNotificationV1* Arena::CreateMaybeMessage< ::session::DSStatusChangedNotificationV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::session::DSStatusChangedNotificationV1 >(arena);
 }
 template<> PROTOBUF_NOINLINE ::session::UserIDs* Arena::CreateMaybeMessage< ::session::UserIDs >(Arena* arena) {
   return Arena::CreateMessageInternal< ::session::UserIDs >(arena);
