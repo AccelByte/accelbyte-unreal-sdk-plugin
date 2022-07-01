@@ -79,7 +79,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2BaseSession
 		TArray<FAccelByteModelsV2SessionUser> Members{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
 		FJsonObjectWrapper Attributes{};
-	// This is being moved to the configuration template. Leaving it here until that is implemented on the backend.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
 		EAccelByteV2SessionJoinability JoinType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
@@ -89,7 +88,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2BaseSession
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
 		FDateTime UpdatedAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
-		FAccelByteModelsV2SessionConfigurationTemplate ConfigurationTemplate{};
+		FAccelByteModelsV2SessionConfigurationTemplate Configuration{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
 		int64 Version{};
 };
@@ -186,10 +185,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest
 		FString MatchPool{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
 		TArray<FAccelByteModelsV2GameSessionTeam> Teams{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
+		FString Template_name;
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUpdateRequest: public FAccelByteModelsV2GameSessionCreateRequest
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUpdateRequest : public FAccelByteModelsV2GameSessionCreateRequest
 {
 	GENERATED_BODY();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateRequest")
