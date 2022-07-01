@@ -1890,6 +1890,7 @@ void DispatchSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCall
 	std::string JsonPayloadUTF8;
 	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
 	FString JsonPayload = UTF8_TO_TCHAR(JsonPayloadUTF8.c_str());
+	UE_LOG(LogAccelByteLobby, Error, TEXT("JSON EVENT: %s"), *JsonPayload);
 	DataStruct Result;
 	if(FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Result, 0, 0))
 	{
@@ -1906,13 +1907,18 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		return;
 	}
 
-	FString ProtobufPayloadString;
-	FBase64::Decode(Notif.Payload, ProtobufPayloadString);
+	FString PayloadString;
+	if(!FBase64::Decode(Notif.Payload, PayloadString))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot decode protobuf payload from Base64\nNotification: %s"), *ParsedJsonString);
+		return;
+	}
 
 	session::NotificationEventEnvelope EventEnvelope;
-	if(!EventEnvelope.ParseFromString(TCHAR_TO_UTF8(*ProtobufPayloadString)))
+	const std::string Utf8PayloadString = TCHAR_TO_UTF8(*PayloadString);
+	if(!EventEnvelope.ParsePartialFromString(Utf8PayloadString))
 	{
-		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize protobuf payload\nNotification: %s"), *ParsedJsonString);
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize event protobuf payload\nNotification: %s"), *ParsedJsonString);
 		return;
 	}
 
