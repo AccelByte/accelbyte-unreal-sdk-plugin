@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [14.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/14.0.0%0D13.0.0) (2022-07-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Lobby:** - Remove EAccelByteGeneralUserStatus
+- Renamed Availability to EAvailability
+- Renamed Availability::Availabe to EAvailability::Online
+* **iam:** Refactor/removal AvatarURL/User Profile related Implementation
+
+### Features
+
+* **auth:** Add SnapChatAuth Support ([929fe07](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/929fe07c4eb725494eb9441b527be760571ad09b))
+* **iam:** Login with OIDC in SDK ([5f576e4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5f576e430eb7a4569263d64a8b74b3940d1a8901))
+* **iam:** Refactor Avatar/User Profile Implementation ([0b494f6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0b494f6897bb3adb367e81ce79f6b76c441e8b32))
+* **iam:** SDK Changes for BE Refactor/removal AvatarURL/User Profile related Implementation ([102dc9c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/102dc9caa52944bd3401a2b468d9d7f4d57a3801))
+* **lobby:** add Leader field in lobby models ([fdfd5b5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fdfd5b508c7011149e7afafc627963655c4c0b72))
+* **repoting:** add new enum of USER for reporting player or user ([09e9e4e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/09e9e4efe1a8e5fd6256ad6fd9c299407e5f9e6e))
+* sdk adjustment for avoiding breaking changes and revisioning/reverting of phase 2 cleanup legacy Avatar/User Profile implementation ([b886deb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b886debd51d16e064db3a868a65204b0975d796a))
+* **Tests:** remove tests from module directory ([2129e63](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2129e63efca57f9d0f7d5de3ec90700fd89f5023))
+* **user:** fix query search users encode twice ([db2ea07](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/db2ea071e298d5fa99ad19326c24a762cdc1a2d9))
+
+
+### Bug Fixes
+
+* create ticker alias to support both UE4 FTicker and UE5 FTSTicker ([bf91b2f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bf91b2fa32fd70689229e9f65d62ec057c3a10ef))
+* wrong implementation causing errors ([b0ad23e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b0ad23efe21f07c3ef8987dde94fba7701822d39))
+
+
+### Tests
+
+* add default value to test models and remove unused variables ([bc87073](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bc870737ea17a47a1dd3e4aa1fd3fb031d639b49))
+
+
+### Refactors
+
+* **Lobby:** Change availability type in presence model ([f246a35](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f246a35599830b184a94371c75d5c0980f6526fd))
+
 ## [13.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/13.0.0%0D12.2.1) (2022-06-20)
 
 
