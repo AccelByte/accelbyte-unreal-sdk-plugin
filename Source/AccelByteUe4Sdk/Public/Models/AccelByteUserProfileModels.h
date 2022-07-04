@@ -21,19 +21,19 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString FirstName{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString LastName{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString AvatarSmallUrl{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString AvatarUrl{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString AvatarLargeUrl{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString Status{};
 
@@ -41,10 +41,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileInfo
 	FString Language{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
-	FString Timezone{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString DateOfBirth{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	FString Timezone{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	TMap<FString, FJsonObjectWrapper> CustomAttributes{};
@@ -73,8 +73,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicUserProfileInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString AvatarSmallUrl{};
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString AvatarUrl{};
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString AvatarLargeUrl{};
@@ -97,18 +99,21 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileUpdateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
 	FString FirstName{};
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
 	FString LastName{};
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
 	FString AvatarSmallUrl{};
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
 	FString AvatarUrl{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
 	FString AvatarLargeUrl{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
 	FString Language{};
 
@@ -117,6 +122,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileUpdateRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
 	FString DateOfBirth{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
+	FString ZipCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
+	TMap<FString, FJsonObjectWrapper>  PrivateCustomAttributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
+	TMap<FString, FJsonObjectWrapper>  CustomAttributes{};
 
 	FAccelByteModelsUserProfileUpdateRequest() = default;
 
@@ -130,6 +144,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileUpdateRequest
 		Language = UserProfileInfo.Language;
 		Timezone = UserProfileInfo.Timezone;
 		DateOfBirth = UserProfileInfo.DateOfBirth;
+		ZipCode = UserProfileInfo.ZipCode;
+		PrivateCustomAttributes = UserProfileInfo.PrivateCustomAttributes;
+		CustomAttributes = UserProfileInfo.CustomAttributes;
 	}
 };
 
@@ -143,13 +160,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileCreateRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
 	FString LastName{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
 	FString Language{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
 	FString AvatarSmallUrl{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
 	FString AvatarUrl{};
 
@@ -161,4 +178,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileCreateRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
 	FString DateOfBirth{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
+	TMap<FString, FJsonObjectWrapper> CustomAttributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
+	TMap<FString, FJsonObjectWrapper> PrivateCustomAttributes{};
 };

@@ -375,7 +375,7 @@ void UAccelByteBlueprintsLobby::SetGetAllUserPresenceResponseDelegate(FGetAllFri
     FRegistry::Lobby.SetGetAllUserPresenceResponseDelegate(OnInfoPartyResponseDelegate);
 }
 
-void UAccelByteBlueprintsLobby::SetPresenceStatus(Availability State, FString GameName)
+void UAccelByteBlueprintsLobby::SetPresenceStatus(EAvailability State, FString GameName)
 {
 	FRegistry::Lobby.SendSetPresenceStatus(State, GameName);
 }

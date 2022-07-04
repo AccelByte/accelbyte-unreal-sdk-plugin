@@ -11,6 +11,16 @@
 #include "Models/AccelByteDSMModels.h"
 #include "AccelByteLobbyModels.generated.h"
 
+/** @brief presence enumeration. */
+UENUM(BlueprintType)
+enum class EAvailability : uint8
+{
+	Offline = 0,
+	Online = 1,
+	Busy = 2,
+	Invisible = 3
+};
+
 // Emulate namespace with long class names
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyType
@@ -74,7 +84,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsInfoPartyResponse
 	FString PartyId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-	FString LeaderId{};
+	FString LeaderId{}; // planned to be deprecated
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader{};
 	
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	TArray<FString> Members{};
@@ -124,11 +137,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreatePartyResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FString Code{};
 	
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FString PartyId{};
-	
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-	FString LeaderId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString LeaderId{}; // planned to be deprecated
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader{};
 	
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	TArray<FString> Members{};
@@ -160,10 +176,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLeavePartyNotice
     GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-    FString UserID{};
+	FString UserID{};
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-    FString LeaderID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString LeaderID{}; // planned to be deprecated
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader{};
 };
 
 //Invite user to party
@@ -199,9 +218,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyGetInvitedNotice
     GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-    FString From{};
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString From{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FString PartyId{};
 	
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
@@ -221,7 +240,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyJoinResponse
 	FString PartyId{};
 	
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-	FString LeaderId{};
+	FString LeaderId{}; // planned to be deprecated
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	TArray<FString> Members{};
@@ -266,7 +288,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyRejectNotice
 	FString PartyId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-	FString LeaderId{};
+	FString LeaderId{};// planned to be deprecated
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FString UserId{};
@@ -328,7 +353,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGotKickedFromPartyNotice
     GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-	FString LeaderId{};
+	FString LeaderId{};// planned to be deprecated
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader{};
 	
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FString UserId{};
@@ -344,7 +372,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsKickNotice
     GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-    FString LeaderId{};
+	FString LeaderId{};// planned to be deprecated
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader{};
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FString UserId{};
@@ -362,7 +393,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyPromoteLeaderResponse
 	FString PartyId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-	FString LeaderId{};
+	FString LeaderId{};// planned to be deprecated
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	TArray<FString> Members{};
@@ -531,7 +565,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUsersPresenceNotice
     FString UserID{};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-    FString Availability{};
+    EAvailability Availability{};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
     FString Activity{};
@@ -555,7 +589,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetOnlineUsersResponse
 	TArray<FString> friendsId{};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-    TArray<FString> availability{};
+    TArray<EAvailability> availability{};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
     TArray<FString> activity{};
@@ -872,26 +906,6 @@ struct FAccelByteModelsGetFriendshipStatusStringResponse
 	FString friendshipStatus{};
 };
 
-/** @brief presence enumeration. */
-UENUM(BlueprintType)
-enum class Availability : uint8
-{
-	Offline = 0,
-	Availabe = 1,
-	Busy = 2,
-	Invisible = 3
-};
-
-/** @brief general presence enumeration. */
-UENUM(BlueprintType)
-enum class EAccelByteGeneralUserStatus : uint8
-{
-	Offline UMETA(DisplayName = "offline"),
-	Online UMETA(DisplayName = "online"),
-	Busy UMETA(DisplayName = "busy"),
-	Invisible UMETA(DisplayName = "invisible")
-};
-
 USTRUCT(BlueprintType)
 struct FAccelByteModelsAcceptFriendsNotif
 {
@@ -955,7 +969,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatusNotif
 	FString UserID{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
-	EAccelByteGeneralUserStatus Availability{};
+	EAvailability Availability{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
 	FString Activity{};

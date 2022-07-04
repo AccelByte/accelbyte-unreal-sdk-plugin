@@ -19,7 +19,7 @@ struct FPresenceStatus
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	Availability Availability{};
+	EAvailability Availability{};
 
 	UPROPERTY(BlueprintReadWrite)
 	FString Activity{};
