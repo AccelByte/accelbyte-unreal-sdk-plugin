@@ -1890,7 +1890,6 @@ void DispatchSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCall
 	std::string JsonPayloadUTF8;
 	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
 	FString JsonPayload = UTF8_TO_TCHAR(JsonPayloadUTF8.c_str());
-	UE_LOG(LogAccelByteLobby, Error, TEXT("JSON EVENT: %s"), *JsonPayload);
 	DataStruct Result;
 	if(FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Result, 0, 0))
 	{
@@ -1903,7 +1902,7 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	FAccelByteModelsSessionNotificationMessage Notif;
 	if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif, 0, 0) == false)
 	{
-		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
 		return;
 	}
 
