@@ -213,6 +213,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyCreateRequest
 		FJsonObjectWrapper Attributes{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
 		EAccelByteV2SessionJoinability JoinType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
+		FString Template_name{};
 };
 
 USTRUCT(BlueprintType)

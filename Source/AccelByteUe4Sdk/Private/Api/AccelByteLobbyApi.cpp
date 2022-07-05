@@ -1910,17 +1910,21 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	FAccelByteModelsSessionNotificationMessage Notif;
 	if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif, 0, 0) == false)
 	{
-		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
 		return;
 	}
 
-	FString ProtobufPayloadString;
-	FBase64::Decode(Notif.Payload, ProtobufPayloadString);
+	TArray<uint8> ProtobufPayload;
+	if(!FBase64::Decode(Notif.Payload, ProtobufPayload))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot decode protobuf payload from Base64\nNotification: %s"), *ParsedJsonString);
+		return;
+	}
 
 	session::NotificationEventEnvelope EventEnvelope;
-	if(!EventEnvelope.ParseFromString(TCHAR_TO_UTF8(*ProtobufPayloadString)))
+	if(!EventEnvelope.ParseFromArray(ProtobufPayload.GetData(), ProtobufPayload.Num()))
 	{
-		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize protobuf payload\nNotification: %s"), *ParsedJsonString);
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize event protobuf payload\nNotification: %s"), *ParsedJsonString);
 		return;
 	}
 

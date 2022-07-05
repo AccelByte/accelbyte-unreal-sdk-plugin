@@ -136,121 +136,110 @@ void Item::GetItemByAppId(FString const& AppId, FString const& Language, FString
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError)
+FString Item::ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy)
+{ 
+	switch (SortBy)
+	{
+	case EAccelByteItemListSortBy::NAME:
+		return FGenericPlatformHttp::UrlEncode(TEXT("name"));
+	case EAccelByteItemListSortBy::NAME_DESC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("name:desc"));
+	case EAccelByteItemListSortBy::CREATEDAT:
+		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt"));
+	case EAccelByteItemListSortBy::CREATEDAT_ASC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt:asc"));
+	case EAccelByteItemListSortBy::CREATEDAT_DESC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt:desc"));
+	case EAccelByteItemListSortBy::UPDATEDAT:
+		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt"));
+	case EAccelByteItemListSortBy::UPDATEDAT_ASC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt:asc"));
+	case EAccelByteItemListSortBy::UPDATEDAT_DESC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt:desc"));
+	case EAccelByteItemListSortBy::DISPLAYORDER:
+		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder"));
+	case EAccelByteItemListSortBy::DISPLAYORDER_ASC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder:asc"));
+	case EAccelByteItemListSortBy::DISPLAYORDER_DESC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder:desc"));
+	}
+	return TEXT("");
+}
+	
+void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit,
+	THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, TArray<EAccelByteItemListSortBy> SortBy)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
     FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace);
-    bool bIsNotFirst = false;
 
+	FString Query = TEXT("");
 	if (!ItemCriteria.CategoryPath.IsEmpty())
-    {
-        bIsNotFirst = true; Url.Append("?");
-        Url.Append(FString::Printf(TEXT("categoryPath=%s"), *FGenericPlatformHttp::UrlEncode(ItemCriteria.CategoryPath)));
+    { 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("categoryPath=%s"), *FGenericPlatformHttp::UrlEncode(ItemCriteria.CategoryPath))); 
     }
     if (!ItemCriteria.Region.IsEmpty())
-    {
-        if (bIsNotFirst)
-        {
-            Url.Append("&");
-        }
-        else
-        {
-            bIsNotFirst = true; Url.Append("?");
-        }
-        Url.Append(FString::Printf(TEXT("region=%s"), *ItemCriteria.Region));
+    { 
+    	Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+        Query.Append(FString::Printf(TEXT("region=%s"), *ItemCriteria.Region));
     }
     if (!ItemCriteria.Language.IsEmpty())
-	{
-		if (bIsNotFirst)
-		{
-			Url.Append("&");
-		}
-		else
-		{
-			bIsNotFirst = true; Url.Append("?");
-		}
-		Url.Append(FString::Printf(TEXT("language=%s"), *ItemCriteria.Language));
+	{ 
+    	Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&")); 
+		Query.Append(FString::Printf(TEXT("language=%s"), *ItemCriteria.Language));
 	}	
 	if (ItemCriteria.ItemType != EAccelByteItemType::NONE)
-	{
-		if (bIsNotFirst)
-		{
-			Url.Append("&");
-		}
-		else
-		{
-			bIsNotFirst = true; Url.Append("?");
-		}
-		Url.Append(FString::Printf(TEXT("itemType=%s"), *EAccelByteItemTypeToString(ItemCriteria.ItemType)));
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("itemType=%s"), *EAccelByteItemTypeToString(ItemCriteria.ItemType)));
 	}
 	if (ItemCriteria.AppType != EAccelByteAppType::NONE)
-	{
-		if (bIsNotFirst)
-		{
-			Url.Append("&");
-		}
-		else
-		{
-			bIsNotFirst = true; Url.Append("?");
-		}
-		Url.Append(FString::Printf(TEXT("appType=%s"), *EAccelByteAppTypeToString(ItemCriteria.AppType)));
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&")); 
+		Query.Append(FString::Printf(TEXT("appType=%s"), *EAccelByteAppTypeToString(ItemCriteria.AppType)));
 	}
 	if (ItemCriteria.Tags.Num() > 0)
-	{
-		if (bIsNotFirst)
-		{
-			Url.Append("&");
-		}
-		else
-		{
-			bIsNotFirst = true; Url.Append("?");
-		}
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
 		for (int i = 0; i < ItemCriteria.Tags.Num(); i++)
 		{
-			Url.Append((i == 0) ? TEXT("tags=") : TEXT(",")).Append(ItemCriteria.Tags[i]);
+			FString ItemCriteriaTag = FString::Printf(TEXT(",%s"), *ItemCriteria.Tags[i]);
+			Query.Append((i == 0) ? TEXT("tags=") : ItemCriteriaTag);
 		}
 	}
 	if (ItemCriteria.Features.Num() > 0)
-	{
-		if (bIsNotFirst)
-		{
-			Url.Append("&");
-		}
-		else
-		{
-			bIsNotFirst = true; Url.Append("?");
-		}
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
 		for (int i = 0; i < ItemCriteria.Features.Num(); i++)
 		{
-			Url.Append((i == 0) ? TEXT("features=") : TEXT(",")).Append(ItemCriteria.Features[i]);
+			FString ItemCriteriaFeature = FString::Printf(TEXT(",%s"), *ItemCriteria.Features[i]);
+			Query.Append((i == 0) ? TEXT("features=") : ItemCriteriaFeature);
 		}
 	}
 	if (Offset > 0)
-	{
-		if (bIsNotFirst)
-		{
-			Url.Append("&");
-		}
-		else
-		{
-			bIsNotFirst = true; Url.Append("?");
-		}
-		Url.Append(FString::Printf(TEXT("offset=%d"), Offset));
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
 	}
 	if (Limit > 0)
+	{ 
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+	}	
+	if (SortBy.Num() > 0 )
 	{
-		if (bIsNotFirst)
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		for (int i = 0; i < SortBy.Num(); i++)
 		{
-			Url.Append("&");
+			FString sortByString = FString::Printf(TEXT("sortBy=%s"), *ConvertItemSortByToString(SortBy[i]));
+			FString sortByStringAppend = FString::Printf(TEXT(",%s"), *ConvertItemSortByToString(SortBy[i]));
+			Query.Append((i == 0) ? sortByString : sortByStringAppend);
 		}
-		else
-		{
-			bIsNotFirst = true; Url.Append("?");
-		}
-		Url.Append(FString::Printf(TEXT("limit=%d"), Limit));
 	}
+	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+	
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
