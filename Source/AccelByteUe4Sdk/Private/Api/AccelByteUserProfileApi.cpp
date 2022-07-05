@@ -290,6 +290,62 @@ void UserProfile::GetUserProfile(const FString& UserId, const THandler<FAccelByt
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void UserProfile::GenerateUploadURL(const FString& Folder, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/folders/%s/files"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace(), *Folder);
+	FString Verb			= TEXT("POST");
+	FString ContentType		= TEXT("application/json");
+	FString Accept			= TEXT("application/json");
+	FString Content			= TEXT("");
+	
+	FString QueryParam = FAccelByteUtilities::CreateQueryParams({
+		{ TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()},
+	});
+	Url.Append(QueryParam);
+	
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void UserProfile::GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError,
+	EAccelByteUploadCategory Category)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/files"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace(), *UserId);
+	FString Verb			= TEXT("POST");
+	FString ContentType		= TEXT("application/json");
+	FString Accept			= TEXT("application/json");
+	FString Content			= TEXT("");
+	
+	FString QueryParam = FAccelByteUtilities::CreateQueryParams({
+		{ TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()},
+		{ TEXT("category"), FAccelByteUtilities::GetUEnumValueAsString(Category).ToLower()}, 
+	});
+	Url.Append(QueryParam); 
+	
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
   
 } // Namespace Api
 } // Namespace AccelByte

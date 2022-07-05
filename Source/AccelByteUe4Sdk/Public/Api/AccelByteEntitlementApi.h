@@ -257,6 +257,15 @@ public:
 	*/
 	void SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
+	/**
+	* @brief Synchronize Epic Game Durable/dlc Items.
+	* 
+	* @param EpicGamesJwtToken Epic game Jwt token.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void SyncEpicGameDurableItems(FString const& EpicGamesJwtToken, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	
 private:
 	Entitlement() = delete;
 	Entitlement(Entitlement const&) = delete;
