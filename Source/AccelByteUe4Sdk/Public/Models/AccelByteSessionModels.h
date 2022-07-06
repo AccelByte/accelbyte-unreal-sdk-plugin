@@ -22,10 +22,13 @@ UENUM(BlueprintType)
 enum class EAccelByteV2SessionMemberStatus : uint8
 {
 	EMPTY = 0, // Used for performing a query without a status 
-	ACTIVE,
-	INACTIVE,
 	INVITED,
-	TIMEOUT
+	JOINED,
+	CONNECTED,
+	LEFT,
+	DROPPED,
+	REJECTED,
+	KICKED
 };
 
 USTRUCT(BlueprintType)
@@ -113,7 +116,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
 		EAccelByteV2SessionJoinability JoinType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
-		FString Template_name{};
+		FString ConfigurationName{};
 };
 
 USTRUCT(BlueprintType)
