@@ -110,6 +110,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionDSInformation
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSStatusChangedNotif
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+	FAccelByteModelsServerInfo Server{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+	FString SessionId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+	FString Error{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2CustomGameSettings
 {
 	GENERATED_BODY();
@@ -145,7 +157,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSession : public FAccelByteMode
 		FString MatchPool{};
 };
 
-USTRUCT(BlueprintType)
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSRequest
 {
@@ -192,6 +203,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUpdateRequest : public F
 		int64 Version{};
 };
 
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySession : public FAccelByteModelsV2BaseSession
 {
 	GENERATED_BODY()
