@@ -23,10 +23,13 @@ UENUM(BlueprintType)
 enum class EAccelByteV2SessionMemberStatus : uint8
 {
 	EMPTY = 0, // Used for performing a query without a status 
-	ACTIVE,
-	INACTIVE,
 	INVITED,
-	TIMEOUT
+	JOINED,
+	CONNECTED,
+	LEFT,
+	DROPPED,
+	REJECTED,
+	KICKED
 };
 
 USTRUCT(BlueprintType)
