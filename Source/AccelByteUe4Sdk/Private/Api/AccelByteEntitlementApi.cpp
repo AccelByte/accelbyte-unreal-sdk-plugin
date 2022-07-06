@@ -495,5 +495,23 @@ void Entitlement::SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlemen
 	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError); 
 }
 
+void Entitlement::SyncEpicGameDurableItems(FString const& EpicGamesJwtToken, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	// Url 
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/epicgames/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());	 
+	// Content Body 
+	FString Content = TEXT("");
+	FJsonObject DataJson;
+	DataJson.SetStringField("epicGamesJwtToken", EpicGamesJwtToken); 
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+ 
+	// Api Request 
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError); 
+}
+
 } // Namespace Api
 }

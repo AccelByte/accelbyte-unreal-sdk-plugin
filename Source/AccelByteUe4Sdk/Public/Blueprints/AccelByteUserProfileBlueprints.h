@@ -28,4 +28,12 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateUserProfileSuccess, const FAccelByteModelsUserProfileInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
 	static void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const FCreateUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGenerateUploadURLSuccess, const FAccelByteModelsUserProfileUploadURLResult&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
+	static void GenerateUploadURL(const FString& Folder, EAccelByteFileType FileType, const FGenerateUploadURLSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGenerateUploadURLForUserContentSuccess, const FAccelByteModelsUserProfileUploadURLResult&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
+	static void GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, const FGenerateUploadURLForUserContentSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 };

@@ -8,7 +8,7 @@
 #include "Http.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteHttpRetryScheduler.h" 
 
 namespace AccelByte
 {
@@ -36,8 +36,10 @@ public:
 	 * @param Namespace The Namespace.
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsCurrencyList&.
 	 * @param OnError This will be called when the operation failed.
+	 * @param CurrencyType The Currency type.
 	 */
-	void GetCurrencyList(FString const& Namespace, THandler<TArray<FAccelByteModelsCurrencyList>> const& OnSuccess, FErrorHandler const& OnError);
+	void GetCurrencyList(FString const& Namespace, THandler<TArray<FAccelByteModelsCurrencyList>> const& OnSuccess, FErrorHandler const& OnError,
+		EAccelByteCurrencyType CurrencyType = EAccelByteCurrencyType::NONE);
 
 private:
 	Currency() = delete;

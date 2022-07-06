@@ -66,7 +66,7 @@ public:
 	void GetItemByAppId(FString const& AppId, FString const& Language, FString const& Region, FDModelsItemInfoResponse OnSuccess, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
-	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit, FDModelsItemPagingSlicedResultResponse OnSuccess, FDErrorHandler OnError);
+	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit, TArray<EAccelByteItemListSortBy> SortBy, FDModelsItemPagingSlicedResultResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, FDModelsItemPagingSlicedResultResponse OnSuccess, FDErrorHandler OnError);
