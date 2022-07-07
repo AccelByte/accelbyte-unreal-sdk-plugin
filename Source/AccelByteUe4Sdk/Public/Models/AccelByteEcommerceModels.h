@@ -227,6 +227,23 @@ enum class EAccelByteItemListSortBy : uint8
 	DISPLAYORDER_DESC
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteCycle : uint8
+{
+	WEEKLY,
+	MONTHLY,
+	QUARTERLY,
+	YEARLY 
+};
+
+UENUM(BlueprintType)
+enum class EAccelBytePredicateType : uint8
+{
+	EntitlementPredicate,
+	SeasonPassPredicate,
+	SeasonTierPredicate
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -256,6 +273,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemRegionDataItem
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
 	FString CurrencyNamespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+	int TrialPrice{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
 	FDateTime PurchaseAt{0};
@@ -295,6 +315,70 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemImage
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemRecurring
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | Image")
+	EAccelByteCycle Cycle{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | Image")
+	int FixedFreeDays{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | Image")
+	int FixedTrialCycles{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | Image")
+	int GraceDays{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelItemPredicate
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	EAccelBytePredicateType PredicateType{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FString Comparison{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FString AnyOf{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	TArray<FString> Values{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FString Value{};
+};
+
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelItemConditionGroup
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	TArray<FAccelByteModelItemPredicate> Predicate{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FString Operator{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelItemPurchaseCondition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	TArray<FAccelByteModelItemConditionGroup> FAccelByteModelItemConditionGroups{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 {
 	GENERATED_BODY()
@@ -316,6 +400,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FString AppType{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	EAccelByteSeasonType SeasonType{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FString BaseAppId{};
@@ -345,8 +432,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	EAccelByteItemStatus Status{EAccelByteItemStatus::NONE};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	EAccelByteItemType ItemType{EAccelByteItemType::NONE};
+	bool Listable{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	bool Purchasable{};
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	EAccelByteItemType ItemType{EAccelByteItemType::NONE};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FString TargetNamespace{};
 
@@ -366,11 +459,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	TArray<FAccelByteModelsItemRegionDataItem> RegionData{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FString> ItemIds{};
+	FAccelByteModelsItemRecurring Recurring{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	TArray<FString> ItemIds{}; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	TArray<FString> BoundItemIds{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	TArray<FString> Tags{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	TArray<FString> Features{};
 
@@ -403,6 +502,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FDateTime UpdatedAt{0};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FAccelByteModelItemPurchaseCondition PurchaseCondition{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FJsonObjectWrapper LocalExt{};
@@ -410,8 +512,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	TMap<FString, int32> ItemQty{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	bool Purchasable{};
 };
 
 USTRUCT(BlueprintType)
@@ -1740,3 +1840,42 @@ struct FAccelByteModelsQueryReward
 };
 
 #pragma endregion RewardModelsField
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformPredicateValidateResults
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	FString PredicateName{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	FString Validated{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	TArray<FString> Matched{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	TArray<FString> Unmatched{}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformValidateDetails
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	TArray<FAccelByteModelsPlatformPredicateValidateResults> PredicateValidateResults{}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformValidateUserItemPurchaseResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	FString ItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	FString Sku{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	bool Purchasable{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
+	TArray<FAccelByteModelsPlatformValidateDetails> ValidateDetails{};  
+};
