@@ -179,7 +179,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
 		TArray<FAccelByteModelsV2GameSessionTeam> Teams{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
-		FString Configuration_name;
+		FString ConfigurationName;
 };
 
 USTRUCT(BlueprintType)
