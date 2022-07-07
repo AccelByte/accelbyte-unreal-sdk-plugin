@@ -168,11 +168,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | DSRequest")
 		FString GameMode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | DSRequest")
-		int32 MinPlayer{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | DSRequest")
 		TArray<FString> RequestedRegions{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | DSRequest")
-		FString ServerName{};
 };
 
 USTRUCT(BlueprintType)
@@ -192,7 +188,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
 		TArray<FAccelByteModelsV2GameSessionTeam> Teams{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
-		FString Template_name;
+		FString Configuration_name;
 };
 
 USTRUCT(BlueprintType)
