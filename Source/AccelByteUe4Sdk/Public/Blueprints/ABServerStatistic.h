@@ -25,19 +25,19 @@ public:
 	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
 	void CreateUserStatItems(FString const & UserId, TArray<FString> const& StatCodes, FDArrayBulkStatItemOperationDelegate OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
 	void GetAllUserStatItems(FString const& UserId, FDUserStatItemPagingSlicedDelegate OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
 	void GetUserStatItems(FString const& UserId, TArray<FString> const& StatCodes, TArray<FString> const& Tags, FDUserStatItemPagingSlicedDelegate OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
 	void IncrementManyUsersStatItems(TArray<FAccelByteModelsBulkUserStatItemInc> const& Data, FDArrayBulkStatItemOperationDelegate OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
 	void IncrementUserStatItems(FString const& UserId, TArray<FAccelByteModelsBulkStatItemInc> const& Data, FDArrayBulkStatItemOperationDelegate OnSuccess, FDErrorHandler OnError);
 
 private:

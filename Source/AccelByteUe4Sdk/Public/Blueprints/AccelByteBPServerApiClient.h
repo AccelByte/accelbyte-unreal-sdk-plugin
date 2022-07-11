@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABServerOauth2.h"
 #include "ABServerDSM.h"
@@ -26,7 +25,7 @@ class UABServerCredentials final : public UObject
 public:
 	void SetServerApiClient(FServerApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Credentials")
 	FString GetAccessToken();
 
 private:
@@ -43,28 +42,28 @@ public:
 
 	void SetServerApiClient(FServerApiClientPtr const& NewApiClientPtr);
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerCredentials* Credentials;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerOauth2* ServerOauth2;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerDSM* ServerDSM;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerLobby* ServerLobby;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerMatchmaking* ServerMatchmaking;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerSessionBrowser* ServerSessionBrowser;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerAchievement* ServerAchievement;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerStatistic* ServerStatistic;
 private:
 	FServerApiClientPtr ApiClientPtr;
@@ -75,6 +74,6 @@ class UServerMultiRegistry final : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | MultiRegistry | Api")
 	static UServerApiClient* GetServerApiClient(FString const& Key);
 };

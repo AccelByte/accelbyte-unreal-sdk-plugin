@@ -33,7 +33,7 @@ class UABCloudSave : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void SaveUserRecord(
 		FString const& Key,
 		FJsonObjectWrapper RecordRequest,
@@ -41,20 +41,20 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void GetUserRecord(
 		FString const& Key,
 		FDModelsUserRecord const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void GetPublicUserRecord(
 		FString const& Key,
 		FString const& UserId,
 		FDModelsUserRecord const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceUserRecord(
 		FString const& Key,
 		FJsonObjectWrapper RecordRequest,
@@ -62,7 +62,7 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceUserRecordCheckLatest(
 		FString const& Key,
 		FDateTime const LastUpdated,
@@ -70,7 +70,7 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceUserRecordCheckLatestRetry(
 		int TryAttempt,
 		FString const& Key,
@@ -79,33 +79,33 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void DeleteUserRecord(
 		FString const& Key,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void SaveGameRecord(
 		FString const& Key,
 		FJsonObjectWrapper RecordRequest,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void GetGameRecord(
 		FString const& Key,
 		FDModelsGameRecord const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceGameRecord(
 		FString const& Key,
 		FJsonObjectWrapper RecordRequest,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceGameRecordCheckLatest(
 		FString const& Key,
 		FDateTime const LastUpdated,
@@ -113,7 +113,7 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceGameRecordCheckLatestRetry(
 		int TryAttempt,
 		FString const& Key,
@@ -122,7 +122,7 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void DeleteGameRecord(
 		FString const& Key,
 		FDHandler const& OnSuccess,

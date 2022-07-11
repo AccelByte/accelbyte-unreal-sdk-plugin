@@ -18,10 +18,10 @@ struct FSetSessionAttributeRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionAttribute | Api | Models | Attribute")
 	FString Key;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionAttribute | Api | Models | Attribute")
 	FString Value;
 };
 
@@ -30,7 +30,7 @@ struct FGetSessionAttributeRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionAttribute | Api | Models | Attribute")
 	FString Key;
 };
 
@@ -48,19 +48,19 @@ public:
 
 //Request-Response
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionAttribute")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionAttribute | Api")
 	FString SetSessionAttribute(
 		FSetSessionAttributeRequest const& Request,
 		FDSetSessionAttributeResponse OnResponse,
 		FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionAttribute")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionAttribute | Api")
 	FString GetSessionAttribute(
 		FGetSessionAttributeRequest const& Request,
 		FDGetSessionAttributeResponse OnResponse,
 		FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionAttribute")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionAttribute | Api")
 	FString GetAllSessionAttribute(
 		FDGetAllSessionAttributeResponse OnResponse,
 		FDErrorHandler OnError);

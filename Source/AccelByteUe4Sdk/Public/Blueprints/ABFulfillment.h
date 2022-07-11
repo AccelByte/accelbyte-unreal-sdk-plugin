@@ -27,7 +27,7 @@ public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
 public: 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Fulfillment")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Fulfillment | Api")
 	void RedeemCode(FString const& Code, FString const& Region, FString const& Language, FDAccelByteModelsFulfillmentResponse OnSuccess, FDErrorHandler OnError);
 
 private:
