@@ -64,20 +64,6 @@ struct UserV1DefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT UserV1DefaultTypeInternal _UserV1_default_instance_;
-constexpr SessionConfigV1::SessionConfigV1(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : max_size_(0)
-  , initial_join_timeout_(0)
-  , rejoin_timeout_(0){}
-struct SessionConfigV1DefaultTypeInternal {
-  constexpr SessionConfigV1DefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~SessionConfigV1DefaultTypeInternal() {}
-  union {
-    SessionConfigV1 _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SessionConfigV1DefaultTypeInternal _SessionConfigV1_default_instance_;
 constexpr PartySessionV1::PartySessionV1(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : members_()
@@ -88,7 +74,7 @@ constexpr PartySessionV1::PartySessionV1(
   , created_at_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , updated_at_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , leader_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , config_(nullptr)
+  , configuration_(nullptr)
   , version_(0){}
 struct PartySessionV1DefaultTypeInternal {
   constexpr PartySessionV1DefaultTypeInternal()
@@ -99,6 +85,22 @@ struct PartySessionV1DefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PartySessionV1DefaultTypeInternal _PartySessionV1_default_instance_;
+constexpr SessionConfigV1::SessionConfigV1(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , joinability_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , deployment_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , min_players_(0)
+  , max_players_(0){}
+struct SessionConfigV1DefaultTypeInternal {
+  constexpr SessionConfigV1DefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~SessionConfigV1DefaultTypeInternal() {}
+  union {
+    SessionConfigV1 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SessionConfigV1DefaultTypeInternal _SessionConfigV1_default_instance_;
 constexpr PartyNotificationUserJoinedV1::PartyNotificationUserJoinedV1(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : members_()
@@ -256,7 +258,7 @@ constexpr GameSessionV1::GameSessionV1(
   , match_pool_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , game_mode_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , backfill_ticket_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , config_(nullptr)
+  , configuration_(nullptr)
   , dsinformationv1_(nullptr)
   , version_(0){}
 struct GameSessionV1DefaultTypeInternal {
@@ -273,10 +275,7 @@ constexpr DSInformationV1::DSInformationV1(
   : requested_regions_()
   , requested_at_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , status_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , client_version_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , deployment_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , gameserver_(nullptr)
-  , min_players_(0){}
+  , gameserver_(nullptr){}
 struct DSInformationV1DefaultTypeInternal {
   constexpr DSInformationV1DefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -350,15 +349,6 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::session::UserV1, platform_id_),
   PROTOBUF_FIELD_OFFSET(::session::UserV1, platform_user_id_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, max_size_),
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, initial_join_timeout_),
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, rejoin_timeout_),
-  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -371,9 +361,20 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, join_type_),
   PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, created_at_),
   PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, updated_at_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, config_),
+  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, configuration_),
   PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, version_),
   PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, leader_id_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, name_),
+  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, joinability_),
+  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, min_players_),
+  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, max_players_),
+  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, deployment_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserJoinedV1, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -476,7 +477,7 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, join_type_),
   PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, created_at_),
   PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, updated_at_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, config_),
+  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, configuration_),
   PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, version_),
   PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, match_pool_),
   PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, game_mode_),
@@ -492,10 +493,7 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, gameserver_),
   PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, requested_regions_),
   PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, requested_at_),
-  PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, min_players_),
   PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, status_),
-  PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, client_version_),
-  PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, deployment_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::session::GameServerV1, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -523,29 +521,29 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::session::NotificationEventEnvelope)},
   { 18, -1, -1, sizeof(::session::UserV1)},
-  { 29, -1, -1, sizeof(::session::SessionConfigV1)},
-  { 38, -1, -1, sizeof(::session::PartySessionV1)},
-  { 54, -1, -1, sizeof(::session::PartyNotificationUserJoinedV1)},
-  { 62, -1, -1, sizeof(::session::PartyNotificationMembersChangedV1)},
-  { 72, -1, -1, sizeof(::session::PartyNotificationUserInvitedV1)},
-  { 80, -1, -1, sizeof(::session::PartyNotificationUserRejectV1)},
-  { 89, -1, -1, sizeof(::session::PartyNotificationUserKickedV1)},
-  { 96, -1, -1, sizeof(::session::GameSessionNotificationUserInvitedV1)},
-  { 103, -1, -1, sizeof(::session::GameSessionNotificationUserJoinedV1)},
-  { 111, -1, -1, sizeof(::session::GameSessionNotificationMembersChangedV1)},
-  { 120, -1, -1, sizeof(::session::DSStatusChangedNotificationV1)},
-  { 129, -1, -1, sizeof(::session::UserIDs)},
-  { 136, -1, -1, sizeof(::session::Team)},
-  { 143, -1, -1, sizeof(::session::GameSessionV1)},
-  { 163, -1, -1, sizeof(::session::DSInformationV1)},
-  { 176, -1, -1, sizeof(::session::GameServerV1)},
+  { 29, -1, -1, sizeof(::session::PartySessionV1)},
+  { 45, -1, -1, sizeof(::session::SessionConfigV1)},
+  { 56, -1, -1, sizeof(::session::PartyNotificationUserJoinedV1)},
+  { 64, -1, -1, sizeof(::session::PartyNotificationMembersChangedV1)},
+  { 74, -1, -1, sizeof(::session::PartyNotificationUserInvitedV1)},
+  { 82, -1, -1, sizeof(::session::PartyNotificationUserRejectV1)},
+  { 91, -1, -1, sizeof(::session::PartyNotificationUserKickedV1)},
+  { 98, -1, -1, sizeof(::session::GameSessionNotificationUserInvitedV1)},
+  { 105, -1, -1, sizeof(::session::GameSessionNotificationUserJoinedV1)},
+  { 113, -1, -1, sizeof(::session::GameSessionNotificationMembersChangedV1)},
+  { 122, -1, -1, sizeof(::session::DSStatusChangedNotificationV1)},
+  { 131, -1, -1, sizeof(::session::UserIDs)},
+  { 138, -1, -1, sizeof(::session::Team)},
+  { 145, -1, -1, sizeof(::session::GameSessionV1)},
+  { 165, -1, -1, sizeof(::session::DSInformationV1)},
+  { 175, -1, -1, sizeof(::session::GameServerV1)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_NotificationEventEnvelope_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_UserV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_SessionConfigV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartySessionV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_SessionConfigV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartyNotificationUserJoinedV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartyNotificationMembersChangedV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartyNotificationUserInvitedV1_default_instance_),
@@ -592,88 +590,87 @@ const char descriptor_table_protodef_notification_2eproto[] PROTOBUF_SECTION_VAR
   "Updated\022g\n\035DSStatusChangedNotificationV1"
   "\030\013 \001(\0132&.session.DSStatusChangedNotifica"
   "tionV1H\000R\026OnDSStatusChangedNotifB\t\n\007payl"
-  "oad\"\232\001\n\006UserV1\022\017\n\002id\030\001 \001(\tR\003_id\022\026\n\006statu"
-  "s\030\002 \001(\tR\006status\022\034\n\tupdatedAt\030\003 \001(\tR\tupda"
-  "tedAt\022\037\n\013platform_id\030\004 \001(\tR\nplatformID\022("
-  "\n\020platform_user_id\030\005 \001(\tR\016platformUserID"
-  "\"\205\001\n\017SessionConfigV1\022\031\n\010max_size\030\001 \001(\005R\007"
-  "maxSize\0220\n\024initial_join_timeout\030\002 \001(\005R\022i"
-  "nitialJoinTimeout\022%\n\016rejoin_timeout\030\003 \001("
-  "\005R\rrejoinTimeout\"\317\002\n\016PartySessionV1\022\017\n\002i"
-  "d\030\001 \001(\tR\003_id\022\034\n\tnamespace\030\002 \001(\tR\tnamespa"
-  "ce\022)\n\007members\030\003 \003(\0132\017.session.UserV1R\007me"
-  "mbers\022\036\n\nattributes\030\004 \001(\014R\nattributes\022\033\n"
-  "\tjoin_type\030\005 \001(\tR\010joinType\022\035\n\ncreated_at"
-  "\030\006 \001(\tR\tcreatedAt\022\035\n\nupdated_at\030\007 \001(\tR\tu"
-  "pdatedAt\0220\n\006config\030\010 \001(\0132\030.session.Sessi"
-  "onConfigV1R\006config\022\031\n\007version\030\t \001(\005R\010_ve"
-  "rsion\022\033\n\tleader_id\030\n \001(\tR\010leaderID\"d\n\035Pa"
-  "rtyNotificationUserJoinedV1\022)\n\007members\030\001"
-  " \003(\0132\017.session.UserV1R\007members\022\030\n\007PartyI"
-  "D\030\002 \001(\tR\007partyID\"\240\001\n!PartyNotificationMe"
-  "mbersChangedV1\022)\n\007members\030\001 \003(\0132\017.sessio"
-  "n.UserV1R\007members\022\030\n\007PartyID\030\002 \001(\tR\007part"
-  "yID\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\022\032\n\010Leade"
-  "rID\030\004 \001(\tR\010leaderID\"V\n\036PartyNotification"
-  "UserInvitedV1\022\032\n\010senderID\030\001 \001(\tR\010senderI"
-  "D\022\030\n\007PartyID\030\002 \001(\tR\007partyID\"\204\001\n\035PartyNot"
-  "ificationUserRejectV1\022)\n\007members\030\001 \003(\0132\017"
+  "oad\"\231\001\n\006UserV1\022\016\n\002id\030\001 \001(\tR\002id\022\026\n\006status"
+  "\030\002 \001(\tR\006status\022\034\n\tupdatedAt\030\003 \001(\tR\tupdat"
+  "edAt\022\037\n\013platform_id\030\004 \001(\tR\nplatformID\022(\n"
+  "\020platform_user_id\030\005 \001(\tR\016platformUserID\""
+  "\333\002\n\016PartySessionV1\022\016\n\002id\030\001 \001(\tR\002id\022\034\n\tna"
+  "mespace\030\002 \001(\tR\tnamespace\022)\n\007members\030\003 \003("
+  "\0132\017.session.UserV1R\007members\022\036\n\nattribute"
+  "s\030\004 \001(\014R\nattributes\022\033\n\tjoin_type\030\005 \001(\tR\010"
+  "joinType\022\035\n\ncreated_at\030\006 \001(\tR\tcreatedAt\022"
+  "\035\n\nupdated_at\030\007 \001(\tR\tupdatedAt\022>\n\rconfig"
+  "uration\030\010 \001(\0132\030.session.SessionConfigV1R"
+  "\rconfiguration\022\030\n\007version\030\t \001(\005R\007version"
+  "\022\033\n\tleader_id\030\n \001(\tR\010leaderID\"\251\001\n\017Sessio"
+  "nConfigV1\022\022\n\004name\030\001 \001(\tR\004name\022 \n\013joinabi"
+  "lity\030\002 \001(\tR\013joinability\022\037\n\013min_players\030\003"
+  " \001(\005R\nminPlayers\022\037\n\013max_players\030\004 \001(\005R\nm"
+  "axPlayers\022\036\n\ndeployment\030\005 \001(\tR\ndeploymen"
+  "t\"d\n\035PartyNotificationUserJoinedV1\022)\n\007me"
+  "mbers\030\001 \003(\0132\017.session.UserV1R\007members\022\030\n"
+  "\007PartyID\030\002 \001(\tR\007partyID\"\240\001\n!PartyNotific"
+  "ationMembersChangedV1\022)\n\007members\030\001 \003(\0132\017"
   ".session.UserV1R\007members\022\030\n\007PartyID\030\002 \001("
-  "\tR\007partyID\022\036\n\nRejectedID\030\003 \001(\tR\nrejected"
-  "ID\"9\n\035PartyNotificationUserKickedV1\022\030\n\007P"
-  "artyID\030\001 \001(\tR\007partyID\"D\n$GameSessionNoti"
-  "ficationUserInvitedV1\022\034\n\tSessionID\030\001 \001(\t"
-  "R\tSessionID\"n\n#GameSessionNotificationUs"
-  "erJoinedV1\022\034\n\tSessionID\030\001 \001(\tR\tSessionID"
-  "\022)\n\007members\030\002 \003(\0132\017.session.UserV1R\007memb"
-  "ers\"\216\001\n\'GameSessionNotificationMembersCh"
-  "angedV1\022)\n\007members\030\001 \003(\0132\017.session.UserV"
-  "1R\007members\022\034\n\tSessionID\030\002 \001(\tR\tsessionID"
-  "\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\"\213\001\n\035DSStatu"
-  "sChangedNotificationV1\0226\n\nGameServer\030\001 \001"
-  "(\0132\025.session.GameServerV1R\013game_server\022\034"
-  "\n\tSessionID\030\002 \001(\tR\tsessionID\022\024\n\005Error\030\003 "
-  "\001(\tR\005error\"#\n\007UserIDs\022\030\n\006userID\030\001 \003(\tR\010u"
-  "ser_ids\"\"\n\004Team\022\032\n\010user_ids\030\001 \003(\tR\010user_"
-  "ids\"\207\004\n\rGameSessionV1\022\017\n\002id\030\001 \001(\tR\003_id\022\034"
-  "\n\tnamespace\030\002 \001(\tR\tnamespace\022)\n\007members\030"
-  "\003 \003(\0132\017.session.UserV1R\007members\022\036\n\nattri"
-  "butes\030\004 \001(\014R\nattributes\022\033\n\tjoin_type\030\005 \001"
-  "(\tR\010joinType\022\035\n\ncreated_at\030\006 \001(\tR\tcreate"
-  "dAt\022\035\n\nupdated_at\030\007 \001(\tR\tupdatedAt\0220\n\006co"
-  "nfig\030\010 \001(\0132\030.session.SessionConfigV1R\006co"
-  "nfig\022\031\n\007version\030\t \001(\005R\010_version\022\036\n\nmatch"
-  "_pool\030\n \001(\tR\nmatch_pool\022\034\n\tgame_mode\030\013 \001"
-  "(\tR\tgame_mode\022.\n\022backfill_ticket_id\030\014 \001("
-  "\tR\022backfill_ticket_id\022#\n\005teams\030\r \003(\0132\r.s"
-  "ession.TeamR\005teams\022A\n\017DSInformationV1\030\016 "
-  "\001(\0132\030.session.DSInformationV1R\016ds_inform"
-  "ation\"\235\002\n\017DSInformationV1\0226\n\nGameServer\030"
-  "\001 \001(\0132\025.session.GameServerV1R\013game_serve"
-  "r\022,\n\021requested_regions\030\002 \003(\tR\021requested_"
-  "regions\022\"\n\014requested_at\030\003 \001(\tR\014requested"
-  "_at\022 \n\013min_players\030\004 \001(\005R\013min_players\022\026\n"
-  "\006status\030\005 \001(\tR\006status\022&\n\016client_version\030"
-  "\006 \001(\tR\016client_version\022\036\n\ndeployment\030\007 \001("
-  "\tR\ndeployment\"\244\004\n\014GameServerV1\022\032\n\010pod_na"
-  "me\030\001 \001(\tR\010pod_name\022$\n\rimage_version\030\002 \001("
-  "\tR\rimage_version\022\034\n\tnamespace\030\003 \001(\tR\tnam"
-  "espace\022\016\n\002ip\030\004 \001(\tR\002ip\022$\n\ralternate_ips\030"
-  "\005 \003(\tR\ralternate_ips\022\022\n\004port\030\006 \001(\005R\004port"
-  "\022\032\n\010protocol\030\007 \001(\tR\010protocol\022\024\n\005ports\030\010 "
-  "\001(\014R\005ports\022\032\n\010provider\030\t \001(\tR\010provider\022\""
-  "\n\014game_version\030\n \001(\tR\014game_version\022\026\n\006st"
-  "atus\030\013 \001(\tR\006status\022\036\n\nsession_id\030\014 \001(\tR\n"
-  "session_id\022\036\n\ndeployment\030\r \001(\tR\ndeployme"
-  "nt\022\026\n\006region\030\016 \001(\tR\006region\022*\n\020custom_att"
-  "ribute\030\017 \001(\tR\020custom_attribute\022:\n\030is_ove"
-  "rride_game_version\030\020 \001(\010R\030is_override_ga"
-  "me_version\022 \n\013last_update\030\021 \001(\tR\013last_up"
-  "dateB\016Z\014/event;eventb\006proto3"
+  "\tR\007partyID\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\022\032"
+  "\n\010LeaderID\030\004 \001(\tR\010leaderID\"V\n\036PartyNotif"
+  "icationUserInvitedV1\022\032\n\010senderID\030\001 \001(\tR\010"
+  "senderID\022\030\n\007PartyID\030\002 \001(\tR\007partyID\"\204\001\n\035P"
+  "artyNotificationUserRejectV1\022)\n\007members\030"
+  "\001 \003(\0132\017.session.UserV1R\007members\022\030\n\007Party"
+  "ID\030\002 \001(\tR\007partyID\022\036\n\nRejectedID\030\003 \001(\tR\nr"
+  "ejectedID\"9\n\035PartyNotificationUserKicked"
+  "V1\022\030\n\007PartyID\030\001 \001(\tR\007partyID\"D\n$GameSess"
+  "ionNotificationUserInvitedV1\022\034\n\tSessionI"
+  "D\030\001 \001(\tR\tSessionID\"n\n#GameSessionNotific"
+  "ationUserJoinedV1\022\034\n\tSessionID\030\001 \001(\tR\tSe"
+  "ssionID\022)\n\007members\030\002 \003(\0132\017.session.UserV"
+  "1R\007members\"\216\001\n\'GameSessionNotificationMe"
+  "mbersChangedV1\022)\n\007members\030\001 \003(\0132\017.sessio"
+  "n.UserV1R\007members\022\034\n\tSessionID\030\002 \001(\tR\tse"
+  "ssionID\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\"\213\001\n\035"
+  "DSStatusChangedNotificationV1\0226\n\nGameSer"
+  "ver\030\001 \001(\0132\025.session.GameServerV1R\013game_s"
+  "erver\022\034\n\tSessionID\030\002 \001(\tR\tsessionID\022\024\n\005E"
+  "rror\030\003 \001(\tR\005error\"#\n\007UserIDs\022\030\n\006userID\030\001"
+  " \003(\tR\010user_ids\"\"\n\004Team\022\032\n\010user_ids\030\001 \003(\t"
+  "R\010user_ids\"\223\004\n\rGameSessionV1\022\016\n\002id\030\001 \001(\t"
+  "R\002id\022\034\n\tnamespace\030\002 \001(\tR\tnamespace\022)\n\007me"
+  "mbers\030\003 \003(\0132\017.session.UserV1R\007members\022\036\n"
+  "\nattributes\030\004 \001(\014R\nattributes\022\033\n\tjoin_ty"
+  "pe\030\005 \001(\tR\010joinType\022\035\n\ncreated_at\030\006 \001(\tR\t"
+  "createdAt\022\035\n\nupdated_at\030\007 \001(\tR\tupdatedAt"
+  "\022>\n\rconfiguration\030\010 \001(\0132\030.session.Sessio"
+  "nConfigV1R\rconfiguration\022\030\n\007version\030\t \001("
+  "\005R\007version\022\036\n\nmatch_pool\030\n \001(\tR\nmatch_po"
+  "ol\022\034\n\tgame_mode\030\013 \001(\tR\tgame_mode\022.\n\022back"
+  "fill_ticket_id\030\014 \001(\tR\022backfill_ticket_id"
+  "\022#\n\005teams\030\r \003(\0132\r.session.TeamR\005teams\022A\n"
+  "\017DSInformationV1\030\016 \001(\0132\030.session.DSInfor"
+  "mationV1R\016ds_information\"\263\001\n\017DSInformati"
+  "onV1\0226\n\nGameServer\030\001 \001(\0132\025.session.GameS"
+  "erverV1R\013game_server\022,\n\021requested_region"
+  "s\030\002 \003(\tR\021requested_regions\022\"\n\014requested_"
+  "at\030\003 \001(\tR\014requested_at\022\026\n\006status\030\005 \001(\tR\006"
+  "status\"\244\004\n\014GameServerV1\022\032\n\010pod_name\030\001 \001("
+  "\tR\010pod_name\022$\n\rimage_version\030\002 \001(\tR\rimag"
+  "e_version\022\034\n\tnamespace\030\003 \001(\tR\tnamespace\022"
+  "\016\n\002ip\030\004 \001(\tR\002ip\022$\n\ralternate_ips\030\005 \003(\tR\r"
+  "alternate_ips\022\022\n\004port\030\006 \001(\005R\004port\022\032\n\010pro"
+  "tocol\030\007 \001(\tR\010protocol\022\024\n\005ports\030\010 \001(\014R\005po"
+  "rts\022\032\n\010provider\030\t \001(\tR\010provider\022\"\n\014game_"
+  "version\030\n \001(\tR\014game_version\022\026\n\006status\030\013 "
+  "\001(\tR\006status\022\036\n\nsession_id\030\014 \001(\tR\nsession"
+  "_id\022\036\n\ndeployment\030\r \001(\tR\ndeployment\022\026\n\006r"
+  "egion\030\016 \001(\tR\006region\022*\n\020custom_attribute\030"
+  "\017 \001(\tR\020custom_attribute\022:\n\030is_override_g"
+  "ame_version\030\020 \001(\010R\030is_override_game_vers"
+  "ion\022 \n\013last_update\030\021 \001(\tR\013last_updateB\016Z"
+  "\014/event;eventb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_notification_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_notification_2eproto = {
-  false, false, 4268, descriptor_table_protodef_notification_2eproto, "notification.proto", 
+  false, false, 4221, descriptor_table_protodef_notification_2eproto, "notification.proto", 
   &descriptor_table_notification_2eproto_once, nullptr, 0, 18,
   schemas, file_default_instances, TableStruct_notification_2eproto::offsets,
   file_level_metadata_notification_2eproto, file_level_enum_descriptors_notification_2eproto, file_level_service_descriptors_notification_2eproto,
@@ -1629,7 +1626,7 @@ const char* UserV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string id = 1 [json_name = "_id"];
+      // string id = 1 [json_name = "id"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
@@ -1708,7 +1705,7 @@ uint8_t* UserV1::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
@@ -1774,7 +1771,7 @@ size_t UserV1::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -1900,248 +1897,14 @@ void UserV1::InternalSwap(UserV1* other) {
 
 // ===================================================================
 
-class SessionConfigV1::_Internal {
- public:
-};
-
-SessionConfigV1::SessionConfigV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
-  // @@protoc_insertion_point(arena_constructor:session.SessionConfigV1)
-}
-SessionConfigV1::SessionConfigV1(const SessionConfigV1& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&max_size_, &from.max_size_,
-    static_cast<size_t>(reinterpret_cast<char*>(&rejoin_timeout_) -
-    reinterpret_cast<char*>(&max_size_)) + sizeof(rejoin_timeout_));
-  // @@protoc_insertion_point(copy_constructor:session.SessionConfigV1)
-}
-
-inline void SessionConfigV1::SharedCtor() {
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&max_size_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&rejoin_timeout_) -
-    reinterpret_cast<char*>(&max_size_)) + sizeof(rejoin_timeout_));
-}
-
-SessionConfigV1::~SessionConfigV1() {
-  // @@protoc_insertion_point(destructor:session.SessionConfigV1)
-  if (GetArenaForAllocation() != nullptr) return;
-  SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-inline void SessionConfigV1::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-}
-
-void SessionConfigV1::ArenaDtor(void* object) {
-  SessionConfigV1* _this = reinterpret_cast< SessionConfigV1* >(object);
-  (void)_this;
-}
-void SessionConfigV1::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
-void SessionConfigV1::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
-}
-
-void SessionConfigV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.SessionConfigV1)
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  ::memset(&max_size_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&rejoin_timeout_) -
-      reinterpret_cast<char*>(&max_size_)) + sizeof(rejoin_timeout_));
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* SessionConfigV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // int32 max_size = 1 [json_name = "maxSize"];
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          max_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // int32 initial_join_timeout = 2 [json_name = "initialJoinTimeout"];
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          initial_join_timeout_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // int32 rejoin_timeout = 3 [json_name = "rejoinTimeout"];
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
-          rejoin_timeout_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
-}
-
-uint8_t* SessionConfigV1::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.SessionConfigV1)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // int32 max_size = 1 [json_name = "maxSize"];
-  if (this->_internal_max_size() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_max_size(), target);
-  }
-
-  // int32 initial_join_timeout = 2 [json_name = "initialJoinTimeout"];
-  if (this->_internal_initial_join_timeout() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_initial_join_timeout(), target);
-  }
-
-  // int32 rejoin_timeout = 3 [json_name = "rejoinTimeout"];
-  if (this->_internal_rejoin_timeout() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_rejoin_timeout(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:session.SessionConfigV1)
-  return target;
-}
-
-size_t SessionConfigV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.SessionConfigV1)
-  size_t total_size = 0;
-
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // int32 max_size = 1 [json_name = "maxSize"];
-  if (this->_internal_max_size() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_max_size());
-  }
-
-  // int32 initial_join_timeout = 2 [json_name = "initialJoinTimeout"];
-  if (this->_internal_initial_join_timeout() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_initial_join_timeout());
-  }
-
-  // int32 rejoin_timeout = 3 [json_name = "rejoinTimeout"];
-  if (this->_internal_rejoin_timeout() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_rejoin_timeout());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
-}
-
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SessionConfigV1::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
-    SessionConfigV1::MergeImpl
-};
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SessionConfigV1::GetClassData() const { return &_class_data_; }
-
-void SessionConfigV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<SessionConfigV1 *>(to)->MergeFrom(
-      static_cast<const SessionConfigV1 &>(from));
-}
-
-
-void SessionConfigV1::MergeFrom(const SessionConfigV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.SessionConfigV1)
-  GOOGLE_DCHECK_NE(&from, this);
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from._internal_max_size() != 0) {
-    _internal_set_max_size(from._internal_max_size());
-  }
-  if (from._internal_initial_join_timeout() != 0) {
-    _internal_set_initial_join_timeout(from._internal_initial_join_timeout());
-  }
-  if (from._internal_rejoin_timeout() != 0) {
-    _internal_set_rejoin_timeout(from._internal_rejoin_timeout());
-  }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void SessionConfigV1::CopyFrom(const SessionConfigV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.SessionConfigV1)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool SessionConfigV1::IsInitialized() const {
-  return true;
-}
-
-void SessionConfigV1::InternalSwap(SessionConfigV1* other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SessionConfigV1, rejoin_timeout_)
-      + sizeof(SessionConfigV1::rejoin_timeout_)
-      - PROTOBUF_FIELD_OFFSET(SessionConfigV1, max_size_)>(
-          reinterpret_cast<char*>(&max_size_),
-          reinterpret_cast<char*>(&other->max_size_));
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata SessionConfigV1::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
-      &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[2]);
-}
-
-// ===================================================================
-
 class PartySessionV1::_Internal {
  public:
-  static const ::session::SessionConfigV1& config(const PartySessionV1* msg);
+  static const ::session::SessionConfigV1& configuration(const PartySessionV1* msg);
 };
 
 const ::session::SessionConfigV1&
-PartySessionV1::_Internal::config(const PartySessionV1* msg) {
-  return *msg->config_;
+PartySessionV1::_Internal::configuration(const PartySessionV1* msg) {
+  return *msg->configuration_;
 }
 PartySessionV1::PartySessionV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
@@ -2213,10 +1976,10 @@ PartySessionV1::PartySessionV1(const PartySessionV1& from)
     leader_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_leader_id(), 
       GetArenaForAllocation());
   }
-  if (from._internal_has_config()) {
-    config_ = new ::session::SessionConfigV1(*from.config_);
+  if (from._internal_has_configuration()) {
+    configuration_ = new ::session::SessionConfigV1(*from.configuration_);
   } else {
-    config_ = nullptr;
+    configuration_ = nullptr;
   }
   version_ = from.version_;
   // @@protoc_insertion_point(copy_constructor:session.PartySessionV1)
@@ -2252,9 +2015,9 @@ leader_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAl
   leader_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&config_) - reinterpret_cast<char*>(this)),
+    reinterpret_cast<char*>(&configuration_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&version_) -
-    reinterpret_cast<char*>(&config_)) + sizeof(version_));
+    reinterpret_cast<char*>(&configuration_)) + sizeof(version_));
 }
 
 PartySessionV1::~PartySessionV1() {
@@ -2273,7 +2036,7 @@ inline void PartySessionV1::SharedDtor() {
   created_at_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   updated_at_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   leader_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (this != internal_default_instance()) delete config_;
+  if (this != internal_default_instance()) delete configuration_;
 }
 
 void PartySessionV1::ArenaDtor(void* object) {
@@ -2300,10 +2063,10 @@ void PartySessionV1::Clear() {
   created_at_.ClearToEmpty();
   updated_at_.ClearToEmpty();
   leader_id_.ClearToEmpty();
-  if (GetArenaForAllocation() == nullptr && config_ != nullptr) {
-    delete config_;
+  if (GetArenaForAllocation() == nullptr && configuration_ != nullptr) {
+    delete configuration_;
   }
-  config_ = nullptr;
+  configuration_ = nullptr;
   version_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -2314,7 +2077,7 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string id = 1 [json_name = "_id"];
+      // string id = 1 [json_name = "id"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
@@ -2386,15 +2149,15 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         } else
           goto handle_unusual;
         continue;
-      // .session.SessionConfigV1 config = 8 [json_name = "config"];
+      // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
-          ptr = ctx->ParseMessage(_internal_mutable_config(), ptr);
+          ptr = ctx->ParseMessage(_internal_mutable_configuration(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // int32 version = 9 [json_name = "_version"];
+      // int32 version = 9 [json_name = "version"];
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
           version_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
@@ -2441,7 +2204,7 @@ uint8_t* PartySessionV1::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
@@ -2505,15 +2268,15 @@ uint8_t* PartySessionV1::_InternalSerialize(
         7, this->_internal_updated_at(), target);
   }
 
-  // .session.SessionConfigV1 config = 8 [json_name = "config"];
-  if (this->_internal_has_config()) {
+  // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+  if (this->_internal_has_configuration()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        8, _Internal::config(this), target, stream);
+        8, _Internal::configuration(this), target, stream);
   }
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   if (this->_internal_version() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(9, this->_internal_version(), target);
@@ -2552,7 +2315,7 @@ size_t PartySessionV1::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -2601,14 +2364,14 @@ size_t PartySessionV1::ByteSizeLong() const {
         this->_internal_leader_id());
   }
 
-  // .session.SessionConfigV1 config = 8 [json_name = "config"];
-  if (this->_internal_has_config()) {
+  // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+  if (this->_internal_has_configuration()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *config_);
+        *configuration_);
   }
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   if (this->_internal_version() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_version());
   }
@@ -2657,8 +2420,8 @@ void PartySessionV1::MergeFrom(const PartySessionV1& from) {
   if (!from._internal_leader_id().empty()) {
     _internal_set_leader_id(from._internal_leader_id());
   }
-  if (from._internal_has_config()) {
-    _internal_mutable_config()->::session::SessionConfigV1::MergeFrom(from._internal_config());
+  if (from._internal_has_configuration()) {
+    _internal_mutable_configuration()->::session::SessionConfigV1::MergeFrom(from._internal_configuration());
   }
   if (from._internal_version() != 0) {
     _internal_set_version(from._internal_version());
@@ -2721,12 +2484,373 @@ void PartySessionV1::InternalSwap(PartySessionV1* other) {
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(PartySessionV1, version_)
       + sizeof(PartySessionV1::version_)
-      - PROTOBUF_FIELD_OFFSET(PartySessionV1, config_)>(
-          reinterpret_cast<char*>(&config_),
-          reinterpret_cast<char*>(&other->config_));
+      - PROTOBUF_FIELD_OFFSET(PartySessionV1, configuration_)>(
+          reinterpret_cast<char*>(&configuration_),
+          reinterpret_cast<char*>(&other->configuration_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata PartySessionV1::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
+      file_level_metadata_notification_2eproto[2]);
+}
+
+// ===================================================================
+
+class SessionConfigV1::_Internal {
+ public:
+};
+
+SessionConfigV1::SessionConfigV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:session.SessionConfigV1)
+}
+SessionConfigV1::SessionConfigV1(const SessionConfigV1& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_name().empty()) {
+    name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
+      GetArenaForAllocation());
+  }
+  joinability_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    joinability_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_joinability().empty()) {
+    joinability_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_joinability(), 
+      GetArenaForAllocation());
+  }
+  deployment_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    deployment_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_deployment().empty()) {
+    deployment_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_deployment(), 
+      GetArenaForAllocation());
+  }
+  ::memcpy(&min_players_, &from.min_players_,
+    static_cast<size_t>(reinterpret_cast<char*>(&max_players_) -
+    reinterpret_cast<char*>(&min_players_)) + sizeof(max_players_));
+  // @@protoc_insertion_point(copy_constructor:session.SessionConfigV1)
+}
+
+inline void SessionConfigV1::SharedCtor() {
+name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+joinability_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  joinability_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+deployment_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  deployment_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&min_players_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&max_players_) -
+    reinterpret_cast<char*>(&min_players_)) + sizeof(max_players_));
+}
+
+SessionConfigV1::~SessionConfigV1() {
+  // @@protoc_insertion_point(destructor:session.SessionConfigV1)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void SessionConfigV1::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  joinability_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  deployment_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void SessionConfigV1::ArenaDtor(void* object) {
+  SessionConfigV1* _this = reinterpret_cast< SessionConfigV1* >(object);
+  (void)_this;
+}
+void SessionConfigV1::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void SessionConfigV1::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void SessionConfigV1::Clear() {
+// @@protoc_insertion_point(message_clear_start:session.SessionConfigV1)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  name_.ClearToEmpty();
+  joinability_.ClearToEmpty();
+  deployment_.ClearToEmpty();
+  ::memset(&min_players_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&max_players_) -
+      reinterpret_cast<char*>(&min_players_)) + sizeof(max_players_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SessionConfigV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // string name = 1 [json_name = "name"];
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          auto str = _internal_mutable_name();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.SessionConfigV1.name"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string joinability = 2 [json_name = "joinability"];
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_joinability();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.SessionConfigV1.joinability"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 min_players = 3 [json_name = "minPlayers"];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+          min_players_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 max_players = 4 [json_name = "maxPlayers"];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+          max_players_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string deployment = 5 [json_name = "deployment"];
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+          auto str = _internal_mutable_deployment();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.SessionConfigV1.deployment"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SessionConfigV1::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:session.SessionConfigV1)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string name = 1 [json_name = "name"];
+  if (!this->_internal_name().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "session.SessionConfigV1.name");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_name(), target);
+  }
+
+  // string joinability = 2 [json_name = "joinability"];
+  if (!this->_internal_joinability().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_joinability().data(), static_cast<int>(this->_internal_joinability().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "session.SessionConfigV1.joinability");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_joinability(), target);
+  }
+
+  // int32 min_players = 3 [json_name = "minPlayers"];
+  if (this->_internal_min_players() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_min_players(), target);
+  }
+
+  // int32 max_players = 4 [json_name = "maxPlayers"];
+  if (this->_internal_max_players() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_max_players(), target);
+  }
+
+  // string deployment = 5 [json_name = "deployment"];
+  if (!this->_internal_deployment().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_deployment().data(), static_cast<int>(this->_internal_deployment().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "session.SessionConfigV1.deployment");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_deployment(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:session.SessionConfigV1)
+  return target;
+}
+
+size_t SessionConfigV1::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:session.SessionConfigV1)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string name = 1 [json_name = "name"];
+  if (!this->_internal_name().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_name());
+  }
+
+  // string joinability = 2 [json_name = "joinability"];
+  if (!this->_internal_joinability().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_joinability());
+  }
+
+  // string deployment = 5 [json_name = "deployment"];
+  if (!this->_internal_deployment().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_deployment());
+  }
+
+  // int32 min_players = 3 [json_name = "minPlayers"];
+  if (this->_internal_min_players() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_min_players());
+  }
+
+  // int32 max_players = 4 [json_name = "maxPlayers"];
+  if (this->_internal_max_players() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_max_players());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SessionConfigV1::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    SessionConfigV1::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SessionConfigV1::GetClassData() const { return &_class_data_; }
+
+void SessionConfigV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<SessionConfigV1 *>(to)->MergeFrom(
+      static_cast<const SessionConfigV1 &>(from));
+}
+
+
+void SessionConfigV1::MergeFrom(const SessionConfigV1& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:session.SessionConfigV1)
+  GOOGLE_DCHECK_NE(&from, this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_name().empty()) {
+    _internal_set_name(from._internal_name());
+  }
+  if (!from._internal_joinability().empty()) {
+    _internal_set_joinability(from._internal_joinability());
+  }
+  if (!from._internal_deployment().empty()) {
+    _internal_set_deployment(from._internal_deployment());
+  }
+  if (from._internal_min_players() != 0) {
+    _internal_set_min_players(from._internal_min_players());
+  }
+  if (from._internal_max_players() != 0) {
+    _internal_set_max_players(from._internal_max_players());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SessionConfigV1::CopyFrom(const SessionConfigV1& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:session.SessionConfigV1)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SessionConfigV1::IsInitialized() const {
+  return true;
+}
+
+void SessionConfigV1::InternalSwap(SessionConfigV1* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &name_, lhs_arena,
+      &other->name_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &joinability_, lhs_arena,
+      &other->joinability_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &deployment_, lhs_arena,
+      &other->deployment_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SessionConfigV1, max_players_)
+      + sizeof(SessionConfigV1::max_players_)
+      - PROTOBUF_FIELD_OFFSET(SessionConfigV1, min_players_)>(
+          reinterpret_cast<char*>(&min_players_),
+          reinterpret_cast<char*>(&other->min_players_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SessionConfigV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
       file_level_metadata_notification_2eproto[3]);
@@ -5445,13 +5569,13 @@ void Team::InternalSwap(Team* other) {
 
 class GameSessionV1::_Internal {
  public:
-  static const ::session::SessionConfigV1& config(const GameSessionV1* msg);
+  static const ::session::SessionConfigV1& configuration(const GameSessionV1* msg);
   static const ::session::DSInformationV1& dsinformationv1(const GameSessionV1* msg);
 };
 
 const ::session::SessionConfigV1&
-GameSessionV1::_Internal::config(const GameSessionV1* msg) {
-  return *msg->config_;
+GameSessionV1::_Internal::configuration(const GameSessionV1* msg) {
+  return *msg->configuration_;
 }
 const ::session::DSInformationV1&
 GameSessionV1::_Internal::dsinformationv1(const GameSessionV1* msg) {
@@ -5545,10 +5669,10 @@ GameSessionV1::GameSessionV1(const GameSessionV1& from)
     backfill_ticket_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_backfill_ticket_id(), 
       GetArenaForAllocation());
   }
-  if (from._internal_has_config()) {
-    config_ = new ::session::SessionConfigV1(*from.config_);
+  if (from._internal_has_configuration()) {
+    configuration_ = new ::session::SessionConfigV1(*from.configuration_);
   } else {
-    config_ = nullptr;
+    configuration_ = nullptr;
   }
   if (from._internal_has_dsinformationv1()) {
     dsinformationv1_ = new ::session::DSInformationV1(*from.dsinformationv1_);
@@ -5597,9 +5721,9 @@ backfill_ticket_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmpt
   backfill_ticket_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&config_) - reinterpret_cast<char*>(this)),
+    reinterpret_cast<char*>(&configuration_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&version_) -
-    reinterpret_cast<char*>(&config_)) + sizeof(version_));
+    reinterpret_cast<char*>(&configuration_)) + sizeof(version_));
 }
 
 GameSessionV1::~GameSessionV1() {
@@ -5620,7 +5744,7 @@ inline void GameSessionV1::SharedDtor() {
   match_pool_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   game_mode_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   backfill_ticket_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (this != internal_default_instance()) delete config_;
+  if (this != internal_default_instance()) delete configuration_;
   if (this != internal_default_instance()) delete dsinformationv1_;
 }
 
@@ -5651,10 +5775,10 @@ void GameSessionV1::Clear() {
   match_pool_.ClearToEmpty();
   game_mode_.ClearToEmpty();
   backfill_ticket_id_.ClearToEmpty();
-  if (GetArenaForAllocation() == nullptr && config_ != nullptr) {
-    delete config_;
+  if (GetArenaForAllocation() == nullptr && configuration_ != nullptr) {
+    delete configuration_;
   }
-  config_ = nullptr;
+  configuration_ = nullptr;
   if (GetArenaForAllocation() == nullptr && dsinformationv1_ != nullptr) {
     delete dsinformationv1_;
   }
@@ -5669,7 +5793,7 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string id = 1 [json_name = "_id"];
+      // string id = 1 [json_name = "id"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
@@ -5741,15 +5865,15 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         } else
           goto handle_unusual;
         continue;
-      // .session.SessionConfigV1 config = 8 [json_name = "config"];
+      // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
-          ptr = ctx->ParseMessage(_internal_mutable_config(), ptr);
+          ptr = ctx->ParseMessage(_internal_mutable_configuration(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // int32 version = 9 [json_name = "_version"];
+      // int32 version = 9 [json_name = "version"];
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
           version_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
@@ -5837,7 +5961,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
@@ -5901,15 +6025,15 @@ uint8_t* GameSessionV1::_InternalSerialize(
         7, this->_internal_updated_at(), target);
   }
 
-  // .session.SessionConfigV1 config = 8 [json_name = "config"];
-  if (this->_internal_has_config()) {
+  // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+  if (this->_internal_has_configuration()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        8, _Internal::config(this), target, stream);
+        8, _Internal::configuration(this), target, stream);
   }
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   if (this->_internal_version() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(9, this->_internal_version(), target);
@@ -5991,7 +6115,7 @@ size_t GameSessionV1::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -6054,11 +6178,11 @@ size_t GameSessionV1::ByteSizeLong() const {
         this->_internal_backfill_ticket_id());
   }
 
-  // .session.SessionConfigV1 config = 8 [json_name = "config"];
-  if (this->_internal_has_config()) {
+  // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+  if (this->_internal_has_configuration()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *config_);
+        *configuration_);
   }
 
   // .session.DSInformationV1 DSInformationV1 = 14 [json_name = "ds_information"];
@@ -6068,7 +6192,7 @@ size_t GameSessionV1::ByteSizeLong() const {
         *dsinformationv1_);
   }
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   if (this->_internal_version() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_version());
   }
@@ -6124,8 +6248,8 @@ void GameSessionV1::MergeFrom(const GameSessionV1& from) {
   if (!from._internal_backfill_ticket_id().empty()) {
     _internal_set_backfill_ticket_id(from._internal_backfill_ticket_id());
   }
-  if (from._internal_has_config()) {
-    _internal_mutable_config()->::session::SessionConfigV1::MergeFrom(from._internal_config());
+  if (from._internal_has_configuration()) {
+    _internal_mutable_configuration()->::session::SessionConfigV1::MergeFrom(from._internal_configuration());
   }
   if (from._internal_has_dsinformationv1()) {
     _internal_mutable_dsinformationv1()->::session::DSInformationV1::MergeFrom(from._internal_dsinformationv1());
@@ -6202,9 +6326,9 @@ void GameSessionV1::InternalSwap(GameSessionV1* other) {
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(GameSessionV1, version_)
       + sizeof(GameSessionV1::version_)
-      - PROTOBUF_FIELD_OFFSET(GameSessionV1, config_)>(
-          reinterpret_cast<char*>(&config_),
-          reinterpret_cast<char*>(&other->config_));
+      - PROTOBUF_FIELD_OFFSET(GameSessionV1, configuration_)>(
+          reinterpret_cast<char*>(&configuration_),
+          reinterpret_cast<char*>(&other->configuration_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata GameSessionV1::GetMetadata() const {
@@ -6254,28 +6378,11 @@ DSInformationV1::DSInformationV1(const DSInformationV1& from)
     status_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_status(), 
       GetArenaForAllocation());
   }
-  client_version_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    client_version_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_client_version().empty()) {
-    client_version_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_client_version(), 
-      GetArenaForAllocation());
-  }
-  deployment_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    deployment_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_deployment().empty()) {
-    deployment_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_deployment(), 
-      GetArenaForAllocation());
-  }
   if (from._internal_has_gameserver()) {
     gameserver_ = new ::session::GameServerV1(*from.gameserver_);
   } else {
     gameserver_ = nullptr;
   }
-  min_players_ = from.min_players_;
   // @@protoc_insertion_point(copy_constructor:session.DSInformationV1)
 }
 
@@ -6288,18 +6395,7 @@ status_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlrea
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   status_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-client_version_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  client_version_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-deployment_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  deployment_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&gameserver_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&min_players_) -
-    reinterpret_cast<char*>(&gameserver_)) + sizeof(min_players_));
+gameserver_ = nullptr;
 }
 
 DSInformationV1::~DSInformationV1() {
@@ -6313,8 +6409,6 @@ inline void DSInformationV1::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   requested_at_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   status_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  client_version_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  deployment_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete gameserver_;
 }
 
@@ -6337,13 +6431,10 @@ void DSInformationV1::Clear() {
   requested_regions_.Clear();
   requested_at_.ClearToEmpty();
   status_.ClearToEmpty();
-  client_version_.ClearToEmpty();
-  deployment_.ClearToEmpty();
   if (GetArenaForAllocation() == nullptr && gameserver_ != nullptr) {
     delete gameserver_;
   }
   gameserver_ = nullptr;
-  min_players_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -6386,40 +6477,12 @@ const char* DSInformationV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
         } else
           goto handle_unusual;
         continue;
-      // int32 min_players = 4 [json_name = "min_players"];
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
-          min_players_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
       // string status = 5 [json_name = "status"];
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_status();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSInformationV1.status"));
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // string client_version = 6 [json_name = "client_version"];
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
-          auto str = _internal_mutable_client_version();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSInformationV1.client_version"));
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // string deployment = 7 [json_name = "deployment"];
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
-          auto str = _internal_mutable_deployment();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSInformationV1.deployment"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -6481,12 +6544,6 @@ uint8_t* DSInformationV1::_InternalSerialize(
         3, this->_internal_requested_at(), target);
   }
 
-  // int32 min_players = 4 [json_name = "min_players"];
-  if (this->_internal_min_players() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_min_players(), target);
-  }
-
   // string status = 5 [json_name = "status"];
   if (!this->_internal_status().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
@@ -6495,26 +6552,6 @@ uint8_t* DSInformationV1::_InternalSerialize(
       "session.DSInformationV1.status");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_status(), target);
-  }
-
-  // string client_version = 6 [json_name = "client_version"];
-  if (!this->_internal_client_version().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_client_version().data(), static_cast<int>(this->_internal_client_version().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.DSInformationV1.client_version");
-    target = stream->WriteStringMaybeAliased(
-        6, this->_internal_client_version(), target);
-  }
-
-  // string deployment = 7 [json_name = "deployment"];
-  if (!this->_internal_deployment().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_deployment().data(), static_cast<int>(this->_internal_deployment().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.DSInformationV1.deployment");
-    target = stream->WriteStringMaybeAliased(
-        7, this->_internal_deployment(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -6555,30 +6592,11 @@ size_t DSInformationV1::ByteSizeLong() const {
         this->_internal_status());
   }
 
-  // string client_version = 6 [json_name = "client_version"];
-  if (!this->_internal_client_version().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_client_version());
-  }
-
-  // string deployment = 7 [json_name = "deployment"];
-  if (!this->_internal_deployment().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_deployment());
-  }
-
   // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
   if (this->_internal_has_gameserver()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *gameserver_);
-  }
-
-  // int32 min_players = 4 [json_name = "min_players"];
-  if (this->_internal_min_players() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_min_players());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -6610,17 +6628,8 @@ void DSInformationV1::MergeFrom(const DSInformationV1& from) {
   if (!from._internal_status().empty()) {
     _internal_set_status(from._internal_status());
   }
-  if (!from._internal_client_version().empty()) {
-    _internal_set_client_version(from._internal_client_version());
-  }
-  if (!from._internal_deployment().empty()) {
-    _internal_set_deployment(from._internal_deployment());
-  }
   if (from._internal_has_gameserver()) {
     _internal_mutable_gameserver()->::session::GameServerV1::MergeFrom(from._internal_gameserver());
-  }
-  if (from._internal_min_players() != 0) {
-    _internal_set_min_players(from._internal_min_players());
   }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -6652,22 +6661,7 @@ void DSInformationV1::InternalSwap(DSInformationV1* other) {
       &status_, lhs_arena,
       &other->status_, rhs_arena
   );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      &client_version_, lhs_arena,
-      &other->client_version_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      &deployment_, lhs_arena,
-      &other->deployment_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(DSInformationV1, min_players_)
-      + sizeof(DSInformationV1::min_players_)
-      - PROTOBUF_FIELD_OFFSET(DSInformationV1, gameserver_)>(
-          reinterpret_cast<char*>(&gameserver_),
-          reinterpret_cast<char*>(&other->gameserver_));
+  swap(gameserver_, other->gameserver_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DSInformationV1::GetMetadata() const {
@@ -7618,11 +7612,11 @@ template<> PROTOBUF_NOINLINE ::session::NotificationEventEnvelope* Arena::Create
 template<> PROTOBUF_NOINLINE ::session::UserV1* Arena::CreateMaybeMessage< ::session::UserV1 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::session::UserV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::SessionConfigV1* Arena::CreateMaybeMessage< ::session::SessionConfigV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::SessionConfigV1 >(arena);
-}
 template<> PROTOBUF_NOINLINE ::session::PartySessionV1* Arena::CreateMaybeMessage< ::session::PartySessionV1 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::session::PartySessionV1 >(arena);
+}
+template<> PROTOBUF_NOINLINE ::session::SessionConfigV1* Arena::CreateMaybeMessage< ::session::SessionConfigV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::session::SessionConfigV1 >(arena);
 }
 template<> PROTOBUF_NOINLINE ::session::PartyNotificationUserJoinedV1* Arena::CreateMaybeMessage< ::session::PartyNotificationUserJoinedV1 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::session::PartyNotificationUserJoinedV1 >(arena);
