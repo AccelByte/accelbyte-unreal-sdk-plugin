@@ -340,3 +340,20 @@ void UABEntitlement::SyncTwitchDropEntitlement(
 		OnError.ExecuteIfBound(Code, Message);
 	}));
 }
+
+void UABEntitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items,
+	FDAccelByteModelsPlatformValidateUserItemPurchaseResponse OnSuccess, FDErrorHandler OnError)
+{
+	ApiClientPtr->Entitlement.ValidateUserItemPurchaseCondition(
+		Items,
+		THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>>::CreateLambda(
+	[OnSuccess](const TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), 
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+	{
+		OnError.ExecuteIfBound(Code, Message);
+	}));
+}
