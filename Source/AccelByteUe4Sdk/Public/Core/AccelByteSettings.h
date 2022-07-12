@@ -40,6 +40,7 @@ public:
 	FString UGCServerUrl;
 	FString SeasonPassServerUrl;
 	FString ReportingServerUrl;
+	FString SessionServerUrl;
 	FString AppId;
 	float QosLatencyPollIntervalSecs{0};
 	float QosServerLatencyPollIntervalSecs{0};
@@ -143,6 +144,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString ReportingServerUrl;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString SessionServerUrl;
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AppId;
@@ -254,6 +258,9 @@ public:
 	static FString GetReportingServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetSessionServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetAppId();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -327,6 +334,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetReportingServerUrl(const FString& ReportingServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetSessionServerUrl(const FString& ReportingServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetSeasonPassServerUrl(const FString& SeasonPassServerUrl);

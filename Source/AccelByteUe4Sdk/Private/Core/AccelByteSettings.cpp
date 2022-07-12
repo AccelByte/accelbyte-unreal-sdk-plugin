@@ -109,6 +109,9 @@ void Settings::LoadSettings(const FString& SectionPath)
 	GConfig->GetString(*SectionPath, TEXT("ReportingServerUrl"), ReportingServerUrl, GEngineIni);
 	ReportingServerUrl = GetDefaultClientAPIUrl(ReportingServerUrl, BaseUrl, TEXT("reporting"));
 
+	GConfig->GetString(*SectionPath, TEXT("SessionServerUrl"), SessionServerUrl, GEngineIni);
+	SessionServerUrl = GetDefaultClientAPIUrl(SessionServerUrl, BaseUrl, TEXT("session"));
+
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 
 	FString QosLatencyPollIntervalSecsString;
@@ -270,6 +273,11 @@ FString UAccelByteBlueprintsSettings::GetReportingServerUrl()
 	return FRegistry::Settings.ReportingServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetSessionServerUrl()
+{
+	return FRegistry::Settings.SessionServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetAppId()
 {
 	return FRegistry::Settings.AppId;
@@ -398,6 +406,11 @@ void UAccelByteBlueprintsSettings::SetSeasonPassServerUrl(const FString& SeasonP
 void UAccelByteBlueprintsSettings::SetReportingServerUrl(const FString& ReportingServerUrl)
 {
 	FRegistry::Settings.ReportingServerUrl = ReportingServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetSessionServerUrl(const FString& SessionServerUrl)
+{
+	FRegistry::Settings.SessionServerUrl = SessionServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
