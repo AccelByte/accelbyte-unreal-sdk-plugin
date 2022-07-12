@@ -108,6 +108,8 @@ namespace Api
 		const FString PartyKick = TEXT("partyKickResponse");
 		const FString PartyKickNotif = TEXT("partyKickNotif");
 		const FString PartyDataUpdateNotif = TEXT("partyDataUpdateNotif");
+		const FString PartyConnectNotif = TEXT("partyConnectNotif");
+		const FString PartyDisconnectNotif = TEXT("partyDisconnectNotif");
 		const FString PartyGenerateCode = TEXT("partyGenerateCodeResponse");
 		const FString PartyGetCode = TEXT("partyGetCodeResponse");
 		const FString PartyDeleteCode = TEXT("partyDeleteCodeResponse");
@@ -286,6 +288,8 @@ namespace Api
 		PartyRejectNotif,
 		PartyKickNotif,
 		PartyDataUpdateNotif,
+		PartyConnectNotif,
+		PartyDisconnectNotif,
 
 		// Chat
 		PersonalChatNotif,
@@ -383,6 +387,8 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Notif,PartyRejectNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyKickNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyDataUpdateNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyConnectNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyDisconnectNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PersonalChatNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyChatNotif),
 		FORM_STRING_ENUM_PAIR(Notif,ChannelChatNotif),
@@ -1348,6 +1354,8 @@ void Lobby::UnbindPartyNotifEvents()
 	PartyJoinNotif.Unbind();
 	PartyRejectNotif.Unbind();
 	PartyKickNotif.Unbind();
+	PartyConnectNotif.Unbind();
+	PartyDisconnectNotif.Unbind();
 }
 
 void Lobby::UnbindPartyResponseEvents()
@@ -1897,6 +1905,8 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 		CASE_NOTIF(PartyRejectNotif		, FAccelByteModelsPartyRejectNotice);
 		CASE_NOTIF(PartyKickNotif		, FAccelByteModelsGotKickedFromPartyNotice);
 		CASE_NOTIF(PartyDataUpdateNotif	, FAccelByteModelsPartyDataNotif);
+		CASE_NOTIF(PartyConnectNotif	, FAccelByteModelsPartyConnectionNotice);
+		CASE_NOTIF(PartyDisconnectNotif	, FAccelByteModelsPartyConnectionNotice);
 		// Chat
 		CASE_NOTIF(PersonalChatNotif	, FAccelByteModelsPersonalMessageNotice);
 		CASE_NOTIF(PartyChatNotif		, FAccelByteModelsPartyMessageNotice);
