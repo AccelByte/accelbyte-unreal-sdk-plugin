@@ -83,7 +83,9 @@ public:
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinResponse, const FAccelByteModelsPartyJoinResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinNotice, const FAccelByteModelsPartyJoinNotice&, Result);              
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickMemberResponse, const FAccelByteModelsKickPartyMemberResponse&, Result);
-    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickedNotice, const FAccelByteModelsGotKickedFromPartyNotice&, Result);   
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickedNotice, const FAccelByteModelsGotKickedFromPartyNotice&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyConnectNotice, const FAccelByteModelsPartyConnectionNotice&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyDisconnectNotice, const FAccelByteModelsPartyConnectionNotice&, Result);   
 
     // Chat
     DECLARE_DYNAMIC_DELEGATE_OneParam(FPrivateMessageResponse, const FAccelByteModelsPersonalMessageResponse&, Result);
@@ -132,6 +134,8 @@ public:
         const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
         const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
         const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
+        const FPartyConnectNotice& OnPartyConnectNotice,
+		const FPartyDisconnectNotice& OnPartyDisconnectNotice,
         const FPrivateMessageNotice& OnPrivateMessageNotice,
         const FPartyMessageNotice& OnPartyMessageNotice,
         const FUserPresenceNotice& OnUserPresenceNotice,

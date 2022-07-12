@@ -155,6 +155,10 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyInviteNotif, FAccelByteModelsInvitation
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, Notif);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyConnectNotif, FAccelByteModelsPartyConnectionNotice, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDisconnectNotif, FAccelByteModelsPartyConnectionNotice, Notif);
+
 #pragma endregion
 
 //Sub-API from AccelByte Lobby
@@ -238,6 +242,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
 	void SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	void SetOnPartyConnect(FDPartyConnectNotif OnNotif);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	void SetOnPartyDisconnect(FDPartyDisconnectNotif OnNotif);
 
 private:
 	FApiClientPtr ApiClientPtr;

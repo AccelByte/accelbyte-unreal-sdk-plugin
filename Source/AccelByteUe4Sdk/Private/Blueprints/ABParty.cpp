@@ -363,3 +363,23 @@ void UABParty::SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif)
 				OnNotif.ExecuteIfBound(Notif);
 			}));
 }
+
+void UABParty::SetOnPartyConnect(FDPartyConnectNotif OnNotif) 
+{
+	ApiClientPtr->Lobby.SetPartyConnectNotifDelegate(
+		Api::Lobby::FPartyConnectNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsPartyConnectionNotice const& Notif)
+			{
+				OnNotif.ExecuteIfBound(Notif);
+			}));
+}
+
+void UABParty::SetOnPartyDisconnect(FDPartyDisconnectNotif OnNotif) 
+{
+	ApiClientPtr->Lobby.SetPartyDisconnectNotifDelegate(
+		Api::Lobby::FPartyDisconnectNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsPartyConnectionNotice const& Notif)
+			{
+				OnNotif.ExecuteIfBound(Notif);
+			}));
+}

@@ -150,9 +150,19 @@ public:
     DECLARE_DELEGATE_OneParam(FPartyKickNotif, const FAccelByteModelsGotKickedFromPartyNotice&);   // Passive
 
 	/**
-	 * @brief delegate for handling member kicked from party event
+	 * @brief delegate for handling update data notification
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyDataUpdateNotif, const FAccelByteModelsPartyDataNotif&);
+	
+	/**
+	 * @brief delegate for handling party connect notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyConnectNotif, const FAccelByteModelsPartyConnectionNotice&);
+
+	/**
+	 * @brief delegate for handling party disconnect notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyDisconnectNotif, const FAccelByteModelsPartyConnectionNotice&);
 
 	/**
 	 * @brief delegate for handling generate party code event
@@ -899,6 +909,14 @@ public:
 	void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnLeavePartyNotice)
 	{
 		PartyLeaveNotif = OnLeavePartyNotice;
+	}
+	void SetPartyConnectNotifDelegate(FPartyConnectNotif OnPartyConnectNotif) 
+	{
+		PartyConnectNotif = OnPartyConnectNotif;
+	}
+	void SetPartyDisconnectNotifDelegate(FPartyDisconnectNotif OnPartyDisconnectNotif) 
+	{
+		PartyDisconnectNotif = OnPartyDisconnectNotif;
 	}
 	void SetPartyInviteNotifDelegate(const FPartyInviteNotif& OnPartyInviteNotif)
 	{
@@ -1779,6 +1797,8 @@ private:
     FPartyKickResponse PartyKickResponse;
     FPartyKickNotif PartyKickNotif;
 	FPartyDataUpdateNotif PartyDataUpdateNotif;
+	FPartyConnectNotif PartyConnectNotif;
+	FPartyDisconnectNotif PartyDisconnectNotif;
 	FPartyGenerateCodeResponse PartyGenerateCodeResponse;
 	FPartyGetCodeResponse PartyGetCodeResponse;
 	FPartyDeleteCodeResponse PartyDeleteCodeResponse;

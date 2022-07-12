@@ -145,6 +145,8 @@ void UAccelByteBlueprintsLobby::BindEvent(
     const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
     const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
     const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
+    const FPartyConnectNotice& OnPartyConnectNotice,
+	const FPartyDisconnectNotice& OnPartyDisconnectNotice,
     const FPrivateMessageNotice& OnPrivateMessageNotice,
     const FPartyMessageNotice& OnPartyMessageNotice,
     const FUserPresenceNotice& OnUserPresenceNotice,
@@ -197,6 +199,16 @@ void UAccelByteBlueprintsLobby::BindEvent(
         AccelByte::Api::Lobby::FPartyKickNotif::CreateLambda([OnInvitePartyKickedNotice](const FAccelByteModelsGotKickedFromPartyNotice& Result) {
         OnInvitePartyKickedNotice.ExecuteIfBound(Result);
     });
+
+	AccelByte::Api::Lobby::FPartyConnectNotif OnPartyConnectNoticeDelegate =
+		AccelByte::Api::Lobby::FPartyConnectNotif::CreateLambda([OnPartyConnectNotice](const FAccelByteModelsPartyConnectionNotice& Result) {
+		OnPartyConnectNotice.ExecuteIfBound(Result);
+	});
+
+	AccelByte::Api::Lobby::FPartyConnectNotif OnPartyDisconnectNoticeDelegate =
+		AccelByte::Api::Lobby::FPartyConnectNotif::CreateLambda([OnPartyDisconnectNotice](const FAccelByteModelsPartyConnectionNotice& Result) {
+		OnPartyDisconnectNotice.ExecuteIfBound(Result);
+	});
     
     // Chat
     AccelByte::Api::Lobby::FPersonalChatNotif OnPrivateMessageNoticeDelegate =
@@ -265,6 +277,8 @@ void UAccelByteBlueprintsLobby::BindEvent(
     FRegistry::Lobby.SetPartyGetInvitedNotifDelegate(OnInvitePartyGetInvitedNoticeDelegate);
     FRegistry::Lobby.SetPartyJoinNotifDelegate(OnInvitePartyJoinNoticeDelegate);
     FRegistry::Lobby.SetPartyKickNotifDelegate(OnInvitePartyKickedNoticeDelegate);
+	FRegistry::Lobby.SetPartyConnectNotifDelegate(OnPartyConnectNoticeDelegate);
+	FRegistry::Lobby.SetPartyDisconnectNotifDelegate(OnPartyDisconnectNoticeDelegate);
     FRegistry::Lobby.SetPrivateMessageNotifDelegate(OnPrivateMessageNoticeDelegate);
     FRegistry::Lobby.SetPartyChatNotifDelegate(OnPartyMessageNoticeDelegate);
     FRegistry::Lobby.SetUserPresenceNotifDelegate(OnOnUserPresenceNoticeDelegate);
