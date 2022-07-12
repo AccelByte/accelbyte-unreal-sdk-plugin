@@ -1499,7 +1499,7 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 }
-
+	
 FString Lobby::SendRawRequest(const FString& MessageType, const FString& MessageIDPrefix, const FString& CustomPayload)
 {
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
@@ -1893,7 +1893,7 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 		} \
 
 template <typename DataStruct, typename PayloadType, typename ResponseCallbackType>
-void DispatchSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCallback)
+void DispatchV2Notif(PayloadType Payload, ResponseCallbackType ResponseCallback)
 {
 	std::string JsonPayloadUTF8;
 	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
@@ -1906,6 +1906,27 @@ void DispatchSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCall
 	}
 }
 
+template <typename ProtoEventEnvelope>
+bool ParseProtobufPayload(const FString& InPayload, TSharedRef<ProtoEventEnvelope>& OutProtoEventEnvelope)
+{
+	TArray<uint8> ProtobufPayload;
+	if(!FBase64::Decode(InPayload, ProtobufPayload))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot decode protobuf payload from Base64,\npayload is : %s"), *InPayload);
+		return false;
+	}
+
+	TSharedRef<ProtoEventEnvelope> EventEnvelope = MakeShared<ProtoEventEnvelope>();
+	if(!EventEnvelope->ParseFromArray(ProtobufPayload.GetData(), ProtobufPayload.Num()))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize event protobuf payload,\npayload is : %s"), *InPayload);
+		return false;
+	}
+
+	OutProtoEventEnvelope = EventEnvelope;
+	return true;
+}
+
 void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 {
 	FAccelByteModelsSessionNotificationMessage Notif;
@@ -1915,70 +1936,64 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		return;
 	}
 
-	TArray<uint8> ProtobufPayload;
-	if(!FBase64::Decode(Notif.Payload, ProtobufPayload))
+	TSharedRef<session::NotificationEventEnvelope> EventEnvelope = MakeShared<session::NotificationEventEnvelope>();
+	if(!ParseProtobufPayload(Notif.Payload, EventEnvelope))
 	{
-		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot decode protobuf payload from Base64\nNotification: %s"), *ParsedJsonString);
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Failed to parse protobuf payload\nNotification: %s"), *ParsedJsonString);
 		return;
 	}
 
-	session::NotificationEventEnvelope EventEnvelope;
-	if(!EventEnvelope.ParseFromArray(ProtobufPayload.GetData(), ProtobufPayload.Num()))
-	{
-		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize event protobuf payload\nNotification: %s"), *ParsedJsonString);
-		return;
-	}
-
-	switch(EventEnvelope.payload_case())
+	switch(EventEnvelope->payload_case())
 	{
 	case session::NotificationEventEnvelope::kPartyNotificationUserInvitedV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2PartyInvitedEvent>(EventEnvelope.partynotificationuserinvitedv1(), V2PartyInvitedNotif);
+		DispatchV2Notif<FAccelByteModelsV2PartyInvitedEvent>(EventEnvelope->partynotificationuserinvitedv1(), V2PartyInvitedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kPartyNotificationMembersChangedV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2PartyMembersChangedEvent>(EventEnvelope.partynotificationmemberschangedv1(), V2PartyMembersChangedNotif);
+		DispatchV2Notif<FAccelByteModelsV2PartyMembersChangedEvent>(EventEnvelope->partynotificationmemberschangedv1(), V2PartyMembersChangedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kPartyNotificationUserJoinedV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2PartyUserJoinedEvent>(EventEnvelope.partynotificationuserjoinedv1(), V2PartyJoinedNotif);
+		DispatchV2Notif<FAccelByteModelsV2PartyUserJoinedEvent>(EventEnvelope->partynotificationuserjoinedv1(), V2PartyJoinedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kPartyNotificationUserRejectV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2PartyUserRejectedEvent>(EventEnvelope.partynotificationuserrejectv1(), V2PartyRejectedNotif);
+		DispatchV2Notif<FAccelByteModelsV2PartyUserRejectedEvent>(EventEnvelope->partynotificationuserrejectv1(), V2PartyRejectedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kPartyNotificationUserKickedV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope.partynotificationuserkickedv1(), V2PartyKickedNotif);
+		DispatchV2Notif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope->partynotificationuserkickedv1(), V2PartyKickedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kGameSessionNotificationUserInvitedV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2GameSessionUserInvitedEvent>(EventEnvelope.gamesessionnotificationuserinvitedv1(), V2GameSessionInvitedNotif);
+		DispatchV2Notif<FAccelByteModelsV2GameSessionUserInvitedEvent>(EventEnvelope->gamesessionnotificationuserinvitedv1(), V2GameSessionInvitedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kGameSessionNotificationUserJoinedV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2GameSessionUserJoinedEvent>(EventEnvelope.gamesessionnotificationuserjoinedv1(), V2GameSessionJoinedNotif);
+		DispatchV2Notif<FAccelByteModelsV2GameSessionUserJoinedEvent>(EventEnvelope->gamesessionnotificationuserjoinedv1(), V2GameSessionJoinedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kGameSessionNotificationMembersChangedV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2GameSessionMembersChangedEvent>(EventEnvelope.gamesessionnotificationmemberschangedv1(), V2GameSessionMembersChangedNotif);
+		DispatchV2Notif<FAccelByteModelsV2GameSessionMembersChangedEvent>(EventEnvelope->gamesessionnotificationmemberschangedv1(), V2GameSessionMembersChangedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
 	{
-		DispatchSessionNotif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope.dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
+		DispatchV2Notif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope->dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
 		break;
 	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
 	}
 }
+
 
 void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
 {
