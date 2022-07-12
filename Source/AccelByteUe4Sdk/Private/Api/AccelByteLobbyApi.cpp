@@ -17,6 +17,7 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
 #include "Proto/session_notification.pb.h"
+#include "Proto/matchmaking_notification.pb.h"
 #include "google/protobuf/util/json_util.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
@@ -209,7 +210,6 @@ namespace Api
 	{
 		const FString Response = TEXT("Response");
 		const FString Notif = TEXT("Notif"); // Note: current usage is not yet uniformized -> Notif/Notification
-
 	}
 
 	enum Response : uint8
@@ -1299,6 +1299,7 @@ void Lobby::UnbindEvent()
 
 	UnbindV2PartyEvents();
 	UnbindV2GameSessionEvents();
+	UnbindV2MatchmakingEvents();
 	
 	UserBannedNotification.Unbind();
 	UserUnbannedNotification.Unbind();
@@ -1469,6 +1470,12 @@ void Lobby::UnbindV2GameSessionEvents()
 	V2GameSessionInvitedNotif.Unbind();
 	V2GameSessionJoinedNotif.Unbind();
 	V2GameSessionMembersChangedNotif.Unbind();
+	V2DSStatusChangedNotif.Unbind();
+}
+
+void Lobby::UnbindV2MatchmakingEvents()
+{
+	V2MatchmakingMatchFoundNotif.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -1994,6 +2001,33 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	}
 }
 
+void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message)
+{
+	TSharedRef<matchmaking::NotificationEventEnvelope> Envelope = MakeShared<matchmaking::NotificationEventEnvelope>();
+	if(!ParseProtobufPayload(Message.Payload, Envelope))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Failed to parse matchmaking v2 notification"));
+		return;
+	}
+
+	switch (Envelope->payload_case())
+	{
+		case matchmaking::NotificationEventEnvelope::kMatchFoundNotifV1:
+		{
+			DispatchV2Notif<FAccelByteModelsV2MatchFoundNotif>(Envelope->matchfoundnotifv1(), V2MatchmakingMatchFoundNotif);
+			break;
+		}
+		
+		default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown matchmaking v2 notification topic : %s"), *Message.Topic);
+	}
+}
+
+void Lobby::InitializeV2MatchmakingNotifDelegates()
+{
+	MatchmakingV2NotifDelegates = {
+		{EV2MatchmakingNotif::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+	};
+}
 
 void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
 {
@@ -2067,6 +2101,14 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 					return;
 				}
 			}
+
+			EV2MatchmakingNotif MMNotifEnum = FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotif>(NotificationMessage.Topic);
+			if(MMNotifEnum != EV2MatchmakingNotif::Invalid && MatchmakingV2NotifDelegates.Contains(MMNotifEnum))
+			{
+				MatchmakingV2NotifDelegates[MMNotifEnum].ExecuteIfBound(NotificationMessage);
+				break;
+			}
+				
 			MessageNotif.ExecuteIfBound(NotificationMessage);
 			break;
 		}
@@ -2379,6 +2421,7 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, TimeSinceLastReconnect{.0f}
 	, TimeSinceConnectionLost{.0f}
 {
+	InitializeV2MatchmakingNotifDelegates();
 }
 
 Lobby::~Lobby()

@@ -21,6 +21,14 @@ enum class EAvailability : uint8
 	Invisible = 3
 };
 
+/** @brief Matchmaking v2 notification topics enums. */
+UENUM(BlueprintType)
+enum class EV2MatchmakingNotif : uint8
+{
+	Invalid,
+	OnMatchFound,
+};
+
 // Emulate namespace with long class names
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyType

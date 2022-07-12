@@ -10,6 +10,7 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteLobbyModels.h"
+#include "Models/AccelByteMatchmakingModels.h"
 #include "Models/AccelByteSessionModels.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
@@ -50,6 +51,7 @@ struct FLobbyMessageMetaData
 	
 enum Response : uint8;
 enum Notif : uint8;
+
 /**
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
@@ -464,6 +466,11 @@ public:
 	* @brief Delegate for game session when DS status is changed.
 	*/
 	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif)
+
+	/**
+	* @brief Delegate for notif when match is found.
+	*/
+	DECLARE_DELEGATE_OneParam(FV2MatchmakingMatchFoundNotif, FAccelByteModelsV2MatchFoundNotif)
 	
 public:
     /**
@@ -936,6 +943,11 @@ public:
 	 */
 	void UnbindV2GameSessionEvents();
 
+	/**
+	 * @brief Unbind all V2 matchmaking delegates set previously.
+	 */
+	void UnbindV2MatchmakingEvents();
+
 	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
 	{
 		ConnectSuccess = OnConnectSuccess;
@@ -1028,6 +1040,12 @@ public:
 	{
 		V2DSStatusChangedNotif = OnDSStatusChangedNotif;
 	}
+
+	void SetV2MatchmakingMatchFoundNotifDelegate(const FV2MatchmakingMatchFoundNotif& OnMatchFoundNotif)
+	{
+		V2MatchmakingMatchFoundNotif = OnMatchFoundNotif;
+	}
+	
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
 		UserBannedNotification = OnUserBannedNotification;
@@ -1767,7 +1785,13 @@ private:
 #pragma region Message Parsing
 	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj, const TSharedPtr<FLobbyMessageMetaData>& MessageMeta);
 	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
+	
 	void HandleV2SessionNotif(const FString& ParsedJsonString);
+	void HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message);
+
+	void InitializeV2MatchmakingNotifDelegates();
+	TMap<EV2MatchmakingNotif, FMessageNotif> MatchmakingV2NotifDelegates;
+	
 	static TMap<FString, Response> ResponseStringEnumMap;
 	static TMap<FString, Notif> NotifStringEnumMap;
 #pragma endregion
@@ -1910,6 +1934,7 @@ private:
 
 	// Matchmaking v2
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
+	FV2MatchmakingMatchFoundNotif V2MatchmakingMatchFoundNotif;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;
@@ -2021,6 +2046,5 @@ private:
 	FErrorHandler OnRefreshTokenError;
 	FErrorHandler OnCreateDSError;
 };
-
 } // Namespace Api
 } // Namespace AccelByte
