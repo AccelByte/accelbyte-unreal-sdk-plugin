@@ -446,11 +446,6 @@ public:
 	DECLARE_DELEGATE_OneParam(FV2PartyKickedNotif, FAccelByteModelsV2PartyUserKickedEvent);
 
 	/**
-	 * @brief Delegate for user rejected party invite event.
-	 */
-	DECLARE_DELEGATE_OneParam(FV2PartyRejectedNotif, FAccelByteModelsV2PartyUserRejectedEvent);
-
-	/**
 	 * @brief Delegate for user invited to game session event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2GameSessionInvitedNotif, FAccelByteModelsV2GameSessionUserInvitedEvent);
@@ -1913,7 +1908,6 @@ private:
 	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
 
-	// Matchmaking v2
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 
     // Matchmaking

@@ -247,6 +247,7 @@ void Session::GetPartyDetails(
 	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *PartyID);
 	
