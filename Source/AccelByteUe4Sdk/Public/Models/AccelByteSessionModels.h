@@ -32,6 +32,14 @@ enum class EAccelByteV2SessionMemberStatus : uint8
 	KICKED
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteV2GameSessionDsStatus : uint8
+{
+	INITIALIZED = 0,
+	REQUESTED,
+	READY
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionUser
 {
@@ -110,6 +118,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionDSInformation
 		TArray<FString> RequestedRegions{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSInformation")
 		FDateTime RequestedAt{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSInformation")
+		EAccelByteV2GameSessionDsStatus Status{EAccelByteV2GameSessionDsStatus::INITIALIZED};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSStatusChangedNotif
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+	FAccelByteModelsServerInfo Server{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+	FString SessionId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+	FString Error{};
 };
 
 USTRUCT(BlueprintType)

@@ -658,7 +658,7 @@ class UserV1 final :
     kPlatformIdFieldNumber = 4,
     kPlatformUserIdFieldNumber = 5,
   };
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   void clear_id();
   const std::string& id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -896,7 +896,7 @@ class PartySessionV1 final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::session::UserV1 >&
       members() const;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   void clear_id();
   const std::string& id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -1012,7 +1012,7 @@ class PartySessionV1 final :
       ::session::SessionConfigV1* configuration);
   ::session::SessionConfigV1* unsafe_arena_release_configuration();
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   void clear_version();
   int32_t version() const;
   void set_version(int32_t value);
@@ -3318,7 +3318,7 @@ class GameSessionV1 final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::session::Team >&
       teams() const;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   void clear_id();
   const std::string& id() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -3480,7 +3480,7 @@ class GameSessionV1 final :
       ::session::DSInformationV1* dsinformationv1);
   ::session::DSInformationV1* unsafe_arena_release_dsinformationv1();
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   void clear_version();
   int32_t version() const;
   void set_version(int32_t value);
@@ -4971,7 +4971,7 @@ inline NotificationEventEnvelope::PayloadCase NotificationEventEnvelope::payload
 
 // UserV1
 
-// string id = 1 [json_name = "_id"];
+// string id = 1 [json_name = "id"];
 inline void UserV1::clear_id() {
   id_.ClearToEmpty();
 }
@@ -5230,7 +5230,7 @@ inline void UserV1::set_allocated_platform_user_id(std::string* platform_user_id
 
 // PartySessionV1
 
-// string id = 1 [json_name = "_id"];
+// string id = 1 [json_name = "id"];
 inline void PartySessionV1::clear_id() {
   id_.ClearToEmpty();
 }
@@ -5666,7 +5666,7 @@ inline void PartySessionV1::set_allocated_configuration(::session::SessionConfig
   // @@protoc_insertion_point(field_set_allocated:session.PartySessionV1.configuration)
 }
 
-// int32 version = 9 [json_name = "_version"];
+// int32 version = 9 [json_name = "version"];
 inline void PartySessionV1::clear_version() {
   version_ = 0;
 }
@@ -7187,7 +7187,7 @@ Team::mutable_user_ids() {
 
 // GameSessionV1
 
-// string id = 1 [json_name = "_id"];
+// string id = 1 [json_name = "id"];
 inline void GameSessionV1::clear_id() {
   id_.ClearToEmpty();
 }
@@ -7623,7 +7623,7 @@ inline void GameSessionV1::set_allocated_configuration(::session::SessionConfigV
   // @@protoc_insertion_point(field_set_allocated:session.GameSessionV1.configuration)
 }
 
-// int32 version = 9 [json_name = "_version"];
+// int32 version = 9 [json_name = "version"];
 inline void GameSessionV1::clear_version() {
   version_ = 0;
 }

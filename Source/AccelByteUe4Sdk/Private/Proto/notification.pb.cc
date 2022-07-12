@@ -590,87 +590,87 @@ const char descriptor_table_protodef_notification_2eproto[] PROTOBUF_SECTION_VAR
   "Updated\022g\n\035DSStatusChangedNotificationV1"
   "\030\013 \001(\0132&.session.DSStatusChangedNotifica"
   "tionV1H\000R\026OnDSStatusChangedNotifB\t\n\007payl"
-  "oad\"\232\001\n\006UserV1\022\017\n\002id\030\001 \001(\tR\003_id\022\026\n\006statu"
-  "s\030\002 \001(\tR\006status\022\034\n\tupdatedAt\030\003 \001(\tR\tupda"
-  "tedAt\022\037\n\013platform_id\030\004 \001(\tR\nplatformID\022("
-  "\n\020platform_user_id\030\005 \001(\tR\016platformUserID"
-  "\"\335\002\n\016PartySessionV1\022\017\n\002id\030\001 \001(\tR\003_id\022\034\n\t"
-  "namespace\030\002 \001(\tR\tnamespace\022)\n\007members\030\003 "
-  "\003(\0132\017.session.UserV1R\007members\022\036\n\nattribu"
-  "tes\030\004 \001(\014R\nattributes\022\033\n\tjoin_type\030\005 \001(\t"
-  "R\010joinType\022\035\n\ncreated_at\030\006 \001(\tR\tcreatedA"
-  "t\022\035\n\nupdated_at\030\007 \001(\tR\tupdatedAt\022>\n\rconf"
-  "iguration\030\010 \001(\0132\030.session.SessionConfigV"
-  "1R\rconfiguration\022\031\n\007version\030\t \001(\005R\010_vers"
-  "ion\022\033\n\tleader_id\030\n \001(\tR\010leaderID\"\251\001\n\017Ses"
-  "sionConfigV1\022\022\n\004name\030\001 \001(\tR\004name\022 \n\013join"
-  "ability\030\002 \001(\tR\013joinability\022\037\n\013min_player"
-  "s\030\003 \001(\005R\nminPlayers\022\037\n\013max_players\030\004 \001(\005"
-  "R\nmaxPlayers\022\036\n\ndeployment\030\005 \001(\tR\ndeploy"
-  "ment\"d\n\035PartyNotificationUserJoinedV1\022)\n"
-  "\007members\030\001 \003(\0132\017.session.UserV1R\007members"
-  "\022\030\n\007PartyID\030\002 \001(\tR\007partyID\"\240\001\n!PartyNoti"
-  "ficationMembersChangedV1\022)\n\007members\030\001 \003("
-  "\0132\017.session.UserV1R\007members\022\030\n\007PartyID\030\002"
-  " \001(\tR\007partyID\022\032\n\010JoinerID\030\003 \001(\tR\010joinerI"
-  "D\022\032\n\010LeaderID\030\004 \001(\tR\010leaderID\"V\n\036PartyNo"
-  "tificationUserInvitedV1\022\032\n\010senderID\030\001 \001("
-  "\tR\010senderID\022\030\n\007PartyID\030\002 \001(\tR\007partyID\"\204\001"
-  "\n\035PartyNotificationUserRejectV1\022)\n\007membe"
-  "rs\030\001 \003(\0132\017.session.UserV1R\007members\022\030\n\007Pa"
-  "rtyID\030\002 \001(\tR\007partyID\022\036\n\nRejectedID\030\003 \001(\t"
-  "R\nrejectedID\"9\n\035PartyNotificationUserKic"
-  "kedV1\022\030\n\007PartyID\030\001 \001(\tR\007partyID\"D\n$GameS"
-  "essionNotificationUserInvitedV1\022\034\n\tSessi"
-  "onID\030\001 \001(\tR\tSessionID\"n\n#GameSessionNoti"
-  "ficationUserJoinedV1\022\034\n\tSessionID\030\001 \001(\tR"
-  "\tSessionID\022)\n\007members\030\002 \003(\0132\017.session.Us"
-  "erV1R\007members\"\216\001\n\'GameSessionNotificatio"
-  "nMembersChangedV1\022)\n\007members\030\001 \003(\0132\017.ses"
-  "sion.UserV1R\007members\022\034\n\tSessionID\030\002 \001(\tR"
-  "\tsessionID\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\"\213"
-  "\001\n\035DSStatusChangedNotificationV1\0226\n\nGame"
-  "Server\030\001 \001(\0132\025.session.GameServerV1R\013gam"
-  "e_server\022\034\n\tSessionID\030\002 \001(\tR\tsessionID\022\024"
-  "\n\005Error\030\003 \001(\tR\005error\"#\n\007UserIDs\022\030\n\006userI"
-  "D\030\001 \003(\tR\010user_ids\"\"\n\004Team\022\032\n\010user_ids\030\001 "
-  "\003(\tR\010user_ids\"\225\004\n\rGameSessionV1\022\017\n\002id\030\001 "
-  "\001(\tR\003_id\022\034\n\tnamespace\030\002 \001(\tR\tnamespace\022)"
-  "\n\007members\030\003 \003(\0132\017.session.UserV1R\007member"
-  "s\022\036\n\nattributes\030\004 \001(\014R\nattributes\022\033\n\tjoi"
-  "n_type\030\005 \001(\tR\010joinType\022\035\n\ncreated_at\030\006 \001"
-  "(\tR\tcreatedAt\022\035\n\nupdated_at\030\007 \001(\tR\tupdat"
-  "edAt\022>\n\rconfiguration\030\010 \001(\0132\030.session.Se"
-  "ssionConfigV1R\rconfiguration\022\031\n\007version\030"
-  "\t \001(\005R\010_version\022\036\n\nmatch_pool\030\n \001(\tR\nmat"
-  "ch_pool\022\034\n\tgame_mode\030\013 \001(\tR\tgame_mode\022.\n"
-  "\022backfill_ticket_id\030\014 \001(\tR\022backfill_tick"
-  "et_id\022#\n\005teams\030\r \003(\0132\r.session.TeamR\005tea"
-  "ms\022A\n\017DSInformationV1\030\016 \001(\0132\030.session.DS"
-  "InformationV1R\016ds_information\"\263\001\n\017DSInfo"
-  "rmationV1\0226\n\nGameServer\030\001 \001(\0132\025.session."
-  "GameServerV1R\013game_server\022,\n\021requested_r"
-  "egions\030\002 \003(\tR\021requested_regions\022\"\n\014reque"
-  "sted_at\030\003 \001(\tR\014requested_at\022\026\n\006status\030\005 "
-  "\001(\tR\006status\"\244\004\n\014GameServerV1\022\032\n\010pod_name"
-  "\030\001 \001(\tR\010pod_name\022$\n\rimage_version\030\002 \001(\tR"
-  "\rimage_version\022\034\n\tnamespace\030\003 \001(\tR\tnames"
-  "pace\022\016\n\002ip\030\004 \001(\tR\002ip\022$\n\ralternate_ips\030\005 "
-  "\003(\tR\ralternate_ips\022\022\n\004port\030\006 \001(\005R\004port\022\032"
-  "\n\010protocol\030\007 \001(\tR\010protocol\022\024\n\005ports\030\010 \001("
-  "\014R\005ports\022\032\n\010provider\030\t \001(\tR\010provider\022\"\n\014"
-  "game_version\030\n \001(\tR\014game_version\022\026\n\006stat"
-  "us\030\013 \001(\tR\006status\022\036\n\nsession_id\030\014 \001(\tR\nse"
-  "ssion_id\022\036\n\ndeployment\030\r \001(\tR\ndeployment"
-  "\022\026\n\006region\030\016 \001(\tR\006region\022*\n\020custom_attri"
-  "bute\030\017 \001(\tR\020custom_attribute\022:\n\030is_overr"
-  "ide_game_version\030\020 \001(\010R\030is_override_game"
-  "_version\022 \n\013last_update\030\021 \001(\tR\013last_upda"
-  "teB\016Z\014/event;eventb\006proto3"
+  "oad\"\231\001\n\006UserV1\022\016\n\002id\030\001 \001(\tR\002id\022\026\n\006status"
+  "\030\002 \001(\tR\006status\022\034\n\tupdatedAt\030\003 \001(\tR\tupdat"
+  "edAt\022\037\n\013platform_id\030\004 \001(\tR\nplatformID\022(\n"
+  "\020platform_user_id\030\005 \001(\tR\016platformUserID\""
+  "\333\002\n\016PartySessionV1\022\016\n\002id\030\001 \001(\tR\002id\022\034\n\tna"
+  "mespace\030\002 \001(\tR\tnamespace\022)\n\007members\030\003 \003("
+  "\0132\017.session.UserV1R\007members\022\036\n\nattribute"
+  "s\030\004 \001(\014R\nattributes\022\033\n\tjoin_type\030\005 \001(\tR\010"
+  "joinType\022\035\n\ncreated_at\030\006 \001(\tR\tcreatedAt\022"
+  "\035\n\nupdated_at\030\007 \001(\tR\tupdatedAt\022>\n\rconfig"
+  "uration\030\010 \001(\0132\030.session.SessionConfigV1R"
+  "\rconfiguration\022\030\n\007version\030\t \001(\005R\007version"
+  "\022\033\n\tleader_id\030\n \001(\tR\010leaderID\"\251\001\n\017Sessio"
+  "nConfigV1\022\022\n\004name\030\001 \001(\tR\004name\022 \n\013joinabi"
+  "lity\030\002 \001(\tR\013joinability\022\037\n\013min_players\030\003"
+  " \001(\005R\nminPlayers\022\037\n\013max_players\030\004 \001(\005R\nm"
+  "axPlayers\022\036\n\ndeployment\030\005 \001(\tR\ndeploymen"
+  "t\"d\n\035PartyNotificationUserJoinedV1\022)\n\007me"
+  "mbers\030\001 \003(\0132\017.session.UserV1R\007members\022\030\n"
+  "\007PartyID\030\002 \001(\tR\007partyID\"\240\001\n!PartyNotific"
+  "ationMembersChangedV1\022)\n\007members\030\001 \003(\0132\017"
+  ".session.UserV1R\007members\022\030\n\007PartyID\030\002 \001("
+  "\tR\007partyID\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\022\032"
+  "\n\010LeaderID\030\004 \001(\tR\010leaderID\"V\n\036PartyNotif"
+  "icationUserInvitedV1\022\032\n\010senderID\030\001 \001(\tR\010"
+  "senderID\022\030\n\007PartyID\030\002 \001(\tR\007partyID\"\204\001\n\035P"
+  "artyNotificationUserRejectV1\022)\n\007members\030"
+  "\001 \003(\0132\017.session.UserV1R\007members\022\030\n\007Party"
+  "ID\030\002 \001(\tR\007partyID\022\036\n\nRejectedID\030\003 \001(\tR\nr"
+  "ejectedID\"9\n\035PartyNotificationUserKicked"
+  "V1\022\030\n\007PartyID\030\001 \001(\tR\007partyID\"D\n$GameSess"
+  "ionNotificationUserInvitedV1\022\034\n\tSessionI"
+  "D\030\001 \001(\tR\tSessionID\"n\n#GameSessionNotific"
+  "ationUserJoinedV1\022\034\n\tSessionID\030\001 \001(\tR\tSe"
+  "ssionID\022)\n\007members\030\002 \003(\0132\017.session.UserV"
+  "1R\007members\"\216\001\n\'GameSessionNotificationMe"
+  "mbersChangedV1\022)\n\007members\030\001 \003(\0132\017.sessio"
+  "n.UserV1R\007members\022\034\n\tSessionID\030\002 \001(\tR\tse"
+  "ssionID\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\"\213\001\n\035"
+  "DSStatusChangedNotificationV1\0226\n\nGameSer"
+  "ver\030\001 \001(\0132\025.session.GameServerV1R\013game_s"
+  "erver\022\034\n\tSessionID\030\002 \001(\tR\tsessionID\022\024\n\005E"
+  "rror\030\003 \001(\tR\005error\"#\n\007UserIDs\022\030\n\006userID\030\001"
+  " \003(\tR\010user_ids\"\"\n\004Team\022\032\n\010user_ids\030\001 \003(\t"
+  "R\010user_ids\"\223\004\n\rGameSessionV1\022\016\n\002id\030\001 \001(\t"
+  "R\002id\022\034\n\tnamespace\030\002 \001(\tR\tnamespace\022)\n\007me"
+  "mbers\030\003 \003(\0132\017.session.UserV1R\007members\022\036\n"
+  "\nattributes\030\004 \001(\014R\nattributes\022\033\n\tjoin_ty"
+  "pe\030\005 \001(\tR\010joinType\022\035\n\ncreated_at\030\006 \001(\tR\t"
+  "createdAt\022\035\n\nupdated_at\030\007 \001(\tR\tupdatedAt"
+  "\022>\n\rconfiguration\030\010 \001(\0132\030.session.Sessio"
+  "nConfigV1R\rconfiguration\022\030\n\007version\030\t \001("
+  "\005R\007version\022\036\n\nmatch_pool\030\n \001(\tR\nmatch_po"
+  "ol\022\034\n\tgame_mode\030\013 \001(\tR\tgame_mode\022.\n\022back"
+  "fill_ticket_id\030\014 \001(\tR\022backfill_ticket_id"
+  "\022#\n\005teams\030\r \003(\0132\r.session.TeamR\005teams\022A\n"
+  "\017DSInformationV1\030\016 \001(\0132\030.session.DSInfor"
+  "mationV1R\016ds_information\"\263\001\n\017DSInformati"
+  "onV1\0226\n\nGameServer\030\001 \001(\0132\025.session.GameS"
+  "erverV1R\013game_server\022,\n\021requested_region"
+  "s\030\002 \003(\tR\021requested_regions\022\"\n\014requested_"
+  "at\030\003 \001(\tR\014requested_at\022\026\n\006status\030\005 \001(\tR\006"
+  "status\"\244\004\n\014GameServerV1\022\032\n\010pod_name\030\001 \001("
+  "\tR\010pod_name\022$\n\rimage_version\030\002 \001(\tR\rimag"
+  "e_version\022\034\n\tnamespace\030\003 \001(\tR\tnamespace\022"
+  "\016\n\002ip\030\004 \001(\tR\002ip\022$\n\ralternate_ips\030\005 \003(\tR\r"
+  "alternate_ips\022\022\n\004port\030\006 \001(\005R\004port\022\032\n\010pro"
+  "tocol\030\007 \001(\tR\010protocol\022\024\n\005ports\030\010 \001(\014R\005po"
+  "rts\022\032\n\010provider\030\t \001(\tR\010provider\022\"\n\014game_"
+  "version\030\n \001(\tR\014game_version\022\026\n\006status\030\013 "
+  "\001(\tR\006status\022\036\n\nsession_id\030\014 \001(\tR\nsession"
+  "_id\022\036\n\ndeployment\030\r \001(\tR\ndeployment\022\026\n\006r"
+  "egion\030\016 \001(\tR\006region\022*\n\020custom_attribute\030"
+  "\017 \001(\tR\020custom_attribute\022:\n\030is_override_g"
+  "ame_version\030\020 \001(\010R\030is_override_game_vers"
+  "ion\022 \n\013last_update\030\021 \001(\tR\013last_updateB\016Z"
+  "\014/event;eventb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_notification_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_notification_2eproto = {
-  false, false, 4226, descriptor_table_protodef_notification_2eproto, "notification.proto", 
+  false, false, 4221, descriptor_table_protodef_notification_2eproto, "notification.proto", 
   &descriptor_table_notification_2eproto_once, nullptr, 0, 18,
   schemas, file_default_instances, TableStruct_notification_2eproto::offsets,
   file_level_metadata_notification_2eproto, file_level_enum_descriptors_notification_2eproto, file_level_service_descriptors_notification_2eproto,
@@ -1626,7 +1626,7 @@ const char* UserV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string id = 1 [json_name = "_id"];
+      // string id = 1 [json_name = "id"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
@@ -1705,7 +1705,7 @@ uint8_t* UserV1::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
@@ -1771,7 +1771,7 @@ size_t UserV1::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -2077,7 +2077,7 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string id = 1 [json_name = "_id"];
+      // string id = 1 [json_name = "id"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
@@ -2157,7 +2157,7 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         } else
           goto handle_unusual;
         continue;
-      // int32 version = 9 [json_name = "_version"];
+      // int32 version = 9 [json_name = "version"];
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
           version_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
@@ -2204,7 +2204,7 @@ uint8_t* PartySessionV1::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
@@ -2276,7 +2276,7 @@ uint8_t* PartySessionV1::_InternalSerialize(
         8, _Internal::configuration(this), target, stream);
   }
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   if (this->_internal_version() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(9, this->_internal_version(), target);
@@ -2315,7 +2315,7 @@ size_t PartySessionV1::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -2371,7 +2371,7 @@ size_t PartySessionV1::ByteSizeLong() const {
         *configuration_);
   }
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   if (this->_internal_version() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_version());
   }
@@ -5793,7 +5793,7 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string id = 1 [json_name = "_id"];
+      // string id = 1 [json_name = "id"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
@@ -5873,7 +5873,7 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         } else
           goto handle_unusual;
         continue;
-      // int32 version = 9 [json_name = "_version"];
+      // int32 version = 9 [json_name = "version"];
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
           version_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
@@ -5961,7 +5961,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
@@ -6033,7 +6033,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
         8, _Internal::configuration(this), target, stream);
   }
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   if (this->_internal_version() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(9, this->_internal_version(), target);
@@ -6115,7 +6115,7 @@ size_t GameSessionV1::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // string id = 1 [json_name = "_id"];
+  // string id = 1 [json_name = "id"];
   if (!this->_internal_id().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -6192,7 +6192,7 @@ size_t GameSessionV1::ByteSizeLong() const {
         *dsinformationv1_);
   }
 
-  // int32 version = 9 [json_name = "_version"];
+  // int32 version = 9 [json_name = "version"];
   if (this->_internal_version() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_version());
   }
