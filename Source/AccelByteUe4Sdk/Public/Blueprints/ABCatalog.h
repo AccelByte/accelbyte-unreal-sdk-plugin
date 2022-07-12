@@ -33,6 +33,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsItemInfoResponse, FAccelByteModelsItem
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsItemPagingSlicedResultResponse, FAccelByteModelsItemPagingSlicedResult, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsItemDynamicDataResponse, FAccelByteModelsItemDynamicData, Response);
+
 #pragma endregion 
 
 //Combination of Category and Item API
@@ -60,7 +62,7 @@ public:
 //Item
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
-	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, FDModelsPopulatedItemInfoResponse OnSuccess, FDErrorHandler OnError);
+	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, const FString& StoreId, bool bPopulateBundle, FDModelsPopulatedItemInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void GetItemByAppId(FString const& AppId, FString const& Language, FString const& Region, FDModelsItemInfoResponse OnSuccess, FDErrorHandler OnError);
@@ -70,6 +72,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, FDModelsItemPagingSlicedResultResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
+	void GetItemDynamicData(FString const& ItemId, FDModelsItemDynamicDataResponse OnSuccess, FDErrorHandler OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;

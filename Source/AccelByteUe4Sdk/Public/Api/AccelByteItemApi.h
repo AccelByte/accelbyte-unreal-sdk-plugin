@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteApiBase.h"
 #include "Models/AccelByteEcommerceModels.h"
 
 namespace AccelByte
@@ -17,16 +17,12 @@ namespace Api
 /**
  * @brief Item API for buying things from the online store. An item represents a single product sold in the online store. Each category has items inside it. You can get a list of items by criteria or by its ID.
  */
-class ACCELBYTEUE4SDK_API Item
+class ACCELBYTEUE4SDK_API Item : public FApiBase
 {
 public:
 	Item(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Item();
-private:
-	FHttpRetryScheduler& HttpRef;
-	Credentials const& CredentialsRef;
-	Settings const& SettingsRef;
-public:
+	
 	/**
 	 * @brief Get one item information from an online store.
 	 *
@@ -39,7 +35,7 @@ public:
 	 * @param PopulateBundle Whether populate bundled items if it's a bundle, default value is false.
 	 */
 	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess, FErrorHandler const& OnError,
-		const FString& StoreId = TEXT(""), bool PopulateBundle = false);
+		const FString& StoreId = TEXT(""), bool bPopulateBundle = false);
 
 	/**
 	 * @brief Get one item information from an online store.
@@ -81,15 +77,24 @@ public:
 	void SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
-	* @brief Get Item information by SKU number from an online store.
-	*
-	* @param Sku should contain specific number of item Sku.
-	* @param Language ISO 639-1 language tag, e.g., "en, "zh".
-	* @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
-	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
-	* @param OnError This will be called when the operation failed.
-	*/
+	 * @brief Get Item information by SKU number from an online store.
+	 *
+	 * @param Sku should contain specific number of item Sku.
+	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
+	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
+	 * @param OnError This will be called when the operation failed.
+	 */
 	void GetItemBySku(FString const& Sku, FString const& Language,FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get Dynamic Data information from specified Item
+	 *
+	 * @param ItemId The Item ID.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemDynamicData&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetItemDynamicData(FString const& ItemId, THandler<FAccelByteModelsItemDynamicData> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	* @brief Get Item information by SKU number from an online store.
