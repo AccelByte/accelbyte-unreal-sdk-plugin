@@ -160,9 +160,18 @@ void Session::UpdateGameSession(
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
 
+	// If the given DSRequest object contains all default values, we remove it from the request JSON by passing a flag
+	// to SerializeAndRemoveEmptyEnumValues
+	const FAccelByteModelsV2DSRequest DSRequest = UpdateRequest.DSRequest;
+	const bool bRemoveDSRequest =
+		DSRequest.Deployment.IsEmpty() &&
+		DSRequest.ClientVersion.IsEmpty() &&
+		DSRequest.GameMode.IsEmpty() &&
+		DSRequest.RequestedRegions.Num() == 0;
+
 	FString Content = TEXT("");    
-	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
-	
+	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content, bRemoveDSRequest);
+
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
