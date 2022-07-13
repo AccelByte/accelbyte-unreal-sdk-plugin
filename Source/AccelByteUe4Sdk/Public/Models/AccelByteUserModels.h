@@ -40,7 +40,8 @@ enum class EAccelBytePlatformType : uint8
 	AwsCognito,
 	Discord,
 	Nintendo,
-	SnapChat
+	SnapChat,
+	EAOrigin
 };
 
 UENUM(BlueprintType)
