@@ -37,7 +37,9 @@ enum class EAccelByteV2GameSessionDsStatus : uint8
 {
 	INITIALIZED = 0,
 	REQUESTED,
-	READY
+	READY,
+	CREATING,
+	BUSY
 };
 
 USTRUCT(BlueprintType)
@@ -127,7 +129,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSStatusChangedNotif
 {
 	GENERATED_BODY();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
-	FAccelByteModelsServerInfo Server{};
+	FAccelByteModelsServerInfo Game_server{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
 	FString SessionId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
