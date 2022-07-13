@@ -81,14 +81,32 @@ namespace Api
 		FString Accept = TEXT("application/json");
 		FString Content;
 
-		for (int i = 0; i < StatCodes.Num(); i++)
-		{
-			Url.Append((i == 0) ? TEXT("?statCodes=") : TEXT("%2C")).Append(StatCodes[i]);
-		}
+		bool bIsBeginning = true;
 
-		for (int i = 0; i < Tags.Num(); i++)
+		if (StatCodes.Num() > 0)
 		{
-			Url.Append((i == 0) ? TEXT("?tags=") : TEXT("%2C")).Append(Tags[i]);
+			if (bIsBeginning)
+			{
+				Url.Append(TEXT("?"));
+				bIsBeginning = false;
+			}
+			Url.Append(TEXT("statCodes="));
+			Url.Append(FGenericPlatformHttp::UrlEncode(FString::Join(StatCodes, TEXT(","))));
+		}
+		
+		if (Tags.Num() > 0)
+		{
+			if (bIsBeginning)
+			{
+				Url.Append(TEXT("?"));
+				bIsBeginning = false;
+			}
+			else
+			{
+				Url.Append(TEXT("&"));
+			}
+			Url.Append(TEXT("tags="));
+			Url.Append(FGenericPlatformHttp::UrlEncode(FString::Join(Tags, TEXT(","))));
 		}
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
