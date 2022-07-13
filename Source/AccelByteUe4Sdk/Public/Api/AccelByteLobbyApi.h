@@ -86,8 +86,7 @@ public:
      * @brief delegate for handling info party response.
      */
     DECLARE_DELEGATE_OneParam(FPartyInfoResponse, const FAccelByteModelsInfoPartyResponse&); 
-
-
+	
     /**
      * @brief delegate for handling create party response.
      */
@@ -101,9 +100,8 @@ public:
     /**
      * @brief delegate for handling leave party notification.
      */
-    DECLARE_DELEGATE_OneParam(FPartyLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
-
-
+    DECLARE_DELEGATE_OneParam(FPartyMemberLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
+	
     /**
      * @brief delegate for handling invite party response.
      */
@@ -157,12 +155,12 @@ public:
 	/**
 	 * @brief delegate for handling party connect notification
 	 */
-	DECLARE_DELEGATE_OneParam(FPartyConnectNotif, const FAccelByteModelsPartyConnectionNotice&);
+	DECLARE_DELEGATE_OneParam(FPartyMemberConnectNotif, const FAccelByteModelsPartyMemberConnectionNotice&);
 
 	/**
 	 * @brief delegate for handling party disconnect notification
 	 */
-	DECLARE_DELEGATE_OneParam(FPartyDisconnectNotif, const FAccelByteModelsPartyConnectionNotice&);
+	DECLARE_DELEGATE_OneParam(FPartyMemberDisconnectNotif, const FAccelByteModelsPartyMemberConnectionNotice&);
 
 	/**
 	 * @brief delegate for handling generate party code event
@@ -240,8 +238,7 @@ public:
      * @brief delegate for handling get all user presence
      */
     DECLARE_DELEGATE_OneParam(FGetAllFriendsStatusResponse, const FAccelByteModelsGetOnlineUsersResponse&);        
-
-
+	
     // Notification
 	/**
 	 * @brief delegate for handling incoming notification
@@ -906,17 +903,29 @@ public:
 	{
 		ConnectionClosed = OnConnectionClosed;
 	}
-	void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnLeavePartyNotice)
+	/**
+	 * @brief Set a trigger function when a party member leave from the party
+	 * @param OnPartyMemberLeaveNotice delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
+	 */
+	void SetPartyMemberLeaveNotifDelegate(const FPartyMemberLeaveNotif& OnPartyMemberLeaveNotice)
 	{
-		PartyLeaveNotif = OnLeavePartyNotice;
+		PartyMemberLeaveNotif = OnPartyMemberLeaveNotice;
 	}
-	void SetPartyConnectNotifDelegate(FPartyConnectNotif OnPartyConnectNotif) 
+	/**
+	 * @brief Set a trigger function when a party member reconnecting to the lobby
+	 * @param OnPartyMemberConnectNotif return models called FAccelByteModelsPartyMemberConnectionNotice
+	 */
+	void SetPartyMemberConnectNotifDelegate(FPartyMemberConnectNotif OnPartyMemberConnectNotif) 
 	{
-		PartyConnectNotif = OnPartyConnectNotif;
+		PartyMemberConnectNotif = OnPartyMemberConnectNotif;
 	}
-	void SetPartyDisconnectNotifDelegate(FPartyDisconnectNotif OnPartyDisconnectNotif) 
+	/**
+	 * @brief Set a trigger function when a party member disconnect from lobby
+	 * @param OnPartyMemberDisconnectNotif return models called FAccelByteModelsPartyMemberConnectionNotice
+	 */
+	void SetPartyMemberDisconnectNotifDelegate(FPartyMemberDisconnectNotif OnPartyMemberDisconnectNotif) 
 	{
-		PartyDisconnectNotif = OnPartyDisconnectNotif;
+		PartyMemberDisconnectNotif = OnPartyMemberDisconnectNotif;
 	}
 	void SetPartyInviteNotifDelegate(const FPartyInviteNotif& OnPartyInviteNotif)
 	{
@@ -1786,7 +1795,7 @@ private:
     FPartyInfoResponse PartyInfoResponse;
     FPartyCreateResponse PartyCreateResponse;
     FPartyLeaveResponse PartyLeaveResponse;
-    FPartyLeaveNotif PartyLeaveNotif;
+    FPartyMemberLeaveNotif PartyMemberLeaveNotif;
     FPartyInviteResponse PartyInviteResponse;
     FPartyInviteNotif PartyInviteNotif;
     FPartyGetInvitedNotif PartyGetInvitedNotif;
@@ -1797,8 +1806,8 @@ private:
     FPartyKickResponse PartyKickResponse;
     FPartyKickNotif PartyKickNotif;
 	FPartyDataUpdateNotif PartyDataUpdateNotif;
-	FPartyConnectNotif PartyConnectNotif;
-	FPartyDisconnectNotif PartyDisconnectNotif;
+	FPartyMemberConnectNotif PartyMemberConnectNotif;
+	FPartyMemberDisconnectNotif PartyMemberDisconnectNotif;
 	FPartyGenerateCodeResponse PartyGenerateCodeResponse;
 	FPartyGetCodeResponse PartyGetCodeResponse;
 	FPartyDeleteCodeResponse PartyDeleteCodeResponse;
