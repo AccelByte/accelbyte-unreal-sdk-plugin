@@ -1932,7 +1932,6 @@ private:
 	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
 
-	// Matchmaking v2
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 	FV2MatchmakingMatchFoundNotif V2MatchmakingMatchFoundNotif;
 

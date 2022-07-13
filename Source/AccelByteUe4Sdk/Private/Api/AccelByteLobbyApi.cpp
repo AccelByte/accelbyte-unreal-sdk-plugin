@@ -1905,7 +1905,9 @@ void DispatchV2Notif(PayloadType Payload, ResponseCallbackType ResponseCallback)
 	std::string JsonPayloadUTF8;
 	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
 	FString JsonPayload = UTF8_TO_TCHAR(JsonPayloadUTF8.c_str());
+
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Received MPv2 lobby notification\n%s"), *JsonPayload);
+
 	DataStruct Result;
 	if(FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Result, 0, 0))
 	{
