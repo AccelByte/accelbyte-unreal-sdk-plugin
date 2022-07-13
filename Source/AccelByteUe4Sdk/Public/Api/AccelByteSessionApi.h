@@ -45,11 +45,13 @@ public:
 	/**
 	 * @brief Query game sessions.
 	 *
-	 * @param QueryObject JSON object containing the queries you wish to make, along with comparison types.
+	 * @param QueryObject Query object containing the parameters to query on.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * @param Offset Pagination offset.
+	 * @param Limit Pagination limit.
 	 */
-	void QueryGameSessions(TSharedRef<FJsonObject> const& QueryObject, THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
+	void QueryGameSessions(FAccelByteModelsV2GameSessionQuery const& QueryObject, THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
 
 	/**
 	 * @brief Update a game session by ID.
@@ -175,17 +177,6 @@ public:
 	/**
 	 * @brief Get a list of parties matching the given query.
 	 *
-	 * @param Query The object containing fields to query on - empty fields are omitted.
-	 * @param OnSuccess This will be called if the operation succeeded.
-	 * @param OnError This will be called if the operation failed.
-	 * @param Offset The pagination offset.
-	 * @param Limit The pagination limit.
-	 */
-	void QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
-
-	/**
-	 * @brief Get a list of parties matching the given query.
-	 *
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Status Optional membership status to query for - either active or invited.
@@ -197,7 +188,6 @@ private:
 	Session(Session const&) = delete;
 	Session(Session&&) = delete;
 
-	static void AppendQueryParams(FAccelByteModelsV2SessionQueryRequest const& Query, int32 const& Offset, int32 const& Limit,	TMap<FString, FString>& OutParams);
 	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 

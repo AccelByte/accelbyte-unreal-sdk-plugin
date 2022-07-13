@@ -15,44 +15,6 @@ namespace AccelByte
 {
 namespace Api
 {
-void Session::AppendQueryParams(
-	FAccelByteModelsV2SessionQueryRequest const& Query,
-	int32 const& Offset,
-	int32 const& Limit,
-	TMap<FString, FString>& OutParams)
-{
-	if(Offset >= 0)
-	{
-		OutParams.Add(TEXT("offset"), FString::Printf(TEXT("%ld"), Offset));
-	}
-
-	if(Limit >= 0)
-	{
-		OutParams.Add(TEXT("limit"), FString::Printf(TEXT("%ld"), Limit));
-	}
-
-#define ADD_QUERY_PARAM(Name, Value) if(!Value.IsEmpty()) {  \
-    OutParams.Add(Name, Value);                              \
-}
-	ADD_QUERY_PARAM(TEXT("key"), Query.Key);
-	ADD_QUERY_PARAM(TEXT("value"), Query.Value);
-	ADD_QUERY_PARAM(TEXT("leaderID"), Query.LeaderID);
-	ADD_QUERY_PARAM(TEXT("memberID"), Query.MemberID);
-#undef ADD_QUERY_PARAM
-
-	if(Query.JoinType != EAccelByteV2SessionJoinability::EMPTY)
-	{
-		OutParams.Add(TEXT("joinType"),
-			StaticEnum<EAccelByteV2SessionJoinability>()->GetNameStringByValue(static_cast<int64>(Query.JoinType)));
-	}
-
-	if(Query.MemberStatus != EAccelByteV2SessionMemberStatus::EMPTY)
-	{
-		OutParams.Add(TEXT("memberStatus"),
-			StaticEnum<EAccelByteV2SessionMemberStatus>()->GetNameStringByValue(static_cast<int64>(Query.MemberStatus)));
-	}
-}
-
 void Session::RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName)
 {
 	FString FieldValue;
@@ -122,7 +84,7 @@ void Session::GetGameSessionDetails(
 }
 
 void Session::QueryGameSessions(
-	TSharedRef<FJsonObject> const& QueryObject,
+	FAccelByteModelsV2GameSessionQuery const& QueryObject,
 	THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess,
 	FErrorHandler const& OnError,
 	int32 const& Offset,
@@ -134,15 +96,17 @@ void Session::QueryGameSessions(
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
 
 	// Add pagination information to query object
-	QueryObject->SetNumberField(TEXT("offset"), Offset);
-	QueryObject->SetNumberField(TEXT("limit"), Limit);
+	QueryObject.JsonWrapper.JsonObject->SetNumberField(TEXT("offset"), Offset);
+	QueryObject.JsonWrapper.JsonObject->SetNumberField(TEXT("limit"), Limit);
 
 	// Convert query object to JSON string
 	FString RequestString;
-	TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&RequestString);
-	if (!FJsonSerializer::Serialize(QueryObject, JsonWriter))
+	const TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&RequestString);
+	if (!FJsonSerializer::Serialize(QueryObject.JsonWrapper.JsonObject.ToSharedRef(), JsonWriter))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to send query game session request as our query JSON object failed to serialize to string!"));
+		OnError.ExecuteIfBound(
+			static_cast<int32>(ErrorCodes::InvalidRequest),
+			TEXT("Failed to send query game session request as our query JSON object failed to serialize to string!"));
 		return;
 	}
 
@@ -347,24 +311,6 @@ void Session::KickUserFromParty(
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *PartyID, *UserID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
-}
-
-void Session::QueryParties(
-	FAccelByteModelsV2SessionQueryRequest const& Query,
-	THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess,
-	FErrorHandler const& OnError,
-	int32 const& Offset,
-	int32 const& Limit)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/parties"),
-		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
-
-	TMap<FString, FString> QueryParams;
-	AppendQueryParams(Query, Offset, Limit, QueryParams);
-
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void Session::GetMyParties(
