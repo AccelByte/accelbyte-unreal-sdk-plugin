@@ -97,7 +97,7 @@ namespace Api
 		const FString PartyInfo = TEXT("partyInfoResponse");
 		const FString PartyCreate = TEXT("partyCreateResponse");
 		const FString PartyLeave = TEXT("partyLeaveResponse");
-		const FString PartyLeaveNotif = TEXT("partyLeaveNotif");
+		const FString PartyMemberLeaveNotif = TEXT("partyLeaveNotif");
 		const FString PartyInvite = TEXT("partyInviteResponse");
 		const FString PartyInviteNotif = TEXT("partyInviteNotif");
 		const FString PartyGetInvitedNotif = TEXT("partyGetInvitedNotif");
@@ -108,8 +108,8 @@ namespace Api
 		const FString PartyKick = TEXT("partyKickResponse");
 		const FString PartyKickNotif = TEXT("partyKickNotif");
 		const FString PartyDataUpdateNotif = TEXT("partyDataUpdateNotif");
-		const FString PartyConnectNotif = TEXT("partyConnectNotif");
-		const FString PartyDisconnectNotif = TEXT("partyDisconnectNotif");
+		const FString PartyMemberConnectNotif = TEXT("partyConnectNotif");
+		const FString PartyMemberDisconnectNotif = TEXT("partyDisconnectNotif");
 		const FString PartyGenerateCode = TEXT("partyGenerateCodeResponse");
 		const FString PartyGetCode = TEXT("partyGetCodeResponse");
 		const FString PartyDeleteCode = TEXT("partyDeleteCodeResponse");
@@ -281,15 +281,15 @@ namespace Api
 		DisconnectNotif,
 
 		// Party
-		PartyLeaveNotif,
+		PartyMemberLeaveNotif,
 		PartyInviteNotif,
 		PartyGetInvitedNotif,
 		PartyJoinNotif,
 		PartyRejectNotif,
 		PartyKickNotif,
 		PartyDataUpdateNotif,
-		PartyConnectNotif,
-		PartyDisconnectNotif,
+		PartyMemberConnectNotif,
+		PartyMemberDisconnectNotif,
 
 		// Chat
 		PersonalChatNotif,
@@ -380,15 +380,15 @@ namespace Api
 	TMap<FString, Notif> Lobby::NotifStringEnumMap{
 		FORM_STRING_ENUM_PAIR(Notif,ConnectedNotif),
 		FORM_STRING_ENUM_PAIR(Notif,DisconnectNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyLeaveNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyMemberLeaveNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyInviteNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyGetInvitedNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyJoinNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyRejectNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyKickNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyDataUpdateNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyConnectNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyDisconnectNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyMemberConnectNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyMemberDisconnectNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PersonalChatNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyChatNotif),
 		FORM_STRING_ENUM_PAIR(Notif,ChannelChatNotif),
@@ -1348,14 +1348,14 @@ void Lobby::UnbindPartyNotifEvents()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	PartyLeaveNotif.Unbind();
+	PartyMemberLeaveNotif.Unbind();
 	PartyInviteNotif.Unbind();
 	PartyGetInvitedNotif.Unbind();
 	PartyJoinNotif.Unbind();
 	PartyRejectNotif.Unbind();
 	PartyKickNotif.Unbind();
-	PartyConnectNotif.Unbind();
-	PartyDisconnectNotif.Unbind();
+	PartyMemberConnectNotif.Unbind();
+	PartyMemberDisconnectNotif.Unbind();
 }
 
 void Lobby::UnbindPartyResponseEvents()
@@ -1897,22 +1897,22 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			}
 			break;
 		}
-		CASE_NOTIF(DisconnectNotif		, FAccelByteModelsDisconnectNotif);
-		CASE_NOTIF(PartyLeaveNotif		, FAccelByteModelsLeavePartyNotice);
-		CASE_NOTIF(PartyInviteNotif		, FAccelByteModelsInvitationNotice);
-		CASE_NOTIF(PartyGetInvitedNotif	, FAccelByteModelsPartyGetInvitedNotice);
-		CASE_NOTIF(PartyJoinNotif		, FAccelByteModelsPartyJoinNotice);
-		CASE_NOTIF(PartyRejectNotif		, FAccelByteModelsPartyRejectNotice);
-		CASE_NOTIF(PartyKickNotif		, FAccelByteModelsGotKickedFromPartyNotice);
-		CASE_NOTIF(PartyDataUpdateNotif	, FAccelByteModelsPartyDataNotif);
-		CASE_NOTIF(PartyConnectNotif	, FAccelByteModelsPartyConnectionNotice);
-		CASE_NOTIF(PartyDisconnectNotif	, FAccelByteModelsPartyConnectionNotice);
+		CASE_NOTIF(DisconnectNotif, FAccelByteModelsDisconnectNotif);
+		CASE_NOTIF(PartyMemberLeaveNotif, FAccelByteModelsLeavePartyNotice);
+		CASE_NOTIF(PartyInviteNotif, FAccelByteModelsInvitationNotice);
+		CASE_NOTIF(PartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice);
+		CASE_NOTIF(PartyJoinNotif, FAccelByteModelsPartyJoinNotice);
+		CASE_NOTIF(PartyRejectNotif, FAccelByteModelsPartyRejectNotice);
+		CASE_NOTIF(PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice);
+		CASE_NOTIF(PartyDataUpdateNotif, FAccelByteModelsPartyDataNotif);
+		CASE_NOTIF(PartyMemberConnectNotif, FAccelByteModelsPartyMemberConnectionNotice);
+		CASE_NOTIF(PartyMemberDisconnectNotif, FAccelByteModelsPartyMemberConnectionNotice);
 		// Chat
-		CASE_NOTIF(PersonalChatNotif	, FAccelByteModelsPersonalMessageNotice);
-		CASE_NOTIF(PartyChatNotif		, FAccelByteModelsPartyMessageNotice);
-		CASE_NOTIF(ChannelChatNotif		, FAccelByteModelsChannelMessageNotice);
+		CASE_NOTIF(PersonalChatNotif, FAccelByteModelsPersonalMessageNotice);
+		CASE_NOTIF(PartyChatNotif, FAccelByteModelsPartyMessageNotice);
+		CASE_NOTIF(ChannelChatNotif, FAccelByteModelsChannelMessageNotice);
 		// Presence
-		CASE_NOTIF(FriendStatusNotif	, FAccelByteModelsUsersPresenceNotice);
+		CASE_NOTIF(FriendStatusNotif, FAccelByteModelsUsersPresenceNotice);
 		// Notification
 		case(Notif::MessageNotif):
 		{

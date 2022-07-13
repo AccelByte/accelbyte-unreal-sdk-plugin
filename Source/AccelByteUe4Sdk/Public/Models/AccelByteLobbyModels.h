@@ -368,9 +368,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGotKickedFromPartyNotice
 	FString PartyId{};
 };
 
-// Party connection notice
+// Party member data model for party member reconnect and disconnect notification
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyConnectionNotice
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyMemberConnectionNotice
 {
 	GENERATED_BODY()
 	
