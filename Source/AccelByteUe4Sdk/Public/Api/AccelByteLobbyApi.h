@@ -444,6 +444,11 @@ public:
 	 * @brief Delegate for user kicked from party event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2PartyKickedNotif, FAccelByteModelsV2PartyUserKickedEvent);
+
+	/**
+	 * @brief Delegate for party updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyUpdatedNotif, FAccelByteModelsV2PartySession);
 	
 public:
     /**
@@ -986,6 +991,10 @@ public:
 	void SetV2PartyKickedNotifDelegate(const FV2PartyKickedNotif& OnPartyKickedNotif)
 	{
 		V2PartyKickedNotif = OnPartyKickedNotif;
+	}
+	void SetV2PartyUpdatedNotifDelegate(const FV2PartyUpdatedNotif& OnPartyUpdatedNotif)
+	{
+		V2PartyUpdatedNotif = OnPartyUpdatedNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1862,6 +1871,7 @@ private:
 	FV2PartyJoinedNotif V2PartyJoinedNotif;
 	FV2PartyRejectedNotif V2PartyRejectedNotif;
 	FV2PartyKickedNotif V2PartyKickedNotif;
+	FV2PartyUpdatedNotif V2PartyUpdatedNotif;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;
