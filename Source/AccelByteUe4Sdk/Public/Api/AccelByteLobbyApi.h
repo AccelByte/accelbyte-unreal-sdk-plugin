@@ -95,7 +95,12 @@ public:
     /**
      * @brief delegate for handling leave party response.
      */
-    DECLARE_DELEGATE_OneParam(FPartyLeaveResponse, const FAccelByteModelsLeavePartyResponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyLeaveResponse, const FAccelByteModelsLeavePartyResponse&);
+
+	/**
+	 * @brief delegate for handling leave party notification. This delegate is DEPRECATED
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
 
     /**
      * @brief delegate for handling leave party notification.
@@ -902,6 +907,14 @@ public:
 	void SetConnectionClosedDelegate(const FConnectionClosed& OnConnectionClosed)
 	{
 		ConnectionClosed = OnConnectionClosed;
+	}
+	/**
+	 * @brief Set a trigger function when a party member leave from the party. This function is DEPRECATED
+	 * @param OnPartyLeaveNotice delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
+	 */
+	void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnPartyLeaveNotice)
+	{
+		PartyLeaveNotif = OnPartyLeaveNotice;
 	}
 	/**
 	 * @brief Set a trigger function when a party member leave from the party
@@ -1795,6 +1808,7 @@ private:
     FPartyInfoResponse PartyInfoResponse;
     FPartyCreateResponse PartyCreateResponse;
     FPartyLeaveResponse PartyLeaveResponse;
+	FPartyLeaveNotif PartyLeaveNotif; // This Delegate is DEPRECATED
     FPartyMemberLeaveNotif PartyMemberLeaveNotif;
     FPartyInviteResponse PartyInviteResponse;
     FPartyInviteNotif PartyInviteNotif;

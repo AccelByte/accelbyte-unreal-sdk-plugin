@@ -97,6 +97,7 @@ namespace Api
 		const FString PartyInfo = TEXT("partyInfoResponse");
 		const FString PartyCreate = TEXT("partyCreateResponse");
 		const FString PartyLeave = TEXT("partyLeaveResponse");
+		const FString PartyLeaveNotif = TEXT("partyLeaveNotif"); // This variable is DEPRECATED
 		const FString PartyMemberLeaveNotif = TEXT("partyLeaveNotif");
 		const FString PartyInvite = TEXT("partyInviteResponse");
 		const FString PartyInviteNotif = TEXT("partyInviteNotif");
@@ -281,6 +282,7 @@ namespace Api
 		DisconnectNotif,
 
 		// Party
+		PartyLeaveNotif, // This enum is DEPRECATED
 		PartyMemberLeaveNotif,
 		PartyInviteNotif,
 		PartyGetInvitedNotif,
@@ -380,6 +382,7 @@ namespace Api
 	TMap<FString, Notif> Lobby::NotifStringEnumMap{
 		FORM_STRING_ENUM_PAIR(Notif,ConnectedNotif),
 		FORM_STRING_ENUM_PAIR(Notif,DisconnectNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyLeaveNotif), // This FORM STRING ENUM is DEPRECATED
 		FORM_STRING_ENUM_PAIR(Notif,PartyMemberLeaveNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyInviteNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyGetInvitedNotif),
@@ -1348,6 +1351,7 @@ void Lobby::UnbindPartyNotifEvents()
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	PartyLeaveNotif.Unbind(); // This Unbind is DEPRECATED
 	PartyMemberLeaveNotif.Unbind();
 	PartyInviteNotif.Unbind();
 	PartyGetInvitedNotif.Unbind();
@@ -1898,6 +1902,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			break;
 		}
 		CASE_NOTIF(DisconnectNotif, FAccelByteModelsDisconnectNotif);
+		CASE_NOTIF(PartyLeaveNotif, FAccelByteModelsLeavePartyNotice); // This Case Notif is DEPRECATED
 		CASE_NOTIF(PartyMemberLeaveNotif, FAccelByteModelsLeavePartyNotice);
 		CASE_NOTIF(PartyInviteNotif, FAccelByteModelsInvitationNotice);
 		CASE_NOTIF(PartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice);
