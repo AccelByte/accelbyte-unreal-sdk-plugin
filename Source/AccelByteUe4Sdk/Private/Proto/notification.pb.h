@@ -35,6 +35,9 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
+#include <google/protobuf/map.h>  // IWYU pragma: export
+#include <google/protobuf/map_entry.h>
+#include <google/protobuf/map_field_inl.h>
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
@@ -51,7 +54,7 @@ struct TableStruct_notification_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[18]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[19]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -68,6 +71,9 @@ extern DSStatusChangedNotificationV1DefaultTypeInternal _DSStatusChangedNotifica
 class GameServerV1;
 struct GameServerV1DefaultTypeInternal;
 extern GameServerV1DefaultTypeInternal _GameServerV1_default_instance_;
+class GameServerV1_PortsEntry_DoNotUse;
+struct GameServerV1_PortsEntry_DoNotUseDefaultTypeInternal;
+extern GameServerV1_PortsEntry_DoNotUseDefaultTypeInternal _GameServerV1_PortsEntry_DoNotUse_default_instance_;
 class GameSessionNotificationMembersChangedV1;
 struct GameSessionNotificationMembersChangedV1DefaultTypeInternal;
 extern GameSessionNotificationMembersChangedV1DefaultTypeInternal _GameSessionNotificationMembersChangedV1_default_instance_;
@@ -118,6 +124,7 @@ PROTOBUF_NAMESPACE_OPEN
 template<> ::session::DSInformationV1* Arena::CreateMaybeMessage<::session::DSInformationV1>(Arena*);
 template<> ::session::DSStatusChangedNotificationV1* Arena::CreateMaybeMessage<::session::DSStatusChangedNotificationV1>(Arena*);
 template<> ::session::GameServerV1* Arena::CreateMaybeMessage<::session::GameServerV1>(Arena*);
+template<> ::session::GameServerV1_PortsEntry_DoNotUse* Arena::CreateMaybeMessage<::session::GameServerV1_PortsEntry_DoNotUse>(Arena*);
 template<> ::session::GameSessionNotificationMembersChangedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationMembersChangedV1>(Arena*);
 template<> ::session::GameSessionNotificationUserInvitedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationUserInvitedV1>(Arena*);
 template<> ::session::GameSessionNotificationUserJoinedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationUserJoinedV1>(Arena*);
@@ -3728,6 +3735,31 @@ class DSInformationV1 final :
 };
 // -------------------------------------------------------------------
 
+class GameServerV1_PortsEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GameServerV1_PortsEntry_DoNotUse, 
+    std::string, int32_t,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_INT32> {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GameServerV1_PortsEntry_DoNotUse, 
+    std::string, int32_t,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_INT32> SuperType;
+  GameServerV1_PortsEntry_DoNotUse();
+  explicit constexpr GameServerV1_PortsEntry_DoNotUse(
+      ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  explicit GameServerV1_PortsEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const GameServerV1_PortsEntry_DoNotUse& other);
+  static const GameServerV1_PortsEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const GameServerV1_PortsEntry_DoNotUse*>(&_GameServerV1_PortsEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "session.GameServerV1.PortsEntry.key");
+ }
+  static bool ValidateValue(void*) { return true; }
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+};
+
+// -------------------------------------------------------------------
+
 class GameServerV1 final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:session.GameServerV1) */ {
  public:
@@ -3776,7 +3808,7 @@ class GameServerV1 final :
                &_GameServerV1_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    18;
 
   friend void swap(GameServerV1& a, GameServerV1& b) {
     a.Swap(&b);
@@ -3847,16 +3879,17 @@ class GameServerV1 final :
 
   // nested types ----------------------------------------------------
 
+
   // accessors -------------------------------------------------------
 
   enum : int {
     kAlternateIpsFieldNumber = 5,
+    kPortsFieldNumber = 8,
     kPodNameFieldNumber = 1,
     kImageVersionFieldNumber = 2,
     kNamespaceFieldNumber = 3,
     kIpFieldNumber = 4,
     kProtocolFieldNumber = 7,
-    kPortsFieldNumber = 8,
     kProviderFieldNumber = 9,
     kGameVersionFieldNumber = 10,
     kStatusFieldNumber = 11,
@@ -3891,6 +3924,23 @@ class GameServerV1 final :
   const std::string& _internal_alternate_ips(int index) const;
   std::string* _internal_add_alternate_ips();
   public:
+
+  // map<string, int32> ports = 8 [json_name = "ports"];
+  int ports_size() const;
+  private:
+  int _internal_ports_size() const;
+  public:
+  void clear_ports();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >&
+      _internal_ports() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >*
+      _internal_mutable_ports();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >&
+      ports() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >*
+      mutable_ports();
 
   // string pod_name = 1 [json_name = "pod_name"];
   void clear_pod_name();
@@ -3960,20 +4010,6 @@ class GameServerV1 final :
   const std::string& _internal_protocol() const;
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_protocol(const std::string& value);
   std::string* _internal_mutable_protocol();
-  public:
-
-  // bytes ports = 8 [json_name = "ports"];
-  void clear_ports();
-  const std::string& ports() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_ports(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_ports();
-  PROTOBUF_NODISCARD std::string* release_ports();
-  void set_allocated_ports(std::string* ports);
-  private:
-  const std::string& _internal_ports() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_ports(const std::string& value);
-  std::string* _internal_mutable_ports();
   public:
 
   // string provider = 9 [json_name = "provider"];
@@ -4114,12 +4150,16 @@ class GameServerV1 final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> alternate_ips_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      GameServerV1_PortsEntry_DoNotUse,
+      std::string, int32_t,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_INT32> ports_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr pod_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr image_version_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr namespace__;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ip_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr protocol_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ports_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr provider_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr game_version_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr status_;
@@ -8199,6 +8239,8 @@ inline void DSInformationV1::set_allocated_status(std::string* status) {
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
 // GameServerV1
 
 // string pod_name = 1 [json_name = "pod_name"];
@@ -8551,55 +8593,33 @@ inline void GameServerV1::set_allocated_protocol(std::string* protocol) {
   // @@protoc_insertion_point(field_set_allocated:session.GameServerV1.protocol)
 }
 
-// bytes ports = 8 [json_name = "ports"];
-inline void GameServerV1::clear_ports() {
-  ports_.ClearToEmpty();
+// map<string, int32> ports = 8 [json_name = "ports"];
+inline int GameServerV1::_internal_ports_size() const {
+  return ports_.size();
 }
-inline const std::string& GameServerV1::ports() const {
-  // @@protoc_insertion_point(field_get:session.GameServerV1.ports)
+inline int GameServerV1::ports_size() const {
+  return _internal_ports_size();
+}
+inline void GameServerV1::clear_ports() {
+  ports_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >&
+GameServerV1::_internal_ports() const {
+  return ports_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >&
+GameServerV1::ports() const {
+  // @@protoc_insertion_point(field_map:session.GameServerV1.ports)
   return _internal_ports();
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void GameServerV1::set_ports(ArgT0&& arg0, ArgT... args) {
- 
- ports_.SetBytes(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:session.GameServerV1.ports)
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >*
+GameServerV1::_internal_mutable_ports() {
+  return ports_.MutableMap();
 }
-inline std::string* GameServerV1::mutable_ports() {
-  std::string* _s = _internal_mutable_ports();
-  // @@protoc_insertion_point(field_mutable:session.GameServerV1.ports)
-  return _s;
-}
-inline const std::string& GameServerV1::_internal_ports() const {
-  return ports_.Get();
-}
-inline void GameServerV1::_internal_set_ports(const std::string& value) {
-  
-  ports_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
-}
-inline std::string* GameServerV1::_internal_mutable_ports() {
-  
-  return ports_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
-}
-inline std::string* GameServerV1::release_ports() {
-  // @@protoc_insertion_point(field_release:session.GameServerV1.ports)
-  return ports_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
-}
-inline void GameServerV1::set_allocated_ports(std::string* ports) {
-  if (ports != nullptr) {
-    
-  } else {
-    
-  }
-  ports_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ports,
-      GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (ports_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
-    ports_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:session.GameServerV1.ports)
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >*
+GameServerV1::mutable_ports() {
+  // @@protoc_insertion_point(field_mutable_map:session.GameServerV1.ports)
+  return _internal_mutable_ports();
 }
 
 // string provider = 9 [json_name = "provider"];
@@ -9033,6 +9053,8 @@ inline void GameServerV1::set_allocated_last_update(std::string* last_update) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
