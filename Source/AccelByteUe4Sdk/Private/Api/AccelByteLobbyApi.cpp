@@ -1470,6 +1470,7 @@ void Lobby::UnbindV2GameSessionEvents()
 	V2GameSessionInvitedNotif.Unbind();
 	V2GameSessionJoinedNotif.Unbind();
 	V2GameSessionMembersChangedNotif.Unbind();
+	V2GameSessionUpdatedNotif.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -2059,6 +2060,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		DispatchSessionNotif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope.partynotificationuserkickedv1(), V2PartyKickedNotif);
 		break;
 	}
+	case session::NotificationEventEnvelope::kPartySessionV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2PartySession>(EventEnvelope.partysessionv1(), V2PartyUpdatedNotif, true);
+		break;
+	}
 	case session::NotificationEventEnvelope::kGameSessionNotificationUserInvitedV1:
 	{
 		DispatchSessionNotif<FAccelByteModelsV2GameSessionUserInvitedEvent>(EventEnvelope.gamesessionnotificationuserinvitedv1(), V2GameSessionInvitedNotif);
@@ -2074,14 +2080,14 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		DispatchSessionNotif<FAccelByteModelsV2GameSessionMembersChangedEvent>(EventEnvelope.gamesessionnotificationmemberschangedv1(), V2GameSessionMembersChangedNotif);
 		break;
 	}
+	case session::NotificationEventEnvelope::kGameSessionV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2GameSession>(EventEnvelope.gamesessionv1(), V2GameSessionUpdatedNotif, true);
+		break;
+	}
 	case session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
 	{
 		DispatchSessionNotif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope.dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
-	}
-	case session::NotificationEventEnvelope::kPartySessionV1:
-	{
-		DispatchSessionNotif<FAccelByteModelsV2PartySession>(EventEnvelope.partysessionv1(), V2PartyUpdatedNotif, true);
-		break;
 	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
 	}

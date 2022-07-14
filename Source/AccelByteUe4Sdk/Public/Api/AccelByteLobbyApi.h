@@ -445,6 +445,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FV2PartyKickedNotif, FAccelByteModelsV2PartyUserKickedEvent);
 
+	/*
+	 * @brief Delegate for party updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyUpdatedNotif, FAccelByteModelsV2PartySession);
+
 	/**
 	 * @brief Delegate for user invited to game session event.
 	 */
@@ -459,17 +464,18 @@ public:
 	 * @brief Delegate for game session members changed event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2GameSessionMembersChangedNotif, FAccelByteModelsV2GameSessionMembersChangedEvent);
-	
+
+	/**
+	 * @brief Delegate for game session updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionUpdatedNotif, FAccelByteModelsV2GameSession);
+
 	/**
 	* @brief Delegate for game session when DS status is changed.
 	*/
 	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif);
 
-	/*
-	 * @brief Delegate for party updated event.
-	 */
-	DECLARE_DELEGATE_OneParam(FV2PartyUpdatedNotif, FAccelByteModelsV2PartySession);
-	
+
 public:
     /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
@@ -1028,6 +1034,10 @@ public:
 	void SetV2GameSessionMembersChangedNotifDelegate(const FV2GameSessionMembersChangedNotif& OnGameSessionMembersChangedNotif)
 	{
 		V2GameSessionMembersChangedNotif = OnGameSessionMembersChangedNotif;
+	}
+	void SetV2GameSessionUpdatedNotifDelegate(const FV2GameSessionUpdatedNotif& OnGameSessionUpdatedNotif)
+	{
+		V2GameSessionUpdatedNotif = OnGameSessionUpdatedNotif;
 	}
 	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
 	{
@@ -1917,6 +1927,7 @@ private:
 	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
 	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
+	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;
 
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 
