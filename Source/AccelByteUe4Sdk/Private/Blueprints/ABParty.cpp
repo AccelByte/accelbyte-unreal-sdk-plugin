@@ -324,6 +324,16 @@ void UABParty::SetOnPartyReject(FDPartyRejectNotif OnNotif)
 			}));
 }
 
+void UABParty::SetOnPartyLeave(FDPartyLeaveNotif OnNotif) 
+{
+	ApiClientPtr->Lobby.SetPartyLeaveNotifDelegate(
+		Api::Lobby::FPartyLeaveNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsLeavePartyNotice const& Notif)
+			{
+				OnNotif.ExecuteIfBound(Notif);
+			}));
+}
+
 void UABParty::SetOnPartyMemberLeave(FDPartyMemberLeaveNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyMemberLeaveNotifDelegate(

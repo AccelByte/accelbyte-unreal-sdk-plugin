@@ -74,7 +74,7 @@ public:
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FCreatePartyResponse, const FAccelByteModelsCreatePartyResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FLeavePartyResponse, const FAccelByteModelsLeavePartyResponse&, Result);
-    DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyMemberLeaveNotice, const FAccelByteModelsLeavePartyNotice&, Result);                  
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FLeavePartyNotice, const FAccelByteModelsLeavePartyNotice&, Result); // This delegate is DEPRECATED. better to use FPartyMemberLEaveNotice
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyResponse, const FAccelByteModelsPartyInviteResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyInvitationNotice, const FAccelByteModelsInvitationNotice&, Result);       
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyGetInvitedNotice, const FAccelByteModelsPartyGetInvitedNotice&, Result);  
@@ -127,7 +127,7 @@ public:
         const FConnectSuccess& OnConnectSuccess,
         const FBlueprintErrorHandler& OnConnectError,
         const FConnectionClosed& OnConnectionClosed,
-        const FPartyMemberLeaveNotice& OnLeavePartyNotice,
+        const FLeavePartyNotice& OnLeavePartyNotice, // This delegate is DEPRECATED. better to use FPartyMemberLEaveNotice
         const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
         const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
         const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,

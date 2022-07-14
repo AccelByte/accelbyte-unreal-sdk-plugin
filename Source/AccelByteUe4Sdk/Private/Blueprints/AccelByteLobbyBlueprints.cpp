@@ -140,7 +140,7 @@ void UAccelByteBlueprintsLobby::BindEvent(
     const FConnectSuccess& OnSuccess,
     const FBlueprintErrorHandler& OnError,
     const FConnectionClosed& OnConnectionClosed,
-    const FPartyMemberLeaveNotice& OnLeavePartyNotice,
+    const FLeavePartyNotice& OnLeavePartyNotice, // This delegate is DEPRECATED. better to use FPartyMemberLEaveNotice
     const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
     const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
     const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
@@ -171,12 +171,11 @@ void UAccelByteBlueprintsLobby::BindEvent(
         AccelByte::Api::Lobby::FConnectionClosed::CreateLambda([OnConnectionClosed](int32  StatusCode, const FString& Reason, bool  WasClean) {
         OnConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
     });
-
-
-
+	
     // Party
-	AccelByte::Api::Lobby::FPartyMemberLeaveNotif OnLeavePartyNoticeDelegate =
-        AccelByte::Api::Lobby::FPartyMemberLeaveNotif::CreateLambda([OnLeavePartyNotice](const FAccelByteModelsLeavePartyNotice& Result) {
+	// This delegate is DEPRECATED. better to use FPartyMemberLEaveNotice
+	AccelByte::Api::Lobby::FPartyLeaveNotif OnLeavePartyNoticeDelegate =
+        AccelByte::Api::Lobby::FPartyLeaveNotif::CreateLambda([OnLeavePartyNotice](const FAccelByteModelsLeavePartyNotice& Result) {
         OnLeavePartyNotice.ExecuteIfBound(Result);
     });
 
@@ -272,7 +271,7 @@ void UAccelByteBlueprintsLobby::BindEvent(
     FRegistry::Lobby.SetConnectSuccessDelegate(OnSuccessDelegate);
     FRegistry::Lobby.SetConnectFailedDelegate(OnErrorDelegate);
     FRegistry::Lobby.SetConnectionClosedDelegate(OnConnectionCloseDelegate);
-    FRegistry::Lobby.SetPartyMemberLeaveNotifDelegate(OnLeavePartyNoticeDelegate);
+    FRegistry::Lobby.SetPartyLeaveNotifDelegate(OnLeavePartyNoticeDelegate); // This delegate is DEPRECATED. better to use SetPartyMemberLeaveNotifDelegate().
     FRegistry::Lobby.SetPartyInviteNotifDelegate(OnInvitePartyInvitationNoticeDelegate);
     FRegistry::Lobby.SetPartyGetInvitedNotifDelegate(OnInvitePartyGetInvitedNoticeDelegate);
     FRegistry::Lobby.SetPartyJoinNotifDelegate(OnInvitePartyJoinNoticeDelegate);

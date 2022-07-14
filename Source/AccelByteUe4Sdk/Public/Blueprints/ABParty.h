@@ -147,6 +147,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinNotif, FAccelByteModelsPartyJoinNot
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyRejectNotif, FAccelByteModelsPartyRejectNotice, Notif);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyLeaveNotif, FAccelByteModelsLeavePartyNotice, Notif); // This delegate is DEPRECATED
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyMemberLeaveNotif, FAccelByteModelsLeavePartyNotice, Notif);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, Notif);
@@ -230,6 +232,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyReject(FDPartyRejectNotif OnNotif);
+
+	/**
+	 * @brief Set a trigger function when a party member leave from the party. This function is DEPRECATED
+	 * @param OnNotif delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
+	 */
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	void SetOnPartyLeave(FDPartyLeaveNotif OnNotif);
 
 	/**
 	 * @brief Set a trigger function when a party member leave from the party
