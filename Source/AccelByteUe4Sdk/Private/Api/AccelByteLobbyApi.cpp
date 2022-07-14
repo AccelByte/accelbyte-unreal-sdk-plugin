@@ -1298,6 +1298,7 @@ void Lobby::UnbindEvent()
 	UnbindSessionAttributeEvents();
 
 	UnbindV2PartyEvents();
+	UnbindV2GameSessionEvents();
 	
 	UserBannedNotification.Unbind();
 	UserUnbannedNotification.Unbind();
@@ -1461,6 +1462,13 @@ void Lobby::UnbindV2PartyEvents()
 	V2PartyKickedNotif.Unbind();
 	V2PartyRejectedNotif.Unbind();
 	V2PartyMembersChangedNotif.Unbind();
+}
+
+void Lobby::UnbindV2GameSessionEvents()
+{
+	V2GameSessionInvitedNotif.Unbind();
+	V2GameSessionJoinedNotif.Unbind();
+	V2GameSessionMembersChangedNotif.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -1890,6 +1898,9 @@ void DispatchSessionNotif(PayloadType Payload, ResponseCallbackType ResponseCall
 	std::string JsonPayloadUTF8;
 	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
 	FString JsonPayload = UTF8_TO_TCHAR(JsonPayloadUTF8.c_str());
+
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Received MPv2 lobby notification\n%s"), *JsonPayload);
+
 	DataStruct Result;
 	if(FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Result, 0, 0))
 	{
@@ -1945,6 +1956,26 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	case session::NotificationEventEnvelope::kPartyNotificationUserKickedV1:
 	{
 		DispatchSessionNotif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope.partynotificationuserkickedv1(), V2PartyKickedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionNotificationUserInvitedV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2GameSessionUserInvitedEvent>(EventEnvelope.gamesessionnotificationuserinvitedv1(), V2GameSessionInvitedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionNotificationUserJoinedV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2GameSessionUserJoinedEvent>(EventEnvelope.gamesessionnotificationuserjoinedv1(), V2GameSessionJoinedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionNotificationMembersChangedV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2GameSessionMembersChangedEvent>(EventEnvelope.gamesessionnotificationmemberschangedv1(), V2GameSessionMembersChangedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope.dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
 		break;
 	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);

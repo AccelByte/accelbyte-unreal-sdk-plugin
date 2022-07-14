@@ -25,6 +25,81 @@ public:
 	~Session();
 
 	/**
+	 * @brief Create a new game session.
+	 *
+	 * @param CreateRequest The game session creation request body.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get details for a game session by ID
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GetGameSessionDetails(FString const& GameSessionID, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Query game sessions.
+	 *
+	 * @param QueryObject Query object containing the parameters to query on.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Offset Pagination offset.
+	 * @param Limit Pagination limit.
+	 */
+	void QueryGameSessions(FAccelByteModelsV2GameSessionQuery const& QueryObject, THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
+
+	/**
+	 * @brief Update a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param UpdateRequest The game session update request body.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void UpdateGameSession(FString const& GameSessionID, FAccelByteModelsV2GameSessionUpdateRequest const& UpdateRequest, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void DeleteGameSession(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Join a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void JoinGameSession(FString const& GameSessionID, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Leave a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void LeaveGameSession(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get a list of the logged in user's game sessions.
+	 *
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Status Optional membership status to query for - either active or invited.
+	 */
+	void GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
+
+	/**
 	 * @brief Create a new party with the calling user as the sole member.
 	 *
 	 * @param CreateRequest The party creation request with attributes, join type, and members.
@@ -102,17 +177,6 @@ public:
 	/**
 	 * @brief Get a list of parties matching the given query.
 	 *
-	 * @param Query The object containing fields to query on - empty fields are omitted.
-	 * @param OnSuccess This will be called if the operation succeeded.
-	 * @param OnError This will be called if the operation failed.
-	 * @param Offset The pagination offset.
-	 * @param Limit The pagination limit.
-	 */
-	void QueryParties(FAccelByteModelsV2SessionQueryRequest const& Query, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
-
-	/**
-	 * @brief Get a list of parties matching the given query.
-	 *
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Status Optional membership status to query for - either active or invited.
@@ -124,14 +188,18 @@ private:
 	Session(Session const&) = delete;
 	Session(Session&&) = delete;
 
-	static void AppendQueryParams(FAccelByteModelsV2SessionQueryRequest const& Query, int32 const& Offset, int32 const& Limit,	TMap<FString, FString>& OutParams);
 	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 
 	template <typename DataStruct>
-	static void SerializeAndRemoveEmptyEnumValues(DataStruct Model, FString& OutputString)
+	static void SerializeAndRemoveEmptyEnumValues(DataStruct Model, FString& OutputString, bool bRemoveDSRequest = false)
 	{
 		auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
+
+		if(bRemoveDSRequest)
+		{
+			JsonObjectPtr->RemoveField(TEXT("dsRequest"));
+		}
 
 		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinType"));
 		RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));

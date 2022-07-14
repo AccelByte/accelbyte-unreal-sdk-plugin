@@ -15,44 +15,6 @@ namespace AccelByte
 {
 namespace Api
 {
-void Session::AppendQueryParams(
-	FAccelByteModelsV2SessionQueryRequest const& Query,
-	int32 const& Offset,
-	int32 const& Limit,
-	TMap<FString, FString>& OutParams)
-{
-	if(Offset >= 0)
-	{
-		OutParams.Add(TEXT("offset"), FString::Printf(TEXT("%ld"), Offset));
-	}
-
-	if(Limit >= 0)
-	{
-		OutParams.Add(TEXT("limit"), FString::Printf(TEXT("%ld"), Limit));
-	}
-
-#define ADD_QUERY_PARAM(Name, Value) if(!Value.IsEmpty()) {  \
-    OutParams.Add(Name, Value);                              \
-}
-	ADD_QUERY_PARAM(TEXT("key"), Query.Key);
-	ADD_QUERY_PARAM(TEXT("value"), Query.Value);
-	ADD_QUERY_PARAM(TEXT("leaderID"), Query.LeaderID);
-	ADD_QUERY_PARAM(TEXT("memberID"), Query.MemberID);
-#undef ADD_QUERY_PARAM
-
-	if(Query.JoinType != EAccelByteV2SessionJoinability::EMPTY)
-	{
-		OutParams.Add(TEXT("joinType"),
-			StaticEnum<EAccelByteV2SessionJoinability>()->GetNameStringByValue(static_cast<int64>(Query.JoinType)));
-	}
-
-	if(Query.MemberStatus != EAccelByteV2SessionMemberStatus::EMPTY)
-	{
-		OutParams.Add(TEXT("memberStatus"),
-			StaticEnum<EAccelByteV2SessionMemberStatus>()->GetNameStringByValue(static_cast<int64>(Query.MemberStatus)));
-	}
-}
-
 void Session::RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName)
 {
 	FString FieldValue;
@@ -91,6 +53,150 @@ Session::Session(
 
 Session::~Session()
 {}
+
+void Session::CreateGameSession(
+	FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest,
+	THandler<FAccelByteModelsV2GameSession> const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesession"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
+
+	FString Content = TEXT("");
+	SerializeAndRemoveEmptyEnumValues(CreateRequest, Content);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void Session::GetGameSessionDetails(
+	FString const& GameSessionID,
+	THandler<FAccelByteModelsV2GameSession> const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Session::QueryGameSessions(
+	FAccelByteModelsV2GameSessionQuery const& QueryObject,
+	THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess,
+	FErrorHandler const& OnError,
+	int32 const& Offset,
+	int32 const& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
+
+	// Add pagination information to query object
+	QueryObject.JsonWrapper.JsonObject->SetNumberField(TEXT("offset"), Offset);
+	QueryObject.JsonWrapper.JsonObject->SetNumberField(TEXT("limit"), Limit);
+
+	// Convert query object to JSON string
+	FString RequestString;
+	const TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&RequestString);
+	if (!FJsonSerializer::Serialize(QueryObject.JsonWrapper.JsonObject.ToSharedRef(), JsonWriter))
+	{
+		OnError.ExecuteIfBound(
+			static_cast<int32>(ErrorCodes::InvalidRequest),
+			TEXT("Failed to send query game session request as our query JSON object failed to serialize to string!"));
+		return;
+	}
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestString, OnSuccess, OnError);
+}
+
+void Session::UpdateGameSession(
+	FString const& GameSessionID,
+	FAccelByteModelsV2GameSessionUpdateRequest const& UpdateRequest,
+	THandler<FAccelByteModelsV2GameSession> const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
+
+	// If the given DSRequest object contains all default values, we remove it from the request JSON by passing a flag
+	// to SerializeAndRemoveEmptyEnumValues
+	const FAccelByteModelsV2DSRequest DSRequest = UpdateRequest.DSRequest;
+	const bool bRemoveDSRequest =
+		DSRequest.Deployment.IsEmpty() &&
+		DSRequest.ClientVersion.IsEmpty() &&
+		DSRequest.GameMode.IsEmpty() &&
+		DSRequest.RequestedRegions.Num() == 0;
+
+	FString Content = TEXT("");    
+	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content, bRemoveDSRequest);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void Session::DeleteGameSession(
+	FString const& GameSessionID,
+	FVoidHandler const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Session::JoinGameSession(
+	FString const& GameSessionID,
+	THandler<FAccelByteModelsV2GameSession> const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/join"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Session::LeaveGameSession(
+	FString const& GameSessionID,
+	FVoidHandler const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/leave"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Session::GetMyGameSessions(
+	THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess,
+	FErrorHandler const& OnError,
+	EAccelByteV2SessionMemberStatus Status)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/gamesessions"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> QueryParams;
+	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
+	{
+		QueryParams.Add(TEXT("status"),
+			StaticEnum<EAccelByteV2SessionMemberStatus>()->GetNameStringByValue(static_cast<int64>(Status)));
+	}
+	
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
 
 void Session::CreateParty(
 	FAccelByteModelsV2PartyCreateRequest const& CreateRequest,
@@ -205,24 +311,6 @@ void Session::KickUserFromParty(
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *PartyID, *UserID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
-}
-
-void Session::QueryParties(
-	FAccelByteModelsV2SessionQueryRequest const& Query,
-	THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess,
-	FErrorHandler const& OnError,
-	int32 const& Offset,
-	int32 const& Limit)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/parties"),
-		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
-
-	TMap<FString, FString> QueryParams;
-	AppendQueryParams(Query, Offset, Limit, QueryParams);
-
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void Session::GetMyParties(
