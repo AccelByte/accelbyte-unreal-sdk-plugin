@@ -37,7 +37,9 @@ enum class EAccelByteV2GameSessionDsStatus : uint8
 {
 	INITIALIZED = 0,
 	REQUESTED,
-	READY
+	READY,
+	CREATING,
+	BUSY
 };
 
 USTRUCT(BlueprintType)
@@ -265,24 +267,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyUserInvitedEvent
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionQueryRequest
-{
-	GENERATED_BODY();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionQueryRequest")
-		FString Key{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionQueryRequest")
-		FString Value{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionQueryRequest")
-		FString LeaderID{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionQueryRequest")
-		FString MemberID{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionQueryRequest")
-		EAccelByteV2SessionMemberStatus MemberStatus{ EAccelByteV2SessionMemberStatus::EMPTY };
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionQueryRequest")
-		EAccelByteV2SessionJoinability JoinType{ EAccelByteV2SessionJoinability::EMPTY };
-};
-
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PaginatedGameSessionQueryResult
 {
 	GENERATED_BODY()
@@ -300,6 +284,32 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PaginatedPartyQueryResult
 		TArray<FAccelByteModelsV2PartySession> Data{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PaginatedPartyQueryResult")
 		FAccelByteModelsPaging Paging{};
+};
+
+// NOTE: This model will be used for more complex operations when the backend supports numeric range queries
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionQuery
+{
+	GENERATED_BODY()
+
+	FAccelByteModelsV2GameSessionQuery()
+	{
+		FJsonObject JsonObject;
+		JsonWrapper.JsonObject = MakeShared<FJsonObject>(JsonObject);
+	}
+
+	void AddParam(const FString& Field, const FString& Value) const
+	{
+		JsonWrapper.JsonObject->SetStringField(Field, Value);
+	}
+
+	void AddParam(const FString& Field, float Value) const
+	{
+		JsonWrapper.JsonObject->SetNumberField(Field, Value);
+	}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionQuery")
+		FJsonObjectWrapper JsonWrapper;
 };
 
 USTRUCT(BlueprintType)
