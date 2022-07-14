@@ -463,7 +463,12 @@ public:
 	/**
 	* @brief Delegate for game session when DS status is changed.
 	*/
-	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif)
+	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif);
+
+	/*
+	 * @brief Delegate for party updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyUpdatedNotif, FAccelByteModelsV2PartySession);
 	
 public:
     /**
@@ -1027,6 +1032,10 @@ public:
 	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
 	{
 		V2DSStatusChangedNotif = OnDSStatusChangedNotif;
+	}
+	void SetV2PartyUpdatedNotifDelegate(const FV2PartyUpdatedNotif& OnPartyUpdatedNotif)
+	{
+		V2PartyUpdatedNotif = OnPartyUpdatedNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1903,6 +1912,7 @@ private:
 	FV2PartyJoinedNotif V2PartyJoinedNotif;
 	FV2PartyRejectedNotif V2PartyRejectedNotif;
 	FV2PartyKickedNotif V2PartyKickedNotif;
+	FV2PartyUpdatedNotif V2PartyUpdatedNotif;
 
 	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
 	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
