@@ -324,6 +324,45 @@ void Item::GetItemBySku(FString const& Sku, FString const& Language, FString con
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void Item::GetItemDynamicData(FString const& ItemId
+	, THandler<FAccelByteModelsItemDynamicData> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	}
+	
+	if(ItemId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemId can not be empty."));
+		return;
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/dynamic")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ItemId);
+
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
 	
 } // Namespace Api
 } // Namespace AccelByte

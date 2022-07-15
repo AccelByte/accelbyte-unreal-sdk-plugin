@@ -196,3 +196,21 @@ void UABCatalog::SearchItem(
 				OnError.ExecuteIfBound(Code, Message);
 			}));
 }
+
+void UABCatalog::GetItemDynamicData(FString const& ItemId
+	, FDModelsItemDynamicDataResponse OnSuccess
+	, FDErrorHandler OnError)
+{
+	ApiClientPtr->Item.GetItemDynamicData(ItemId
+		, THandler<FAccelByteModelsItemDynamicData>::CreateLambda(
+			[OnSuccess](FAccelByteModelsItemDynamicData const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+		);
+}
