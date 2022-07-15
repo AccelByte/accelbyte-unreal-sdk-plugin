@@ -447,6 +447,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FV2PartyKickedNotif, FAccelByteModelsV2PartyUserKickedEvent);
 
+	/*
+	 * @brief Delegate for party updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyUpdatedNotif, FAccelByteModelsV2PartySession);
+
 	/**
 	 * @brief Delegate for user invited to game session event.
 	 */
@@ -461,6 +466,11 @@ public:
 	 * @brief Delegate for game session members changed event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2GameSessionMembersChangedNotif, FAccelByteModelsV2GameSessionMembersChangedEvent);
+
+	/**
+	 * @brief Delegate for game session updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionUpdatedNotif, FAccelByteModelsV2GameSession);
 	
 	/**
 	* @brief Delegate for game session when DS status is changed.
@@ -1036,16 +1046,22 @@ public:
 	{
 		V2GameSessionMembersChangedNotif = OnGameSessionMembersChangedNotif;
 	}
+	void SetV2GameSessionUpdatedNotifDelegate(const FV2GameSessionUpdatedNotif& OnGameSessionUpdatedNotif)
+	{
+		V2GameSessionUpdatedNotif = OnGameSessionUpdatedNotif;
+	}
 	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
 	{
 		V2DSStatusChangedNotif = OnDSStatusChangedNotif;
 	}
-
+	void SetV2PartyUpdatedNotifDelegate(const FV2PartyUpdatedNotif& OnPartyUpdatedNotif)
+	{
+		V2PartyUpdatedNotif = OnPartyUpdatedNotif;
+	}
 	void SetV2MatchmakingMatchFoundNotifDelegate(const FV2MatchmakingMatchFoundNotif& OnMatchFoundNotif)
 	{
 		V2MatchmakingMatchFoundNotif = OnMatchFoundNotif;
 	}
-	
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
 		UserBannedNotification = OnUserBannedNotification;
@@ -1927,12 +1943,15 @@ private:
 	FV2PartyJoinedNotif V2PartyJoinedNotif;
 	FV2PartyRejectedNotif V2PartyRejectedNotif;
 	FV2PartyKickedNotif V2PartyKickedNotif;
+	FV2PartyUpdatedNotif V2PartyUpdatedNotif;
 
 	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
 	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
+	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;
 
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
+
 	FV2MatchmakingMatchFoundNotif V2MatchmakingMatchFoundNotif;
 
     // Matchmaking

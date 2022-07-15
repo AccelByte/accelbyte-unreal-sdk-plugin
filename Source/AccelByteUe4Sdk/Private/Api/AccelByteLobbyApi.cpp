@@ -1463,6 +1463,7 @@ void Lobby::UnbindV2PartyEvents()
 	V2PartyKickedNotif.Unbind();
 	V2PartyRejectedNotif.Unbind();
 	V2PartyMembersChangedNotif.Unbind();
+	V2PartyUpdatedNotif.Unbind();
 }
 
 void Lobby::UnbindV2GameSessionEvents()
@@ -1470,6 +1471,7 @@ void Lobby::UnbindV2GameSessionEvents()
 	V2GameSessionInvitedNotif.Unbind();
 	V2GameSessionJoinedNotif.Unbind();
 	V2GameSessionMembersChangedNotif.Unbind();
+	V2GameSessionUpdatedNotif.Unbind();
 	V2DSStatusChangedNotif.Unbind();
 }
 
@@ -1899,8 +1901,95 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 			break; \
 		} \
 
+void ReplaceBytesFieldsWithJsonObjects(const FString& ParsedJsonString, const TSharedPtr<FJsonObject> JsonObjectPtr, const google::protobuf::Descriptor* MessageDescriptor)
+{
+	for(int i = 0; i < MessageDescriptor->field_count(); i++)
+	{
+		const google::protobuf::FieldDescriptor* Field = MessageDescriptor->field(i);
+		if(Field->type() == google::protobuf::FieldDescriptor::TYPE_BYTES)
+		{
+			// For 'bytes' fields, we decode from base64, then deserialize that result as a JSON string, replacing the
+			// original field value with the new JSON object
+			const FString JsonFieldName = UTF8_TO_TCHAR(Field->json_name().c_str());
+			FString EncodedData;
+			if(!JsonObjectPtr->TryGetStringField(JsonFieldName, EncodedData))
+			{
+				UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot get protobuf bytes field string from JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+				return;
+			}
+
+			FString DecodedData;
+			if(!FBase64::Decode(EncodedData, DecodedData))
+			{
+				UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot decode protobuf bytes data from base64 for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+				return;
+			}
+
+			TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(DecodedData);
+			FJsonObject DeserializedObject;
+			TSharedPtr<FJsonObject> DeserializedObjectPtr = MakeShared<FJsonObject>(DeserializedObject);
+			if(!FJsonSerializer::Deserialize(JsonReader, DeserializedObjectPtr))
+			{
+				UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize decoded protobuf bytes data as JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+				return;
+			}
+
+			JsonObjectPtr->SetObjectField(JsonFieldName, DeserializedObjectPtr);
+		}
+		else if(Field->type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE)
+		{
+			const FString JsonFieldName = UTF8_TO_TCHAR(Field->json_name().c_str());
+			const google::protobuf::Descriptor* NestedDescriptor = Field->message_type();
+
+			// A repeated message field is represented by an array of objects in JSON, so we iterate over the objects
+			// and recursively convert the fields of each one
+			if(Field->is_repeated())
+			{
+				TArray<TSharedPtr<FJsonValue>> ConvertedNestedArray;
+				const TArray<TSharedPtr<FJsonValue>>* NestedArray;
+				if(!JsonObjectPtr->TryGetArrayField(JsonFieldName, NestedArray))
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot get protobuf repeated message array from JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+					return;
+				}
+
+				for(const TSharedPtr<FJsonValue> Item : *NestedArray)
+				{
+					const TSharedPtr<FJsonObject>* Object;
+					if(!Item->TryGetObject(Object))
+					{
+						UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot get protobuf message object from JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+						return;
+					}
+
+					ReplaceBytesFieldsWithJsonObjects(ParsedJsonString, *Object, NestedDescriptor);
+
+					FJsonValueObject ObjectValue(*Object);
+					TSharedPtr<FJsonValueObject> ObjectValuePtr = MakeShared<FJsonValueObject>(ObjectValue);
+					ConvertedNestedArray.Add(ObjectValuePtr);
+				}
+
+				JsonObjectPtr->SetArrayField(JsonFieldName, ConvertedNestedArray);
+			}
+			else
+			{
+				// If the field is a message that is NOT repeated, it's just another objects whose fields we convert recursively
+				const TSharedPtr<FJsonObject>* NestedObject;
+				if(!JsonObjectPtr->TryGetObjectField(JsonFieldName, NestedObject))
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot get protobuf message object from JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+					return;
+				}
+
+				ReplaceBytesFieldsWithJsonObjects(ParsedJsonString, *NestedObject, NestedDescriptor);
+				JsonObjectPtr->SetObjectField(JsonFieldName, *NestedObject);
+			}
+		}
+	}
+}
+
 template <typename DataStruct, typename PayloadType, typename ResponseCallbackType>
-void DispatchV2Notif(PayloadType Payload, ResponseCallbackType ResponseCallback)
+void DispatchV2Notif(PayloadType Payload, ResponseCallbackType ResponseCallback, bool bConvertBytesFields = false)
 {
 	std::string JsonPayloadUTF8;
 	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
@@ -1908,8 +1997,21 @@ void DispatchV2Notif(PayloadType Payload, ResponseCallbackType ResponseCallback)
 
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Received MPv2 lobby notification\n%s"), *JsonPayload);
 
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonPayload);
+	TSharedPtr<FJsonObject> JsonObjectPtr;
+	if(!FJsonSerializer::Deserialize(JsonReader, JsonObjectPtr))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize protobuf payload from JSON\nNotification: %s"), *JsonPayload);
+		return;
+	}
+
+	if(bConvertBytesFields)
+	{
+		ReplaceBytesFieldsWithJsonObjects(JsonPayload, JsonObjectPtr, PayloadType::GetDescriptor());
+	}
+
 	DataStruct Result;
-	if(FJsonObjectConverter::JsonObjectStringToUStruct(JsonPayload, &Result, 0, 0))
+	if(FJsonObjectConverter::JsonObjectToUStruct(JsonObjectPtr.ToSharedRef(), &Result))
 	{
 		ResponseCallback.ExecuteIfBound(Result);
 	}
@@ -1997,6 +2099,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	case session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope->dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartySessionV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2PartySession>(EventEnvelope->partysessionv1(), V2PartyUpdatedNotif, true);
 		break;
 	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
