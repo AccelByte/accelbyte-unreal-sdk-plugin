@@ -21,7 +21,7 @@ public:
 	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Achievement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Achievement | Api")
 	void UnlockAchievement(FString const& UserId, FString const& AchievementCode, FDHandler OnSuccess, FDErrorHandler OnError);
 
 private:

@@ -24,13 +24,13 @@ public:
 	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | OAuth2")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | OAuth2 | Api")
 	void LoginWithClientCredentials(FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | OAuth2")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | OAuth2 | Api")
 	void GetJwks(FDJwkSetDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | OAuth2")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | OAuth2 | Api")
 	void ForgetAllCredentials();
 
 private:
