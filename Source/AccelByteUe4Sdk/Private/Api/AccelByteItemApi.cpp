@@ -203,20 +203,12 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, 
 	if (ItemCriteria.Tags.Num() > 0)
 	{ 
 		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		for (int i = 0; i < ItemCriteria.Tags.Num(); i++)
-		{
-			FString ItemCriteriaTag = FString::Printf(TEXT(",%s"), *ItemCriteria.Tags[i]);
-			Query.Append((i == 0) ? TEXT("tags=") : ItemCriteriaTag);
-		}
+		Query.Append(FString::Printf(TEXT("tags=%s"), *FString::Join(ItemCriteria.Tags, TEXT(","))));
 	}
 	if (ItemCriteria.Features.Num() > 0)
 	{ 
 		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		for (int i = 0; i < ItemCriteria.Features.Num(); i++)
-		{
-			FString ItemCriteriaFeature = FString::Printf(TEXT(",%s"), *ItemCriteria.Features[i]);
-			Query.Append((i == 0) ? TEXT("features=") : ItemCriteriaFeature);
-		}
+		Query.Append(FString::Printf(TEXT("features=%s"), *FString::Join(ItemCriteria.Features, TEXT(","))));
 	}
 	if (Offset > 0)
 	{ 
@@ -231,12 +223,12 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, 
 	if (SortBy.Num() > 0 )
 	{
 		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		TArray<FString> QuerySortBy;
 		for (int i = 0; i < SortBy.Num(); i++)
 		{
-			FString sortByString = FString::Printf(TEXT("sortBy=%s"), *ConvertItemSortByToString(SortBy[i]));
-			FString sortByStringAppend = FString::Printf(TEXT(",%s"), *ConvertItemSortByToString(SortBy[i]));
-			Query.Append((i == 0) ? sortByString : sortByStringAppend);
+			QuerySortBy.Add(ConvertItemSortByToString(SortBy[i]));
 		}
+		Query.Append(FString::Printf(TEXT("sortBy=%s"), *FString::Join(QuerySortBy, TEXT(","))));
 	}
 	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
 	
