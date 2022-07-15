@@ -285,15 +285,26 @@ struct DSInformationV1DefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DSInformationV1DefaultTypeInternal _DSInformationV1_default_instance_;
+constexpr GameServerV1_PortsEntry_DoNotUse::GameServerV1_PortsEntry_DoNotUse(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+struct GameServerV1_PortsEntry_DoNotUseDefaultTypeInternal {
+  constexpr GameServerV1_PortsEntry_DoNotUseDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~GameServerV1_PortsEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    GameServerV1_PortsEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GameServerV1_PortsEntry_DoNotUseDefaultTypeInternal _GameServerV1_PortsEntry_DoNotUse_default_instance_;
 constexpr GameServerV1::GameServerV1(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : alternate_ips_()
+  , ports_(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{})
   , pod_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , image_version_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , namespace__(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , ip_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , protocol_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , ports_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , provider_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , game_version_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , status_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -314,7 +325,7 @@ struct GameServerV1DefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GameServerV1DefaultTypeInternal _GameServerV1_default_instance_;
 }  // namespace session
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_notification_2eproto[18];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_notification_2eproto[19];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_notification_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_notification_2eproto = nullptr;
 
@@ -494,6 +505,16 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, requested_regions_),
   PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, requested_at_),
   PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, status_),
+  PROTOBUF_FIELD_OFFSET(::session::GameServerV1_PortsEntry_DoNotUse, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::session::GameServerV1_PortsEntry_DoNotUse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::session::GameServerV1_PortsEntry_DoNotUse, key_),
+  PROTOBUF_FIELD_OFFSET(::session::GameServerV1_PortsEntry_DoNotUse, value_),
+  0,
+  1,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::session::GameServerV1, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -536,7 +557,8 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 138, -1, -1, sizeof(::session::Team)},
   { 145, -1, -1, sizeof(::session::GameSessionV1)},
   { 165, -1, -1, sizeof(::session::DSInformationV1)},
-  { 175, -1, -1, sizeof(::session::GameServerV1)},
+  { 175, 183, -1, sizeof(::session::GameServerV1_PortsEntry_DoNotUse)},
+  { 185, -1, -1, sizeof(::session::GameServerV1)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -557,6 +579,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_Team_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_DSInformationV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameServerV1_PortsEntry_DoNotUse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameServerV1_default_instance_),
 };
 
@@ -652,26 +675,28 @@ const char descriptor_table_protodef_notification_2eproto[] PROTOBUF_SECTION_VAR
   "erverV1R\013game_server\022,\n\021requested_region"
   "s\030\002 \003(\tR\021requested_regions\022\"\n\014requested_"
   "at\030\003 \001(\tR\014requested_at\022\026\n\006status\030\005 \001(\tR\006"
-  "status\"\244\004\n\014GameServerV1\022\032\n\010pod_name\030\001 \001("
+  "status\"\364\004\n\014GameServerV1\022\032\n\010pod_name\030\001 \001("
   "\tR\010pod_name\022$\n\rimage_version\030\002 \001(\tR\rimag"
   "e_version\022\034\n\tnamespace\030\003 \001(\tR\tnamespace\022"
   "\016\n\002ip\030\004 \001(\tR\002ip\022$\n\ralternate_ips\030\005 \003(\tR\r"
   "alternate_ips\022\022\n\004port\030\006 \001(\005R\004port\022\032\n\010pro"
-  "tocol\030\007 \001(\tR\010protocol\022\024\n\005ports\030\010 \001(\014R\005po"
-  "rts\022\032\n\010provider\030\t \001(\tR\010provider\022\"\n\014game_"
-  "version\030\n \001(\tR\014game_version\022\026\n\006status\030\013 "
-  "\001(\tR\006status\022\036\n\nsession_id\030\014 \001(\tR\nsession"
-  "_id\022\036\n\ndeployment\030\r \001(\tR\ndeployment\022\026\n\006r"
-  "egion\030\016 \001(\tR\006region\022*\n\020custom_attribute\030"
-  "\017 \001(\tR\020custom_attribute\022:\n\030is_override_g"
-  "ame_version\030\020 \001(\010R\030is_override_game_vers"
-  "ion\022 \n\013last_update\030\021 \001(\tR\013last_updateB\016Z"
+  "tocol\030\007 \001(\tR\010protocol\0226\n\005ports\030\010 \003(\0132 .s"
+  "ession.GameServerV1.PortsEntryR\005ports\022\032\n"
+  "\010provider\030\t \001(\tR\010provider\022\"\n\014game_versio"
+  "n\030\n \001(\tR\014game_version\022\026\n\006status\030\013 \001(\tR\006s"
+  "tatus\022\036\n\nsession_id\030\014 \001(\tR\nsession_id\022\036\n"
+  "\ndeployment\030\r \001(\tR\ndeployment\022\026\n\006region\030"
+  "\016 \001(\tR\006region\022*\n\020custom_attribute\030\017 \001(\tR"
+  "\020custom_attribute\022:\n\030is_override_game_ve"
+  "rsion\030\020 \001(\010R\030is_override_game_version\022 \n"
+  "\013last_update\030\021 \001(\tR\013last_update\032,\n\nPorts"
+  "Entry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\005:\0028\001B\016Z"
   "\014/event;eventb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_notification_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_notification_2eproto = {
-  false, false, 4221, descriptor_table_protodef_notification_2eproto, "notification.proto", 
-  &descriptor_table_notification_2eproto_once, nullptr, 0, 18,
+  false, false, 4301, descriptor_table_protodef_notification_2eproto, "notification.proto", 
+  &descriptor_table_notification_2eproto_once, nullptr, 0, 19,
   schemas, file_default_instances, TableStruct_notification_2eproto::offsets,
   file_level_metadata_notification_2eproto, file_level_enum_descriptors_notification_2eproto, file_level_service_descriptors_notification_2eproto,
 };
@@ -6672,6 +6697,20 @@ void DSInformationV1::InternalSwap(DSInformationV1* other) {
 
 // ===================================================================
 
+GameServerV1_PortsEntry_DoNotUse::GameServerV1_PortsEntry_DoNotUse() {}
+GameServerV1_PortsEntry_DoNotUse::GameServerV1_PortsEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+    : SuperType(arena) {}
+void GameServerV1_PortsEntry_DoNotUse::MergeFrom(const GameServerV1_PortsEntry_DoNotUse& other) {
+  MergeFromInternal(other);
+}
+::PROTOBUF_NAMESPACE_ID::Metadata GameServerV1_PortsEntry_DoNotUse::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
+      file_level_metadata_notification_2eproto[17]);
+}
+
+// ===================================================================
+
 class GameServerV1::_Internal {
  public:
 };
@@ -6679,7 +6718,8 @@ class GameServerV1::_Internal {
 GameServerV1::GameServerV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
-  alternate_ips_(arena) {
+  alternate_ips_(arena),
+  ports_(arena) {
   SharedCtor();
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
@@ -6690,6 +6730,7 @@ GameServerV1::GameServerV1(const GameServerV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       alternate_ips_(from.alternate_ips_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ports_.MergeFrom(from.ports_);
   pod_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     pod_name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
@@ -6728,14 +6769,6 @@ GameServerV1::GameServerV1(const GameServerV1& from)
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_protocol().empty()) {
     protocol_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_protocol(), 
-      GetArenaForAllocation());
-  }
-  ports_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    ports_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_ports().empty()) {
-    ports_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_ports(), 
       GetArenaForAllocation());
   }
   provider_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -6829,10 +6862,6 @@ protocol_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlr
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   protocol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-ports_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  ports_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 provider_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   provider_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
@@ -6885,7 +6914,6 @@ inline void GameServerV1::SharedDtor() {
   namespace__.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ip_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   protocol_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ports_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   provider_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   game_version_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   status_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -6899,8 +6927,12 @@ inline void GameServerV1::SharedDtor() {
 void GameServerV1::ArenaDtor(void* object) {
   GameServerV1* _this = reinterpret_cast< GameServerV1* >(object);
   (void)_this;
+  _this->ports_. ~MapField();
 }
-void GameServerV1::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+inline void GameServerV1::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena) {
+  if (arena != nullptr) {
+    arena->OwnCustomDestructor(this, &GameServerV1::ArenaDtor);
+  }
 }
 void GameServerV1::SetCachedSize(int size) const {
   _cached_size_.Set(size);
@@ -6913,12 +6945,12 @@ void GameServerV1::Clear() {
   (void) cached_has_bits;
 
   alternate_ips_.Clear();
+  ports_.Clear();
   pod_name_.ClearToEmpty();
   image_version_.ClearToEmpty();
   namespace__.ClearToEmpty();
   ip_.ClearToEmpty();
   protocol_.ClearToEmpty();
-  ports_.ClearToEmpty();
   provider_.ClearToEmpty();
   game_version_.ClearToEmpty();
   status_.ClearToEmpty();
@@ -7012,12 +7044,16 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         } else
           goto handle_unusual;
         continue;
-      // bytes ports = 8 [json_name = "ports"];
+      // map<string, int32> ports = 8 [json_name = "ports"];
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
-          auto str = _internal_mutable_ports();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(&ports_, ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<66>(ptr));
         } else
           goto handle_unusual;
         continue;
@@ -7204,10 +7240,46 @@ uint8_t* GameServerV1::_InternalSerialize(
         7, this->_internal_protocol(), target);
   }
 
-  // bytes ports = 8 [json_name = "ports"];
+  // map<string, int32> ports = 8 [json_name = "ports"];
   if (!this->_internal_ports().empty()) {
-    target = stream->WriteBytesMaybeAliased(
-        8, this->_internal_ports(), target);
+    typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >::const_pointer
+        ConstPtr;
+    typedef ConstPtr SortItem;
+    typedef ::PROTOBUF_NAMESPACE_ID::internal::CompareByDerefFirst<SortItem> Less;
+    struct Utf8Check {
+      static void Check(ConstPtr p) {
+        (void)p;
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+          p->first.data(), static_cast<int>(p->first.length()),
+          ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+          "session.GameServerV1.PortsEntry.key");
+      }
+    };
+
+    if (stream->IsSerializationDeterministic() &&
+        this->_internal_ports().size() > 1) {
+      ::std::unique_ptr<SortItem[]> items(
+          new SortItem[this->_internal_ports().size()]);
+      typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >::size_type size_type;
+      size_type n = 0;
+      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >::const_iterator
+          it = this->_internal_ports().begin();
+          it != this->_internal_ports().end(); ++it, ++n) {
+        items[static_cast<ptrdiff_t>(n)] = SortItem(&*it);
+      }
+      ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
+      for (size_type i = 0; i < n; i++) {
+        target = GameServerV1_PortsEntry_DoNotUse::Funcs::InternalSerialize(8, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
+        Utf8Check::Check(&(*items[static_cast<ptrdiff_t>(i)]));
+      }
+    } else {
+      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >::const_iterator
+          it = this->_internal_ports().begin();
+          it != this->_internal_ports().end(); ++it) {
+        target = GameServerV1_PortsEntry_DoNotUse::Funcs::InternalSerialize(8, it->first, it->second, target, stream);
+        Utf8Check::Check(&(*it));
+      }
+    }
   }
 
   // string provider = 9 [json_name = "provider"];
@@ -7320,6 +7392,15 @@ size_t GameServerV1::ByteSizeLong() const {
       alternate_ips_.Get(i));
   }
 
+  // map<string, int32> ports = 8 [json_name = "ports"];
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(this->_internal_ports_size());
+  for (::PROTOBUF_NAMESPACE_ID::Map< std::string, int32_t >::const_iterator
+      it = this->_internal_ports().begin();
+      it != this->_internal_ports().end(); ++it) {
+    total_size += GameServerV1_PortsEntry_DoNotUse::Funcs::ByteSizeLong(it->first, it->second);
+  }
+
   // string pod_name = 1 [json_name = "pod_name"];
   if (!this->_internal_pod_name().empty()) {
     total_size += 1 +
@@ -7353,13 +7434,6 @@ size_t GameServerV1::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_protocol());
-  }
-
-  // bytes ports = 8 [json_name = "ports"];
-  if (!this->_internal_ports().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_ports());
   }
 
   // string provider = 9 [json_name = "provider"];
@@ -7451,6 +7525,7 @@ void GameServerV1::MergeFrom(const GameServerV1& from) {
   (void) cached_has_bits;
 
   alternate_ips_.MergeFrom(from.alternate_ips_);
+  ports_.MergeFrom(from.ports_);
   if (!from._internal_pod_name().empty()) {
     _internal_set_pod_name(from._internal_pod_name());
   }
@@ -7465,9 +7540,6 @@ void GameServerV1::MergeFrom(const GameServerV1& from) {
   }
   if (!from._internal_protocol().empty()) {
     _internal_set_protocol(from._internal_protocol());
-  }
-  if (!from._internal_ports().empty()) {
-    _internal_set_ports(from._internal_ports());
   }
   if (!from._internal_provider().empty()) {
     _internal_set_provider(from._internal_provider());
@@ -7519,6 +7591,7 @@ void GameServerV1::InternalSwap(GameServerV1* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   alternate_ips_.InternalSwap(&other->alternate_ips_);
+  ports_.InternalSwap(&other->ports_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &pod_name_, lhs_arena,
@@ -7543,11 +7616,6 @@ void GameServerV1::InternalSwap(GameServerV1* other) {
       &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &protocol_, lhs_arena,
       &other->protocol_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      &ports_, lhs_arena,
-      &other->ports_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
@@ -7600,7 +7668,7 @@ void GameServerV1::InternalSwap(GameServerV1* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata GameServerV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[17]);
+      file_level_metadata_notification_2eproto[18]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -7656,6 +7724,9 @@ template<> PROTOBUF_NOINLINE ::session::GameSessionV1* Arena::CreateMaybeMessage
 }
 template<> PROTOBUF_NOINLINE ::session::DSInformationV1* Arena::CreateMaybeMessage< ::session::DSInformationV1 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::session::DSInformationV1 >(arena);
+}
+template<> PROTOBUF_NOINLINE ::session::GameServerV1_PortsEntry_DoNotUse* Arena::CreateMaybeMessage< ::session::GameServerV1_PortsEntry_DoNotUse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::session::GameServerV1_PortsEntry_DoNotUse >(arena);
 }
 template<> PROTOBUF_NOINLINE ::session::GameServerV1* Arena::CreateMaybeMessage< ::session::GameServerV1 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::session::GameServerV1 >(arena);
