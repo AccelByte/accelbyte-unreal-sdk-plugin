@@ -54,7 +54,7 @@ struct TableStruct_notification_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[19]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[20]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -83,6 +83,9 @@ extern GameSessionNotificationUserInvitedV1DefaultTypeInternal _GameSessionNotif
 class GameSessionNotificationUserJoinedV1;
 struct GameSessionNotificationUserJoinedV1DefaultTypeInternal;
 extern GameSessionNotificationUserJoinedV1DefaultTypeInternal _GameSessionNotificationUserJoinedV1_default_instance_;
+class GameSessionNotificationUserKickedV1;
+struct GameSessionNotificationUserKickedV1DefaultTypeInternal;
+extern GameSessionNotificationUserKickedV1DefaultTypeInternal _GameSessionNotificationUserKickedV1_default_instance_;
 class GameSessionV1;
 struct GameSessionV1DefaultTypeInternal;
 extern GameSessionV1DefaultTypeInternal _GameSessionV1_default_instance_;
@@ -128,6 +131,7 @@ template<> ::session::GameServerV1_PortsEntry_DoNotUse* Arena::CreateMaybeMessag
 template<> ::session::GameSessionNotificationMembersChangedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationMembersChangedV1>(Arena*);
 template<> ::session::GameSessionNotificationUserInvitedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationUserInvitedV1>(Arena*);
 template<> ::session::GameSessionNotificationUserJoinedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationUserJoinedV1>(Arena*);
+template<> ::session::GameSessionNotificationUserKickedV1* Arena::CreateMaybeMessage<::session::GameSessionNotificationUserKickedV1>(Arena*);
 template<> ::session::GameSessionV1* Arena::CreateMaybeMessage<::session::GameSessionV1>(Arena*);
 template<> ::session::NotificationEventEnvelope* Arena::CreateMaybeMessage<::session::NotificationEventEnvelope>(Arena*);
 template<> ::session::PartyNotificationMembersChangedV1* Arena::CreateMaybeMessage<::session::PartyNotificationMembersChangedV1>(Arena*);
@@ -197,6 +201,7 @@ class NotificationEventEnvelope final :
     kPartySessionV1 = 6,
     kGameSessionNotificationUserInvitedV1 = 7,
     kGameSessionNotificationUserJoinedV1 = 8,
+    kGameSessionNotificationUserKickedV1 = 12,
     kGameSessionNotificationMembersChangedV1 = 9,
     kGameSessionV1 = 10,
     kDSStatusChangedNotificationV1 = 11,
@@ -290,6 +295,7 @@ class NotificationEventEnvelope final :
     kPartySessionV1FieldNumber = 6,
     kGameSessionNotificationUserInvitedV1FieldNumber = 7,
     kGameSessionNotificationUserJoinedV1FieldNumber = 8,
+    kGameSessionNotificationUserKickedV1FieldNumber = 12,
     kGameSessionNotificationMembersChangedV1FieldNumber = 9,
     kGameSessionV1FieldNumber = 10,
     kDSStatusChangedNotificationV1FieldNumber = 11,
@@ -438,6 +444,24 @@ class NotificationEventEnvelope final :
       ::session::GameSessionNotificationUserJoinedV1* gamesessionnotificationuserjoinedv1);
   ::session::GameSessionNotificationUserJoinedV1* unsafe_arena_release_gamesessionnotificationuserjoinedv1();
 
+  // .session.GameSessionNotificationUserKickedV1 GameSessionNotificationUserKickedV1 = 12 [json_name = "OnSessionKicked"];
+  bool has_gamesessionnotificationuserkickedv1() const;
+  private:
+  bool _internal_has_gamesessionnotificationuserkickedv1() const;
+  public:
+  void clear_gamesessionnotificationuserkickedv1();
+  const ::session::GameSessionNotificationUserKickedV1& gamesessionnotificationuserkickedv1() const;
+  PROTOBUF_NODISCARD ::session::GameSessionNotificationUserKickedV1* release_gamesessionnotificationuserkickedv1();
+  ::session::GameSessionNotificationUserKickedV1* mutable_gamesessionnotificationuserkickedv1();
+  void set_allocated_gamesessionnotificationuserkickedv1(::session::GameSessionNotificationUserKickedV1* gamesessionnotificationuserkickedv1);
+  private:
+  const ::session::GameSessionNotificationUserKickedV1& _internal_gamesessionnotificationuserkickedv1() const;
+  ::session::GameSessionNotificationUserKickedV1* _internal_mutable_gamesessionnotificationuserkickedv1();
+  public:
+  void unsafe_arena_set_allocated_gamesessionnotificationuserkickedv1(
+      ::session::GameSessionNotificationUserKickedV1* gamesessionnotificationuserkickedv1);
+  ::session::GameSessionNotificationUserKickedV1* unsafe_arena_release_gamesessionnotificationuserkickedv1();
+
   // .session.GameSessionNotificationMembersChangedV1 GameSessionNotificationMembersChangedV1 = 9 [json_name = "OnSessionMembersChanged"];
   bool has_gamesessionnotificationmemberschangedv1() const;
   private:
@@ -505,6 +529,7 @@ class NotificationEventEnvelope final :
   void set_has_partysessionv1();
   void set_has_gamesessionnotificationuserinvitedv1();
   void set_has_gamesessionnotificationuserjoinedv1();
+  void set_has_gamesessionnotificationuserkickedv1();
   void set_has_gamesessionnotificationmemberschangedv1();
   void set_has_gamesessionv1();
   void set_has_dsstatuschangednotificationv1();
@@ -526,6 +551,7 @@ class NotificationEventEnvelope final :
     ::session::PartySessionV1* partysessionv1_;
     ::session::GameSessionNotificationUserInvitedV1* gamesessionnotificationuserinvitedv1_;
     ::session::GameSessionNotificationUserJoinedV1* gamesessionnotificationuserjoinedv1_;
+    ::session::GameSessionNotificationUserKickedV1* gamesessionnotificationuserkickedv1_;
     ::session::GameSessionNotificationMembersChangedV1* gamesessionnotificationmemberschangedv1_;
     ::session::GameSessionV1* gamesessionv1_;
     ::session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1_;
@@ -4173,6 +4199,157 @@ class GameServerV1 final :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_notification_2eproto;
 };
+// -------------------------------------------------------------------
+
+class GameSessionNotificationUserKickedV1 final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:session.GameSessionNotificationUserKickedV1) */ {
+ public:
+  inline GameSessionNotificationUserKickedV1() : GameSessionNotificationUserKickedV1(nullptr) {}
+  ~GameSessionNotificationUserKickedV1() override;
+  explicit constexpr GameSessionNotificationUserKickedV1(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  GameSessionNotificationUserKickedV1(const GameSessionNotificationUserKickedV1& from);
+  GameSessionNotificationUserKickedV1(GameSessionNotificationUserKickedV1&& from) noexcept
+    : GameSessionNotificationUserKickedV1() {
+    *this = ::std::move(from);
+  }
+
+  inline GameSessionNotificationUserKickedV1& operator=(const GameSessionNotificationUserKickedV1& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GameSessionNotificationUserKickedV1& operator=(GameSessionNotificationUserKickedV1&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GameSessionNotificationUserKickedV1& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GameSessionNotificationUserKickedV1* internal_default_instance() {
+    return reinterpret_cast<const GameSessionNotificationUserKickedV1*>(
+               &_GameSessionNotificationUserKickedV1_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    19;
+
+  friend void swap(GameSessionNotificationUserKickedV1& a, GameSessionNotificationUserKickedV1& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GameSessionNotificationUserKickedV1* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GameSessionNotificationUserKickedV1* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  GameSessionNotificationUserKickedV1* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<GameSessionNotificationUserKickedV1>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const GameSessionNotificationUserKickedV1& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const GameSessionNotificationUserKickedV1& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GameSessionNotificationUserKickedV1* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "session.GameSessionNotificationUserKickedV1";
+  }
+  protected:
+  explicit GameSessionNotificationUserKickedV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSessionIDFieldNumber = 1,
+  };
+  // string SessionID = 1 [json_name = "sessionID"];
+  void clear_sessionid();
+  const std::string& sessionid() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_sessionid(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_sessionid();
+  PROTOBUF_NODISCARD std::string* release_sessionid();
+  void set_allocated_sessionid(std::string* sessionid);
+  private:
+  const std::string& _internal_sessionid() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_sessionid(const std::string& value);
+  std::string* _internal_mutable_sessionid();
+  public:
+
+  // @@protoc_insertion_point(class_scope:session.GameSessionNotificationUserKickedV1)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sessionid_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_notification_2eproto;
+};
 // ===================================================================
 
 
@@ -4773,6 +4950,80 @@ inline ::session::GameSessionNotificationUserJoinedV1* NotificationEventEnvelope
 inline ::session::GameSessionNotificationUserJoinedV1* NotificationEventEnvelope::mutable_gamesessionnotificationuserjoinedv1() {
   ::session::GameSessionNotificationUserJoinedV1* _msg = _internal_mutable_gamesessionnotificationuserjoinedv1();
   // @@protoc_insertion_point(field_mutable:session.NotificationEventEnvelope.GameSessionNotificationUserJoinedV1)
+  return _msg;
+}
+
+// .session.GameSessionNotificationUserKickedV1 GameSessionNotificationUserKickedV1 = 12 [json_name = "OnSessionKicked"];
+inline bool NotificationEventEnvelope::_internal_has_gamesessionnotificationuserkickedv1() const {
+  return payload_case() == kGameSessionNotificationUserKickedV1;
+}
+inline bool NotificationEventEnvelope::has_gamesessionnotificationuserkickedv1() const {
+  return _internal_has_gamesessionnotificationuserkickedv1();
+}
+inline void NotificationEventEnvelope::set_has_gamesessionnotificationuserkickedv1() {
+  _oneof_case_[0] = kGameSessionNotificationUserKickedV1;
+}
+inline void NotificationEventEnvelope::clear_gamesessionnotificationuserkickedv1() {
+  if (_internal_has_gamesessionnotificationuserkickedv1()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete payload_.gamesessionnotificationuserkickedv1_;
+    }
+    clear_has_payload();
+  }
+}
+inline ::session::GameSessionNotificationUserKickedV1* NotificationEventEnvelope::release_gamesessionnotificationuserkickedv1() {
+  // @@protoc_insertion_point(field_release:session.NotificationEventEnvelope.GameSessionNotificationUserKickedV1)
+  if (_internal_has_gamesessionnotificationuserkickedv1()) {
+    clear_has_payload();
+      ::session::GameSessionNotificationUserKickedV1* temp = payload_.gamesessionnotificationuserkickedv1_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    payload_.gamesessionnotificationuserkickedv1_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::session::GameSessionNotificationUserKickedV1& NotificationEventEnvelope::_internal_gamesessionnotificationuserkickedv1() const {
+  return _internal_has_gamesessionnotificationuserkickedv1()
+      ? *payload_.gamesessionnotificationuserkickedv1_
+      : reinterpret_cast< ::session::GameSessionNotificationUserKickedV1&>(::session::_GameSessionNotificationUserKickedV1_default_instance_);
+}
+inline const ::session::GameSessionNotificationUserKickedV1& NotificationEventEnvelope::gamesessionnotificationuserkickedv1() const {
+  // @@protoc_insertion_point(field_get:session.NotificationEventEnvelope.GameSessionNotificationUserKickedV1)
+  return _internal_gamesessionnotificationuserkickedv1();
+}
+inline ::session::GameSessionNotificationUserKickedV1* NotificationEventEnvelope::unsafe_arena_release_gamesessionnotificationuserkickedv1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:session.NotificationEventEnvelope.GameSessionNotificationUserKickedV1)
+  if (_internal_has_gamesessionnotificationuserkickedv1()) {
+    clear_has_payload();
+    ::session::GameSessionNotificationUserKickedV1* temp = payload_.gamesessionnotificationuserkickedv1_;
+    payload_.gamesessionnotificationuserkickedv1_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NotificationEventEnvelope::unsafe_arena_set_allocated_gamesessionnotificationuserkickedv1(::session::GameSessionNotificationUserKickedV1* gamesessionnotificationuserkickedv1) {
+  clear_payload();
+  if (gamesessionnotificationuserkickedv1) {
+    set_has_gamesessionnotificationuserkickedv1();
+    payload_.gamesessionnotificationuserkickedv1_ = gamesessionnotificationuserkickedv1;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationUserKickedV1)
+}
+inline ::session::GameSessionNotificationUserKickedV1* NotificationEventEnvelope::_internal_mutable_gamesessionnotificationuserkickedv1() {
+  if (!_internal_has_gamesessionnotificationuserkickedv1()) {
+    clear_payload();
+    set_has_gamesessionnotificationuserkickedv1();
+    payload_.gamesessionnotificationuserkickedv1_ = CreateMaybeMessage< ::session::GameSessionNotificationUserKickedV1 >(GetArenaForAllocation());
+  }
+  return payload_.gamesessionnotificationuserkickedv1_;
+}
+inline ::session::GameSessionNotificationUserKickedV1* NotificationEventEnvelope::mutable_gamesessionnotificationuserkickedv1() {
+  ::session::GameSessionNotificationUserKickedV1* _msg = _internal_mutable_gamesessionnotificationuserkickedv1();
+  // @@protoc_insertion_point(field_mutable:session.NotificationEventEnvelope.GameSessionNotificationUserKickedV1)
   return _msg;
 }
 
@@ -9050,9 +9301,66 @@ inline void GameServerV1::set_allocated_last_update(std::string* last_update) {
   // @@protoc_insertion_point(field_set_allocated:session.GameServerV1.last_update)
 }
 
+// -------------------------------------------------------------------
+
+// GameSessionNotificationUserKickedV1
+
+// string SessionID = 1 [json_name = "sessionID"];
+inline void GameSessionNotificationUserKickedV1::clear_sessionid() {
+  sessionid_.ClearToEmpty();
+}
+inline const std::string& GameSessionNotificationUserKickedV1::sessionid() const {
+  // @@protoc_insertion_point(field_get:session.GameSessionNotificationUserKickedV1.SessionID)
+  return _internal_sessionid();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void GameSessionNotificationUserKickedV1::set_sessionid(ArgT0&& arg0, ArgT... args) {
+ 
+ sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:session.GameSessionNotificationUserKickedV1.SessionID)
+}
+inline std::string* GameSessionNotificationUserKickedV1::mutable_sessionid() {
+  std::string* _s = _internal_mutable_sessionid();
+  // @@protoc_insertion_point(field_mutable:session.GameSessionNotificationUserKickedV1.SessionID)
+  return _s;
+}
+inline const std::string& GameSessionNotificationUserKickedV1::_internal_sessionid() const {
+  return sessionid_.Get();
+}
+inline void GameSessionNotificationUserKickedV1::_internal_set_sessionid(const std::string& value) {
+  
+  sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* GameSessionNotificationUserKickedV1::_internal_mutable_sessionid() {
+  
+  return sessionid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* GameSessionNotificationUserKickedV1::release_sessionid() {
+  // @@protoc_insertion_point(field_release:session.GameSessionNotificationUserKickedV1.SessionID)
+  return sessionid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void GameSessionNotificationUserKickedV1::set_allocated_sessionid(std::string* sessionid) {
+  if (sessionid != nullptr) {
+    
+  } else {
+    
+  }
+  sessionid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), sessionid,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (sessionid_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    sessionid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:session.GameSessionNotificationUserKickedV1.SessionID)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

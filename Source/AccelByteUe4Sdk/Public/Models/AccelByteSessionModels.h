@@ -395,3 +395,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionMembersChangedEvent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionMembersChangedEvent")
 		FString JoinerID{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUserKickedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionKickedEvent")
+		FString SessionID{};
+};

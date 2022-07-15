@@ -1477,6 +1477,7 @@ void Lobby::UnbindV2GameSessionEvents()
 	V2GameSessionJoinedNotif.Unbind();
 	V2GameSessionMembersChangedNotif.Unbind();
 	V2GameSessionUpdatedNotif.Unbind();
+	V2GameSessionKickedNotif.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -2089,6 +2090,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	case session::NotificationEventEnvelope::kGameSessionV1:
 	{
 		DispatchSessionNotif<FAccelByteModelsV2GameSession>(EventEnvelope.gamesessionv1(), V2GameSessionUpdatedNotif, true);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionNotificationUserKickedV1:
+	{
+		DispatchSessionNotif<FAccelByteModelsV2GameSessionUserKickedEvent>(EventEnvelope.gamesessionnotificationuserkickedv1(), V2GameSessionKickedNotif);
 		break;
 	}
 	case session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
