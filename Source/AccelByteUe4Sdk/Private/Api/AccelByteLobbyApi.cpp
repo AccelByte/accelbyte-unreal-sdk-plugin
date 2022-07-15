@@ -2126,7 +2126,11 @@ void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& 
 			DispatchV2Notif<FAccelByteModelsV2MatchFoundNotif>(Envelope->matchfoundnotifv1(), V2MatchmakingMatchFoundNotif);
 			break;
 		}
-		
+		case matchmaking::NotificationEventEnvelope::kStartMatchmakingNotifV1:
+		{
+			DispatchV2Notif<FAccelByteModelsV2StartMatchmakingNotif>(Envelope->startmatchmakingnotifv1(), V2MatchmakingStartNotif);
+			break;
+		}
 		default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown matchmaking v2 notification topic : %s"), *Message.Topic);
 	}
 }
@@ -2135,6 +2139,7 @@ void Lobby::InitializeV2MatchmakingNotifDelegates()
 {
 	MatchmakingV2NotifDelegates = {
 		{EV2MatchmakingNotif::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotif::OnMatchmakingStarted, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
 	};
 }
 

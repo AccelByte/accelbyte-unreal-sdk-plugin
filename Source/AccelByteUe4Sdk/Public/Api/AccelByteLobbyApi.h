@@ -481,7 +481,11 @@ public:
 	* @brief Delegate for notif when match is found.
 	*/
 	DECLARE_DELEGATE_OneParam(FV2MatchmakingMatchFoundNotif, FAccelByteModelsV2MatchFoundNotif)
-	
+
+	/**
+	* @brief Delegate for notification when party leader started matchmaking
+	*/
+	DECLARE_DELEGATE_OneParam(FV2MatchmakingStartNotif, FAccelByteModelsV2StartMatchmakingNotif)
 public:
     /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
@@ -1061,6 +1065,10 @@ public:
 	void SetV2MatchmakingMatchFoundNotifDelegate(const FV2MatchmakingMatchFoundNotif& OnMatchFoundNotif)
 	{
 		V2MatchmakingMatchFoundNotif = OnMatchFoundNotif;
+	}
+	void SetV2MatchmakingStartNotifDelegate(const FV2MatchmakingStartNotif& OnMatchmakingStartNotif)
+	{
+		V2MatchmakingStartNotif = OnMatchmakingStartNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1953,6 +1961,7 @@ private:
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 
 	FV2MatchmakingMatchFoundNotif V2MatchmakingMatchFoundNotif;
+	FV2MatchmakingStartNotif V2MatchmakingStartNotif;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;

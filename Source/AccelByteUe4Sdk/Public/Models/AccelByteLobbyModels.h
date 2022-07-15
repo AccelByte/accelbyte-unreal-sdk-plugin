@@ -27,6 +27,7 @@ enum class EV2MatchmakingNotif : uint8
 {
 	Invalid,
 	OnMatchFound,
+	OnMatchmakingStarted,
 };
 
 // Emulate namespace with long class names

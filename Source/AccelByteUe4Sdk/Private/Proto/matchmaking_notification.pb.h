@@ -51,7 +51,7 @@ struct TableStruct_matchmaking_5fnotification_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -65,6 +65,9 @@ extern MatchFoundNotifV1DefaultTypeInternal _MatchFoundNotifV1_default_instance_
 class NotificationEventEnvelope;
 struct NotificationEventEnvelopeDefaultTypeInternal;
 extern NotificationEventEnvelopeDefaultTypeInternal _NotificationEventEnvelope_default_instance_;
+class StartMatchmakingNotifV1;
+struct StartMatchmakingNotifV1DefaultTypeInternal;
+extern StartMatchmakingNotifV1DefaultTypeInternal _StartMatchmakingNotifV1_default_instance_;
 class Team;
 struct TeamDefaultTypeInternal;
 extern TeamDefaultTypeInternal _Team_default_instance_;
@@ -75,6 +78,7 @@ extern TicketDefaultTypeInternal _Ticket_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
 template<> ::matchmaking::MatchFoundNotifV1* Arena::CreateMaybeMessage<::matchmaking::MatchFoundNotifV1>(Arena*);
 template<> ::matchmaking::NotificationEventEnvelope* Arena::CreateMaybeMessage<::matchmaking::NotificationEventEnvelope>(Arena*);
+template<> ::matchmaking::StartMatchmakingNotifV1* Arena::CreateMaybeMessage<::matchmaking::StartMatchmakingNotifV1>(Arena*);
 template<> ::matchmaking::Team* Arena::CreateMaybeMessage<::matchmaking::Team>(Arena*);
 template<> ::matchmaking::Ticket* Arena::CreateMaybeMessage<::matchmaking::Ticket>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -127,6 +131,7 @@ class NotificationEventEnvelope final :
   }
   enum PayloadCase {
     kMatchFoundNotifV1 = 1,
+    kStartMatchmakingNotifV1 = 2,
     PAYLOAD_NOT_SET = 0,
   };
 
@@ -210,6 +215,7 @@ class NotificationEventEnvelope final :
 
   enum : int {
     kMatchFoundNotifV1FieldNumber = 1,
+    kStartMatchmakingNotifV1FieldNumber = 2,
   };
   // .matchmaking.MatchFoundNotifV1 MatchFoundNotifV1 = 1;
   bool has_matchfoundnotifv1() const;
@@ -229,12 +235,31 @@ class NotificationEventEnvelope final :
       ::matchmaking::MatchFoundNotifV1* matchfoundnotifv1);
   ::matchmaking::MatchFoundNotifV1* unsafe_arena_release_matchfoundnotifv1();
 
+  // .matchmaking.StartMatchmakingNotifV1 StartMatchmakingNotifV1 = 2;
+  bool has_startmatchmakingnotifv1() const;
+  private:
+  bool _internal_has_startmatchmakingnotifv1() const;
+  public:
+  void clear_startmatchmakingnotifv1();
+  const ::matchmaking::StartMatchmakingNotifV1& startmatchmakingnotifv1() const;
+  PROTOBUF_NODISCARD ::matchmaking::StartMatchmakingNotifV1* release_startmatchmakingnotifv1();
+  ::matchmaking::StartMatchmakingNotifV1* mutable_startmatchmakingnotifv1();
+  void set_allocated_startmatchmakingnotifv1(::matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1);
+  private:
+  const ::matchmaking::StartMatchmakingNotifV1& _internal_startmatchmakingnotifv1() const;
+  ::matchmaking::StartMatchmakingNotifV1* _internal_mutable_startmatchmakingnotifv1();
+  public:
+  void unsafe_arena_set_allocated_startmatchmakingnotifv1(
+      ::matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1);
+  ::matchmaking::StartMatchmakingNotifV1* unsafe_arena_release_startmatchmakingnotifv1();
+
   void clear_payload();
   PayloadCase payload_case() const;
   // @@protoc_insertion_point(class_scope:matchmaking.NotificationEventEnvelope)
  private:
   class _Internal;
   void set_has_matchfoundnotifv1();
+  void set_has_startmatchmakingnotifv1();
 
   inline bool has_payload() const;
   inline void clear_has_payload();
@@ -246,6 +271,7 @@ class NotificationEventEnvelope final :
     constexpr PayloadUnion() : _constinit_{} {}
       ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
     ::matchmaking::MatchFoundNotifV1* matchfoundnotifv1_;
+    ::matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1_;
   } payload_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   uint32_t _oneof_case_[1];
@@ -803,6 +829,221 @@ class MatchFoundNotifV1 final :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_matchmaking_5fnotification_2eproto;
 };
+// -------------------------------------------------------------------
+
+class StartMatchmakingNotifV1 final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:matchmaking.StartMatchmakingNotifV1) */ {
+ public:
+  inline StartMatchmakingNotifV1() : StartMatchmakingNotifV1(nullptr) {}
+  ~StartMatchmakingNotifV1() override;
+  explicit constexpr StartMatchmakingNotifV1(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StartMatchmakingNotifV1(const StartMatchmakingNotifV1& from);
+  StartMatchmakingNotifV1(StartMatchmakingNotifV1&& from) noexcept
+    : StartMatchmakingNotifV1() {
+    *this = ::std::move(from);
+  }
+
+  inline StartMatchmakingNotifV1& operator=(const StartMatchmakingNotifV1& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartMatchmakingNotifV1& operator=(StartMatchmakingNotifV1&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const StartMatchmakingNotifV1& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StartMatchmakingNotifV1* internal_default_instance() {
+    return reinterpret_cast<const StartMatchmakingNotifV1*>(
+               &_StartMatchmakingNotifV1_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(StartMatchmakingNotifV1& a, StartMatchmakingNotifV1& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartMatchmakingNotifV1* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartMatchmakingNotifV1* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  StartMatchmakingNotifV1* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<StartMatchmakingNotifV1>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const StartMatchmakingNotifV1& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const StartMatchmakingNotifV1& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartMatchmakingNotifV1* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "matchmaking.StartMatchmakingNotifV1";
+  }
+  protected:
+  explicit StartMatchmakingNotifV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTicketIdFieldNumber = 1,
+    kPartyIdFieldNumber = 2,
+    kNamespaceFieldNumber = 3,
+    kCreatedAtFieldNumber = 4,
+    kMatchPoolFieldNumber = 5,
+  };
+  // string ticket_id = 1;
+  void clear_ticket_id();
+  const std::string& ticket_id() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_ticket_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_ticket_id();
+  PROTOBUF_NODISCARD std::string* release_ticket_id();
+  void set_allocated_ticket_id(std::string* ticket_id);
+  private:
+  const std::string& _internal_ticket_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_ticket_id(const std::string& value);
+  std::string* _internal_mutable_ticket_id();
+  public:
+
+  // string party_id = 2;
+  void clear_party_id();
+  const std::string& party_id() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_party_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_party_id();
+  PROTOBUF_NODISCARD std::string* release_party_id();
+  void set_allocated_party_id(std::string* party_id);
+  private:
+  const std::string& _internal_party_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_party_id(const std::string& value);
+  std::string* _internal_mutable_party_id();
+  public:
+
+  // string namespace = 3;
+  void clear_namespace_();
+  const std::string& namespace_() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_namespace_(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_namespace_();
+  PROTOBUF_NODISCARD std::string* release_namespace_();
+  void set_allocated_namespace_(std::string* namespace_);
+  private:
+  const std::string& _internal_namespace_() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_namespace_(const std::string& value);
+  std::string* _internal_mutable_namespace_();
+  public:
+
+  // string created_at = 4;
+  void clear_created_at();
+  const std::string& created_at() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_created_at(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_created_at();
+  PROTOBUF_NODISCARD std::string* release_created_at();
+  void set_allocated_created_at(std::string* created_at);
+  private:
+  const std::string& _internal_created_at() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_created_at(const std::string& value);
+  std::string* _internal_mutable_created_at();
+  public:
+
+  // string match_pool = 5;
+  void clear_match_pool();
+  const std::string& match_pool() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_match_pool(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_match_pool();
+  PROTOBUF_NODISCARD std::string* release_match_pool();
+  void set_allocated_match_pool(std::string* match_pool);
+  private:
+  const std::string& _internal_match_pool() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_match_pool(const std::string& value);
+  std::string* _internal_mutable_match_pool();
+  public:
+
+  // @@protoc_insertion_point(class_scope:matchmaking.StartMatchmakingNotifV1)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ticket_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr party_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr namespace__;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr created_at_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr match_pool_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_matchmaking_5fnotification_2eproto;
+};
 // ===================================================================
 
 
@@ -885,6 +1126,80 @@ inline ::matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::_internal_mu
 inline ::matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::mutable_matchfoundnotifv1() {
   ::matchmaking::MatchFoundNotifV1* _msg = _internal_mutable_matchfoundnotifv1();
   // @@protoc_insertion_point(field_mutable:matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
+  return _msg;
+}
+
+// .matchmaking.StartMatchmakingNotifV1 StartMatchmakingNotifV1 = 2;
+inline bool NotificationEventEnvelope::_internal_has_startmatchmakingnotifv1() const {
+  return payload_case() == kStartMatchmakingNotifV1;
+}
+inline bool NotificationEventEnvelope::has_startmatchmakingnotifv1() const {
+  return _internal_has_startmatchmakingnotifv1();
+}
+inline void NotificationEventEnvelope::set_has_startmatchmakingnotifv1() {
+  _oneof_case_[0] = kStartMatchmakingNotifV1;
+}
+inline void NotificationEventEnvelope::clear_startmatchmakingnotifv1() {
+  if (_internal_has_startmatchmakingnotifv1()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete payload_.startmatchmakingnotifv1_;
+    }
+    clear_has_payload();
+  }
+}
+inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::release_startmatchmakingnotifv1() {
+  // @@protoc_insertion_point(field_release:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+  if (_internal_has_startmatchmakingnotifv1()) {
+    clear_has_payload();
+      ::matchmaking::StartMatchmakingNotifV1* temp = payload_.startmatchmakingnotifv1_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    payload_.startmatchmakingnotifv1_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::matchmaking::StartMatchmakingNotifV1& NotificationEventEnvelope::_internal_startmatchmakingnotifv1() const {
+  return _internal_has_startmatchmakingnotifv1()
+      ? *payload_.startmatchmakingnotifv1_
+      : reinterpret_cast< ::matchmaking::StartMatchmakingNotifV1&>(::matchmaking::_StartMatchmakingNotifV1_default_instance_);
+}
+inline const ::matchmaking::StartMatchmakingNotifV1& NotificationEventEnvelope::startmatchmakingnotifv1() const {
+  // @@protoc_insertion_point(field_get:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+  return _internal_startmatchmakingnotifv1();
+}
+inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::unsafe_arena_release_startmatchmakingnotifv1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+  if (_internal_has_startmatchmakingnotifv1()) {
+    clear_has_payload();
+    ::matchmaking::StartMatchmakingNotifV1* temp = payload_.startmatchmakingnotifv1_;
+    payload_.startmatchmakingnotifv1_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NotificationEventEnvelope::unsafe_arena_set_allocated_startmatchmakingnotifv1(::matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1) {
+  clear_payload();
+  if (startmatchmakingnotifv1) {
+    set_has_startmatchmakingnotifv1();
+    payload_.startmatchmakingnotifv1_ = startmatchmakingnotifv1;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+}
+inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::_internal_mutable_startmatchmakingnotifv1() {
+  if (!_internal_has_startmatchmakingnotifv1()) {
+    clear_payload();
+    set_has_startmatchmakingnotifv1();
+    payload_.startmatchmakingnotifv1_ = CreateMaybeMessage< ::matchmaking::StartMatchmakingNotifV1 >(GetArenaForAllocation());
+  }
+  return payload_.startmatchmakingnotifv1_;
+}
+inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::mutable_startmatchmakingnotifv1() {
+  ::matchmaking::StartMatchmakingNotifV1* _msg = _internal_mutable_startmatchmakingnotifv1();
+  // @@protoc_insertion_point(field_mutable:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
   return _msg;
 }
 
@@ -1319,9 +1634,270 @@ MatchFoundNotifV1::tickets() const {
   return tickets_;
 }
 
+// -------------------------------------------------------------------
+
+// StartMatchmakingNotifV1
+
+// string ticket_id = 1;
+inline void StartMatchmakingNotifV1::clear_ticket_id() {
+  ticket_id_.ClearToEmpty();
+}
+inline const std::string& StartMatchmakingNotifV1::ticket_id() const {
+  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.ticket_id)
+  return _internal_ticket_id();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void StartMatchmakingNotifV1::set_ticket_id(ArgT0&& arg0, ArgT... args) {
+ 
+ ticket_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.ticket_id)
+}
+inline std::string* StartMatchmakingNotifV1::mutable_ticket_id() {
+  std::string* _s = _internal_mutable_ticket_id();
+  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.ticket_id)
+  return _s;
+}
+inline const std::string& StartMatchmakingNotifV1::_internal_ticket_id() const {
+  return ticket_id_.Get();
+}
+inline void StartMatchmakingNotifV1::_internal_set_ticket_id(const std::string& value) {
+  
+  ticket_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::_internal_mutable_ticket_id() {
+  
+  return ticket_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::release_ticket_id() {
+  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.ticket_id)
+  return ticket_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void StartMatchmakingNotifV1::set_allocated_ticket_id(std::string* ticket_id) {
+  if (ticket_id != nullptr) {
+    
+  } else {
+    
+  }
+  ticket_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ticket_id,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (ticket_id_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    ticket_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.ticket_id)
+}
+
+// string party_id = 2;
+inline void StartMatchmakingNotifV1::clear_party_id() {
+  party_id_.ClearToEmpty();
+}
+inline const std::string& StartMatchmakingNotifV1::party_id() const {
+  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.party_id)
+  return _internal_party_id();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void StartMatchmakingNotifV1::set_party_id(ArgT0&& arg0, ArgT... args) {
+ 
+ party_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.party_id)
+}
+inline std::string* StartMatchmakingNotifV1::mutable_party_id() {
+  std::string* _s = _internal_mutable_party_id();
+  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.party_id)
+  return _s;
+}
+inline const std::string& StartMatchmakingNotifV1::_internal_party_id() const {
+  return party_id_.Get();
+}
+inline void StartMatchmakingNotifV1::_internal_set_party_id(const std::string& value) {
+  
+  party_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::_internal_mutable_party_id() {
+  
+  return party_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::release_party_id() {
+  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.party_id)
+  return party_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void StartMatchmakingNotifV1::set_allocated_party_id(std::string* party_id) {
+  if (party_id != nullptr) {
+    
+  } else {
+    
+  }
+  party_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), party_id,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (party_id_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    party_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.party_id)
+}
+
+// string namespace = 3;
+inline void StartMatchmakingNotifV1::clear_namespace_() {
+  namespace__.ClearToEmpty();
+}
+inline const std::string& StartMatchmakingNotifV1::namespace_() const {
+  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.namespace)
+  return _internal_namespace_();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void StartMatchmakingNotifV1::set_namespace_(ArgT0&& arg0, ArgT... args) {
+ 
+ namespace__.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.namespace)
+}
+inline std::string* StartMatchmakingNotifV1::mutable_namespace_() {
+  std::string* _s = _internal_mutable_namespace_();
+  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.namespace)
+  return _s;
+}
+inline const std::string& StartMatchmakingNotifV1::_internal_namespace_() const {
+  return namespace__.Get();
+}
+inline void StartMatchmakingNotifV1::_internal_set_namespace_(const std::string& value) {
+  
+  namespace__.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::_internal_mutable_namespace_() {
+  
+  return namespace__.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::release_namespace_() {
+  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.namespace)
+  return namespace__.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void StartMatchmakingNotifV1::set_allocated_namespace_(std::string* namespace_) {
+  if (namespace_ != nullptr) {
+    
+  } else {
+    
+  }
+  namespace__.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), namespace_,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (namespace__.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    namespace__.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.namespace)
+}
+
+// string created_at = 4;
+inline void StartMatchmakingNotifV1::clear_created_at() {
+  created_at_.ClearToEmpty();
+}
+inline const std::string& StartMatchmakingNotifV1::created_at() const {
+  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.created_at)
+  return _internal_created_at();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void StartMatchmakingNotifV1::set_created_at(ArgT0&& arg0, ArgT... args) {
+ 
+ created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.created_at)
+}
+inline std::string* StartMatchmakingNotifV1::mutable_created_at() {
+  std::string* _s = _internal_mutable_created_at();
+  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.created_at)
+  return _s;
+}
+inline const std::string& StartMatchmakingNotifV1::_internal_created_at() const {
+  return created_at_.Get();
+}
+inline void StartMatchmakingNotifV1::_internal_set_created_at(const std::string& value) {
+  
+  created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::_internal_mutable_created_at() {
+  
+  return created_at_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::release_created_at() {
+  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.created_at)
+  return created_at_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void StartMatchmakingNotifV1::set_allocated_created_at(std::string* created_at) {
+  if (created_at != nullptr) {
+    
+  } else {
+    
+  }
+  created_at_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), created_at,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (created_at_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    created_at_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.created_at)
+}
+
+// string match_pool = 5;
+inline void StartMatchmakingNotifV1::clear_match_pool() {
+  match_pool_.ClearToEmpty();
+}
+inline const std::string& StartMatchmakingNotifV1::match_pool() const {
+  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.match_pool)
+  return _internal_match_pool();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void StartMatchmakingNotifV1::set_match_pool(ArgT0&& arg0, ArgT... args) {
+ 
+ match_pool_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.match_pool)
+}
+inline std::string* StartMatchmakingNotifV1::mutable_match_pool() {
+  std::string* _s = _internal_mutable_match_pool();
+  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.match_pool)
+  return _s;
+}
+inline const std::string& StartMatchmakingNotifV1::_internal_match_pool() const {
+  return match_pool_.Get();
+}
+inline void StartMatchmakingNotifV1::_internal_set_match_pool(const std::string& value) {
+  
+  match_pool_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::_internal_mutable_match_pool() {
+  
+  return match_pool_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* StartMatchmakingNotifV1::release_match_pool() {
+  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.match_pool)
+  return match_pool_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void StartMatchmakingNotifV1::set_allocated_match_pool(std::string* match_pool) {
+  if (match_pool != nullptr) {
+    
+  } else {
+    
+  }
+  match_pool_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), match_pool,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (match_pool_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    match_pool_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.match_pool)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
