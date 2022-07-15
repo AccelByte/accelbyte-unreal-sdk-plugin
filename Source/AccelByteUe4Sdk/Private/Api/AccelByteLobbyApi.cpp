@@ -16,9 +16,15 @@
 #include "Core/FUnrealWebSocketFactory.h"
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
+
+// Use of type map<string, int32> in proto file leads to a warning about converting an integer to bool due to the way
+// protobuf maps are implemented
+#pragma warning(push)
+#pragma warning(disable : 4800)
 #include "Proto/session_notification.pb.h"
 #include "Proto/matchmaking_notification.pb.h"
 #include "google/protobuf/util/json_util.h"
+#pragma warning(pop)
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
