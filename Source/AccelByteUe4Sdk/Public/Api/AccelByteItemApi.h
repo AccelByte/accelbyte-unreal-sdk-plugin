@@ -57,8 +57,12 @@ public:
 	 * @param Limit Page size.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
+	 * @param SortBy Make sure to always use more than one sort if the first sort is not an unique value for example, if you wish to sort by displayOrder,
+	 * make sure to include other sort such as name or createdAt after the first sort, eg: displayOrder:asc,name:asc
+	 * if it leave with empty array, it will be set to default value : name:asc,displayOrder:asc
 	 */
-	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError);
+	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit,
+		THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, TArray<EAccelByteItemListSortBy> SortBy = { });
 
 	/**
 	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
@@ -74,21 +78,31 @@ public:
 	void SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
-	* @brief Get Item information by SKU number from an online store.
-	*
-	* @param Sku should contain specific number of item Sku.
-	* @param Language ISO 639-1 language tag, e.g., "en, "zh".
-	* @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
-	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
-	* @param OnError This will be called when the operation failed.
-	*/
+	 * @brief Get Item information by SKU number from an online store.
+	 *
+	 * @param Sku should contain specific number of item Sku.
+	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
+	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
+	 * @param OnError This will be called when the operation failed.
+	 */
 	void GetItemBySku(FString const& Sku, FString const& Language,FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get Dynamic Data information from specified Item
+	 *
+	 * @param ItemId The Item ID.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemDynamicData&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetItemDynamicData(FString const& ItemId, THandler<FAccelByteModelsItemDynamicData> const& OnSuccess, FErrorHandler const& OnError);
 	
 private:
 	Item() = delete;
 	Item(Item const&) = delete;
 	Item(Item&&) = delete;
 
+	FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
 };
 
 } // Namespace Api

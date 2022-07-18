@@ -36,7 +36,7 @@ class UABServerSessionBrowser final : public UObject
 public:
 	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void CreateGameSessionPublic(
 		FString const& GameMode,
 		FString const& GameMapName,
@@ -48,7 +48,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void CreateGameSessionPrivate(
 		FString const& GameMode,
 		FString const& GameMapName,
@@ -62,7 +62,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void CreateGameSessionTypeSpecifiedByString(
 		FString const& SessionTypeString,
 		FString const& GameMode,
@@ -77,7 +77,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void CreateGameSessionTypeSpecifiedByEnum(
 		EAccelByteSessionType SessionType,
 		FString const& GameMode,
@@ -92,14 +92,14 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void CreateGameSessionTypeSpecificByStruct(
 		FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequest,
 		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void UpdateGameSession(
 		FString const& SessionId,
 		int32 MaxPlayer,
@@ -108,7 +108,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void UpdateGameSessionByStruct(
 		FString const& SessionId,
 		FAccelByteModelsSessionBrowserUpdateRequest const& UpdateSessionRequest,
@@ -116,14 +116,14 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void RemoveGameSession(
 		FString const& SessionId,
 		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void GetGameSessionsByTypeString(
 		FString const& SessionTypeString,
 		FString const& GameMode,
@@ -133,7 +133,7 @@ public:
 		int32 Limit = 10
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void GetGameSessionsByTypeEnum(
 		EAccelByteSessionType SessionType,
 		FString const& GameMode,
@@ -143,7 +143,7 @@ public:
 		int32 Limit = 10
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void GetGameSessionsByTypeStringAndMatchExist(
 		FString const& SessionTypeString,
 		FString const& GameMode,
@@ -154,7 +154,7 @@ public:
 		int32 Limit = 10
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void GetGameSessionsByTypeEnumAndMatchExist(
 		EAccelByteSessionType SessionType,
 		FString const& GameMode,
@@ -165,7 +165,7 @@ public:
 		int32 Limit = 10
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void RegisterPlayer(
 		FString const& SessionId,
 		FString const& PlayerToAdd,
@@ -174,7 +174,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void UnregisterPlayer(
 		FString const& SessionId,
 		FString const& PlayerToRemove,
@@ -182,7 +182,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void GetRecentPlayer(
 		FString const& UserId,
 		FDServerSessionBrowserRecentPlayerGetResultResponse const& OnSuccess,
@@ -191,7 +191,7 @@ public:
 		int32 Limit = 10
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void JoinSession(
 		FString const& SessionId,
 		FString const& Password,

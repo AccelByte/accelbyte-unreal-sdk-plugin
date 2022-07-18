@@ -14,7 +14,7 @@ struct FArrayModelsCurrencyList
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | List Currency")
 	TArray<FAccelByteModelsCurrencyList> Content;
 };
 
@@ -28,8 +28,9 @@ public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Currency")
-	void GetCurrencyList(FDArrayModelsCurrencyListResponse OnSuccess, FDErrorHandler OnError);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Currency | Api")
+	void GetCurrencyList(FDArrayModelsCurrencyListResponse OnSuccess, FDErrorHandler OnError,
+		EAccelByteCurrencyType CurrencyType = EAccelByteCurrencyType::NONE);
 
 private:
 	FApiClientPtr ApiClientPtr;

@@ -33,40 +33,40 @@ public:
 	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void RegisterServerToDSM(int32 const& Port, FDHandler OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void RegisterLocalServerToDSM(FString const& IPAddress, int32 const& Port, FString const& ServerName, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void SendShutdownToDSM(bool const& KillMe, FString const& MatchId, FDHandler OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void DeregisterLocalServerFromDSM(FString const& ServerName, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void GetSessionId(FDServerSessionResponseDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void GetServerInfo(FDServerInfoDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void ConfigureAutoShutdown(int32 TickSeconds = 5, int CountdownStart = 30);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void SetOnAutoShutdownResponse(FDHandler OnAutoShutdown);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void SetOnAutoShutdownErrorDelegate(FDErrorHandler OnShutdownError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void SetServerName(const FString Name);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void SetServerType(UEnumServerType Type);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	int32 GetPlayerNum();
 
 private:

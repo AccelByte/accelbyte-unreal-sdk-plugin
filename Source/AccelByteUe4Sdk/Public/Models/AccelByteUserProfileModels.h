@@ -8,6 +8,26 @@
 #include "JsonObjectWrapper.h"
 #include "AccelByteUserProfileModels.generated.h"
 
+UENUM(BlueprintType)
+enum class EAccelByteFileType : uint8
+{
+	JPEG,
+	JPG,
+	PNG,
+	BMP,
+	GIF,
+	MP3,
+	BIN,
+	WEBP
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteUploadCategory : uint8
+{
+	DEFAULT,
+	REPORTING
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileInfo
 {
@@ -184,4 +204,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileCreateRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
 	TMap<FString, FJsonObjectWrapper> PrivateCustomAttributes{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileUploadURLResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileUploadURL")
+	FString Url{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileUploadURL")
+	FString AccessUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileUploadURL")
+	FString Method{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileUploadURL")
+	FString ContentType{};
 };

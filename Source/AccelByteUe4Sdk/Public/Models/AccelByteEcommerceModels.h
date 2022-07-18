@@ -210,6 +210,23 @@ enum class EAccelByteWalletTable :uint8
 	Other
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteItemListSortBy : uint8
+{
+	NONE = 0,
+	NAME,
+	NAME_DESC,
+	CREATEDAT,
+	CREATEDAT_ASC,
+	CREATEDAT_DESC,
+	UPDATEDAT,
+	UPDATEDAT_ASC,
+	UPDATEDAT_DESC,
+	DISPLAYORDER,
+	DISPLAYORDER_ASC,
+	DISPLAYORDER_DESC
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -555,7 +572,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemCriteria
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemCriteria")
 	TArray<FString> Tags{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemCriteria")
 	TArray<FString> Features{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemCriteria")
@@ -570,6 +587,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkGetItemsBySkus
 	FString Sku{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemInfo")
 	FString ItemId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemDynamicData
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemDynamicData")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemDynamicData")
+	FString ItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemDynamicData")
+	int32 AvailableCount{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemDynamicData")
+	int32 UserAvailableCount{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemDynamicData")
+	int32 UserPurchaseLimit{};
 };
 
 #pragma endregion ItemModelsField
@@ -1627,7 +1660,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyList
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
 	FDateTime UpdateAt{0};
-};
+}; 
 
 #pragma endregion CurrencyModelsField
 

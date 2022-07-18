@@ -42,3 +42,25 @@ void UAccelByteBlueprintsUserProfile::CreateUserProfile(const FAccelByteModelsUs
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
+
+void UAccelByteBlueprintsUserProfile::GenerateUploadURL(const FString& Folder, EAccelByteFileType FileType, const FGenerateUploadURLSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::UserProfile.GenerateUploadURL(Folder, FileType, AccelByte::THandler<FAccelByteModelsUserProfileUploadURLResult>::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileUploadURLResult& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUserProfile::GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, const FGenerateUploadURLForUserContentSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::UserProfile.GenerateUploadURLForUserContent(UserId, FileType, AccelByte::THandler<FAccelByteModelsUserProfileUploadURLResult>::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileUploadURLResult& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}

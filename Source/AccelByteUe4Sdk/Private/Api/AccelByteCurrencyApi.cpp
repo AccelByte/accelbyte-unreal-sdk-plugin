@@ -7,7 +7,8 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteSettings.h" 
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
@@ -25,7 +26,8 @@ Currency::Currency(Credentials const& InCredentialsRef
 Currency::~Currency()
 {}
 
-void Currency::GetCurrencyList(const FString& Namespace, const THandler<TArray<FAccelByteModelsCurrencyList>>& OnSuccess, const FErrorHandler& OnError)
+void Currency::GetCurrencyList(const FString& Namespace, const THandler<TArray<FAccelByteModelsCurrencyList>>& OnSuccess, const FErrorHandler& OnError,
+	EAccelByteCurrencyType CurrencyType)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -36,6 +38,12 @@ void Currency::GetCurrencyList(const FString& Namespace, const THandler<TArray<F
 	FString Accept = TEXT("application/json");
 	FString Content = TEXT("");
 
+	if (CurrencyType != EAccelByteCurrencyType::NONE)
+	{
+		FString Query = FString::Printf(TEXT("currencyType=%s"), *FAccelByteUtilities::GetUEnumValueAsString(CurrencyType));
+		Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+	}
+	
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);

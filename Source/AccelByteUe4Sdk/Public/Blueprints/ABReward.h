@@ -29,21 +29,21 @@ class UABReward : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Reward")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Reward | Api")
 	void GetRewardByRewardCode(
 		FString const& RewardCode,
 		FDModelsRewardInfo const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Reward")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Reward | Api")
 	void GetRewardByRewardId(
 		FString const& RewardId,
 		FDModelsRewardInfo const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Reward")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Reward | Api")
 	void QueryRewards(
 		FString const& EventTopic,
 		int32 Offset,
