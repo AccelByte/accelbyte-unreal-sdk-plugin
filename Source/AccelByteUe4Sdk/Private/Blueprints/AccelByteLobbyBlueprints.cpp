@@ -140,7 +140,7 @@ void UAccelByteBlueprintsLobby::BindEvent(
     const FConnectSuccess& OnSuccess,
     const FBlueprintErrorHandler& OnError,
     const FConnectionClosed& OnConnectionClosed,
-    const FLeavePartyNotice& OnLeavePartyNotice, // This delegate is DEPRECATED. better to use FPartyMemberLEaveNotice
+    const FLeavePartyNotice& OnLeavePartyNotice, // This delegate is DEPRECATED. better to use FPartyMemberLeaveNotice
     const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
     const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
     const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
@@ -173,7 +173,7 @@ void UAccelByteBlueprintsLobby::BindEvent(
     });
 	
     // Party
-	// This delegate is DEPRECATED. better to use FPartyMemberLEaveNotice
+	// This delegate is DEPRECATED. better to use FPartyMemberLeaveNotice
 	AccelByte::Api::Lobby::FPartyLeaveNotif OnLeavePartyNoticeDelegate =
         AccelByte::Api::Lobby::FPartyLeaveNotif::CreateLambda([OnLeavePartyNotice](const FAccelByteModelsLeavePartyNotice& Result) {
         OnLeavePartyNotice.ExecuteIfBound(Result);
@@ -204,8 +204,8 @@ void UAccelByteBlueprintsLobby::BindEvent(
 		OnPartyConnectNotice.ExecuteIfBound(Result);
 	});
 
-	AccelByte::Api::Lobby::FPartyMemberConnectNotif OnPartyDisconnectNoticeDelegate =
-		AccelByte::Api::Lobby::FPartyMemberConnectNotif::CreateLambda([OnPartyDisconnectNotice](const FAccelByteModelsPartyMemberConnectionNotice& Result) {
+	AccelByte::Api::Lobby::FPartyMemberDisconnectNotif OnPartyDisconnectNoticeDelegate =
+		AccelByte::Api::Lobby::FPartyMemberDisconnectNotif::CreateLambda([OnPartyDisconnectNotice](const FAccelByteModelsPartyMemberConnectionNotice& Result) {
 		OnPartyDisconnectNotice.ExecuteIfBound(Result);
 	});
     
