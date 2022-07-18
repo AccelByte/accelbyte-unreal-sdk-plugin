@@ -29,7 +29,7 @@ class UABLeaderboard : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
 	void GetRankings(
 		FString const& LeaderboardCode,
 		EAccelByteLeaderboardTimeFrame const& TimeFrame,
@@ -39,7 +39,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
 	void GetUserRanking(
 		FString const& UserId,
 		FString const& LeaderboardCode,

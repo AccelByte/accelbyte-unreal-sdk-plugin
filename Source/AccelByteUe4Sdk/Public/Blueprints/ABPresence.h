@@ -18,10 +18,10 @@ struct FPresenceStatus
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Presence | Models | Status")
 	EAvailability Availability{};
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Presence | Models | Status")
 	FString Activity{};
 };
 
@@ -30,10 +30,10 @@ struct FBulkGetUserPresenceRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Presence | Models | Status")
 	bool bCountOnly{};
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Presence | Models | Status")
 	TArray<FString> UserIds{};
 };
 
@@ -55,18 +55,18 @@ public:
 
 //Request-Response
 public: 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence | Api")
 	void GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence | Api")
 	void BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence | Api")
 	void SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError);
 
 //Notification
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence | Delegate")
 	void SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif);
 
 private:

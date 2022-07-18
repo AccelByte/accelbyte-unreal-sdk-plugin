@@ -18,10 +18,10 @@ struct FSendPrivateMessageRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Message | Models | Private Message")
 	FString UserID;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Message | Models | Private Message")
 	FString Message;
 };
 
@@ -30,7 +30,7 @@ struct FSendPartyMessageRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Message | Models | Party Message")
 	FString Message;
 };
 
@@ -39,7 +39,7 @@ struct FSendChannelMessageRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Message | Models | Channel Message")
 	FString Message;
 };
 
@@ -70,27 +70,27 @@ public:
 
 //Request-Response
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Api")
 	void SendPing();
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Api")
 	FString SendPrivateMessage(
 		FSendPrivateMessageRequest const& Request,
 		FDPersonalChatResponse OnResponse,
 		FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Api")
 	FString SendPartyMessage(
 		FSendPartyMessageRequest const& Request,
 		FDPartyChatResponse OnResponse,
 		FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Api")
 	FString SendJoinDefaultChannelChatRequest(
 		FDJoinDefaultChannelChatResponse OnResponse,
 		FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Api")
 	FString SendChannelMessage(
 		FSendChannelMessageRequest const& Request,
 		FDChannelChatResponse OnResponse,
@@ -98,13 +98,13 @@ public:
 
 //Notification
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Delegate")
 	void SetPrivateMessageNotifDelegate(FDPersonalChatNotif OnNotif);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Delegate")
 	void SetMessageNotifDelegate(FDMessageNotif OnNotif);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Delegate")
 	void SetChannelMessageNotifDelegate(FDChannelChatNotif OnNotif);
 
 private:

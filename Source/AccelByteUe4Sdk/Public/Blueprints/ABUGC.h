@@ -41,7 +41,7 @@ class UABUGC : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void CreateContentByStruct(
 		FString const& ChannelId,
 		FAccelByteModelsUGCRequest const& UGCRequest,
@@ -49,7 +49,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void CreateContent(
 		FString const& ChannelId,
 		FString const& Name,
@@ -63,7 +63,7 @@ public:
 		FString ContentType = TEXT("application/octet-stream")
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void ModifyContentByStruct(
 		FString const& ChannelId,
 		FString const& ContentId,
@@ -72,7 +72,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void ModifyContent(
 		FString const& ChannelId,
 		FString const& ContentId,
@@ -87,7 +87,7 @@ public:
 		FString ContentType = TEXT("application/octet-stream")
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void DeleteContent(
 		FString const& ChannelId,
 		FString const& ContentId,
@@ -95,35 +95,35 @@ public:
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetContentByContentId(
 		FString const& ContentId,
 		FDModelsUGCContentResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetContentByShareCode(
 		FString const& ShareCode,
 		FDModelsUGCContentResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetContentPreviewAsStruct(
 		FString const& ContentId,
 		FDModelsUGCPreviewResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetContentPreviewAsIntArray(
 		FString const& ContentId,
 		FDArrayUint8 const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetTags(
 		FDModelsUGCTagsPagingResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
@@ -131,7 +131,7 @@ public:
 		int32 Offset = 0
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetTypes(
 		FDModelsUGCTypesPagingResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
@@ -139,14 +139,14 @@ public:
 		int32 Offset = 0
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void CreateChannel(
 		FString const& ChannelName,
 		FDModelsUGCChannelResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetChannels(
 		FDModelsUGCChannelsPagingResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
@@ -154,7 +154,7 @@ public:
 		int32 Offset = 0
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void DeleteChannel(
 		FString const& ChannelId,
 		FDHandler const& OnSuccess,
