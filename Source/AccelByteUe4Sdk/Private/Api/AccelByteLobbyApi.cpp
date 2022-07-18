@@ -2112,6 +2112,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		DispatchV2Notif<FAccelByteModelsV2PartySession>(EventEnvelope->partysessionv1(), V2PartyUpdatedNotif, true);
 		break;
 	}
+	case session::NotificationEventEnvelope::kGameSessionV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2GameSession>(EventEnvelope->gamesessionv1(), V2GameSessionUpdatedNotif, true);
+		break;
+	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
 	}
 }
