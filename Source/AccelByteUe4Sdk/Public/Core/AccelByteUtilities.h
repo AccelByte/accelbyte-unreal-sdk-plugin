@@ -197,6 +197,19 @@ public:
 		return QueryParamValue;	
 	}
 
+	static TMap<FString, FString> CreateQueryParamsAndSkipIfValueEmpty(TMap<FString, FString> Map)
+	{
+		TMap<FString, FString> Query = {};
+		for (auto kvp : Map)
+		{
+			if (!kvp.Key.IsEmpty() && !kvp.Value.IsEmpty())
+			{
+				Query.Add(kvp.Key, kvp.Value);
+			}
+		}
+		return Query;
+	}
+	
 private:
 	static void AppendQueryParam(FString& Query, FString const& Param, FString const& Value)
 	{

@@ -150,7 +150,8 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 	, int32 const& Limit
 	, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
 	, FErrorHandler const& OnError
-	, TArray<EAccelByteItemListSortBy> SortBy)
+	, TArray<EAccelByteItemListSortBy> SortBy
+	, FString const& StoreId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -165,64 +166,30 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
     	, *SettingsRef.PlatformServerUrl
     	, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> Params;
-
-	if (!ItemCriteria.CategoryPath.IsEmpty())
-	{
-		Params.Add(TEXT("categoryPath"), ItemCriteria.CategoryPath);
-	}
-	if (!ItemCriteria.Region.IsEmpty())
-	{
-		Params.Add(TEXT("region"), *ItemCriteria.Region);
-	}
-	if (!ItemCriteria.Language.IsEmpty())
-	{
-		Params.Add(TEXT("language"), ItemCriteria.Language);
-	}
-	if (ItemCriteria.ItemType != EAccelByteItemType::NONE)
-	{
-		Params.Add(TEXT("itemType"), FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType));
-	}
-	if (ItemCriteria.AppType != EAccelByteAppType::NONE)
-	{
-		Params.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType));
-	}
-	if (ItemCriteria.Tags.Num() > 0)
-	{
-		TArray<FString> Tags;
-		for (auto& Tag : ItemCriteria.Tags)
-		{
-			Tags.Add(Tag);
-		}
-		Params.Add(TEXT("tags"), FString::Join(Tags, TEXT(",")));
-	}
-	if (ItemCriteria.Features.Num() > 0)
-	{
-		TArray<FString> Features;
-		for (auto& Feature : ItemCriteria.Features)
-		{
-			Features.Add(Feature);
-		}
-		Params.Add(TEXT("features"), FString::Join(Features, TEXT(",")));
-	}
-	if (Offset > 0)
-	{
-		Params.Add(TEXT("offset"), FString::Printf(TEXT("%d"), Offset));
-	}
-	if (Limit > 0)
-	{
-		Params.Add(TEXT("limit"), FString::Printf(TEXT("%d"), Limit));
-	}
+	TArray<FString> SortByStringArray = {};
 	if (SortBy.Num() > 0 )
-	{
-		TArray<FString> SortByStrings;
+	{		 
 		for (auto SortByEnum : SortBy)
 		{
-			SortByStrings.Add(ConvertItemSortByToString(SortByEnum));
-		}
-		Params.Add(TEXT("sortBy"), FString::Join(SortByStrings, TEXT(",")));
-	} 
-
+			SortByStringArray.Add(ConvertItemSortByToString(SortByEnum));
+		} 
+	}
+	const TMap<FString, FString> Params = FAccelByteUtilities::CreateQueryParamsAndSkipIfValueEmpty({
+		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
+		{ TEXT("region"), ItemCriteria.Region },
+		{ TEXT("language"), ItemCriteria.Language },
+		{ TEXT("itemType"), ItemCriteria.ItemType != EAccelByteItemType::NONE ?
+				FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType) : TEXT("") },
+		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ?
+				FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType) : TEXT("")  },
+		{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemCriteria.Tags) },
+		{ TEXT("features"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemCriteria.Features)  },
+		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
+		{ TEXT("sortBy"), FAccelByteUtilities::CreateQueryParamValueFromArray(SortByStringArray)  },
+		{ TEXT("storeId"), StoreId },
+	});
+	
 	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
 }
 
@@ -380,6 +347,25 @@ void Item::GetItemDynamicData(FString const& ItemId
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace()
 		, *ItemId);
+
+	HttpClient.ApiRequest(Verb, Url, OnSuccess, OnError);
+}
+
+void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	} 
+
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/stores")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace());
 
 	HttpClient.ApiRequest(Verb, Url, OnSuccess, OnError);
 }

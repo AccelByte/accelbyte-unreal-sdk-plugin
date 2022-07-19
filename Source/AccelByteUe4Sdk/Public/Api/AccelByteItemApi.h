@@ -59,9 +59,13 @@ public:
 	 * @param SortBy Make sure to always use more than one sort if the first sort is not an unique value for example, if you wish to sort by displayOrder,
 	 * make sure to include other sort such as name or createdAt after the first sort, eg: displayOrder:asc,name:asc
 	 * if it leave with empty array, it will be set to default value : name:asc,displayOrder:asc
+	 * @param StoreId The Store Id, default value is published store id
+	 * Note that It will only one available published store in each game namespace, if you assigned this with other, means you will be able to expose items on draft store.
+	 * Nonetheless it will only user who has SANDBOX role (set on AP) and has permission and ability to hit this end point with other StoreId value.
 	 */
 	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit,
-		THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, TArray<EAccelByteItemListSortBy> SortBy = { });
+		THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError,
+		TArray<EAccelByteItemListSortBy> SortBy = { }, FString const& StoreId = TEXT(""));
 
 	/**
 	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
@@ -108,6 +112,14 @@ public:
 	*/
 	void BulkGetLocaleItems(const TArray<FString>& ItemIds, const FString& Region, const FString& Language,
 		THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess, FErrorHandler const& OnError, const FString& StoreId = TEXT(""));
+
+	/**
+	* @brief Get list all stores in a namespace..
+	*
+	* @param OnSuccess This will be called when the operation succeeded. The result is array of FAccelByteModelsPlatformStore.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess, FErrorHandler const& OnError);
 
 private:
 	Item() = delete;
