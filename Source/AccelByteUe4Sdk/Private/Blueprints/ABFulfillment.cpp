@@ -11,7 +11,7 @@ void UABFulfillment::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-void UABFulfillment::GetWalletInfoByCurrencyCode(
+void UABFulfillment::RedeemCode(
 	FString const& Code,
 	FString const& Region,
 	FString const& Language,

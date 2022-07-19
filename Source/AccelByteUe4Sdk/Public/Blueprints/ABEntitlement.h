@@ -19,7 +19,7 @@ USTRUCT(BlueprintType)
 struct FArrayModelsDistributionReceiver
 {
 	GENERATED_BODY()
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlement | Models | Distribution Receiver")
 	TArray<FAccelByteModelsDistributionReceiver> Content;
 };
 
@@ -45,52 +45,52 @@ public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void QueryUserEntitlements(FString const& EntitlementName, TArray<FString> const& ItemIds, int32 const& Offset, int32 const& Limit, FDAccelByteModelsEntitlementPagingSlicedResultResponse OnSuccess, FDErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetUserEntitlementById(FString const& Entitlementid, FDAccelByteModelsEntitlementInfoResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetUserEntitlementOwnershipByAppId(FString const& AppId, FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetUserEntitlementOwnershipBySku(FString const& Sku, FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetUserEntitlementOwnershipByItemId(FString const& ItemId, FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetUserEntitlementOwnershipAny(TArray<FString> const& ItemIds, TArray<FString> const& AppIds, TArray<FString> const& Skus, FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, FDAccelByteModelsEntitlementInfoResponse OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void CreateDistributionReceiver(FString const& ExtUserId, FAccelByteModelsAttributes const& Attributes, FDHandler OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void DeleteDistributionReceiver(FString const& ExtUserId, FString const& UserId, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetDistributionReceiver(FString const& PublisherNamespace, FString const& PublisherUserId, FDArrayModelsDistributionReceiverResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void UpdateDistributionReceiver(FString const& ExtUserId, FAccelByteModelsAttributes const& Attributes, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void SyncMobilePlatformPurchaseGoogle(const FAccelByteModelsPlatformSyncMobileGoogle& SyncRequest, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void SyncMobilePlatformPurchaseGooglePlay(const FAccelByteModelsPlatformSyncMobileGoogle& SyncRequest, FDAccelByteModelsPlatformSyncMobileGoogleResponse OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest, FDHandler OnSuccess, FDErrorHandler OnError);
  
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")

@@ -30,34 +30,34 @@ class UABSeasonPass : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass | Api")
 	void GetCurrentSeason(
 		FString const& Language,
 		FDModelsSeasonInfo const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass | Api")
 	void GetUserSeason(
 		FString const& SeasonId,
 		FDModelsUserSeasonInfo const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass | Api")
 	void GetCurrentUserSeason(
 		FDModelsUserSeasonInfo const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass | Api")
 	void ClaimRewards(
 		FAccelByteModelsSeasonClaimRewardRequest const& RewardRequest,
 		FDModelsSeasonClaimRewardResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass | Api")
 	void BulkClaimRewards(
 		FDModelsSeasonClaimRewardResponse const& OnSuccess,
 		FDErrorHandler const& OnError

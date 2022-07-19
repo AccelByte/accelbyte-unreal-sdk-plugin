@@ -31,7 +31,7 @@ class UABAchievement : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
 	void QueryAchievements(
 		FString const& Language,
 		EAccelByteAchievementListSortBy const& SortBy,
@@ -41,14 +41,14 @@ public:
 		int32 const& Limit = 20
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
 	void GetAchievement(
 		FString const& AchievementCode,
 		FDModelsMultiLanguageAchievementResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
 	void QueryUserAchievements(
 		EAccelByteAchievementListSortBy const& SortBy,
 		FDModelsPaginatedUserAchievementResponse const& OnSuccess,
@@ -58,7 +58,7 @@ public:
 		bool PreferUnlocked = true
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
 	void UnlockAchievement(
 		FString const& AchievementCode,
 		FDHandler const OnSuccess,

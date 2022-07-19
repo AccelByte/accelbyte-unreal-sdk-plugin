@@ -25,10 +25,8 @@ public:
 	static void Disconnect();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static bool IsConnected();
-
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SendPing();
-
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SendPrivateMessage(const FString& UserId, const FString& Message);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
@@ -76,14 +74,16 @@ public:
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FCreatePartyResponse, const FAccelByteModelsCreatePartyResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FLeavePartyResponse, const FAccelByteModelsLeavePartyResponse&, Result);
-    DECLARE_DYNAMIC_DELEGATE_OneParam(FLeavePartyNotice, const FAccelByteModelsLeavePartyNotice&, Result);                  
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FLeavePartyNotice, const FAccelByteModelsLeavePartyNotice&, Result); // This delegate is DEPRECATED. better to use FPartyMemberLeaveNotice
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyResponse, const FAccelByteModelsPartyInviteResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyInvitationNotice, const FAccelByteModelsInvitationNotice&, Result);       
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyGetInvitedNotice, const FAccelByteModelsPartyGetInvitedNotice&, Result);  
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinResponse, const FAccelByteModelsPartyJoinResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinNotice, const FAccelByteModelsPartyJoinNotice&, Result);              
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickMemberResponse, const FAccelByteModelsKickPartyMemberResponse&, Result);
-    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickedNotice, const FAccelByteModelsGotKickedFromPartyNotice&, Result);   
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickedNotice, const FAccelByteModelsGotKickedFromPartyNotice&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyMemberConnectNotice, const FAccelByteModelsPartyMemberConnectionNotice&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyMemberDisconnectNotice, const FAccelByteModelsPartyMemberConnectionNotice&, Result);   
 
     // Chat
     DECLARE_DYNAMIC_DELEGATE_OneParam(FPrivateMessageResponse, const FAccelByteModelsPersonalMessageResponse&, Result);
@@ -127,11 +127,13 @@ public:
         const FConnectSuccess& OnConnectSuccess,
         const FBlueprintErrorHandler& OnConnectError,
         const FConnectionClosed& OnConnectionClosed,
-        const FLeavePartyNotice& OnLeavePartyNotice,
+        const FLeavePartyNotice& OnLeavePartyNotice, // This delegate is DEPRECATED. better to use FPartyMemberLeaveNotice
         const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
         const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
         const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
         const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
+        const FPartyMemberConnectNotice& OnPartyConnectNotice,
+		const FPartyMemberDisconnectNotice& OnPartyDisconnectNotice,
         const FPrivateMessageNotice& OnPrivateMessageNotice,
         const FPartyMessageNotice& OnPartyMessageNotice,
         const FUserPresenceNotice& OnUserPresenceNotice,
@@ -144,8 +146,7 @@ public:
 		const FIncomingFriendNotif& OnRequestFriendsNotifDelegate,
         const FBlueprintErrorHandler& OnParsingError
 	);
-
-
+	
     // Party
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetInfoPartyResponseDelegate(FInfoPartyResponse OnInfoPartyResponse);
@@ -164,9 +165,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetInvitePartyKickMemberResponseDelegate(FInvitePartyKickMemberResponse OnInvitePartyKickMemberResponse);
-
-
-
+	
     // Chat
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetPrivateMessageResponseDelegate(FPrivateMessageResponse OnPrivateMessageResponse);
@@ -174,12 +173,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetPartyMessageResponseDelegate(FPartyMessageResponse OnPartyMessageResponse);
 
-
     // Presence
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnUserPresenceResponse);
-
-
+	
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SetPresenceStatus(EAvailability State, FString Activity);
 

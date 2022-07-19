@@ -30,31 +30,31 @@ public:
 	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void GetPartyDataByUserId(FString const& UserId, FDDataPartyResponseDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void WritePartyStorage(FString const& PartyId, FDPayloadModifier PayloadModifier, int const& RetryAttempt, FDPartyDataNotifDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void GetPartyStorage(FString const& PartyId, FDPartyDataNotifDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void GetSessionAttributeAll(FString const& UserId, FDSessionAttributeAllResponseDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void GetSessionAttribute(FString const& UserId, FString const& Key, FDSessionAttributeResponseDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void SetSessionAttribute(FString const& UserId, TMap<FString, FString> const& Attributes, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void SetSessionAttributeString(FString const& UserId, FString const& Key, FString const& Value, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void GetListOfBlockers(FString const& UserId, FDListBlockerResponseDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
 	void GetListOfBlockedUsers(FString const& UserId, FDListBlockedUserResponseDelegate OnSuccess, FDErrorHandler OnError);
 
 private:
