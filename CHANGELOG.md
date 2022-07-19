@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [15.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.0.0%0D14.0.0) (2022-07-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **reporting:** Changed AdditionalInfo datatype from dictionary to a struct / JsonObject later
+
+### Features
+
+* add setby from server response function GetGameRecord ([280a5d0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/280a5d0d16e17c37582e4564459456f8b7b376b9))
+* Adding SortBy parameter of AccelByteModelsItemCriteria to call GetItemsByCriteria blueprint function ([5c51226](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5c512263c27bb125fecdc4d19832a7979adc1243))
+* **basic:** added category (optional) param in upload generate URL for user content ([9dcb1af](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9dcb1af412310a303efbab0b1d1b0b540d40d689))
+* **basic:** Expose generate upload URL ([2ab1517](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2ab15174509b88331907f586e014688cfb302b87))
+* **ecommerce:** Support to sync Durable items from Epic Game Store ([d2aae0b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d2aae0bb3bee7117b1f633fce2cf2d877fa7b11e))
+* Implement query game record method for ServerCloudSave ([2e9441a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2e9441aa4e19060113556f474513ca7c0f5e6606))
+* **item:** get Item Dynamic Data ([8343831](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8343831c6012f192c65c21fc1b8d1f57497776a9))
+* Purchasing Requirements ([c331c94](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c331c944c409350d087c5df18591a4b23bcd0aac))
+* **reporting:** Reporting Signature Adjustment ([5e00a2a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5e00a2a9f1725d23297e3b8c4fb5ada6e90287d9))
+* sdk adjustment for avoiding breaking changes and revisioning/reverting of phase 2 cleanup legacy Avatar/User Profile implementation ([27a16c6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/27a16c62d7ecb071f1330be100540e94c709d213))
+* Set the currencyType for Currency.GetCurrencyList ([30067e7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/30067e7f6fcda6a135cc33b38735376512596820))
+* **User:** add country and DoB on FAccountUserData ([96acefc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/96acefcfb8672b5196ec84d3b32627e203a88a9d))
+
+
+### Bug Fixes
+
+* add UMETA to the Environment enum class to fix compile errors ([7c64000](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7c64000b059617e54d2f6b3c7420c73e3d476125))
+* **blueprints:** add missing category for any class exposed to Blueprints which use UPROPERTY ([c9e477b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c9e477b489813e93c81a5cbacfd6960defc5ddf7))
+* **blueprints:** wrong function name for Fulfillment to redeem code ([8a59361](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8a59361493a8cc188b00a155ebdb6b504a1dd11c))
+* **item:** wrong query parameters creation on GetItemsByCriteria ([fb4c584](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fb4c58408fca6aaf3535c68696318bbf5efac859))
+
 ## [14.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/14.0.0%0D13.0.0) (2022-07-04)
 
 
