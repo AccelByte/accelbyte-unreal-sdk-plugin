@@ -11,13 +11,13 @@ UENUM(BlueprintType)
 enum class ESettingsEnvironment : uint8
 {
 	/** Dev environment settings */
-	Development,
+	Development		UMETA(DisplayName = "Development"),
 	/** Cert environment settings */
-	Certification,
+	Certification	UMETA(DisplayName = "Certification"),
 	/** Prod environment settings */
-	Production,
+	Production		UMETA(DisplayName = "Production"),
 	/** Default environment settings */
-	Default
+	Default			UMETA(DisplayName = "Default")
 };
 
 namespace AccelByte 

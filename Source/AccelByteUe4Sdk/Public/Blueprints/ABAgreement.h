@@ -19,7 +19,7 @@ USTRUCT(BlueprintType)
 struct FArrayModelsPublicPolicyResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | Public Policy")
 	TArray<FAccelByteModelsPublicPolicy> Content;
 };
 
@@ -27,7 +27,7 @@ USTRUCT(BlueprintType)
 struct FArrayModelsRetrieveUserEligibilitiesResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | Eligibility")
 	TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> Content;
 };
 
@@ -35,7 +35,7 @@ USTRUCT(BlueprintType)
 struct FArrayModelsAcceptAgreementRequest
 {
 	GENERATED_BODY()
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | Accept Agreement")
 	TArray<FAccelByteModelsAcceptAgreementRequest> Content;
 };
 
@@ -57,14 +57,14 @@ class  UABAgreement : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void GetLegalPolicies(
 		EAccelByteAgreementPolicyType const& AgreementPolicyType,
 		bool DefaultOnEmpty,
 		FDArrayModelsPublicPolicyResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void GetLegalPoliciesByNamespace(
 		FString const& Namesapce,
 		EAccelByteAgreementPolicyType const& AgreementPolicyType,
@@ -72,7 +72,7 @@ public:
 		FDArrayModelsPublicPolicyResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void GetLegalPoliciesByTags(
 		EAccelByteAgreementPolicyType const& AgreementPolicyType,
 		TArray<FString> const& tags,
@@ -80,7 +80,7 @@ public:
 		FDArrayModelsPublicPolicyResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void GetLegalPoliciesByCountry(
 		FString const& CountryCode,
 		EAccelByteAgreementPolicyType const& AgreementPolicyType,
@@ -88,7 +88,7 @@ public:
 		FDArrayModelsPublicPolicyResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void GetLegalPoliciesByCountryAndTags(
 		FString const& CountryCode,
 		EAccelByteAgreementPolicyType const& AgreementPolicyType,
@@ -97,25 +97,25 @@ public:
 		FDArrayModelsPublicPolicyResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void BulkAcceptPolicyVersions(
 		FArrayModelsAcceptAgreementRequest const& AgreementRequests,
 		FDModelsAcceptAgreementResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void AcceptPolicyVersion(
 		FString const& LocalizedPolicyVersionId,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void QueryLegalEligibilities(
 		FString const& Namespace,
 		FDArrayModelsRetrieveUserEligibilitiesResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement")
+	UFUNCTION(BlueprintCallable, Category = "AAccelByte | Agreement | Api")
 	void GetLegalDocument(
 		FString const& Url,
 		FDString const& OnSuccess,

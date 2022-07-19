@@ -19,7 +19,7 @@ USTRUCT(BlueprintType)
 struct FArrayModelsBulkStatItemOperationResultResponse
 {
 	GENERATED_BODY();
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Api | Models | StatItem")
 	TArray<FAccelByteModelsBulkStatItemOperationResult> Content;
 };
 
@@ -37,20 +37,20 @@ class UABStatistic : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 	void CreateUserStatItems(
 		TArray<FString> const& StatCodes,
 		FDArrayModelsBulkStatItemOperationResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 	void GetAllUserStatItems(
 		FDModelsUserStatItemPagingSlicedResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 	void GetUserStatItems(
 		TArray<FString> const& StatCodes,
 		TArray<FString> const& Tags,
@@ -58,7 +58,7 @@ public:
 		FDErrorHandler const& OnError
 	);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 	void IncrementUserStatItems(
 		TArray<FAccelByteModelsBulkStatItemInc> const& Data,
 		FDArrayModelsBulkStatItemOperationResultResponse const& OnSuccess,

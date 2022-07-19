@@ -89,8 +89,7 @@ public:
      * @brief delegate for handling info party response.
      */
     DECLARE_DELEGATE_OneParam(FPartyInfoResponse, const FAccelByteModelsInfoPartyResponse&); 
-
-
+	
     /**
      * @brief delegate for handling create party response.
      */
@@ -99,14 +98,18 @@ public:
     /**
      * @brief delegate for handling leave party response.
      */
-    DECLARE_DELEGATE_OneParam(FPartyLeaveResponse, const FAccelByteModelsLeavePartyResponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyLeaveResponse, const FAccelByteModelsLeavePartyResponse&);
+
+	/**
+	 * @brief delegate for handling leave party notification. This delegate is DEPRECATED
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
 
     /**
      * @brief delegate for handling leave party notification.
      */
-    DECLARE_DELEGATE_OneParam(FPartyLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
-
-
+    DECLARE_DELEGATE_OneParam(FPartyMemberLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
+	
     /**
      * @brief delegate for handling invite party response.
      */
@@ -153,9 +156,19 @@ public:
     DECLARE_DELEGATE_OneParam(FPartyKickNotif, const FAccelByteModelsGotKickedFromPartyNotice&);   // Passive
 
 	/**
-	 * @brief delegate for handling member kicked from party event
+	 * @brief delegate for handling update data notification
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyDataUpdateNotif, const FAccelByteModelsPartyDataNotif&);
+	
+	/**
+	 * @brief delegate for handling party connect notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyMemberConnectNotif, const FAccelByteModelsPartyMemberConnectionNotice&);
+
+	/**
+	 * @brief delegate for handling party disconnect notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyMemberDisconnectNotif, const FAccelByteModelsPartyMemberConnectionNotice&);
 
 	/**
 	 * @brief delegate for handling generate party code event
@@ -233,8 +246,7 @@ public:
      * @brief delegate for handling get all user presence
      */
     DECLARE_DELEGATE_OneParam(FGetAllFriendsStatusResponse, const FAccelByteModelsGetOnlineUsersResponse&);        
-
-
+	
     // Notification
 	/**
 	 * @brief delegate for handling incoming notification
@@ -472,6 +484,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FV2GameSessionUpdatedNotif, FAccelByteModelsV2GameSession);
 	
+	/**
+	 * @brief Delegate for game session updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionKickedNotif, FAccelByteModelsV2GameSessionUserKickedEvent);
+
 	/**
 	* @brief Delegate for game session when DS status is changed.
 	*/
@@ -978,9 +995,37 @@ public:
 	{
 		ConnectionClosed = OnConnectionClosed;
 	}
-	void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnLeavePartyNotice)
+	/**
+	 * @brief Set a trigger function when a party member leave from the party. This function is DEPRECATED
+	 * @param OnPartyLeaveNotice delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
+	 */
+	void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnPartyLeaveNotice)
 	{
-		PartyLeaveNotif = OnLeavePartyNotice;
+		PartyLeaveNotif = OnPartyLeaveNotice;
+	}
+	/**
+	 * @brief Set a trigger function when a party member leave from the party
+	 * @param OnPartyMemberLeaveNotice delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
+	 */
+	void SetPartyMemberLeaveNotifDelegate(const FPartyMemberLeaveNotif& OnPartyMemberLeaveNotice)
+	{
+		PartyMemberLeaveNotif = OnPartyMemberLeaveNotice;
+	}
+	/**
+	 * @brief Set a trigger function when a party member reconnecting to the lobby
+	 * @param OnPartyMemberConnectNotif return models called FAccelByteModelsPartyMemberConnectionNotice
+	 */
+	void SetPartyMemberConnectNotifDelegate(FPartyMemberConnectNotif OnPartyMemberConnectNotif) 
+	{
+		PartyMemberConnectNotif = OnPartyMemberConnectNotif;
+	}
+	/**
+	 * @brief Set a trigger function when a party member disconnect from lobby
+	 * @param OnPartyMemberDisconnectNotif return models called FAccelByteModelsPartyMemberConnectionNotice
+	 */
+	void SetPartyMemberDisconnectNotifDelegate(FPartyMemberDisconnectNotif OnPartyMemberDisconnectNotif) 
+	{
+		PartyMemberDisconnectNotif = OnPartyMemberDisconnectNotif;
 	}
 	void SetPartyInviteNotifDelegate(const FPartyInviteNotif& OnPartyInviteNotif)
 	{
@@ -1053,6 +1098,10 @@ public:
 	void SetV2GameSessionUpdatedNotifDelegate(const FV2GameSessionUpdatedNotif& OnGameSessionUpdatedNotif)
 	{
 		V2GameSessionUpdatedNotif = OnGameSessionUpdatedNotif;
+	}
+	void SetV2GameSessionKickedNotifDelegate(const FV2GameSessionKickedNotif& OnGameSessionKickedNotif)
+	{
+		V2GameSessionKickedNotif = OnGameSessionKickedNotif;
 	}
 	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
 	{
@@ -1909,7 +1958,8 @@ private:
     FPartyInfoResponse PartyInfoResponse;
     FPartyCreateResponse PartyCreateResponse;
     FPartyLeaveResponse PartyLeaveResponse;
-    FPartyLeaveNotif PartyLeaveNotif;
+	FPartyLeaveNotif PartyLeaveNotif; // This Delegate is DEPRECATED
+    FPartyMemberLeaveNotif PartyMemberLeaveNotif;
     FPartyInviteResponse PartyInviteResponse;
     FPartyInviteNotif PartyInviteNotif;
     FPartyGetInvitedNotif PartyGetInvitedNotif;
@@ -1920,6 +1970,8 @@ private:
     FPartyKickResponse PartyKickResponse;
     FPartyKickNotif PartyKickNotif;
 	FPartyDataUpdateNotif PartyDataUpdateNotif;
+	FPartyMemberConnectNotif PartyMemberConnectNotif;
+	FPartyMemberDisconnectNotif PartyMemberDisconnectNotif;
 	FPartyGenerateCodeResponse PartyGenerateCodeResponse;
 	FPartyGetCodeResponse PartyGetCodeResponse;
 	FPartyDeleteCodeResponse PartyDeleteCodeResponse;
@@ -1957,6 +2009,7 @@ private:
 	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
 	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;
+	FV2GameSessionKickedNotif V2GameSessionKickedNotif;
 
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 
