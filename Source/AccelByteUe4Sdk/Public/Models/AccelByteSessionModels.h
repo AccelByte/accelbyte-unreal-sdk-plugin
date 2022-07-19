@@ -42,6 +42,14 @@ enum class EAccelByteV2GameSessionDsStatus : uint8
 	BUSY
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteV2SessionConfigurationServerType : uint8
+{
+	NONE = 0,
+	DS,
+	P2P
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionUser
 {
@@ -62,6 +70,8 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionConfigurationTemplate
 {
 	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfigurationTemplate")
+		EAccelByteV2SessionConfigurationServerType Type{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfigurationTemplate")
 		FString Name{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfigurationTemplate")
