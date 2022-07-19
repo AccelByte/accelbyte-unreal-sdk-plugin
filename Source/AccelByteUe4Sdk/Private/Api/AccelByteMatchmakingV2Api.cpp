@@ -30,7 +30,7 @@ namespace Api
 			OnError.ExecuteIfBound(400, TEXT("MatchPool cannot be empty!"));
 		}
 
-		const FString Verb = "POST";
+		const FString Verb = TEXT("POST");
 		const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets"),
 			*SettingsRef.MatchmakingV2ServerUrl,
 			*CredentialsRef.GetNamespace());
@@ -40,9 +40,9 @@ namespace Api
 		Request.SessionId = Optionals.SessionId;
 		Request.Attributes = Optionals.Attributes;
 
-		for(const TPair<FString, float> Latency : Optionals.Latencies)
+		for(const TPair<FString, float>& Latency : Optionals.Latencies)
 		{
-			Request.Latencies.Emplace(Latency.Key, static_cast<int>(Latency.Value));
+			Request.Latencies.Emplace(Latency.Key, static_cast<int32>(FMath::Floor(Latency.Value)));
 		}
 
 		FString Content;
@@ -61,7 +61,7 @@ namespace Api
 			OnError.ExecuteIfBound(400, TEXT("TicketId cannot be empty!"));
 		}
 
-		const FString Verb = "GET";
+		const FString Verb = TEXT("GET");
 		const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/%s"),
 			*SettingsRef.MatchmakingV2ServerUrl,
 			*CredentialsRef.GetNamespace(),
@@ -79,7 +79,7 @@ namespace Api
 		{
 			OnError.ExecuteIfBound(400, TEXT("TicketId cannot be empty!"));
 		}
-		const FString Verb = "DELETE";
+		const FString Verb = TEXT("DELETE");
 		const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/%s"),
 			*SettingsRef.MatchmakingV2ServerUrl,
 			*CredentialsRef.GetNamespace(),

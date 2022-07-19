@@ -25,11 +25,19 @@ enum class EAccelByteMatchmakingSessionStatus : uint8
 	SessionTimeout	UMETA(DisplayName = "sessionTimeout"), // when joinable session is timed out, and removed from queue
 };
 
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchTicketOptionalParams
 {
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
 	FString SessionId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
 	FJsonObjectWrapper Attributes{};
-	TArray<TPair<FString, float>> Latencies{};	
+	
+	// Cannot expose this field as UPROPERTY as TPair is not a blueprint type
+	TArray<TPair<FString, float>> Latencies{};
 };
 
 USTRUCT(BlueprintType)
@@ -107,7 +115,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCreateTicketRequest
 	FJsonObjectWrapper Attributes{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketRequest")
-	TMap<FString, float> Latencies{};
+	TMap<FString, int32> Latencies{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketRequest")
 	FString MatchPool{};
