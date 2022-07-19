@@ -42,10 +42,10 @@ class UABCredentials final : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	FString GetAccessToken();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	FString GetUserId();
 
 private:
@@ -63,85 +63,85 @@ public:
 
 	void SetApiClient(FApiClientPtr NewApiClientPtr);
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABCredentials* Credentials;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABUser* User;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABLobby* Lobby;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABParty* Party;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABMatchmaking* Matchmaking;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABFriends* Friends;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABCatalog* Catalog;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABOrder* Order;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABEntitlement* Entitlement;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABCurrency* Currency;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABWallet* Wallet;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABFulfillment* Fulfillment;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABCloudSave* CloudSave;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABAgreement* Agreement;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABReward* Reward;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABSeasonPass* SeasonPass;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABStatistic* Statistic;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABLeaderboard* Leaderboard;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABAchievement* Achievement;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABSessionBrowser* SessionBrowser;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABUGC* UGC;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABPresence* Presence;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABBlock* Block;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABMessage* Message;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABSessionAttribute* SessionAttribute;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABSignaling* Signaling;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABGroup* Group;
 
 private:
@@ -156,7 +156,7 @@ class UABMultiRegistry final : public UBlueprintFunctionLibrary
 
 public:
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | MultiRegistry | Api")
 	static UABApiClient* GetApiClient(FString const& Key);
 };
 

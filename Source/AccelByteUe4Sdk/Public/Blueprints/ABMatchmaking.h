@@ -18,7 +18,7 @@ struct FStartMatchmakingRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Matchmaking | Models | Start Matchmaking")
 	FString gameMode;
 };
 
@@ -27,10 +27,10 @@ struct FCancelMatchmakingRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Matchmaking | Models | Cancel Matchmaking")
 	FString gameMode;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Matchmaking | Models | Cancel Matchmaking")
 	bool isTempParty{ false };
 };
 
@@ -39,7 +39,7 @@ struct FSetReadyConsentRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Matchmaking | Models | Ready Consent")
 	FString matchId;
 };
 
@@ -68,19 +68,19 @@ public:
 
 	//Request-Response
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Api")
 	void StartMatchmaking(
 		FStartMatchmakingRequest const& Request,
 		FDStartMatchmakingResponse OnResponse,
 		FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Api")
 	void CancelMatchmaking(
 		FCancelMatchmakingRequest const& Request,
 		FDCancelMatchmakingResponse OnResponse,
 		FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Api")
 	void SetReadyConsent(
 		FSetReadyConsentRequest const& Request,
 		FDSetReadyConsentResponse OnResponse,
@@ -88,16 +88,16 @@ public:
 
 	//Notification
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Delegate")
 	void SetOnMatchmaking(FDMatchmakingNotif OnNotif);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Delegate")
 	void SetOnSetReadyConsent(FDSetReadyConsentNotif OnNotif);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Delegate")
 	void SetOnRematchmaking(FDRematchmakingNotif OnNotif);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Delegate")
 	void SetOnDs(FDDsNotif OnNotif);
 
 	

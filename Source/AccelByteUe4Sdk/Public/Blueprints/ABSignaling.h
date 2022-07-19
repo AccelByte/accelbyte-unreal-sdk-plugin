@@ -18,10 +18,10 @@ struct FSendSignalingMessageRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Signaling | Models | Message")
 	FString UserID;
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Signaling | Models | Message")
 	FString Message;
 };
 
@@ -37,12 +37,12 @@ public:
 
 //Request-Response
 public: 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Signaling")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Signaling | Api")
 	FString SendSignalingMessage(FSendSignalingMessageRequest const& Request);
 
 //Notification
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Signaling")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Signaling | Api")
 	void SetSignalingP2PNotif(FDSignalingP2PNotif OnNotif);
 
 private:

@@ -60,7 +60,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetUserEntitlementById(FString const& Entitlementid, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError);
+	void GetUserEntitlementById(FString const& EntitlementId, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Get user's Entitlement ownership of the AppId.
@@ -133,8 +133,10 @@ public:
 	* @param UseCount Number of consumed entitlement.
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	* @param OnError This will be called when the operation failed.
+	* @param Options Options of consumed entitlements.
 	*/
-	void ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError);
+	void ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError,
+		TArray<FString> Options = {});
 	
 	/**
 	* @brief Create Distribution Receiver.
@@ -274,6 +276,15 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void ValidateUserItemPurchaseCondition(TArray<FString> const& Items, THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	* @brief Get user entitlement ownership by itemIds.
+	*
+	* @param Ids ItemsIds.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Ids, THandler<TArray<FAccelByteModelsEntitlementOwnershipItemIds>> const& OnSuccess, FErrorHandler const& OnError);
 
 	
 private:
