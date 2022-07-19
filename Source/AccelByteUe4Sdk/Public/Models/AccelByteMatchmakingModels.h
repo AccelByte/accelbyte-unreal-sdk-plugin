@@ -25,6 +25,13 @@ enum class EAccelByteMatchmakingSessionStatus : uint8
 	SessionTimeout	UMETA(DisplayName = "sessionTimeout"), // when joinable session is timed out, and removed from queue
 };
 
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchTicketOptionalParams
+{
+	FString SessionId{};
+	FJsonObjectWrapper Attributes{};
+	TArray<TPair<FString, float>> Latencies{};	
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResult
 {
@@ -91,12 +98,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDequeueRequest
 	FString Match_id{};
 };
 
-
-
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCreateTicketRequest
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketRequest")
+	FJsonObjectWrapper Attributes{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketRequest")
 	TMap<FString, float> Latencies{};

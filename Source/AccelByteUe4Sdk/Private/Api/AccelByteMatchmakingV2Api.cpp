@@ -20,11 +20,10 @@ namespace Api
 	{
 	}
 
-	void MatchmakingV2::CreateMatchTicket(
-		const FString& MatchPool,
+	void MatchmakingV2::CreateMatchTicket(const FString& MatchPool,
 		const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess,
-		const FErrorHandler& OnError,const FString& SessionId,
-		const TArray<TPair<FString, float>>& Latencies)
+		const FErrorHandler& OnError,
+		const FAccelByteModelsV2MatchTicketOptionalParams& Optionals)
 	{
 		if(MatchPool.IsEmpty())
 		{
@@ -38,9 +37,10 @@ namespace Api
 
 		FAccelByteModelsV2MatchmakingCreateTicketRequest Request;
 		Request.MatchPool = MatchPool;
-		Request.SessionId = SessionId;
+		Request.SessionId = Optionals.SessionId;
+		Request.Attributes = Optionals.Attributes;
 
-		for(const TPair<FString, float> Latency : Latencies)
+		for(const TPair<FString, float> Latency : Optionals.Latencies)
 		{
 			Request.Latencies.Emplace(Latency.Key, static_cast<int>(Latency.Value));
 		}

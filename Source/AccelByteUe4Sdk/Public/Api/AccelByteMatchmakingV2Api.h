@@ -27,8 +27,7 @@ public:
 		const FString& MatchPool,
 		const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess,
 		const FErrorHandler& OnError,
-		const FString& SessionId = "",
-		const TArray<TPair<FString, float>>& Latencies = {});
+		const FAccelByteModelsV2MatchTicketOptionalParams& Optionals = {});
 	
 	void GetMatchTicketDetails(
 		const FString& TicketId,
