@@ -101,7 +101,7 @@ private:
 	void PingRegionsSetLatencies(
 		const FAccelByteModelsQosServerList& QosServerList,
 		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
-		const FErrorHandler& OnError, float PingTimeout = .6);
+		const FErrorHandler& OnError);
 
 	/**
 	 * @brief Sets QosServers, using this cache for future calls.
@@ -116,7 +116,7 @@ private:
 	void CallGetQosServers(
 		const bool bPingRegionsOnSuccess,
 		const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess,
-		const FErrorHandler& OnError, float PingTimeout = .6);
+		const FErrorHandler& OnError);
 
 	/**
 	 * @brief Poll every x second to refresh Latencies (pings) with cached (via QosServers) regions.
