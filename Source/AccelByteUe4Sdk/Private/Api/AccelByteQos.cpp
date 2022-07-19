@@ -61,16 +61,16 @@ namespace Api
 	void Qos::CallGetQosServers(
 		const bool bPingRegionsOnSuccess,
 		const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess,
-		const FErrorHandler& OnError)
+		const FErrorHandler& OnError, float PingTimeout)
 	{
 		FRegistry::QosManager.GetQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
-			[this, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError](const FAccelByteModelsQosServerList Result)
+			[this, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError, PingTimeout](const FAccelByteModelsQosServerList Result)
 			{
 				Qos::QosServers = Result; // Cache for the session
 
 				if (bPingRegionsOnSuccess)
 				{
-					PingRegionsSetLatencies(Qos::QosServers, OnPingRegionsSuccess, OnError);
+					PingRegionsSetLatencies(Qos::QosServers, OnPingRegionsSuccess, OnError, PingTimeout);
 				} 
 				else
 				{
@@ -82,7 +82,7 @@ namespace Api
 	void Qos::PingRegionsSetLatencies(
 		const FAccelByteModelsQosServerList& QosServerList,
 		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
-		const FErrorHandler& OnError)
+		const FErrorHandler& OnError, float PingTimeout)
 	{
 		TSharedRef<TArray<TPair<FString, float>>> SuccessLatencies = MakeShared<TArray<TPair<FString, float>>>();
 		TSharedRef<TArray<FString>> FailedLatencies = MakeShared<TArray<FString>>();
@@ -99,7 +99,7 @@ namespace Api
 				FString Region = Server.Region;
 
 				// Ping -> Get the latencies on pong.
-				FUDPPing::UDPEcho(IpPort, 10.00, FIcmpEchoResultDelegate::CreateLambda(
+				FUDPPing::UDPEcho(IpPort, PingTimeout, FIcmpEchoResultDelegate::CreateLambda(
 					[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError](FIcmpEchoResult& PingResult)
 					{
 						// Add <Region, PingSeconds>
