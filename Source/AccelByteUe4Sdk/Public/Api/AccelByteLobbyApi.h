@@ -1067,7 +1067,7 @@ public:
 	{
 		V2PartyInvitedNotif = OnPartyInvitedNotif;
 	}
-	void SetV2PartyMembersChangedDelegate(const FV2PartyMembersChangedNotif& OnPartyMembersChanged)
+	void SetV2PartyMembersChangedNotifDelegate(const FV2PartyMembersChangedNotif& OnPartyMembersChanged)
 	{
 		V2PartyMembersChangedNotif = OnPartyMembersChanged;
 	}
