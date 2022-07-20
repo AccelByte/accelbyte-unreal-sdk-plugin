@@ -197,6 +197,27 @@ public:
 		return QueryParamValue;	
 	}
 
+	template<typename ObjectType> 
+	static bool UStructArrayToJsonObjectString(TArray<ObjectType> Objects, FString& OutString)
+	{
+		OutString.Append(TEXT("["));	
+		FString JsonArrayString = TEXT("");
+		for (auto Item : Objects)
+		{
+			JsonArrayString = JsonArrayString.IsEmpty() ? TEXT("") : TEXT(",");
+			FString JsonObjectString = TEXT("");
+			if (!FJsonObjectConverter::UStructToJsonObjectString(Item, JsonObjectString))
+			{
+				return false;
+			}
+			JsonArrayString.Append(JsonObjectString);
+			//JsonArrayString.Append(TEXT(","));
+		}
+		OutString.Append(JsonArrayString);
+		OutString.Append(TEXT("]")); 
+		return true;
+	}
+	
 private:
 	static void AppendQueryParam(FString& Query, FString const& Param, FString const& Value)
 	{

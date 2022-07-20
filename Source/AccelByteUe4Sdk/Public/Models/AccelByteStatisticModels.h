@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonUtilities.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteStatisticModels.generated.h"
 
@@ -20,6 +21,15 @@ enum class EAccelByteStatisticStatus : uint8
 {
 	INIT = 0,
 	TIED
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteStatisticUpdateStrategy : uint8
+{
+	OVERRIDE = 0,
+	INCREMENT,
+	MAX,
+	MIN
 };
 
 USTRUCT(BlueprintType)
@@ -168,3 +178,136 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkStatItemCreate
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkStatItemCreate")
 	FString StatCode{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkFetchUser
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkFetchUser")
+	FString ProfileId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkFetchUser")
+	FString StatCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkFetchUser")
+	int Value{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUpdateMultipleUserStatItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
+	FString AdditionalKey{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
+	FString StatCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
+	EAccelByteStatisticUpdateStrategy UpdateStrategy{EAccelByteStatisticUpdateStrategy::OVERRIDE};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
+	int Value{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
+	FJsonObjectWrapper AdditionalData{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUpdateMultipleUserStatItemsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUserResponse")
+	bool Success{}; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUserResponse")
+	FString StatCode{}; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUserResponse")
+	FJsonObjectWrapper Details{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUserStatItem
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUserStatItem")
+	FString StatCode{}; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUserStatItem")
+	FJsonObjectWrapper AdditionalData{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUpdateUserStatItem
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItem")
+	FString StatCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItem")
+	EAccelByteStatisticUpdateStrategy UpdateStrategy{EAccelByteStatisticUpdateStrategy::OVERRIDE};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItem")
+	int Value{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItem")
+	FJsonObjectWrapper AdditionalData{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUpdateUserStatItemResponse
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItemResponse")
+	bool Success{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItemResponse")
+	FString StatCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItemResponse")
+	FJsonObjectWrapper Details{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateUserStatItemValue
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItem")
+	EAccelByteStatisticUpdateStrategy UpdateStrategy{EAccelByteStatisticUpdateStrategy::OVERRIDE};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItem")
+	int Value{}; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItem")
+	FJsonObjectWrapper AdditionalData{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateUserStatItemValueRespose
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItemValueRespose")
+	int CurrentValue{};  
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsListUserStatItemRespose
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | ListUserStatItemRespose")
+	FString ProfileId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | ListUserStatItemRespose")
+	FString StatCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | ListUserStatItemRespose")
+	int Value{}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicUpdateUserStatItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItem")
+	EAccelByteStatisticUpdateStrategy UpdateStrategy{EAccelByteStatisticUpdateStrategy::OVERRIDE};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItem")
+	int Value{}; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItem")
+	FJsonObjectWrapper AdditionalData{};
+};
+

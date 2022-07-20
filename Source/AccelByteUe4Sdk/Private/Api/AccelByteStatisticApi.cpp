@@ -7,6 +7,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
@@ -153,7 +154,90 @@ namespace Api
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Contents);
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	} 
+	
+	void Statistic::ListUserStatItems(const TArray<FString>& StatCodes,  const TArray<FString>& Tags,  const FString& AdditionalKey, 
+		const THandler<TArray<FAccelByteModelsListUserStatItemRespose>>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/statitems/value/bulk"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Content = TEXT(""); 
+		FString QueryParam = FAccelByteUtilities::CreateQueryParams({
+			{ TEXT("statCodes"), FAccelByteUtilities::CreateQueryParamValueFromArray(StatCodes) },
+			{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueFromArray(Tags) },
+			{ TEXT("additionalKey"), AdditionalKey },
+		});
+		Url.Append(QueryParam);
+	
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
+
+	void Statistic::BulkUpdateUserStatItemsValue(const FString& AdditionalKey, const TArray<FAccelByteModelsBulkUpdateUserStatItem>& BulkUpdateUserStatItems,
+			const THandler<TArray<FAccelByteModelsBulkUpdateUserStatItemResponse>>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/statitems/value/bulk"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+		FString Verb = TEXT("PUT");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Content = TEXT("");
+		FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsBulkUpdateUserStatItem>(BulkUpdateUserStatItems, Content);
+		FString QueryParam = FAccelByteUtilities::CreateQueryParams({
+				{ TEXT("additionalKey"), AdditionalKey },
+			});
+		Url.Append(QueryParam);
+		
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	void Statistic::UpdateUserStatItemsValue(const FString& StatCode, const FString& AdditionalKey, const FAccelByteModelsPublicUpdateUserStatItem& UpdateUserStatItem,
+		const THandler<FAccelByteModelsUpdateUserStatItemValueRespose>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/stats/%s/statitems/value"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *StatCode);
+		FString Verb = TEXT("PUT");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Content = TEXT("");
+		FJsonObjectConverter::UStructToJsonObjectString(UpdateUserStatItem, Content); 
+		FString QueryParam = FAccelByteUtilities::CreateQueryParams({
+				{ TEXT("additionalKey"), AdditionalKey },
+			});
+		Url.Append(QueryParam);
+		
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+	
 
 } // Namespace Api
 } // Namespace AccelByte
