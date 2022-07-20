@@ -24,25 +24,25 @@ public:
 	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
 	void EnqueueJoinableSession(FAccelByteModelsMatchmakingResult const& MatchmakingResult, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
 	void DequeueJoinableSession(const FString& MatchId, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
 	void AddUserToSession(FString const& ChannelName, FString const& MatchId, FString const& UserId, FString const& OptionalPartyId, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
 	void RemoveUserFromSession(FString const& ChannelName, FString const& MatchId, FString const& UserId, FAccelByteModelsMatchmakingResult const& OptionalBody, FDHandler OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
 	void QuerySessionStatus(FString const& MatchId, FDMatchmakingResultDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
 	void ActivateSessionStatusPolling(FString const& MatchId, int IntervalSec, FDMatchmakingResultDelegate OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
 	void DeactivateStatusPolling();
 
 private:

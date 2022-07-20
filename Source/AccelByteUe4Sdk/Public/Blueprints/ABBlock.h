@@ -18,7 +18,7 @@ struct FBlockPlayerRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Block | Models | Block Player")
 	FString UserID;
 };
 
@@ -27,7 +27,7 @@ struct FUnblockPlayerRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Block | Models | Unblock Player")
 	FString UserID;
 };
 
@@ -50,34 +50,34 @@ public:
 //Request-Response
 public: 
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block | Api")
 	void BlockPlayer(
 		FBlockPlayerRequest const& Request,
 		FDBlockPlayerResponse OnResponse,
 		FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block | Api")
 	void UnblockPlayer(
 		FUnblockPlayerRequest const& Request,
 		FDUnblockPlayerResponse OnResponse,
 		FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block | Api")
 	void GetListOfBlockedUsers(
 		FDListOfBlockedUserResponse OnResponse,
 		FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block | Api")
 	void GetListOfBlockers(
 		FDListOfBlockersResponse OnResponse,
 		FDErrorHandler OnError);
 
 //Notification
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block | Delegate")
 	void SetBlockPlayerNotifDelegate(FDBlockPlayerNotif OnNotif);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block | Delegate")
 	void SetUnblockPlayerNotifDelegate(FDUnblockPlayerNotif OnNotif);
 
 private:

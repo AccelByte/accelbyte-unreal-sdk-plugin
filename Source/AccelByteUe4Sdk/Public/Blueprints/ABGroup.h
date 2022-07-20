@@ -74,7 +74,7 @@ public:
 	 * - Result is simply a FAccelByteModelsGroupInformationResponse + pagination info.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void GetGroupList(
 		const FAccelByteModelsGetGroupListRequest& RequestContent,
 		const FSearchGroupsSuccess& OnSuccess,
@@ -104,7 +104,7 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void CreateGroup(
 		const FAccelByteModelsCreateGroupRequest& RequestContent,
 		const FCreateGroupSuccess& OnSuccess,
@@ -122,7 +122,7 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void GetGroup(
 		const FString& GroupId,
 		const FGetGroupSuccess& OnSuccess,
@@ -146,7 +146,7 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void UpdateGroup(
 		const FString& GroupId,
 		const bool bCompletelyReplace,
@@ -166,7 +166,7 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void DeleteGroup(
 		const FString& GroupId,
 		const FDeleteGroupSuccess& OnSuccess,
@@ -187,7 +187,7 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void UpdateGroupCustomAttributes(
 		const FString& GroupId,
 		const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
@@ -208,14 +208,14 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError Called upon failed op.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void UpdateGroupCustomRule(
 		const FString& GroupId,
 		const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
 		const FUpdateGroupCustomRuleSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	/**
 	 * @brief Update predefined group rule.
 	 * - Required valid user authentication.
@@ -256,7 +256,7 @@ public:
 	 * - Void Result
 	 * @param OnError Called upon failed op.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void DeleteGroupPredefinedRule(
 		const FString& GroupId,
 		const EAccelByteAllowedAction& AllowedAction,
@@ -280,7 +280,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void AcceptGroupInvitation(
 		const FString& GroupId,
 		const FAcceptGroupInvitationSuccess& OnSuccess,
@@ -298,7 +298,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void RejectGroupInvitation(
 		const FString& GroupId,
 		const FRejectGroupInvitationSuccess& OnSuccess,
@@ -323,7 +323,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void JoinGroup(
 		const FString& GroupId,
 		const FJoinGroupSuccess& OnSuccess,
@@ -339,7 +339,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void CancelJoinGroupRequest(
         const FString& GroupId,
         const FCancelJoinGroupRequestSuccess& OnSuccess,
@@ -356,7 +356,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void GetGroupMembersListByGroupId(
 		const FString& GroupId,
 		const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent,
@@ -377,7 +377,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void LeaveGroup(
 		const FLeaveGroupSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
@@ -399,7 +399,7 @@ public:
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void GetUserGroupInfoByUserId(
 		const FString& UserId,
 		const FGetUserGroupInfoByUserIdSuccess& OnSuccess,
@@ -418,7 +418,7 @@ public:
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void InviteUserToGroup(
 		const FString UserId,
 		const FInviteUserToGroupSuccess& OnSuccess,
@@ -441,7 +441,7 @@ public:
 	* - Returns { GroupId, UserId }
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void AcceptGroupJoinRequest(
 		const FString UserId,
 		const FAcceptGroupJoinRequestSuccess& OnSuccess,
@@ -464,7 +464,7 @@ public:
 	* - Returns { GroupId, UserId }
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void RejectGroupJoinRequest(
 		const FString UserId,
 		const FRejectGroupJoinRequestSuccess& OnSuccess,
@@ -483,7 +483,7 @@ public:
 	* - Returns { GroupId, KickedUserId }
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void KickGroupMember(
 		const FString UserId,
 		const FKickGroupMemberSuccess& OnSuccess,
@@ -503,7 +503,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void GetMemberRoles(
 		const FAccelByteModelsLimitOffsetRequest& RequestContent,
 		const FGetMemberRolesSuccess& OnSuccess,
@@ -521,7 +521,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void AssignMemberRole(
 		const FString& MemberRoleId,
 		const FAccelByteModelsUserIdWrapper& RequestContent,
@@ -540,7 +540,7 @@ public:
 	* @param OnSuccess Called upon successful op.
 	* @param OnError Called upon failed op.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void DeleteMemberRole(
 		const FString& MemberRoleId,
 		const FAccelByteModelsUserIdWrapper& RequestContent,
