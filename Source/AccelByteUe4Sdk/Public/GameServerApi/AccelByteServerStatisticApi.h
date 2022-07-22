@@ -91,21 +91,21 @@ public:
 	* @param StatCode This is the StatCode that will be stored in the slot.
 	* @param UserIds This is the UserId array that will be stored in the slot.
 	* @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
-	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsFetchUser.
 	* @param OnError This will be called when the operation failed.
 	*/
 	void BulkFetchUserStatItemValues(const FString& StatCode, const TArray<FString>& UserIds, const FString& AdditionalKey,
-		const THandler<TArray<FAccelByteModelsBulkFetchUser>>& OnSuccess, const FErrorHandler& OnError);
+		const THandler<TArray<FAccelByteModelsFetchUser>>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Bulk update multiple user's statitems value with specific update strategy.
 	*
 	* @param BulkUpdateMultipleUserStatItems This is the BulkUpdateMultipleUserStatItem array that will be stored in the slot. 
-	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsUpdateUserStatItemsResponse.
 	* @param OnError This will be called when the operation failed.
 	*/ 
-	void BulkUpdateMultipleUserStatItemsValue(const TArray<FAccelByteModelsBulkUpdateMultipleUserStatItem>& BulkUpdateMultipleUserStatItems,
-		const THandler<TArray<FAccelByteModelsBulkUpdateMultipleUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError);
+	void BulkUpdateMultipleUserStatItemsValue(const TArray<FAccelByteModelsUpdateUserStatItem>& BulkUpdateMultipleUserStatItems,
+		const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Bulk reset user's statitem values for given namespace and user.
@@ -113,11 +113,11 @@ public:
 	* @param UserId This is the UserId that will be stored in the slot.
 	* @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
 	* @param BulkUserStatItems This is the BulkUserStatItem array that will be stored in the slot. 
-	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsUpdateUserStatItemsResponse.
 	* @param OnError This will be called when the operation failed.
 	*/ 
-	void BulkResetUserStatItemsValues(const FString& UserId, const FString& AdditionalKey, const TArray<FAccelByteModelsBulkUserStatItem>& BulkUserStatItems,
-		const THandler<TArray<FAccelByteModelsBulkUpdateMultipleUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError);
+	void BulkResetUserStatItemsValues(const FString& UserId, const FString& AdditionalKey, const TArray<FAccelByteModelsUserStatItem>& BulkUserStatItems,
+		const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Bulk update user's statitems value for given namespace and user with specific update strategy.
@@ -125,11 +125,11 @@ public:
 	* @param UserId UserId.
 	* @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
 	* @param BulkUpdateUserStatItems This is the BulkUpdateUserStatItem array that will be stored in the slot.
-	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsUpdateUserStatItemsResponse.
 	* @param OnError This will be called when the operation failed.
 	*/ 
-	void BulkUpdateUserStatItemValue(const FString& UserId, const FString& AdditionalKey, const TArray<FAccelByteModelsBulkUpdateUserStatItem>& BulkUpdateUserStatItems,
-		const THandler<TArray<FAccelByteModelsBulkUpdateMultipleUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError);
+	void BulkUpdateUserStatItemValue(const FString& UserId, const FString& AdditionalKey, const TArray<FAccelByteModelsUpdateUserStatItemWithStatCode>& BulkUpdateUserStatItems,
+		const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Update user's statitem value for a given namespace and user with a certain update strategy.
@@ -137,12 +137,12 @@ public:
 	* @param UserId UserId.
 	* @param StatCode StatCode.
 	* @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
-	* @param FAccelByteModelsUpdateUserStatItemValue This is the FAccelByteModelsUpdateUserStatItemValue that will be stored in the slot. 
-	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
+	* @param UpdateUserStatItemValue This is the FAccelByteModelsUpdateUserStatItem that will be stored in the slot. 
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUpdateUserStatItemValueResponse.
 	* @param OnError This will be called when the operation failed.
 	*/ 			
-	void UpdateUserStatItemValue(const FString& UserId,  const FString& StatCode, const FString& AdditionalKey, const FAccelByteModelsBulkUpdateUserStatItem& FAccelByteModelsUpdateUserStatItemValue,
-		const THandler<FAccelByteModelsUpdateUserStatItemValueRespose>& OnSuccess, const FErrorHandler& OnError);
+	void UpdateUserStatItemValue(const FString& UserId,  const FString& StatCode, const FString& AdditionalKey, const FAccelByteModelsUpdateUserStatItem& UpdateUserStatItemValue,
+		const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Delete user's stat items for given namespace, statCode, and user Id.
@@ -152,7 +152,7 @@ public:
 	* @param UserId This is the UserId that will be stored in the slot.
 	* @param StatCode This is the StatCode that will be stored in the slot.
 	* @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
-	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
+	* @param OnSuccess This will be called when the operation succeeded.  
 	* @param OnError This will be called when the operation failed.
 	*/ 				
 	void DeleteUserStatItems(const FString& UserId, const FString& StatCode, const FString& AdditionalKey,

@@ -217,7 +217,8 @@ public:
 		FString JsonArrayString = TEXT("");
 		for (auto Item : Objects)
 		{
-			JsonArrayString = JsonArrayString.IsEmpty() ? TEXT("") : TEXT(",");
+			FString Delimiter =	JsonArrayString.IsEmpty() ? TEXT("") : TEXT(",");
+			JsonArrayString.Append(Delimiter);
 			FString JsonObjectString = TEXT("");
 			if (!FJsonObjectConverter::UStructToJsonObjectString(Item, JsonObjectString))
 			{
