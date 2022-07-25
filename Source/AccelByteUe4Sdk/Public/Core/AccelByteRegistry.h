@@ -46,6 +46,8 @@ namespace Api
 	class Currency;
 	class Miscellaneous;
 	class Reward;
+	class Session;
+	class MatchmakingV2;
 }
 
 namespace GameServerApi
@@ -101,6 +103,8 @@ public:
 	static Api::Currency Currency;
 	static Api::Miscellaneous Miscellaneous;
 	static Api::Reward Reward;
+	static Api::Session Session;
+	static Api::MatchmakingV2 MatchmakingV2;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;

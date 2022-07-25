@@ -21,6 +21,15 @@ enum class EAvailability : uint8
 	Invisible = 3
 };
 
+/** @brief Matchmaking v2 notification topics enums. */
+UENUM(BlueprintType)
+enum class EV2MatchmakingNotif : uint8
+{
+	Invalid,
+	OnMatchFound,
+	OnMatchmakingStarted,
+};
+
 // Emulate namespace with long class names
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyType
@@ -617,6 +626,24 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsNotificationMessage
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
     FString Topic{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Payload{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FDateTime SentAt{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionNotificationMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Topic{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FString Payload{};

@@ -109,6 +109,12 @@ void Settings::LoadSettings(const FString& SectionPath)
 	GConfig->GetString(*SectionPath, TEXT("ReportingServerUrl"), ReportingServerUrl, GEngineIni);
 	ReportingServerUrl = GetDefaultClientAPIUrl(ReportingServerUrl, BaseUrl, TEXT("reporting"));
 
+	GConfig->GetString(*SectionPath, TEXT("SessionServerUrl"), SessionServerUrl, GEngineIni);
+	SessionServerUrl = GetDefaultClientAPIUrl(SessionServerUrl, BaseUrl, TEXT("session"));
+	
+	GConfig->GetString(*SectionPath, TEXT("MatchmakingV2ServerUrl"), MatchmakingV2ServerUrl, GEngineIni);
+	MatchmakingV2ServerUrl = GetDefaultClientAPIUrl(MatchmakingV2ServerUrl, BaseUrl, TEXT("match2"));
+
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 
 	FString QosLatencyPollIntervalSecsString;
@@ -270,6 +276,16 @@ FString UAccelByteBlueprintsSettings::GetReportingServerUrl()
 	return FRegistry::Settings.ReportingServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetSessionServerUrl()
+{
+	return FRegistry::Settings.SessionServerUrl;
+}
+
+FString UAccelByteBlueprintsSettings::GetMatchmakingV2ServerUrl()
+{
+	return FRegistry::Settings.MatchmakingV2ServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetAppId()
 {
 	return FRegistry::Settings.AppId;
@@ -398,6 +414,16 @@ void UAccelByteBlueprintsSettings::SetSeasonPassServerUrl(const FString& SeasonP
 void UAccelByteBlueprintsSettings::SetReportingServerUrl(const FString& ReportingServerUrl)
 {
 	FRegistry::Settings.ReportingServerUrl = ReportingServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetSessionServerUrl(const FString& SessionServerUrl)
+{
+	FRegistry::Settings.SessionServerUrl = SessionServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl)
+{
+	FRegistry::Settings.MatchmakingV2ServerUrl = MatchmakingV2ServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)

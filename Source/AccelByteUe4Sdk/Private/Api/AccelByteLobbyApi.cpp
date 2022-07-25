@@ -17,6 +17,15 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
 
+// Use of type map<string, int32> in proto file leads to a warning about converting an integer to bool due to the way
+// protobuf maps are implemented
+#pragma warning(push)
+#pragma warning(disable : 4800)
+#include "Proto/session_notification.pb.h"
+#include "Proto/matchmaking_notification.pb.h"
+#include "google/protobuf/util/json_util.h"
+#pragma warning(pop)
+
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
 namespace AccelByte
@@ -185,6 +194,9 @@ namespace Api
 		
 		// Refresh Token
 		const FString RefreshToken = TEXT("refreshTokenResponse");
+
+		// V2 session notif
+		const FString SessionNotif = TEXT("messageSessionNotif");
 	}
 
 	namespace Prefix
@@ -204,7 +216,6 @@ namespace Api
 	{
 		const FString Response = TEXT("Response");
 		const FString Notif = TEXT("Notif"); // Note: current usage is not yet uniformized -> Notif/Notification
-
 	}
 
 	enum Response : uint8
@@ -1291,6 +1302,10 @@ void Lobby::UnbindEvent()
 	UnbindBlockResponseEvents();
 
 	UnbindSessionAttributeEvents();
+
+	UnbindV2PartyEvents();
+	UnbindV2GameSessionEvents();
+	UnbindV2MatchmakingEvents();
 	
 	UserBannedNotification.Unbind();
 	UserUnbannedNotification.Unbind();
@@ -1445,6 +1460,31 @@ void Lobby::UnbindSessionAttributeEvents()
 	OnGetSessionAttributeError.Unbind();
 	OnSetSessionAttributeError.Unbind();
 	OnGetAllSessionAttributeError.Unbind();
+}
+
+void Lobby::UnbindV2PartyEvents()
+{
+	V2PartyInvitedNotif.Unbind();
+	V2PartyJoinedNotif.Unbind();
+	V2PartyKickedNotif.Unbind();
+	V2PartyRejectedNotif.Unbind();
+	V2PartyMembersChangedNotif.Unbind();
+	V2PartyUpdatedNotif.Unbind();
+}
+
+void Lobby::UnbindV2GameSessionEvents()
+{
+	V2GameSessionInvitedNotif.Unbind();
+	V2GameSessionJoinedNotif.Unbind();
+	V2GameSessionMembersChangedNotif.Unbind();
+	V2GameSessionUpdatedNotif.Unbind();
+	V2DSStatusChangedNotif.Unbind();
+	V2GameSessionKickedNotif.Unbind();
+}
+
+void Lobby::UnbindV2MatchmakingEvents()
+{
+	V2MatchmakingMatchFoundNotif.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -1868,6 +1908,258 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 			break; \
 		} \
 
+void ReplaceBytesFieldsWithJsonObjects(const FString& ParsedJsonString, const TSharedPtr<FJsonObject> JsonObjectPtr, const google::protobuf::Descriptor* MessageDescriptor)
+{
+	for(int i = 0; i < MessageDescriptor->field_count(); i++)
+	{
+		const google::protobuf::FieldDescriptor* Field = MessageDescriptor->field(i);
+		if(Field->type() == google::protobuf::FieldDescriptor::TYPE_BYTES)
+		{
+			// For 'bytes' fields, we decode from base64, then deserialize that result as a JSON string, replacing the
+			// original field value with the new JSON object
+			const FString JsonFieldName = UTF8_TO_TCHAR(Field->json_name().c_str());
+			FString EncodedData;
+			if(!JsonObjectPtr->TryGetStringField(JsonFieldName, EncodedData))
+			{
+				UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot get protobuf bytes field string from JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+				return;
+			}
+
+			FString DecodedData;
+			if(!FBase64::Decode(EncodedData, DecodedData))
+			{
+				UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot decode protobuf bytes data from base64 for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+				return;
+			}
+
+			TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(DecodedData);
+			FJsonObject DeserializedObject;
+			TSharedPtr<FJsonObject> DeserializedObjectPtr = MakeShared<FJsonObject>(DeserializedObject);
+			if(!FJsonSerializer::Deserialize(JsonReader, DeserializedObjectPtr))
+			{
+				UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize decoded protobuf bytes data as JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+				return;
+			}
+
+			JsonObjectPtr->SetObjectField(JsonFieldName, DeserializedObjectPtr);
+		}
+		else if(Field->type() == google::protobuf::FieldDescriptor::TYPE_MESSAGE)
+		{
+			const FString JsonFieldName = UTF8_TO_TCHAR(Field->json_name().c_str());
+			const google::protobuf::Descriptor* NestedDescriptor = Field->message_type();
+
+			// A repeated message field is represented by an array of objects in JSON, so we iterate over the objects
+			// and recursively convert the fields of each one
+			if(Field->is_repeated())
+			{
+				TArray<TSharedPtr<FJsonValue>> ConvertedNestedArray;
+				const TArray<TSharedPtr<FJsonValue>>* NestedArray;
+				if(!JsonObjectPtr->TryGetArrayField(JsonFieldName, NestedArray))
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot get protobuf repeated message array from JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+					return;
+				}
+
+				for(const TSharedPtr<FJsonValue> Item : *NestedArray)
+				{
+					const TSharedPtr<FJsonObject>* Object;
+					if(!Item->TryGetObject(Object))
+					{
+						UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot get protobuf message object from JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+						return;
+					}
+
+					ReplaceBytesFieldsWithJsonObjects(ParsedJsonString, *Object, NestedDescriptor);
+
+					FJsonValueObject ObjectValue(*Object);
+					TSharedPtr<FJsonValueObject> ObjectValuePtr = MakeShared<FJsonValueObject>(ObjectValue);
+					ConvertedNestedArray.Add(ObjectValuePtr);
+				}
+
+				JsonObjectPtr->SetArrayField(JsonFieldName, ConvertedNestedArray);
+			}
+			else
+			{
+				// If the field is a message that is NOT repeated, it's just another objects whose fields we convert recursively
+				const TSharedPtr<FJsonObject>* NestedObject;
+				if(!JsonObjectPtr->TryGetObjectField(JsonFieldName, NestedObject))
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot get protobuf message object from JSON for field '%s'\nNotification: %s"), *JsonFieldName, *ParsedJsonString);
+					return;
+				}
+
+				ReplaceBytesFieldsWithJsonObjects(ParsedJsonString, *NestedObject, NestedDescriptor);
+				JsonObjectPtr->SetObjectField(JsonFieldName, *NestedObject);
+			}
+		}
+	}
+}
+
+template <typename DataStruct, typename PayloadType, typename ResponseCallbackType>
+void DispatchV2Notif(PayloadType Payload, ResponseCallbackType ResponseCallback, bool bConvertBytesFields = false)
+{
+	std::string JsonPayloadUTF8;
+	google::protobuf::util::MessageToJsonString(Payload, &JsonPayloadUTF8);
+	FString JsonPayload = UTF8_TO_TCHAR(JsonPayloadUTF8.c_str());
+
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Received MPv2 lobby notification\n%s"), *JsonPayload);
+
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonPayload);
+	TSharedPtr<FJsonObject> JsonObjectPtr;
+	if(!FJsonSerializer::Deserialize(JsonReader, JsonObjectPtr))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize protobuf payload from JSON\nNotification: %s"), *JsonPayload);
+		return;
+	}
+
+	if(bConvertBytesFields)
+	{
+		ReplaceBytesFieldsWithJsonObjects(JsonPayload, JsonObjectPtr, PayloadType::GetDescriptor());
+	}
+
+	DataStruct Result;
+	if(FJsonObjectConverter::JsonObjectToUStruct(JsonObjectPtr.ToSharedRef(), &Result))
+	{
+		ResponseCallback.ExecuteIfBound(Result);
+	}
+}
+
+template <typename ProtoEventEnvelope>
+bool ParseProtobufPayload(const FString& InPayload, TSharedRef<ProtoEventEnvelope>& OutProtoEventEnvelope)
+{
+	TArray<uint8> ProtobufPayload;
+	if(!FBase64::Decode(InPayload, ProtobufPayload))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot decode protobuf payload from Base64,\npayload is : %s"), *InPayload);
+		return false;
+	}
+
+	TSharedRef<ProtoEventEnvelope> EventEnvelope = MakeShared<ProtoEventEnvelope>();
+	if(!EventEnvelope->ParseFromArray(ProtobufPayload.GetData(), ProtobufPayload.Num()))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize event protobuf payload,\npayload is : %s"), *InPayload);
+		return false;
+	}
+
+	OutProtoEventEnvelope = EventEnvelope;
+	return true;
+}
+
+void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
+{
+	FAccelByteModelsSessionNotificationMessage Notif;
+	if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif, 0, 0) == false)
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
+		return;
+	}
+
+	TSharedRef<session::NotificationEventEnvelope> EventEnvelope = MakeShared<session::NotificationEventEnvelope>();
+	if(!ParseProtobufPayload(Notif.Payload, EventEnvelope))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Failed to parse protobuf payload\nNotification: %s"), *ParsedJsonString);
+		return;
+	}
+
+	switch(EventEnvelope->payload_case())
+	{
+	case session::NotificationEventEnvelope::kPartyNotificationUserInvitedV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2PartyInvitedEvent>(EventEnvelope->partynotificationuserinvitedv1(), V2PartyInvitedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartyNotificationMembersChangedV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2PartyMembersChangedEvent>(EventEnvelope->partynotificationmemberschangedv1(), V2PartyMembersChangedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartyNotificationUserJoinedV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2PartyUserJoinedEvent>(EventEnvelope->partynotificationuserjoinedv1(), V2PartyJoinedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartyNotificationUserRejectV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2PartyUserRejectedEvent>(EventEnvelope->partynotificationuserrejectv1(), V2PartyRejectedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartyNotificationUserKickedV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope->partynotificationuserkickedv1(), V2PartyKickedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionNotificationUserInvitedV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2GameSessionUserInvitedEvent>(EventEnvelope->gamesessionnotificationuserinvitedv1(), V2GameSessionInvitedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionNotificationUserJoinedV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2GameSessionUserJoinedEvent>(EventEnvelope->gamesessionnotificationuserjoinedv1(), V2GameSessionJoinedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionNotificationMembersChangedV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2GameSessionMembersChangedEvent>(EventEnvelope->gamesessionnotificationmemberschangedv1(), V2GameSessionMembersChangedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionNotificationUserKickedV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2GameSessionUserKickedEvent>(EventEnvelope->gamesessionnotificationuserkickedv1(), V2GameSessionKickedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope->dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
+		break;
+	}
+	case session::NotificationEventEnvelope::kPartySessionV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2PartySession>(EventEnvelope->partysessionv1(), V2PartyUpdatedNotif, true);
+		break;
+	}
+	case session::NotificationEventEnvelope::kGameSessionV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2GameSession>(EventEnvelope->gamesessionv1(), V2GameSessionUpdatedNotif, true);
+		break;
+	}
+	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
+	}
+}
+
+void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message)
+{
+	TSharedRef<matchmaking::NotificationEventEnvelope> Envelope = MakeShared<matchmaking::NotificationEventEnvelope>();
+	if(!ParseProtobufPayload(Message.Payload, Envelope))
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Failed to parse matchmaking v2 notification"));
+		return;
+	}
+
+	switch (Envelope->payload_case())
+	{
+		case matchmaking::NotificationEventEnvelope::kMatchFoundNotifV1:
+		{
+			DispatchV2Notif<FAccelByteModelsV2MatchFoundNotif>(Envelope->matchfoundnotifv1(), V2MatchmakingMatchFoundNotif);
+			break;
+		}
+		case matchmaking::NotificationEventEnvelope::kStartMatchmakingNotifV1:
+		{
+			DispatchV2Notif<FAccelByteModelsV2StartMatchmakingNotif>(Envelope->startmatchmakingnotifv1(), V2MatchmakingStartNotif);
+			break;
+		}
+		default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown matchmaking v2 notification topic : %s"), *Message.Topic);
+	}
+}
+
+void Lobby::InitializeV2MatchmakingNotifDelegates()
+{
+	MatchmakingV2NotifDelegates = {
+		{EV2MatchmakingNotif::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotif::OnMatchmakingStarted, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+	};
+}
+
 void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
 {
 	Notif NotifEnum = Notif::Invalid_Notif;
@@ -1940,6 +2232,14 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 					return;
 				}
 			}
+
+			EV2MatchmakingNotif MMNotifEnum = FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotif>(NotificationMessage.Topic);
+			if(MMNotifEnum != EV2MatchmakingNotif::Invalid && MatchmakingV2NotifDelegates.Contains(MMNotifEnum))
+			{
+				MatchmakingV2NotifDelegates[MMNotifEnum].ExecuteIfBound(NotificationMessage);
+				break;
+			}
+				
 			MessageNotif.ExecuteIfBound(NotificationMessage);
 			break;
 		}
@@ -2070,7 +2370,11 @@ void Lobby::OnMessage(const FString& Message)
 	const FString ReceivedMessageType = ParsedJsonObj->GetStringField(JsonTypeIdentifier);
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Type: %s"), *ReceivedMessageType);
 
-	if (ReceivedMessageType.Contains(Suffix::Response))
+	if (ReceivedMessageType.Equals(LobbyResponse::SessionNotif))
+	{
+		HandleV2SessionNotif(ParsedJsonString);
+	}
+	else if (ReceivedMessageType.Contains(Suffix::Response))
 	{
 		HandleMessageResponse(ReceivedMessageType, ParsedJsonString, ParsedJsonObj);
 	}
@@ -2248,6 +2552,7 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, TimeSinceLastReconnect{.0f}
 	, TimeSinceConnectionLost{.0f}
 {
+	InitializeV2MatchmakingNotifDelegates();
 }
 
 Lobby::~Lobby()

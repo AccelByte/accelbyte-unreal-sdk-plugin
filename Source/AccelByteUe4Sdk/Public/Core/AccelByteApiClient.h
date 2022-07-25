@@ -35,6 +35,8 @@
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "Api/AccelByteWalletApi.h"
+#include "Api/AccelByteSessionApi.h"
+#include "Api/AccelByteMatchmakingV2Api.h"
 #include "Core/AccelByteApiBase.h"
 
 using namespace AccelByte;
@@ -80,6 +82,8 @@ public:
 	Api::Miscellaneous Miscellaneous{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Reward Reward{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::TurnManager TurnManager{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Session Session{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::MatchmakingV2 MatchmakingV2{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)

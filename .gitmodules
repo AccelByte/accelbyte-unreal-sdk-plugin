@@ -1,0 +1,3 @@
+[submodule "Source/ThirdParty/libprotobuf"]
+	path = Source/ThirdParty/libprotobuf
+	url = https://github.com/thejinchao/libprotobuf
