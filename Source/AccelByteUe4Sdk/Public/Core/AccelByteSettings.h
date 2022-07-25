@@ -148,6 +148,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString SessionServerUrl;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString MatchmakingV2ServerUrl;
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AppId;
@@ -340,7 +343,10 @@ public:
 	static void SetReportingServerUrl(const FString& ReportingServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
-	static void SetSessionServerUrl(const FString& ReportingServerUrl);
+	static void SetSessionServerUrl(const FString& SessionServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetSeasonPassServerUrl(const FString& SeasonPassServerUrl);

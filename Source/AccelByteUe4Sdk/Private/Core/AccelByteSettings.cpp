@@ -421,6 +421,11 @@ void UAccelByteBlueprintsSettings::SetSessionServerUrl(const FString& SessionSer
 	FRegistry::Settings.SessionServerUrl = SessionServerUrl;
 }
 
+void UAccelByteBlueprintsSettings::SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl)
+{
+	FRegistry::Settings.MatchmakingV2ServerUrl = MatchmakingV2ServerUrl;
+}
+
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
 {
 	FRegistry::Settings.AppId = AppId;
