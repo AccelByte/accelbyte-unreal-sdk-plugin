@@ -189,7 +189,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFetchUser
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkFetchUser")
 	FString StatCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkFetchUser")
-	int Value{};
+	float Value{};
 };
 
 USTRUCT(BlueprintType)
@@ -206,7 +206,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateUserStatItem
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
 	EAccelByteStatisticUpdateStrategy UpdateStrategy{EAccelByteStatisticUpdateStrategy::OVERRIDE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
-	int Value{};
+	float Value{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUser")
 	FJsonObjectWrapper AdditionalData{};
 };
@@ -245,7 +245,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateUserStatItemWithStatCode
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItemWithStatCode")
 	EAccelByteStatisticUpdateStrategy UpdateStrategy{EAccelByteStatisticUpdateStrategy::OVERRIDE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItemWithStatCode")
-	int Value{};
+	float Value{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItemWithStatCode")
 	FJsonObjectWrapper AdditionalData{};
 };
@@ -258,7 +258,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicUpdateUserStatItem
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItem")
 	EAccelByteStatisticUpdateStrategy UpdateStrategy { EAccelByteStatisticUpdateStrategy::OVERRIDE };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItem")
-	int Value{};
+	float Value{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateUserStatItem")
 	FJsonObjectWrapper AdditionalData {};
 };
@@ -269,6 +269,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateUserStatItemValueResponse
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UpdateUserStatItemValueResponse")
-	int CurrentValue{};  
+	float CurrentValue{};  
 };
 
