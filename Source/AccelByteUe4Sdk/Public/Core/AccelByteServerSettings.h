@@ -33,6 +33,7 @@ public:
 	FString CloudSaveServerUrl;
 	FString SeasonPassServerUrl;
 	FString SessionBrowserServerUrl;
+	FString SessionServerUrl;
 	
 	void Reset(ESettingsEnvironment const Environment);
 
@@ -114,6 +115,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString SessionBrowserServerUrl;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	FString SessionServerUrl;
 };
 
 UCLASS(Config = Engine)
@@ -197,6 +201,9 @@ public:
 	static FString GetSessionBrowserServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetSessionServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -243,6 +250,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetSessionBrowserServerUrl(const FString& CloudServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetSessionServerUrl(const FString& CloudServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void ResetSettings(const ESettingsEnvironment Environment);

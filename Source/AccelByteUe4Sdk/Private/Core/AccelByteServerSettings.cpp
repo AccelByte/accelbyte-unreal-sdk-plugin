@@ -83,6 +83,9 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	GConfig->GetString(*SectionPath, TEXT("SessionBrowserServerUrl"), SessionBrowserServerUrl, GEngineIni);
 	SessionBrowserServerUrl = GetDefaultServerAPIUrl(SessionBrowserServerUrl, BaseUrl, TEXT("sessionbrowser"));
+
+	GConfig->GetString(*SectionPath, TEXT("SessionServerUrl"), SessionServerUrl, GEngineIni);
+	SessionServerUrl = GetDefaultServerAPIUrl(SessionServerUrl, BaseUrl, TEXT("session"));
 #endif
 }
 
@@ -197,6 +200,11 @@ FString UAccelByteBlueprintsServerSettings::GetSessionBrowserServerUrl()
 	return FRegistry::ServerSettings.SessionBrowserServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetSessionServerUrl()
+{
+	return FRegistry::ServerSettings.SessionServerUrl;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -275,6 +283,11 @@ void UAccelByteBlueprintsServerSettings::SetSeasonPassServerUrl(const FString & 
 void UAccelByteBlueprintsServerSettings::SetSessionBrowserServerUrl(const FString & SessionBrowserUrl)
 {
 	FRegistry::ServerSettings.SessionBrowserServerUrl = SessionBrowserUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetSessionServerUrl(const FString& SessionUrl)
+{
+	FRegistry::ServerSettings.SessionServerUrl = SessionUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::ResetSettings(ESettingsEnvironment const Environment)
