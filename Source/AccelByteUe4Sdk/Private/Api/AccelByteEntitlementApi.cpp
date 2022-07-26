@@ -54,6 +54,7 @@ void Entitlement::QueryUserEntitlements(
 	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
 		{ TEXT("entitlementName"), EntitlementName },
 		{ "itemId", FString::Join(ItemIds, TEXT("&itemId=")) },
+		{ "features", FString::Join(Features, TEXT("&features=")) },
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ?
