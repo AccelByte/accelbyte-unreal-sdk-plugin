@@ -157,7 +157,7 @@ namespace Api
 	} 
 	
 	void Statistic::ListUserStatItems(const TArray<FString>& StatCodes,  const TArray<FString>& Tags,  const FString& AdditionalKey, 
-		const THandler<TArray<FAccelByteModelsListUserStatItemRespose>>& OnSuccess, const FErrorHandler& OnError)
+		const THandler<TArray<FAccelByteModelsFetchUser>>& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -168,10 +168,11 @@ namespace Api
 		FString Accept = TEXT("application/json");
 		FString Content = TEXT(""); 
 		FString QueryParam = FAccelByteUtilities::CreateQueryParams({
-			{ TEXT("statCodes"), FAccelByteUtilities::CreateQueryParamValueFromArray(StatCodes) },
-			{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueFromArray(Tags) },
+			{ "statCodes", FString::Join(StatCodes, TEXT("&statCodes=")) },
+			{ "tags", FString::Join(Tags, TEXT("&tags=")) },
 			{ TEXT("additionalKey"), AdditionalKey },
 		});
+
 		Url.Append(QueryParam);
 	
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -184,8 +185,8 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void Statistic::BulkUpdateUserStatItemsValue(const FString& AdditionalKey, const TArray<FAccelByteModelsBulkUpdateUserStatItem>& BulkUpdateUserStatItems,
-			const THandler<TArray<FAccelByteModelsBulkUpdateUserStatItemResponse>>& OnSuccess, const FErrorHandler& OnError)
+	void Statistic::BulkUpdateUserStatItemsValue(const FString& AdditionalKey, const TArray<FAccelByteModelsUpdateUserStatItemWithStatCode>& BulkUpdateUserStatItems,
+			const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -195,7 +196,7 @@ namespace Api
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
 		FString Content = TEXT("");
-		FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsBulkUpdateUserStatItem>(BulkUpdateUserStatItems, Content);
+		FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsUpdateUserStatItemWithStatCode>(BulkUpdateUserStatItems, Content);
 		FString QueryParam = FAccelByteUtilities::CreateQueryParams({
 				{ TEXT("additionalKey"), AdditionalKey },
 			});
@@ -212,7 +213,7 @@ namespace Api
 	}
 
 	void Statistic::UpdateUserStatItemsValue(const FString& StatCode, const FString& AdditionalKey, const FAccelByteModelsPublicUpdateUserStatItem& UpdateUserStatItem,
-		const THandler<FAccelByteModelsUpdateUserStatItemValueRespose>& OnSuccess, const FErrorHandler& OnError)
+		const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 

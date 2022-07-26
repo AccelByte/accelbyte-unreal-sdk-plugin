@@ -52,7 +52,8 @@ void Entitlement::QueryUserEntitlements(
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
  	
 	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("entitlementName"), EntitlementName }, 
+		{ TEXT("entitlementName"), EntitlementName },
+		{ "itemId", FString::Join(ItemIds, TEXT("&itemId=")) },
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ?
@@ -60,23 +61,6 @@ void Entitlement::QueryUserEntitlements(
 		{ TEXT("appType"), AppType != EAccelByteAppType::NONE ?
 				*FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType) : TEXT("")},
 	});
-	// Here we use append string to Url, we couldn't we use TMap for ItemIds, since the key should be unique 
-	for (FString const& ItemId : ItemIds)
-	{
-		if (!ItemId.IsEmpty())
-		{
-			QueryParams.Append(QueryParams.IsEmpty() ? TEXT("?") : TEXT("&"));
-			QueryParams.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
-		}
-	}
-	for (FString const& Feature : Features)
-	{
-		if (!Feature.IsEmpty())
-		{
-			QueryParams.Append(QueryParams.IsEmpty() ? TEXT("?") : TEXT("&"));
-			QueryParams.Append(FString::Printf(TEXT("features=%s"), *Feature));
-		}
-	}	
 	Url.Append(QueryParams);
 
 	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
@@ -515,24 +499,16 @@ void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Id
 	// Url 
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/ownership/byItemIds"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 
-	// Params
-	FString IdsQueryParamString = TEXT("");
-	for (FString const& Id : Ids)
-	{
-		if (!Id.IsEmpty())
-		{
-			IdsQueryParamString.Append(IdsQueryParamString.IsEmpty() ? TEXT("?") : TEXT("&"));
-			IdsQueryParamString.Append(FString::Printf(TEXT("ids=%s"), *Id));
-		}
-	} 
-	// Here we use append string to Url; we couldn't use TMap for ids, since the key should be unique 
-	Url.Append(IdsQueryParamString); 
+	// Params 
+	auto QueryParam = FAccelByteUtilities::CreateQueryParamsAndSkipIfValueEmpty({
+		{ "ids", FString::Join(Ids, TEXT("&ids=")) }
+	}); 
 
 	// Content 
 	FString Content = TEXT("");
 	
 	// Api Request 
-	HttpClient.ApiRequest("GET", Url, {}, Content, OnSuccess, OnError); 
+	HttpClient.ApiRequest("GET", Url, QueryParam, Content, OnSuccess, OnError); 
 }
 
 } // Namespace Api
