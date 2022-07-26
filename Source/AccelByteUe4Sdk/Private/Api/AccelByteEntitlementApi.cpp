@@ -27,13 +27,12 @@ Entitlement::Entitlement(Credentials const& InCredentialsRef
 
 Entitlement::~Entitlement(){}
 
-void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE, FString const& Feature )
+void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE, TArray<FString> const& Features)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	TArray<FString> ItemIdsArray = { ItemId };
-	TArray<FString> FeatureArray = { Feature };
-	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType, FeatureArray);
+	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType, Features);
 
 }
 
@@ -501,15 +500,26 @@ void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Id
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/ownership/byItemIds"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 
 	// Params 
-	auto QueryParam = FAccelByteUtilities::CreateQueryParamsAndSkipIfValueEmpty({
-		{ "ids", FString::Join(Ids, TEXT("&ids=")) }
-	}); 
+	FString IdsQueryParamString = TEXT("");
+
+	for (FString const& Id : Ids)
+	{
+		if (!Id.IsEmpty())
+		{
+			IdsQueryParamString.Append(IdsQueryParamString.IsEmpty() ? TEXT("?") : TEXT("&"));
+			IdsQueryParamString.Append(FString::Printf(TEXT("ids=%s"), *Id));
+		}
+	} 
+
+	// Here we use append string to Url; we couldn't use TMap for ids, since the key should be unique 
+
+	Url.Append(IdsQueryParamString); 
 
 	// Content 
 	FString Content = TEXT("");
 	
 	// Api Request 
-	HttpClient.ApiRequest("GET", Url, QueryParam, Content, OnSuccess, OnError); 
+	HttpClient.ApiRequest("GET", Url, {}, Content, OnSuccess, OnError); 
 }
 
 } // Namespace Api
