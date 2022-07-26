@@ -27,12 +27,13 @@ Entitlement::Entitlement(Credentials const& InCredentialsRef
 
 Entitlement::~Entitlement(){}
 
-void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
+void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE, FString const& Feature )
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	TArray<FString> ItemIdsArray = { ItemId };
-	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType);
+	TArray<FString> FeatureArray = { Feature };
+	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType, FeatureArray);
 
 }
 
@@ -42,7 +43,8 @@ void Entitlement::QueryUserEntitlements(
 	int32 const& Offset,
 	int32 const& Limit,
 	THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess,
-	FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType)
+	FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType,
+	TArray<FString> const& Features)
 { 
 
 	FReport::Log(FString(__FUNCTION__));
@@ -65,6 +67,14 @@ void Entitlement::QueryUserEntitlements(
 		{
 			QueryParams.Append(QueryParams.IsEmpty() ? TEXT("?") : TEXT("&"));
 			QueryParams.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
+		}
+	}
+	for (FString const& Feature : Features)
+	{
+		if (!Feature.IsEmpty())
+		{
+			QueryParams.Append(QueryParams.IsEmpty() ? TEXT("?") : TEXT("&"));
+			QueryParams.Append(FString::Printf(TEXT("features=%s"), *Feature));
 		}
 	}	
 	Url.Append(QueryParams);
