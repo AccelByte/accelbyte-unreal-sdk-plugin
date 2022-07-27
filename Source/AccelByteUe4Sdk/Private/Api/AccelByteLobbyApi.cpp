@@ -1972,7 +1972,7 @@ void ReplaceBytesFieldsWithJsonObjects(const FString& ParsedJsonString, const TS
 					return;
 				}
 
-				for(const TSharedPtr<FJsonValue> Item : *NestedArray)
+				for(const TSharedPtr<FJsonValue>& Item : *NestedArray)
 				{
 					const TSharedPtr<FJsonObject>* Object;
 					if(!Item->TryGetObject(Object))
