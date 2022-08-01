@@ -369,6 +369,34 @@ void UABUGC::DeleteChannel(
 	);
 }
 
+void UABUGC::SearchContents(const FString& Name,
+	const FString& Creator,
+	const FString& Type,
+	const FString& Subtype,
+	const TArray<FString>& Tags,
+	bool IsOfficial,
+	const FString& UserId,
+	FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	EAccelByteUgcSortBy SortBy,
+	EAccelByteUgcOrderBy OrderBy,
+	int32 Limit,
+	int32 Offset)
+{
+	ApiClientPtr->UGC.SearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+			SortBy, OrderBy, Limit, Offset
+	);
+}
+
 void UABUGC::UpdateLikeStatusToContent(const FString& ContentId,
 	bool bLikeStatus,
 	FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
