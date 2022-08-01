@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [15.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.1.0%0D15.0.0) (2022-08-01)
+
+
+### Features
+
+* **party:** add party connect, and disconnect notification ([bee9d18](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bee9d181a3d9f6ecf7628c8e4a47399382fd0510))
+
+
+### Bug Fixes
+
+* **party:** change all all function, delegate or variable by using PartyMember. Also adding some description on the function. ([6189926](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6189926b8e4a767fa3adf61e1e043bade49df630))
+* **party:** fix typo on partyMemberLeaveNotice and FPartyMemberDisconnectNotif ([b28a515](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b28a515b78434d76b038475056fc4fabe8cac801))
+* **party:** Set Deprecation Variable, Function, and Delegate for PartyLeaveNotif. ([ab4d428](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ab4d42860e26b8c26ffbef79a73a6a0fdd8f87ba))
+
 ## [15.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.0.0%0D14.0.0) (2022-07-18)
 
 
