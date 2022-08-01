@@ -382,6 +382,30 @@ void UGC::DeleteChannel(FString const& ChannelId
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void UGC::UpdateLikeStatusToContent(const FString& ContentId, bool bLikeStatus
+	, THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/like"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ContentId);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json"); 
+	FString Content = FString::Printf(TEXT("{\"likeStatus\": %s}"), bLikeStatus ? TEXT("true") : TEXT("false"));
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
 	
 }
 }
