@@ -368,3 +368,51 @@ void UABUGC::DeleteChannel(
 		)
 	);
 }
+
+void UABUGC::GetListFollowers(const FString& UserId,
+	FDModelsUGCGetListFollowersPagingResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	int32 Limit,
+	int32 Offset
+)
+{
+	ApiClientPtr->UGC.GetListFollowers(UserId,
+		THandler<FAccelByteModelsUGCGetListFollowersPagingResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCGetListFollowersPagingResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		),
+		Limit,
+		Offset
+	);
+}
+
+void UABUGC::UpdateFollowStatusToUser(const FString& UserId,
+	bool bFollowStatus, 
+	FDModelsUGCUpdateFollowStatusToUserResponse const& OnSuccess,
+	FDErrorHandler const& OnError 
+)
+{
+	ApiClientPtr->UGC.UpdateFollowStatusToUser(UserId,
+		bFollowStatus, 
+		THandler<FAccelByteModelsUGCUpdateFollowStatusToUserResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCUpdateFollowStatusToUserResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		) 
+	);
+}

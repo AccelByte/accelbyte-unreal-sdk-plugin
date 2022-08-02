@@ -189,6 +189,26 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void DeleteChannel(FString const& ChannelId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/** @brief Get list of followers.
+	*
+	* @param UserId The id of the user that will be given it's followers.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of user per page, Default value : 1000.
+	* @param Offset The offset number to retrieve, Default value : 0.
+	*/
+	void GetListFollowers(const FString& UserId, THandler<FAccelByteModelsUGCGetListFollowersPagingResponse> const& OnSuccess, FErrorHandler const& OnError,
+		int32 Limit = 1000, int32 Offset = 0);
+
+	/** @brief Update follow/unfollow status to a user.
+	*
+	* @param UserId The id of the user that will be updated.
+	* @param bFollowStatus The new follow status value.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void UpdateFollowStatusToUser(const FString& UserId, bool bFollowStatus, THandler<FAccelByteModelsUGCUpdateFollowStatusToUserResponse> const& OnSuccess, FErrorHandler const& OnError);
 	
 	private:
 	UGC() = delete;

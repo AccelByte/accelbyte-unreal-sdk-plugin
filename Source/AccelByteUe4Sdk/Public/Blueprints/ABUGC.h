@@ -31,6 +31,10 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelResponse, FAccelByteModelsUG
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelsPagingResponse, FAccelByteModelsUGCChannelsPagingResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetListFollowersPagingResponse, FAccelByteModelsUGCGetListFollowersPagingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateFollowStatusToUserResponse, FAccelByteModelsUGCUpdateFollowStatusToUserResponse, Response);
+
 #pragma endregion
 
 UCLASS(BlueprintType, Blueprintable)
@@ -160,6 +164,19 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void GetListFollowers(const FString& UserId,
+		FDModelsUGCGetListFollowersPagingResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 Limit = 1000,
+		int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void UpdateFollowStatusToUser(const FString& UserId,
+		bool bFollowStatus, 
+		FDModelsUGCUpdateFollowStatusToUserResponse const& OnSuccess,
+		FDErrorHandler const& OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;
