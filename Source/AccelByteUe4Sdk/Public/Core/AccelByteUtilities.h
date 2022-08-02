@@ -183,14 +183,15 @@ public:
 		return Query;
 	}
 
-	static FString CreateQueryParamValueFromArray(TArray<FString> Array)
+	static FString CreateQueryParamValueUrlEncodedFromArray(const TArray<FString>& Array, const FString& Delimiter = TEXT(","))
 	{
 		FString QueryParamValue = TEXT("");
 		if (Array.Num() > 0)
 		{ 
 			for (int i = 0; i < Array.Num(); i++)
 			{
-				FString ItemAppended = FString::Printf(TEXT(",%s"), *Array[i]);
+				const FString& UrlEncodedStringValue = FGenericPlatformHttp::UrlEncode(Array[i]);
+				FString ItemAppended = FString::Printf(TEXT("%s%s"), *Delimiter, *UrlEncodedStringValue);
 				QueryParamValue.Append( i == 0 ? Array[i] : ItemAppended);
 			}
 		}

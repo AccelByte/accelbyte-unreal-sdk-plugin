@@ -31,6 +31,10 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelResponse, FAccelByteModelsUG
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelsPagingResponse, FAccelByteModelsUGCChannelsPagingResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCSearchContentsPagingResponse, FAccelByteModelsUGCSearchContentsPagingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateLikeStatusToContentResponse, FAccelByteModelsUGCUpdateLikeStatusToContentResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetListFollowersPagingResponse, FAccelByteModelsUGCGetListFollowersPagingResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateFollowStatusToUserResponse, FAccelByteModelsUGCUpdateFollowStatusToUserResponse, Response);
@@ -164,6 +168,27 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void SearchContents(const FString& Name,
+		const FString& Creator,
+		const FString& Type,
+		const FString& Subtype,
+		const TArray<FString>& Tags,
+		bool IsOfficial,
+		const FString& UserId,
+		FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE,
+		EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC,
+		int32 Limit = 1000,
+		int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void UpdateLikeStatusToContent(const FString& ContentId,
+		bool bLikeStatus,
+		FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
+		FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetListFollowers(const FString& UserId,
