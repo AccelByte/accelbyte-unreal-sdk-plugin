@@ -266,6 +266,27 @@ void UABEntitlement::SyncPlatformPurchase(
 			}));
 }
 
+void UABEntitlement::SyncPlatformPurchaseSingleItem(
+	FAccelByteModelsEntitlementSyncBase EntitlementSyncBase,
+	EAccelBytePlatformSync PlatformType,
+	FDHandler OnSuccess,
+	FDErrorHandler OnError)
+{
+	ApiClientPtr->Entitlement.SyncPlatformPurchase(
+		EntitlementSyncBase,
+		PlatformType,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
 void UABEntitlement::SyncMobilePlatformPurchaseGoogle(
 	FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest, 
 	FDHandler OnSuccess, 
