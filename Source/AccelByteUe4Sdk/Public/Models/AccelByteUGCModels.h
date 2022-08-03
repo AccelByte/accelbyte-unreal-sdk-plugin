@@ -338,7 +338,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCSearchContentsResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponse")
 	FString ChannelId{};	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponse")
-	FString createdTime{};
+	FString CreatedTime{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponse")
 	FAccelByteModelsUserIdState CreatorFollowState{};			
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponse")

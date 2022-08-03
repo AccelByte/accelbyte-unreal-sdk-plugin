@@ -203,6 +203,22 @@ public:
 		FDModelsUGCUpdateFollowStatusToUserResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void SearchContentsSpecificToChannel(const FString& ChannelId,
+		const FString& Name,
+		const FString& Creator,
+		const FString& Type,
+		const FString& Subtype,
+		const TArray<FString>& Tags,
+		bool IsOfficial,
+		const FString& UserId,
+		FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE,
+		EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC,
+		int32 Limit = 1000,
+		int32 Offset = 0);
+		
 private:
 	FApiClientPtr ApiClientPtr;
 };

@@ -241,7 +241,30 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void UpdateFollowStatusToUser(const FString& UserId, bool bFollowStatus, THandler<FAccelByteModelsUGCUpdateFollowStatusToUserResponse> const& OnSuccess, FErrorHandler const& OnError);
-	
+
+	/** @brief Search contents specific to a channel.   
+	*
+	* @param ChannelId Channel Id.
+	* @param Name Content Name.
+	* @param Creator Creator Name.
+	* @param Type Content Type.
+	* @param Subtype Content Subtype.
+	* @param Tags Content Tags.
+	* @param IsOfficial Filter only official contents
+	* @param UserId User Id 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param SortBy Sorting criteria, name,download,like,date. default=date.
+	* @param OrderBy Sorting order: asc, desc. default=desc
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/
+	void SearchContentsSpecificToChannel(const FString& ChannelId, const FString& Name, const FString& Creator, const FString& Type, const FString& Subtype,
+		const TArray<FString>& Tags, bool IsOfficial, const FString& UserId,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess, FErrorHandler const& OnError,
+		EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC,
+		int32 Limit = 1000, int32 Offset = 0);
+
 	private:
 	UGC() = delete;
 	UGC(UGC const&) = delete;
