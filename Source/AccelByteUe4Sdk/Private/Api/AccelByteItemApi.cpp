@@ -9,6 +9,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
@@ -203,7 +204,7 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, 
 	if (ItemCriteria.Tags.Num() > 0)
 	{ 
 		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("tags=%s"), *FString::Join(ItemCriteria.Tags, TEXT(","))));
+		Query.Append(FString::Printf(TEXT("tags=%s"), *FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(ItemCriteria.Tags)));
 	}
 	if (ItemCriteria.Features.Num() > 0)
 	{ 
@@ -226,7 +227,10 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, 
 		TArray<FString> QuerySortBy;
 		for (int i = 0; i < SortBy.Num(); i++)
 		{
-			QuerySortBy.Add(ConvertItemSortByToString(SortBy[i]));
+			if (SortBy[i] != EAccelByteItemListSortBy::NONE)
+			{
+				QuerySortBy.Add(ConvertItemSortByToString(SortBy[i]));
+			}
 		}
 		Query.Append(FString::Printf(TEXT("sortBy=%s"), *FString::Join(QuerySortBy, TEXT(","))));
 	}
