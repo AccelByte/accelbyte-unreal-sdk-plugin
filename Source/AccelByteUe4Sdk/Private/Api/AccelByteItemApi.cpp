@@ -171,7 +171,10 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 	{		 
 		for (auto SortByEnum : SortBy)
 		{
-			SortByStringArray.Add(ConvertItemSortByToString(SortByEnum));
+			if (SortByEnum != EAccelByteItemListSortBy::NONE)
+			{
+				SortByStringArray.Add(ConvertItemSortByToString(SortByEnum));
+			}
 		} 
 	}
 	const TMap<FString, FString> Params = FAccelByteUtilities::CreateQueryParamsAndSkipIfValueEmpty({
@@ -182,11 +185,11 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 				FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType) : TEXT("") },
 		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ?
 				FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType) : TEXT("")  },
-		{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemCriteria.Tags) },
-		{ TEXT("features"), FAccelByteUtilities::CreateQueryParamValueFromArray(ItemCriteria.Features)  },
+		{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(ItemCriteria.Tags) },
+		{ TEXT("features"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(ItemCriteria.Features)  },
 		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
 		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
-		{ TEXT("sortBy"), FAccelByteUtilities::CreateQueryParamValueFromArray(SortByStringArray)  },
+		{ TEXT("sortBy"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(SortByStringArray)  },
 		{ TEXT("storeId"), StoreId },
 	});
 	
