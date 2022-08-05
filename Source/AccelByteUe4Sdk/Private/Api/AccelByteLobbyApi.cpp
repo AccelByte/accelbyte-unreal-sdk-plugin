@@ -2283,6 +2283,10 @@ Lobby::~Lobby()
 	if(UObjectInitialized())
 	{
 		Disconnect(true);
+		UnbindEvent();
+		ConnectSuccess.Unbind();
+		ConnectError.Unbind();
+		ConnectionClosed.Unbind();
 	}
 }
 
