@@ -190,7 +190,8 @@ private:
 
 	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
-
+	static void RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject>& JsonObjectPtr);
+	
 	template <typename DataStruct>
 	static void SerializeAndRemoveEmptyEnumValues(DataStruct Model, FString& OutputString, bool bRemoveDSRequest = false)
 	{
@@ -203,6 +204,7 @@ private:
 
 		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinType"));
 		RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));
+		RemoveEmptyFieldsFromJson(JsonObjectPtr);
 
 		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);

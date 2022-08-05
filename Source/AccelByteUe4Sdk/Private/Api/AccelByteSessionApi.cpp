@@ -43,6 +43,45 @@ void Session::RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObje
 	}
 }
 
+void Session::RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject>& JsonObjectPtr)
+{
+	// Remove empty field so it doesn't get updated in BE
+	for(auto& val : JsonObjectPtr->Values)
+	{
+		// check if value is valid and value is not null.
+		// if it is then this field has a value and we continue to check other fields.
+		if(val.Value.IsValid() && !val.Value->IsNull())
+		{
+			continue;
+		}
+
+		bool bRemoveField = false;
+		switch (val.Value->Type)
+		{
+		case EJson::Array:
+			{
+				bRemoveField = val.Value->AsArray().Num() == 0;
+				break;
+			}
+		case EJson::Object:
+			{
+				TArray<FString> Keys;
+				bRemoveField = val.Value->AsObject()->Values.GetKeys(Keys) == 0;
+				break;
+			}
+		case EJson::String:
+			{
+				bRemoveField = val.Value->AsString().IsEmpty();
+				break;
+			}
+		}
+
+		// this field is empty so we remove this field.
+		if(bRemoveField)
+			JsonObjectPtr->RemoveField(val.Key);
+	}
+}
+
 Session::Session(
 	Credentials const& InCredentialsRef,
 	Settings const& InSettingsRef,
