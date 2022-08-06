@@ -3,44 +3,17 @@
 // and restrictions contact your company contract manager.
 
 #include "GameServerApi/AccelByteServerSessionApi.h"
+
+#include "Api/AccelByteSessionApi.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteSettings.h"
 
 namespace AccelByte
 {
 namespace GameServerApi
 {
-void ServerSession::RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName)
-{
-	FString FieldValue;
-	if(JsonObjectPtr->TryGetStringField(FieldName, FieldValue))
-	{
-		if(FieldValue.Equals(TEXT("EMPTY")))
-		{
-			JsonObjectPtr->SetStringField(FieldName, TEXT(""));
-		}
-	}
-}
-
-void ServerSession::RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName)
-{
-	if(JsonObjectPtr->HasTypedField<EJson::Array>(FieldName))
-	{
-		TArray<TSharedPtr<FJsonValue>> Array = JsonObjectPtr->GetArrayField(FieldName);
-		for(auto& Item : Array)
-		{
-			if(Item->Type == EJson::Object)
-			{
-				TSharedPtr<FJsonObject> Child = Item->AsObject();
-				RemoveEmptyEnumValue(Child, TEXT("status"));
-			}
-		}
-	}
-}
-
 ServerSession::ServerSession(
 	ServerCredentials const& InCredentialsRef,
 	ServerSettings const& InSettingsRef,
@@ -87,17 +60,8 @@ void ServerSession::UpdateGameSession(
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetClientNamespace(), *GameSessionID);
 
-	// If the given DSRequest object contains all default values, we remove it from the request JSON by passing a flag
-	// to SerializeAndRemoveEmptyEnumValues
-	const FAccelByteModelsV2DSRequest DSRequest = UpdateRequest.DSRequest;
-	const bool bRemoveDSRequest =
-		DSRequest.Deployment.IsEmpty() &&
-		DSRequest.ClientVersion.IsEmpty() &&
-		DSRequest.GameMode.IsEmpty() &&
-		DSRequest.RequestedRegions.Num() == 0;
-
-	FString Content = TEXT("");    
-	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content, bRemoveDSRequest);
+	FString Content;
+	Api::Session::SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);

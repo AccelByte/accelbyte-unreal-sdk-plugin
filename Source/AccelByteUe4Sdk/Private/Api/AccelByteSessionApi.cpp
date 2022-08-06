@@ -43,42 +43,104 @@ void Session::RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObje
 	}
 }
 
-void Session::RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject>& JsonObjectPtr)
+void Session::RemoveEmptyFieldsFromJson(const TSharedPtr<FJsonObject>& JsonObjectPtr)
 {
+	TArray<FString> FieldsToRemove;
+	TMap<FString, TSharedPtr<FJsonValue>> FieldsToReplace;
+
 	// Remove empty field so it doesn't get updated in BE
-	for(auto& val : JsonObjectPtr->Values)
+	for(auto& KeyValuePair : JsonObjectPtr->Values)
 	{
-		// check if value is valid and value is not null.
-		// if it is then this field has a value and we continue to check other fields.
-		if(val.Value.IsValid() && !val.Value->IsNull())
+		if(!KeyValuePair.Value.IsValid())
 		{
 			continue;
 		}
 
-		bool bRemoveField = false;
-		switch (val.Value->Type)
+		bool bRemoveField;
+		switch (KeyValuePair.Value->Type)
 		{
 		case EJson::Array:
+		{
+			TArray<TSharedPtr<FJsonValue>> OriginalArray = KeyValuePair.Value->AsArray(); 
+			bRemoveField = OriginalArray.Num() == 0;
+
+			if(bRemoveField)
 			{
-				bRemoveField = val.Value->AsArray().Num() == 0;
 				break;
 			}
+
+			// If the array is not empty, we want to look for nested objects which might have empty values inside them
+			TArray<TSharedPtr<FJsonValue>> NewArray;
+			for(const auto& NestedValue : OriginalArray)
+			{
+				// Skipping over any array item that is not an object
+				if(NestedValue->Type != EJson::Object)
+				{
+					// NewArray.Add(NestedValue);
+					continue;
+				}
+
+				TSharedPtr<FJsonObject> NestedObject = NestedValue->AsObject();
+				RemoveEmptyFieldsFromJson(NestedObject);
+				NewArray.Add(MakeShared<FJsonValueObject>(NestedObject));
+			}
+
+			FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueArray>(NewArray));
+
+			break;
+		}
 		case EJson::Object:
+		{
+			TSharedPtr<FJsonObject> Object = KeyValuePair.Value->AsObject();
+			TArray<FString> Keys;
+			bRemoveField = Object->Values.Num() == 0;
+
+			if(bRemoveField)
 			{
-				TArray<FString> Keys;
-				bRemoveField = val.Value->AsObject()->Values.GetKeys(Keys) == 0;
 				break;
 			}
+
+			RemoveEmptyFieldsFromJson(Object);
+			FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueObject>(Object));
+
+			break;
+		}
 		case EJson::String:
-			{
-				bRemoveField = val.Value->AsString().IsEmpty();
-				break;
-			}
+		{
+			// #NOTE(jordan): Removing string fields if they are equal to an uninitialized datetime (aka 0 ticks)
+			const FString Value = KeyValuePair.Value->AsString();
+			bRemoveField = Value.IsEmpty() || Value.Equals(FDateTime(0).ToString());
+
+			break;
+		}
+
+		// #NOTE(jordan): It should be safe to remove any number fields with value 0, as these are the fields we have:
+		//                InviteTimeout, InactiveTimeout, MinPlayers, MaxPlayers, Version
+		//                None of these should reasonably have a zero value, so I'm assuming the field should be omitted in that case. 
+		case EJson::Number:
+		{
+			bRemoveField = KeyValuePair.Value->AsNumber() == 0;
+			break;
+		}
+
+		default: bRemoveField = false;
 		}
 
 		// this field is empty so we remove this field.
 		if(bRemoveField)
-			JsonObjectPtr->RemoveField(val.Key);
+		{
+			FieldsToRemove.Add(KeyValuePair.Key);
+		}
+	}
+
+	for(const FString& Key : FieldsToRemove)
+	{
+		JsonObjectPtr->RemoveField(Key);
+	}
+
+	for(const auto& KeyValuePair : FieldsToReplace)
+	{
+		JsonObjectPtr->SetField(KeyValuePair.Key, KeyValuePair.Value);
 	}
 }
 
@@ -163,17 +225,8 @@ void Session::UpdateGameSession(
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
 
-	// If the given DSRequest object contains all default values, we remove it from the request JSON by passing a flag
-	// to SerializeAndRemoveEmptyEnumValues
-	const FAccelByteModelsV2DSRequest DSRequest = UpdateRequest.DSRequest;
-	const bool bRemoveDSRequest =
-		DSRequest.Deployment.IsEmpty() &&
-		DSRequest.ClientVersion.IsEmpty() &&
-		DSRequest.GameMode.IsEmpty() &&
-		DSRequest.RequestedRegions.Num() == 0;
-
-	FString Content = TEXT("");    
-	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content, bRemoveDSRequest);
+	FString Content = TEXT("");
+	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }

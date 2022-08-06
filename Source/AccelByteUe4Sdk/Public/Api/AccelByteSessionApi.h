@@ -18,6 +18,8 @@ class Settings;
 namespace Api
 {
 
+class ServerSessionApi;
+
 class ACCELBYTEUE4SDK_API Session : public FApiBase
 {
 public:
@@ -182,7 +184,21 @@ public:
 	 * @param Status Optional membership status to query for - either active or invited.
 	 */
 	void GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
-	
+
+	// Public so that it can be accessed by the SessionServerApi class
+	template <typename DataStruct>
+	static void SerializeAndRemoveEmptyEnumValues(const DataStruct& Model, FString& OutputString)
+	{
+		auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
+
+		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinability"));
+		RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));
+		RemoveEmptyFieldsFromJson(JsonObjectPtr);
+
+		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
+	}
+
 private:
 	Session() = delete;
 	Session(Session const&) = delete;
@@ -190,25 +206,7 @@ private:
 
 	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
-	static void RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject>& JsonObjectPtr);
-	
-	template <typename DataStruct>
-	static void SerializeAndRemoveEmptyEnumValues(DataStruct Model, FString& OutputString, bool bRemoveDSRequest = false)
-	{
-		auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
-
-		if(bRemoveDSRequest)
-		{
-			JsonObjectPtr->RemoveField(TEXT("dsRequest"));
-		}
-
-		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinType"));
-		RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));
-		RemoveEmptyFieldsFromJson(JsonObjectPtr);
-
-		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
-	}
+	static void RemoveEmptyFieldsFromJson(const TSharedPtr<FJsonObject>& JsonObjectPtr);
 };
 }
 }
