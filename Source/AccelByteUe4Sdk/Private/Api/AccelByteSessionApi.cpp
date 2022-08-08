@@ -228,7 +228,7 @@ void Session::UpdateGameSession(
 	FString Content = TEXT("");
 	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
 }
 
 void Session::DeleteGameSession(
