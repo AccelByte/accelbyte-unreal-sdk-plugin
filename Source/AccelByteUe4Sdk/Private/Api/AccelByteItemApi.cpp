@@ -171,7 +171,10 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 	{		 
 		for (auto SortByEnum : SortBy)
 		{
-			SortByStringArray.Add(ConvertItemSortByToString(SortByEnum));
+			if (SortByEnum != EAccelByteItemListSortBy::NONE)
+			{
+				SortByStringArray.Add(ConvertItemSortByToString(SortByEnum));
+			}
 		} 
 	}
 	const TMap<FString, FString> Params = FAccelByteUtilities::CreateQueryParamsAndSkipIfValueEmpty({

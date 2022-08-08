@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [15.1.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.1.2%0D15.1.1) (2022-08-05)
+
+
+### Bug Fixes
+
+* **lobby:** unbind delegates on Lobby destructor ([daa6af1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/daa6af13907a89a844cd9b4838a27ac02694a453))
+* **party:** Party leave notif is not triggered ([5e8458f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5e8458f4070ba19cbe6cbeba9511ba4757f051d1))
+
+### [15.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.1.1%0D15.1.0) (2022-08-04)
+
 ## [15.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.1.0%0D15.0.0) (2022-08-01)
 
 
