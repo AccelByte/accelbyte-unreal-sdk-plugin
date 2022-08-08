@@ -15,6 +15,11 @@ namespace AccelByte
 class Credentials;
 class Settings;
 
+namespace GameServerApi
+{
+class ServerSession;
+}
+
 namespace Api
 {
 
@@ -185,9 +190,20 @@ public:
 	 */
 	void GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
 
-	// Public so that it can be accessed by the SessionServerApi class
+private:
+	Session() = delete;
+	Session(Session const&) = delete;
+	Session(Session&&) = delete;
+
+	// The server session API class needs access to `SerializeAndRemoveEmptyValues`
+	friend class GameServerApi::ServerSession;
+
+	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
+	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
+	static void RemoveEmptyFieldsFromJson(const TSharedPtr<FJsonObject>& JsonObjectPtr);
+
 	template <typename DataStruct>
-	static void SerializeAndRemoveEmptyEnumValues(const DataStruct& Model, FString& OutputString)
+	static void SerializeAndRemoveEmptyValues(const DataStruct& Model, FString& OutputString)
 	{
 		auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
 
@@ -198,15 +214,6 @@ public:
 		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
 	}
-
-private:
-	Session() = delete;
-	Session(Session const&) = delete;
-	Session(Session&&) = delete;
-
-	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
-	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
-	static void RemoveEmptyFieldsFromJson(const TSharedPtr<FJsonObject>& JsonObjectPtr);
 };
 }
 }

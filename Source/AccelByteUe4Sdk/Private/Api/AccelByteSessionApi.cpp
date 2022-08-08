@@ -56,7 +56,7 @@ void Session::RemoveEmptyFieldsFromJson(const TSharedPtr<FJsonObject>& JsonObjec
 			continue;
 		}
 
-		bool bRemoveField;
+		bool bRemoveField = false;
 		switch (KeyValuePair.Value->Type)
 		{
 		case EJson::Array:
@@ -76,7 +76,7 @@ void Session::RemoveEmptyFieldsFromJson(const TSharedPtr<FJsonObject>& JsonObjec
 				// Skipping over any array item that is not an object
 				if(NestedValue->Type != EJson::Object)
 				{
-					// NewArray.Add(NestedValue);
+					NewArray.Add(NestedValue);
 					continue;
 				}
 
@@ -123,10 +123,10 @@ void Session::RemoveEmptyFieldsFromJson(const TSharedPtr<FJsonObject>& JsonObjec
 			break;
 		}
 
-		default: bRemoveField = false;
+		// Redundant technically, but for readability explicitly says that we don't care about the other members of EJson
+		default: break;
 		}
 
-		// this field is empty so we remove this field.
 		if(bRemoveField)
 		{
 			FieldsToRemove.Add(KeyValuePair.Key);
@@ -166,7 +166,7 @@ void Session::CreateGameSession(
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
 
 	FString Content = TEXT("");
-	SerializeAndRemoveEmptyEnumValues(CreateRequest, Content);
+	SerializeAndRemoveEmptyValues(CreateRequest, Content);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -226,7 +226,7 @@ void Session::UpdateGameSession(
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
 
 	FString Content = TEXT("");
-	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
+	SerializeAndRemoveEmptyValues(UpdateRequest, Content);
 
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -298,7 +298,7 @@ void Session::CreateParty(
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Content = TEXT("");
-	SerializeAndRemoveEmptyEnumValues(CreateRequest, Content);
+	SerializeAndRemoveEmptyValues(CreateRequest, Content);
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/party"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
@@ -328,7 +328,7 @@ void Session::UpdateParty(
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Content = TEXT("");
-	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
+	SerializeAndRemoveEmptyValues(UpdateRequest, Content);
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *PartyID);

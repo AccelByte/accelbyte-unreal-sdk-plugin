@@ -61,12 +61,12 @@ void ServerSession::UpdateGameSession(
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetClientNamespace(), *GameSessionID);
 
 	FString Content;
-	Api::Session::SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
+	Api::Session::SerializeAndRemoveEmptyValues(UpdateRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(TEXT("PUT"));
+	Request->SetVerb(TEXT("PATCH"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetContentAsString(Content);
