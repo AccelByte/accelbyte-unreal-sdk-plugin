@@ -333,7 +333,7 @@ void Session::UpdateParty(
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *PartyID);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
 }
 	
 void Session::SendPartyInvite(
