@@ -741,6 +741,26 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemDynamicData
 #pragma region EntitlementModelsField
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementSyncBase
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
+		FString ProductId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
+		int32 Price{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
+		FString CurrencyCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
+		FString XstsToken{}; // Used for Xbox
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
+		int32 ServiceLabel = 0; // Used for PS
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
+		FString Region{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
+		FString Language{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementItemSnapshot
 {
 	GENERATED_BODY()

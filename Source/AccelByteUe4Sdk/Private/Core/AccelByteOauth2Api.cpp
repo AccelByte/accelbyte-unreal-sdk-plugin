@@ -113,7 +113,7 @@ void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
+	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
 	
 	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&device_id=%s");
 	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
