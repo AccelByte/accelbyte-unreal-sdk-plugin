@@ -113,7 +113,7 @@ void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
+	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
 	
 	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&device_id=%s");
 	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
@@ -188,7 +188,7 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FStri
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
+	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
 	Request->SetContentAsString(FString::Printf(TEXT("platform_token=%s&createHeadless=%s"), *FGenericPlatformHttp::UrlEncode(PlatformToken),
 		bCreateHeadless ? TEXT("true") : TEXT("false")));
 
@@ -282,7 +282,7 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FS
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
+	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
 
 	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&namespace=%s&extend_exp=%s");
 	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
@@ -308,7 +308,7 @@ void Oauth2::VerifyAndRememberNewDevice(const FString& ClientId, const FString& 
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
+	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
 	const FString RememberThisDevice = bRememberDevice ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
 	Request->SetContentAsString(FString::Printf(TEXT("mfaToken=%s&factor=%s&code=%s&rememberDevice=%s"), *MfaToken, *Factor, *Code, *RememberThisDevice));
 
