@@ -9,6 +9,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteSessionModels.h"
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
@@ -200,7 +201,6 @@ private:
 
 	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
-	static void RemoveEmptyFieldsFromJson(const TSharedPtr<FJsonObject>& JsonObjectPtr);
 
 	template <typename DataStruct>
 	static void SerializeAndRemoveEmptyValues(const DataStruct& Model, FString& OutputString)
@@ -209,7 +209,7 @@ private:
 
 		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinability"));
 		RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));
-		RemoveEmptyFieldsFromJson(JsonObjectPtr);
+		FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll);
 
 		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
