@@ -207,8 +207,8 @@ public:
 	}
 
 	/**
-	 * Remove fields which have empty values according to the given flags. Defaults to removing empty objects, blank
-	 * strings, and operating on nested objects and arrays which contains nested objects.
+	 * Remove fields which have empty values according to the given flags. Defaults to removing empty objects/arrays, blank
+	 * strings, and recursing on object and array field values.
 	 */
 	static void RemoveEmptyFieldsFromJson(
 		const TSharedPtr<FJsonObject>& JsonObjectPtr,
