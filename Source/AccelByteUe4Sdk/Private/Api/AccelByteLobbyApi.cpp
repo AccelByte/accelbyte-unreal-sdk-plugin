@@ -2063,7 +2063,7 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		return;
 	}
 
-	TSharedRef<session::NotificationEventEnvelope> EventEnvelope = MakeShared<session::NotificationEventEnvelope>();
+	TSharedRef<accelbyte_session::NotificationEventEnvelope> EventEnvelope = MakeShared<accelbyte_session::NotificationEventEnvelope>();
 	if(!ParseProtobufPayload(Notif.Payload, EventEnvelope))
 	{
 		UE_LOG(LogAccelByteLobby, Log, TEXT("Failed to parse protobuf payload\nNotification: %s"), *ParsedJsonString);
@@ -2072,62 +2072,62 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 
 	switch(EventEnvelope->payload_case())
 	{
-	case session::NotificationEventEnvelope::kPartyNotificationUserInvitedV1:
+	case accelbyte_session::NotificationEventEnvelope::kPartyNotificationUserInvitedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2PartyInvitedEvent>(EventEnvelope->partynotificationuserinvitedv1(), V2PartyInvitedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kPartyNotificationMembersChangedV1:
+	case accelbyte_session::NotificationEventEnvelope::kPartyNotificationMembersChangedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2PartyMembersChangedEvent>(EventEnvelope->partynotificationmemberschangedv1(), V2PartyMembersChangedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kPartyNotificationUserJoinedV1:
+	case accelbyte_session::NotificationEventEnvelope::kPartyNotificationUserJoinedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2PartyUserJoinedEvent>(EventEnvelope->partynotificationuserjoinedv1(), V2PartyJoinedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kPartyNotificationUserRejectV1:
+	case accelbyte_session::NotificationEventEnvelope::kPartyNotificationUserRejectV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2PartyUserRejectedEvent>(EventEnvelope->partynotificationuserrejectv1(), V2PartyRejectedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kPartyNotificationUserKickedV1:
+	case accelbyte_session::NotificationEventEnvelope::kPartyNotificationUserKickedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2PartyUserKickedEvent>(EventEnvelope->partynotificationuserkickedv1(), V2PartyKickedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kGameSessionNotificationUserInvitedV1:
+	case accelbyte_session::NotificationEventEnvelope::kGameSessionNotificationUserInvitedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2GameSessionUserInvitedEvent>(EventEnvelope->gamesessionnotificationuserinvitedv1(), V2GameSessionInvitedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kGameSessionNotificationUserJoinedV1:
+	case accelbyte_session::NotificationEventEnvelope::kGameSessionNotificationUserJoinedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2GameSessionUserJoinedEvent>(EventEnvelope->gamesessionnotificationuserjoinedv1(), V2GameSessionJoinedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kGameSessionNotificationMembersChangedV1:
+	case accelbyte_session::NotificationEventEnvelope::kGameSessionNotificationMembersChangedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2GameSessionMembersChangedEvent>(EventEnvelope->gamesessionnotificationmemberschangedv1(), V2GameSessionMembersChangedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kGameSessionNotificationUserKickedV1:
+	case accelbyte_session::NotificationEventEnvelope::kGameSessionNotificationUserKickedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2GameSessionUserKickedEvent>(EventEnvelope->gamesessionnotificationuserkickedv1(), V2GameSessionKickedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
+	case accelbyte_session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope->dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
 		break;
 	}
-	case session::NotificationEventEnvelope::kPartySessionV1:
+	case accelbyte_session::NotificationEventEnvelope::kPartySessionV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2PartySession>(EventEnvelope->partysessionv1(), V2PartyUpdatedNotif, true);
 		break;
 	}
-	case session::NotificationEventEnvelope::kGameSessionV1:
+	case accelbyte_session::NotificationEventEnvelope::kGameSessionV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2GameSession>(EventEnvelope->gamesessionv1(), V2GameSessionUpdatedNotif, true);
 		break;
