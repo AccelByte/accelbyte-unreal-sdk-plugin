@@ -35,7 +35,7 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
-namespace session {
+namespace accelbyte_session {
 constexpr NotificationEventEnvelope::NotificationEventEnvelope(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : _oneof_case_{}{}
@@ -343,9 +343,9 @@ static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_s
 
 const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::NotificationEventEnvelope, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::NotificationEventEnvelope, _internal_metadata_),
   ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::session::NotificationEventEnvelope, _oneof_case_[0]),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::NotificationEventEnvelope, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
@@ -360,249 +360,249 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::session::NotificationEventEnvelope, payload_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::NotificationEventEnvelope, payload_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::UserV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::UserV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::UserV1, id_),
-  PROTOBUF_FIELD_OFFSET(::session::UserV1, status_),
-  PROTOBUF_FIELD_OFFSET(::session::UserV1, updatedat_),
-  PROTOBUF_FIELD_OFFSET(::session::UserV1, platform_id_),
-  PROTOBUF_FIELD_OFFSET(::session::UserV1, platform_user_id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::UserV1, id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::UserV1, status_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::UserV1, updatedat_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::UserV1, platform_id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::UserV1, platform_user_id_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, id_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, namespace__),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, members_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, attributes_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, join_type_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, created_at_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, updated_at_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, configuration_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, version_),
-  PROTOBUF_FIELD_OFFSET(::session::PartySessionV1, leader_id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, namespace__),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, members_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, attributes_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, join_type_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, created_at_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, updated_at_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, configuration_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, version_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, leader_id_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, name_),
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, joinability_),
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, min_players_),
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, max_players_),
-  PROTOBUF_FIELD_OFFSET(::session::SessionConfigV1, deployment_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, name_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, joinability_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, min_players_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, max_players_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, deployment_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserJoinedV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserJoinedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserJoinedV1, members_),
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserJoinedV1, partyid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserJoinedV1, members_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserJoinedV1, partyid_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationMembersChangedV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationMembersChangedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationMembersChangedV1, members_),
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationMembersChangedV1, partyid_),
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationMembersChangedV1, joinerid_),
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationMembersChangedV1, leaderid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationMembersChangedV1, members_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationMembersChangedV1, partyid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationMembersChangedV1, joinerid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationMembersChangedV1, leaderid_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserInvitedV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserInvitedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserInvitedV1, senderid_),
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserInvitedV1, partyid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserInvitedV1, senderid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserInvitedV1, partyid_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserRejectV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserRejectV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserRejectV1, members_),
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserRejectV1, partyid_),
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserRejectV1, rejectedid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserRejectV1, members_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserRejectV1, partyid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserRejectV1, rejectedid_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserKickedV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserKickedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::PartyNotificationUserKickedV1, partyid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserKickedV1, partyid_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationUserInvitedV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserInvitedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationUserInvitedV1, sessionid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserInvitedV1, sessionid_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationUserJoinedV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserJoinedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationUserJoinedV1, sessionid_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationUserJoinedV1, members_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserJoinedV1, sessionid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserJoinedV1, members_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationMembersChangedV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationMembersChangedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationMembersChangedV1, members_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationMembersChangedV1, sessionid_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationMembersChangedV1, joinerid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationMembersChangedV1, members_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationMembersChangedV1, sessionid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationMembersChangedV1, joinerid_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::DSStatusChangedNotificationV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSStatusChangedNotificationV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::DSStatusChangedNotificationV1, gameserver_),
-  PROTOBUF_FIELD_OFFSET(::session::DSStatusChangedNotificationV1, sessionid_),
-  PROTOBUF_FIELD_OFFSET(::session::DSStatusChangedNotificationV1, error_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSStatusChangedNotificationV1, gameserver_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSStatusChangedNotificationV1, sessionid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSStatusChangedNotificationV1, error_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::UserIDs, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::UserIDs, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::UserIDs, userid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::UserIDs, userid_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::Team, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::Team, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::Team, user_ids_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::Team, user_ids_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, id_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, namespace__),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, members_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, attributes_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, join_type_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, created_at_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, updated_at_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, configuration_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, version_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, match_pool_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, game_mode_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, backfill_ticket_id_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, teams_),
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionV1, dsinformationv1_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, namespace__),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, members_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, attributes_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, join_type_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, created_at_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, updated_at_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, configuration_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, version_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, match_pool_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, game_mode_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, backfill_ticket_id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, teams_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, dsinformationv1_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSInformationV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, gameserver_),
-  PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, requested_regions_),
-  PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, requested_at_),
-  PROTOBUF_FIELD_OFFSET(::session::DSInformationV1, status_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1_PortsEntry_DoNotUse, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1_PortsEntry_DoNotUse, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSInformationV1, gameserver_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSInformationV1, requested_regions_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSInformationV1, requested_at_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSInformationV1, status_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1_PortsEntry_DoNotUse, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1_PortsEntry_DoNotUse, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1_PortsEntry_DoNotUse, key_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1_PortsEntry_DoNotUse, value_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1_PortsEntry_DoNotUse, key_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1_PortsEntry_DoNotUse, value_),
   0,
   1,
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, pod_name_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, image_version_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, namespace__),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, ip_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, alternate_ips_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, port_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, protocol_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, ports_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, provider_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, game_version_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, status_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, session_id_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, deployment_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, region_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, custom_attribute_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, is_override_game_version_),
-  PROTOBUF_FIELD_OFFSET(::session::GameServerV1, last_update_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, pod_name_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, image_version_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, namespace__),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, ip_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, alternate_ips_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, port_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, protocol_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, ports_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, provider_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, game_version_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, status_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, session_id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, deployment_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, region_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, custom_attribute_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, is_override_game_version_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameServerV1, last_update_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationUserKickedV1, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserKickedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::session::GameSessionNotificationUserKickedV1, sessionid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserKickedV1, sessionid_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::session::NotificationEventEnvelope)},
-  { 19, -1, -1, sizeof(::session::UserV1)},
-  { 30, -1, -1, sizeof(::session::PartySessionV1)},
-  { 46, -1, -1, sizeof(::session::SessionConfigV1)},
-  { 57, -1, -1, sizeof(::session::PartyNotificationUserJoinedV1)},
-  { 65, -1, -1, sizeof(::session::PartyNotificationMembersChangedV1)},
-  { 75, -1, -1, sizeof(::session::PartyNotificationUserInvitedV1)},
-  { 83, -1, -1, sizeof(::session::PartyNotificationUserRejectV1)},
-  { 92, -1, -1, sizeof(::session::PartyNotificationUserKickedV1)},
-  { 99, -1, -1, sizeof(::session::GameSessionNotificationUserInvitedV1)},
-  { 106, -1, -1, sizeof(::session::GameSessionNotificationUserJoinedV1)},
-  { 114, -1, -1, sizeof(::session::GameSessionNotificationMembersChangedV1)},
-  { 123, -1, -1, sizeof(::session::DSStatusChangedNotificationV1)},
-  { 132, -1, -1, sizeof(::session::UserIDs)},
-  { 139, -1, -1, sizeof(::session::Team)},
-  { 146, -1, -1, sizeof(::session::GameSessionV1)},
-  { 166, -1, -1, sizeof(::session::DSInformationV1)},
-  { 176, 184, -1, sizeof(::session::GameServerV1_PortsEntry_DoNotUse)},
-  { 186, -1, -1, sizeof(::session::GameServerV1)},
-  { 209, -1, -1, sizeof(::session::GameSessionNotificationUserKickedV1)},
+  { 0, -1, -1, sizeof(::accelbyte_session::NotificationEventEnvelope)},
+  { 19, -1, -1, sizeof(::accelbyte_session::UserV1)},
+  { 30, -1, -1, sizeof(::accelbyte_session::PartySessionV1)},
+  { 46, -1, -1, sizeof(::accelbyte_session::SessionConfigV1)},
+  { 57, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserJoinedV1)},
+  { 65, -1, -1, sizeof(::accelbyte_session::PartyNotificationMembersChangedV1)},
+  { 75, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserInvitedV1)},
+  { 83, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserRejectV1)},
+  { 92, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserKickedV1)},
+  { 99, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserInvitedV1)},
+  { 106, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserJoinedV1)},
+  { 114, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationMembersChangedV1)},
+  { 123, -1, -1, sizeof(::accelbyte_session::DSStatusChangedNotificationV1)},
+  { 132, -1, -1, sizeof(::accelbyte_session::UserIDs)},
+  { 139, -1, -1, sizeof(::accelbyte_session::Team)},
+  { 146, -1, -1, sizeof(::accelbyte_session::GameSessionV1)},
+  { 166, -1, -1, sizeof(::accelbyte_session::DSInformationV1)},
+  { 176, 184, -1, sizeof(::accelbyte_session::GameServerV1_PortsEntry_DoNotUse)},
+  { 186, -1, -1, sizeof(::accelbyte_session::GameServerV1)},
+  { 209, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserKickedV1)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_NotificationEventEnvelope_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_UserV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartySessionV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_SessionConfigV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartyNotificationUserJoinedV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartyNotificationMembersChangedV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartyNotificationUserInvitedV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartyNotificationUserRejectV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_PartyNotificationUserKickedV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionNotificationUserInvitedV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionNotificationUserJoinedV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionNotificationMembersChangedV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_DSStatusChangedNotificationV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_UserIDs_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_Team_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_DSInformationV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameServerV1_PortsEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameServerV1_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::session::_GameSessionNotificationUserKickedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_NotificationEventEnvelope_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_UserV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_PartySessionV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_SessionConfigV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_PartyNotificationUserJoinedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_PartyNotificationMembersChangedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_PartyNotificationUserInvitedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_PartyNotificationUserRejectV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_PartyNotificationUserKickedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionNotificationUserInvitedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionNotificationUserJoinedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionNotificationMembersChangedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_DSStatusChangedNotificationV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_UserIDs_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_Team_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_DSInformationV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameServerV1_PortsEntry_DoNotUse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameServerV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionNotificationUserKickedV1_default_instance_),
 };
 
 const char descriptor_table_protodef_notification_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -732,80 +732,80 @@ PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable
 
 // Force running AddDescriptors() at dynamic initialization time.
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_notification_2eproto(&descriptor_table_notification_2eproto);
-namespace session {
+namespace accelbyte_session {
 
 // ===================================================================
 
 class NotificationEventEnvelope::_Internal {
  public:
-  static const ::session::PartyNotificationUserInvitedV1& partynotificationuserinvitedv1(const NotificationEventEnvelope* msg);
-  static const ::session::PartyNotificationUserJoinedV1& partynotificationuserjoinedv1(const NotificationEventEnvelope* msg);
-  static const ::session::PartyNotificationMembersChangedV1& partynotificationmemberschangedv1(const NotificationEventEnvelope* msg);
-  static const ::session::PartyNotificationUserRejectV1& partynotificationuserrejectv1(const NotificationEventEnvelope* msg);
-  static const ::session::PartyNotificationUserKickedV1& partynotificationuserkickedv1(const NotificationEventEnvelope* msg);
-  static const ::session::PartySessionV1& partysessionv1(const NotificationEventEnvelope* msg);
-  static const ::session::GameSessionNotificationUserInvitedV1& gamesessionnotificationuserinvitedv1(const NotificationEventEnvelope* msg);
-  static const ::session::GameSessionNotificationUserJoinedV1& gamesessionnotificationuserjoinedv1(const NotificationEventEnvelope* msg);
-  static const ::session::GameSessionNotificationUserKickedV1& gamesessionnotificationuserkickedv1(const NotificationEventEnvelope* msg);
-  static const ::session::GameSessionNotificationMembersChangedV1& gamesessionnotificationmemberschangedv1(const NotificationEventEnvelope* msg);
-  static const ::session::GameSessionV1& gamesessionv1(const NotificationEventEnvelope* msg);
-  static const ::session::DSStatusChangedNotificationV1& dsstatuschangednotificationv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::PartyNotificationUserInvitedV1& partynotificationuserinvitedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::PartyNotificationUserJoinedV1& partynotificationuserjoinedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::PartyNotificationMembersChangedV1& partynotificationmemberschangedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::PartyNotificationUserRejectV1& partynotificationuserrejectv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::PartyNotificationUserKickedV1& partynotificationuserkickedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::PartySessionV1& partysessionv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::GameSessionNotificationUserInvitedV1& gamesessionnotificationuserinvitedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::GameSessionNotificationUserJoinedV1& gamesessionnotificationuserjoinedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::GameSessionNotificationUserKickedV1& gamesessionnotificationuserkickedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::GameSessionNotificationMembersChangedV1& gamesessionnotificationmemberschangedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::GameSessionV1& gamesessionv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::DSStatusChangedNotificationV1& dsstatuschangednotificationv1(const NotificationEventEnvelope* msg);
 };
 
-const ::session::PartyNotificationUserInvitedV1&
+const ::accelbyte_session::PartyNotificationUserInvitedV1&
 NotificationEventEnvelope::_Internal::partynotificationuserinvitedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.partynotificationuserinvitedv1_;
 }
-const ::session::PartyNotificationUserJoinedV1&
+const ::accelbyte_session::PartyNotificationUserJoinedV1&
 NotificationEventEnvelope::_Internal::partynotificationuserjoinedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.partynotificationuserjoinedv1_;
 }
-const ::session::PartyNotificationMembersChangedV1&
+const ::accelbyte_session::PartyNotificationMembersChangedV1&
 NotificationEventEnvelope::_Internal::partynotificationmemberschangedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.partynotificationmemberschangedv1_;
 }
-const ::session::PartyNotificationUserRejectV1&
+const ::accelbyte_session::PartyNotificationUserRejectV1&
 NotificationEventEnvelope::_Internal::partynotificationuserrejectv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.partynotificationuserrejectv1_;
 }
-const ::session::PartyNotificationUserKickedV1&
+const ::accelbyte_session::PartyNotificationUserKickedV1&
 NotificationEventEnvelope::_Internal::partynotificationuserkickedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.partynotificationuserkickedv1_;
 }
-const ::session::PartySessionV1&
+const ::accelbyte_session::PartySessionV1&
 NotificationEventEnvelope::_Internal::partysessionv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.partysessionv1_;
 }
-const ::session::GameSessionNotificationUserInvitedV1&
+const ::accelbyte_session::GameSessionNotificationUserInvitedV1&
 NotificationEventEnvelope::_Internal::gamesessionnotificationuserinvitedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.gamesessionnotificationuserinvitedv1_;
 }
-const ::session::GameSessionNotificationUserJoinedV1&
+const ::accelbyte_session::GameSessionNotificationUserJoinedV1&
 NotificationEventEnvelope::_Internal::gamesessionnotificationuserjoinedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.gamesessionnotificationuserjoinedv1_;
 }
-const ::session::GameSessionNotificationUserKickedV1&
+const ::accelbyte_session::GameSessionNotificationUserKickedV1&
 NotificationEventEnvelope::_Internal::gamesessionnotificationuserkickedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.gamesessionnotificationuserkickedv1_;
 }
-const ::session::GameSessionNotificationMembersChangedV1&
+const ::accelbyte_session::GameSessionNotificationMembersChangedV1&
 NotificationEventEnvelope::_Internal::gamesessionnotificationmemberschangedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.gamesessionnotificationmemberschangedv1_;
 }
-const ::session::GameSessionV1&
+const ::accelbyte_session::GameSessionV1&
 NotificationEventEnvelope::_Internal::gamesessionv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.gamesessionv1_;
 }
-const ::session::DSStatusChangedNotificationV1&
+const ::accelbyte_session::DSStatusChangedNotificationV1&
 NotificationEventEnvelope::_Internal::dsstatuschangednotificationv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.dsstatuschangednotificationv1_;
 }
-void NotificationEventEnvelope::set_allocated_partynotificationuserinvitedv1(::session::PartyNotificationUserInvitedV1* partynotificationuserinvitedv1) {
+void NotificationEventEnvelope::set_allocated_partynotificationuserinvitedv1(::accelbyte_session::PartyNotificationUserInvitedV1* partynotificationuserinvitedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (partynotificationuserinvitedv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::PartyNotificationUserInvitedV1>::GetOwningArena(partynotificationuserinvitedv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::PartyNotificationUserInvitedV1>::GetOwningArena(partynotificationuserinvitedv1);
     if (message_arena != submessage_arena) {
       partynotificationuserinvitedv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, partynotificationuserinvitedv1, submessage_arena);
@@ -815,12 +815,12 @@ void NotificationEventEnvelope::set_allocated_partynotificationuserinvitedv1(::s
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationUserInvitedV1)
 }
-void NotificationEventEnvelope::set_allocated_partynotificationuserjoinedv1(::session::PartyNotificationUserJoinedV1* partynotificationuserjoinedv1) {
+void NotificationEventEnvelope::set_allocated_partynotificationuserjoinedv1(::accelbyte_session::PartyNotificationUserJoinedV1* partynotificationuserjoinedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (partynotificationuserjoinedv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::PartyNotificationUserJoinedV1>::GetOwningArena(partynotificationuserjoinedv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::PartyNotificationUserJoinedV1>::GetOwningArena(partynotificationuserjoinedv1);
     if (message_arena != submessage_arena) {
       partynotificationuserjoinedv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, partynotificationuserjoinedv1, submessage_arena);
@@ -830,12 +830,12 @@ void NotificationEventEnvelope::set_allocated_partynotificationuserjoinedv1(::se
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationUserJoinedV1)
 }
-void NotificationEventEnvelope::set_allocated_partynotificationmemberschangedv1(::session::PartyNotificationMembersChangedV1* partynotificationmemberschangedv1) {
+void NotificationEventEnvelope::set_allocated_partynotificationmemberschangedv1(::accelbyte_session::PartyNotificationMembersChangedV1* partynotificationmemberschangedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (partynotificationmemberschangedv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::PartyNotificationMembersChangedV1>::GetOwningArena(partynotificationmemberschangedv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::PartyNotificationMembersChangedV1>::GetOwningArena(partynotificationmemberschangedv1);
     if (message_arena != submessage_arena) {
       partynotificationmemberschangedv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, partynotificationmemberschangedv1, submessage_arena);
@@ -845,12 +845,12 @@ void NotificationEventEnvelope::set_allocated_partynotificationmemberschangedv1(
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationMembersChangedV1)
 }
-void NotificationEventEnvelope::set_allocated_partynotificationuserrejectv1(::session::PartyNotificationUserRejectV1* partynotificationuserrejectv1) {
+void NotificationEventEnvelope::set_allocated_partynotificationuserrejectv1(::accelbyte_session::PartyNotificationUserRejectV1* partynotificationuserrejectv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (partynotificationuserrejectv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::PartyNotificationUserRejectV1>::GetOwningArena(partynotificationuserrejectv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::PartyNotificationUserRejectV1>::GetOwningArena(partynotificationuserrejectv1);
     if (message_arena != submessage_arena) {
       partynotificationuserrejectv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, partynotificationuserrejectv1, submessage_arena);
@@ -860,12 +860,12 @@ void NotificationEventEnvelope::set_allocated_partynotificationuserrejectv1(::se
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationUserRejectV1)
 }
-void NotificationEventEnvelope::set_allocated_partynotificationuserkickedv1(::session::PartyNotificationUserKickedV1* partynotificationuserkickedv1) {
+void NotificationEventEnvelope::set_allocated_partynotificationuserkickedv1(::accelbyte_session::PartyNotificationUserKickedV1* partynotificationuserkickedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (partynotificationuserkickedv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::PartyNotificationUserKickedV1>::GetOwningArena(partynotificationuserkickedv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::PartyNotificationUserKickedV1>::GetOwningArena(partynotificationuserkickedv1);
     if (message_arena != submessage_arena) {
       partynotificationuserkickedv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, partynotificationuserkickedv1, submessage_arena);
@@ -875,12 +875,12 @@ void NotificationEventEnvelope::set_allocated_partynotificationuserkickedv1(::se
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationUserKickedV1)
 }
-void NotificationEventEnvelope::set_allocated_partysessionv1(::session::PartySessionV1* partysessionv1) {
+void NotificationEventEnvelope::set_allocated_partysessionv1(::accelbyte_session::PartySessionV1* partysessionv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (partysessionv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::PartySessionV1>::GetOwningArena(partysessionv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::PartySessionV1>::GetOwningArena(partysessionv1);
     if (message_arena != submessage_arena) {
       partysessionv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, partysessionv1, submessage_arena);
@@ -890,12 +890,12 @@ void NotificationEventEnvelope::set_allocated_partysessionv1(::session::PartySes
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartySessionV1)
 }
-void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserinvitedv1(::session::GameSessionNotificationUserInvitedV1* gamesessionnotificationuserinvitedv1) {
+void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserinvitedv1(::accelbyte_session::GameSessionNotificationUserInvitedV1* gamesessionnotificationuserinvitedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (gamesessionnotificationuserinvitedv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::GameSessionNotificationUserInvitedV1>::GetOwningArena(gamesessionnotificationuserinvitedv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::GameSessionNotificationUserInvitedV1>::GetOwningArena(gamesessionnotificationuserinvitedv1);
     if (message_arena != submessage_arena) {
       gamesessionnotificationuserinvitedv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, gamesessionnotificationuserinvitedv1, submessage_arena);
@@ -905,12 +905,12 @@ void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserinvited
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationUserInvitedV1)
 }
-void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserjoinedv1(::session::GameSessionNotificationUserJoinedV1* gamesessionnotificationuserjoinedv1) {
+void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserjoinedv1(::accelbyte_session::GameSessionNotificationUserJoinedV1* gamesessionnotificationuserjoinedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (gamesessionnotificationuserjoinedv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::GameSessionNotificationUserJoinedV1>::GetOwningArena(gamesessionnotificationuserjoinedv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::GameSessionNotificationUserJoinedV1>::GetOwningArena(gamesessionnotificationuserjoinedv1);
     if (message_arena != submessage_arena) {
       gamesessionnotificationuserjoinedv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, gamesessionnotificationuserjoinedv1, submessage_arena);
@@ -920,12 +920,12 @@ void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserjoinedv
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationUserJoinedV1)
 }
-void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserkickedv1(::session::GameSessionNotificationUserKickedV1* gamesessionnotificationuserkickedv1) {
+void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserkickedv1(::accelbyte_session::GameSessionNotificationUserKickedV1* gamesessionnotificationuserkickedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (gamesessionnotificationuserkickedv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::GameSessionNotificationUserKickedV1>::GetOwningArena(gamesessionnotificationuserkickedv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::GameSessionNotificationUserKickedV1>::GetOwningArena(gamesessionnotificationuserkickedv1);
     if (message_arena != submessage_arena) {
       gamesessionnotificationuserkickedv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, gamesessionnotificationuserkickedv1, submessage_arena);
@@ -935,12 +935,12 @@ void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserkickedv
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationUserKickedV1)
 }
-void NotificationEventEnvelope::set_allocated_gamesessionnotificationmemberschangedv1(::session::GameSessionNotificationMembersChangedV1* gamesessionnotificationmemberschangedv1) {
+void NotificationEventEnvelope::set_allocated_gamesessionnotificationmemberschangedv1(::accelbyte_session::GameSessionNotificationMembersChangedV1* gamesessionnotificationmemberschangedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (gamesessionnotificationmemberschangedv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::GameSessionNotificationMembersChangedV1>::GetOwningArena(gamesessionnotificationmemberschangedv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::GameSessionNotificationMembersChangedV1>::GetOwningArena(gamesessionnotificationmemberschangedv1);
     if (message_arena != submessage_arena) {
       gamesessionnotificationmemberschangedv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, gamesessionnotificationmemberschangedv1, submessage_arena);
@@ -950,12 +950,12 @@ void NotificationEventEnvelope::set_allocated_gamesessionnotificationmemberschan
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationMembersChangedV1)
 }
-void NotificationEventEnvelope::set_allocated_gamesessionv1(::session::GameSessionV1* gamesessionv1) {
+void NotificationEventEnvelope::set_allocated_gamesessionv1(::accelbyte_session::GameSessionV1* gamesessionv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (gamesessionv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::GameSessionV1>::GetOwningArena(gamesessionv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::GameSessionV1>::GetOwningArena(gamesessionv1);
     if (message_arena != submessage_arena) {
       gamesessionv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, gamesessionv1, submessage_arena);
@@ -965,12 +965,12 @@ void NotificationEventEnvelope::set_allocated_gamesessionv1(::session::GameSessi
   }
   // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionV1)
 }
-void NotificationEventEnvelope::set_allocated_dsstatuschangednotificationv1(::session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1) {
+void NotificationEventEnvelope::set_allocated_dsstatuschangednotificationv1(::accelbyte_session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload();
   if (dsstatuschangednotificationv1) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::session::DSStatusChangedNotificationV1>::GetOwningArena(dsstatuschangednotificationv1);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::DSStatusChangedNotificationV1>::GetOwningArena(dsstatuschangednotificationv1);
     if (message_arena != submessage_arena) {
       dsstatuschangednotificationv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, dsstatuschangednotificationv1, submessage_arena);
@@ -995,51 +995,51 @@ NotificationEventEnvelope::NotificationEventEnvelope(const NotificationEventEnve
   clear_has_payload();
   switch (from.payload_case()) {
     case kPartyNotificationUserInvitedV1: {
-      _internal_mutable_partynotificationuserinvitedv1()->::session::PartyNotificationUserInvitedV1::MergeFrom(from._internal_partynotificationuserinvitedv1());
+      _internal_mutable_partynotificationuserinvitedv1()->::accelbyte_session::PartyNotificationUserInvitedV1::MergeFrom(from._internal_partynotificationuserinvitedv1());
       break;
     }
     case kPartyNotificationUserJoinedV1: {
-      _internal_mutable_partynotificationuserjoinedv1()->::session::PartyNotificationUserJoinedV1::MergeFrom(from._internal_partynotificationuserjoinedv1());
+      _internal_mutable_partynotificationuserjoinedv1()->::accelbyte_session::PartyNotificationUserJoinedV1::MergeFrom(from._internal_partynotificationuserjoinedv1());
       break;
     }
     case kPartyNotificationMembersChangedV1: {
-      _internal_mutable_partynotificationmemberschangedv1()->::session::PartyNotificationMembersChangedV1::MergeFrom(from._internal_partynotificationmemberschangedv1());
+      _internal_mutable_partynotificationmemberschangedv1()->::accelbyte_session::PartyNotificationMembersChangedV1::MergeFrom(from._internal_partynotificationmemberschangedv1());
       break;
     }
     case kPartyNotificationUserRejectV1: {
-      _internal_mutable_partynotificationuserrejectv1()->::session::PartyNotificationUserRejectV1::MergeFrom(from._internal_partynotificationuserrejectv1());
+      _internal_mutable_partynotificationuserrejectv1()->::accelbyte_session::PartyNotificationUserRejectV1::MergeFrom(from._internal_partynotificationuserrejectv1());
       break;
     }
     case kPartyNotificationUserKickedV1: {
-      _internal_mutable_partynotificationuserkickedv1()->::session::PartyNotificationUserKickedV1::MergeFrom(from._internal_partynotificationuserkickedv1());
+      _internal_mutable_partynotificationuserkickedv1()->::accelbyte_session::PartyNotificationUserKickedV1::MergeFrom(from._internal_partynotificationuserkickedv1());
       break;
     }
     case kPartySessionV1: {
-      _internal_mutable_partysessionv1()->::session::PartySessionV1::MergeFrom(from._internal_partysessionv1());
+      _internal_mutable_partysessionv1()->::accelbyte_session::PartySessionV1::MergeFrom(from._internal_partysessionv1());
       break;
     }
     case kGameSessionNotificationUserInvitedV1: {
-      _internal_mutable_gamesessionnotificationuserinvitedv1()->::session::GameSessionNotificationUserInvitedV1::MergeFrom(from._internal_gamesessionnotificationuserinvitedv1());
+      _internal_mutable_gamesessionnotificationuserinvitedv1()->::accelbyte_session::GameSessionNotificationUserInvitedV1::MergeFrom(from._internal_gamesessionnotificationuserinvitedv1());
       break;
     }
     case kGameSessionNotificationUserJoinedV1: {
-      _internal_mutable_gamesessionnotificationuserjoinedv1()->::session::GameSessionNotificationUserJoinedV1::MergeFrom(from._internal_gamesessionnotificationuserjoinedv1());
+      _internal_mutable_gamesessionnotificationuserjoinedv1()->::accelbyte_session::GameSessionNotificationUserJoinedV1::MergeFrom(from._internal_gamesessionnotificationuserjoinedv1());
       break;
     }
     case kGameSessionNotificationUserKickedV1: {
-      _internal_mutable_gamesessionnotificationuserkickedv1()->::session::GameSessionNotificationUserKickedV1::MergeFrom(from._internal_gamesessionnotificationuserkickedv1());
+      _internal_mutable_gamesessionnotificationuserkickedv1()->::accelbyte_session::GameSessionNotificationUserKickedV1::MergeFrom(from._internal_gamesessionnotificationuserkickedv1());
       break;
     }
     case kGameSessionNotificationMembersChangedV1: {
-      _internal_mutable_gamesessionnotificationmemberschangedv1()->::session::GameSessionNotificationMembersChangedV1::MergeFrom(from._internal_gamesessionnotificationmemberschangedv1());
+      _internal_mutable_gamesessionnotificationmemberschangedv1()->::accelbyte_session::GameSessionNotificationMembersChangedV1::MergeFrom(from._internal_gamesessionnotificationmemberschangedv1());
       break;
     }
     case kGameSessionV1: {
-      _internal_mutable_gamesessionv1()->::session::GameSessionV1::MergeFrom(from._internal_gamesessionv1());
+      _internal_mutable_gamesessionv1()->::accelbyte_session::GameSessionV1::MergeFrom(from._internal_gamesessionv1());
       break;
     }
     case kDSStatusChangedNotificationV1: {
-      _internal_mutable_dsstatuschangednotificationv1()->::session::DSStatusChangedNotificationV1::MergeFrom(from._internal_dsstatuschangednotificationv1());
+      _internal_mutable_dsstatuschangednotificationv1()->::accelbyte_session::DSStatusChangedNotificationV1::MergeFrom(from._internal_dsstatuschangednotificationv1());
       break;
     }
     case PAYLOAD_NOT_SET: {
@@ -1526,51 +1526,51 @@ void NotificationEventEnvelope::MergeFrom(const NotificationEventEnvelope& from)
 
   switch (from.payload_case()) {
     case kPartyNotificationUserInvitedV1: {
-      _internal_mutable_partynotificationuserinvitedv1()->::session::PartyNotificationUserInvitedV1::MergeFrom(from._internal_partynotificationuserinvitedv1());
+      _internal_mutable_partynotificationuserinvitedv1()->::accelbyte_session::PartyNotificationUserInvitedV1::MergeFrom(from._internal_partynotificationuserinvitedv1());
       break;
     }
     case kPartyNotificationUserJoinedV1: {
-      _internal_mutable_partynotificationuserjoinedv1()->::session::PartyNotificationUserJoinedV1::MergeFrom(from._internal_partynotificationuserjoinedv1());
+      _internal_mutable_partynotificationuserjoinedv1()->::accelbyte_session::PartyNotificationUserJoinedV1::MergeFrom(from._internal_partynotificationuserjoinedv1());
       break;
     }
     case kPartyNotificationMembersChangedV1: {
-      _internal_mutable_partynotificationmemberschangedv1()->::session::PartyNotificationMembersChangedV1::MergeFrom(from._internal_partynotificationmemberschangedv1());
+      _internal_mutable_partynotificationmemberschangedv1()->::accelbyte_session::PartyNotificationMembersChangedV1::MergeFrom(from._internal_partynotificationmemberschangedv1());
       break;
     }
     case kPartyNotificationUserRejectV1: {
-      _internal_mutable_partynotificationuserrejectv1()->::session::PartyNotificationUserRejectV1::MergeFrom(from._internal_partynotificationuserrejectv1());
+      _internal_mutable_partynotificationuserrejectv1()->::accelbyte_session::PartyNotificationUserRejectV1::MergeFrom(from._internal_partynotificationuserrejectv1());
       break;
     }
     case kPartyNotificationUserKickedV1: {
-      _internal_mutable_partynotificationuserkickedv1()->::session::PartyNotificationUserKickedV1::MergeFrom(from._internal_partynotificationuserkickedv1());
+      _internal_mutable_partynotificationuserkickedv1()->::accelbyte_session::PartyNotificationUserKickedV1::MergeFrom(from._internal_partynotificationuserkickedv1());
       break;
     }
     case kPartySessionV1: {
-      _internal_mutable_partysessionv1()->::session::PartySessionV1::MergeFrom(from._internal_partysessionv1());
+      _internal_mutable_partysessionv1()->::accelbyte_session::PartySessionV1::MergeFrom(from._internal_partysessionv1());
       break;
     }
     case kGameSessionNotificationUserInvitedV1: {
-      _internal_mutable_gamesessionnotificationuserinvitedv1()->::session::GameSessionNotificationUserInvitedV1::MergeFrom(from._internal_gamesessionnotificationuserinvitedv1());
+      _internal_mutable_gamesessionnotificationuserinvitedv1()->::accelbyte_session::GameSessionNotificationUserInvitedV1::MergeFrom(from._internal_gamesessionnotificationuserinvitedv1());
       break;
     }
     case kGameSessionNotificationUserJoinedV1: {
-      _internal_mutable_gamesessionnotificationuserjoinedv1()->::session::GameSessionNotificationUserJoinedV1::MergeFrom(from._internal_gamesessionnotificationuserjoinedv1());
+      _internal_mutable_gamesessionnotificationuserjoinedv1()->::accelbyte_session::GameSessionNotificationUserJoinedV1::MergeFrom(from._internal_gamesessionnotificationuserjoinedv1());
       break;
     }
     case kGameSessionNotificationUserKickedV1: {
-      _internal_mutable_gamesessionnotificationuserkickedv1()->::session::GameSessionNotificationUserKickedV1::MergeFrom(from._internal_gamesessionnotificationuserkickedv1());
+      _internal_mutable_gamesessionnotificationuserkickedv1()->::accelbyte_session::GameSessionNotificationUserKickedV1::MergeFrom(from._internal_gamesessionnotificationuserkickedv1());
       break;
     }
     case kGameSessionNotificationMembersChangedV1: {
-      _internal_mutable_gamesessionnotificationmemberschangedv1()->::session::GameSessionNotificationMembersChangedV1::MergeFrom(from._internal_gamesessionnotificationmemberschangedv1());
+      _internal_mutable_gamesessionnotificationmemberschangedv1()->::accelbyte_session::GameSessionNotificationMembersChangedV1::MergeFrom(from._internal_gamesessionnotificationmemberschangedv1());
       break;
     }
     case kGameSessionV1: {
-      _internal_mutable_gamesessionv1()->::session::GameSessionV1::MergeFrom(from._internal_gamesessionv1());
+      _internal_mutable_gamesessionv1()->::accelbyte_session::GameSessionV1::MergeFrom(from._internal_gamesessionv1());
       break;
     }
     case kDSStatusChangedNotificationV1: {
-      _internal_mutable_dsstatuschangednotificationv1()->::session::DSStatusChangedNotificationV1::MergeFrom(from._internal_dsstatuschangednotificationv1());
+      _internal_mutable_dsstatuschangednotificationv1()->::accelbyte_session::DSStatusChangedNotificationV1::MergeFrom(from._internal_dsstatuschangednotificationv1());
       break;
     }
     case PAYLOAD_NOT_SET: {
@@ -2007,10 +2007,10 @@ void UserV1::InternalSwap(UserV1* other) {
 
 class PartySessionV1::_Internal {
  public:
-  static const ::session::SessionConfigV1& configuration(const PartySessionV1* msg);
+  static const ::accelbyte_session::SessionConfigV1& configuration(const PartySessionV1* msg);
 };
 
-const ::session::SessionConfigV1&
+const ::accelbyte_session::SessionConfigV1&
 PartySessionV1::_Internal::configuration(const PartySessionV1* msg) {
   return *msg->configuration_;
 }
@@ -2085,7 +2085,7 @@ PartySessionV1::PartySessionV1(const PartySessionV1& from)
       GetArenaForAllocation());
   }
   if (from._internal_has_configuration()) {
-    configuration_ = new ::session::SessionConfigV1(*from.configuration_);
+    configuration_ = new ::accelbyte_session::SessionConfigV1(*from.configuration_);
   } else {
     configuration_ = nullptr;
   }
@@ -2529,7 +2529,7 @@ void PartySessionV1::MergeFrom(const PartySessionV1& from) {
     _internal_set_leader_id(from._internal_leader_id());
   }
   if (from._internal_has_configuration()) {
-    _internal_mutable_configuration()->::session::SessionConfigV1::MergeFrom(from._internal_configuration());
+    _internal_mutable_configuration()->::accelbyte_session::SessionConfigV1::MergeFrom(from._internal_configuration());
   }
   if (from._internal_version() != 0) {
     _internal_set_version(from._internal_version());
@@ -5002,10 +5002,10 @@ void GameSessionNotificationMembersChangedV1::InternalSwap(GameSessionNotificati
 
 class DSStatusChangedNotificationV1::_Internal {
  public:
-  static const ::session::GameServerV1& gameserver(const DSStatusChangedNotificationV1* msg);
+  static const ::accelbyte_session::GameServerV1& gameserver(const DSStatusChangedNotificationV1* msg);
 };
 
-const ::session::GameServerV1&
+const ::accelbyte_session::GameServerV1&
 DSStatusChangedNotificationV1::_Internal::gameserver(const DSStatusChangedNotificationV1* msg) {
   return *msg->gameserver_;
 }
@@ -5038,7 +5038,7 @@ DSStatusChangedNotificationV1::DSStatusChangedNotificationV1(const DSStatusChang
       GetArenaForAllocation());
   }
   if (from._internal_has_gameserver()) {
-    gameserver_ = new ::session::GameServerV1(*from.gameserver_);
+    gameserver_ = new ::accelbyte_session::GameServerV1(*from.gameserver_);
   } else {
     gameserver_ = nullptr;
   }
@@ -5253,7 +5253,7 @@ void DSStatusChangedNotificationV1::MergeFrom(const DSStatusChangedNotificationV
     _internal_set_error(from._internal_error());
   }
   if (from._internal_has_gameserver()) {
-    _internal_mutable_gameserver()->::session::GameServerV1::MergeFrom(from._internal_gameserver());
+    _internal_mutable_gameserver()->::accelbyte_session::GameServerV1::MergeFrom(from._internal_gameserver());
   }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -5677,15 +5677,15 @@ void Team::InternalSwap(Team* other) {
 
 class GameSessionV1::_Internal {
  public:
-  static const ::session::SessionConfigV1& configuration(const GameSessionV1* msg);
-  static const ::session::DSInformationV1& dsinformationv1(const GameSessionV1* msg);
+  static const ::accelbyte_session::SessionConfigV1& configuration(const GameSessionV1* msg);
+  static const ::accelbyte_session::DSInformationV1& dsinformationv1(const GameSessionV1* msg);
 };
 
-const ::session::SessionConfigV1&
+const ::accelbyte_session::SessionConfigV1&
 GameSessionV1::_Internal::configuration(const GameSessionV1* msg) {
   return *msg->configuration_;
 }
-const ::session::DSInformationV1&
+const ::accelbyte_session::DSInformationV1&
 GameSessionV1::_Internal::dsinformationv1(const GameSessionV1* msg) {
   return *msg->dsinformationv1_;
 }
@@ -5778,12 +5778,12 @@ GameSessionV1::GameSessionV1(const GameSessionV1& from)
       GetArenaForAllocation());
   }
   if (from._internal_has_configuration()) {
-    configuration_ = new ::session::SessionConfigV1(*from.configuration_);
+    configuration_ = new ::accelbyte_session::SessionConfigV1(*from.configuration_);
   } else {
     configuration_ = nullptr;
   }
   if (from._internal_has_dsinformationv1()) {
-    dsinformationv1_ = new ::session::DSInformationV1(*from.dsinformationv1_);
+    dsinformationv1_ = new ::accelbyte_session::DSInformationV1(*from.dsinformationv1_);
   } else {
     dsinformationv1_ = nullptr;
   }
@@ -6357,10 +6357,10 @@ void GameSessionV1::MergeFrom(const GameSessionV1& from) {
     _internal_set_backfill_ticket_id(from._internal_backfill_ticket_id());
   }
   if (from._internal_has_configuration()) {
-    _internal_mutable_configuration()->::session::SessionConfigV1::MergeFrom(from._internal_configuration());
+    _internal_mutable_configuration()->::accelbyte_session::SessionConfigV1::MergeFrom(from._internal_configuration());
   }
   if (from._internal_has_dsinformationv1()) {
-    _internal_mutable_dsinformationv1()->::session::DSInformationV1::MergeFrom(from._internal_dsinformationv1());
+    _internal_mutable_dsinformationv1()->::accelbyte_session::DSInformationV1::MergeFrom(from._internal_dsinformationv1());
   }
   if (from._internal_version() != 0) {
     _internal_set_version(from._internal_version());
@@ -6449,10 +6449,10 @@ void GameSessionV1::InternalSwap(GameSessionV1* other) {
 
 class DSInformationV1::_Internal {
  public:
-  static const ::session::GameServerV1& gameserver(const DSInformationV1* msg);
+  static const ::accelbyte_session::GameServerV1& gameserver(const DSInformationV1* msg);
 };
 
-const ::session::GameServerV1&
+const ::accelbyte_session::GameServerV1&
 DSInformationV1::_Internal::gameserver(const DSInformationV1* msg) {
   return *msg->gameserver_;
 }
@@ -6487,7 +6487,7 @@ DSInformationV1::DSInformationV1(const DSInformationV1& from)
       GetArenaForAllocation());
   }
   if (from._internal_has_gameserver()) {
-    gameserver_ = new ::session::GameServerV1(*from.gameserver_);
+    gameserver_ = new ::accelbyte_session::GameServerV1(*from.gameserver_);
   } else {
     gameserver_ = nullptr;
   }
@@ -6737,7 +6737,7 @@ void DSInformationV1::MergeFrom(const DSInformationV1& from) {
     _internal_set_status(from._internal_status());
   }
   if (from._internal_has_gameserver()) {
-    _internal_mutable_gameserver()->::session::GameServerV1::MergeFrom(from._internal_gameserver());
+    _internal_mutable_gameserver()->::accelbyte_session::GameServerV1::MergeFrom(from._internal_gameserver());
   }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -7960,65 +7960,65 @@ void GameSessionNotificationUserKickedV1::InternalSwap(GameSessionNotificationUs
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace session
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::session::NotificationEventEnvelope* Arena::CreateMaybeMessage< ::session::NotificationEventEnvelope >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::NotificationEventEnvelope >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::NotificationEventEnvelope* Arena::CreateMaybeMessage< ::accelbyte_session::NotificationEventEnvelope >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::NotificationEventEnvelope >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::UserV1* Arena::CreateMaybeMessage< ::session::UserV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::UserV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::UserV1* Arena::CreateMaybeMessage< ::accelbyte_session::UserV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::UserV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::PartySessionV1* Arena::CreateMaybeMessage< ::session::PartySessionV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::PartySessionV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::PartySessionV1* Arena::CreateMaybeMessage< ::accelbyte_session::PartySessionV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::PartySessionV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::SessionConfigV1* Arena::CreateMaybeMessage< ::session::SessionConfigV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::SessionConfigV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::SessionConfigV1* Arena::CreateMaybeMessage< ::accelbyte_session::SessionConfigV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::SessionConfigV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::PartyNotificationUserJoinedV1* Arena::CreateMaybeMessage< ::session::PartyNotificationUserJoinedV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::PartyNotificationUserJoinedV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::PartyNotificationUserJoinedV1* Arena::CreateMaybeMessage< ::accelbyte_session::PartyNotificationUserJoinedV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::PartyNotificationUserJoinedV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::PartyNotificationMembersChangedV1* Arena::CreateMaybeMessage< ::session::PartyNotificationMembersChangedV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::PartyNotificationMembersChangedV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::PartyNotificationMembersChangedV1* Arena::CreateMaybeMessage< ::accelbyte_session::PartyNotificationMembersChangedV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::PartyNotificationMembersChangedV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::PartyNotificationUserInvitedV1* Arena::CreateMaybeMessage< ::session::PartyNotificationUserInvitedV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::PartyNotificationUserInvitedV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::PartyNotificationUserInvitedV1* Arena::CreateMaybeMessage< ::accelbyte_session::PartyNotificationUserInvitedV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::PartyNotificationUserInvitedV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::PartyNotificationUserRejectV1* Arena::CreateMaybeMessage< ::session::PartyNotificationUserRejectV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::PartyNotificationUserRejectV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::PartyNotificationUserRejectV1* Arena::CreateMaybeMessage< ::accelbyte_session::PartyNotificationUserRejectV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::PartyNotificationUserRejectV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::PartyNotificationUserKickedV1* Arena::CreateMaybeMessage< ::session::PartyNotificationUserKickedV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::PartyNotificationUserKickedV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::PartyNotificationUserKickedV1* Arena::CreateMaybeMessage< ::accelbyte_session::PartyNotificationUserKickedV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::PartyNotificationUserKickedV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::GameSessionNotificationUserInvitedV1* Arena::CreateMaybeMessage< ::session::GameSessionNotificationUserInvitedV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::GameSessionNotificationUserInvitedV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::GameSessionNotificationUserInvitedV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameSessionNotificationUserInvitedV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::GameSessionNotificationUserInvitedV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::GameSessionNotificationUserJoinedV1* Arena::CreateMaybeMessage< ::session::GameSessionNotificationUserJoinedV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::GameSessionNotificationUserJoinedV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::GameSessionNotificationUserJoinedV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameSessionNotificationUserJoinedV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::GameSessionNotificationUserJoinedV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::GameSessionNotificationMembersChangedV1* Arena::CreateMaybeMessage< ::session::GameSessionNotificationMembersChangedV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::GameSessionNotificationMembersChangedV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::GameSessionNotificationMembersChangedV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameSessionNotificationMembersChangedV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::GameSessionNotificationMembersChangedV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::DSStatusChangedNotificationV1* Arena::CreateMaybeMessage< ::session::DSStatusChangedNotificationV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::DSStatusChangedNotificationV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::DSStatusChangedNotificationV1* Arena::CreateMaybeMessage< ::accelbyte_session::DSStatusChangedNotificationV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::DSStatusChangedNotificationV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::UserIDs* Arena::CreateMaybeMessage< ::session::UserIDs >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::UserIDs >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::UserIDs* Arena::CreateMaybeMessage< ::accelbyte_session::UserIDs >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::UserIDs >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::Team* Arena::CreateMaybeMessage< ::session::Team >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::Team >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::Team* Arena::CreateMaybeMessage< ::accelbyte_session::Team >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::Team >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::GameSessionV1* Arena::CreateMaybeMessage< ::session::GameSessionV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::GameSessionV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::GameSessionV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameSessionV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::GameSessionV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::DSInformationV1* Arena::CreateMaybeMessage< ::session::DSInformationV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::DSInformationV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::DSInformationV1* Arena::CreateMaybeMessage< ::accelbyte_session::DSInformationV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::DSInformationV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::GameServerV1_PortsEntry_DoNotUse* Arena::CreateMaybeMessage< ::session::GameServerV1_PortsEntry_DoNotUse >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::GameServerV1_PortsEntry_DoNotUse >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::GameServerV1_PortsEntry_DoNotUse* Arena::CreateMaybeMessage< ::accelbyte_session::GameServerV1_PortsEntry_DoNotUse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::GameServerV1_PortsEntry_DoNotUse >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::GameServerV1* Arena::CreateMaybeMessage< ::session::GameServerV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::GameServerV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::GameServerV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameServerV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::GameServerV1 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::session::GameSessionNotificationUserKickedV1* Arena::CreateMaybeMessage< ::session::GameSessionNotificationUserKickedV1 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::session::GameSessionNotificationUserKickedV1 >(arena);
+template<> PROTOBUF_NOINLINE ::accelbyte_session::GameSessionNotificationUserKickedV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameSessionNotificationUserKickedV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::GameSessionNotificationUserKickedV1 >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 
