@@ -150,6 +150,18 @@ public:
 	static void RevokeUserToken(const FString& ClientId, const FString& ClientSecret, const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	 * @brief login from Accelbyte Launcher
+	 * 
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param AuthorizationCode This should be filled with "JUSTICE_AUTHORIZATION_CODE" environment variable.
+	 * @param RedirectUri The URL the IAM server will redirect you to when the operation succeeded. Again, this doesn't work at all. Do not use this function!!!
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void GetTokenWithAuthorizationCodeV3(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
+	
+	/**
 	* @brief Log user in with their username and password using V3 endpoint.
 	* 
 	* @param ClientId The issued OAuth2 client credentials.
@@ -215,7 +227,19 @@ public:
 	*/
 	static void AuthenticationWithPlatformLink(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const FString& LinkingToken,
 		const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError);
-	
+
+	/**
+	* @brief Verify OAuth2 token verification API.
+	* 
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param Token Token to be verified.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	* @param OnError This will be called when the operation failed.
+	*/
+	static void VerifyToken(const FString& ClientId, const FString& ClientSecret, const FString& Token,
+	                 const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
 private:
 	Oauth2() = delete; // static class can't have instance
 	Oauth2(Oauth2 const&) = delete;

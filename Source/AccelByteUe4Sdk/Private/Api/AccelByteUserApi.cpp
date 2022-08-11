@@ -1387,5 +1387,20 @@ void User::GetPublisherUser(const FString& UserId, const THandler<FGetPublisherU
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnError) const
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	Oauth2::VerifyToken(
+		CredentialsRef.GetOAuthClientId(),
+		CredentialsRef.GetOAuthClientSecret(),
+		CredentialsRef.GetAccessToken(),
+		FVoidHandler::CreateLambda([this, OnSuccess]() 
+		{
+			OnSuccess.ExecuteIfBound();
+		}),
+		OnError);
+}
+
 } // Namespace Api
 } // Namespace AccelByte
