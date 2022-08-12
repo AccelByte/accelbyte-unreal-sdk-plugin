@@ -81,6 +81,16 @@ public:
 	void DeleteGameSession(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Send an invite to a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param UserID The ID of the user to invite.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void SendGameSessionInvite(FString const& GameSessionID, FString const& UserID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Join a game session by ID.
 	 *
 	 * @param GameSessionID The ID of the session.

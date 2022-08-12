@@ -36,11 +36,10 @@ enum class EAccelByteV2SessionMemberStatus : uint8
 UENUM(BlueprintType)
 enum class EAccelByteV2GameSessionDsStatus : uint8
 {
-	INITIALIZED = 0,
+	NEED_TO_REQUEST = 0,
 	REQUESTED,
-	READY,
-	CREATING,
-	BUSY
+	AVAILABLE,
+	FAILED_TO_REQUEST
 };
 
 UENUM(BlueprintType)
@@ -229,10 +228,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySession : public FAccelByteMod
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyInviteRequest
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionInviteRequest
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyInviteRequest")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionInviteRequest")
 		FString UserID{};
 };
 
