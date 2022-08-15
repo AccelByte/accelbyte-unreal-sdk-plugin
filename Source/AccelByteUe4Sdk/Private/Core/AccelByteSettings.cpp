@@ -138,6 +138,17 @@ void Settings::LoadSettings(const FString& SectionPath)
 	{
 		QosServerLatencyPollIntervalSecs = 0;
 	}
+
+	FString QosPingTimeoutString;
+	LoadFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString);
+	if (QosPingTimeoutString.IsNumeric())
+	{
+		QosPingTimeout = FCString::Atof(*QosPingTimeoutString);
+	}
+	else
+	{
+		QosPingTimeout = .6;
+	}
 }
 
 void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FString& Value)
@@ -301,6 +312,11 @@ float UAccelByteBlueprintsSettings::GetQosServerLatencyPollIntervalSecs()
 	return FRegistry::Settings.QosServerLatencyPollIntervalSecs;
 }
 
+float UAccelByteBlueprintsSettings::GetQosPingTimeout()
+{
+	return FRegistry::Settings.QosPingTimeout;
+}
+
 bool UAccelByteBlueprintsSettings::IsHttpCacheEnabled()
 {
 	return FRegistry::Settings.bEnableHttpCache;
@@ -444,6 +460,22 @@ void UAccelByteBlueprintsSettings::SetServerQosLatencyPollIntervalSecs(const flo
 void UAccelByteBlueprintsSettings::SetIsHttpCacheEnabled(bool bEnable)
 {
 	FRegistry::Settings.bEnableHttpCache = bEnable;
+}
+
+void UAccelByteBlueprintsSettings::SetQosPingTimeout(const float& QosPingTimeout)
+{
+	if (QosPingTimeout < .6)
+	{
+		FRegistry::Settings.QosPingTimeout = .6;
+	}
+	else if (QosPingTimeout > 60)
+	{
+		FRegistry::Settings.QosPingTimeout = 60;
+	}
+	else
+	{
+		FRegistry::Settings.QosPingTimeout = QosPingTimeout;
+	}
 }
 
 void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment Environment)

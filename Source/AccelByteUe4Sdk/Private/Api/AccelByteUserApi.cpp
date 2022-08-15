@@ -1369,5 +1369,38 @@ void User::UpdateUserV3(FUserUpdateRequest UpdateRequest, const THandler<FAccoun
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void User::GetPublisherUser(const FString& UserId, const THandler<FGetPublisherUserResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/publisher"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace, *UserId);
+	FString Verb            = TEXT("GET");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnError) const
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	Oauth2::VerifyToken(
+		CredentialsRef.GetOAuthClientId(),
+		CredentialsRef.GetOAuthClientSecret(),
+		CredentialsRef.GetAccessToken(),
+		FVoidHandler::CreateLambda([this, OnSuccess]() 
+		{
+			OnSuccess.ExecuteIfBound();
+		}),
+		OnError);
+}
+
 } // Namespace Api
 } // Namespace AccelByte

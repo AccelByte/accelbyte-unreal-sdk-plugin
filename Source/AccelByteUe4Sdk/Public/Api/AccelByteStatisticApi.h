@@ -51,8 +51,8 @@ public:
 		* @brief Get this user stat items by specifying statCodes and tags to get from. Returned stat items will only contain
 		* stat items specified by statCodes and tags (inclusive)
 		*
-		* @param statCodes Specify statCodes for stat items to get from this method
-		* @param tags Specify tags for for stat items to get from this method
+		* @param StatCodes Specify statCodes for stat items to get from this method
+		* @param Tags Specify tags for for stat items to get from this method
 		* @param OnSuccess This will be called when the operation succeeded. Thre result is an FAccelByteModelsUserStatItemPagingSlicedResult
 		* @param OnError This will be called when the operation failed.
 	*/
@@ -66,6 +66,44 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void IncrementUserStatItems(const TArray<FAccelByteModelsBulkStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError);
+ 
+	/**
+	* @brief Public list all statItems of user.
+	*	NOTE:
+	*		If stat code does not exist, will ignore this stat code.
+	*		If stat item does not exist, will return default value
+	*
+	* @param StatCodes StatCodes.
+	* @param Tags This is the Tag array that will be stored in the slot.
+	* @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsFetchUser.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void ListUserStatItems(const TArray<FString>& StatCodes,  const TArray<FString>& Tags,  const FString& AdditionalKey, 
+		const THandler<TArray<FAccelByteModelsFetchUser>>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Public bulk update user's statitems value for given namespace and user with specific update strategy.
+	*
+	* @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
+	* @param BulkUpdateUserStatItems This is the BulkUpdateUserStatItem array that will be stored in the slot.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsUpdateUserStatItemsResponse.
+	* @param OnError This will be called when the operation failed.
+	*/		
+	void BulkUpdateUserStatItemsValue(const FString& AdditionalKey, const TArray<FAccelByteModelsUpdateUserStatItemWithStatCode>& BulkUpdateUserStatItems,
+		const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Public update user's statitem value for a given namespace and user with a certain update strategy.
+	*
+	* @param StatCode StatCode.
+	* @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
+	* @param UpdateUserStatItem This is the UpdateUserStatItem that will be stored in the slot.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUpdateUserStatItemValueResponse.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void UpdateUserStatItemsValue(const FString& StatCode, const FString& AdditionalKey, const FAccelByteModelsPublicUpdateUserStatItem& UpdateUserStatItem,
+		const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Statistic() = delete;

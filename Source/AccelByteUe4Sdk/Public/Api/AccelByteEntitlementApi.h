@@ -37,7 +37,7 @@ public:
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
 	*/
-	void QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType, TArray<FString> const& Features = {});
 
 	/**
 	* @brief Get list of user's Entitlement(s).
@@ -50,8 +50,9 @@ public:
 	* @param OnError This will be called when the operation failed.
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
+	* @param Features The feature array.
 	*/
-	void QueryUserEntitlements(FString const& EntitlementName, TArray<FString> const& ItemIds, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlements(FString const& EntitlementName, TArray<FString> const& ItemIds, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType, TArray<FString> const& Features = {});
 
 	/**
 	* @brief Get user's Entitlement by the EntitlementId.
@@ -196,6 +197,16 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FAccelByteModelsPlayStationDLCSync const& PSSyncModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Sync entitlement from 3rd party platform purchase.
+	 *
+	 * @param EntitlementSyncBase Base information needed by some platforms.
+	 * @param PlatformType The platform type identifier for sync entitlement.
+	 * @param OnSuccess This will be called when the operation success.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase EntitlementSyncBase, EAccelBytePlatformSync PlatformType, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Sync (Verify and fulfil) item entitlement from Google Play platform purchase.

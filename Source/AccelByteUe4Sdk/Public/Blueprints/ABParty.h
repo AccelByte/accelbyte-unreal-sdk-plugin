@@ -237,17 +237,17 @@ public:
 	 * @brief Set a trigger function when a party member leave from the party. This function is DEPRECATED
 	 * @param OnNotif delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyLeave(FDPartyLeaveNotif OnNotif);
 
 	/**
 	 * @brief Set a trigger function when a party member leave from the party
 	 * @param OnNotif delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyMemberLeave(FDPartyMemberLeaveNotif OnNotif);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyKick(FDPartyKickNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
@@ -260,14 +260,14 @@ public:
 	 * @brief Set a trigger function when a party member reconnecting to the lobby
 	 * @param OnNotif return models called FAccelByteModelsPartyMemberConnectionNotice
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyMemberConnect(FDPartyMemberConnectNotif OnNotif);
 
 	/**
 	 * @brief Set a trigger function when a party member disconnect from lobby
 	 * @param OnNotif return models called FAccelByteModelsPartyMemberConnectionNotice
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyMemberDisconnect(FDPartyMemberDisconnectNotif OnNotif);
 
 private:

@@ -16,6 +16,7 @@
 #include "Core/FUnrealWebSocketFactory.h"
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteMessageParser.h"
 
 THIRD_PARTY_INCLUDES_START
 #include "Proto/session_notification.pb.h"
@@ -103,7 +104,6 @@ namespace Api
 		const FString PartyInfo = TEXT("partyInfoResponse");
 		const FString PartyCreate = TEXT("partyCreateResponse");
 		const FString PartyLeave = TEXT("partyLeaveResponse");
-		const FString PartyLeaveNotif = TEXT("partyLeaveNotif"); // This variable is DEPRECATED
 		const FString PartyMemberLeaveNotif = TEXT("partyLeaveNotif");
 		const FString PartyInvite = TEXT("partyInviteResponse");
 		const FString PartyInviteNotif = TEXT("partyInviteNotif");
@@ -290,7 +290,6 @@ namespace Api
 		DisconnectNotif,
 
 		// Party
-		PartyLeaveNotif, // This enum is DEPRECATED
 		PartyMemberLeaveNotif,
 		PartyInviteNotif,
 		PartyGetInvitedNotif,
@@ -390,7 +389,6 @@ namespace Api
 	TMap<FString, Notif> Lobby::NotifStringEnumMap{
 		FORM_STRING_ENUM_PAIR(Notif,ConnectedNotif),
 		FORM_STRING_ENUM_PAIR(Notif,DisconnectNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyLeaveNotif), // This FORM STRING ENUM is DEPRECATED
 		FORM_STRING_ENUM_PAIR(Notif,PartyMemberLeaveNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyInviteNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyGetInvitedNotif),
@@ -697,8 +695,9 @@ void Lobby::SetPartySizeLimit(const FString& PartyId, const int32 Limit, const F
 FString Lobby::SendSetPresenceStatus(const EAvailability Availability, const FString& Activity)
 {
 	FReport::Log(FString(__FUNCTION__));
+	const FString EscapedActivity = MessageParser::EscapeString(Activity);
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(SetUserPresence, Presence
-		, FString::Printf(TEXT("availability: %s\nactivity: %s\n"), *FAccelByteUtilities::GetUEnumValueAsString(Availability).ToLower(), *Activity))
+		, FString::Printf(TEXT("availability: %s\nactivity: %s\n"), *FAccelByteUtilities::GetUEnumValueAsString(Availability).ToLower(), *EscapedActivity))
 }
 
 FString Lobby::SendGetOnlineUsersRequest()
@@ -1578,113 +1577,94 @@ void Lobby::CreateWebSocket(const FString& Token)
 	WebSocket->OnConnectionClosed().AddRaw(this, &Lobby::OnClosed);
 }
 
-FString Lobby::LobbyMessageToJson(FString Message)
+FString Lobby::LobbyMessageToJson(const FString& Message)
 {
-	FString Json = TEXT("{");
-	TArray<FString> Out;
-	Message.ParseIntoArray(Out, TEXT("\n"), true);
-	for (int i = 0; i < Out.Num(); i++)
+	bool bFirst = true;
+	FString JsonString = TEXT("{");
+	TArray<FString> Lines;
+	Message.ParseIntoArray(Lines, TEXT("\n"), true);
+	for (const auto& Line : Lines)
 	{
-		FString CurrentLine = Out[i];
-
-		FString Key;
+		FString Name;
 		FString Value;
-
-		CurrentLine.Split(": ", &Key, &Value);
-		Json += FString::Printf(TEXT("\"%s\":"), *Key);
-		Value.TrimStartAndEndInline();
-
-		if (Value.StartsWith("["))
+		if (bFirst)
 		{
-			// if starts with "[{" then it's an array of jsonObject field, pass the value since expected to be valid json field.
-			// "[]" is also a valid empty array json field.
-			if (Value.Equals("[]") || Value.StartsWith("[{")) 
-			{
-				Json += Value;
-			}
-			else
-			{
-				bool Quote = false;
-				bool ElementStart = false;
-				FString Element;
-				Json += "[";
-				for (int j = 1; j < Value.Len() - 1; j++)
-				{
-					if (!ElementStart)
-					{
-						if (Value[j] == ' ') 
-						{
-							continue;
-						}
-
-						ElementStart = true;
-						Element.AppendChar('"');
-						if (Value[j] == '"')
-						{
-							Quote = true;
-							continue;
-						}
-					}
-
-					if (!Quote && Value[j] == ',')
-					{
-						ElementStart = false;
-						Element.TrimEndInline();
-						Json += Element;
-
-						if (!Element.EndsWith("\"") // if element doesn't end with (")
-							|| (Element.Equals("\"") && Element.Len() == 1) // if element only (")
-							|| Element.Equals(",\"")) // if element only (,")
-						{
-							Json.AppendChar('"');
-						}
-						Element = "";
-
-						if (j == Value.Len() - 2) 
-						{
-							break;
-						}
-					}
-
-					Element.AppendChar(Value[j]);
-
-					if (Quote && Value[j] == '\\')
-					{
-						Element.AppendChar(Value[++j]);
-					}
-					else if (Value[j] == '"')
-					{
-						Quote = false;
-					}
-				}
-
-				if (!Element.IsEmpty())
-				{
-					Json += Element;
-					if (!Element.EndsWith("\""))
-					{
-						Json.AppendChar('"');
-					}
-				}
-				Json += "]";
-			}
-		}
-		else if (Value.StartsWith("{"))
-		{
-			Json += Value;
+			bFirst = false;
 		}
 		else
 		{
-			Json += FString::Printf(TEXT("\"%s\""), *Value);
+			JsonString.Append(",");
 		}
+		Line.Split(": ", &Name, &Value);
+		JsonString.Appendf(TEXT("\"%s\":"), *Name);
 
-		if (i < Out.Num() - 1)
+		Value.TrimStartAndEndInline();
+
+		const TCHAR* Cursor = GetData(Value);
+
+		if (Cursor == nullptr)
 		{
-			Json += ",";
+			JsonString.Append("null");
+			continue;
+		}
+		
+		// make sure it's null terminated
+		checkf(*(Cursor + Value.Len()) == 0, TEXT("Invalid value: '%s' length: %d"), *Value, Value.Len());
+
+		// Array
+		if (*Cursor == '[')
+		{
+			++Cursor;
+			// skip spaces
+			while (*Cursor && *Cursor == ' ') ++Cursor;
+			bool bWasArrayParsed;
+			FString JsonArrayString;
+			// array of JSON object
+			if (*Cursor == '{')
+			{
+				bWasArrayParsed = MessageParser::ParseArrayOfObject(Cursor, JsonArrayString);
+			}
+			// array of string
+			else
+			{
+				bWasArrayParsed = MessageParser::ParseArrayOfString(Cursor, JsonArrayString);
+			}
+			
+			if (bWasArrayParsed)
+			{
+				JsonString.Append(JsonArrayString);
+			}
+			else
+			{
+				// if the array was not parsed, set to empty array
+				JsonString.Append("[]");
+				UE_LOG(LogAccelByte, Warning, TEXT("[LobbyMessageToJson] Invalid array for field '%s', set to empty array"), *Name);
+			}
+		}
+		// JSON
+		else if (*Cursor == '{')
+		{
+			FString ObjectString;
+			// only append valid object
+			if (MessageParser::ParseObject(Cursor, ObjectString))
+			{
+				JsonString.Append(ObjectString);
+			}
+			else
+			{
+				JsonString.Append("{}");
+				UE_LOG(LogAccelByte, Warning, TEXT("[LobbyMessageToJson] Invalid object for field '%s', set to empty object"), *Name);
+			}
+		}
+		// everything else
+		else
+		{
+			MessageParser::ParseString(Cursor, JsonString);
 		}
 	}
-	Json += TEXT("}");
-	return Json;
+
+	JsonString += TEXT("}");
+	return JsonString;
 }
 
 /**
@@ -2191,8 +2171,23 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			break;
 		}
 		CASE_NOTIF(DisconnectNotif, FAccelByteModelsDisconnectNotif);
-		CASE_NOTIF(PartyLeaveNotif, FAccelByteModelsLeavePartyNotice); // This Case Notif is DEPRECATED
-		CASE_NOTIF(PartyMemberLeaveNotif, FAccelByteModelsLeavePartyNotice);
+		case (Notif::PartyMemberLeaveNotif):
+		{
+				FAccelByteModelsLeavePartyNotice PartyLeaveResult;
+				bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &PartyLeaveResult, 0, 0);
+				if (bSuccess)
+				{
+					if (PartyLeaveNotif.IsBound())
+					{
+						PartyLeaveNotif.ExecuteIfBound(PartyLeaveResult);
+					}
+					else
+					{
+						PartyMemberLeaveNotif.ExecuteIfBound(PartyLeaveResult);
+					}
+				}
+				break;
+		}
 		CASE_NOTIF(PartyInviteNotif, FAccelByteModelsInvitationNotice);
 		CASE_NOTIF(PartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice);
 		CASE_NOTIF(PartyJoinNotif, FAccelByteModelsPartyJoinNotice);
@@ -2573,6 +2568,10 @@ Lobby::~Lobby()
 	if(UObjectInitialized())
 	{
 		Disconnect(true);
+		UnbindEvent();
+		ConnectSuccess.Unbind();
+		ConnectError.Unbind();
+		ConnectionClosed.Unbind();
 	}
 }
 

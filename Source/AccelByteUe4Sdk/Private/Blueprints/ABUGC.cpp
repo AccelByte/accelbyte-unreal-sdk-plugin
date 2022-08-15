@@ -368,3 +368,132 @@ void UABUGC::DeleteChannel(
 		)
 	);
 }
+
+void UABUGC::SearchContents(const FString& Name,
+	const FString& Creator,
+	const FString& Type,
+	const FString& Subtype,
+	const TArray<FString>& Tags,
+	bool IsOfficial,
+	const FString& UserId,
+	FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	EAccelByteUgcSortBy SortBy,
+	EAccelByteUgcOrderBy OrderBy,
+	int32 Limit,
+	int32 Offset)
+{
+	ApiClientPtr->UGC.SearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+			SortBy, OrderBy, Limit, Offset
+	);
+}
+
+void UABUGC::UpdateLikeStatusToContent(const FString& ContentId,
+	bool bLikeStatus,
+	FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
+	FDErrorHandler const& OnError
+)
+{
+	ApiClientPtr->UGC.UpdateLikeStatusToContent(
+		ContentId,
+		bLikeStatus, 
+		THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCUpdateLikeStatusToContentResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
+void UABUGC::GetListFollowers(const FString& UserId,
+	FDModelsUGCGetListFollowersPagingResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	int32 Limit,
+	int32 Offset
+)
+{
+	ApiClientPtr->UGC.GetListFollowers(UserId,
+		THandler<FAccelByteModelsUGCGetListFollowersPagingResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCGetListFollowersPagingResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		),
+		Limit,
+		Offset
+	);
+}
+
+void UABUGC::UpdateFollowStatusToUser(const FString& UserId,
+	bool bFollowStatus, 
+	FDModelsUGCUpdateFollowStatusToUserResponse const& OnSuccess,
+	FDErrorHandler const& OnError 
+)
+{
+	ApiClientPtr->UGC.UpdateFollowStatusToUser(UserId,
+		bFollowStatus, 
+		THandler<FAccelByteModelsUGCUpdateFollowStatusToUserResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCUpdateFollowStatusToUserResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		) 
+	);
+}
+
+void UABUGC::SearchContentsSpecificToChannel(const FString& ChannelId,
+	const FString& Name,
+	const FString& Creator,
+	const FString& Type,
+	const FString& Subtype,
+	const TArray<FString>& Tags,
+	bool IsOfficial,
+	const FString& UserId,
+	FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	EAccelByteUgcSortBy SortBy,
+	EAccelByteUgcOrderBy OrderBy,
+	int32 Limit,
+	int32 Offset)
+{
+	ApiClientPtr->UGC.SearchContentsSpecificToChannel(ChannelId, Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+			SortBy, OrderBy, Limit, Offset
+	);
+}

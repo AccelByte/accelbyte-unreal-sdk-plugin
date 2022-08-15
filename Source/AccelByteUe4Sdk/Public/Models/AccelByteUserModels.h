@@ -1010,3 +1010,15 @@ struct ACCELBYTEUE4SDK_API FBanUserResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
 	FString UserId{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FGetPublisherUserResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkedPlatform")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkedPlatform")
+	FString UserId{};
+};

@@ -1829,7 +1829,7 @@ public:
 	*/
 	void SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator);
 
-	static FString LobbyMessageToJson(FString Message);
+	static FString LobbyMessageToJson(const FString& Message);
 
 	void ClearLobbyErrorMessages();
 

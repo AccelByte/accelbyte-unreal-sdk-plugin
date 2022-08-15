@@ -27,12 +27,12 @@ Entitlement::Entitlement(Credentials const& InCredentialsRef
 
 Entitlement::~Entitlement(){}
 
-void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
+void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE, TArray<FString> const& Features)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	TArray<FString> ItemIdsArray = { ItemId };
-	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType);
+	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType, Features);
 
 }
 
@@ -42,7 +42,8 @@ void Entitlement::QueryUserEntitlements(
 	int32 const& Offset,
 	int32 const& Limit,
 	THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess,
-	FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType)
+	FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType,
+	TArray<FString> const& Features)
 { 
 
 	FReport::Log(FString(__FUNCTION__));
@@ -50,7 +51,9 @@ void Entitlement::QueryUserEntitlements(
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
  	
 	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("entitlementName"), EntitlementName }, 
+		{ TEXT("entitlementName"), EntitlementName },
+		{ "itemId", FString::Join(ItemIds, TEXT("&itemId=")) },
+		{ "features", FString::Join(Features, TEXT("&features=")) },
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ?
@@ -58,15 +61,6 @@ void Entitlement::QueryUserEntitlements(
 		{ TEXT("appType"), AppType != EAccelByteAppType::NONE ?
 				*FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType) : TEXT("")},
 	});
-	// Here we use append string to Url, we couldn't we use TMap for ItemIds, since the key should be unique 
-	for (FString const& ItemId : ItemIds)
-	{
-		if (!ItemId.IsEmpty())
-		{
-			QueryParams.Append(QueryParams.IsEmpty() ? TEXT("?") : TEXT("&"));
-			QueryParams.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
-		}
-	}	
 	Url.Append(QueryParams);
 
 	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
@@ -297,38 +291,83 @@ void Entitlement::UpdateDistributionReceiver(FString const& ExtUserId, FAccelByt
 
 void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
-	FAccelByteModelsPlayStationDLCSync PSSyncModel;
+	FAccelByteModelsPlayStationDLCSync PSSyncModel{};
 	SyncPlatformPurchase(PlatformType, PSSyncModel, OnSuccess, OnError);
 }
 
 void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FAccelByteModelsPlayStationDLCSync const& PSSyncModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
+	FAccelByteModelsEntitlementSyncBase SyncBase;
+	SyncBase.ServiceLabel = PSSyncModel.ServiceLabel;
+	SyncPlatformPurchase(SyncBase, PlatformType, OnSuccess, OnError);
+}
+
+void Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase EntitlementSyncBase, EAccelBytePlatformSync PlatformType, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
 	FReport::Log(FString(__FUNCTION__));
 
 	FString PlatformText = TEXT("");
-	FString Content = TEXT("{}");
-	FString platformUserId = CredentialsRef.GetPlatformUserId();
+	FString PlatformUserId = CredentialsRef.GetPlatformUserId();
 
+	// #TODO: Replace this switch statement with some kind of model backed sync or something
+	TSharedRef<FJsonObject> SyncRequestJson = MakeShared<FJsonObject>();
+	bool bSyncForSingleProduct = true;
 	switch (PlatformType)
 	{
 	case EAccelBytePlatformSync::STEAM:
 		PlatformText = TEXT("steam");
-		if (platformUserId.IsEmpty()) {
+		if (PlatformUserId.IsEmpty())
+		{
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
 			return;
 		}
-		Content = FString::Printf(TEXT("{\"steamId\": \"%s\", \"appId\": %s}"), *CredentialsRef.GetPlatformUserId(), *SettingsRef.AppId);
+
+		SyncRequestJson->SetStringField(TEXT("steamId"), PlatformUserId);
+		SyncRequestJson->SetStringField(TEXT("appId"), SettingsRef.AppId);
+
+		// If we don't have a product ID or a currency code set in this base mode, just send the request with user ID and app ID
+		if (EntitlementSyncBase.ProductId.IsEmpty() || EntitlementSyncBase.CurrencyCode.IsEmpty())
+		{
+			bSyncForSingleProduct = false;
+			break;
+		}
+
+		if (!EntitlementSyncBase.Region.IsEmpty())
+		{
+			SyncRequestJson->SetStringField(TEXT("region"), EntitlementSyncBase.Region);
+		}
+		if (!EntitlementSyncBase.Language.IsEmpty())
+		{
+			SyncRequestJson->SetStringField(TEXT("language"), EntitlementSyncBase.Language);
+		}
 		break;
 	case EAccelBytePlatformSync::XBOX_LIVE:
 		PlatformText = TEXT("xbl");
+		if (EntitlementSyncBase.ProductId.IsEmpty() || EntitlementSyncBase.CurrencyCode.IsEmpty())
+		{
+			bSyncForSingleProduct = false;
+			break;
+		}
+
+		SyncRequestJson->SetStringField(TEXT("xstsToken"), EntitlementSyncBase.XstsToken);
 		break;
 	case EAccelBytePlatformSync::PLAYSTATION:
 		PlatformText = TEXT("psn");
-		Content = FString::Printf(TEXT("{\"serviceLabel\": \"%d\"}"), PSSyncModel.ServiceLabel);
+		if (EntitlementSyncBase.ServiceLabel > 0)
+		{
+			SyncRequestJson->SetNumberField(TEXT("serviceLabel"), EntitlementSyncBase.ServiceLabel);
+		}
+
+		if (EntitlementSyncBase.ProductId.IsEmpty() || EntitlementSyncBase.CurrencyCode.IsEmpty())
+		{
+			bSyncForSingleProduct = false;
+			break;
+		}
+
 		break;
 	case EAccelBytePlatformSync::EPIC_GAMES:
 		PlatformText = TEXT("epicgames");
-		if (platformUserId.IsEmpty())
+		if (PlatformUserId.IsEmpty())
 		{
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
 			return;
@@ -339,10 +378,24 @@ void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FAcc
 		return;
 	}
 
+	// If we are trying to sync for a single product, add product information here to request
+	if (bSyncForSingleProduct)
+	{
+		SyncRequestJson->SetStringField(TEXT("productId"), EntitlementSyncBase.ProductId);
+		SyncRequestJson->SetNumberField(TEXT("price"), EntitlementSyncBase.Price);
+		SyncRequestJson->SetStringField(TEXT("currencyCode"), EntitlementSyncBase.CurrencyCode);
+	}
+
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *PlatformText);
 
+	FString ContentString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ContentString);
+	if (!FJsonSerializer::Serialize(SyncRequestJson, Writer))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to convert request JSON object to string"));
+	}
 
-	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest("PUT", Url, {}, ContentString, OnSuccess, OnError);
 }
 
 void Entitlement::SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
@@ -505,8 +558,9 @@ void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Id
 	// Url 
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/ownership/byItemIds"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 
-	// Params
+	// Params 
 	FString IdsQueryParamString = TEXT("");
+
 	for (FString const& Id : Ids)
 	{
 		if (!Id.IsEmpty())
@@ -515,7 +569,9 @@ void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Id
 			IdsQueryParamString.Append(FString::Printf(TEXT("ids=%s"), *Id));
 		}
 	} 
+
 	// Here we use append string to Url; we couldn't use TMap for ids, since the key should be unique 
+
 	Url.Append(IdsQueryParamString); 
 
 	// Content 
