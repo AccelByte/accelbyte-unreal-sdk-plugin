@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [16.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.0.0%0D15.1.2) (2022-08-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* group API models change affect function signature
+
+### Features
+
+* adjust code to following new method ([a4cdf85](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a4cdf8545f9664631c1e95b54a79acd81a669871))
+* adjust the code and bring back the code that made some test error ([b71ca6f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b71ca6fd6aa0834170cbb3d8dc27582b1edf2cbe))
+* **blueprints:** add utilities class ([2104ba6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2104ba611be1a08be68c26b32896fe78280be4d6))
+* **blueprints:** add utilities to get and modify fjsonobjectwrapper ([24ff88e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/24ff88e4590ec9605bd937b14ada944809e02d75))
+* changed a value on struct related statistic end point to floating number type ([0497802](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/04978025862f9eae474726eb082047e41bca9091))
+* expose statistic v2 endpoints ([0a70ae7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0a70ae7dd27a87904ee54f2d4f6dcf7d16a8f269))
+* expose store Id and list public store ([5e18dce](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5e18dce082e0317f3d424a6934e52d35e9a0631f))
+* fixed typo and comments, wrong param and some struct ([c897cc1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c897cc1ddfc5897dc881d0516e61dd43604e1bb0))
+* **iam:** EA Origin Authentication Integration ([63e92f6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/63e92f6a06da7e412b56c384aacd588763ccb501))
+* **item:** get Item Dynamic Data ([ae7ad68](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ae7ad6855c221c1e0e801e01030d0d44f1d3c9dd))
+* New item type for get items like method, option box config. New API call method, get entitlement ownership by item ids. OPTIONBOX ItemType. ([42873cc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/42873ccfb0f0633bb8b9c7b99ad07c280fbb015b))
+* **party:** add party connect, and disconnect notification ([a6200a2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a6200a200d999ee1ad113147269e16a81c7d3e2b))
+* Purchasing Requirements ([649841b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/649841b955028592a4ffa71002fbc3b70fb94530))
+* **qos:** get ping timeout from GConfig ([fc8c79f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fc8c79f79a6c5769d612af9286e7c641751388b5))
+* **qos:** reduce udpecho timeout from 10s to 0.6s ([d549bfa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d549bfad3e3c5bbac8aacb30622668ba4234b5b4))
+* SDK Implementation for UGC service - "like' a content ([8b5c6c1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8b5c6c100933472e9cde20fe8ed284a74bf9552b))
+* **sessionbrowser:** add get game sessions by user ids ([6a21472](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6a2147283a97e206dd97474d6896695e2f130f38))
+* support searching entitlement by feature ([d66fc9e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d66fc9ec6d333403a2e3d65ff86a53d94865f0dc))
+
+
+### Bug Fixes
+
+* Group blueprint function, JSON request creation, Group Member Roles model ([5aea352](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5aea3523de59a4f4c3245bd7825af45e16c9b2a3))
+* **party:** change all all function, delegate or variable by using PartyMember. Also adding some description on the function. ([856337b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/856337bc3e2fdf50d5afd7ec81ed7481ad1b7b33))
+* **party:** fix typo on partyMemberLeaveNotice and FPartyMemberDisconnectNotif ([01c3a2b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/01c3a2b808a4bc4ddde5d461ab3db0eefbf6b1c1))
+* **party:** Set Deprecation Variable, Function, and Delegate for PartyLeaveNotif. ([72283eb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/72283eb57dac1ac7c0904080689f6953bfbe436a))
+* SortBy in GetItemByCriteria and UrlEncoded in Query Param Array ([3a15458](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3a1545846e21f7badd09434a024681cb38116021))
+* **statistic:** wrong query params in GetUserStatItems ([b5a1395](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b5a139579e9e6a0abacda2f16b5f095539676758))
+
 ### [15.1.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.1.2%0D15.1.1) (2022-08-05)
 
 
