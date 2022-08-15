@@ -315,7 +315,7 @@ public:
 	void GetGroupMembersListByGroupId(
 		const FString& GroupId,
 		const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+		const THandler<FAccelByteModelsGetGroupMemberListResponse>& OnSuccess,
 		const FErrorHandler& OnError);
 
 	/**
@@ -489,7 +489,7 @@ public:
 	void DeleteMemberRole(
 		const FString& MemberRoleId,
 		const FAccelByteModelsUserIdWrapper& RequestContent,
-		const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
+		const FVoidHandler& OnSuccess,
 		const FErrorHandler& OnError);
 	#pragma endregion /Group Roles (permissions)
 
@@ -536,7 +536,6 @@ private:
 	Group(Group const&) = delete;
 	Group(Group&&) = delete;
 
-	static FString ConvertGroupSortByToString(const EAccelByteGroupListSortBy& SortBy);
 	static FString ConvertGroupAllowedActionToString(const EAccelByteAllowedAction& AllowedAction);
 };
 
