@@ -198,6 +198,40 @@ public:
 		return QueryParamValue;	
 	}
 
+	static TMap<FString, FString> CreateQueryParamsAndSkipIfValueEmpty(TMap<FString, FString> Map)
+	{
+		TMap<FString, FString> Query = {};
+		for (auto kvp : Map)
+		{
+			if (!kvp.Key.IsEmpty() && !kvp.Value.IsEmpty())
+			{
+				Query.Add(kvp.Key, kvp.Value);
+			}
+		}
+		return Query;
+	}
+	
+	template<typename ObjectType> 
+	static bool UStructArrayToJsonObjectString(TArray<ObjectType> Objects, FString& OutString)
+	{
+		OutString.Append(TEXT("["));	
+		FString JsonArrayString = TEXT("");
+		for (auto Item : Objects)
+		{
+			FString Delimiter =	JsonArrayString.IsEmpty() ? TEXT("") : TEXT(",");
+			JsonArrayString.Append(Delimiter);
+			FString JsonObjectString = TEXT("");
+			if (!FJsonObjectConverter::UStructToJsonObjectString(Item, JsonObjectString))
+			{
+				return false;
+			}
+			JsonArrayString.Append(JsonObjectString); 
+		}
+		OutString.Append(JsonArrayString);
+		OutString.Append(TEXT("]")); 
+		return true;
+	}
+	
 private:
 	static void AppendQueryParam(FString& Query, FString const& Param, FString const& Value)
 	{

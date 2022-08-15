@@ -43,6 +43,7 @@ public:
 	FString AppId;
 	float QosLatencyPollIntervalSecs{0};
 	float QosServerLatencyPollIntervalSecs{0};
+	float QosPingTimeout{.6};
 	bool bEnableHttpCache;
 	
 	/** @brief Ensure a minimum # secs for Qos Latency polling */
@@ -152,6 +153,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	float QosServerLatencyPollIntervalSecs;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	float QosPingTimeout;
 	
 	// Enable token for client side http caching
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
@@ -260,7 +264,10 @@ public:
 	static float GetQosLatencyPollIntervalSecs();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
-	static float GetQosServerLatencyPollIntervalSecs();	
+	static float GetQosServerLatencyPollIntervalSecs();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static float GetQosPingTimeout();
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static bool IsHttpCacheEnabled();
@@ -347,6 +354,13 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetServerQosLatencyPollIntervalSecs(const float& QosServerLatencyPollIntervalSecs);
+
+	/**
+	 * @brief
+	 * @param QosPingTimeout should be no less than .6 second and no more than 1 min
+	 */
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetQosPingTimeout(const float& QosPingTimeout);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void ResetSettings(const ESettingsEnvironment Environment);

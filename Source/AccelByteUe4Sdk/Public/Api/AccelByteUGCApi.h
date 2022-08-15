@@ -189,6 +189,16 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void DeleteChannel(FString const& ChannelId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/** @brief Update like/unlike status to a content
+	*
+	* @param ContentId The content id that will be updated.
+	* @param bLikeStatus New like Status value.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* **/
+	void UpdateLikeStatusToContent(const FString& ContentId, bool bLikeStatus,
+		THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse> const& OnSuccess, FErrorHandler const& OnError);
 	
 	private:
 	UGC() = delete;

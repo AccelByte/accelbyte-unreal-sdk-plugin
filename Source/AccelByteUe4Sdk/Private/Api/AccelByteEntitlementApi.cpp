@@ -27,89 +27,42 @@ Entitlement::Entitlement(Credentials const& InCredentialsRef
 
 Entitlement::~Entitlement(){}
 
-void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
+void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE, TArray<FString> const& Features)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+	TArray<FString> ItemIdsArray = { ItemId };
+	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType, Features);
 
-	TMap<FString, FString> QueryParams;
-	if (!EntitlementName.IsEmpty())
-	{
-		QueryParams.Add("entitlementName", *EntitlementName);
-	}
-	if (!ItemId.IsEmpty())
-	{
-		QueryParams.Add("itemId", *ItemId);
-	}
-	if (Offset>=0)
-	{
-		QueryParams.Add("offset", FString::FromInt(Offset));
-	}
-	if (Limit>=0)
-	{
-		QueryParams.Add("limit", FString::FromInt(Limit));
-	}
-	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
-	{
-		QueryParams.Add("entitlementClazz", *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass));
-	}
-	if (AppType != EAccelByteAppType::NONE)
-	{
-		QueryParams.Add("appType", *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType));
-	}
-
-	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-	void Entitlement::QueryUserEntitlements(
+void Entitlement::QueryUserEntitlements(
 	FString const& EntitlementName,
 	TArray<FString> const& ItemIds,
 	int32 const& Offset,
 	int32 const& Limit,
 	THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess,
-	FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType)
-{
+	FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType,
+	TArray<FString> const& Features)
+{ 
+
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
-	FString Query = TEXT("");
-	if (!EntitlementName.IsEmpty())
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("entitlementName=%s"), *EntitlementName));
-	}
-	for (FString const& ItemId : ItemIds)
-	{
-		if (!ItemId.IsEmpty())
-		{
-			Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-			Query.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
-		}
-	}
-	if (Offset>=0)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
-	}
-	if (Limit>=0)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
-	}
-	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("entitlementClazz=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass)));
-	}
-	if (AppType != EAccelByteAppType::NONE)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("appType=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType)));
-	}
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+ 	
+	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
+		{ TEXT("entitlementName"), EntitlementName },
+		{ "itemId", FString::Join(ItemIds, TEXT("&itemId=")) },
+		{ "features", FString::Join(Features, TEXT("&features=")) },
+		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ?
+				*FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass) : TEXT("")},
+		{ TEXT("appType"), AppType != EAccelByteAppType::NONE ?
+				*FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType) : TEXT("")},
+	});
+	Url.Append(QueryParams);
 
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
-	
 	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
 }
 
@@ -283,12 +236,14 @@ void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& It
 	}
 }
 
-void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError)
+void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError,
+	TArray<FString> Options)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FAccelByteModelsConsumeUserEntitlementRequest ConsumeUserEntitlementRequest;
 	ConsumeUserEntitlementRequest.UseCount = UseCount;
+	ConsumeUserEntitlementRequest.Options = Options;
 
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s/decrement"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *EntitlementId);
 
@@ -511,6 +466,60 @@ void Entitlement::SyncEpicGameDurableItems(FString const& EpicGamesJwtToken, FVo
  
 	// Api Request 
 	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError); 
+}
+
+void Entitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items, THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	// Url 
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/purchase/conditions/validate"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace());
+
+	// Content Body 
+	FString Content = TEXT("");
+	FJsonObject DataJson;
+	TArray<TSharedPtr<FJsonValue>> ItemArray{};
+	for (FString Item : Items)
+	{
+		ItemArray.Add(MakeShareable(new FJsonValueString(Item)));
+	}
+	DataJson.SetArrayField("itemIds", ItemArray);
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer); 
+	
+	// Api Request 
+	HttpClient.ApiRequest("POST", Url, {}, Content, OnSuccess, OnError); 
+}
+
+void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Ids, THandler<TArray<FAccelByteModelsEntitlementOwnershipItemIds>> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	// Url 
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/ownership/byItemIds"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+
+	// Params 
+	FString IdsQueryParamString = TEXT("");
+
+	for (FString const& Id : Ids)
+	{
+		if (!Id.IsEmpty())
+		{
+			IdsQueryParamString.Append(IdsQueryParamString.IsEmpty() ? TEXT("?") : TEXT("&"));
+			IdsQueryParamString.Append(FString::Printf(TEXT("ids=%s"), *Id));
+		}
+	} 
+
+	// Here we use append string to Url; we couldn't use TMap for ids, since the key should be unique 
+
+	Url.Append(IdsQueryParamString); 
+
+	// Content 
+	FString Content = TEXT("");
+	
+	// Api Request 
+	HttpClient.ApiRequest("GET", Url, {}, Content, OnSuccess, OnError); 
 }
 
 } // Namespace Api

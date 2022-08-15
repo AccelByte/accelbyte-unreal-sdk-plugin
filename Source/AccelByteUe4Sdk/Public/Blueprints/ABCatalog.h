@@ -19,7 +19,7 @@ USTRUCT(BlueprintType)
 struct FArrayModelsCategoryInfoResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Catalog | Models | Category Info")
+	UPROPERTY(BlueprintReadWrite)
 	TArray<FAccelByteModelsCategoryInfo> Content;
 };
 
@@ -47,30 +47,30 @@ public:
 
 //Category
 public: 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog | Api")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void GetRootCategories(FString const& Language, FDArrayModelsCategoryInfoResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog | Api")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void GetCategory(FString const& CategoryPath, FString const& Language, FDModelsCategoryInfoResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog | Api")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void GetChildCategories(FString const& CategoryPath, FString const& Language, FDArrayModelsCategoryInfoResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog | Api")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void GetDescendantCategories(FString const& CategoryPath, FString const& Language, FDArrayModelsCategoryInfoResponse OnSuccess, FDErrorHandler OnError);
 
 //Item
 public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog | Api")
-	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, FDModelsPopulatedItemInfoResponse OnSuccess, FDErrorHandler OnError);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
+	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, const FString& StoreId, bool bPopulateBundle, FDModelsPopulatedItemInfoResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog | Api")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void GetItemByAppId(FString const& AppId, FString const& Language, FString const& Region, FDModelsItemInfoResponse OnSuccess, FDErrorHandler OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog | Api")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit, TArray<EAccelByteItemListSortBy> SortBy, FDModelsItemPagingSlicedResultResponse OnSuccess, FDErrorHandler OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog | Api")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
 	void SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, FDModelsItemPagingSlicedResultResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Catalog")
