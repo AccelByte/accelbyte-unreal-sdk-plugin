@@ -2124,7 +2124,7 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 
 void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message)
 {
-	TSharedRef<matchmaking::NotificationEventEnvelope> Envelope = MakeShared<matchmaking::NotificationEventEnvelope>();
+	TSharedRef<accelbyte_matchmaking::NotificationEventEnvelope> Envelope = MakeShared<accelbyte_matchmaking::NotificationEventEnvelope>();
 	if(!ParseProtobufPayload(Message.Payload, Envelope))
 	{
 		UE_LOG(LogAccelByteLobby, Log, TEXT("Failed to parse matchmaking v2 notification"));
@@ -2133,25 +2133,31 @@ void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& 
 
 	switch (Envelope->payload_case())
 	{
-		case matchmaking::NotificationEventEnvelope::kMatchFoundNotifV1:
+		case accelbyte_matchmaking::NotificationEventEnvelope::kMatchFoundNotifV1:
 		{
 			DispatchV2Notif<FAccelByteModelsV2MatchFoundNotif>(Envelope->matchfoundnotifv1(), V2MatchmakingMatchFoundNotif);
 			break;
 		}
-		case matchmaking::NotificationEventEnvelope::kStartMatchmakingNotifV1:
+		case accelbyte_matchmaking::NotificationEventEnvelope::kStartMatchmakingNotifV1:
 		{
 			DispatchV2Notif<FAccelByteModelsV2StartMatchmakingNotif>(Envelope->startmatchmakingnotifv1(), V2MatchmakingStartNotif);
 			break;
 		}
-		default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown matchmaking v2 notification topic : %s"), *Message.Topic);
+		case accelbyte_matchmaking::NotificationEventEnvelope::kTicketExpiredNotifV1:
+		{
+			DispatchV2Notif<FAccelByteModelsV2MatchmakingExpiredNotif>(Envelope->ticketexpirednotifv1(), V2MatchmakingExpiredNotif);
+			break;
+		}
+	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown matchmaking v2 notification topic : %s, envelope enum num is %d"), *Message.Topic, Envelope->payload_case());
 	}
 }
 
 void Lobby::InitializeV2MatchmakingNotifDelegates()
 {
 	MatchmakingV2NotifDelegates = {
-		{EV2MatchmakingNotif::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
-		{EV2MatchmakingNotif::OnMatchmakingStarted, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotifTopic::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotifTopic::OnMatchmakingStarted, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotifTopic::OnMatchmakingTicketExpired, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
 	};
 }
 
@@ -2246,8 +2252,8 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 				}
 			}
 
-			EV2MatchmakingNotif MMNotifEnum = FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotif>(NotificationMessage.Topic);
-			if(MMNotifEnum != EV2MatchmakingNotif::Invalid && MatchmakingV2NotifDelegates.Contains(MMNotifEnum))
+			EV2MatchmakingNotifTopic MMNotifEnum = FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotifTopic>(NotificationMessage.Topic);
+			if(MMNotifEnum != EV2MatchmakingNotifTopic::Invalid && MatchmakingV2NotifDelegates.Contains(MMNotifEnum))
 			{
 				MatchmakingV2NotifDelegates[MMNotifEnum].ExecuteIfBound(NotificationMessage);
 				break;
