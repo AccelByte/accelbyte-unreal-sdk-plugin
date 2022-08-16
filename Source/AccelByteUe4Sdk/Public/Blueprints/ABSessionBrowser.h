@@ -19,6 +19,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserDataResponse, FAccelByte
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserGetResultResponse, FAccelByteModelsSessionBrowserGetResult, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserGetResultByUserIdsResponse, FAccelByteModelsSessionBrowserGetByUserIdsResult, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserAddPlayerResponse, FAccelByteModelsSessionBrowserAddPlayerResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserRecentPlayerGetResultResponse, FAccelByteModelsSessionBrowserRecentPlayerGetResult, Response);
@@ -176,6 +178,13 @@ public:
 		FDErrorHandler const& OnError,
 		int32 Offset = 0,
 		int32 Limit = 10
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser | Api")
+	void GetGameSessionsByUserIds(
+		TArray<FString> UserIds,
+		FDModelsSessionBrowserGetResultByUserIdsResponse const& OnSuccess,
+		FDErrorHandler const& OnError
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser | Api")

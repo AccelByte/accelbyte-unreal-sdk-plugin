@@ -25,33 +25,6 @@ Group::~Group()
 {}
 
 #pragma region Utils
-FString Group::ConvertGroupSortByToString(const EAccelByteGroupListSortBy& SortBy)
-{
-	switch (SortBy)
-	{
-		case EAccelByteGroupListSortBy::LISTORDER:
-			return TEXT("listOrder");
-		case EAccelByteGroupListSortBy::LISTORDER_ASC:
-			return TEXT("listOrder%3Aasc");
-		case EAccelByteGroupListSortBy::LISTORDER_DESC:
-			return TEXT("listOrder%3Adesc");
-		case EAccelByteGroupListSortBy::CREATED_AT:
-			return TEXT("createdAt");
-		case EAccelByteGroupListSortBy::CREATED_AT_ASC:
-			return TEXT("createdAt%3Aasc");
-		case EAccelByteGroupListSortBy::CREATED_AT_DESC:
-			return TEXT("createdAt%3Adesc");
-		case EAccelByteGroupListSortBy::UPDATED_AT:
-			return TEXT("updatedAt");
-		case EAccelByteGroupListSortBy::UPDATED_AT_ASC:
-			return TEXT("updatedAt%3Aasc");
-		case EAccelByteGroupListSortBy::UPDATED_AT_DESC:
-			return TEXT("updatedAt%3Adesc");
-		
-		default:
-			return TEXT("");
-	}
-}
 FString Group::ConvertGroupAllowedActionToString(const EAccelByteAllowedAction& AllowedAction)
 {
 	switch (AllowedAction)
@@ -341,7 +314,7 @@ void Group::AssignMemberRole(
 void Group::DeleteMemberRole(
 	const FString& MemberRoleId,
 	const FAccelByteModelsUserIdWrapper& RequestContent,
-	const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
+	const FVoidHandler& OnSuccess,
 	const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -452,7 +425,7 @@ void Group::CancelJoinGroupRequest(
 void Group::GetGroupMembersListByGroupId(
 	const FString& GroupId,
 	const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent,
-	const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+	const THandler<FAccelByteModelsGetGroupMemberListResponse>& OnSuccess,
 	const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -461,11 +434,12 @@ void Group::GetGroupMembersListByGroupId(
 		*SettingsRef.GroupServerUrl,
 		*GroupId);
 
+	FString Order = (RequestContent.SortBy == EAccelByteGroupListSortBy::DESCENDING) ? TEXT("desc") : TEXT("asc");
 	const TMap<FString, FString> QueryParams
 	{
 		{ "limit", FString::FromInt(RequestContent.Limit) },
 		{ "offset", FString::FromInt(RequestContent.Offset) },
-		{ "order", RequestContent.Order },
+		{ "order",  Order}
 	};
 
 	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);

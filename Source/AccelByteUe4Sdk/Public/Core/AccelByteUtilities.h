@@ -183,20 +183,55 @@ public:
 		return Query;
 	}
 
-	static FString CreateQueryParamValueFromArray(TArray<FString> Array)
+	static FString CreateQueryParamValueUrlEncodedFromArray(const TArray<FString>& Array, const FString& Delimiter = TEXT(","))
 	{
 		FString QueryParamValue = TEXT("");
 		if (Array.Num() > 0)
 		{ 
 			for (int i = 0; i < Array.Num(); i++)
 			{
-				FString ItemAppended = FString::Printf(TEXT(",%s"), *Array[i]);
+				const FString& UrlEncodedStringValue = FGenericPlatformHttp::UrlEncode(Array[i]);
+				FString ItemAppended = FString::Printf(TEXT("%s%s"), *Delimiter, *UrlEncodedStringValue);
 				QueryParamValue.Append( i == 0 ? Array[i] : ItemAppended);
 			}
 		}
 		return QueryParamValue;	
 	}
 
+	static TMap<FString, FString> CreateQueryParamsAndSkipIfValueEmpty(TMap<FString, FString> Map)
+	{
+		TMap<FString, FString> Query = {};
+		for (auto kvp : Map)
+		{
+			if (!kvp.Key.IsEmpty() && !kvp.Value.IsEmpty())
+			{
+				Query.Add(kvp.Key, kvp.Value);
+			}
+		}
+		return Query;
+	}
+	
+	template<typename ObjectType> 
+	static bool UStructArrayToJsonObjectString(TArray<ObjectType> Objects, FString& OutString)
+	{
+		OutString.Append(TEXT("["));	
+		FString JsonArrayString = TEXT("");
+		for (auto Item : Objects)
+		{
+			FString Delimiter =	JsonArrayString.IsEmpty() ? TEXT("") : TEXT(",");
+			JsonArrayString.Append(Delimiter);
+			FString JsonObjectString = TEXT("");
+			if (!FJsonObjectConverter::UStructToJsonObjectString(Item, JsonObjectString))
+			{
+				return false;
+			}
+			JsonArrayString.Append(JsonObjectString); 
+		}
+		OutString.Append(JsonArrayString);
+		OutString.Append(TEXT("]")); 
+		return true;
+	}
+	
 private:
 	static void AppendQueryParam(FString& Query, FString const& Param, FString const& Value)
 	{

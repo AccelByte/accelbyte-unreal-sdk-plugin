@@ -334,6 +334,16 @@ void UABParty::SetOnPartyLeave(FDPartyLeaveNotif OnNotif)
 			}));
 }
 
+void UABParty::SetOnPartyMemberLeave(FDPartyMemberLeaveNotif OnNotif) 
+{
+	ApiClientPtr->Lobby.SetPartyMemberLeaveNotifDelegate(
+		Api::Lobby::FPartyMemberLeaveNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsLeavePartyNotice const& Notif)
+			{
+				OnNotif.ExecuteIfBound(Notif);
+			}));
+}
+
 void UABParty::SetOnPartyKick(FDPartyKickNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyKickNotifDelegate(
@@ -359,6 +369,26 @@ void UABParty::SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif)
 	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
 		Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
 			[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
+			{
+				OnNotif.ExecuteIfBound(Notif);
+			}));
+}
+
+void UABParty::SetOnPartyMemberConnect(FDPartyMemberConnectNotif OnNotif) 
+{
+	ApiClientPtr->Lobby.SetPartyMemberConnectNotifDelegate(
+		Api::Lobby::FPartyMemberConnectNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsPartyMemberConnectionNotice const& Notif)
+			{
+				OnNotif.ExecuteIfBound(Notif);
+			}));
+}
+
+void UABParty::SetOnPartyMemberDisconnect(FDPartyMemberDisconnectNotif OnNotif) 
+{
+	ApiClientPtr->Lobby.SetPartyMemberDisconnectNotifDelegate(
+		Api::Lobby::FPartyMemberDisconnectNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsPartyMemberConnectionNotice const& Notif)
 			{
 				OnNotif.ExecuteIfBound(Notif);
 			}));

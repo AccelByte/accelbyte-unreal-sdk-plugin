@@ -140,11 +140,13 @@ void UAccelByteBlueprintsLobby::BindEvent(
     const FConnectSuccess& OnSuccess,
     const FBlueprintErrorHandler& OnError,
     const FConnectionClosed& OnConnectionClosed,
-    const FLeavePartyNotice& OnLeavePartyNotice,
+    const FLeavePartyNotice& OnLeavePartyNotice, // This delegate is DEPRECATED. better to use FPartyMemberLeaveNotice
     const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
     const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
     const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
     const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
+    const FPartyMemberConnectNotice& OnPartyConnectNotice,
+	const FPartyMemberDisconnectNotice& OnPartyDisconnectNotice,
     const FPrivateMessageNotice& OnPrivateMessageNotice,
     const FPartyMessageNotice& OnPartyMessageNotice,
     const FUserPresenceNotice& OnUserPresenceNotice,
@@ -169,10 +171,9 @@ void UAccelByteBlueprintsLobby::BindEvent(
         AccelByte::Api::Lobby::FConnectionClosed::CreateLambda([OnConnectionClosed](int32  StatusCode, const FString& Reason, bool  WasClean) {
         OnConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
     });
-
-
-
+	
     // Party
+	// This delegate is DEPRECATED. better to use FPartyMemberLeaveNotice
 	AccelByte::Api::Lobby::FPartyLeaveNotif OnLeavePartyNoticeDelegate =
         AccelByte::Api::Lobby::FPartyLeaveNotif::CreateLambda([OnLeavePartyNotice](const FAccelByteModelsLeavePartyNotice& Result) {
         OnLeavePartyNotice.ExecuteIfBound(Result);
@@ -197,6 +198,16 @@ void UAccelByteBlueprintsLobby::BindEvent(
         AccelByte::Api::Lobby::FPartyKickNotif::CreateLambda([OnInvitePartyKickedNotice](const FAccelByteModelsGotKickedFromPartyNotice& Result) {
         OnInvitePartyKickedNotice.ExecuteIfBound(Result);
     });
+
+	AccelByte::Api::Lobby::FPartyMemberConnectNotif OnPartyConnectNoticeDelegate =
+		AccelByte::Api::Lobby::FPartyMemberConnectNotif::CreateLambda([OnPartyConnectNotice](const FAccelByteModelsPartyMemberConnectionNotice& Result) {
+		OnPartyConnectNotice.ExecuteIfBound(Result);
+	});
+
+	AccelByte::Api::Lobby::FPartyMemberDisconnectNotif OnPartyDisconnectNoticeDelegate =
+		AccelByte::Api::Lobby::FPartyMemberDisconnectNotif::CreateLambda([OnPartyDisconnectNotice](const FAccelByteModelsPartyMemberConnectionNotice& Result) {
+		OnPartyDisconnectNotice.ExecuteIfBound(Result);
+	});
     
     // Chat
     AccelByte::Api::Lobby::FPersonalChatNotif OnPrivateMessageNoticeDelegate =
@@ -260,11 +271,13 @@ void UAccelByteBlueprintsLobby::BindEvent(
     FRegistry::Lobby.SetConnectSuccessDelegate(OnSuccessDelegate);
     FRegistry::Lobby.SetConnectFailedDelegate(OnErrorDelegate);
     FRegistry::Lobby.SetConnectionClosedDelegate(OnConnectionCloseDelegate);
-    FRegistry::Lobby.SetPartyLeaveNotifDelegate(OnLeavePartyNoticeDelegate);
+    FRegistry::Lobby.SetPartyLeaveNotifDelegate(OnLeavePartyNoticeDelegate); // This delegate is DEPRECATED. better to use SetPartyMemberLeaveNotifDelegate().
     FRegistry::Lobby.SetPartyInviteNotifDelegate(OnInvitePartyInvitationNoticeDelegate);
     FRegistry::Lobby.SetPartyGetInvitedNotifDelegate(OnInvitePartyGetInvitedNoticeDelegate);
     FRegistry::Lobby.SetPartyJoinNotifDelegate(OnInvitePartyJoinNoticeDelegate);
     FRegistry::Lobby.SetPartyKickNotifDelegate(OnInvitePartyKickedNoticeDelegate);
+	FRegistry::Lobby.SetPartyMemberConnectNotifDelegate(OnPartyConnectNoticeDelegate);
+	FRegistry::Lobby.SetPartyMemberDisconnectNotifDelegate(OnPartyDisconnectNoticeDelegate);
     FRegistry::Lobby.SetPrivateMessageNotifDelegate(OnPrivateMessageNoticeDelegate);
     FRegistry::Lobby.SetPartyChatNotifDelegate(OnPartyMessageNoticeDelegate);
     FRegistry::Lobby.SetUserPresenceNotifDelegate(OnOnUserPresenceNoticeDelegate);

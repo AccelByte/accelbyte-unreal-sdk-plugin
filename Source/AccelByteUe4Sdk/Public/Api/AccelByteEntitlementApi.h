@@ -37,7 +37,7 @@ public:
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
 	*/
-	void QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType, TArray<FString> const& Features = {});
 
 	/**
 	* @brief Get list of user's Entitlement(s).
@@ -50,8 +50,9 @@ public:
 	* @param OnError This will be called when the operation failed.
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
+	* @param Features The feature array.
 	*/
-	void QueryUserEntitlements(FString const& EntitlementName, TArray<FString> const& ItemIds, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlements(FString const& EntitlementName, TArray<FString> const& ItemIds, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType, TArray<FString> const& Features = {});
 
 	/**
 	* @brief Get user's Entitlement by the EntitlementId.
@@ -60,7 +61,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetUserEntitlementById(FString const& Entitlementid, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError);
+	void GetUserEntitlementById(FString const& EntitlementId, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Get user's Entitlement ownership of the AppId.
@@ -133,8 +134,10 @@ public:
 	* @param UseCount Number of consumed entitlement.
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	* @param OnError This will be called when the operation failed.
+	* @param Options Options of consumed entitlements.
 	*/
-	void ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError);
+	void ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError,
+		TArray<FString> Options = {});
 	
 	/**
 	* @brief Create Distribution Receiver.
@@ -265,6 +268,25 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void SyncEpicGameDurableItems(FString const& EpicGamesJwtToken, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	
+	/**
+	* @brief Validate user item purchase condition.
+	*
+	* @param Items Items to be validated.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void ValidateUserItemPurchaseCondition(TArray<FString> const& Items, THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	* @brief Get user entitlement ownership by itemIds.
+	*
+	* @param Ids ItemsIds.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Ids, THandler<TArray<FAccelByteModelsEntitlementOwnershipItemIds>> const& OnSuccess, FErrorHandler const& OnError);
+
 	
 private:
 	Entitlement() = delete;

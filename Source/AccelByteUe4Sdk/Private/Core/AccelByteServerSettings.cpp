@@ -83,6 +83,17 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	GConfig->GetString(*SectionPath, TEXT("SessionBrowserServerUrl"), SessionBrowserServerUrl, GEngineIni);
 	SessionBrowserServerUrl = GetDefaultServerAPIUrl(SessionBrowserServerUrl, BaseUrl, TEXT("sessionbrowser"));
+
+	FString QosPingTimeoutString;
+	LoadFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString);
+	if (QosPingTimeoutString.IsNumeric())
+	{
+		QosPingTimeout = FCString::Atof(*QosPingTimeoutString);
+	}
+	else
+	{
+		QosPingTimeout = .6;
+	}
 #endif
 }
 
@@ -197,6 +208,11 @@ FString UAccelByteBlueprintsServerSettings::GetSessionBrowserServerUrl()
 	return FRegistry::ServerSettings.SessionBrowserServerUrl;
 }
 
+float UAccelByteBlueprintsServerSettings::GetQosPingTimeout()
+{
+	return FRegistry::ServerSettings.QosPingTimeout;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -275,6 +291,22 @@ void UAccelByteBlueprintsServerSettings::SetSeasonPassServerUrl(const FString & 
 void UAccelByteBlueprintsServerSettings::SetSessionBrowserServerUrl(const FString & SessionBrowserUrl)
 {
 	FRegistry::ServerSettings.SessionBrowserServerUrl = SessionBrowserUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetQosPingTimeout(const float& QosPingTimeout)
+{
+	if (QosPingTimeout < .6)
+	{
+		FRegistry::ServerSettings.QosPingTimeout = .6;
+	}
+	else if (QosPingTimeout > 60)
+	{
+		FRegistry::ServerSettings.QosPingTimeout = 60;
+	}
+	else
+	{
+		FRegistry::ServerSettings.QosPingTimeout = QosPingTimeout;
+	}
 }
 
 void UAccelByteBlueprintsServerSettings::ResetSettings(ESettingsEnvironment const Environment)
