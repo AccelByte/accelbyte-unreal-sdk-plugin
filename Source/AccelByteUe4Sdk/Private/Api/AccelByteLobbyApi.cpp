@@ -1488,6 +1488,7 @@ void Lobby::UnbindV2GameSessionEvents()
 	V2GameSessionUpdatedNotif.Unbind();
 	V2DSStatusChangedNotif.Unbind();
 	V2GameSessionKickedNotif.Unbind();
+	V2GameSessionRejectedNotif.Unbind();
 }
 
 void Lobby::UnbindV2MatchmakingEvents()
@@ -2095,6 +2096,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	case accelbyte_session::NotificationEventEnvelope::kGameSessionNotificationUserKickedV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2GameSessionUserKickedEvent>(EventEnvelope->gamesessionnotificationuserkickedv1(), V2GameSessionKickedNotif);
+		break;
+	}
+	case accelbyte_session::NotificationEventEnvelope::kGameSessionNotificationUserRejectV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2GameSessionUserRejectedEvent>(EventEnvelope->gamesessionnotificationuserrejectv1(), V2GameSessionRejectedNotif);
 		break;
 	}
 	case accelbyte_session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:

@@ -91,6 +91,15 @@ public:
 	void SendGameSessionInvite(FString const& GameSessionID, FString const& UserID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Reject an invite to a game session by game session ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void RejectGameSessionInvite(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Join a game session by ID.
 	 *
 	 * @param GameSessionID The ID of the session.

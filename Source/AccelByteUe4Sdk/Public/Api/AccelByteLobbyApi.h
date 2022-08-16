@@ -490,6 +490,11 @@ public:
 	DECLARE_DELEGATE_OneParam(FV2GameSessionKickedNotif, FAccelByteModelsV2GameSessionUserKickedEvent);
 
 	/**
+	 * @brief Delegate for game session invite rejected event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionRejectedNotif, FAccelByteModelsV2GameSessionUserRejectedEvent);
+
+	/**
 	* @brief Delegate for game session when DS status is changed.
 	*/
 	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif)
@@ -1102,6 +1107,10 @@ public:
 	void SetV2GameSessionKickedNotifDelegate(const FV2GameSessionKickedNotif& OnGameSessionKickedNotif)
 	{
 		V2GameSessionKickedNotif = OnGameSessionKickedNotif;
+	}
+	void SetV2GameSessionRejectedNotifDelegate(const FV2GameSessionRejectedNotif& OnGameSessionRejectedNotif)
+	{
+		V2GameSessionRejectedNotif = OnGameSessionRejectedNotif;
 	}
 	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
 	{
@@ -2010,6 +2019,7 @@ private:
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
 	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;
 	FV2GameSessionKickedNotif V2GameSessionKickedNotif;
+	FV2GameSessionRejectedNotif V2GameSessionRejectedNotif;
 
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 

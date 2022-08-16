@@ -564,3 +564,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUserKickedEvent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionKickedEvent")
 		FString SessionID{};
 };
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsV2GameSessionUserRejectedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserRejectedEvent")
+		FString SessionID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserRejectedEvent")
+		TArray<FAccelByteModelsV2SessionUser> Members{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserRejectedEvent")
+		FString RejectedID{};
+};
