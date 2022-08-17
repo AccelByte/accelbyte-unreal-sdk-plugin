@@ -45,7 +45,8 @@ enum class EAccelByteV2GameSessionDsStatus : uint8
 UENUM(BlueprintType)
 enum class EAccelByteV2SessionConfigurationServerType : uint8
 {
-	NONE = 0,
+	EMPTY = 0,
+	NONE,
 	DS,
 	P2P
 };
