@@ -227,6 +227,7 @@ private:
 		auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
 
 		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinability"));
+		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("type"));
 		RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));
 		FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll);
 
