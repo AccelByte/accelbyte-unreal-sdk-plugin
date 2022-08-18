@@ -103,6 +103,15 @@ private:
 class ACCELBYTEUE4SDK_API FAccelByteUtilities
 {
 public:
+	static constexpr uint8 FieldRemovalFlagObjects = 1 << 0;
+	static constexpr uint8 FieldRemovalFlagArrays  = 1 << 1;
+	static constexpr uint8 FieldRemovalFlagStrings = 1 << 2;
+	static constexpr uint8 FieldRemovalFlagDates   = 1 << 3;
+	static constexpr uint8 FieldRemovalFlagNumbers = 1 << 4;
+	static constexpr uint8 FieldRemovalFlagNull    = 1 << 5;
+	static constexpr uint8 FieldRemovalFlagNested  = 1 << 6;
+	static constexpr uint8 FieldRemovalFlagAll     = 0xFF;
+
 	template<typename CharType = TCHAR, template<typename> class PrintPolicy = TPrettyJsonPrintPolicy, typename InStructType>
 	static bool TArrayUStructToJsonString(const TArray<InStructType>& InArray, FString& OutJsonString, int64 CheckFlags = 0, int64 SkipFlags = 0, int32 Indent = 0)
 	{
@@ -198,6 +207,127 @@ public:
 		return QueryParamValue;	
 	}
 
+	/**
+	 * Remove fields which have empty values according to the given flags. Defaults to removing empty objects/arrays, blank
+	 * strings, and recursing on object and array field values.
+	 */
+	static void RemoveEmptyFieldsFromJson(
+		const TSharedPtr<FJsonObject>& JsonObjectPtr,
+		uint8 Flags = FieldRemovalFlagObjects | FieldRemovalFlagStrings | FieldRemovalFlagArrays | FieldRemovalFlagNested)
+	{
+		TArray<FString> FieldsToRemove;
+		TMap<FString, TSharedPtr<FJsonValue>> FieldsToReplace;
+
+		// Remove empty field so it doesn't get updated in BE
+		for(auto& KeyValuePair : JsonObjectPtr->Values)
+		{
+			if(!KeyValuePair.Value.IsValid())
+			{
+				continue;
+			}
+
+			bool bRemoveField = false;
+			switch (KeyValuePair.Value->Type)
+			{
+			case EJson::Array:
+			{
+				TArray<TSharedPtr<FJsonValue>> OriginalArray = KeyValuePair.Value->AsArray();
+				bRemoveField = (Flags & FieldRemovalFlagArrays) != 0 && OriginalArray.Num() == 0;
+
+				if(bRemoveField || (Flags & FieldRemovalFlagNested) == 0)
+				{
+					break;
+				}
+
+				// If the array is not empty, we want to look for nested objects which might have empty values inside them
+				TArray<TSharedPtr<FJsonValue>> NewArray;
+				for(const auto& NestedValue : OriginalArray)
+				{
+					// Skipping over any array item that is not an object
+					if(NestedValue->Type != EJson::Object)
+					{
+						NewArray.Add(NestedValue);
+						continue;
+					}
+
+					TSharedPtr<FJsonObject> NestedObject = NestedValue->AsObject();
+					RemoveEmptyFieldsFromJson(NestedObject, Flags);
+					NewArray.Add(MakeShared<FJsonValueObject>(NestedObject));
+				}
+
+				if((Flags & FieldRemovalFlagArrays) != 0 && NewArray.Num() == 0)
+				{
+					bRemoveField = true;
+					break;
+				}
+				FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueArray>(NewArray));
+
+				break;
+			}
+			case EJson::Object:
+			{
+				TSharedPtr<FJsonObject> Object = KeyValuePair.Value->AsObject();
+				TArray<FString> Keys;
+				bRemoveField = (Flags & FieldRemovalFlagObjects) != 0 && Object->Values.Num() == 0;
+
+				if(bRemoveField || (Flags & FieldRemovalFlagNested) == 0)
+				{
+					break;
+				}
+
+				RemoveEmptyFieldsFromJson(Object, Flags);
+				if((Flags & FieldRemovalFlagObjects) != 0 && Object->Values.Num() == 0)
+				{
+					bRemoveField = true;
+					break;
+				}
+				FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueObject>(Object));
+
+				break;
+			}
+			case EJson::String:
+			{
+				const FString Value = KeyValuePair.Value->AsString();
+
+				// Removing string fields if the dates flag is set and the string is equal to an uninitialized datetime (aka 0 ticks)
+				bRemoveField =
+					((Flags & FieldRemovalFlagStrings) != 0 && Value.IsEmpty()) ||
+					((Flags & FieldRemovalFlagDates) != 0 && Value.Equals(FDateTime(0).ToString()));
+
+				break;
+			}
+			case EJson::Number:
+			{
+				bRemoveField = (Flags & FieldRemovalFlagNumbers) != 0 && KeyValuePair.Value->AsNumber() == 0;
+				break;
+			}
+			case EJson::Null:
+			{
+				bRemoveField = (Flags & FieldRemovalFlagNull) != 0;
+				break;
+			}
+
+			// Redundant technically, but for readability explicitly says that we don't care about the other members of EJson
+			default: break;
+			}
+
+			if(bRemoveField)
+			{
+				FieldsToRemove.Add(KeyValuePair.Key);
+			}
+		}
+
+		for(const FString& Key : FieldsToRemove)
+		{
+			JsonObjectPtr->RemoveField(Key);
+		}
+
+		for(const auto& KeyValuePair : FieldsToReplace)
+		{
+			JsonObjectPtr->SetField(KeyValuePair.Key, KeyValuePair.Value);
+		}
+	}
+
 	static TMap<FString, FString> CreateQueryParamsAndSkipIfValueEmpty(TMap<FString, FString> Map)
 	{
 		TMap<FString, FString> Query = {};
@@ -231,7 +361,7 @@ public:
 		OutString.Append(TEXT("]")); 
 		return true;
 	}
-	
+
 private:
 	static void AppendQueryParam(FString& Query, FString const& Param, FString const& Value)
 	{

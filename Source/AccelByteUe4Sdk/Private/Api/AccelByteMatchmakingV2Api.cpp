@@ -42,7 +42,7 @@ namespace Api
 
 		for(const TPair<FString, float>& Latency : Optionals.Latencies)
 		{
-			Request.Latencies.Emplace(Latency.Key, static_cast<int32>(FMath::Floor(Latency.Value)));
+			Request.Latencies.Emplace(Latency.Key, FGenericPlatformMath::FloorToInt(Latency.Value));
 		}
 
 		FString Content;

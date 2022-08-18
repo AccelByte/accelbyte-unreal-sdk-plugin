@@ -74,6 +74,8 @@ constexpr PartySessionV1::PartySessionV1(
   , created_at_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , updated_at_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , leader_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , configuration_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , created_by_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , configuration_(nullptr)
   , version_(0){}
 struct PartySessionV1DefaultTypeInternal {
@@ -87,11 +89,16 @@ struct PartySessionV1DefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PartySessionV1DefaultTypeInternal _PartySessionV1_default_instance_;
 constexpr SessionConfigV1::SessionConfigV1(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  : requested_regions_()
+  , name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , joinability_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , deployment_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , client_version_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , type_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , min_players_(0)
-  , max_players_(0){}
+  , max_players_(0)
+  , invite_timeout_(0)
+  , inactive_timeout_(0){}
 struct SessionConfigV1DefaultTypeInternal {
   constexpr SessionConfigV1DefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -180,6 +187,20 @@ struct GameSessionNotificationUserInvitedV1DefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GameSessionNotificationUserInvitedV1DefaultTypeInternal _GameSessionNotificationUserInvitedV1_default_instance_;
+constexpr GameSessionNotificationUserRejectV1::GameSessionNotificationUserRejectV1(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : members_()
+  , sessionid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , rejectedid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct GameSessionNotificationUserRejectV1DefaultTypeInternal {
+  constexpr GameSessionNotificationUserRejectV1DefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~GameSessionNotificationUserRejectV1DefaultTypeInternal() {}
+  union {
+    GameSessionNotificationUserRejectV1 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GameSessionNotificationUserRejectV1DefaultTypeInternal _GameSessionNotificationUserRejectV1_default_instance_;
 constexpr GameSessionNotificationUserJoinedV1::GameSessionNotificationUserJoinedV1(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : members_()
@@ -197,7 +218,8 @@ constexpr GameSessionNotificationMembersChangedV1::GameSessionNotificationMember
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : members_()
   , sessionid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , joinerid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+  , joinerid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , leaderid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
 struct GameSessionNotificationMembersChangedV1DefaultTypeInternal {
   constexpr GameSessionNotificationMembersChangedV1DefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -258,6 +280,7 @@ constexpr GameSessionV1::GameSessionV1(
   , match_pool_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , game_mode_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , backfill_ticket_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , joinability_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , configuration_(nullptr)
   , dsinformationv1_(nullptr)
   , version_(0){}
@@ -336,8 +359,8 @@ struct GameSessionNotificationUserKickedV1DefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GameSessionNotificationUserKickedV1DefaultTypeInternal _GameSessionNotificationUserKickedV1_default_instance_;
-}  // namespace session
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_notification_2eproto[20];
+}  // namespace accelbyte_session
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_notification_2eproto[21];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_notification_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_notification_2eproto = nullptr;
 
@@ -348,6 +371,7 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::NotificationEventEnvelope, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
   ::PROTOBUF_NAMESPACE_ID::internal::kInvalidFieldOffsetTag,
@@ -388,6 +412,8 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, configuration_),
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, version_),
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, leader_id_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, configuration_name_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartySessionV1, created_by_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -399,6 +425,11 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, min_players_),
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, max_players_),
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, deployment_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, client_version_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, requested_regions_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, type_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, invite_timeout_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::SessionConfigV1, inactive_timeout_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::PartyNotificationUserJoinedV1, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -449,6 +480,15 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserInvitedV1, sessionid_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserRejectV1, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserRejectV1, members_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserRejectV1, sessionid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserRejectV1, rejectedid_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationUserJoinedV1, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -465,6 +505,7 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationMembersChangedV1, members_),
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationMembersChangedV1, sessionid_),
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationMembersChangedV1, joinerid_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionNotificationMembersChangedV1, leaderid_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSStatusChangedNotificationV1, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -508,6 +549,7 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, backfill_ticket_id_),
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, teams_),
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, dsinformationv1_),
+  PROTOBUF_FIELD_OFFSET(::accelbyte_session::GameSessionV1, joinability_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::accelbyte_session::DSInformationV1, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -561,25 +603,26 @@ const uint32_t TableStruct_notification_2eproto::offsets[] PROTOBUF_SECTION_VARI
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::accelbyte_session::NotificationEventEnvelope)},
-  { 19, -1, -1, sizeof(::accelbyte_session::UserV1)},
-  { 30, -1, -1, sizeof(::accelbyte_session::PartySessionV1)},
-  { 46, -1, -1, sizeof(::accelbyte_session::SessionConfigV1)},
-  { 57, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserJoinedV1)},
-  { 65, -1, -1, sizeof(::accelbyte_session::PartyNotificationMembersChangedV1)},
-  { 75, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserInvitedV1)},
-  { 83, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserRejectV1)},
-  { 92, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserKickedV1)},
-  { 99, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserInvitedV1)},
-  { 106, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserJoinedV1)},
-  { 114, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationMembersChangedV1)},
-  { 123, -1, -1, sizeof(::accelbyte_session::DSStatusChangedNotificationV1)},
-  { 132, -1, -1, sizeof(::accelbyte_session::UserIDs)},
-  { 139, -1, -1, sizeof(::accelbyte_session::Team)},
-  { 146, -1, -1, sizeof(::accelbyte_session::GameSessionV1)},
-  { 166, -1, -1, sizeof(::accelbyte_session::DSInformationV1)},
-  { 176, 184, -1, sizeof(::accelbyte_session::GameServerV1_PortsEntry_DoNotUse)},
-  { 186, -1, -1, sizeof(::accelbyte_session::GameServerV1)},
-  { 209, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserKickedV1)},
+  { 20, -1, -1, sizeof(::accelbyte_session::UserV1)},
+  { 31, -1, -1, sizeof(::accelbyte_session::PartySessionV1)},
+  { 49, -1, -1, sizeof(::accelbyte_session::SessionConfigV1)},
+  { 65, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserJoinedV1)},
+  { 73, -1, -1, sizeof(::accelbyte_session::PartyNotificationMembersChangedV1)},
+  { 83, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserInvitedV1)},
+  { 91, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserRejectV1)},
+  { 100, -1, -1, sizeof(::accelbyte_session::PartyNotificationUserKickedV1)},
+  { 107, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserInvitedV1)},
+  { 114, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserRejectV1)},
+  { 123, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserJoinedV1)},
+  { 131, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationMembersChangedV1)},
+  { 141, -1, -1, sizeof(::accelbyte_session::DSStatusChangedNotificationV1)},
+  { 150, -1, -1, sizeof(::accelbyte_session::UserIDs)},
+  { 157, -1, -1, sizeof(::accelbyte_session::Team)},
+  { 164, -1, -1, sizeof(::accelbyte_session::GameSessionV1)},
+  { 185, -1, -1, sizeof(::accelbyte_session::DSInformationV1)},
+  { 195, 203, -1, sizeof(::accelbyte_session::GameServerV1_PortsEntry_DoNotUse)},
+  { 205, -1, -1, sizeof(::accelbyte_session::GameServerV1)},
+  { 228, -1, -1, sizeof(::accelbyte_session::GameSessionNotificationUserKickedV1)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -593,6 +636,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_PartyNotificationUserRejectV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_PartyNotificationUserKickedV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionNotificationUserInvitedV1_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionNotificationUserRejectV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionNotificationUserJoinedV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_GameSessionNotificationMembersChangedV1_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::accelbyte_session::_DSStatusChangedNotificationV1_default_instance_),
@@ -606,123 +650,145 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_notification_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\022notification.proto\022\007session\"\331\t\n\031Notifi"
-  "cationEventEnvelope\022a\n\036PartyNotification"
-  "UserInvitedV1\030\001 \001(\0132\'.session.PartyNotif"
-  "icationUserInvitedV1H\000R\016OnPartyInvited\022^"
-  "\n\035PartyNotificationUserJoinedV1\030\002 \001(\0132&."
-  "session.PartyNotificationUserJoinedV1H\000R"
-  "\rOnPartyJoined\022n\n!PartyNotificationMembe"
-  "rsChangedV1\030\003 \001(\0132*.session.PartyNotific"
+  "\n\022notification.proto\022\021accelbyte_session\""
+  "\314\013\n\031NotificationEventEnvelope\022k\n\036PartyNo"
+  "tificationUserInvitedV1\030\001 \001(\01321.accelbyt"
+  "e_session.PartyNotificationUserInvitedV1"
+  "H\000R\016OnPartyInvited\022h\n\035PartyNotificationU"
+  "serJoinedV1\030\002 \001(\01320.accelbyte_session.Pa"
+  "rtyNotificationUserJoinedV1H\000R\rOnPartyJo"
+  "ined\022x\n!PartyNotificationMembersChangedV"
+  "1\030\003 \001(\01324.accelbyte_session.PartyNotific"
   "ationMembersChangedV1H\000R\025OnPartyMembersC"
-  "hanged\022`\n\035PartyNotificationUserRejectV1\030"
-  "\004 \001(\0132&.session.PartyNotificationUserRej"
-  "ectV1H\000R\017OnPartyRejected\022^\n\035PartyNotific"
-  "ationUserKickedV1\030\005 \001(\0132&.session.PartyN"
-  "otificationUserKickedV1H\000R\rOnPartyKicked"
-  "\022A\n\016PartySessionV1\030\006 \001(\0132\027.session.Party"
-  "SessionV1H\000R\016OnPartyUpdated\022o\n$GameSessi"
-  "onNotificationUserInvitedV1\030\007 \001(\0132-.sess"
+  "hanged\022j\n\035PartyNotificationUserRejectV1\030"
+  "\004 \001(\01320.accelbyte_session.PartyNotificat"
+  "ionUserRejectV1H\000R\017OnPartyRejected\022h\n\035Pa"
+  "rtyNotificationUserKickedV1\030\005 \001(\01320.acce"
+  "lbyte_session.PartyNotificationUserKicke"
+  "dV1H\000R\rOnPartyKicked\022K\n\016PartySessionV1\030\006"
+  " \001(\0132!.accelbyte_session.PartySessionV1H"
+  "\000R\016OnPartyUpdated\022y\n$GameSessionNotifica"
+  "tionUserInvitedV1\030\007 \001(\01327.accelbyte_sess"
   "ion.GameSessionNotificationUserInvitedV1"
-  "H\000R\020OnSessionInvited\022l\n#GameSessionNotif"
-  "icationUserJoinedV1\030\010 \001(\0132,.session.Game"
-  "SessionNotificationUserJoinedV1H\000R\017OnSes"
-  "sionJoined\022l\n#GameSessionNotificationUse"
-  "rKickedV1\030\014 \001(\0132,.session.GameSessionNot"
-  "ificationUserKickedV1H\000R\017OnSessionKicked"
-  "\022|\n\'GameSessionNotificationMembersChange"
-  "dV1\030\t \001(\01320.session.GameSessionNotificat"
-  "ionMembersChangedV1H\000R\027OnSessionMembersC"
-  "hanged\022E\n\rGameSessionV1\030\n \001(\0132\026.session."
-  "GameSessionV1H\000R\024OnGameSessionUpdated\022g\n"
-  "\035DSStatusChangedNotificationV1\030\013 \001(\0132&.s"
-  "ession.DSStatusChangedNotificationV1H\000R\026"
-  "OnDSStatusChangedNotifB\t\n\007payload\"\231\001\n\006Us"
-  "erV1\022\016\n\002id\030\001 \001(\tR\002id\022\026\n\006status\030\002 \001(\tR\006st"
-  "atus\022\034\n\tupdatedAt\030\003 \001(\tR\tupdatedAt\022\037\n\013pl"
-  "atform_id\030\004 \001(\tR\nplatformID\022(\n\020platform_"
-  "user_id\030\005 \001(\tR\016platformUserID\"\333\002\n\016PartyS"
-  "essionV1\022\016\n\002id\030\001 \001(\tR\002id\022\034\n\tnamespace\030\002 "
-  "\001(\tR\tnamespace\022)\n\007members\030\003 \003(\0132\017.sessio"
+  "H\000R\020OnSessionInvited\022v\n#GameSessionNotif"
+  "icationUserJoinedV1\030\010 \001(\01326.accelbyte_se"
+  "ssion.GameSessionNotificationUserJoinedV"
+  "1H\000R\017OnSessionJoined\022v\n#GameSessionNotif"
+  "icationUserKickedV1\030\014 \001(\01326.accelbyte_se"
+  "ssion.GameSessionNotificationUserKickedV"
+  "1H\000R\017OnSessionKicked\022x\n#GameSessionNotif"
+  "icationUserRejectV1\030\r \001(\01326.accelbyte_se"
+  "ssion.GameSessionNotificationUserRejectV"
+  "1H\000R\021OnSessionRejected\022\206\001\n\'GameSessionNo"
+  "tificationMembersChangedV1\030\t \001(\0132:.accel"
+  "byte_session.GameSessionNotificationMemb"
+  "ersChangedV1H\000R\027OnSessionMembersChanged\022"
+  "O\n\rGameSessionV1\030\n \001(\0132 .accelbyte_sessi"
+  "on.GameSessionV1H\000R\024OnGameSessionUpdated"
+  "\022q\n\035DSStatusChangedNotificationV1\030\013 \001(\0132"
+  "0.accelbyte_session.DSStatusChangedNotif"
+  "icationV1H\000R\026OnDSStatusChangedNotifB\t\n\007p"
+  "ayload\"\231\001\n\006UserV1\022\016\n\002id\030\001 \001(\tR\002id\022\026\n\006sta"
+  "tus\030\002 \001(\tR\006status\022\034\n\tupdatedAt\030\003 \001(\tR\tup"
+  "datedAt\022\037\n\013platform_id\030\004 \001(\tR\nplatformID"
+  "\022(\n\020platform_user_id\030\005 \001(\tR\016platformUser"
+  "ID\"\275\003\n\016PartySessionV1\022\016\n\002id\030\001 \001(\tR\002id\022\034\n"
+  "\tnamespace\030\002 \001(\tR\tnamespace\0223\n\007members\030\003"
+  " \003(\0132\031.accelbyte_session.UserV1R\007members"
+  "\022\036\n\nattributes\030\004 \001(\014R\nattributes\022\033\n\tjoin"
+  "_type\030\005 \001(\tR\010joinType\022\035\n\ncreated_at\030\006 \001("
+  "\tR\tcreatedAt\022\035\n\nupdated_at\030\007 \001(\tR\tupdate"
+  "dAt\022H\n\rconfiguration\030\010 \001(\0132\".accelbyte_s"
+  "ession.SessionConfigV1R\rconfiguration\022\030\n"
+  "\007version\030\t \001(\005R\007version\022\033\n\tleader_id\030\n \001"
+  "(\tR\010leaderID\022-\n\022configuration_name\030\013 \001(\t"
+  "R\021configurationName\022\035\n\ncreated_by\030\014 \001(\tR"
+  "\tcreatedBy\"\343\002\n\017SessionConfigV1\022\022\n\004name\030\001"
+  " \001(\tR\004name\022 \n\013joinability\030\002 \001(\tR\013joinabi"
+  "lity\022\037\n\013min_players\030\003 \001(\005R\nminPlayers\022\037\n"
+  "\013max_players\030\004 \001(\005R\nmaxPlayers\022\036\n\ndeploy"
+  "ment\030\005 \001(\tR\ndeployment\022%\n\016client_version"
+  "\030\006 \001(\tR\rclientVersion\022+\n\021requested_regio"
+  "ns\030\007 \003(\tR\020requestedRegions\022\022\n\004type\030\010 \001(\t"
+  "R\004type\022%\n\016invite_timeout\030\t \001(\005R\rinviteTi"
+  "meout\022)\n\020inactive_timeout\030\n \001(\005R\017inactiv"
+  "eTimeout\"n\n\035PartyNotificationUserJoinedV"
+  "1\0223\n\007members\030\001 \003(\0132\031.accelbyte_session.U"
+  "serV1R\007members\022\030\n\007PartyID\030\002 \001(\tR\007partyID"
+  "\"\252\001\n!PartyNotificationMembersChangedV1\0223"
+  "\n\007members\030\001 \003(\0132\031.accelbyte_session.User"
+  "V1R\007members\022\030\n\007PartyID\030\002 \001(\tR\007partyID\022\032\n"
+  "\010JoinerID\030\003 \001(\tR\010joinerID\022\032\n\010LeaderID\030\004 "
+  "\001(\tR\010leaderID\"V\n\036PartyNotificationUserIn"
+  "vitedV1\022\032\n\010senderID\030\001 \001(\tR\010senderID\022\030\n\007P"
+  "artyID\030\002 \001(\tR\007partyID\"\216\001\n\035PartyNotificat"
+  "ionUserRejectV1\0223\n\007members\030\001 \003(\0132\031.accel"
+  "byte_session.UserV1R\007members\022\030\n\007PartyID\030"
+  "\002 \001(\tR\007partyID\022\036\n\nRejectedID\030\003 \001(\tR\nreje"
+  "ctedID\"9\n\035PartyNotificationUserKickedV1\022"
+  "\030\n\007PartyID\030\001 \001(\tR\007partyID\"D\n$GameSession"
+  "NotificationUserInvitedV1\022\034\n\tSessionID\030\001"
+  " \001(\tR\tSessionID\"\230\001\n#GameSessionNotificat"
+  "ionUserRejectV1\0223\n\007members\030\001 \003(\0132\031.accel"
+  "byte_session.UserV1R\007members\022\034\n\tSessionI"
+  "D\030\002 \001(\tR\tsessionID\022\036\n\nRejectedID\030\003 \001(\tR\n"
+  "rejectedID\"x\n#GameSessionNotificationUse"
+  "rJoinedV1\022\034\n\tSessionID\030\001 \001(\tR\tSessionID\022"
+  "3\n\007members\030\002 \003(\0132\031.accelbyte_session.Use"
+  "rV1R\007members\"\264\001\n\'GameSessionNotification"
+  "MembersChangedV1\0223\n\007members\030\001 \003(\0132\031.acce"
+  "lbyte_session.UserV1R\007members\022\034\n\tSession"
+  "ID\030\002 \001(\tR\tsessionID\022\032\n\010JoinerID\030\003 \001(\tR\010j"
+  "oinerID\022\032\n\010LeaderID\030\004 \001(\tR\010leaderID\"\225\001\n\035"
+  "DSStatusChangedNotificationV1\022@\n\nGameSer"
+  "ver\030\001 \001(\0132\037.accelbyte_session.GameServer"
+  "V1R\013game_server\022\034\n\tSessionID\030\002 \001(\tR\tsess"
+  "ionID\022\024\n\005Error\030\003 \001(\tR\005error\"#\n\007UserIDs\022\030"
+  "\n\006userID\030\001 \003(\tR\010user_ids\"\"\n\004Team\022\032\n\010user"
+  "_ids\030\001 \003(\tR\010user_ids\"\335\004\n\rGameSessionV1\022\016"
+  "\n\002id\030\001 \001(\tR\002id\022\034\n\tnamespace\030\002 \001(\tR\tnames"
+  "pace\0223\n\007members\030\003 \003(\0132\031.accelbyte_sessio"
   "n.UserV1R\007members\022\036\n\nattributes\030\004 \001(\014R\na"
   "ttributes\022\033\n\tjoin_type\030\005 \001(\tR\010joinType\022\035"
   "\n\ncreated_at\030\006 \001(\tR\tcreatedAt\022\035\n\nupdated"
-  "_at\030\007 \001(\tR\tupdatedAt\022>\n\rconfiguration\030\010 "
-  "\001(\0132\030.session.SessionConfigV1R\rconfigura"
-  "tion\022\030\n\007version\030\t \001(\005R\007version\022\033\n\tleader"
-  "_id\030\n \001(\tR\010leaderID\"\251\001\n\017SessionConfigV1\022"
-  "\022\n\004name\030\001 \001(\tR\004name\022 \n\013joinability\030\002 \001(\t"
-  "R\013joinability\022\037\n\013min_players\030\003 \001(\005R\nminP"
-  "layers\022\037\n\013max_players\030\004 \001(\005R\nmaxPlayers\022"
-  "\036\n\ndeployment\030\005 \001(\tR\ndeployment\"d\n\035Party"
-  "NotificationUserJoinedV1\022)\n\007members\030\001 \003("
-  "\0132\017.session.UserV1R\007members\022\030\n\007PartyID\030\002"
-  " \001(\tR\007partyID\"\240\001\n!PartyNotificationMembe"
-  "rsChangedV1\022)\n\007members\030\001 \003(\0132\017.session.U"
-  "serV1R\007members\022\030\n\007PartyID\030\002 \001(\tR\007partyID"
-  "\022\032\n\010JoinerID\030\003 \001(\tR\010joinerID\022\032\n\010LeaderID"
-  "\030\004 \001(\tR\010leaderID\"V\n\036PartyNotificationUse"
-  "rInvitedV1\022\032\n\010senderID\030\001 \001(\tR\010senderID\022\030"
-  "\n\007PartyID\030\002 \001(\tR\007partyID\"\204\001\n\035PartyNotifi"
-  "cationUserRejectV1\022)\n\007members\030\001 \003(\0132\017.se"
-  "ssion.UserV1R\007members\022\030\n\007PartyID\030\002 \001(\tR\007"
-  "partyID\022\036\n\nRejectedID\030\003 \001(\tR\nrejectedID\""
-  "9\n\035PartyNotificationUserKickedV1\022\030\n\007Part"
-  "yID\030\001 \001(\tR\007partyID\"D\n$GameSessionNotific"
-  "ationUserInvitedV1\022\034\n\tSessionID\030\001 \001(\tR\tS"
-  "essionID\"n\n#GameSessionNotificationUserJ"
-  "oinedV1\022\034\n\tSessionID\030\001 \001(\tR\tSessionID\022)\n"
-  "\007members\030\002 \003(\0132\017.session.UserV1R\007members"
-  "\"\216\001\n\'GameSessionNotificationMembersChang"
-  "edV1\022)\n\007members\030\001 \003(\0132\017.session.UserV1R\007"
-  "members\022\034\n\tSessionID\030\002 \001(\tR\tsessionID\022\032\n"
-  "\010JoinerID\030\003 \001(\tR\010joinerID\"\213\001\n\035DSStatusCh"
-  "angedNotificationV1\0226\n\nGameServer\030\001 \001(\0132"
-  "\025.session.GameServerV1R\013game_server\022\034\n\tS"
-  "essionID\030\002 \001(\tR\tsessionID\022\024\n\005Error\030\003 \001(\t"
-  "R\005error\"#\n\007UserIDs\022\030\n\006userID\030\001 \003(\tR\010user"
-  "_ids\"\"\n\004Team\022\032\n\010user_ids\030\001 \003(\tR\010user_ids"
-  "\"\223\004\n\rGameSessionV1\022\016\n\002id\030\001 \001(\tR\002id\022\034\n\tna"
-  "mespace\030\002 \001(\tR\tnamespace\022)\n\007members\030\003 \003("
-  "\0132\017.session.UserV1R\007members\022\036\n\nattribute"
-  "s\030\004 \001(\014R\nattributes\022\033\n\tjoin_type\030\005 \001(\tR\010"
-  "joinType\022\035\n\ncreated_at\030\006 \001(\tR\tcreatedAt\022"
-  "\035\n\nupdated_at\030\007 \001(\tR\tupdatedAt\022>\n\rconfig"
-  "uration\030\010 \001(\0132\030.session.SessionConfigV1R"
+  "_at\030\007 \001(\tR\tupdatedAt\022H\n\rconfiguration\030\010 "
+  "\001(\0132\".accelbyte_session.SessionConfigV1R"
   "\rconfiguration\022\030\n\007version\030\t \001(\005R\007version"
   "\022\036\n\nmatch_pool\030\n \001(\tR\nmatch_pool\022\034\n\tgame"
   "_mode\030\013 \001(\tR\tgame_mode\022.\n\022backfill_ticke"
-  "t_id\030\014 \001(\tR\022backfill_ticket_id\022#\n\005teams\030"
-  "\r \003(\0132\r.session.TeamR\005teams\022A\n\017DSInforma"
-  "tionV1\030\016 \001(\0132\030.session.DSInformationV1R\016"
-  "ds_information\"\263\001\n\017DSInformationV1\0226\n\nGa"
-  "meServer\030\001 \001(\0132\025.session.GameServerV1R\013g"
-  "ame_server\022,\n\021requested_regions\030\002 \003(\tR\021r"
-  "equested_regions\022\"\n\014requested_at\030\003 \001(\tR\014"
-  "requested_at\022\026\n\006status\030\005 \001(\tR\006status\"\364\004\n"
-  "\014GameServerV1\022\032\n\010pod_name\030\001 \001(\tR\010pod_nam"
-  "e\022$\n\rimage_version\030\002 \001(\tR\rimage_version\022"
-  "\034\n\tnamespace\030\003 \001(\tR\tnamespace\022\016\n\002ip\030\004 \001("
-  "\tR\002ip\022$\n\ralternate_ips\030\005 \003(\tR\ralternate_"
-  "ips\022\022\n\004port\030\006 \001(\005R\004port\022\032\n\010protocol\030\007 \001("
-  "\tR\010protocol\0226\n\005ports\030\010 \003(\0132 .session.Gam"
-  "eServerV1.PortsEntryR\005ports\022\032\n\010provider\030"
-  "\t \001(\tR\010provider\022\"\n\014game_version\030\n \001(\tR\014g"
-  "ame_version\022\026\n\006status\030\013 \001(\tR\006status\022\036\n\ns"
-  "ession_id\030\014 \001(\tR\nsession_id\022\036\n\ndeploymen"
-  "t\030\r \001(\tR\ndeployment\022\026\n\006region\030\016 \001(\tR\006reg"
-  "ion\022*\n\020custom_attribute\030\017 \001(\tR\020custom_at"
-  "tribute\022:\n\030is_override_game_version\030\020 \001("
-  "\010R\030is_override_game_version\022 \n\013last_upda"
-  "te\030\021 \001(\tR\013last_update\032,\n\nPortsEntry\022\013\n\003k"
-  "ey\030\001 \001(\t\022\r\n\005value\030\002 \001(\005:\0028\001\"C\n#GameSessi"
-  "onNotificationUserKickedV1\022\034\n\tSessionID\030"
-  "\001 \001(\tR\tsessionIDB\016Z\014/event;eventb\006proto3"
+  "t_id\030\014 \001(\tR\022backfill_ticket_id\022-\n\005teams\030"
+  "\r \003(\0132\027.accelbyte_session.TeamR\005teams\022K\n"
+  "\017DSInformationV1\030\016 \001(\0132\".accelbyte_sessi"
+  "on.DSInformationV1R\016ds_information\022 \n\013jo"
+  "inability\030\017 \001(\tR\013joinability\"\275\001\n\017DSInfor"
+  "mationV1\022@\n\nGameServer\030\001 \001(\0132\037.accelbyte"
+  "_session.GameServerV1R\013game_server\022,\n\021re"
+  "quested_regions\030\002 \003(\tR\021requested_regions"
+  "\022\"\n\014requested_at\030\003 \001(\tR\014requested_at\022\026\n\006"
+  "status\030\005 \001(\tR\006status\"\376\004\n\014GameServerV1\022\032\n"
+  "\010pod_name\030\001 \001(\tR\010pod_name\022$\n\rimage_versi"
+  "on\030\002 \001(\tR\rimage_version\022\034\n\tnamespace\030\003 \001"
+  "(\tR\tnamespace\022\016\n\002ip\030\004 \001(\tR\002ip\022$\n\ralterna"
+  "te_ips\030\005 \003(\tR\ralternate_ips\022\022\n\004port\030\006 \001("
+  "\005R\004port\022\032\n\010protocol\030\007 \001(\tR\010protocol\022@\n\005p"
+  "orts\030\010 \003(\0132*.accelbyte_session.GameServe"
+  "rV1.PortsEntryR\005ports\022\032\n\010provider\030\t \001(\tR"
+  "\010provider\022\"\n\014game_version\030\n \001(\tR\014game_ve"
+  "rsion\022\026\n\006status\030\013 \001(\tR\006status\022\036\n\nsession"
+  "_id\030\014 \001(\tR\nsession_id\022\036\n\ndeployment\030\r \001("
+  "\tR\ndeployment\022\026\n\006region\030\016 \001(\tR\006region\022*\n"
+  "\020custom_attribute\030\017 \001(\tR\020custom_attribut"
+  "e\022:\n\030is_override_game_version\030\020 \001(\010R\030is_"
+  "override_game_version\022 \n\013last_update\030\021 \001"
+  "(\tR\013last_update\032,\n\nPortsEntry\022\013\n\003key\030\001 \001"
+  "(\t\022\r\n\005value\030\002 \001(\005:\0028\001\"C\n#GameSessionNoti"
+  "ficationUserKickedV1\022\034\n\tSessionID\030\001 \001(\tR"
+  "\tsessionIDB\016Z\014/event;eventb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_notification_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_notification_2eproto = {
-  false, false, 4480, descriptor_table_protodef_notification_2eproto, "notification.proto", 
-  &descriptor_table_notification_2eproto_once, nullptr, 0, 20,
+  false, false, 5354, descriptor_table_protodef_notification_2eproto, "notification.proto", 
+  &descriptor_table_notification_2eproto_once, nullptr, 0, 21,
   schemas, file_default_instances, TableStruct_notification_2eproto::offsets,
   file_level_metadata_notification_2eproto, file_level_enum_descriptors_notification_2eproto, file_level_service_descriptors_notification_2eproto,
 };
@@ -747,6 +813,7 @@ class NotificationEventEnvelope::_Internal {
   static const ::accelbyte_session::GameSessionNotificationUserInvitedV1& gamesessionnotificationuserinvitedv1(const NotificationEventEnvelope* msg);
   static const ::accelbyte_session::GameSessionNotificationUserJoinedV1& gamesessionnotificationuserjoinedv1(const NotificationEventEnvelope* msg);
   static const ::accelbyte_session::GameSessionNotificationUserKickedV1& gamesessionnotificationuserkickedv1(const NotificationEventEnvelope* msg);
+  static const ::accelbyte_session::GameSessionNotificationUserRejectV1& gamesessionnotificationuserrejectv1(const NotificationEventEnvelope* msg);
   static const ::accelbyte_session::GameSessionNotificationMembersChangedV1& gamesessionnotificationmemberschangedv1(const NotificationEventEnvelope* msg);
   static const ::accelbyte_session::GameSessionV1& gamesessionv1(const NotificationEventEnvelope* msg);
   static const ::accelbyte_session::DSStatusChangedNotificationV1& dsstatuschangednotificationv1(const NotificationEventEnvelope* msg);
@@ -788,6 +855,10 @@ const ::accelbyte_session::GameSessionNotificationUserKickedV1&
 NotificationEventEnvelope::_Internal::gamesessionnotificationuserkickedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.gamesessionnotificationuserkickedv1_;
 }
+const ::accelbyte_session::GameSessionNotificationUserRejectV1&
+NotificationEventEnvelope::_Internal::gamesessionnotificationuserrejectv1(const NotificationEventEnvelope* msg) {
+  return *msg->payload_.gamesessionnotificationuserrejectv1_;
+}
 const ::accelbyte_session::GameSessionNotificationMembersChangedV1&
 NotificationEventEnvelope::_Internal::gamesessionnotificationmemberschangedv1(const NotificationEventEnvelope* msg) {
   return *msg->payload_.gamesessionnotificationmemberschangedv1_;
@@ -813,7 +884,7 @@ void NotificationEventEnvelope::set_allocated_partynotificationuserinvitedv1(::a
     set_has_partynotificationuserinvitedv1();
     payload_.partynotificationuserinvitedv1_ = partynotificationuserinvitedv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationUserInvitedV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.PartyNotificationUserInvitedV1)
 }
 void NotificationEventEnvelope::set_allocated_partynotificationuserjoinedv1(::accelbyte_session::PartyNotificationUserJoinedV1* partynotificationuserjoinedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -828,7 +899,7 @@ void NotificationEventEnvelope::set_allocated_partynotificationuserjoinedv1(::ac
     set_has_partynotificationuserjoinedv1();
     payload_.partynotificationuserjoinedv1_ = partynotificationuserjoinedv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationUserJoinedV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.PartyNotificationUserJoinedV1)
 }
 void NotificationEventEnvelope::set_allocated_partynotificationmemberschangedv1(::accelbyte_session::PartyNotificationMembersChangedV1* partynotificationmemberschangedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -843,7 +914,7 @@ void NotificationEventEnvelope::set_allocated_partynotificationmemberschangedv1(
     set_has_partynotificationmemberschangedv1();
     payload_.partynotificationmemberschangedv1_ = partynotificationmemberschangedv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationMembersChangedV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.PartyNotificationMembersChangedV1)
 }
 void NotificationEventEnvelope::set_allocated_partynotificationuserrejectv1(::accelbyte_session::PartyNotificationUserRejectV1* partynotificationuserrejectv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -858,7 +929,7 @@ void NotificationEventEnvelope::set_allocated_partynotificationuserrejectv1(::ac
     set_has_partynotificationuserrejectv1();
     payload_.partynotificationuserrejectv1_ = partynotificationuserrejectv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationUserRejectV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.PartyNotificationUserRejectV1)
 }
 void NotificationEventEnvelope::set_allocated_partynotificationuserkickedv1(::accelbyte_session::PartyNotificationUserKickedV1* partynotificationuserkickedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -873,7 +944,7 @@ void NotificationEventEnvelope::set_allocated_partynotificationuserkickedv1(::ac
     set_has_partynotificationuserkickedv1();
     payload_.partynotificationuserkickedv1_ = partynotificationuserkickedv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartyNotificationUserKickedV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.PartyNotificationUserKickedV1)
 }
 void NotificationEventEnvelope::set_allocated_partysessionv1(::accelbyte_session::PartySessionV1* partysessionv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -888,7 +959,7 @@ void NotificationEventEnvelope::set_allocated_partysessionv1(::accelbyte_session
     set_has_partysessionv1();
     payload_.partysessionv1_ = partysessionv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.PartySessionV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.PartySessionV1)
 }
 void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserinvitedv1(::accelbyte_session::GameSessionNotificationUserInvitedV1* gamesessionnotificationuserinvitedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -903,7 +974,7 @@ void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserinvited
     set_has_gamesessionnotificationuserinvitedv1();
     payload_.gamesessionnotificationuserinvitedv1_ = gamesessionnotificationuserinvitedv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationUserInvitedV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.GameSessionNotificationUserInvitedV1)
 }
 void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserjoinedv1(::accelbyte_session::GameSessionNotificationUserJoinedV1* gamesessionnotificationuserjoinedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -918,7 +989,7 @@ void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserjoinedv
     set_has_gamesessionnotificationuserjoinedv1();
     payload_.gamesessionnotificationuserjoinedv1_ = gamesessionnotificationuserjoinedv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationUserJoinedV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.GameSessionNotificationUserJoinedV1)
 }
 void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserkickedv1(::accelbyte_session::GameSessionNotificationUserKickedV1* gamesessionnotificationuserkickedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -933,7 +1004,22 @@ void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserkickedv
     set_has_gamesessionnotificationuserkickedv1();
     payload_.gamesessionnotificationuserkickedv1_ = gamesessionnotificationuserkickedv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationUserKickedV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.GameSessionNotificationUserKickedV1)
+}
+void NotificationEventEnvelope::set_allocated_gamesessionnotificationuserrejectv1(::accelbyte_session::GameSessionNotificationUserRejectV1* gamesessionnotificationuserrejectv1) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  clear_payload();
+  if (gamesessionnotificationuserrejectv1) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::accelbyte_session::GameSessionNotificationUserRejectV1>::GetOwningArena(gamesessionnotificationuserrejectv1);
+    if (message_arena != submessage_arena) {
+      gamesessionnotificationuserrejectv1 = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, gamesessionnotificationuserrejectv1, submessage_arena);
+    }
+    set_has_gamesessionnotificationuserrejectv1();
+    payload_.gamesessionnotificationuserrejectv1_ = gamesessionnotificationuserrejectv1;
+  }
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.GameSessionNotificationUserRejectV1)
 }
 void NotificationEventEnvelope::set_allocated_gamesessionnotificationmemberschangedv1(::accelbyte_session::GameSessionNotificationMembersChangedV1* gamesessionnotificationmemberschangedv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -948,7 +1034,7 @@ void NotificationEventEnvelope::set_allocated_gamesessionnotificationmemberschan
     set_has_gamesessionnotificationmemberschangedv1();
     payload_.gamesessionnotificationmemberschangedv1_ = gamesessionnotificationmemberschangedv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionNotificationMembersChangedV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.GameSessionNotificationMembersChangedV1)
 }
 void NotificationEventEnvelope::set_allocated_gamesessionv1(::accelbyte_session::GameSessionV1* gamesessionv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -963,7 +1049,7 @@ void NotificationEventEnvelope::set_allocated_gamesessionv1(::accelbyte_session:
     set_has_gamesessionv1();
     payload_.gamesessionv1_ = gamesessionv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.GameSessionV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.GameSessionV1)
 }
 void NotificationEventEnvelope::set_allocated_dsstatuschangednotificationv1(::accelbyte_session::DSStatusChangedNotificationV1* dsstatuschangednotificationv1) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -978,7 +1064,7 @@ void NotificationEventEnvelope::set_allocated_dsstatuschangednotificationv1(::ac
     set_has_dsstatuschangednotificationv1();
     payload_.dsstatuschangednotificationv1_ = dsstatuschangednotificationv1;
   }
-  // @@protoc_insertion_point(field_set_allocated:session.NotificationEventEnvelope.DSStatusChangedNotificationV1)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_session.NotificationEventEnvelope.DSStatusChangedNotificationV1)
 }
 NotificationEventEnvelope::NotificationEventEnvelope(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
@@ -987,7 +1073,7 @@ NotificationEventEnvelope::NotificationEventEnvelope(::PROTOBUF_NAMESPACE_ID::Ar
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.NotificationEventEnvelope)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.NotificationEventEnvelope)
 }
 NotificationEventEnvelope::NotificationEventEnvelope(const NotificationEventEnvelope& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -1030,6 +1116,10 @@ NotificationEventEnvelope::NotificationEventEnvelope(const NotificationEventEnve
       _internal_mutable_gamesessionnotificationuserkickedv1()->::accelbyte_session::GameSessionNotificationUserKickedV1::MergeFrom(from._internal_gamesessionnotificationuserkickedv1());
       break;
     }
+    case kGameSessionNotificationUserRejectV1: {
+      _internal_mutable_gamesessionnotificationuserrejectv1()->::accelbyte_session::GameSessionNotificationUserRejectV1::MergeFrom(from._internal_gamesessionnotificationuserrejectv1());
+      break;
+    }
     case kGameSessionNotificationMembersChangedV1: {
       _internal_mutable_gamesessionnotificationmemberschangedv1()->::accelbyte_session::GameSessionNotificationMembersChangedV1::MergeFrom(from._internal_gamesessionnotificationmemberschangedv1());
       break;
@@ -1046,7 +1136,7 @@ NotificationEventEnvelope::NotificationEventEnvelope(const NotificationEventEnve
       break;
     }
   }
-  // @@protoc_insertion_point(copy_constructor:session.NotificationEventEnvelope)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.NotificationEventEnvelope)
 }
 
 inline void NotificationEventEnvelope::SharedCtor() {
@@ -1054,7 +1144,7 @@ clear_has_payload();
 }
 
 NotificationEventEnvelope::~NotificationEventEnvelope() {
-  // @@protoc_insertion_point(destructor:session.NotificationEventEnvelope)
+  // @@protoc_insertion_point(destructor:accelbyte_session.NotificationEventEnvelope)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -1078,7 +1168,7 @@ void NotificationEventEnvelope::SetCachedSize(int size) const {
 }
 
 void NotificationEventEnvelope::clear_payload() {
-// @@protoc_insertion_point(one_of_clear_start:session.NotificationEventEnvelope)
+// @@protoc_insertion_point(one_of_clear_start:accelbyte_session.NotificationEventEnvelope)
   switch (payload_case()) {
     case kPartyNotificationUserInvitedV1: {
       if (GetArenaForAllocation() == nullptr) {
@@ -1134,6 +1224,12 @@ void NotificationEventEnvelope::clear_payload() {
       }
       break;
     }
+    case kGameSessionNotificationUserRejectV1: {
+      if (GetArenaForAllocation() == nullptr) {
+        delete payload_.gamesessionnotificationuserrejectv1_;
+      }
+      break;
+    }
     case kGameSessionNotificationMembersChangedV1: {
       if (GetArenaForAllocation() == nullptr) {
         delete payload_.gamesessionnotificationmemberschangedv1_;
@@ -1161,7 +1257,7 @@ void NotificationEventEnvelope::clear_payload() {
 
 
 void NotificationEventEnvelope::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.NotificationEventEnvelope)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.NotificationEventEnvelope)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -1176,7 +1272,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // .session.PartyNotificationUserInvitedV1 PartyNotificationUserInvitedV1 = 1 [json_name = "OnPartyInvited"];
+      // .accelbyte_session.PartyNotificationUserInvitedV1 PartyNotificationUserInvitedV1 = 1 [json_name = "OnPartyInvited"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_partynotificationuserinvitedv1(), ptr);
@@ -1184,7 +1280,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.PartyNotificationUserJoinedV1 PartyNotificationUserJoinedV1 = 2 [json_name = "OnPartyJoined"];
+      // .accelbyte_session.PartyNotificationUserJoinedV1 PartyNotificationUserJoinedV1 = 2 [json_name = "OnPartyJoined"];
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_partynotificationuserjoinedv1(), ptr);
@@ -1192,7 +1288,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.PartyNotificationMembersChangedV1 PartyNotificationMembersChangedV1 = 3 [json_name = "OnPartyMembersChanged"];
+      // .accelbyte_session.PartyNotificationMembersChangedV1 PartyNotificationMembersChangedV1 = 3 [json_name = "OnPartyMembersChanged"];
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_partynotificationmemberschangedv1(), ptr);
@@ -1200,7 +1296,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.PartyNotificationUserRejectV1 PartyNotificationUserRejectV1 = 4 [json_name = "OnPartyRejected"];
+      // .accelbyte_session.PartyNotificationUserRejectV1 PartyNotificationUserRejectV1 = 4 [json_name = "OnPartyRejected"];
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_partynotificationuserrejectv1(), ptr);
@@ -1208,7 +1304,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.PartyNotificationUserKickedV1 PartyNotificationUserKickedV1 = 5 [json_name = "OnPartyKicked"];
+      // .accelbyte_session.PartyNotificationUserKickedV1 PartyNotificationUserKickedV1 = 5 [json_name = "OnPartyKicked"];
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           ptr = ctx->ParseMessage(_internal_mutable_partynotificationuserkickedv1(), ptr);
@@ -1216,7 +1312,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.PartySessionV1 PartySessionV1 = 6 [json_name = "OnPartyUpdated"];
+      // .accelbyte_session.PartySessionV1 PartySessionV1 = 6 [json_name = "OnPartyUpdated"];
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           ptr = ctx->ParseMessage(_internal_mutable_partysessionv1(), ptr);
@@ -1224,7 +1320,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.GameSessionNotificationUserInvitedV1 GameSessionNotificationUserInvitedV1 = 7 [json_name = "OnSessionInvited"];
+      // .accelbyte_session.GameSessionNotificationUserInvitedV1 GameSessionNotificationUserInvitedV1 = 7 [json_name = "OnSessionInvited"];
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
           ptr = ctx->ParseMessage(_internal_mutable_gamesessionnotificationuserinvitedv1(), ptr);
@@ -1232,7 +1328,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.GameSessionNotificationUserJoinedV1 GameSessionNotificationUserJoinedV1 = 8 [json_name = "OnSessionJoined"];
+      // .accelbyte_session.GameSessionNotificationUserJoinedV1 GameSessionNotificationUserJoinedV1 = 8 [json_name = "OnSessionJoined"];
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
           ptr = ctx->ParseMessage(_internal_mutable_gamesessionnotificationuserjoinedv1(), ptr);
@@ -1240,7 +1336,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.GameSessionNotificationMembersChangedV1 GameSessionNotificationMembersChangedV1 = 9 [json_name = "OnSessionMembersChanged"];
+      // .accelbyte_session.GameSessionNotificationMembersChangedV1 GameSessionNotificationMembersChangedV1 = 9 [json_name = "OnSessionMembersChanged"];
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 74)) {
           ptr = ctx->ParseMessage(_internal_mutable_gamesessionnotificationmemberschangedv1(), ptr);
@@ -1248,7 +1344,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.GameSessionV1 GameSessionV1 = 10 [json_name = "OnGameSessionUpdated"];
+      // .accelbyte_session.GameSessionV1 GameSessionV1 = 10 [json_name = "OnGameSessionUpdated"];
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           ptr = ctx->ParseMessage(_internal_mutable_gamesessionv1(), ptr);
@@ -1256,7 +1352,7 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
+      // .accelbyte_session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
       case 11:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 90)) {
           ptr = ctx->ParseMessage(_internal_mutable_dsstatuschangednotificationv1(), ptr);
@@ -1264,10 +1360,18 @@ const char* NotificationEventEnvelope::_InternalParse(const char* ptr, ::PROTOBU
         } else
           goto handle_unusual;
         continue;
-      // .session.GameSessionNotificationUserKickedV1 GameSessionNotificationUserKickedV1 = 12 [json_name = "OnSessionKicked"];
+      // .accelbyte_session.GameSessionNotificationUserKickedV1 GameSessionNotificationUserKickedV1 = 12 [json_name = "OnSessionKicked"];
       case 12:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 98)) {
           ptr = ctx->ParseMessage(_internal_mutable_gamesessionnotificationuserkickedv1(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .accelbyte_session.GameSessionNotificationUserRejectV1 GameSessionNotificationUserRejectV1 = 13 [json_name = "OnSessionRejected"];
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 106)) {
+          ptr = ctx->ParseMessage(_internal_mutable_gamesessionnotificationuserrejectv1(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1297,11 +1401,11 @@ failure:
 
 uint8_t* NotificationEventEnvelope::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.NotificationEventEnvelope)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.NotificationEventEnvelope)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .session.PartyNotificationUserInvitedV1 PartyNotificationUserInvitedV1 = 1 [json_name = "OnPartyInvited"];
+  // .accelbyte_session.PartyNotificationUserInvitedV1 PartyNotificationUserInvitedV1 = 1 [json_name = "OnPartyInvited"];
   if (_internal_has_partynotificationuserinvitedv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1309,7 +1413,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         1, _Internal::partynotificationuserinvitedv1(this), target, stream);
   }
 
-  // .session.PartyNotificationUserJoinedV1 PartyNotificationUserJoinedV1 = 2 [json_name = "OnPartyJoined"];
+  // .accelbyte_session.PartyNotificationUserJoinedV1 PartyNotificationUserJoinedV1 = 2 [json_name = "OnPartyJoined"];
   if (_internal_has_partynotificationuserjoinedv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1317,7 +1421,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         2, _Internal::partynotificationuserjoinedv1(this), target, stream);
   }
 
-  // .session.PartyNotificationMembersChangedV1 PartyNotificationMembersChangedV1 = 3 [json_name = "OnPartyMembersChanged"];
+  // .accelbyte_session.PartyNotificationMembersChangedV1 PartyNotificationMembersChangedV1 = 3 [json_name = "OnPartyMembersChanged"];
   if (_internal_has_partynotificationmemberschangedv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1325,7 +1429,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         3, _Internal::partynotificationmemberschangedv1(this), target, stream);
   }
 
-  // .session.PartyNotificationUserRejectV1 PartyNotificationUserRejectV1 = 4 [json_name = "OnPartyRejected"];
+  // .accelbyte_session.PartyNotificationUserRejectV1 PartyNotificationUserRejectV1 = 4 [json_name = "OnPartyRejected"];
   if (_internal_has_partynotificationuserrejectv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1333,7 +1437,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         4, _Internal::partynotificationuserrejectv1(this), target, stream);
   }
 
-  // .session.PartyNotificationUserKickedV1 PartyNotificationUserKickedV1 = 5 [json_name = "OnPartyKicked"];
+  // .accelbyte_session.PartyNotificationUserKickedV1 PartyNotificationUserKickedV1 = 5 [json_name = "OnPartyKicked"];
   if (_internal_has_partynotificationuserkickedv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1341,7 +1445,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         5, _Internal::partynotificationuserkickedv1(this), target, stream);
   }
 
-  // .session.PartySessionV1 PartySessionV1 = 6 [json_name = "OnPartyUpdated"];
+  // .accelbyte_session.PartySessionV1 PartySessionV1 = 6 [json_name = "OnPartyUpdated"];
   if (_internal_has_partysessionv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1349,7 +1453,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         6, _Internal::partysessionv1(this), target, stream);
   }
 
-  // .session.GameSessionNotificationUserInvitedV1 GameSessionNotificationUserInvitedV1 = 7 [json_name = "OnSessionInvited"];
+  // .accelbyte_session.GameSessionNotificationUserInvitedV1 GameSessionNotificationUserInvitedV1 = 7 [json_name = "OnSessionInvited"];
   if (_internal_has_gamesessionnotificationuserinvitedv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1357,7 +1461,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         7, _Internal::gamesessionnotificationuserinvitedv1(this), target, stream);
   }
 
-  // .session.GameSessionNotificationUserJoinedV1 GameSessionNotificationUserJoinedV1 = 8 [json_name = "OnSessionJoined"];
+  // .accelbyte_session.GameSessionNotificationUserJoinedV1 GameSessionNotificationUserJoinedV1 = 8 [json_name = "OnSessionJoined"];
   if (_internal_has_gamesessionnotificationuserjoinedv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1365,7 +1469,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         8, _Internal::gamesessionnotificationuserjoinedv1(this), target, stream);
   }
 
-  // .session.GameSessionNotificationMembersChangedV1 GameSessionNotificationMembersChangedV1 = 9 [json_name = "OnSessionMembersChanged"];
+  // .accelbyte_session.GameSessionNotificationMembersChangedV1 GameSessionNotificationMembersChangedV1 = 9 [json_name = "OnSessionMembersChanged"];
   if (_internal_has_gamesessionnotificationmemberschangedv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1373,7 +1477,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         9, _Internal::gamesessionnotificationmemberschangedv1(this), target, stream);
   }
 
-  // .session.GameSessionV1 GameSessionV1 = 10 [json_name = "OnGameSessionUpdated"];
+  // .accelbyte_session.GameSessionV1 GameSessionV1 = 10 [json_name = "OnGameSessionUpdated"];
   if (_internal_has_gamesessionv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1381,7 +1485,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         10, _Internal::gamesessionv1(this), target, stream);
   }
 
-  // .session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
+  // .accelbyte_session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
   if (_internal_has_dsstatuschangednotificationv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1389,7 +1493,7 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         11, _Internal::dsstatuschangednotificationv1(this), target, stream);
   }
 
-  // .session.GameSessionNotificationUserKickedV1 GameSessionNotificationUserKickedV1 = 12 [json_name = "OnSessionKicked"];
+  // .accelbyte_session.GameSessionNotificationUserKickedV1 GameSessionNotificationUserKickedV1 = 12 [json_name = "OnSessionKicked"];
   if (_internal_has_gamesessionnotificationuserkickedv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1397,16 +1501,24 @@ uint8_t* NotificationEventEnvelope::_InternalSerialize(
         12, _Internal::gamesessionnotificationuserkickedv1(this), target, stream);
   }
 
+  // .accelbyte_session.GameSessionNotificationUserRejectV1 GameSessionNotificationUserRejectV1 = 13 [json_name = "OnSessionRejected"];
+  if (_internal_has_gamesessionnotificationuserrejectv1()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        13, _Internal::gamesessionnotificationuserrejectv1(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.NotificationEventEnvelope)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.NotificationEventEnvelope)
   return target;
 }
 
 size_t NotificationEventEnvelope::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.NotificationEventEnvelope)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.NotificationEventEnvelope)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -1414,84 +1526,91 @@ size_t NotificationEventEnvelope::ByteSizeLong() const {
   (void) cached_has_bits;
 
   switch (payload_case()) {
-    // .session.PartyNotificationUserInvitedV1 PartyNotificationUserInvitedV1 = 1 [json_name = "OnPartyInvited"];
+    // .accelbyte_session.PartyNotificationUserInvitedV1 PartyNotificationUserInvitedV1 = 1 [json_name = "OnPartyInvited"];
     case kPartyNotificationUserInvitedV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.partynotificationuserinvitedv1_);
       break;
     }
-    // .session.PartyNotificationUserJoinedV1 PartyNotificationUserJoinedV1 = 2 [json_name = "OnPartyJoined"];
+    // .accelbyte_session.PartyNotificationUserJoinedV1 PartyNotificationUserJoinedV1 = 2 [json_name = "OnPartyJoined"];
     case kPartyNotificationUserJoinedV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.partynotificationuserjoinedv1_);
       break;
     }
-    // .session.PartyNotificationMembersChangedV1 PartyNotificationMembersChangedV1 = 3 [json_name = "OnPartyMembersChanged"];
+    // .accelbyte_session.PartyNotificationMembersChangedV1 PartyNotificationMembersChangedV1 = 3 [json_name = "OnPartyMembersChanged"];
     case kPartyNotificationMembersChangedV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.partynotificationmemberschangedv1_);
       break;
     }
-    // .session.PartyNotificationUserRejectV1 PartyNotificationUserRejectV1 = 4 [json_name = "OnPartyRejected"];
+    // .accelbyte_session.PartyNotificationUserRejectV1 PartyNotificationUserRejectV1 = 4 [json_name = "OnPartyRejected"];
     case kPartyNotificationUserRejectV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.partynotificationuserrejectv1_);
       break;
     }
-    // .session.PartyNotificationUserKickedV1 PartyNotificationUserKickedV1 = 5 [json_name = "OnPartyKicked"];
+    // .accelbyte_session.PartyNotificationUserKickedV1 PartyNotificationUserKickedV1 = 5 [json_name = "OnPartyKicked"];
     case kPartyNotificationUserKickedV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.partynotificationuserkickedv1_);
       break;
     }
-    // .session.PartySessionV1 PartySessionV1 = 6 [json_name = "OnPartyUpdated"];
+    // .accelbyte_session.PartySessionV1 PartySessionV1 = 6 [json_name = "OnPartyUpdated"];
     case kPartySessionV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.partysessionv1_);
       break;
     }
-    // .session.GameSessionNotificationUserInvitedV1 GameSessionNotificationUserInvitedV1 = 7 [json_name = "OnSessionInvited"];
+    // .accelbyte_session.GameSessionNotificationUserInvitedV1 GameSessionNotificationUserInvitedV1 = 7 [json_name = "OnSessionInvited"];
     case kGameSessionNotificationUserInvitedV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.gamesessionnotificationuserinvitedv1_);
       break;
     }
-    // .session.GameSessionNotificationUserJoinedV1 GameSessionNotificationUserJoinedV1 = 8 [json_name = "OnSessionJoined"];
+    // .accelbyte_session.GameSessionNotificationUserJoinedV1 GameSessionNotificationUserJoinedV1 = 8 [json_name = "OnSessionJoined"];
     case kGameSessionNotificationUserJoinedV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.gamesessionnotificationuserjoinedv1_);
       break;
     }
-    // .session.GameSessionNotificationUserKickedV1 GameSessionNotificationUserKickedV1 = 12 [json_name = "OnSessionKicked"];
+    // .accelbyte_session.GameSessionNotificationUserKickedV1 GameSessionNotificationUserKickedV1 = 12 [json_name = "OnSessionKicked"];
     case kGameSessionNotificationUserKickedV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.gamesessionnotificationuserkickedv1_);
       break;
     }
-    // .session.GameSessionNotificationMembersChangedV1 GameSessionNotificationMembersChangedV1 = 9 [json_name = "OnSessionMembersChanged"];
+    // .accelbyte_session.GameSessionNotificationUserRejectV1 GameSessionNotificationUserRejectV1 = 13 [json_name = "OnSessionRejected"];
+    case kGameSessionNotificationUserRejectV1: {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *payload_.gamesessionnotificationuserrejectv1_);
+      break;
+    }
+    // .accelbyte_session.GameSessionNotificationMembersChangedV1 GameSessionNotificationMembersChangedV1 = 9 [json_name = "OnSessionMembersChanged"];
     case kGameSessionNotificationMembersChangedV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.gamesessionnotificationmemberschangedv1_);
       break;
     }
-    // .session.GameSessionV1 GameSessionV1 = 10 [json_name = "OnGameSessionUpdated"];
+    // .accelbyte_session.GameSessionV1 GameSessionV1 = 10 [json_name = "OnGameSessionUpdated"];
     case kGameSessionV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *payload_.gamesessionv1_);
       break;
     }
-    // .session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
+    // .accelbyte_session.DSStatusChangedNotificationV1 DSStatusChangedNotificationV1 = 11 [json_name = "OnDSStatusChangedNotif"];
     case kDSStatusChangedNotificationV1: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -1519,7 +1638,7 @@ void NotificationEventEnvelope::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void NotificationEventEnvelope::MergeFrom(const NotificationEventEnvelope& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.NotificationEventEnvelope)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.NotificationEventEnvelope)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -1561,6 +1680,10 @@ void NotificationEventEnvelope::MergeFrom(const NotificationEventEnvelope& from)
       _internal_mutable_gamesessionnotificationuserkickedv1()->::accelbyte_session::GameSessionNotificationUserKickedV1::MergeFrom(from._internal_gamesessionnotificationuserkickedv1());
       break;
     }
+    case kGameSessionNotificationUserRejectV1: {
+      _internal_mutable_gamesessionnotificationuserrejectv1()->::accelbyte_session::GameSessionNotificationUserRejectV1::MergeFrom(from._internal_gamesessionnotificationuserrejectv1());
+      break;
+    }
     case kGameSessionNotificationMembersChangedV1: {
       _internal_mutable_gamesessionnotificationmemberschangedv1()->::accelbyte_session::GameSessionNotificationMembersChangedV1::MergeFrom(from._internal_gamesessionnotificationmemberschangedv1());
       break;
@@ -1581,7 +1704,7 @@ void NotificationEventEnvelope::MergeFrom(const NotificationEventEnvelope& from)
 }
 
 void NotificationEventEnvelope::CopyFrom(const NotificationEventEnvelope& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.NotificationEventEnvelope)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.NotificationEventEnvelope)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -1617,7 +1740,7 @@ UserV1::UserV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.UserV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.UserV1)
 }
 UserV1::UserV1(const UserV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -1662,7 +1785,7 @@ UserV1::UserV1(const UserV1& from)
     platform_user_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_platform_user_id(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.UserV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.UserV1)
 }
 
 inline void UserV1::SharedCtor() {
@@ -1689,7 +1812,7 @@ platform_user_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyS
 }
 
 UserV1::~UserV1() {
-  // @@protoc_insertion_point(destructor:session.UserV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.UserV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -1715,7 +1838,7 @@ void UserV1::SetCachedSize(int size) const {
 }
 
 void UserV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.UserV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.UserV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -1739,7 +1862,7 @@ const char* UserV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.UserV1.id"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.UserV1.id"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1749,7 +1872,7 @@ const char* UserV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_status();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.UserV1.status"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.UserV1.status"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1759,7 +1882,7 @@ const char* UserV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_updatedat();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.UserV1.updatedAt"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.UserV1.updatedAt"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1769,7 +1892,7 @@ const char* UserV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           auto str = _internal_mutable_platform_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.UserV1.platform_id"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.UserV1.platform_id"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1779,7 +1902,7 @@ const char* UserV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_platform_user_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.UserV1.platform_user_id"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.UserV1.platform_user_id"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1809,7 +1932,7 @@ failure:
 
 uint8_t* UserV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.UserV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.UserV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -1818,7 +1941,7 @@ uint8_t* UserV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.UserV1.id");
+      "accelbyte_session.UserV1.id");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_id(), target);
   }
@@ -1828,7 +1951,7 @@ uint8_t* UserV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_status().data(), static_cast<int>(this->_internal_status().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.UserV1.status");
+      "accelbyte_session.UserV1.status");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_status(), target);
   }
@@ -1838,7 +1961,7 @@ uint8_t* UserV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_updatedat().data(), static_cast<int>(this->_internal_updatedat().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.UserV1.updatedAt");
+      "accelbyte_session.UserV1.updatedAt");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_updatedat(), target);
   }
@@ -1848,7 +1971,7 @@ uint8_t* UserV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_platform_id().data(), static_cast<int>(this->_internal_platform_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.UserV1.platform_id");
+      "accelbyte_session.UserV1.platform_id");
     target = stream->WriteStringMaybeAliased(
         4, this->_internal_platform_id(), target);
   }
@@ -1858,7 +1981,7 @@ uint8_t* UserV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_platform_user_id().data(), static_cast<int>(this->_internal_platform_user_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.UserV1.platform_user_id");
+      "accelbyte_session.UserV1.platform_user_id");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_platform_user_id(), target);
   }
@@ -1867,12 +1990,12 @@ uint8_t* UserV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.UserV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.UserV1)
   return target;
 }
 
 size_t UserV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.UserV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.UserV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -1931,7 +2054,7 @@ void UserV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void UserV1::MergeFrom(const UserV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.UserV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.UserV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -1955,7 +2078,7 @@ void UserV1::MergeFrom(const UserV1& from) {
 }
 
 void UserV1::CopyFrom(const UserV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.UserV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.UserV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -2022,7 +2145,7 @@ PartySessionV1::PartySessionV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.PartySessionV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.PartySessionV1)
 }
 PartySessionV1::PartySessionV1(const PartySessionV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -2084,13 +2207,29 @@ PartySessionV1::PartySessionV1(const PartySessionV1& from)
     leader_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_leader_id(), 
       GetArenaForAllocation());
   }
+  configuration_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    configuration_name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_configuration_name().empty()) {
+    configuration_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_configuration_name(), 
+      GetArenaForAllocation());
+  }
+  created_by_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    created_by_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_created_by().empty()) {
+    created_by_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_created_by(), 
+      GetArenaForAllocation());
+  }
   if (from._internal_has_configuration()) {
     configuration_ = new ::accelbyte_session::SessionConfigV1(*from.configuration_);
   } else {
     configuration_ = nullptr;
   }
   version_ = from.version_;
-  // @@protoc_insertion_point(copy_constructor:session.PartySessionV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.PartySessionV1)
 }
 
 inline void PartySessionV1::SharedCtor() {
@@ -2122,6 +2261,14 @@ leader_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAl
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   leader_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+configuration_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  configuration_name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+created_by_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  created_by_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&configuration_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&version_) -
@@ -2129,7 +2276,7 @@ leader_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAl
 }
 
 PartySessionV1::~PartySessionV1() {
-  // @@protoc_insertion_point(destructor:session.PartySessionV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.PartySessionV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -2144,6 +2291,8 @@ inline void PartySessionV1::SharedDtor() {
   created_at_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   updated_at_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   leader_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  configuration_name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  created_by_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete configuration_;
 }
 
@@ -2158,7 +2307,7 @@ void PartySessionV1::SetCachedSize(int size) const {
 }
 
 void PartySessionV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.PartySessionV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.PartySessionV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -2171,6 +2320,8 @@ void PartySessionV1::Clear() {
   created_at_.ClearToEmpty();
   updated_at_.ClearToEmpty();
   leader_id_.ClearToEmpty();
+  configuration_name_.ClearToEmpty();
+  created_by_.ClearToEmpty();
   if (GetArenaForAllocation() == nullptr && configuration_ != nullptr) {
     delete configuration_;
   }
@@ -2190,7 +2341,7 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartySessionV1.id"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartySessionV1.id"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2200,12 +2351,12 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_namespace_();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartySessionV1.namespace"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartySessionV1.namespace"));
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // repeated .session.UserV1 members = 3 [json_name = "members"];
+      // repeated .accelbyte_session.UserV1 members = 3 [json_name = "members"];
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr -= 1;
@@ -2232,7 +2383,7 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_join_type();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartySessionV1.join_type"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartySessionV1.join_type"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2242,7 +2393,7 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           auto str = _internal_mutable_created_at();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartySessionV1.created_at"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartySessionV1.created_at"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2252,12 +2403,12 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
           auto str = _internal_mutable_updated_at();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartySessionV1.updated_at"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartySessionV1.updated_at"));
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+      // .accelbyte_session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
           ptr = ctx->ParseMessage(_internal_mutable_configuration(), ptr);
@@ -2278,7 +2429,27 @@ const char* PartySessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           auto str = _internal_mutable_leader_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartySessionV1.leader_id"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartySessionV1.leader_id"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string configuration_name = 11 [json_name = "configurationName"];
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 90)) {
+          auto str = _internal_mutable_configuration_name();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartySessionV1.configuration_name"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string created_by = 12 [json_name = "createdBy"];
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 98)) {
+          auto str = _internal_mutable_created_by();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartySessionV1.created_by"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2308,7 +2479,7 @@ failure:
 
 uint8_t* PartySessionV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.PartySessionV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.PartySessionV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -2317,7 +2488,7 @@ uint8_t* PartySessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartySessionV1.id");
+      "accelbyte_session.PartySessionV1.id");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_id(), target);
   }
@@ -2327,12 +2498,12 @@ uint8_t* PartySessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_namespace_().data(), static_cast<int>(this->_internal_namespace_().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartySessionV1.namespace");
+      "accelbyte_session.PartySessionV1.namespace");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_namespace_(), target);
   }
 
-  // repeated .session.UserV1 members = 3 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 3 [json_name = "members"];
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_members_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -2351,7 +2522,7 @@ uint8_t* PartySessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_join_type().data(), static_cast<int>(this->_internal_join_type().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartySessionV1.join_type");
+      "accelbyte_session.PartySessionV1.join_type");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_join_type(), target);
   }
@@ -2361,7 +2532,7 @@ uint8_t* PartySessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_created_at().data(), static_cast<int>(this->_internal_created_at().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartySessionV1.created_at");
+      "accelbyte_session.PartySessionV1.created_at");
     target = stream->WriteStringMaybeAliased(
         6, this->_internal_created_at(), target);
   }
@@ -2371,12 +2542,12 @@ uint8_t* PartySessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_updated_at().data(), static_cast<int>(this->_internal_updated_at().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartySessionV1.updated_at");
+      "accelbyte_session.PartySessionV1.updated_at");
     target = stream->WriteStringMaybeAliased(
         7, this->_internal_updated_at(), target);
   }
 
-  // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+  // .accelbyte_session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
   if (this->_internal_has_configuration()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -2395,28 +2566,48 @@ uint8_t* PartySessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_leader_id().data(), static_cast<int>(this->_internal_leader_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartySessionV1.leader_id");
+      "accelbyte_session.PartySessionV1.leader_id");
     target = stream->WriteStringMaybeAliased(
         10, this->_internal_leader_id(), target);
+  }
+
+  // string configuration_name = 11 [json_name = "configurationName"];
+  if (!this->_internal_configuration_name().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_configuration_name().data(), static_cast<int>(this->_internal_configuration_name().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.PartySessionV1.configuration_name");
+    target = stream->WriteStringMaybeAliased(
+        11, this->_internal_configuration_name(), target);
+  }
+
+  // string created_by = 12 [json_name = "createdBy"];
+  if (!this->_internal_created_by().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_created_by().data(), static_cast<int>(this->_internal_created_by().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.PartySessionV1.created_by");
+    target = stream->WriteStringMaybeAliased(
+        12, this->_internal_created_by(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.PartySessionV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.PartySessionV1)
   return target;
 }
 
 size_t PartySessionV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.PartySessionV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.PartySessionV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 3 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 3 [json_name = "members"];
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->members_) {
     total_size +=
@@ -2472,7 +2663,21 @@ size_t PartySessionV1::ByteSizeLong() const {
         this->_internal_leader_id());
   }
 
-  // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+  // string configuration_name = 11 [json_name = "configurationName"];
+  if (!this->_internal_configuration_name().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_configuration_name());
+  }
+
+  // string created_by = 12 [json_name = "createdBy"];
+  if (!this->_internal_created_by().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_created_by());
+  }
+
+  // .accelbyte_session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
   if (this->_internal_has_configuration()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -2501,7 +2706,7 @@ void PartySessionV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void PartySessionV1::MergeFrom(const PartySessionV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.PartySessionV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.PartySessionV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -2528,6 +2733,12 @@ void PartySessionV1::MergeFrom(const PartySessionV1& from) {
   if (!from._internal_leader_id().empty()) {
     _internal_set_leader_id(from._internal_leader_id());
   }
+  if (!from._internal_configuration_name().empty()) {
+    _internal_set_configuration_name(from._internal_configuration_name());
+  }
+  if (!from._internal_created_by().empty()) {
+    _internal_set_created_by(from._internal_created_by());
+  }
   if (from._internal_has_configuration()) {
     _internal_mutable_configuration()->::accelbyte_session::SessionConfigV1::MergeFrom(from._internal_configuration());
   }
@@ -2538,7 +2749,7 @@ void PartySessionV1::MergeFrom(const PartySessionV1& from) {
 }
 
 void PartySessionV1::CopyFrom(const PartySessionV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.PartySessionV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.PartySessionV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -2589,6 +2800,16 @@ void PartySessionV1::InternalSwap(PartySessionV1* other) {
       &leader_id_, lhs_arena,
       &other->leader_id_, rhs_arena
   );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &configuration_name_, lhs_arena,
+      &other->configuration_name_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &created_by_, lhs_arena,
+      &other->created_by_, rhs_arena
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(PartySessionV1, version_)
       + sizeof(PartySessionV1::version_)
@@ -2611,15 +2832,17 @@ class SessionConfigV1::_Internal {
 
 SessionConfigV1::SessionConfigV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
+  requested_regions_(arena) {
   SharedCtor();
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.SessionConfigV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.SessionConfigV1)
 }
 SessionConfigV1::SessionConfigV1(const SessionConfigV1& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      requested_regions_(from.requested_regions_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -2645,10 +2868,26 @@ SessionConfigV1::SessionConfigV1(const SessionConfigV1& from)
     deployment_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_deployment(), 
       GetArenaForAllocation());
   }
+  client_version_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    client_version_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_client_version().empty()) {
+    client_version_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_client_version(), 
+      GetArenaForAllocation());
+  }
+  type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    type_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_type().empty()) {
+    type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_type(), 
+      GetArenaForAllocation());
+  }
   ::memcpy(&min_players_, &from.min_players_,
-    static_cast<size_t>(reinterpret_cast<char*>(&max_players_) -
-    reinterpret_cast<char*>(&min_players_)) + sizeof(max_players_));
-  // @@protoc_insertion_point(copy_constructor:session.SessionConfigV1)
+    static_cast<size_t>(reinterpret_cast<char*>(&inactive_timeout_) -
+    reinterpret_cast<char*>(&min_players_)) + sizeof(inactive_timeout_));
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.SessionConfigV1)
 }
 
 inline void SessionConfigV1::SharedCtor() {
@@ -2664,14 +2903,22 @@ deployment_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringA
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   deployment_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+client_version_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  client_version_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  type_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&min_players_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&max_players_) -
-    reinterpret_cast<char*>(&min_players_)) + sizeof(max_players_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&inactive_timeout_) -
+    reinterpret_cast<char*>(&min_players_)) + sizeof(inactive_timeout_));
 }
 
 SessionConfigV1::~SessionConfigV1() {
-  // @@protoc_insertion_point(destructor:session.SessionConfigV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.SessionConfigV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -2682,6 +2929,8 @@ inline void SessionConfigV1::SharedDtor() {
   name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   joinability_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   deployment_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  client_version_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  type_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void SessionConfigV1::ArenaDtor(void* object) {
@@ -2695,17 +2944,20 @@ void SessionConfigV1::SetCachedSize(int size) const {
 }
 
 void SessionConfigV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.SessionConfigV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.SessionConfigV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  requested_regions_.Clear();
   name_.ClearToEmpty();
   joinability_.ClearToEmpty();
   deployment_.ClearToEmpty();
+  client_version_.ClearToEmpty();
+  type_.ClearToEmpty();
   ::memset(&min_players_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&max_players_) -
-      reinterpret_cast<char*>(&min_players_)) + sizeof(max_players_));
+      reinterpret_cast<char*>(&inactive_timeout_) -
+      reinterpret_cast<char*>(&min_players_)) + sizeof(inactive_timeout_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2720,7 +2972,7 @@ const char* SessionConfigV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_name();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.SessionConfigV1.name"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.SessionConfigV1.name"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2730,7 +2982,7 @@ const char* SessionConfigV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_joinability();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.SessionConfigV1.joinability"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.SessionConfigV1.joinability"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2756,7 +3008,58 @@ const char* SessionConfigV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_deployment();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.SessionConfigV1.deployment"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.SessionConfigV1.deployment"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string client_version = 6 [json_name = "clientVersion"];
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+          auto str = _internal_mutable_client_version();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.SessionConfigV1.client_version"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated string requested_regions = 7 [json_name = "requestedRegions"];
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_requested_regions();
+            ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.SessionConfigV1.requested_regions"));
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
+        } else
+          goto handle_unusual;
+        continue;
+      // string type = 8 [json_name = "type"];
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
+          auto str = _internal_mutable_type();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.SessionConfigV1.type"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 invite_timeout = 9 [json_name = "inviteTimeout"];
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
+          invite_timeout_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 inactive_timeout = 10 [json_name = "inactiveTimeout"];
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 80)) {
+          inactive_timeout_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2786,7 +3089,7 @@ failure:
 
 uint8_t* SessionConfigV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.SessionConfigV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.SessionConfigV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -2795,7 +3098,7 @@ uint8_t* SessionConfigV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.SessionConfigV1.name");
+      "accelbyte_session.SessionConfigV1.name");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_name(), target);
   }
@@ -2805,7 +3108,7 @@ uint8_t* SessionConfigV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_joinability().data(), static_cast<int>(this->_internal_joinability().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.SessionConfigV1.joinability");
+      "accelbyte_session.SessionConfigV1.joinability");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_joinability(), target);
   }
@@ -2827,26 +3130,76 @@ uint8_t* SessionConfigV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_deployment().data(), static_cast<int>(this->_internal_deployment().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.SessionConfigV1.deployment");
+      "accelbyte_session.SessionConfigV1.deployment");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_deployment(), target);
+  }
+
+  // string client_version = 6 [json_name = "clientVersion"];
+  if (!this->_internal_client_version().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_client_version().data(), static_cast<int>(this->_internal_client_version().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.SessionConfigV1.client_version");
+    target = stream->WriteStringMaybeAliased(
+        6, this->_internal_client_version(), target);
+  }
+
+  // repeated string requested_regions = 7 [json_name = "requestedRegions"];
+  for (int i = 0, n = this->_internal_requested_regions_size(); i < n; i++) {
+    const auto& s = this->_internal_requested_regions(i);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      s.data(), static_cast<int>(s.length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.SessionConfigV1.requested_regions");
+    target = stream->WriteString(7, s, target);
+  }
+
+  // string type = 8 [json_name = "type"];
+  if (!this->_internal_type().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_type().data(), static_cast<int>(this->_internal_type().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.SessionConfigV1.type");
+    target = stream->WriteStringMaybeAliased(
+        8, this->_internal_type(), target);
+  }
+
+  // int32 invite_timeout = 9 [json_name = "inviteTimeout"];
+  if (this->_internal_invite_timeout() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(9, this->_internal_invite_timeout(), target);
+  }
+
+  // int32 inactive_timeout = 10 [json_name = "inactiveTimeout"];
+  if (this->_internal_inactive_timeout() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(10, this->_internal_inactive_timeout(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.SessionConfigV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.SessionConfigV1)
   return target;
 }
 
 size_t SessionConfigV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.SessionConfigV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.SessionConfigV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // repeated string requested_regions = 7 [json_name = "requestedRegions"];
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(requested_regions_.size());
+  for (int i = 0, n = requested_regions_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      requested_regions_.Get(i));
+  }
 
   // string name = 1 [json_name = "name"];
   if (!this->_internal_name().empty()) {
@@ -2869,6 +3222,20 @@ size_t SessionConfigV1::ByteSizeLong() const {
         this->_internal_deployment());
   }
 
+  // string client_version = 6 [json_name = "clientVersion"];
+  if (!this->_internal_client_version().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_client_version());
+  }
+
+  // string type = 8 [json_name = "type"];
+  if (!this->_internal_type().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_type());
+  }
+
   // int32 min_players = 3 [json_name = "minPlayers"];
   if (this->_internal_min_players() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_min_players());
@@ -2877,6 +3244,16 @@ size_t SessionConfigV1::ByteSizeLong() const {
   // int32 max_players = 4 [json_name = "maxPlayers"];
   if (this->_internal_max_players() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_max_players());
+  }
+
+  // int32 invite_timeout = 9 [json_name = "inviteTimeout"];
+  if (this->_internal_invite_timeout() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_invite_timeout());
+  }
+
+  // int32 inactive_timeout = 10 [json_name = "inactiveTimeout"];
+  if (this->_internal_inactive_timeout() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_inactive_timeout());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -2896,11 +3273,12 @@ void SessionConfigV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void SessionConfigV1::MergeFrom(const SessionConfigV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.SessionConfigV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.SessionConfigV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  requested_regions_.MergeFrom(from.requested_regions_);
   if (!from._internal_name().empty()) {
     _internal_set_name(from._internal_name());
   }
@@ -2910,17 +3288,29 @@ void SessionConfigV1::MergeFrom(const SessionConfigV1& from) {
   if (!from._internal_deployment().empty()) {
     _internal_set_deployment(from._internal_deployment());
   }
+  if (!from._internal_client_version().empty()) {
+    _internal_set_client_version(from._internal_client_version());
+  }
+  if (!from._internal_type().empty()) {
+    _internal_set_type(from._internal_type());
+  }
   if (from._internal_min_players() != 0) {
     _internal_set_min_players(from._internal_min_players());
   }
   if (from._internal_max_players() != 0) {
     _internal_set_max_players(from._internal_max_players());
   }
+  if (from._internal_invite_timeout() != 0) {
+    _internal_set_invite_timeout(from._internal_invite_timeout());
+  }
+  if (from._internal_inactive_timeout() != 0) {
+    _internal_set_inactive_timeout(from._internal_inactive_timeout());
+  }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void SessionConfigV1::CopyFrom(const SessionConfigV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.SessionConfigV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.SessionConfigV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -2935,6 +3325,7 @@ void SessionConfigV1::InternalSwap(SessionConfigV1* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  requested_regions_.InternalSwap(&other->requested_regions_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &name_, lhs_arena,
@@ -2950,9 +3341,19 @@ void SessionConfigV1::InternalSwap(SessionConfigV1* other) {
       &deployment_, lhs_arena,
       &other->deployment_, rhs_arena
   );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &client_version_, lhs_arena,
+      &other->client_version_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &type_, lhs_arena,
+      &other->type_, rhs_arena
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SessionConfigV1, max_players_)
-      + sizeof(SessionConfigV1::max_players_)
+      PROTOBUF_FIELD_OFFSET(SessionConfigV1, inactive_timeout_)
+      + sizeof(SessionConfigV1::inactive_timeout_)
       - PROTOBUF_FIELD_OFFSET(SessionConfigV1, min_players_)>(
           reinterpret_cast<char*>(&min_players_),
           reinterpret_cast<char*>(&other->min_players_));
@@ -2978,7 +3379,7 @@ PartyNotificationUserJoinedV1::PartyNotificationUserJoinedV1(::PROTOBUF_NAMESPAC
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.PartyNotificationUserJoinedV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.PartyNotificationUserJoinedV1)
 }
 PartyNotificationUserJoinedV1::PartyNotificationUserJoinedV1(const PartyNotificationUserJoinedV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -2992,7 +3393,7 @@ PartyNotificationUserJoinedV1::PartyNotificationUserJoinedV1(const PartyNotifica
     partyid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_partyid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.PartyNotificationUserJoinedV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.PartyNotificationUserJoinedV1)
 }
 
 inline void PartyNotificationUserJoinedV1::SharedCtor() {
@@ -3003,7 +3404,7 @@ partyid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlre
 }
 
 PartyNotificationUserJoinedV1::~PartyNotificationUserJoinedV1() {
-  // @@protoc_insertion_point(destructor:session.PartyNotificationUserJoinedV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.PartyNotificationUserJoinedV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -3025,7 +3426,7 @@ void PartyNotificationUserJoinedV1::SetCachedSize(int size) const {
 }
 
 void PartyNotificationUserJoinedV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.PartyNotificationUserJoinedV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.PartyNotificationUserJoinedV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -3041,7 +3442,7 @@ const char* PartyNotificationUserJoinedV1::_InternalParse(const char* ptr, ::PRO
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // repeated .session.UserV1 members = 1 [json_name = "members"];
+      // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr -= 1;
@@ -3059,7 +3460,7 @@ const char* PartyNotificationUserJoinedV1::_InternalParse(const char* ptr, ::PRO
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_partyid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationUserJoinedV1.PartyID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationUserJoinedV1.PartyID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3089,11 +3490,11 @@ failure:
 
 uint8_t* PartyNotificationUserJoinedV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.PartyNotificationUserJoinedV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.PartyNotificationUserJoinedV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 1 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_members_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -3106,7 +3507,7 @@ uint8_t* PartyNotificationUserJoinedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_partyid().data(), static_cast<int>(this->_internal_partyid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationUserJoinedV1.PartyID");
+      "accelbyte_session.PartyNotificationUserJoinedV1.PartyID");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_partyid(), target);
   }
@@ -3115,19 +3516,19 @@ uint8_t* PartyNotificationUserJoinedV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.PartyNotificationUserJoinedV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.PartyNotificationUserJoinedV1)
   return target;
 }
 
 size_t PartyNotificationUserJoinedV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.PartyNotificationUserJoinedV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.PartyNotificationUserJoinedV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 1 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->members_) {
     total_size +=
@@ -3158,7 +3559,7 @@ void PartyNotificationUserJoinedV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* 
 
 
 void PartyNotificationUserJoinedV1::MergeFrom(const PartyNotificationUserJoinedV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.PartyNotificationUserJoinedV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.PartyNotificationUserJoinedV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -3171,7 +3572,7 @@ void PartyNotificationUserJoinedV1::MergeFrom(const PartyNotificationUserJoinedV
 }
 
 void PartyNotificationUserJoinedV1::CopyFrom(const PartyNotificationUserJoinedV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.PartyNotificationUserJoinedV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.PartyNotificationUserJoinedV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -3214,7 +3615,7 @@ PartyNotificationMembersChangedV1::PartyNotificationMembersChangedV1(::PROTOBUF_
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.PartyNotificationMembersChangedV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.PartyNotificationMembersChangedV1)
 }
 PartyNotificationMembersChangedV1::PartyNotificationMembersChangedV1(const PartyNotificationMembersChangedV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -3244,7 +3645,7 @@ PartyNotificationMembersChangedV1::PartyNotificationMembersChangedV1(const Party
     leaderid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_leaderid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.PartyNotificationMembersChangedV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.PartyNotificationMembersChangedV1)
 }
 
 inline void PartyNotificationMembersChangedV1::SharedCtor() {
@@ -3263,7 +3664,7 @@ leaderid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlr
 }
 
 PartyNotificationMembersChangedV1::~PartyNotificationMembersChangedV1() {
-  // @@protoc_insertion_point(destructor:session.PartyNotificationMembersChangedV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.PartyNotificationMembersChangedV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -3287,7 +3688,7 @@ void PartyNotificationMembersChangedV1::SetCachedSize(int size) const {
 }
 
 void PartyNotificationMembersChangedV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.PartyNotificationMembersChangedV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.PartyNotificationMembersChangedV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -3305,7 +3706,7 @@ const char* PartyNotificationMembersChangedV1::_InternalParse(const char* ptr, :
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // repeated .session.UserV1 members = 1 [json_name = "members"];
+      // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr -= 1;
@@ -3323,7 +3724,7 @@ const char* PartyNotificationMembersChangedV1::_InternalParse(const char* ptr, :
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_partyid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationMembersChangedV1.PartyID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationMembersChangedV1.PartyID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3333,7 +3734,7 @@ const char* PartyNotificationMembersChangedV1::_InternalParse(const char* ptr, :
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_joinerid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationMembersChangedV1.JoinerID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationMembersChangedV1.JoinerID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3343,7 +3744,7 @@ const char* PartyNotificationMembersChangedV1::_InternalParse(const char* ptr, :
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           auto str = _internal_mutable_leaderid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationMembersChangedV1.LeaderID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationMembersChangedV1.LeaderID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3373,11 +3774,11 @@ failure:
 
 uint8_t* PartyNotificationMembersChangedV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.PartyNotificationMembersChangedV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.PartyNotificationMembersChangedV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 1 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_members_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -3390,7 +3791,7 @@ uint8_t* PartyNotificationMembersChangedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_partyid().data(), static_cast<int>(this->_internal_partyid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationMembersChangedV1.PartyID");
+      "accelbyte_session.PartyNotificationMembersChangedV1.PartyID");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_partyid(), target);
   }
@@ -3400,7 +3801,7 @@ uint8_t* PartyNotificationMembersChangedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_joinerid().data(), static_cast<int>(this->_internal_joinerid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationMembersChangedV1.JoinerID");
+      "accelbyte_session.PartyNotificationMembersChangedV1.JoinerID");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_joinerid(), target);
   }
@@ -3410,7 +3811,7 @@ uint8_t* PartyNotificationMembersChangedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_leaderid().data(), static_cast<int>(this->_internal_leaderid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationMembersChangedV1.LeaderID");
+      "accelbyte_session.PartyNotificationMembersChangedV1.LeaderID");
     target = stream->WriteStringMaybeAliased(
         4, this->_internal_leaderid(), target);
   }
@@ -3419,19 +3820,19 @@ uint8_t* PartyNotificationMembersChangedV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.PartyNotificationMembersChangedV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.PartyNotificationMembersChangedV1)
   return target;
 }
 
 size_t PartyNotificationMembersChangedV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.PartyNotificationMembersChangedV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.PartyNotificationMembersChangedV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 1 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->members_) {
     total_size +=
@@ -3476,7 +3877,7 @@ void PartyNotificationMembersChangedV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Messa
 
 
 void PartyNotificationMembersChangedV1::MergeFrom(const PartyNotificationMembersChangedV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.PartyNotificationMembersChangedV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.PartyNotificationMembersChangedV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -3495,7 +3896,7 @@ void PartyNotificationMembersChangedV1::MergeFrom(const PartyNotificationMembers
 }
 
 void PartyNotificationMembersChangedV1::CopyFrom(const PartyNotificationMembersChangedV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.PartyNotificationMembersChangedV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.PartyNotificationMembersChangedV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -3547,7 +3948,7 @@ PartyNotificationUserInvitedV1::PartyNotificationUserInvitedV1(::PROTOBUF_NAMESP
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.PartyNotificationUserInvitedV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.PartyNotificationUserInvitedV1)
 }
 PartyNotificationUserInvitedV1::PartyNotificationUserInvitedV1(const PartyNotificationUserInvitedV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -3568,7 +3969,7 @@ PartyNotificationUserInvitedV1::PartyNotificationUserInvitedV1(const PartyNotifi
     partyid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_partyid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.PartyNotificationUserInvitedV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.PartyNotificationUserInvitedV1)
 }
 
 inline void PartyNotificationUserInvitedV1::SharedCtor() {
@@ -3583,7 +3984,7 @@ partyid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlre
 }
 
 PartyNotificationUserInvitedV1::~PartyNotificationUserInvitedV1() {
-  // @@protoc_insertion_point(destructor:session.PartyNotificationUserInvitedV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.PartyNotificationUserInvitedV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -3606,7 +4007,7 @@ void PartyNotificationUserInvitedV1::SetCachedSize(int size) const {
 }
 
 void PartyNotificationUserInvitedV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.PartyNotificationUserInvitedV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.PartyNotificationUserInvitedV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -3627,7 +4028,7 @@ const char* PartyNotificationUserInvitedV1::_InternalParse(const char* ptr, ::PR
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_senderid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationUserInvitedV1.senderID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationUserInvitedV1.senderID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3637,7 +4038,7 @@ const char* PartyNotificationUserInvitedV1::_InternalParse(const char* ptr, ::PR
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_partyid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationUserInvitedV1.PartyID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationUserInvitedV1.PartyID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3667,7 +4068,7 @@ failure:
 
 uint8_t* PartyNotificationUserInvitedV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.PartyNotificationUserInvitedV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.PartyNotificationUserInvitedV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -3676,7 +4077,7 @@ uint8_t* PartyNotificationUserInvitedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_senderid().data(), static_cast<int>(this->_internal_senderid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationUserInvitedV1.senderID");
+      "accelbyte_session.PartyNotificationUserInvitedV1.senderID");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_senderid(), target);
   }
@@ -3686,7 +4087,7 @@ uint8_t* PartyNotificationUserInvitedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_partyid().data(), static_cast<int>(this->_internal_partyid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationUserInvitedV1.PartyID");
+      "accelbyte_session.PartyNotificationUserInvitedV1.PartyID");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_partyid(), target);
   }
@@ -3695,12 +4096,12 @@ uint8_t* PartyNotificationUserInvitedV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.PartyNotificationUserInvitedV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.PartyNotificationUserInvitedV1)
   return target;
 }
 
 size_t PartyNotificationUserInvitedV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.PartyNotificationUserInvitedV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.PartyNotificationUserInvitedV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -3738,7 +4139,7 @@ void PartyNotificationUserInvitedV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message*
 
 
 void PartyNotificationUserInvitedV1::MergeFrom(const PartyNotificationUserInvitedV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.PartyNotificationUserInvitedV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.PartyNotificationUserInvitedV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -3753,7 +4154,7 @@ void PartyNotificationUserInvitedV1::MergeFrom(const PartyNotificationUserInvite
 }
 
 void PartyNotificationUserInvitedV1::CopyFrom(const PartyNotificationUserInvitedV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.PartyNotificationUserInvitedV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.PartyNotificationUserInvitedV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -3800,7 +4201,7 @@ PartyNotificationUserRejectV1::PartyNotificationUserRejectV1(::PROTOBUF_NAMESPAC
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.PartyNotificationUserRejectV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.PartyNotificationUserRejectV1)
 }
 PartyNotificationUserRejectV1::PartyNotificationUserRejectV1(const PartyNotificationUserRejectV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -3822,7 +4223,7 @@ PartyNotificationUserRejectV1::PartyNotificationUserRejectV1(const PartyNotifica
     rejectedid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_rejectedid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.PartyNotificationUserRejectV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.PartyNotificationUserRejectV1)
 }
 
 inline void PartyNotificationUserRejectV1::SharedCtor() {
@@ -3837,7 +4238,7 @@ rejectedid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringA
 }
 
 PartyNotificationUserRejectV1::~PartyNotificationUserRejectV1() {
-  // @@protoc_insertion_point(destructor:session.PartyNotificationUserRejectV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.PartyNotificationUserRejectV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -3860,7 +4261,7 @@ void PartyNotificationUserRejectV1::SetCachedSize(int size) const {
 }
 
 void PartyNotificationUserRejectV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.PartyNotificationUserRejectV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.PartyNotificationUserRejectV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -3877,7 +4278,7 @@ const char* PartyNotificationUserRejectV1::_InternalParse(const char* ptr, ::PRO
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // repeated .session.UserV1 members = 1 [json_name = "members"];
+      // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr -= 1;
@@ -3895,7 +4296,7 @@ const char* PartyNotificationUserRejectV1::_InternalParse(const char* ptr, ::PRO
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_partyid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationUserRejectV1.PartyID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationUserRejectV1.PartyID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3905,7 +4306,7 @@ const char* PartyNotificationUserRejectV1::_InternalParse(const char* ptr, ::PRO
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_rejectedid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationUserRejectV1.RejectedID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationUserRejectV1.RejectedID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3935,11 +4336,11 @@ failure:
 
 uint8_t* PartyNotificationUserRejectV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.PartyNotificationUserRejectV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.PartyNotificationUserRejectV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 1 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_members_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -3952,7 +4353,7 @@ uint8_t* PartyNotificationUserRejectV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_partyid().data(), static_cast<int>(this->_internal_partyid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationUserRejectV1.PartyID");
+      "accelbyte_session.PartyNotificationUserRejectV1.PartyID");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_partyid(), target);
   }
@@ -3962,7 +4363,7 @@ uint8_t* PartyNotificationUserRejectV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_rejectedid().data(), static_cast<int>(this->_internal_rejectedid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationUserRejectV1.RejectedID");
+      "accelbyte_session.PartyNotificationUserRejectV1.RejectedID");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_rejectedid(), target);
   }
@@ -3971,19 +4372,19 @@ uint8_t* PartyNotificationUserRejectV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.PartyNotificationUserRejectV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.PartyNotificationUserRejectV1)
   return target;
 }
 
 size_t PartyNotificationUserRejectV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.PartyNotificationUserRejectV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.PartyNotificationUserRejectV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 1 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->members_) {
     total_size +=
@@ -4021,7 +4422,7 @@ void PartyNotificationUserRejectV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* 
 
 
 void PartyNotificationUserRejectV1::MergeFrom(const PartyNotificationUserRejectV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.PartyNotificationUserRejectV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.PartyNotificationUserRejectV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -4037,7 +4438,7 @@ void PartyNotificationUserRejectV1::MergeFrom(const PartyNotificationUserRejectV
 }
 
 void PartyNotificationUserRejectV1::CopyFrom(const PartyNotificationUserRejectV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.PartyNotificationUserRejectV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.PartyNotificationUserRejectV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -4084,7 +4485,7 @@ PartyNotificationUserKickedV1::PartyNotificationUserKickedV1(::PROTOBUF_NAMESPAC
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.PartyNotificationUserKickedV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.PartyNotificationUserKickedV1)
 }
 PartyNotificationUserKickedV1::PartyNotificationUserKickedV1(const PartyNotificationUserKickedV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -4097,7 +4498,7 @@ PartyNotificationUserKickedV1::PartyNotificationUserKickedV1(const PartyNotifica
     partyid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_partyid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.PartyNotificationUserKickedV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.PartyNotificationUserKickedV1)
 }
 
 inline void PartyNotificationUserKickedV1::SharedCtor() {
@@ -4108,7 +4509,7 @@ partyid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlre
 }
 
 PartyNotificationUserKickedV1::~PartyNotificationUserKickedV1() {
-  // @@protoc_insertion_point(destructor:session.PartyNotificationUserKickedV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.PartyNotificationUserKickedV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -4130,7 +4531,7 @@ void PartyNotificationUserKickedV1::SetCachedSize(int size) const {
 }
 
 void PartyNotificationUserKickedV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.PartyNotificationUserKickedV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.PartyNotificationUserKickedV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -4150,7 +4551,7 @@ const char* PartyNotificationUserKickedV1::_InternalParse(const char* ptr, ::PRO
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_partyid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.PartyNotificationUserKickedV1.PartyID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.PartyNotificationUserKickedV1.PartyID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -4180,7 +4581,7 @@ failure:
 
 uint8_t* PartyNotificationUserKickedV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.PartyNotificationUserKickedV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.PartyNotificationUserKickedV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -4189,7 +4590,7 @@ uint8_t* PartyNotificationUserKickedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_partyid().data(), static_cast<int>(this->_internal_partyid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.PartyNotificationUserKickedV1.PartyID");
+      "accelbyte_session.PartyNotificationUserKickedV1.PartyID");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_partyid(), target);
   }
@@ -4198,12 +4599,12 @@ uint8_t* PartyNotificationUserKickedV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.PartyNotificationUserKickedV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.PartyNotificationUserKickedV1)
   return target;
 }
 
 size_t PartyNotificationUserKickedV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.PartyNotificationUserKickedV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.PartyNotificationUserKickedV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -4234,7 +4635,7 @@ void PartyNotificationUserKickedV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* 
 
 
 void PartyNotificationUserKickedV1::MergeFrom(const PartyNotificationUserKickedV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.PartyNotificationUserKickedV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.PartyNotificationUserKickedV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -4246,7 +4647,7 @@ void PartyNotificationUserKickedV1::MergeFrom(const PartyNotificationUserKickedV
 }
 
 void PartyNotificationUserKickedV1::CopyFrom(const PartyNotificationUserKickedV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.PartyNotificationUserKickedV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.PartyNotificationUserKickedV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -4287,7 +4688,7 @@ GameSessionNotificationUserInvitedV1::GameSessionNotificationUserInvitedV1(::PRO
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.GameSessionNotificationUserInvitedV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.GameSessionNotificationUserInvitedV1)
 }
 GameSessionNotificationUserInvitedV1::GameSessionNotificationUserInvitedV1(const GameSessionNotificationUserInvitedV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -4300,7 +4701,7 @@ GameSessionNotificationUserInvitedV1::GameSessionNotificationUserInvitedV1(const
     sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_sessionid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.GameSessionNotificationUserInvitedV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.GameSessionNotificationUserInvitedV1)
 }
 
 inline void GameSessionNotificationUserInvitedV1::SharedCtor() {
@@ -4311,7 +4712,7 @@ sessionid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAl
 }
 
 GameSessionNotificationUserInvitedV1::~GameSessionNotificationUserInvitedV1() {
-  // @@protoc_insertion_point(destructor:session.GameSessionNotificationUserInvitedV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.GameSessionNotificationUserInvitedV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -4333,7 +4734,7 @@ void GameSessionNotificationUserInvitedV1::SetCachedSize(int size) const {
 }
 
 void GameSessionNotificationUserInvitedV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.GameSessionNotificationUserInvitedV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.GameSessionNotificationUserInvitedV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -4353,7 +4754,7 @@ const char* GameSessionNotificationUserInvitedV1::_InternalParse(const char* ptr
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_sessionid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionNotificationUserInvitedV1.SessionID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionNotificationUserInvitedV1.SessionID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -4383,7 +4784,7 @@ failure:
 
 uint8_t* GameSessionNotificationUserInvitedV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.GameSessionNotificationUserInvitedV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.GameSessionNotificationUserInvitedV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -4392,7 +4793,7 @@ uint8_t* GameSessionNotificationUserInvitedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_sessionid().data(), static_cast<int>(this->_internal_sessionid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionNotificationUserInvitedV1.SessionID");
+      "accelbyte_session.GameSessionNotificationUserInvitedV1.SessionID");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_sessionid(), target);
   }
@@ -4401,12 +4802,12 @@ uint8_t* GameSessionNotificationUserInvitedV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.GameSessionNotificationUserInvitedV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.GameSessionNotificationUserInvitedV1)
   return target;
 }
 
 size_t GameSessionNotificationUserInvitedV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.GameSessionNotificationUserInvitedV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.GameSessionNotificationUserInvitedV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -4437,7 +4838,7 @@ void GameSessionNotificationUserInvitedV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Me
 
 
 void GameSessionNotificationUserInvitedV1::MergeFrom(const GameSessionNotificationUserInvitedV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.GameSessionNotificationUserInvitedV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.GameSessionNotificationUserInvitedV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -4449,7 +4850,7 @@ void GameSessionNotificationUserInvitedV1::MergeFrom(const GameSessionNotificati
 }
 
 void GameSessionNotificationUserInvitedV1::CopyFrom(const GameSessionNotificationUserInvitedV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.GameSessionNotificationUserInvitedV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.GameSessionNotificationUserInvitedV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -4479,6 +4880,291 @@ void GameSessionNotificationUserInvitedV1::InternalSwap(GameSessionNotificationU
 
 // ===================================================================
 
+class GameSessionNotificationUserRejectV1::_Internal {
+ public:
+};
+
+GameSessionNotificationUserRejectV1::GameSessionNotificationUserRejectV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
+  members_(arena) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.GameSessionNotificationUserRejectV1)
+}
+GameSessionNotificationUserRejectV1::GameSessionNotificationUserRejectV1(const GameSessionNotificationUserRejectV1& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      members_(from.members_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  sessionid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    sessionid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_sessionid().empty()) {
+    sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_sessionid(), 
+      GetArenaForAllocation());
+  }
+  rejectedid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    rejectedid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_rejectedid().empty()) {
+    rejectedid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_rejectedid(), 
+      GetArenaForAllocation());
+  }
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.GameSessionNotificationUserRejectV1)
+}
+
+inline void GameSessionNotificationUserRejectV1::SharedCtor() {
+sessionid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  sessionid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+rejectedid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  rejectedid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+GameSessionNotificationUserRejectV1::~GameSessionNotificationUserRejectV1() {
+  // @@protoc_insertion_point(destructor:accelbyte_session.GameSessionNotificationUserRejectV1)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void GameSessionNotificationUserRejectV1::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  sessionid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  rejectedid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void GameSessionNotificationUserRejectV1::ArenaDtor(void* object) {
+  GameSessionNotificationUserRejectV1* _this = reinterpret_cast< GameSessionNotificationUserRejectV1* >(object);
+  (void)_this;
+}
+void GameSessionNotificationUserRejectV1::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void GameSessionNotificationUserRejectV1::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void GameSessionNotificationUserRejectV1::Clear() {
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.GameSessionNotificationUserRejectV1)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  members_.Clear();
+  sessionid_.ClearToEmpty();
+  rejectedid_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* GameSessionNotificationUserRejectV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_members(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+        } else
+          goto handle_unusual;
+        continue;
+      // string SessionID = 2 [json_name = "sessionID"];
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_sessionid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionNotificationUserRejectV1.SessionID"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string RejectedID = 3 [json_name = "rejectedID"];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          auto str = _internal_mutable_rejectedid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionNotificationUserRejectV1.RejectedID"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* GameSessionNotificationUserRejectV1::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.GameSessionNotificationUserRejectV1)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_members_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, this->_internal_members(i), target, stream);
+  }
+
+  // string SessionID = 2 [json_name = "sessionID"];
+  if (!this->_internal_sessionid().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_sessionid().data(), static_cast<int>(this->_internal_sessionid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.GameSessionNotificationUserRejectV1.SessionID");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_sessionid(), target);
+  }
+
+  // string RejectedID = 3 [json_name = "rejectedID"];
+  if (!this->_internal_rejectedid().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_rejectedid().data(), static_cast<int>(this->_internal_rejectedid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.GameSessionNotificationUserRejectV1.RejectedID");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_rejectedid(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.GameSessionNotificationUserRejectV1)
+  return target;
+}
+
+size_t GameSessionNotificationUserRejectV1::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.GameSessionNotificationUserRejectV1)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
+  total_size += 1UL * this->_internal_members_size();
+  for (const auto& msg : this->members_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // string SessionID = 2 [json_name = "sessionID"];
+  if (!this->_internal_sessionid().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_sessionid());
+  }
+
+  // string RejectedID = 3 [json_name = "rejectedID"];
+  if (!this->_internal_rejectedid().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_rejectedid());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData GameSessionNotificationUserRejectV1::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    GameSessionNotificationUserRejectV1::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GameSessionNotificationUserRejectV1::GetClassData() const { return &_class_data_; }
+
+void GameSessionNotificationUserRejectV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<GameSessionNotificationUserRejectV1 *>(to)->MergeFrom(
+      static_cast<const GameSessionNotificationUserRejectV1 &>(from));
+}
+
+
+void GameSessionNotificationUserRejectV1::MergeFrom(const GameSessionNotificationUserRejectV1& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.GameSessionNotificationUserRejectV1)
+  GOOGLE_DCHECK_NE(&from, this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  members_.MergeFrom(from.members_);
+  if (!from._internal_sessionid().empty()) {
+    _internal_set_sessionid(from._internal_sessionid());
+  }
+  if (!from._internal_rejectedid().empty()) {
+    _internal_set_rejectedid(from._internal_rejectedid());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void GameSessionNotificationUserRejectV1::CopyFrom(const GameSessionNotificationUserRejectV1& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.GameSessionNotificationUserRejectV1)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GameSessionNotificationUserRejectV1::IsInitialized() const {
+  return true;
+}
+
+void GameSessionNotificationUserRejectV1::InternalSwap(GameSessionNotificationUserRejectV1* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  members_.InternalSwap(&other->members_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &sessionid_, lhs_arena,
+      &other->sessionid_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &rejectedid_, lhs_arena,
+      &other->rejectedid_, rhs_arena
+  );
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata GameSessionNotificationUserRejectV1::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
+      file_level_metadata_notification_2eproto[10]);
+}
+
+// ===================================================================
+
 class GameSessionNotificationUserJoinedV1::_Internal {
  public:
 };
@@ -4491,7 +5177,7 @@ GameSessionNotificationUserJoinedV1::GameSessionNotificationUserJoinedV1(::PROTO
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.GameSessionNotificationUserJoinedV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.GameSessionNotificationUserJoinedV1)
 }
 GameSessionNotificationUserJoinedV1::GameSessionNotificationUserJoinedV1(const GameSessionNotificationUserJoinedV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -4505,7 +5191,7 @@ GameSessionNotificationUserJoinedV1::GameSessionNotificationUserJoinedV1(const G
     sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_sessionid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.GameSessionNotificationUserJoinedV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.GameSessionNotificationUserJoinedV1)
 }
 
 inline void GameSessionNotificationUserJoinedV1::SharedCtor() {
@@ -4516,7 +5202,7 @@ sessionid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAl
 }
 
 GameSessionNotificationUserJoinedV1::~GameSessionNotificationUserJoinedV1() {
-  // @@protoc_insertion_point(destructor:session.GameSessionNotificationUserJoinedV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.GameSessionNotificationUserJoinedV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -4538,7 +5224,7 @@ void GameSessionNotificationUserJoinedV1::SetCachedSize(int size) const {
 }
 
 void GameSessionNotificationUserJoinedV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.GameSessionNotificationUserJoinedV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.GameSessionNotificationUserJoinedV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -4559,12 +5245,12 @@ const char* GameSessionNotificationUserJoinedV1::_InternalParse(const char* ptr,
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_sessionid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionNotificationUserJoinedV1.SessionID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionNotificationUserJoinedV1.SessionID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // repeated .session.UserV1 members = 2 [json_name = "members"];
+      // repeated .accelbyte_session.UserV1 members = 2 [json_name = "members"];
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr -= 1;
@@ -4602,7 +5288,7 @@ failure:
 
 uint8_t* GameSessionNotificationUserJoinedV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.GameSessionNotificationUserJoinedV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.GameSessionNotificationUserJoinedV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -4611,12 +5297,12 @@ uint8_t* GameSessionNotificationUserJoinedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_sessionid().data(), static_cast<int>(this->_internal_sessionid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionNotificationUserJoinedV1.SessionID");
+      "accelbyte_session.GameSessionNotificationUserJoinedV1.SessionID");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_sessionid(), target);
   }
 
-  // repeated .session.UserV1 members = 2 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 2 [json_name = "members"];
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_members_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -4628,19 +5314,19 @@ uint8_t* GameSessionNotificationUserJoinedV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.GameSessionNotificationUserJoinedV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.GameSessionNotificationUserJoinedV1)
   return target;
 }
 
 size_t GameSessionNotificationUserJoinedV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.GameSessionNotificationUserJoinedV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.GameSessionNotificationUserJoinedV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 2 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 2 [json_name = "members"];
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->members_) {
     total_size +=
@@ -4671,7 +5357,7 @@ void GameSessionNotificationUserJoinedV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Mes
 
 
 void GameSessionNotificationUserJoinedV1::MergeFrom(const GameSessionNotificationUserJoinedV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.GameSessionNotificationUserJoinedV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.GameSessionNotificationUserJoinedV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -4684,7 +5370,7 @@ void GameSessionNotificationUserJoinedV1::MergeFrom(const GameSessionNotificatio
 }
 
 void GameSessionNotificationUserJoinedV1::CopyFrom(const GameSessionNotificationUserJoinedV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.GameSessionNotificationUserJoinedV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.GameSessionNotificationUserJoinedV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -4710,7 +5396,7 @@ void GameSessionNotificationUserJoinedV1::InternalSwap(GameSessionNotificationUs
 ::PROTOBUF_NAMESPACE_ID::Metadata GameSessionNotificationUserJoinedV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[10]);
+      file_level_metadata_notification_2eproto[11]);
 }
 
 // ===================================================================
@@ -4727,7 +5413,7 @@ GameSessionNotificationMembersChangedV1::GameSessionNotificationMembersChangedV1
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.GameSessionNotificationMembersChangedV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.GameSessionNotificationMembersChangedV1)
 }
 GameSessionNotificationMembersChangedV1::GameSessionNotificationMembersChangedV1(const GameSessionNotificationMembersChangedV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -4749,7 +5435,15 @@ GameSessionNotificationMembersChangedV1::GameSessionNotificationMembersChangedV1
     joinerid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_joinerid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.GameSessionNotificationMembersChangedV1)
+  leaderid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    leaderid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_leaderid().empty()) {
+    leaderid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_leaderid(), 
+      GetArenaForAllocation());
+  }
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.GameSessionNotificationMembersChangedV1)
 }
 
 inline void GameSessionNotificationMembersChangedV1::SharedCtor() {
@@ -4761,10 +5455,14 @@ joinerid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlr
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   joinerid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+leaderid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  leaderid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 GameSessionNotificationMembersChangedV1::~GameSessionNotificationMembersChangedV1() {
-  // @@protoc_insertion_point(destructor:session.GameSessionNotificationMembersChangedV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.GameSessionNotificationMembersChangedV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -4774,6 +5472,7 @@ inline void GameSessionNotificationMembersChangedV1::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   sessionid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   joinerid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  leaderid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void GameSessionNotificationMembersChangedV1::ArenaDtor(void* object) {
@@ -4787,7 +5486,7 @@ void GameSessionNotificationMembersChangedV1::SetCachedSize(int size) const {
 }
 
 void GameSessionNotificationMembersChangedV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.GameSessionNotificationMembersChangedV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.GameSessionNotificationMembersChangedV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -4795,6 +5494,7 @@ void GameSessionNotificationMembersChangedV1::Clear() {
   members_.Clear();
   sessionid_.ClearToEmpty();
   joinerid_.ClearToEmpty();
+  leaderid_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -4804,7 +5504,7 @@ const char* GameSessionNotificationMembersChangedV1::_InternalParse(const char* 
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // repeated .session.UserV1 members = 1 [json_name = "members"];
+      // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr -= 1;
@@ -4822,7 +5522,7 @@ const char* GameSessionNotificationMembersChangedV1::_InternalParse(const char* 
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_sessionid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionNotificationMembersChangedV1.SessionID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionNotificationMembersChangedV1.SessionID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -4832,7 +5532,17 @@ const char* GameSessionNotificationMembersChangedV1::_InternalParse(const char* 
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_joinerid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionNotificationMembersChangedV1.JoinerID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionNotificationMembersChangedV1.JoinerID"));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string LeaderID = 4 [json_name = "leaderID"];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          auto str = _internal_mutable_leaderid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionNotificationMembersChangedV1.LeaderID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -4862,11 +5572,11 @@ failure:
 
 uint8_t* GameSessionNotificationMembersChangedV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.GameSessionNotificationMembersChangedV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.GameSessionNotificationMembersChangedV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 1 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_members_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -4879,7 +5589,7 @@ uint8_t* GameSessionNotificationMembersChangedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_sessionid().data(), static_cast<int>(this->_internal_sessionid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionNotificationMembersChangedV1.SessionID");
+      "accelbyte_session.GameSessionNotificationMembersChangedV1.SessionID");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_sessionid(), target);
   }
@@ -4889,28 +5599,38 @@ uint8_t* GameSessionNotificationMembersChangedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_joinerid().data(), static_cast<int>(this->_internal_joinerid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionNotificationMembersChangedV1.JoinerID");
+      "accelbyte_session.GameSessionNotificationMembersChangedV1.JoinerID");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_joinerid(), target);
+  }
+
+  // string LeaderID = 4 [json_name = "leaderID"];
+  if (!this->_internal_leaderid().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_leaderid().data(), static_cast<int>(this->_internal_leaderid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.GameSessionNotificationMembersChangedV1.LeaderID");
+    target = stream->WriteStringMaybeAliased(
+        4, this->_internal_leaderid(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.GameSessionNotificationMembersChangedV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.GameSessionNotificationMembersChangedV1)
   return target;
 }
 
 size_t GameSessionNotificationMembersChangedV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.GameSessionNotificationMembersChangedV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.GameSessionNotificationMembersChangedV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 1 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 1 [json_name = "members"];
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->members_) {
     total_size +=
@@ -4931,6 +5651,13 @@ size_t GameSessionNotificationMembersChangedV1::ByteSizeLong() const {
         this->_internal_joinerid());
   }
 
+  // string LeaderID = 4 [json_name = "leaderID"];
+  if (!this->_internal_leaderid().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_leaderid());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
 }
 
@@ -4948,7 +5675,7 @@ void GameSessionNotificationMembersChangedV1::MergeImpl(::PROTOBUF_NAMESPACE_ID:
 
 
 void GameSessionNotificationMembersChangedV1::MergeFrom(const GameSessionNotificationMembersChangedV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.GameSessionNotificationMembersChangedV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.GameSessionNotificationMembersChangedV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -4960,11 +5687,14 @@ void GameSessionNotificationMembersChangedV1::MergeFrom(const GameSessionNotific
   if (!from._internal_joinerid().empty()) {
     _internal_set_joinerid(from._internal_joinerid());
   }
+  if (!from._internal_leaderid().empty()) {
+    _internal_set_leaderid(from._internal_leaderid());
+  }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void GameSessionNotificationMembersChangedV1::CopyFrom(const GameSessionNotificationMembersChangedV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.GameSessionNotificationMembersChangedV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.GameSessionNotificationMembersChangedV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -4990,12 +5720,17 @@ void GameSessionNotificationMembersChangedV1::InternalSwap(GameSessionNotificati
       &joinerid_, lhs_arena,
       &other->joinerid_, rhs_arena
   );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &leaderid_, lhs_arena,
+      &other->leaderid_, rhs_arena
+  );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata GameSessionNotificationMembersChangedV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[11]);
+      file_level_metadata_notification_2eproto[12]);
 }
 
 // ===================================================================
@@ -5016,7 +5751,7 @@ DSStatusChangedNotificationV1::DSStatusChangedNotificationV1(::PROTOBUF_NAMESPAC
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.DSStatusChangedNotificationV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.DSStatusChangedNotificationV1)
 }
 DSStatusChangedNotificationV1::DSStatusChangedNotificationV1(const DSStatusChangedNotificationV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -5042,7 +5777,7 @@ DSStatusChangedNotificationV1::DSStatusChangedNotificationV1(const DSStatusChang
   } else {
     gameserver_ = nullptr;
   }
-  // @@protoc_insertion_point(copy_constructor:session.DSStatusChangedNotificationV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.DSStatusChangedNotificationV1)
 }
 
 inline void DSStatusChangedNotificationV1::SharedCtor() {
@@ -5058,7 +5793,7 @@ gameserver_ = nullptr;
 }
 
 DSStatusChangedNotificationV1::~DSStatusChangedNotificationV1() {
-  // @@protoc_insertion_point(destructor:session.DSStatusChangedNotificationV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.DSStatusChangedNotificationV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -5082,7 +5817,7 @@ void DSStatusChangedNotificationV1::SetCachedSize(int size) const {
 }
 
 void DSStatusChangedNotificationV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.DSStatusChangedNotificationV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.DSStatusChangedNotificationV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -5102,7 +5837,7 @@ const char* DSStatusChangedNotificationV1::_InternalParse(const char* ptr, ::PRO
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+      // .accelbyte_session.GameServerV1 GameServer = 1 [json_name = "game_server"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_gameserver(), ptr);
@@ -5115,7 +5850,7 @@ const char* DSStatusChangedNotificationV1::_InternalParse(const char* ptr, ::PRO
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_sessionid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSStatusChangedNotificationV1.SessionID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.DSStatusChangedNotificationV1.SessionID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -5125,7 +5860,7 @@ const char* DSStatusChangedNotificationV1::_InternalParse(const char* ptr, ::PRO
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_error();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSStatusChangedNotificationV1.Error"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.DSStatusChangedNotificationV1.Error"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -5155,11 +5890,11 @@ failure:
 
 uint8_t* DSStatusChangedNotificationV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.DSStatusChangedNotificationV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.DSStatusChangedNotificationV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+  // .accelbyte_session.GameServerV1 GameServer = 1 [json_name = "game_server"];
   if (this->_internal_has_gameserver()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -5172,7 +5907,7 @@ uint8_t* DSStatusChangedNotificationV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_sessionid().data(), static_cast<int>(this->_internal_sessionid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.DSStatusChangedNotificationV1.SessionID");
+      "accelbyte_session.DSStatusChangedNotificationV1.SessionID");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_sessionid(), target);
   }
@@ -5182,7 +5917,7 @@ uint8_t* DSStatusChangedNotificationV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_error().data(), static_cast<int>(this->_internal_error().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.DSStatusChangedNotificationV1.Error");
+      "accelbyte_session.DSStatusChangedNotificationV1.Error");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_error(), target);
   }
@@ -5191,12 +5926,12 @@ uint8_t* DSStatusChangedNotificationV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.DSStatusChangedNotificationV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.DSStatusChangedNotificationV1)
   return target;
 }
 
 size_t DSStatusChangedNotificationV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.DSStatusChangedNotificationV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.DSStatusChangedNotificationV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -5217,7 +5952,7 @@ size_t DSStatusChangedNotificationV1::ByteSizeLong() const {
         this->_internal_error());
   }
 
-  // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+  // .accelbyte_session.GameServerV1 GameServer = 1 [json_name = "game_server"];
   if (this->_internal_has_gameserver()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -5241,7 +5976,7 @@ void DSStatusChangedNotificationV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* 
 
 
 void DSStatusChangedNotificationV1::MergeFrom(const DSStatusChangedNotificationV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.DSStatusChangedNotificationV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.DSStatusChangedNotificationV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -5259,7 +5994,7 @@ void DSStatusChangedNotificationV1::MergeFrom(const DSStatusChangedNotificationV
 }
 
 void DSStatusChangedNotificationV1::CopyFrom(const DSStatusChangedNotificationV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.DSStatusChangedNotificationV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.DSStatusChangedNotificationV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -5290,7 +6025,7 @@ void DSStatusChangedNotificationV1::InternalSwap(DSStatusChangedNotificationV1* 
 ::PROTOBUF_NAMESPACE_ID::Metadata DSStatusChangedNotificationV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[12]);
+      file_level_metadata_notification_2eproto[13]);
 }
 
 // ===================================================================
@@ -5307,20 +6042,20 @@ UserIDs::UserIDs(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.UserIDs)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.UserIDs)
 }
 UserIDs::UserIDs(const UserIDs& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       userid_(from.userid_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:session.UserIDs)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.UserIDs)
 }
 
 inline void UserIDs::SharedCtor() {
 }
 
 UserIDs::~UserIDs() {
-  // @@protoc_insertion_point(destructor:session.UserIDs)
+  // @@protoc_insertion_point(destructor:accelbyte_session.UserIDs)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -5341,7 +6076,7 @@ void UserIDs::SetCachedSize(int size) const {
 }
 
 void UserIDs::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.UserIDs)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.UserIDs)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -5364,7 +6099,7 @@ const char* UserIDs::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::in
             ptr += 1;
             auto str = _internal_add_userid();
             ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.UserIDs.userID"));
+            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.UserIDs.userID"));
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
@@ -5396,7 +6131,7 @@ failure:
 
 uint8_t* UserIDs::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.UserIDs)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.UserIDs)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -5406,7 +6141,7 @@ uint8_t* UserIDs::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.UserIDs.userID");
+      "accelbyte_session.UserIDs.userID");
     target = stream->WriteString(1, s, target);
   }
 
@@ -5414,12 +6149,12 @@ uint8_t* UserIDs::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.UserIDs)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.UserIDs)
   return target;
 }
 
 size_t UserIDs::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.UserIDs)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.UserIDs)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -5451,7 +6186,7 @@ void UserIDs::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void UserIDs::MergeFrom(const UserIDs& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.UserIDs)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.UserIDs)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -5461,7 +6196,7 @@ void UserIDs::MergeFrom(const UserIDs& from) {
 }
 
 void UserIDs::CopyFrom(const UserIDs& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.UserIDs)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.UserIDs)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -5480,7 +6215,7 @@ void UserIDs::InternalSwap(UserIDs* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata UserIDs::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[13]);
+      file_level_metadata_notification_2eproto[14]);
 }
 
 // ===================================================================
@@ -5497,20 +6232,20 @@ Team::Team(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.Team)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.Team)
 }
 Team::Team(const Team& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       user_ids_(from.user_ids_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:session.Team)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.Team)
 }
 
 inline void Team::SharedCtor() {
 }
 
 Team::~Team() {
-  // @@protoc_insertion_point(destructor:session.Team)
+  // @@protoc_insertion_point(destructor:accelbyte_session.Team)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -5531,7 +6266,7 @@ void Team::SetCachedSize(int size) const {
 }
 
 void Team::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.Team)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.Team)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -5554,7 +6289,7 @@ const char* Team::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inter
             ptr += 1;
             auto str = _internal_add_user_ids();
             ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.Team.user_ids"));
+            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.Team.user_ids"));
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
@@ -5586,7 +6321,7 @@ failure:
 
 uint8_t* Team::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.Team)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.Team)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -5596,7 +6331,7 @@ uint8_t* Team::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.Team.user_ids");
+      "accelbyte_session.Team.user_ids");
     target = stream->WriteString(1, s, target);
   }
 
@@ -5604,12 +6339,12 @@ uint8_t* Team::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.Team)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.Team)
   return target;
 }
 
 size_t Team::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.Team)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.Team)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -5641,7 +6376,7 @@ void Team::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void Team::MergeFrom(const Team& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.Team)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.Team)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -5651,7 +6386,7 @@ void Team::MergeFrom(const Team& from) {
 }
 
 void Team::CopyFrom(const Team& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.Team)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.Team)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -5670,7 +6405,7 @@ void Team::InternalSwap(Team* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Team::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[14]);
+      file_level_metadata_notification_2eproto[15]);
 }
 
 // ===================================================================
@@ -5698,7 +6433,7 @@ GameSessionV1::GameSessionV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.GameSessionV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.GameSessionV1)
 }
 GameSessionV1::GameSessionV1(const GameSessionV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -5777,6 +6512,14 @@ GameSessionV1::GameSessionV1(const GameSessionV1& from)
     backfill_ticket_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_backfill_ticket_id(), 
       GetArenaForAllocation());
   }
+  joinability_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    joinability_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_joinability().empty()) {
+    joinability_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_joinability(), 
+      GetArenaForAllocation());
+  }
   if (from._internal_has_configuration()) {
     configuration_ = new ::accelbyte_session::SessionConfigV1(*from.configuration_);
   } else {
@@ -5788,7 +6531,7 @@ GameSessionV1::GameSessionV1(const GameSessionV1& from)
     dsinformationv1_ = nullptr;
   }
   version_ = from.version_;
-  // @@protoc_insertion_point(copy_constructor:session.GameSessionV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.GameSessionV1)
 }
 
 inline void GameSessionV1::SharedCtor() {
@@ -5828,6 +6571,10 @@ backfill_ticket_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmpt
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   backfill_ticket_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+joinability_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  joinability_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&configuration_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&version_) -
@@ -5835,7 +6582,7 @@ backfill_ticket_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmpt
 }
 
 GameSessionV1::~GameSessionV1() {
-  // @@protoc_insertion_point(destructor:session.GameSessionV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.GameSessionV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -5852,6 +6599,7 @@ inline void GameSessionV1::SharedDtor() {
   match_pool_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   game_mode_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   backfill_ticket_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  joinability_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete configuration_;
   if (this != internal_default_instance()) delete dsinformationv1_;
 }
@@ -5867,7 +6615,7 @@ void GameSessionV1::SetCachedSize(int size) const {
 }
 
 void GameSessionV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.GameSessionV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.GameSessionV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -5883,6 +6631,7 @@ void GameSessionV1::Clear() {
   match_pool_.ClearToEmpty();
   game_mode_.ClearToEmpty();
   backfill_ticket_id_.ClearToEmpty();
+  joinability_.ClearToEmpty();
   if (GetArenaForAllocation() == nullptr && configuration_ != nullptr) {
     delete configuration_;
   }
@@ -5906,7 +6655,7 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionV1.id"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.id"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -5916,12 +6665,12 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_namespace_();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionV1.namespace"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.namespace"));
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // repeated .session.UserV1 members = 3 [json_name = "members"];
+      // repeated .accelbyte_session.UserV1 members = 3 [json_name = "members"];
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr -= 1;
@@ -5948,7 +6697,7 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_join_type();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionV1.join_type"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.join_type"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -5958,7 +6707,7 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           auto str = _internal_mutable_created_at();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionV1.created_at"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.created_at"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -5968,12 +6717,12 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
           auto str = _internal_mutable_updated_at();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionV1.updated_at"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.updated_at"));
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+      // .accelbyte_session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
           ptr = ctx->ParseMessage(_internal_mutable_configuration(), ptr);
@@ -5994,7 +6743,7 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           auto str = _internal_mutable_match_pool();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionV1.match_pool"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.match_pool"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -6004,7 +6753,7 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 90)) {
           auto str = _internal_mutable_game_mode();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionV1.game_mode"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.game_mode"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -6014,12 +6763,12 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 98)) {
           auto str = _internal_mutable_backfill_ticket_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionV1.backfill_ticket_id"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.backfill_ticket_id"));
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // repeated .session.Team teams = 13 [json_name = "teams"];
+      // repeated .accelbyte_session.Team teams = 13 [json_name = "teams"];
       case 13:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 106)) {
           ptr -= 1;
@@ -6032,10 +6781,20 @@ const char* GameSessionV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
         } else
           goto handle_unusual;
         continue;
-      // .session.DSInformationV1 DSInformationV1 = 14 [json_name = "ds_information"];
+      // .accelbyte_session.DSInformationV1 DSInformationV1 = 14 [json_name = "ds_information"];
       case 14:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 114)) {
           ptr = ctx->ParseMessage(_internal_mutable_dsinformationv1(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string joinability = 15 [json_name = "joinability"];
+      case 15:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 122)) {
+          auto str = _internal_mutable_joinability();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionV1.joinability"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -6065,7 +6824,7 @@ failure:
 
 uint8_t* GameSessionV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.GameSessionV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.GameSessionV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -6074,7 +6833,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_id().data(), static_cast<int>(this->_internal_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionV1.id");
+      "accelbyte_session.GameSessionV1.id");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_id(), target);
   }
@@ -6084,12 +6843,12 @@ uint8_t* GameSessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_namespace_().data(), static_cast<int>(this->_internal_namespace_().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionV1.namespace");
+      "accelbyte_session.GameSessionV1.namespace");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_namespace_(), target);
   }
 
-  // repeated .session.UserV1 members = 3 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 3 [json_name = "members"];
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_members_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -6108,7 +6867,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_join_type().data(), static_cast<int>(this->_internal_join_type().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionV1.join_type");
+      "accelbyte_session.GameSessionV1.join_type");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_join_type(), target);
   }
@@ -6118,7 +6877,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_created_at().data(), static_cast<int>(this->_internal_created_at().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionV1.created_at");
+      "accelbyte_session.GameSessionV1.created_at");
     target = stream->WriteStringMaybeAliased(
         6, this->_internal_created_at(), target);
   }
@@ -6128,12 +6887,12 @@ uint8_t* GameSessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_updated_at().data(), static_cast<int>(this->_internal_updated_at().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionV1.updated_at");
+      "accelbyte_session.GameSessionV1.updated_at");
     target = stream->WriteStringMaybeAliased(
         7, this->_internal_updated_at(), target);
   }
 
-  // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+  // .accelbyte_session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
   if (this->_internal_has_configuration()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -6152,7 +6911,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_match_pool().data(), static_cast<int>(this->_internal_match_pool().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionV1.match_pool");
+      "accelbyte_session.GameSessionV1.match_pool");
     target = stream->WriteStringMaybeAliased(
         10, this->_internal_match_pool(), target);
   }
@@ -6162,7 +6921,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_game_mode().data(), static_cast<int>(this->_internal_game_mode().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionV1.game_mode");
+      "accelbyte_session.GameSessionV1.game_mode");
     target = stream->WriteStringMaybeAliased(
         11, this->_internal_game_mode(), target);
   }
@@ -6172,12 +6931,12 @@ uint8_t* GameSessionV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_backfill_ticket_id().data(), static_cast<int>(this->_internal_backfill_ticket_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionV1.backfill_ticket_id");
+      "accelbyte_session.GameSessionV1.backfill_ticket_id");
     target = stream->WriteStringMaybeAliased(
         12, this->_internal_backfill_ticket_id(), target);
   }
 
-  // repeated .session.Team teams = 13 [json_name = "teams"];
+  // repeated .accelbyte_session.Team teams = 13 [json_name = "teams"];
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_teams_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -6185,7 +6944,7 @@ uint8_t* GameSessionV1::_InternalSerialize(
       InternalWriteMessage(13, this->_internal_teams(i), target, stream);
   }
 
-  // .session.DSInformationV1 DSInformationV1 = 14 [json_name = "ds_information"];
+  // .accelbyte_session.DSInformationV1 DSInformationV1 = 14 [json_name = "ds_information"];
   if (this->_internal_has_dsinformationv1()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -6193,30 +6952,40 @@ uint8_t* GameSessionV1::_InternalSerialize(
         14, _Internal::dsinformationv1(this), target, stream);
   }
 
+  // string joinability = 15 [json_name = "joinability"];
+  if (!this->_internal_joinability().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_joinability().data(), static_cast<int>(this->_internal_joinability().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "accelbyte_session.GameSessionV1.joinability");
+    target = stream->WriteStringMaybeAliased(
+        15, this->_internal_joinability(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.GameSessionV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.GameSessionV1)
   return target;
 }
 
 size_t GameSessionV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.GameSessionV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.GameSessionV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .session.UserV1 members = 3 [json_name = "members"];
+  // repeated .accelbyte_session.UserV1 members = 3 [json_name = "members"];
   total_size += 1UL * this->_internal_members_size();
   for (const auto& msg : this->members_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // repeated .session.Team teams = 13 [json_name = "teams"];
+  // repeated .accelbyte_session.Team teams = 13 [json_name = "teams"];
   total_size += 1UL * this->_internal_teams_size();
   for (const auto& msg : this->teams_) {
     total_size +=
@@ -6286,14 +7055,21 @@ size_t GameSessionV1::ByteSizeLong() const {
         this->_internal_backfill_ticket_id());
   }
 
-  // .session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
+  // string joinability = 15 [json_name = "joinability"];
+  if (!this->_internal_joinability().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_joinability());
+  }
+
+  // .accelbyte_session.SessionConfigV1 configuration = 8 [json_name = "configuration"];
   if (this->_internal_has_configuration()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *configuration_);
   }
 
-  // .session.DSInformationV1 DSInformationV1 = 14 [json_name = "ds_information"];
+  // .accelbyte_session.DSInformationV1 DSInformationV1 = 14 [json_name = "ds_information"];
   if (this->_internal_has_dsinformationv1()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -6322,7 +7098,7 @@ void GameSessionV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void GameSessionV1::MergeFrom(const GameSessionV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.GameSessionV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.GameSessionV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -6356,6 +7132,9 @@ void GameSessionV1::MergeFrom(const GameSessionV1& from) {
   if (!from._internal_backfill_ticket_id().empty()) {
     _internal_set_backfill_ticket_id(from._internal_backfill_ticket_id());
   }
+  if (!from._internal_joinability().empty()) {
+    _internal_set_joinability(from._internal_joinability());
+  }
   if (from._internal_has_configuration()) {
     _internal_mutable_configuration()->::accelbyte_session::SessionConfigV1::MergeFrom(from._internal_configuration());
   }
@@ -6369,7 +7148,7 @@ void GameSessionV1::MergeFrom(const GameSessionV1& from) {
 }
 
 void GameSessionV1::CopyFrom(const GameSessionV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.GameSessionV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.GameSessionV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -6431,6 +7210,11 @@ void GameSessionV1::InternalSwap(GameSessionV1* other) {
       &backfill_ticket_id_, lhs_arena,
       &other->backfill_ticket_id_, rhs_arena
   );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      &joinability_, lhs_arena,
+      &other->joinability_, rhs_arena
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(GameSessionV1, version_)
       + sizeof(GameSessionV1::version_)
@@ -6442,7 +7226,7 @@ void GameSessionV1::InternalSwap(GameSessionV1* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata GameSessionV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[15]);
+      file_level_metadata_notification_2eproto[16]);
 }
 
 // ===================================================================
@@ -6464,7 +7248,7 @@ DSInformationV1::DSInformationV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.DSInformationV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.DSInformationV1)
 }
 DSInformationV1::DSInformationV1(const DSInformationV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -6491,7 +7275,7 @@ DSInformationV1::DSInformationV1(const DSInformationV1& from)
   } else {
     gameserver_ = nullptr;
   }
-  // @@protoc_insertion_point(copy_constructor:session.DSInformationV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.DSInformationV1)
 }
 
 inline void DSInformationV1::SharedCtor() {
@@ -6507,7 +7291,7 @@ gameserver_ = nullptr;
 }
 
 DSInformationV1::~DSInformationV1() {
-  // @@protoc_insertion_point(destructor:session.DSInformationV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.DSInformationV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -6531,7 +7315,7 @@ void DSInformationV1::SetCachedSize(int size) const {
 }
 
 void DSInformationV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.DSInformationV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.DSInformationV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -6552,7 +7336,7 @@ const char* DSInformationV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+      // .accelbyte_session.GameServerV1 GameServer = 1 [json_name = "game_server"];
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_gameserver(), ptr);
@@ -6568,7 +7352,7 @@ const char* DSInformationV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
             ptr += 1;
             auto str = _internal_add_requested_regions();
             ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSInformationV1.requested_regions"));
+            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.DSInformationV1.requested_regions"));
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
@@ -6580,7 +7364,7 @@ const char* DSInformationV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_requested_at();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSInformationV1.requested_at"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.DSInformationV1.requested_at"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -6590,7 +7374,7 @@ const char* DSInformationV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           auto str = _internal_mutable_status();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.DSInformationV1.status"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.DSInformationV1.status"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -6620,11 +7404,11 @@ failure:
 
 uint8_t* DSInformationV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.DSInformationV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.DSInformationV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+  // .accelbyte_session.GameServerV1 GameServer = 1 [json_name = "game_server"];
   if (this->_internal_has_gameserver()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -6638,7 +7422,7 @@ uint8_t* DSInformationV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.DSInformationV1.requested_regions");
+      "accelbyte_session.DSInformationV1.requested_regions");
     target = stream->WriteString(2, s, target);
   }
 
@@ -6647,7 +7431,7 @@ uint8_t* DSInformationV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_requested_at().data(), static_cast<int>(this->_internal_requested_at().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.DSInformationV1.requested_at");
+      "accelbyte_session.DSInformationV1.requested_at");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_requested_at(), target);
   }
@@ -6657,7 +7441,7 @@ uint8_t* DSInformationV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_status().data(), static_cast<int>(this->_internal_status().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.DSInformationV1.status");
+      "accelbyte_session.DSInformationV1.status");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_status(), target);
   }
@@ -6666,12 +7450,12 @@ uint8_t* DSInformationV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.DSInformationV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.DSInformationV1)
   return target;
 }
 
 size_t DSInformationV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.DSInformationV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.DSInformationV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -6700,7 +7484,7 @@ size_t DSInformationV1::ByteSizeLong() const {
         this->_internal_status());
   }
 
-  // .session.GameServerV1 GameServer = 1 [json_name = "game_server"];
+  // .accelbyte_session.GameServerV1 GameServer = 1 [json_name = "game_server"];
   if (this->_internal_has_gameserver()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -6724,7 +7508,7 @@ void DSInformationV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void DSInformationV1::MergeFrom(const DSInformationV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.DSInformationV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.DSInformationV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -6743,7 +7527,7 @@ void DSInformationV1::MergeFrom(const DSInformationV1& from) {
 }
 
 void DSInformationV1::CopyFrom(const DSInformationV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.DSInformationV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.DSInformationV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -6775,7 +7559,7 @@ void DSInformationV1::InternalSwap(DSInformationV1* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata DSInformationV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[16]);
+      file_level_metadata_notification_2eproto[17]);
 }
 
 // ===================================================================
@@ -6789,7 +7573,7 @@ void GameServerV1_PortsEntry_DoNotUse::MergeFrom(const GameServerV1_PortsEntry_D
 ::PROTOBUF_NAMESPACE_ID::Metadata GameServerV1_PortsEntry_DoNotUse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[17]);
+      file_level_metadata_notification_2eproto[18]);
 }
 
 // ===================================================================
@@ -6807,7 +7591,7 @@ GameServerV1::GameServerV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.GameServerV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.GameServerV1)
 }
 GameServerV1::GameServerV1(const GameServerV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
@@ -6921,7 +7705,7 @@ GameServerV1::GameServerV1(const GameServerV1& from)
   ::memcpy(&port_, &from.port_,
     static_cast<size_t>(reinterpret_cast<char*>(&is_override_game_version_) -
     reinterpret_cast<char*>(&port_)) + sizeof(is_override_game_version_));
-  // @@protoc_insertion_point(copy_constructor:session.GameServerV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.GameServerV1)
 }
 
 inline void GameServerV1::SharedCtor() {
@@ -6984,7 +7768,7 @@ last_update_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString
 }
 
 GameServerV1::~GameServerV1() {
-  // @@protoc_insertion_point(destructor:session.GameServerV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.GameServerV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -7022,7 +7806,7 @@ void GameServerV1::SetCachedSize(int size) const {
 }
 
 void GameServerV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.GameServerV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.GameServerV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -7059,7 +7843,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_pod_name();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.pod_name"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.pod_name"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7069,7 +7853,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_image_version();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.image_version"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.image_version"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7079,7 +7863,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           auto str = _internal_mutable_namespace_();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.namespace"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.namespace"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7089,7 +7873,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           auto str = _internal_mutable_ip();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.ip"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.ip"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7102,7 +7886,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
             ptr += 1;
             auto str = _internal_add_alternate_ips();
             ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.alternate_ips"));
+            CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.alternate_ips"));
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<42>(ptr));
@@ -7122,7 +7906,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
           auto str = _internal_mutable_protocol();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.protocol"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.protocol"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7145,7 +7929,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 74)) {
           auto str = _internal_mutable_provider();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.provider"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.provider"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7155,7 +7939,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           auto str = _internal_mutable_game_version();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.game_version"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.game_version"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7165,7 +7949,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 90)) {
           auto str = _internal_mutable_status();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.status"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.status"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7175,7 +7959,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 98)) {
           auto str = _internal_mutable_session_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.session_id"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.session_id"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7185,7 +7969,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 106)) {
           auto str = _internal_mutable_deployment();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.deployment"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.deployment"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7195,7 +7979,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 114)) {
           auto str = _internal_mutable_region();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.region"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.region"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7205,7 +7989,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 122)) {
           auto str = _internal_mutable_custom_attribute();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.custom_attribute"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.custom_attribute"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7223,7 +8007,7 @@ const char* GameServerV1::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 138)) {
           auto str = _internal_mutable_last_update();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameServerV1.last_update"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameServerV1.last_update"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7253,7 +8037,7 @@ failure:
 
 uint8_t* GameServerV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.GameServerV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.GameServerV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -7262,7 +8046,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_pod_name().data(), static_cast<int>(this->_internal_pod_name().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.pod_name");
+      "accelbyte_session.GameServerV1.pod_name");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_pod_name(), target);
   }
@@ -7272,7 +8056,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_image_version().data(), static_cast<int>(this->_internal_image_version().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.image_version");
+      "accelbyte_session.GameServerV1.image_version");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_image_version(), target);
   }
@@ -7282,7 +8066,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_namespace_().data(), static_cast<int>(this->_internal_namespace_().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.namespace");
+      "accelbyte_session.GameServerV1.namespace");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_namespace_(), target);
   }
@@ -7292,7 +8076,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_ip().data(), static_cast<int>(this->_internal_ip().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.ip");
+      "accelbyte_session.GameServerV1.ip");
     target = stream->WriteStringMaybeAliased(
         4, this->_internal_ip(), target);
   }
@@ -7303,7 +8087,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.alternate_ips");
+      "accelbyte_session.GameServerV1.alternate_ips");
     target = stream->WriteString(5, s, target);
   }
 
@@ -7318,7 +8102,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_protocol().data(), static_cast<int>(this->_internal_protocol().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.protocol");
+      "accelbyte_session.GameServerV1.protocol");
     target = stream->WriteStringMaybeAliased(
         7, this->_internal_protocol(), target);
   }
@@ -7335,7 +8119,7 @@ uint8_t* GameServerV1::_InternalSerialize(
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
           p->first.data(), static_cast<int>(p->first.length()),
           ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-          "session.GameServerV1.PortsEntry.key");
+          "accelbyte_session.GameServerV1.PortsEntry.key");
       }
     };
 
@@ -7370,7 +8154,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_provider().data(), static_cast<int>(this->_internal_provider().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.provider");
+      "accelbyte_session.GameServerV1.provider");
     target = stream->WriteStringMaybeAliased(
         9, this->_internal_provider(), target);
   }
@@ -7380,7 +8164,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_game_version().data(), static_cast<int>(this->_internal_game_version().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.game_version");
+      "accelbyte_session.GameServerV1.game_version");
     target = stream->WriteStringMaybeAliased(
         10, this->_internal_game_version(), target);
   }
@@ -7390,7 +8174,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_status().data(), static_cast<int>(this->_internal_status().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.status");
+      "accelbyte_session.GameServerV1.status");
     target = stream->WriteStringMaybeAliased(
         11, this->_internal_status(), target);
   }
@@ -7400,7 +8184,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_session_id().data(), static_cast<int>(this->_internal_session_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.session_id");
+      "accelbyte_session.GameServerV1.session_id");
     target = stream->WriteStringMaybeAliased(
         12, this->_internal_session_id(), target);
   }
@@ -7410,7 +8194,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_deployment().data(), static_cast<int>(this->_internal_deployment().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.deployment");
+      "accelbyte_session.GameServerV1.deployment");
     target = stream->WriteStringMaybeAliased(
         13, this->_internal_deployment(), target);
   }
@@ -7420,7 +8204,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_region().data(), static_cast<int>(this->_internal_region().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.region");
+      "accelbyte_session.GameServerV1.region");
     target = stream->WriteStringMaybeAliased(
         14, this->_internal_region(), target);
   }
@@ -7430,7 +8214,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_custom_attribute().data(), static_cast<int>(this->_internal_custom_attribute().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.custom_attribute");
+      "accelbyte_session.GameServerV1.custom_attribute");
     target = stream->WriteStringMaybeAliased(
         15, this->_internal_custom_attribute(), target);
   }
@@ -7446,7 +8230,7 @@ uint8_t* GameServerV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_last_update().data(), static_cast<int>(this->_internal_last_update().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameServerV1.last_update");
+      "accelbyte_session.GameServerV1.last_update");
     target = stream->WriteStringMaybeAliased(
         17, this->_internal_last_update(), target);
   }
@@ -7455,12 +8239,12 @@ uint8_t* GameServerV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.GameServerV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.GameServerV1)
   return target;
 }
 
 size_t GameServerV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.GameServerV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.GameServerV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -7602,7 +8386,7 @@ void GameServerV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void GameServerV1::MergeFrom(const GameServerV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.GameServerV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.GameServerV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -7658,7 +8442,7 @@ void GameServerV1::MergeFrom(const GameServerV1& from) {
 }
 
 void GameServerV1::CopyFrom(const GameServerV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.GameServerV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.GameServerV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -7751,7 +8535,7 @@ void GameServerV1::InternalSwap(GameServerV1* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata GameServerV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[18]);
+      file_level_metadata_notification_2eproto[19]);
 }
 
 // ===================================================================
@@ -7767,7 +8551,7 @@ GameSessionNotificationUserKickedV1::GameSessionNotificationUserKickedV1(::PROTO
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:session.GameSessionNotificationUserKickedV1)
+  // @@protoc_insertion_point(arena_constructor:accelbyte_session.GameSessionNotificationUserKickedV1)
 }
 GameSessionNotificationUserKickedV1::GameSessionNotificationUserKickedV1(const GameSessionNotificationUserKickedV1& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -7780,7 +8564,7 @@ GameSessionNotificationUserKickedV1::GameSessionNotificationUserKickedV1(const G
     sessionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_sessionid(), 
       GetArenaForAllocation());
   }
-  // @@protoc_insertion_point(copy_constructor:session.GameSessionNotificationUserKickedV1)
+  // @@protoc_insertion_point(copy_constructor:accelbyte_session.GameSessionNotificationUserKickedV1)
 }
 
 inline void GameSessionNotificationUserKickedV1::SharedCtor() {
@@ -7791,7 +8575,7 @@ sessionid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAl
 }
 
 GameSessionNotificationUserKickedV1::~GameSessionNotificationUserKickedV1() {
-  // @@protoc_insertion_point(destructor:session.GameSessionNotificationUserKickedV1)
+  // @@protoc_insertion_point(destructor:accelbyte_session.GameSessionNotificationUserKickedV1)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -7813,7 +8597,7 @@ void GameSessionNotificationUserKickedV1::SetCachedSize(int size) const {
 }
 
 void GameSessionNotificationUserKickedV1::Clear() {
-// @@protoc_insertion_point(message_clear_start:session.GameSessionNotificationUserKickedV1)
+// @@protoc_insertion_point(message_clear_start:accelbyte_session.GameSessionNotificationUserKickedV1)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -7833,7 +8617,7 @@ const char* GameSessionNotificationUserKickedV1::_InternalParse(const char* ptr,
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_sessionid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "session.GameSessionNotificationUserKickedV1.SessionID"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "accelbyte_session.GameSessionNotificationUserKickedV1.SessionID"));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -7863,7 +8647,7 @@ failure:
 
 uint8_t* GameSessionNotificationUserKickedV1::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:session.GameSessionNotificationUserKickedV1)
+  // @@protoc_insertion_point(serialize_to_array_start:accelbyte_session.GameSessionNotificationUserKickedV1)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -7872,7 +8656,7 @@ uint8_t* GameSessionNotificationUserKickedV1::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_sessionid().data(), static_cast<int>(this->_internal_sessionid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "session.GameSessionNotificationUserKickedV1.SessionID");
+      "accelbyte_session.GameSessionNotificationUserKickedV1.SessionID");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_sessionid(), target);
   }
@@ -7881,12 +8665,12 @@ uint8_t* GameSessionNotificationUserKickedV1::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:session.GameSessionNotificationUserKickedV1)
+  // @@protoc_insertion_point(serialize_to_array_end:accelbyte_session.GameSessionNotificationUserKickedV1)
   return target;
 }
 
 size_t GameSessionNotificationUserKickedV1::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:session.GameSessionNotificationUserKickedV1)
+// @@protoc_insertion_point(message_byte_size_start:accelbyte_session.GameSessionNotificationUserKickedV1)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -7917,7 +8701,7 @@ void GameSessionNotificationUserKickedV1::MergeImpl(::PROTOBUF_NAMESPACE_ID::Mes
 
 
 void GameSessionNotificationUserKickedV1::MergeFrom(const GameSessionNotificationUserKickedV1& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:session.GameSessionNotificationUserKickedV1)
+// @@protoc_insertion_point(class_specific_merge_from_start:accelbyte_session.GameSessionNotificationUserKickedV1)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -7929,7 +8713,7 @@ void GameSessionNotificationUserKickedV1::MergeFrom(const GameSessionNotificatio
 }
 
 void GameSessionNotificationUserKickedV1::CopyFrom(const GameSessionNotificationUserKickedV1& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:session.GameSessionNotificationUserKickedV1)
+// @@protoc_insertion_point(class_specific_copy_from_start:accelbyte_session.GameSessionNotificationUserKickedV1)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -7954,11 +8738,11 @@ void GameSessionNotificationUserKickedV1::InternalSwap(GameSessionNotificationUs
 ::PROTOBUF_NAMESPACE_ID::Metadata GameSessionNotificationUserKickedV1::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_notification_2eproto_getter, &descriptor_table_notification_2eproto_once,
-      file_level_metadata_notification_2eproto[19]);
+      file_level_metadata_notification_2eproto[20]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
-}  // namespace session
+}  // namespace accelbyte_session
 PROTOBUF_NAMESPACE_OPEN
 template<> PROTOBUF_NOINLINE ::accelbyte_session::NotificationEventEnvelope* Arena::CreateMaybeMessage< ::accelbyte_session::NotificationEventEnvelope >(Arena* arena) {
   return Arena::CreateMessageInternal< ::accelbyte_session::NotificationEventEnvelope >(arena);
@@ -7989,6 +8773,9 @@ template<> PROTOBUF_NOINLINE ::accelbyte_session::PartyNotificationUserKickedV1*
 }
 template<> PROTOBUF_NOINLINE ::accelbyte_session::GameSessionNotificationUserInvitedV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameSessionNotificationUserInvitedV1 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::accelbyte_session::GameSessionNotificationUserInvitedV1 >(arena);
+}
+template<> PROTOBUF_NOINLINE ::accelbyte_session::GameSessionNotificationUserRejectV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameSessionNotificationUserRejectV1 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::accelbyte_session::GameSessionNotificationUserRejectV1 >(arena);
 }
 template<> PROTOBUF_NOINLINE ::accelbyte_session::GameSessionNotificationUserJoinedV1* Arena::CreateMaybeMessage< ::accelbyte_session::GameSessionNotificationUserJoinedV1 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::accelbyte_session::GameSessionNotificationUserJoinedV1 >(arena);

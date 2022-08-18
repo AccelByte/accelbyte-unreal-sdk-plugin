@@ -33,8 +33,10 @@ public:
 	FString CloudSaveServerUrl;
 	FString SeasonPassServerUrl;
 	FString SessionBrowserServerUrl;
+	FString SessionServerUrl;
+
 	float QosPingTimeout{.6};
-	
+
 	void Reset(ESettingsEnvironment const Environment);
 
 	ServerSettings& operator=(ServerSettings const& Other) = default;
@@ -115,6 +117,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString SessionBrowserServerUrl;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	FString SessionServerUrl;
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	float QosPingTimeout;
@@ -201,6 +206,9 @@ public:
 	static FString GetSessionBrowserServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetSessionServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static float GetQosPingTimeout();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -257,6 +265,9 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetQosPingTimeout(const float& QosPingTimeout);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetSessionServerUrl(const FString& CloudServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void ResetSettings(const ESettingsEnvironment Environment);

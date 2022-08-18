@@ -84,6 +84,9 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 	GConfig->GetString(*SectionPath, TEXT("SessionBrowserServerUrl"), SessionBrowserServerUrl, GEngineIni);
 	SessionBrowserServerUrl = GetDefaultServerAPIUrl(SessionBrowserServerUrl, BaseUrl, TEXT("sessionbrowser"));
 
+	GConfig->GetString(*SectionPath, TEXT("SessionServerUrl"), SessionServerUrl, GEngineIni);
+	SessionServerUrl = GetDefaultServerAPIUrl(SessionServerUrl, BaseUrl, TEXT("session"));
+
 	FString QosPingTimeoutString;
 	LoadFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString);
 	if (QosPingTimeoutString.IsNumeric())
@@ -208,6 +211,11 @@ FString UAccelByteBlueprintsServerSettings::GetSessionBrowserServerUrl()
 	return FRegistry::ServerSettings.SessionBrowserServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetSessionServerUrl()
+{
+	return FRegistry::ServerSettings.SessionServerUrl;
+}
+
 float UAccelByteBlueprintsServerSettings::GetQosPingTimeout()
 {
 	return FRegistry::ServerSettings.QosPingTimeout;
@@ -291,6 +299,12 @@ void UAccelByteBlueprintsServerSettings::SetSeasonPassServerUrl(const FString & 
 void UAccelByteBlueprintsServerSettings::SetSessionBrowserServerUrl(const FString & SessionBrowserUrl)
 {
 	FRegistry::ServerSettings.SessionBrowserServerUrl = SessionBrowserUrl;
+}
+
+
+void UAccelByteBlueprintsServerSettings::SetSessionServerUrl(const FString& SessionUrl)
+{
+	FRegistry::ServerSettings.SessionServerUrl = SessionUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetQosPingTimeout(const float& QosPingTimeout)

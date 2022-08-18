@@ -65,7 +65,7 @@ void Session::CreateGameSession(
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
 
 	FString Content = TEXT("");
-	SerializeAndRemoveEmptyEnumValues(CreateRequest, Content);
+	SerializeAndRemoveEmptyValues(CreateRequest, Content);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -124,19 +124,10 @@ void Session::UpdateGameSession(
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
 
-	// If the given DSRequest object contains all default values, we remove it from the request JSON by passing a flag
-	// to SerializeAndRemoveEmptyEnumValues
-	const FAccelByteModelsV2DSRequest DSRequest = UpdateRequest.DSRequest;
-	const bool bRemoveDSRequest =
-		DSRequest.Deployment.IsEmpty() &&
-		DSRequest.ClientVersion.IsEmpty() &&
-		DSRequest.GameMode.IsEmpty() &&
-		DSRequest.RequestedRegions.Num() == 0;
+	FString Content = TEXT("");
+	SerializeAndRemoveEmptyValues(UpdateRequest, Content);
 
-	FString Content = TEXT("");    
-	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content, bRemoveDSRequest);
-
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
 }
 
 void Session::DeleteGameSession(
@@ -147,6 +138,34 @@ void Session::DeleteGameSession(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Session::SendGameSessionInvite(
+	FString const& GameSessionID,
+	FString const& UserID,
+	FVoidHandler const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FAccelByteModelsV2SessionInviteRequest RequestBody = {UserID};
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/invite"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
+}
+
+void Session::RejectGameSessionInvite(
+	FString const& GameSessionID,
+	FVoidHandler const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/reject"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -206,7 +225,7 @@ void Session::CreateParty(
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Content = TEXT("");
-	SerializeAndRemoveEmptyEnumValues(CreateRequest, Content);
+	SerializeAndRemoveEmptyValues(CreateRequest, Content);
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/party"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());
@@ -236,12 +255,12 @@ void Session::UpdateParty(
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Content = TEXT("");
-	SerializeAndRemoveEmptyEnumValues(UpdateRequest, Content);
+	SerializeAndRemoveEmptyValues(UpdateRequest, Content);
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *PartyID);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
 }
 	
 void Session::SendPartyInvite(
@@ -252,7 +271,7 @@ void Session::SendPartyInvite(
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FAccelByteModelsV2PartyInviteRequest RequestBody = {InviteeID};
+	const FAccelByteModelsV2SessionInviteRequest RequestBody = {InviteeID};
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/invite"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace(), *PartyID);
 

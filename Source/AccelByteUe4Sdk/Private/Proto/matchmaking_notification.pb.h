@@ -51,14 +51,14 @@ struct TableStruct_matchmaking_5fnotification_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[6]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
   static const uint32_t offsets[];
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_matchmaking_5fnotification_2eproto;
-namespace matchmaking {
+namespace accelbyte_matchmaking {
 class MatchFoundNotifV1;
 struct MatchFoundNotifV1DefaultTypeInternal;
 extern MatchFoundNotifV1DefaultTypeInternal _MatchFoundNotifV1_default_instance_;
@@ -74,20 +74,24 @@ extern TeamDefaultTypeInternal _Team_default_instance_;
 class Ticket;
 struct TicketDefaultTypeInternal;
 extern TicketDefaultTypeInternal _Ticket_default_instance_;
-}  // namespace matchmaking
+class TicketExpiredNotifV1;
+struct TicketExpiredNotifV1DefaultTypeInternal;
+extern TicketExpiredNotifV1DefaultTypeInternal _TicketExpiredNotifV1_default_instance_;
+}  // namespace accelbyte_matchmaking
 PROTOBUF_NAMESPACE_OPEN
-template<> ::matchmaking::MatchFoundNotifV1* Arena::CreateMaybeMessage<::matchmaking::MatchFoundNotifV1>(Arena*);
-template<> ::matchmaking::NotificationEventEnvelope* Arena::CreateMaybeMessage<::matchmaking::NotificationEventEnvelope>(Arena*);
-template<> ::matchmaking::StartMatchmakingNotifV1* Arena::CreateMaybeMessage<::matchmaking::StartMatchmakingNotifV1>(Arena*);
-template<> ::matchmaking::Team* Arena::CreateMaybeMessage<::matchmaking::Team>(Arena*);
-template<> ::matchmaking::Ticket* Arena::CreateMaybeMessage<::matchmaking::Ticket>(Arena*);
+template<> ::accelbyte_matchmaking::MatchFoundNotifV1* Arena::CreateMaybeMessage<::accelbyte_matchmaking::MatchFoundNotifV1>(Arena*);
+template<> ::accelbyte_matchmaking::NotificationEventEnvelope* Arena::CreateMaybeMessage<::accelbyte_matchmaking::NotificationEventEnvelope>(Arena*);
+template<> ::accelbyte_matchmaking::StartMatchmakingNotifV1* Arena::CreateMaybeMessage<::accelbyte_matchmaking::StartMatchmakingNotifV1>(Arena*);
+template<> ::accelbyte_matchmaking::Team* Arena::CreateMaybeMessage<::accelbyte_matchmaking::Team>(Arena*);
+template<> ::accelbyte_matchmaking::Ticket* Arena::CreateMaybeMessage<::accelbyte_matchmaking::Ticket>(Arena*);
+template<> ::accelbyte_matchmaking::TicketExpiredNotifV1* Arena::CreateMaybeMessage<::accelbyte_matchmaking::TicketExpiredNotifV1>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
-namespace matchmaking {
+namespace accelbyte_matchmaking {
 
 // ===================================================================
 
 class NotificationEventEnvelope final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:matchmaking.NotificationEventEnvelope) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:accelbyte_matchmaking.NotificationEventEnvelope) */ {
  public:
   inline NotificationEventEnvelope() : NotificationEventEnvelope(nullptr) {}
   ~NotificationEventEnvelope() override;
@@ -132,6 +136,7 @@ class NotificationEventEnvelope final :
   enum PayloadCase {
     kMatchFoundNotifV1 = 1,
     kStartMatchmakingNotifV1 = 2,
+    kTicketExpiredNotifV1 = 3,
     PAYLOAD_NOT_SET = 0,
   };
 
@@ -194,7 +199,7 @@ class NotificationEventEnvelope final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "matchmaking.NotificationEventEnvelope";
+    return "accelbyte_matchmaking.NotificationEventEnvelope";
   }
   protected:
   explicit NotificationEventEnvelope(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -216,50 +221,70 @@ class NotificationEventEnvelope final :
   enum : int {
     kMatchFoundNotifV1FieldNumber = 1,
     kStartMatchmakingNotifV1FieldNumber = 2,
+    kTicketExpiredNotifV1FieldNumber = 3,
   };
-  // .matchmaking.MatchFoundNotifV1 MatchFoundNotifV1 = 1;
+  // .accelbyte_matchmaking.MatchFoundNotifV1 MatchFoundNotifV1 = 1;
   bool has_matchfoundnotifv1() const;
   private:
   bool _internal_has_matchfoundnotifv1() const;
   public:
   void clear_matchfoundnotifv1();
-  const ::matchmaking::MatchFoundNotifV1& matchfoundnotifv1() const;
-  PROTOBUF_NODISCARD ::matchmaking::MatchFoundNotifV1* release_matchfoundnotifv1();
-  ::matchmaking::MatchFoundNotifV1* mutable_matchfoundnotifv1();
-  void set_allocated_matchfoundnotifv1(::matchmaking::MatchFoundNotifV1* matchfoundnotifv1);
+  const ::accelbyte_matchmaking::MatchFoundNotifV1& matchfoundnotifv1() const;
+  PROTOBUF_NODISCARD ::accelbyte_matchmaking::MatchFoundNotifV1* release_matchfoundnotifv1();
+  ::accelbyte_matchmaking::MatchFoundNotifV1* mutable_matchfoundnotifv1();
+  void set_allocated_matchfoundnotifv1(::accelbyte_matchmaking::MatchFoundNotifV1* matchfoundnotifv1);
   private:
-  const ::matchmaking::MatchFoundNotifV1& _internal_matchfoundnotifv1() const;
-  ::matchmaking::MatchFoundNotifV1* _internal_mutable_matchfoundnotifv1();
+  const ::accelbyte_matchmaking::MatchFoundNotifV1& _internal_matchfoundnotifv1() const;
+  ::accelbyte_matchmaking::MatchFoundNotifV1* _internal_mutable_matchfoundnotifv1();
   public:
   void unsafe_arena_set_allocated_matchfoundnotifv1(
-      ::matchmaking::MatchFoundNotifV1* matchfoundnotifv1);
-  ::matchmaking::MatchFoundNotifV1* unsafe_arena_release_matchfoundnotifv1();
+      ::accelbyte_matchmaking::MatchFoundNotifV1* matchfoundnotifv1);
+  ::accelbyte_matchmaking::MatchFoundNotifV1* unsafe_arena_release_matchfoundnotifv1();
 
-  // .matchmaking.StartMatchmakingNotifV1 StartMatchmakingNotifV1 = 2;
+  // .accelbyte_matchmaking.StartMatchmakingNotifV1 StartMatchmakingNotifV1 = 2;
   bool has_startmatchmakingnotifv1() const;
   private:
   bool _internal_has_startmatchmakingnotifv1() const;
   public:
   void clear_startmatchmakingnotifv1();
-  const ::matchmaking::StartMatchmakingNotifV1& startmatchmakingnotifv1() const;
-  PROTOBUF_NODISCARD ::matchmaking::StartMatchmakingNotifV1* release_startmatchmakingnotifv1();
-  ::matchmaking::StartMatchmakingNotifV1* mutable_startmatchmakingnotifv1();
-  void set_allocated_startmatchmakingnotifv1(::matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1);
+  const ::accelbyte_matchmaking::StartMatchmakingNotifV1& startmatchmakingnotifv1() const;
+  PROTOBUF_NODISCARD ::accelbyte_matchmaking::StartMatchmakingNotifV1* release_startmatchmakingnotifv1();
+  ::accelbyte_matchmaking::StartMatchmakingNotifV1* mutable_startmatchmakingnotifv1();
+  void set_allocated_startmatchmakingnotifv1(::accelbyte_matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1);
   private:
-  const ::matchmaking::StartMatchmakingNotifV1& _internal_startmatchmakingnotifv1() const;
-  ::matchmaking::StartMatchmakingNotifV1* _internal_mutable_startmatchmakingnotifv1();
+  const ::accelbyte_matchmaking::StartMatchmakingNotifV1& _internal_startmatchmakingnotifv1() const;
+  ::accelbyte_matchmaking::StartMatchmakingNotifV1* _internal_mutable_startmatchmakingnotifv1();
   public:
   void unsafe_arena_set_allocated_startmatchmakingnotifv1(
-      ::matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1);
-  ::matchmaking::StartMatchmakingNotifV1* unsafe_arena_release_startmatchmakingnotifv1();
+      ::accelbyte_matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1);
+  ::accelbyte_matchmaking::StartMatchmakingNotifV1* unsafe_arena_release_startmatchmakingnotifv1();
+
+  // .accelbyte_matchmaking.TicketExpiredNotifV1 TicketExpiredNotifV1 = 3;
+  bool has_ticketexpirednotifv1() const;
+  private:
+  bool _internal_has_ticketexpirednotifv1() const;
+  public:
+  void clear_ticketexpirednotifv1();
+  const ::accelbyte_matchmaking::TicketExpiredNotifV1& ticketexpirednotifv1() const;
+  PROTOBUF_NODISCARD ::accelbyte_matchmaking::TicketExpiredNotifV1* release_ticketexpirednotifv1();
+  ::accelbyte_matchmaking::TicketExpiredNotifV1* mutable_ticketexpirednotifv1();
+  void set_allocated_ticketexpirednotifv1(::accelbyte_matchmaking::TicketExpiredNotifV1* ticketexpirednotifv1);
+  private:
+  const ::accelbyte_matchmaking::TicketExpiredNotifV1& _internal_ticketexpirednotifv1() const;
+  ::accelbyte_matchmaking::TicketExpiredNotifV1* _internal_mutable_ticketexpirednotifv1();
+  public:
+  void unsafe_arena_set_allocated_ticketexpirednotifv1(
+      ::accelbyte_matchmaking::TicketExpiredNotifV1* ticketexpirednotifv1);
+  ::accelbyte_matchmaking::TicketExpiredNotifV1* unsafe_arena_release_ticketexpirednotifv1();
 
   void clear_payload();
   PayloadCase payload_case() const;
-  // @@protoc_insertion_point(class_scope:matchmaking.NotificationEventEnvelope)
+  // @@protoc_insertion_point(class_scope:accelbyte_matchmaking.NotificationEventEnvelope)
  private:
   class _Internal;
   void set_has_matchfoundnotifv1();
   void set_has_startmatchmakingnotifv1();
+  void set_has_ticketexpirednotifv1();
 
   inline bool has_payload() const;
   inline void clear_has_payload();
@@ -270,8 +295,9 @@ class NotificationEventEnvelope final :
   union PayloadUnion {
     constexpr PayloadUnion() : _constinit_{} {}
       ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
-    ::matchmaking::MatchFoundNotifV1* matchfoundnotifv1_;
-    ::matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1_;
+    ::accelbyte_matchmaking::MatchFoundNotifV1* matchfoundnotifv1_;
+    ::accelbyte_matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1_;
+    ::accelbyte_matchmaking::TicketExpiredNotifV1* ticketexpirednotifv1_;
   } payload_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   uint32_t _oneof_case_[1];
@@ -281,7 +307,7 @@ class NotificationEventEnvelope final :
 // -------------------------------------------------------------------
 
 class Team final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:matchmaking.Team) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:accelbyte_matchmaking.Team) */ {
  public:
   inline Team() : Team(nullptr) {}
   ~Team() override;
@@ -382,7 +408,7 @@ class Team final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "matchmaking.Team";
+    return "accelbyte_matchmaking.Team";
   }
   protected:
   explicit Team(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -428,7 +454,7 @@ class Team final :
   std::string* _internal_add_user_ids();
   public:
 
-  // @@protoc_insertion_point(class_scope:matchmaking.Team)
+  // @@protoc_insertion_point(class_scope:accelbyte_matchmaking.Team)
  private:
   class _Internal;
 
@@ -442,7 +468,7 @@ class Team final :
 // -------------------------------------------------------------------
 
 class Ticket final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:matchmaking.Ticket) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:accelbyte_matchmaking.Ticket) */ {
  public:
   inline Ticket() : Ticket(nullptr) {}
   ~Ticket() override;
@@ -543,7 +569,7 @@ class Ticket final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "matchmaking.Ticket";
+    return "accelbyte_matchmaking.Ticket";
   }
   protected:
   explicit Ticket(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -579,7 +605,7 @@ class Ticket final :
   std::string* _internal_mutable_ticket_id();
   public:
 
-  // @@protoc_insertion_point(class_scope:matchmaking.Ticket)
+  // @@protoc_insertion_point(class_scope:accelbyte_matchmaking.Ticket)
  private:
   class _Internal;
 
@@ -593,7 +619,7 @@ class Ticket final :
 // -------------------------------------------------------------------
 
 class MatchFoundNotifV1 final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:matchmaking.MatchFoundNotifV1) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:accelbyte_matchmaking.MatchFoundNotifV1) */ {
  public:
   inline MatchFoundNotifV1() : MatchFoundNotifV1(nullptr) {}
   ~MatchFoundNotifV1() override;
@@ -694,7 +720,7 @@ class MatchFoundNotifV1 final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "matchmaking.MatchFoundNotifV1";
+    return "accelbyte_matchmaking.MatchFoundNotifV1";
   }
   protected:
   explicit MatchFoundNotifV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -721,40 +747,40 @@ class MatchFoundNotifV1 final :
     kCreatedAtFieldNumber = 3,
     kMatchPoolFieldNumber = 4,
   };
-  // repeated .matchmaking.Team teams = 5;
+  // repeated .accelbyte_matchmaking.Team teams = 5;
   int teams_size() const;
   private:
   int _internal_teams_size() const;
   public:
   void clear_teams();
-  ::matchmaking::Team* mutable_teams(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Team >*
+  ::accelbyte_matchmaking::Team* mutable_teams(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Team >*
       mutable_teams();
   private:
-  const ::matchmaking::Team& _internal_teams(int index) const;
-  ::matchmaking::Team* _internal_add_teams();
+  const ::accelbyte_matchmaking::Team& _internal_teams(int index) const;
+  ::accelbyte_matchmaking::Team* _internal_add_teams();
   public:
-  const ::matchmaking::Team& teams(int index) const;
-  ::matchmaking::Team* add_teams();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Team >&
+  const ::accelbyte_matchmaking::Team& teams(int index) const;
+  ::accelbyte_matchmaking::Team* add_teams();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Team >&
       teams() const;
 
-  // repeated .matchmaking.Ticket tickets = 6;
+  // repeated .accelbyte_matchmaking.Ticket tickets = 6;
   int tickets_size() const;
   private:
   int _internal_tickets_size() const;
   public:
   void clear_tickets();
-  ::matchmaking::Ticket* mutable_tickets(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Ticket >*
+  ::accelbyte_matchmaking::Ticket* mutable_tickets(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Ticket >*
       mutable_tickets();
   private:
-  const ::matchmaking::Ticket& _internal_tickets(int index) const;
-  ::matchmaking::Ticket* _internal_add_tickets();
+  const ::accelbyte_matchmaking::Ticket& _internal_tickets(int index) const;
+  ::accelbyte_matchmaking::Ticket* _internal_add_tickets();
   public:
-  const ::matchmaking::Ticket& tickets(int index) const;
-  ::matchmaking::Ticket* add_tickets();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Ticket >&
+  const ::accelbyte_matchmaking::Ticket& tickets(int index) const;
+  ::accelbyte_matchmaking::Ticket* add_tickets();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Ticket >&
       tickets() const;
 
   // string id = 1;
@@ -813,15 +839,15 @@ class MatchFoundNotifV1 final :
   std::string* _internal_mutable_match_pool();
   public:
 
-  // @@protoc_insertion_point(class_scope:matchmaking.MatchFoundNotifV1)
+  // @@protoc_insertion_point(class_scope:accelbyte_matchmaking.MatchFoundNotifV1)
  private:
   class _Internal;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Team > teams_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Ticket > tickets_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Team > teams_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Ticket > tickets_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr namespace__;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr created_at_;
@@ -832,7 +858,7 @@ class MatchFoundNotifV1 final :
 // -------------------------------------------------------------------
 
 class StartMatchmakingNotifV1 final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:matchmaking.StartMatchmakingNotifV1) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:accelbyte_matchmaking.StartMatchmakingNotifV1) */ {
  public:
   inline StartMatchmakingNotifV1() : StartMatchmakingNotifV1(nullptr) {}
   ~StartMatchmakingNotifV1() override;
@@ -933,7 +959,7 @@ class StartMatchmakingNotifV1 final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "matchmaking.StartMatchmakingNotifV1";
+    return "accelbyte_matchmaking.StartMatchmakingNotifV1";
   }
   protected:
   explicit StartMatchmakingNotifV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -1029,7 +1055,7 @@ class StartMatchmakingNotifV1 final :
   std::string* _internal_mutable_match_pool();
   public:
 
-  // @@protoc_insertion_point(class_scope:matchmaking.StartMatchmakingNotifV1)
+  // @@protoc_insertion_point(class_scope:accelbyte_matchmaking.StartMatchmakingNotifV1)
  private:
   class _Internal;
 
@@ -1038,6 +1064,205 @@ class StartMatchmakingNotifV1 final :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ticket_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr party_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr namespace__;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr created_at_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr match_pool_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_matchmaking_5fnotification_2eproto;
+};
+// -------------------------------------------------------------------
+
+class TicketExpiredNotifV1 final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:accelbyte_matchmaking.TicketExpiredNotifV1) */ {
+ public:
+  inline TicketExpiredNotifV1() : TicketExpiredNotifV1(nullptr) {}
+  ~TicketExpiredNotifV1() override;
+  explicit constexpr TicketExpiredNotifV1(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  TicketExpiredNotifV1(const TicketExpiredNotifV1& from);
+  TicketExpiredNotifV1(TicketExpiredNotifV1&& from) noexcept
+    : TicketExpiredNotifV1() {
+    *this = ::std::move(from);
+  }
+
+  inline TicketExpiredNotifV1& operator=(const TicketExpiredNotifV1& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline TicketExpiredNotifV1& operator=(TicketExpiredNotifV1&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const TicketExpiredNotifV1& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const TicketExpiredNotifV1* internal_default_instance() {
+    return reinterpret_cast<const TicketExpiredNotifV1*>(
+               &_TicketExpiredNotifV1_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(TicketExpiredNotifV1& a, TicketExpiredNotifV1& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(TicketExpiredNotifV1* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(TicketExpiredNotifV1* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  TicketExpiredNotifV1* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<TicketExpiredNotifV1>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const TicketExpiredNotifV1& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const TicketExpiredNotifV1& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(TicketExpiredNotifV1* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "accelbyte_matchmaking.TicketExpiredNotifV1";
+  }
+  protected:
+  explicit TicketExpiredNotifV1(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTicketIdFieldNumber = 1,
+    kNamespaceFieldNumber = 2,
+    kCreatedAtFieldNumber = 3,
+    kMatchPoolFieldNumber = 4,
+  };
+  // string ticket_id = 1;
+  void clear_ticket_id();
+  const std::string& ticket_id() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_ticket_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_ticket_id();
+  PROTOBUF_NODISCARD std::string* release_ticket_id();
+  void set_allocated_ticket_id(std::string* ticket_id);
+  private:
+  const std::string& _internal_ticket_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_ticket_id(const std::string& value);
+  std::string* _internal_mutable_ticket_id();
+  public:
+
+  // string namespace = 2;
+  void clear_namespace_();
+  const std::string& namespace_() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_namespace_(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_namespace_();
+  PROTOBUF_NODISCARD std::string* release_namespace_();
+  void set_allocated_namespace_(std::string* namespace_);
+  private:
+  const std::string& _internal_namespace_() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_namespace_(const std::string& value);
+  std::string* _internal_mutable_namespace_();
+  public:
+
+  // string created_at = 3;
+  void clear_created_at();
+  const std::string& created_at() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_created_at(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_created_at();
+  PROTOBUF_NODISCARD std::string* release_created_at();
+  void set_allocated_created_at(std::string* created_at);
+  private:
+  const std::string& _internal_created_at() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_created_at(const std::string& value);
+  std::string* _internal_mutable_created_at();
+  public:
+
+  // string match_pool = 4;
+  void clear_match_pool();
+  const std::string& match_pool() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_match_pool(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_match_pool();
+  PROTOBUF_NODISCARD std::string* release_match_pool();
+  void set_allocated_match_pool(std::string* match_pool);
+  private:
+  const std::string& _internal_match_pool() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_match_pool(const std::string& value);
+  std::string* _internal_mutable_match_pool();
+  public:
+
+  // @@protoc_insertion_point(class_scope:accelbyte_matchmaking.TicketExpiredNotifV1)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ticket_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr namespace__;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr created_at_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr match_pool_;
@@ -1055,7 +1280,7 @@ class StartMatchmakingNotifV1 final :
 #endif  // __GNUC__
 // NotificationEventEnvelope
 
-// .matchmaking.MatchFoundNotifV1 MatchFoundNotifV1 = 1;
+// .accelbyte_matchmaking.MatchFoundNotifV1 MatchFoundNotifV1 = 1;
 inline bool NotificationEventEnvelope::_internal_has_matchfoundnotifv1() const {
   return payload_case() == kMatchFoundNotifV1;
 }
@@ -1073,11 +1298,11 @@ inline void NotificationEventEnvelope::clear_matchfoundnotifv1() {
     clear_has_payload();
   }
 }
-inline ::matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::release_matchfoundnotifv1() {
-  // @@protoc_insertion_point(field_release:matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
+inline ::accelbyte_matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::release_matchfoundnotifv1() {
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
   if (_internal_has_matchfoundnotifv1()) {
     clear_has_payload();
-      ::matchmaking::MatchFoundNotifV1* temp = payload_.matchfoundnotifv1_;
+      ::accelbyte_matchmaking::MatchFoundNotifV1* temp = payload_.matchfoundnotifv1_;
     if (GetArenaForAllocation() != nullptr) {
       temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
     }
@@ -1087,49 +1312,49 @@ inline ::matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::release_matc
     return nullptr;
   }
 }
-inline const ::matchmaking::MatchFoundNotifV1& NotificationEventEnvelope::_internal_matchfoundnotifv1() const {
+inline const ::accelbyte_matchmaking::MatchFoundNotifV1& NotificationEventEnvelope::_internal_matchfoundnotifv1() const {
   return _internal_has_matchfoundnotifv1()
       ? *payload_.matchfoundnotifv1_
-      : reinterpret_cast< ::matchmaking::MatchFoundNotifV1&>(::matchmaking::_MatchFoundNotifV1_default_instance_);
+      : reinterpret_cast< ::accelbyte_matchmaking::MatchFoundNotifV1&>(::accelbyte_matchmaking::_MatchFoundNotifV1_default_instance_);
 }
-inline const ::matchmaking::MatchFoundNotifV1& NotificationEventEnvelope::matchfoundnotifv1() const {
-  // @@protoc_insertion_point(field_get:matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
+inline const ::accelbyte_matchmaking::MatchFoundNotifV1& NotificationEventEnvelope::matchfoundnotifv1() const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
   return _internal_matchfoundnotifv1();
 }
-inline ::matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::unsafe_arena_release_matchfoundnotifv1() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
+inline ::accelbyte_matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::unsafe_arena_release_matchfoundnotifv1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:accelbyte_matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
   if (_internal_has_matchfoundnotifv1()) {
     clear_has_payload();
-    ::matchmaking::MatchFoundNotifV1* temp = payload_.matchfoundnotifv1_;
+    ::accelbyte_matchmaking::MatchFoundNotifV1* temp = payload_.matchfoundnotifv1_;
     payload_.matchfoundnotifv1_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline void NotificationEventEnvelope::unsafe_arena_set_allocated_matchfoundnotifv1(::matchmaking::MatchFoundNotifV1* matchfoundnotifv1) {
+inline void NotificationEventEnvelope::unsafe_arena_set_allocated_matchfoundnotifv1(::accelbyte_matchmaking::MatchFoundNotifV1* matchfoundnotifv1) {
   clear_payload();
   if (matchfoundnotifv1) {
     set_has_matchfoundnotifv1();
     payload_.matchfoundnotifv1_ = matchfoundnotifv1;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:accelbyte_matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
 }
-inline ::matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::_internal_mutable_matchfoundnotifv1() {
+inline ::accelbyte_matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::_internal_mutable_matchfoundnotifv1() {
   if (!_internal_has_matchfoundnotifv1()) {
     clear_payload();
     set_has_matchfoundnotifv1();
-    payload_.matchfoundnotifv1_ = CreateMaybeMessage< ::matchmaking::MatchFoundNotifV1 >(GetArenaForAllocation());
+    payload_.matchfoundnotifv1_ = CreateMaybeMessage< ::accelbyte_matchmaking::MatchFoundNotifV1 >(GetArenaForAllocation());
   }
   return payload_.matchfoundnotifv1_;
 }
-inline ::matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::mutable_matchfoundnotifv1() {
-  ::matchmaking::MatchFoundNotifV1* _msg = _internal_mutable_matchfoundnotifv1();
-  // @@protoc_insertion_point(field_mutable:matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
+inline ::accelbyte_matchmaking::MatchFoundNotifV1* NotificationEventEnvelope::mutable_matchfoundnotifv1() {
+  ::accelbyte_matchmaking::MatchFoundNotifV1* _msg = _internal_mutable_matchfoundnotifv1();
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.NotificationEventEnvelope.MatchFoundNotifV1)
   return _msg;
 }
 
-// .matchmaking.StartMatchmakingNotifV1 StartMatchmakingNotifV1 = 2;
+// .accelbyte_matchmaking.StartMatchmakingNotifV1 StartMatchmakingNotifV1 = 2;
 inline bool NotificationEventEnvelope::_internal_has_startmatchmakingnotifv1() const {
   return payload_case() == kStartMatchmakingNotifV1;
 }
@@ -1147,11 +1372,11 @@ inline void NotificationEventEnvelope::clear_startmatchmakingnotifv1() {
     clear_has_payload();
   }
 }
-inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::release_startmatchmakingnotifv1() {
-  // @@protoc_insertion_point(field_release:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+inline ::accelbyte_matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::release_startmatchmakingnotifv1() {
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
   if (_internal_has_startmatchmakingnotifv1()) {
     clear_has_payload();
-      ::matchmaking::StartMatchmakingNotifV1* temp = payload_.startmatchmakingnotifv1_;
+      ::accelbyte_matchmaking::StartMatchmakingNotifV1* temp = payload_.startmatchmakingnotifv1_;
     if (GetArenaForAllocation() != nullptr) {
       temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
     }
@@ -1161,45 +1386,119 @@ inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::releas
     return nullptr;
   }
 }
-inline const ::matchmaking::StartMatchmakingNotifV1& NotificationEventEnvelope::_internal_startmatchmakingnotifv1() const {
+inline const ::accelbyte_matchmaking::StartMatchmakingNotifV1& NotificationEventEnvelope::_internal_startmatchmakingnotifv1() const {
   return _internal_has_startmatchmakingnotifv1()
       ? *payload_.startmatchmakingnotifv1_
-      : reinterpret_cast< ::matchmaking::StartMatchmakingNotifV1&>(::matchmaking::_StartMatchmakingNotifV1_default_instance_);
+      : reinterpret_cast< ::accelbyte_matchmaking::StartMatchmakingNotifV1&>(::accelbyte_matchmaking::_StartMatchmakingNotifV1_default_instance_);
 }
-inline const ::matchmaking::StartMatchmakingNotifV1& NotificationEventEnvelope::startmatchmakingnotifv1() const {
-  // @@protoc_insertion_point(field_get:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+inline const ::accelbyte_matchmaking::StartMatchmakingNotifV1& NotificationEventEnvelope::startmatchmakingnotifv1() const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
   return _internal_startmatchmakingnotifv1();
 }
-inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::unsafe_arena_release_startmatchmakingnotifv1() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+inline ::accelbyte_matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::unsafe_arena_release_startmatchmakingnotifv1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:accelbyte_matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
   if (_internal_has_startmatchmakingnotifv1()) {
     clear_has_payload();
-    ::matchmaking::StartMatchmakingNotifV1* temp = payload_.startmatchmakingnotifv1_;
+    ::accelbyte_matchmaking::StartMatchmakingNotifV1* temp = payload_.startmatchmakingnotifv1_;
     payload_.startmatchmakingnotifv1_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline void NotificationEventEnvelope::unsafe_arena_set_allocated_startmatchmakingnotifv1(::matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1) {
+inline void NotificationEventEnvelope::unsafe_arena_set_allocated_startmatchmakingnotifv1(::accelbyte_matchmaking::StartMatchmakingNotifV1* startmatchmakingnotifv1) {
   clear_payload();
   if (startmatchmakingnotifv1) {
     set_has_startmatchmakingnotifv1();
     payload_.startmatchmakingnotifv1_ = startmatchmakingnotifv1;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:accelbyte_matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
 }
-inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::_internal_mutable_startmatchmakingnotifv1() {
+inline ::accelbyte_matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::_internal_mutable_startmatchmakingnotifv1() {
   if (!_internal_has_startmatchmakingnotifv1()) {
     clear_payload();
     set_has_startmatchmakingnotifv1();
-    payload_.startmatchmakingnotifv1_ = CreateMaybeMessage< ::matchmaking::StartMatchmakingNotifV1 >(GetArenaForAllocation());
+    payload_.startmatchmakingnotifv1_ = CreateMaybeMessage< ::accelbyte_matchmaking::StartMatchmakingNotifV1 >(GetArenaForAllocation());
   }
   return payload_.startmatchmakingnotifv1_;
 }
-inline ::matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::mutable_startmatchmakingnotifv1() {
-  ::matchmaking::StartMatchmakingNotifV1* _msg = _internal_mutable_startmatchmakingnotifv1();
-  // @@protoc_insertion_point(field_mutable:matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+inline ::accelbyte_matchmaking::StartMatchmakingNotifV1* NotificationEventEnvelope::mutable_startmatchmakingnotifv1() {
+  ::accelbyte_matchmaking::StartMatchmakingNotifV1* _msg = _internal_mutable_startmatchmakingnotifv1();
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.NotificationEventEnvelope.StartMatchmakingNotifV1)
+  return _msg;
+}
+
+// .accelbyte_matchmaking.TicketExpiredNotifV1 TicketExpiredNotifV1 = 3;
+inline bool NotificationEventEnvelope::_internal_has_ticketexpirednotifv1() const {
+  return payload_case() == kTicketExpiredNotifV1;
+}
+inline bool NotificationEventEnvelope::has_ticketexpirednotifv1() const {
+  return _internal_has_ticketexpirednotifv1();
+}
+inline void NotificationEventEnvelope::set_has_ticketexpirednotifv1() {
+  _oneof_case_[0] = kTicketExpiredNotifV1;
+}
+inline void NotificationEventEnvelope::clear_ticketexpirednotifv1() {
+  if (_internal_has_ticketexpirednotifv1()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete payload_.ticketexpirednotifv1_;
+    }
+    clear_has_payload();
+  }
+}
+inline ::accelbyte_matchmaking::TicketExpiredNotifV1* NotificationEventEnvelope::release_ticketexpirednotifv1() {
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.NotificationEventEnvelope.TicketExpiredNotifV1)
+  if (_internal_has_ticketexpirednotifv1()) {
+    clear_has_payload();
+      ::accelbyte_matchmaking::TicketExpiredNotifV1* temp = payload_.ticketexpirednotifv1_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    payload_.ticketexpirednotifv1_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::accelbyte_matchmaking::TicketExpiredNotifV1& NotificationEventEnvelope::_internal_ticketexpirednotifv1() const {
+  return _internal_has_ticketexpirednotifv1()
+      ? *payload_.ticketexpirednotifv1_
+      : reinterpret_cast< ::accelbyte_matchmaking::TicketExpiredNotifV1&>(::accelbyte_matchmaking::_TicketExpiredNotifV1_default_instance_);
+}
+inline const ::accelbyte_matchmaking::TicketExpiredNotifV1& NotificationEventEnvelope::ticketexpirednotifv1() const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.NotificationEventEnvelope.TicketExpiredNotifV1)
+  return _internal_ticketexpirednotifv1();
+}
+inline ::accelbyte_matchmaking::TicketExpiredNotifV1* NotificationEventEnvelope::unsafe_arena_release_ticketexpirednotifv1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:accelbyte_matchmaking.NotificationEventEnvelope.TicketExpiredNotifV1)
+  if (_internal_has_ticketexpirednotifv1()) {
+    clear_has_payload();
+    ::accelbyte_matchmaking::TicketExpiredNotifV1* temp = payload_.ticketexpirednotifv1_;
+    payload_.ticketexpirednotifv1_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NotificationEventEnvelope::unsafe_arena_set_allocated_ticketexpirednotifv1(::accelbyte_matchmaking::TicketExpiredNotifV1* ticketexpirednotifv1) {
+  clear_payload();
+  if (ticketexpirednotifv1) {
+    set_has_ticketexpirednotifv1();
+    payload_.ticketexpirednotifv1_ = ticketexpirednotifv1;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:accelbyte_matchmaking.NotificationEventEnvelope.TicketExpiredNotifV1)
+}
+inline ::accelbyte_matchmaking::TicketExpiredNotifV1* NotificationEventEnvelope::_internal_mutable_ticketexpirednotifv1() {
+  if (!_internal_has_ticketexpirednotifv1()) {
+    clear_payload();
+    set_has_ticketexpirednotifv1();
+    payload_.ticketexpirednotifv1_ = CreateMaybeMessage< ::accelbyte_matchmaking::TicketExpiredNotifV1 >(GetArenaForAllocation());
+  }
+  return payload_.ticketexpirednotifv1_;
+}
+inline ::accelbyte_matchmaking::TicketExpiredNotifV1* NotificationEventEnvelope::mutable_ticketexpirednotifv1() {
+  ::accelbyte_matchmaking::TicketExpiredNotifV1* _msg = _internal_mutable_ticketexpirednotifv1();
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.NotificationEventEnvelope.TicketExpiredNotifV1)
   return _msg;
 }
 
@@ -1228,66 +1527,66 @@ inline void Team::clear_user_ids() {
 }
 inline std::string* Team::add_user_ids() {
   std::string* _s = _internal_add_user_ids();
-  // @@protoc_insertion_point(field_add_mutable:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_add_mutable:accelbyte_matchmaking.Team.user_ids)
   return _s;
 }
 inline const std::string& Team::_internal_user_ids(int index) const {
   return user_ids_.Get(index);
 }
 inline const std::string& Team::user_ids(int index) const {
-  // @@protoc_insertion_point(field_get:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.Team.user_ids)
   return _internal_user_ids(index);
 }
 inline std::string* Team::mutable_user_ids(int index) {
-  // @@protoc_insertion_point(field_mutable:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.Team.user_ids)
   return user_ids_.Mutable(index);
 }
 inline void Team::set_user_ids(int index, const std::string& value) {
   user_ids_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.Team.user_ids)
 }
 inline void Team::set_user_ids(int index, std::string&& value) {
   user_ids_.Mutable(index)->assign(std::move(value));
-  // @@protoc_insertion_point(field_set:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.Team.user_ids)
 }
 inline void Team::set_user_ids(int index, const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   user_ids_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_set_char:accelbyte_matchmaking.Team.user_ids)
 }
 inline void Team::set_user_ids(int index, const char* value, size_t size) {
   user_ids_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_set_pointer:accelbyte_matchmaking.Team.user_ids)
 }
 inline std::string* Team::_internal_add_user_ids() {
   return user_ids_.Add();
 }
 inline void Team::add_user_ids(const std::string& value) {
   user_ids_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_add:accelbyte_matchmaking.Team.user_ids)
 }
 inline void Team::add_user_ids(std::string&& value) {
   user_ids_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_add:accelbyte_matchmaking.Team.user_ids)
 }
 inline void Team::add_user_ids(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   user_ids_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_add_char:accelbyte_matchmaking.Team.user_ids)
 }
 inline void Team::add_user_ids(const char* value, size_t size) {
   user_ids_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_add_pointer:accelbyte_matchmaking.Team.user_ids)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
 Team::user_ids() const {
-  // @@protoc_insertion_point(field_list:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_list:accelbyte_matchmaking.Team.user_ids)
   return user_ids_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
 Team::mutable_user_ids() {
-  // @@protoc_insertion_point(field_mutable_list:matchmaking.Team.user_ids)
+  // @@protoc_insertion_point(field_mutable_list:accelbyte_matchmaking.Team.user_ids)
   return &user_ids_;
 }
 
@@ -1300,7 +1599,7 @@ inline void Ticket::clear_ticket_id() {
   ticket_id_.ClearToEmpty();
 }
 inline const std::string& Ticket::ticket_id() const {
-  // @@protoc_insertion_point(field_get:matchmaking.Ticket.ticket_id)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.Ticket.ticket_id)
   return _internal_ticket_id();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1308,11 +1607,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void Ticket::set_ticket_id(ArgT0&& arg0, ArgT... args) {
  
  ticket_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.Ticket.ticket_id)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.Ticket.ticket_id)
 }
 inline std::string* Ticket::mutable_ticket_id() {
   std::string* _s = _internal_mutable_ticket_id();
-  // @@protoc_insertion_point(field_mutable:matchmaking.Ticket.ticket_id)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.Ticket.ticket_id)
   return _s;
 }
 inline const std::string& Ticket::_internal_ticket_id() const {
@@ -1327,7 +1626,7 @@ inline std::string* Ticket::_internal_mutable_ticket_id() {
   return ticket_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* Ticket::release_ticket_id() {
-  // @@protoc_insertion_point(field_release:matchmaking.Ticket.ticket_id)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.Ticket.ticket_id)
   return ticket_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void Ticket::set_allocated_ticket_id(std::string* ticket_id) {
@@ -1343,7 +1642,7 @@ inline void Ticket::set_allocated_ticket_id(std::string* ticket_id) {
     ticket_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.Ticket.ticket_id)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.Ticket.ticket_id)
 }
 
 // -------------------------------------------------------------------
@@ -1355,7 +1654,7 @@ inline void MatchFoundNotifV1::clear_id() {
   id_.ClearToEmpty();
 }
 inline const std::string& MatchFoundNotifV1::id() const {
-  // @@protoc_insertion_point(field_get:matchmaking.MatchFoundNotifV1.id)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.MatchFoundNotifV1.id)
   return _internal_id();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1363,11 +1662,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void MatchFoundNotifV1::set_id(ArgT0&& arg0, ArgT... args) {
  
  id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.MatchFoundNotifV1.id)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.MatchFoundNotifV1.id)
 }
 inline std::string* MatchFoundNotifV1::mutable_id() {
   std::string* _s = _internal_mutable_id();
-  // @@protoc_insertion_point(field_mutable:matchmaking.MatchFoundNotifV1.id)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.MatchFoundNotifV1.id)
   return _s;
 }
 inline const std::string& MatchFoundNotifV1::_internal_id() const {
@@ -1382,7 +1681,7 @@ inline std::string* MatchFoundNotifV1::_internal_mutable_id() {
   return id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* MatchFoundNotifV1::release_id() {
-  // @@protoc_insertion_point(field_release:matchmaking.MatchFoundNotifV1.id)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.MatchFoundNotifV1.id)
   return id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void MatchFoundNotifV1::set_allocated_id(std::string* id) {
@@ -1398,7 +1697,7 @@ inline void MatchFoundNotifV1::set_allocated_id(std::string* id) {
     id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.MatchFoundNotifV1.id)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.MatchFoundNotifV1.id)
 }
 
 // string namespace = 2;
@@ -1406,7 +1705,7 @@ inline void MatchFoundNotifV1::clear_namespace_() {
   namespace__.ClearToEmpty();
 }
 inline const std::string& MatchFoundNotifV1::namespace_() const {
-  // @@protoc_insertion_point(field_get:matchmaking.MatchFoundNotifV1.namespace)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.MatchFoundNotifV1.namespace)
   return _internal_namespace_();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1414,11 +1713,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void MatchFoundNotifV1::set_namespace_(ArgT0&& arg0, ArgT... args) {
  
  namespace__.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.MatchFoundNotifV1.namespace)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.MatchFoundNotifV1.namespace)
 }
 inline std::string* MatchFoundNotifV1::mutable_namespace_() {
   std::string* _s = _internal_mutable_namespace_();
-  // @@protoc_insertion_point(field_mutable:matchmaking.MatchFoundNotifV1.namespace)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.MatchFoundNotifV1.namespace)
   return _s;
 }
 inline const std::string& MatchFoundNotifV1::_internal_namespace_() const {
@@ -1433,7 +1732,7 @@ inline std::string* MatchFoundNotifV1::_internal_mutable_namespace_() {
   return namespace__.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* MatchFoundNotifV1::release_namespace_() {
-  // @@protoc_insertion_point(field_release:matchmaking.MatchFoundNotifV1.namespace)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.MatchFoundNotifV1.namespace)
   return namespace__.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void MatchFoundNotifV1::set_allocated_namespace_(std::string* namespace_) {
@@ -1449,7 +1748,7 @@ inline void MatchFoundNotifV1::set_allocated_namespace_(std::string* namespace_)
     namespace__.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.MatchFoundNotifV1.namespace)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.MatchFoundNotifV1.namespace)
 }
 
 // string created_at = 3;
@@ -1457,7 +1756,7 @@ inline void MatchFoundNotifV1::clear_created_at() {
   created_at_.ClearToEmpty();
 }
 inline const std::string& MatchFoundNotifV1::created_at() const {
-  // @@protoc_insertion_point(field_get:matchmaking.MatchFoundNotifV1.created_at)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.MatchFoundNotifV1.created_at)
   return _internal_created_at();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1465,11 +1764,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void MatchFoundNotifV1::set_created_at(ArgT0&& arg0, ArgT... args) {
  
  created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.MatchFoundNotifV1.created_at)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.MatchFoundNotifV1.created_at)
 }
 inline std::string* MatchFoundNotifV1::mutable_created_at() {
   std::string* _s = _internal_mutable_created_at();
-  // @@protoc_insertion_point(field_mutable:matchmaking.MatchFoundNotifV1.created_at)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.MatchFoundNotifV1.created_at)
   return _s;
 }
 inline const std::string& MatchFoundNotifV1::_internal_created_at() const {
@@ -1484,7 +1783,7 @@ inline std::string* MatchFoundNotifV1::_internal_mutable_created_at() {
   return created_at_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* MatchFoundNotifV1::release_created_at() {
-  // @@protoc_insertion_point(field_release:matchmaking.MatchFoundNotifV1.created_at)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.MatchFoundNotifV1.created_at)
   return created_at_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void MatchFoundNotifV1::set_allocated_created_at(std::string* created_at) {
@@ -1500,7 +1799,7 @@ inline void MatchFoundNotifV1::set_allocated_created_at(std::string* created_at)
     created_at_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.MatchFoundNotifV1.created_at)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.MatchFoundNotifV1.created_at)
 }
 
 // string match_pool = 4;
@@ -1508,7 +1807,7 @@ inline void MatchFoundNotifV1::clear_match_pool() {
   match_pool_.ClearToEmpty();
 }
 inline const std::string& MatchFoundNotifV1::match_pool() const {
-  // @@protoc_insertion_point(field_get:matchmaking.MatchFoundNotifV1.match_pool)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.MatchFoundNotifV1.match_pool)
   return _internal_match_pool();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1516,11 +1815,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void MatchFoundNotifV1::set_match_pool(ArgT0&& arg0, ArgT... args) {
  
  match_pool_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.MatchFoundNotifV1.match_pool)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.MatchFoundNotifV1.match_pool)
 }
 inline std::string* MatchFoundNotifV1::mutable_match_pool() {
   std::string* _s = _internal_mutable_match_pool();
-  // @@protoc_insertion_point(field_mutable:matchmaking.MatchFoundNotifV1.match_pool)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.MatchFoundNotifV1.match_pool)
   return _s;
 }
 inline const std::string& MatchFoundNotifV1::_internal_match_pool() const {
@@ -1535,7 +1834,7 @@ inline std::string* MatchFoundNotifV1::_internal_mutable_match_pool() {
   return match_pool_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* MatchFoundNotifV1::release_match_pool() {
-  // @@protoc_insertion_point(field_release:matchmaking.MatchFoundNotifV1.match_pool)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.MatchFoundNotifV1.match_pool)
   return match_pool_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void MatchFoundNotifV1::set_allocated_match_pool(std::string* match_pool) {
@@ -1551,10 +1850,10 @@ inline void MatchFoundNotifV1::set_allocated_match_pool(std::string* match_pool)
     match_pool_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.MatchFoundNotifV1.match_pool)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.MatchFoundNotifV1.match_pool)
 }
 
-// repeated .matchmaking.Team teams = 5;
+// repeated .accelbyte_matchmaking.Team teams = 5;
 inline int MatchFoundNotifV1::_internal_teams_size() const {
   return teams_.size();
 }
@@ -1564,37 +1863,37 @@ inline int MatchFoundNotifV1::teams_size() const {
 inline void MatchFoundNotifV1::clear_teams() {
   teams_.Clear();
 }
-inline ::matchmaking::Team* MatchFoundNotifV1::mutable_teams(int index) {
-  // @@protoc_insertion_point(field_mutable:matchmaking.MatchFoundNotifV1.teams)
+inline ::accelbyte_matchmaking::Team* MatchFoundNotifV1::mutable_teams(int index) {
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.MatchFoundNotifV1.teams)
   return teams_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Team >*
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Team >*
 MatchFoundNotifV1::mutable_teams() {
-  // @@protoc_insertion_point(field_mutable_list:matchmaking.MatchFoundNotifV1.teams)
+  // @@protoc_insertion_point(field_mutable_list:accelbyte_matchmaking.MatchFoundNotifV1.teams)
   return &teams_;
 }
-inline const ::matchmaking::Team& MatchFoundNotifV1::_internal_teams(int index) const {
+inline const ::accelbyte_matchmaking::Team& MatchFoundNotifV1::_internal_teams(int index) const {
   return teams_.Get(index);
 }
-inline const ::matchmaking::Team& MatchFoundNotifV1::teams(int index) const {
-  // @@protoc_insertion_point(field_get:matchmaking.MatchFoundNotifV1.teams)
+inline const ::accelbyte_matchmaking::Team& MatchFoundNotifV1::teams(int index) const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.MatchFoundNotifV1.teams)
   return _internal_teams(index);
 }
-inline ::matchmaking::Team* MatchFoundNotifV1::_internal_add_teams() {
+inline ::accelbyte_matchmaking::Team* MatchFoundNotifV1::_internal_add_teams() {
   return teams_.Add();
 }
-inline ::matchmaking::Team* MatchFoundNotifV1::add_teams() {
-  ::matchmaking::Team* _add = _internal_add_teams();
-  // @@protoc_insertion_point(field_add:matchmaking.MatchFoundNotifV1.teams)
+inline ::accelbyte_matchmaking::Team* MatchFoundNotifV1::add_teams() {
+  ::accelbyte_matchmaking::Team* _add = _internal_add_teams();
+  // @@protoc_insertion_point(field_add:accelbyte_matchmaking.MatchFoundNotifV1.teams)
   return _add;
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Team >&
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Team >&
 MatchFoundNotifV1::teams() const {
-  // @@protoc_insertion_point(field_list:matchmaking.MatchFoundNotifV1.teams)
+  // @@protoc_insertion_point(field_list:accelbyte_matchmaking.MatchFoundNotifV1.teams)
   return teams_;
 }
 
-// repeated .matchmaking.Ticket tickets = 6;
+// repeated .accelbyte_matchmaking.Ticket tickets = 6;
 inline int MatchFoundNotifV1::_internal_tickets_size() const {
   return tickets_.size();
 }
@@ -1604,33 +1903,33 @@ inline int MatchFoundNotifV1::tickets_size() const {
 inline void MatchFoundNotifV1::clear_tickets() {
   tickets_.Clear();
 }
-inline ::matchmaking::Ticket* MatchFoundNotifV1::mutable_tickets(int index) {
-  // @@protoc_insertion_point(field_mutable:matchmaking.MatchFoundNotifV1.tickets)
+inline ::accelbyte_matchmaking::Ticket* MatchFoundNotifV1::mutable_tickets(int index) {
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.MatchFoundNotifV1.tickets)
   return tickets_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Ticket >*
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Ticket >*
 MatchFoundNotifV1::mutable_tickets() {
-  // @@protoc_insertion_point(field_mutable_list:matchmaking.MatchFoundNotifV1.tickets)
+  // @@protoc_insertion_point(field_mutable_list:accelbyte_matchmaking.MatchFoundNotifV1.tickets)
   return &tickets_;
 }
-inline const ::matchmaking::Ticket& MatchFoundNotifV1::_internal_tickets(int index) const {
+inline const ::accelbyte_matchmaking::Ticket& MatchFoundNotifV1::_internal_tickets(int index) const {
   return tickets_.Get(index);
 }
-inline const ::matchmaking::Ticket& MatchFoundNotifV1::tickets(int index) const {
-  // @@protoc_insertion_point(field_get:matchmaking.MatchFoundNotifV1.tickets)
+inline const ::accelbyte_matchmaking::Ticket& MatchFoundNotifV1::tickets(int index) const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.MatchFoundNotifV1.tickets)
   return _internal_tickets(index);
 }
-inline ::matchmaking::Ticket* MatchFoundNotifV1::_internal_add_tickets() {
+inline ::accelbyte_matchmaking::Ticket* MatchFoundNotifV1::_internal_add_tickets() {
   return tickets_.Add();
 }
-inline ::matchmaking::Ticket* MatchFoundNotifV1::add_tickets() {
-  ::matchmaking::Ticket* _add = _internal_add_tickets();
-  // @@protoc_insertion_point(field_add:matchmaking.MatchFoundNotifV1.tickets)
+inline ::accelbyte_matchmaking::Ticket* MatchFoundNotifV1::add_tickets() {
+  ::accelbyte_matchmaking::Ticket* _add = _internal_add_tickets();
+  // @@protoc_insertion_point(field_add:accelbyte_matchmaking.MatchFoundNotifV1.tickets)
   return _add;
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::matchmaking::Ticket >&
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::accelbyte_matchmaking::Ticket >&
 MatchFoundNotifV1::tickets() const {
-  // @@protoc_insertion_point(field_list:matchmaking.MatchFoundNotifV1.tickets)
+  // @@protoc_insertion_point(field_list:accelbyte_matchmaking.MatchFoundNotifV1.tickets)
   return tickets_;
 }
 
@@ -1643,7 +1942,7 @@ inline void StartMatchmakingNotifV1::clear_ticket_id() {
   ticket_id_.ClearToEmpty();
 }
 inline const std::string& StartMatchmakingNotifV1::ticket_id() const {
-  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.ticket_id)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.StartMatchmakingNotifV1.ticket_id)
   return _internal_ticket_id();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1651,11 +1950,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void StartMatchmakingNotifV1::set_ticket_id(ArgT0&& arg0, ArgT... args) {
  
  ticket_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.ticket_id)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.StartMatchmakingNotifV1.ticket_id)
 }
 inline std::string* StartMatchmakingNotifV1::mutable_ticket_id() {
   std::string* _s = _internal_mutable_ticket_id();
-  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.ticket_id)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.StartMatchmakingNotifV1.ticket_id)
   return _s;
 }
 inline const std::string& StartMatchmakingNotifV1::_internal_ticket_id() const {
@@ -1670,7 +1969,7 @@ inline std::string* StartMatchmakingNotifV1::_internal_mutable_ticket_id() {
   return ticket_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* StartMatchmakingNotifV1::release_ticket_id() {
-  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.ticket_id)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.StartMatchmakingNotifV1.ticket_id)
   return ticket_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void StartMatchmakingNotifV1::set_allocated_ticket_id(std::string* ticket_id) {
@@ -1686,7 +1985,7 @@ inline void StartMatchmakingNotifV1::set_allocated_ticket_id(std::string* ticket
     ticket_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.ticket_id)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.StartMatchmakingNotifV1.ticket_id)
 }
 
 // string party_id = 2;
@@ -1694,7 +1993,7 @@ inline void StartMatchmakingNotifV1::clear_party_id() {
   party_id_.ClearToEmpty();
 }
 inline const std::string& StartMatchmakingNotifV1::party_id() const {
-  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.party_id)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.StartMatchmakingNotifV1.party_id)
   return _internal_party_id();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1702,11 +2001,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void StartMatchmakingNotifV1::set_party_id(ArgT0&& arg0, ArgT... args) {
  
  party_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.party_id)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.StartMatchmakingNotifV1.party_id)
 }
 inline std::string* StartMatchmakingNotifV1::mutable_party_id() {
   std::string* _s = _internal_mutable_party_id();
-  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.party_id)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.StartMatchmakingNotifV1.party_id)
   return _s;
 }
 inline const std::string& StartMatchmakingNotifV1::_internal_party_id() const {
@@ -1721,7 +2020,7 @@ inline std::string* StartMatchmakingNotifV1::_internal_mutable_party_id() {
   return party_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* StartMatchmakingNotifV1::release_party_id() {
-  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.party_id)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.StartMatchmakingNotifV1.party_id)
   return party_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void StartMatchmakingNotifV1::set_allocated_party_id(std::string* party_id) {
@@ -1737,7 +2036,7 @@ inline void StartMatchmakingNotifV1::set_allocated_party_id(std::string* party_i
     party_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.party_id)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.StartMatchmakingNotifV1.party_id)
 }
 
 // string namespace = 3;
@@ -1745,7 +2044,7 @@ inline void StartMatchmakingNotifV1::clear_namespace_() {
   namespace__.ClearToEmpty();
 }
 inline const std::string& StartMatchmakingNotifV1::namespace_() const {
-  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.namespace)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.StartMatchmakingNotifV1.namespace)
   return _internal_namespace_();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1753,11 +2052,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void StartMatchmakingNotifV1::set_namespace_(ArgT0&& arg0, ArgT... args) {
  
  namespace__.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.namespace)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.StartMatchmakingNotifV1.namespace)
 }
 inline std::string* StartMatchmakingNotifV1::mutable_namespace_() {
   std::string* _s = _internal_mutable_namespace_();
-  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.namespace)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.StartMatchmakingNotifV1.namespace)
   return _s;
 }
 inline const std::string& StartMatchmakingNotifV1::_internal_namespace_() const {
@@ -1772,7 +2071,7 @@ inline std::string* StartMatchmakingNotifV1::_internal_mutable_namespace_() {
   return namespace__.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* StartMatchmakingNotifV1::release_namespace_() {
-  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.namespace)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.StartMatchmakingNotifV1.namespace)
   return namespace__.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void StartMatchmakingNotifV1::set_allocated_namespace_(std::string* namespace_) {
@@ -1788,7 +2087,7 @@ inline void StartMatchmakingNotifV1::set_allocated_namespace_(std::string* names
     namespace__.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.namespace)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.StartMatchmakingNotifV1.namespace)
 }
 
 // string created_at = 4;
@@ -1796,7 +2095,7 @@ inline void StartMatchmakingNotifV1::clear_created_at() {
   created_at_.ClearToEmpty();
 }
 inline const std::string& StartMatchmakingNotifV1::created_at() const {
-  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.created_at)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.StartMatchmakingNotifV1.created_at)
   return _internal_created_at();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1804,11 +2103,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void StartMatchmakingNotifV1::set_created_at(ArgT0&& arg0, ArgT... args) {
  
  created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.created_at)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.StartMatchmakingNotifV1.created_at)
 }
 inline std::string* StartMatchmakingNotifV1::mutable_created_at() {
   std::string* _s = _internal_mutable_created_at();
-  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.created_at)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.StartMatchmakingNotifV1.created_at)
   return _s;
 }
 inline const std::string& StartMatchmakingNotifV1::_internal_created_at() const {
@@ -1823,7 +2122,7 @@ inline std::string* StartMatchmakingNotifV1::_internal_mutable_created_at() {
   return created_at_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* StartMatchmakingNotifV1::release_created_at() {
-  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.created_at)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.StartMatchmakingNotifV1.created_at)
   return created_at_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void StartMatchmakingNotifV1::set_allocated_created_at(std::string* created_at) {
@@ -1839,7 +2138,7 @@ inline void StartMatchmakingNotifV1::set_allocated_created_at(std::string* creat
     created_at_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.created_at)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.StartMatchmakingNotifV1.created_at)
 }
 
 // string match_pool = 5;
@@ -1847,7 +2146,7 @@ inline void StartMatchmakingNotifV1::clear_match_pool() {
   match_pool_.ClearToEmpty();
 }
 inline const std::string& StartMatchmakingNotifV1::match_pool() const {
-  // @@protoc_insertion_point(field_get:matchmaking.StartMatchmakingNotifV1.match_pool)
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.StartMatchmakingNotifV1.match_pool)
   return _internal_match_pool();
 }
 template <typename ArgT0, typename... ArgT>
@@ -1855,11 +2154,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void StartMatchmakingNotifV1::set_match_pool(ArgT0&& arg0, ArgT... args) {
  
  match_pool_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:matchmaking.StartMatchmakingNotifV1.match_pool)
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.StartMatchmakingNotifV1.match_pool)
 }
 inline std::string* StartMatchmakingNotifV1::mutable_match_pool() {
   std::string* _s = _internal_mutable_match_pool();
-  // @@protoc_insertion_point(field_mutable:matchmaking.StartMatchmakingNotifV1.match_pool)
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.StartMatchmakingNotifV1.match_pool)
   return _s;
 }
 inline const std::string& StartMatchmakingNotifV1::_internal_match_pool() const {
@@ -1874,7 +2173,7 @@ inline std::string* StartMatchmakingNotifV1::_internal_mutable_match_pool() {
   return match_pool_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* StartMatchmakingNotifV1::release_match_pool() {
-  // @@protoc_insertion_point(field_release:matchmaking.StartMatchmakingNotifV1.match_pool)
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.StartMatchmakingNotifV1.match_pool)
   return match_pool_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void StartMatchmakingNotifV1::set_allocated_match_pool(std::string* match_pool) {
@@ -1890,7 +2189,215 @@ inline void StartMatchmakingNotifV1::set_allocated_match_pool(std::string* match
     match_pool_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:matchmaking.StartMatchmakingNotifV1.match_pool)
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.StartMatchmakingNotifV1.match_pool)
+}
+
+// -------------------------------------------------------------------
+
+// TicketExpiredNotifV1
+
+// string ticket_id = 1;
+inline void TicketExpiredNotifV1::clear_ticket_id() {
+  ticket_id_.ClearToEmpty();
+}
+inline const std::string& TicketExpiredNotifV1::ticket_id() const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.TicketExpiredNotifV1.ticket_id)
+  return _internal_ticket_id();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void TicketExpiredNotifV1::set_ticket_id(ArgT0&& arg0, ArgT... args) {
+ 
+ ticket_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.TicketExpiredNotifV1.ticket_id)
+}
+inline std::string* TicketExpiredNotifV1::mutable_ticket_id() {
+  std::string* _s = _internal_mutable_ticket_id();
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.TicketExpiredNotifV1.ticket_id)
+  return _s;
+}
+inline const std::string& TicketExpiredNotifV1::_internal_ticket_id() const {
+  return ticket_id_.Get();
+}
+inline void TicketExpiredNotifV1::_internal_set_ticket_id(const std::string& value) {
+  
+  ticket_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* TicketExpiredNotifV1::_internal_mutable_ticket_id() {
+  
+  return ticket_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* TicketExpiredNotifV1::release_ticket_id() {
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.TicketExpiredNotifV1.ticket_id)
+  return ticket_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void TicketExpiredNotifV1::set_allocated_ticket_id(std::string* ticket_id) {
+  if (ticket_id != nullptr) {
+    
+  } else {
+    
+  }
+  ticket_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ticket_id,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (ticket_id_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    ticket_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.TicketExpiredNotifV1.ticket_id)
+}
+
+// string namespace = 2;
+inline void TicketExpiredNotifV1::clear_namespace_() {
+  namespace__.ClearToEmpty();
+}
+inline const std::string& TicketExpiredNotifV1::namespace_() const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.TicketExpiredNotifV1.namespace)
+  return _internal_namespace_();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void TicketExpiredNotifV1::set_namespace_(ArgT0&& arg0, ArgT... args) {
+ 
+ namespace__.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.TicketExpiredNotifV1.namespace)
+}
+inline std::string* TicketExpiredNotifV1::mutable_namespace_() {
+  std::string* _s = _internal_mutable_namespace_();
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.TicketExpiredNotifV1.namespace)
+  return _s;
+}
+inline const std::string& TicketExpiredNotifV1::_internal_namespace_() const {
+  return namespace__.Get();
+}
+inline void TicketExpiredNotifV1::_internal_set_namespace_(const std::string& value) {
+  
+  namespace__.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* TicketExpiredNotifV1::_internal_mutable_namespace_() {
+  
+  return namespace__.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* TicketExpiredNotifV1::release_namespace_() {
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.TicketExpiredNotifV1.namespace)
+  return namespace__.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void TicketExpiredNotifV1::set_allocated_namespace_(std::string* namespace_) {
+  if (namespace_ != nullptr) {
+    
+  } else {
+    
+  }
+  namespace__.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), namespace_,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (namespace__.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    namespace__.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.TicketExpiredNotifV1.namespace)
+}
+
+// string created_at = 3;
+inline void TicketExpiredNotifV1::clear_created_at() {
+  created_at_.ClearToEmpty();
+}
+inline const std::string& TicketExpiredNotifV1::created_at() const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.TicketExpiredNotifV1.created_at)
+  return _internal_created_at();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void TicketExpiredNotifV1::set_created_at(ArgT0&& arg0, ArgT... args) {
+ 
+ created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.TicketExpiredNotifV1.created_at)
+}
+inline std::string* TicketExpiredNotifV1::mutable_created_at() {
+  std::string* _s = _internal_mutable_created_at();
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.TicketExpiredNotifV1.created_at)
+  return _s;
+}
+inline const std::string& TicketExpiredNotifV1::_internal_created_at() const {
+  return created_at_.Get();
+}
+inline void TicketExpiredNotifV1::_internal_set_created_at(const std::string& value) {
+  
+  created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* TicketExpiredNotifV1::_internal_mutable_created_at() {
+  
+  return created_at_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* TicketExpiredNotifV1::release_created_at() {
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.TicketExpiredNotifV1.created_at)
+  return created_at_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void TicketExpiredNotifV1::set_allocated_created_at(std::string* created_at) {
+  if (created_at != nullptr) {
+    
+  } else {
+    
+  }
+  created_at_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), created_at,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (created_at_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    created_at_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.TicketExpiredNotifV1.created_at)
+}
+
+// string match_pool = 4;
+inline void TicketExpiredNotifV1::clear_match_pool() {
+  match_pool_.ClearToEmpty();
+}
+inline const std::string& TicketExpiredNotifV1::match_pool() const {
+  // @@protoc_insertion_point(field_get:accelbyte_matchmaking.TicketExpiredNotifV1.match_pool)
+  return _internal_match_pool();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void TicketExpiredNotifV1::set_match_pool(ArgT0&& arg0, ArgT... args) {
+ 
+ match_pool_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:accelbyte_matchmaking.TicketExpiredNotifV1.match_pool)
+}
+inline std::string* TicketExpiredNotifV1::mutable_match_pool() {
+  std::string* _s = _internal_mutable_match_pool();
+  // @@protoc_insertion_point(field_mutable:accelbyte_matchmaking.TicketExpiredNotifV1.match_pool)
+  return _s;
+}
+inline const std::string& TicketExpiredNotifV1::_internal_match_pool() const {
+  return match_pool_.Get();
+}
+inline void TicketExpiredNotifV1::_internal_set_match_pool(const std::string& value) {
+  
+  match_pool_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* TicketExpiredNotifV1::_internal_mutable_match_pool() {
+  
+  return match_pool_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* TicketExpiredNotifV1::release_match_pool() {
+  // @@protoc_insertion_point(field_release:accelbyte_matchmaking.TicketExpiredNotifV1.match_pool)
+  return match_pool_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void TicketExpiredNotifV1::set_allocated_match_pool(std::string* match_pool) {
+  if (match_pool != nullptr) {
+    
+  } else {
+    
+  }
+  match_pool_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), match_pool,
+      GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (match_pool_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
+    match_pool_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:accelbyte_matchmaking.TicketExpiredNotifV1.match_pool)
 }
 
 #ifdef __GNUC__
@@ -1904,10 +2411,12 @@ inline void StartMatchmakingNotifV1::set_allocated_match_pool(std::string* match
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
 
 // @@protoc_insertion_point(namespace_scope)
 
-}  // namespace matchmaking
+}  // namespace accelbyte_matchmaking
 
 // @@protoc_insertion_point(global_scope)
 

@@ -490,6 +490,11 @@ public:
 	DECLARE_DELEGATE_OneParam(FV2GameSessionKickedNotif, FAccelByteModelsV2GameSessionUserKickedEvent);
 
 	/**
+	 * @brief Delegate for game session invite rejected event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionRejectedNotif, FAccelByteModelsV2GameSessionUserRejectedEvent);
+
+	/**
 	* @brief Delegate for game session when DS status is changed.
 	*/
 	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif)
@@ -503,6 +508,11 @@ public:
 	* @brief Delegate for notification when party leader started matchmaking
 	*/
 	DECLARE_DELEGATE_OneParam(FV2MatchmakingStartNotif, FAccelByteModelsV2StartMatchmakingNotif)
+
+	/**
+	* @brief Delegate for notification when party leader started matchmaking
+	*/
+	DECLARE_DELEGATE_OneParam(FV2MatchmakingExpiredNotif, FAccelByteModelsV2MatchmakingExpiredNotif)
 public:
     /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
@@ -1103,6 +1113,10 @@ public:
 	{
 		V2GameSessionKickedNotif = OnGameSessionKickedNotif;
 	}
+	void SetV2GameSessionRejectedNotifDelegate(const FV2GameSessionRejectedNotif& OnGameSessionRejectedNotif)
+	{
+		V2GameSessionRejectedNotif = OnGameSessionRejectedNotif;
+	}
 	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
 	{
 		V2DSStatusChangedNotif = OnDSStatusChangedNotif;
@@ -1118,6 +1132,10 @@ public:
 	void SetV2MatchmakingStartNotifDelegate(const FV2MatchmakingStartNotif& OnMatchmakingStartNotif)
 	{
 		V2MatchmakingStartNotif = OnMatchmakingStartNotif;
+	}
+	void SetV2MatchmakingExpiredNotifDelegate(const FV2MatchmakingExpiredNotif& OnMatchmakingExpiredNotif)
+	{
+		V2MatchmakingExpiredNotif = OnMatchmakingExpiredNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1863,7 +1881,7 @@ private:
 	void HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message);
 
 	void InitializeV2MatchmakingNotifDelegates();
-	TMap<EV2MatchmakingNotif, FMessageNotif> MatchmakingV2NotifDelegates;
+	TMap<EV2MatchmakingNotifTopic, FMessageNotif> MatchmakingV2NotifDelegates;
 	
 	static TMap<FString, Response> ResponseStringEnumMap;
 	static TMap<FString, Notif> NotifStringEnumMap;
@@ -2010,11 +2028,13 @@ private:
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
 	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;
 	FV2GameSessionKickedNotif V2GameSessionKickedNotif;
+	FV2GameSessionRejectedNotif V2GameSessionRejectedNotif;
 
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 
 	FV2MatchmakingMatchFoundNotif V2MatchmakingMatchFoundNotif;
 	FV2MatchmakingStartNotif V2MatchmakingStartNotif;
+	FV2MatchmakingExpiredNotif V2MatchmakingExpiredNotif;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;
@@ -2126,6 +2146,5 @@ private:
 	FErrorHandler OnRefreshTokenError;
 	FErrorHandler OnCreateDSError;
 };
-
 } // Namespace Api
 } // Namespace AccelByte

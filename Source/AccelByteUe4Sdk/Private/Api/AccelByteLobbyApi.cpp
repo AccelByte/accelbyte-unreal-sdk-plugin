@@ -17,14 +17,11 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
 
-// Use of type map<string, int32> in proto file leads to a warning about converting an integer to bool due to the way
-// protobuf maps are implemented
-#pragma warning(push)
-#pragma warning(disable : 4800)
+THIRD_PARTY_INCLUDES_START
 #include "Proto/session_notification.pb.h"
 #include "Proto/matchmaking_notification.pb.h"
 #include "google/protobuf/util/json_util.h"
-#pragma warning(pop)
+THIRD_PARTY_INCLUDES_END
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -345,7 +342,7 @@ namespace Api
 * Helper macro to enforce uniform naming, easier pair initialization, and readibility
 */
 #define FORM_STRING_ENUM_PAIR(Type, MessageType) \
-    { LobbyResponse::MessageType, Type::MessageType } \
+	{ LobbyResponse::MessageType, Type::MessageType } \
 
 	TMap<FString, Response> Lobby::ResponseStringEnumMap{
 		FORM_STRING_ENUM_PAIR(Response,PartyInfo),
@@ -1489,6 +1486,7 @@ void Lobby::UnbindV2GameSessionEvents()
 	V2GameSessionUpdatedNotif.Unbind();
 	V2DSStatusChangedNotif.Unbind();
 	V2GameSessionKickedNotif.Unbind();
+	V2GameSessionRejectedNotif.Unbind();
 }
 
 void Lobby::UnbindV2MatchmakingEvents()
@@ -1524,7 +1522,7 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 }
-
+	
 FString Lobby::SendRawRequest(const FString& MessageType, const FString& MessageIDPrefix, const FString& CustomPayload)
 {
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
@@ -1969,7 +1967,7 @@ void ReplaceBytesFieldsWithJsonObjects(const FString& ParsedJsonString, const TS
 					return;
 				}
 
-				for(const TSharedPtr<FJsonValue> Item : *NestedArray)
+				for(const TSharedPtr<FJsonValue>& Item : *NestedArray)
 				{
 					const TSharedPtr<FJsonObject>* Object;
 					if(!Item->TryGetObject(Object))
@@ -2117,6 +2115,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		DispatchV2Notif<FAccelByteModelsV2GameSessionUserKickedEvent>(EventEnvelope->gamesessionnotificationuserkickedv1(), V2GameSessionKickedNotif);
 		break;
 	}
+	case accelbyte_session::NotificationEventEnvelope::kGameSessionNotificationUserRejectV1:
+	{
+		DispatchV2Notif<FAccelByteModelsV2GameSessionUserRejectedEvent>(EventEnvelope->gamesessionnotificationuserrejectv1(), V2GameSessionRejectedNotif);
+		break;
+	}
 	case accelbyte_session::NotificationEventEnvelope::kDSStatusChangedNotificationV1:
 	{
 		DispatchV2Notif<FAccelByteModelsV2DSStatusChangedNotif>(EventEnvelope->dsstatuschangednotificationv1(), V2DSStatusChangedNotif);
@@ -2138,7 +2141,7 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 
 void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message)
 {
-	TSharedRef<matchmaking::NotificationEventEnvelope> Envelope = MakeShared<matchmaking::NotificationEventEnvelope>();
+	TSharedRef<accelbyte_matchmaking::NotificationEventEnvelope> Envelope = MakeShared<accelbyte_matchmaking::NotificationEventEnvelope>();
 	if(!ParseProtobufPayload(Message.Payload, Envelope))
 	{
 		UE_LOG(LogAccelByteLobby, Log, TEXT("Failed to parse matchmaking v2 notification"));
@@ -2147,25 +2150,31 @@ void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& 
 
 	switch (Envelope->payload_case())
 	{
-		case matchmaking::NotificationEventEnvelope::kMatchFoundNotifV1:
+		case accelbyte_matchmaking::NotificationEventEnvelope::kMatchFoundNotifV1:
 		{
 			DispatchV2Notif<FAccelByteModelsV2MatchFoundNotif>(Envelope->matchfoundnotifv1(), V2MatchmakingMatchFoundNotif);
 			break;
 		}
-		case matchmaking::NotificationEventEnvelope::kStartMatchmakingNotifV1:
+		case accelbyte_matchmaking::NotificationEventEnvelope::kStartMatchmakingNotifV1:
 		{
 			DispatchV2Notif<FAccelByteModelsV2StartMatchmakingNotif>(Envelope->startmatchmakingnotifv1(), V2MatchmakingStartNotif);
 			break;
 		}
-		default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown matchmaking v2 notification topic : %s"), *Message.Topic);
+		case accelbyte_matchmaking::NotificationEventEnvelope::kTicketExpiredNotifV1:
+		{
+			DispatchV2Notif<FAccelByteModelsV2MatchmakingExpiredNotif>(Envelope->ticketexpirednotifv1(), V2MatchmakingExpiredNotif);
+			break;
+		}
+	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown matchmaking v2 notification topic : %s, envelope enum num is %d"), *Message.Topic, Envelope->payload_case());
 	}
 }
 
 void Lobby::InitializeV2MatchmakingNotifDelegates()
 {
 	MatchmakingV2NotifDelegates = {
-		{EV2MatchmakingNotif::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
-		{EV2MatchmakingNotif::OnMatchmakingStarted, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotifTopic::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotifTopic::OnMatchmakingStarted, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotifTopic::OnMatchmakingTicketExpired, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
 	};
 }
 
@@ -2260,8 +2269,8 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 				}
 			}
 
-			EV2MatchmakingNotif MMNotifEnum = FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotif>(NotificationMessage.Topic);
-			if(MMNotifEnum != EV2MatchmakingNotif::Invalid && MatchmakingV2NotifDelegates.Contains(MMNotifEnum))
+			EV2MatchmakingNotifTopic MMNotifEnum = FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotifTopic>(NotificationMessage.Topic);
+			if(MMNotifEnum != EV2MatchmakingNotifTopic::Invalid && MatchmakingV2NotifDelegates.Contains(MMNotifEnum))
 			{
 				MatchmakingV2NotifDelegates[MMNotifEnum].ExecuteIfBound(NotificationMessage);
 				break;

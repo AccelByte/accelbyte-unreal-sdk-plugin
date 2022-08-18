@@ -23,11 +23,12 @@ enum class EAvailability : uint8
 
 /** @brief Matchmaking v2 notification topics enums. */
 UENUM(BlueprintType)
-enum class EV2MatchmakingNotif : uint8
+enum class EV2MatchmakingNotifTopic : uint8
 {
 	Invalid,
 	OnMatchFound,
 	OnMatchmakingStarted,
+	OnMatchmakingTicketExpired,
 };
 
 // Emulate namespace with long class names

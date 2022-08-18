@@ -9,14 +9,22 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteSessionModels.h"
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
 class Credentials;
 class Settings;
 
+namespace GameServerApi
+{
+class ServerSession;
+}
+
 namespace Api
 {
+
+class ServerSessionApi;
 
 class ACCELBYTEUE4SDK_API Session : public FApiBase
 {
@@ -71,6 +79,25 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 */
 	void DeleteGameSession(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Send an invite to a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param UserID The ID of the user to invite.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void SendGameSessionInvite(FString const& GameSessionID, FString const& UserID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Reject an invite to a game session by game session ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void RejectGameSessionInvite(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Join a game session by ID.
@@ -182,27 +209,27 @@ public:
 	 * @param Status Optional membership status to query for - either active or invited.
 	 */
 	void GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
-	
+
 private:
 	Session() = delete;
 	Session(Session const&) = delete;
 	Session(Session&&) = delete;
 
+	// The server session API class needs access to `SerializeAndRemoveEmptyValues`
+	friend class GameServerApi::ServerSession;
+
 	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr, const FString& FieldName);
 
 	template <typename DataStruct>
-	static void SerializeAndRemoveEmptyEnumValues(DataStruct Model, FString& OutputString, bool bRemoveDSRequest = false)
+	static void SerializeAndRemoveEmptyValues(const DataStruct& Model, FString& OutputString)
 	{
 		auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
 
-		if(bRemoveDSRequest)
-		{
-			JsonObjectPtr->RemoveField(TEXT("dsRequest"));
-		}
-
-		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinType"));
+		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinability"));
+		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("type"));
 		RemoveEmptyEnumValuesFromChildren(JsonObjectPtr, TEXT("members"));
+		FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll);
 
 		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
 		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
