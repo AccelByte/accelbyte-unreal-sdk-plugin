@@ -99,7 +99,7 @@ namespace Api
 				FString Region = Server.Region;
 
 				// Ping -> Get the latencies on pong.
-				FUDPPing::UDPEcho(IpPort, 10.00, FIcmpEchoResultDelegate::CreateLambda(
+				FUDPPing::UDPEcho(IpPort, FRegistry::Settings.QosPingTimeout, FIcmpEchoResultDelegate::CreateLambda(
 					[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError](FIcmpEchoResult& PingResult)
 					{
 						// Add <Region, PingSeconds>

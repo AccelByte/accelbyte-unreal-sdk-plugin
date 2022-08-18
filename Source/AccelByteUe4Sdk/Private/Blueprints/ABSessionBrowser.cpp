@@ -432,6 +432,27 @@ void UABSessionBrowser::GetGameSessionsByTypeEnumAndMatchExist(
 	);
 }
 
+void UABSessionBrowser::GetGameSessionsByUserIds(TArray<FString> UserIds,
+	FDModelsSessionBrowserGetResultByUserIdsResponse const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->SessionBrowser.GetGameSessionsByUserIds(
+		UserIds,
+		THandler<FAccelByteModelsSessionBrowserGetByUserIdsResult>::CreateLambda(
+			[OnSuccess](FAccelByteModelsSessionBrowserGetByUserIdsResult const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
 void UABSessionBrowser::RegisterPlayer(
 	FString const& SessionId,
 	FString const& PlayerToAdd,

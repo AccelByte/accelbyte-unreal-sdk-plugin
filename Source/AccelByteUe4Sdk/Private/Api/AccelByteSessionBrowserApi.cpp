@@ -382,6 +382,37 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
+	void SessionBrowser::GetGameSessionsByUserIds(const TArray<FString>& UserIds
+		, THandler<FAccelByteModelsSessionBrowserGetByUserIdsResult> const& OnSuccess
+		, FErrorHandler const& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+		
+		if (UserIds.Num() == 0)
+		{
+			OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Empty userIds"));
+			return;
+		}
+
+		FString UserIdsQueryString = FString::Join(UserIds, TEXT(","));
+		UserIdsQueryString = FGenericPlatformHttp::UrlEncode(UserIdsQueryString);
+		
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/bulk?user_ids=%s"), *SettingsRef.SessionBrowserServerUrl, *CredentialsRef.GetNamespace(), *UserIdsQueryString);
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
 	void SessionBrowser::RegisterPlayer(FString const& SessionId
 		, FString const& PlayerToAdd
 		, bool AsSpectator
