@@ -67,7 +67,7 @@ namespace GameServerApi
 			{
 				auto Server = Result.Servers[i];
 				int32 Count = Result.Servers.Num();
-				FUDPPing::UDPEcho(FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Port), FRegistry::ServerSettings.QosPingTimeout, FIcmpEchoResultDelegate::CreateLambda([this, Server, OnSuccess, Count](FIcmpEchoResult &Result)
+				FUDPPing::UDPEcho(FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Port), 10.00, FIcmpEchoResultDelegate::CreateLambda([this, Server, OnSuccess, Count](FIcmpEchoResult &Result)
 				{
 					Latencies.Add(TPair<FString, float>(Server.Region, Result.Time * 1000));
 					if (Count == Latencies.Num())

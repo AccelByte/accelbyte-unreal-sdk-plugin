@@ -368,27 +368,3 @@ void UABUGC::DeleteChannel(
 		)
 	);
 }
-
-void UABUGC::UpdateLikeStatusToContent(const FString& ContentId,
-	bool bLikeStatus,
-	FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
-	FDErrorHandler const& OnError
-)
-{
-	ApiClientPtr->UGC.UpdateLikeStatusToContent(
-		ContentId,
-		bLikeStatus, 
-		THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse>::CreateLambda(
-			[OnSuccess](FAccelByteModelsUGCUpdateLikeStatusToContentResponse const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
-}

@@ -64,15 +64,10 @@ void UABGroup::GetGroup(
 void UABGroup::UpdateGroup(
 	const FString& GroupId,
 	const bool bCompletelyReplace,
-	FAccelByteModelsGroupUpdatable& RequestContent,
+	const FAccelByteModelsGroupUpdatable RequestContent,
 	const FUpdateGroupSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	if (!RequestContent.CustomAttributes.JsonObject.IsValid())
-	{
-		RequestContent.CustomAttributes.JsonObjectFromString(RequestContent.CustomAttributes.JsonString);
-	}
-
 	ApiClientPtr->Group.UpdateGroup(
 		GroupId,
 		bCompletelyReplace,
@@ -90,15 +85,10 @@ void UABGroup::UpdateGroup(
 
 void UABGroup:: UpdateGroupCustomAttributes(
 	const FString& GroupId,
-	FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
+	const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
 	const FUpdateGroupCustomAttributesSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	if (!RequestContent.CustomAttributes.JsonObject.IsValid())
-	{
-		RequestContent.CustomAttributes.JsonObjectFromString(RequestContent.CustomAttributes.JsonString);
-	}
-
 	ApiClientPtr->Group.UpdateGroupCustomAttributes(
 		GroupId,
 		RequestContent,
@@ -132,15 +122,10 @@ void UABGroup::DeleteGroup(
 
 void UABGroup::UpdateGroupCustomRule(
 	const FString& GroupId,
-	FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
+	const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
 	const FUpdateGroupCustomRuleSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	if (!RequestContent.GroupCustomRule.JsonObject.IsValid())
-	{
-		RequestContent.GroupCustomRule.JsonObjectFromString(RequestContent.GroupCustomRule.JsonString);
-	}
-
 	ApiClientPtr->Group.UpdateGroupCustomRule(
 		GroupId,
 		RequestContent,
@@ -280,8 +265,8 @@ void UABGroup::GetGroupMembersListByGroupId(
 	ApiClientPtr->Group.GetGroupMembersListByGroupId(
 		GroupId,
 		RequestContent,
-		THandler<FAccelByteModelsGetGroupMemberListResponse>::CreateLambda(
-			[OnSuccess](const FAccelByteModelsGetGroupMemberListResponse Response)
+		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
 		{
 			OnSuccess.ExecuteIfBound(Response);
 		}),
@@ -445,10 +430,10 @@ void UABGroup::DeleteMemberRole(
 	ApiClientPtr->Group.DeleteMemberRole(
 		MemberRoleId,
 		RequestContent,
-		FVoidHandler::CreateLambda(
-			[OnSuccess]()
+		THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsGetUserGroupInfoResponse Response)
 	{
-		OnSuccess.ExecuteIfBound();
+		OnSuccess.ExecuteIfBound(Response);
 	}),
 	FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 	{
@@ -456,45 +441,3 @@ void UABGroup::DeleteMemberRole(
 	}));
 }
 #pragma endregion /Group Roles (permissions)
-
-
-#pragma region Group Member Request
-void UABGroup::GetGroupJoinRequests(
-	const FString& GroupId,
-	const FAccelByteModelsLimitOffsetRequest& RequestContent,
-	const FGetGroupJoinRequestsSuccess& OnSuccess,
-	const FDErrorHandler& OnError)
-{
-	ApiClientPtr->Group.GetGroupJoinRequests(
-	GroupId,
-	RequestContent,
-	THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
-		[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse Response)
-		{
-			OnSuccess.ExecuteIfBound(Response);
-		}),
-	FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
-}
-
-void UABGroup::GetGroupInvitationRequests(
-	const FAccelByteModelsLimitOffsetRequest& RequestContent,
-	const FGetGroupInvitationRequestsSuccess& OnSuccess,
-	const FDErrorHandler& OnError)
-{
-	ApiClientPtr->Group.GetGroupInvitationRequests(
-	RequestContent,
-	THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
-		[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse Response)
-		{
-			OnSuccess.ExecuteIfBound(Response);
-		}),
-	FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
-}
-
-#pragma endregion /Group MemberRequest

@@ -174,14 +174,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserGetResult
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserGetByUserIdsResult
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | SessionBrowserGetResult")
-	TArray<FAccelByteModelsSessionBrowserData> Data{};
-};
-
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserAddPlayerRequest
 {
 	GENERATED_BODY()

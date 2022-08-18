@@ -31,8 +31,6 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelResponse, FAccelByteModelsUG
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelsPagingResponse, FAccelByteModelsUGCChannelsPagingResponse, Response);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateLikeStatusToContentResponse, FAccelByteModelsUGCUpdateLikeStatusToContentResponse, Response);
-
 #pragma endregion
 
 UCLASS(BlueprintType, Blueprintable)
@@ -162,12 +160,6 @@ public:
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
-	void UpdateLikeStatusToContent(const FString& ContentId,
-		bool bLikeStatus,
-		FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
-		FDErrorHandler const& OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;

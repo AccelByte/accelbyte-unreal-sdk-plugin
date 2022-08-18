@@ -32,7 +32,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FAcceptGroupInvitationSuccess, const FAccelByt
 DECLARE_DYNAMIC_DELEGATE_OneParam(FRejectGroupInvitationSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FJoinGroupSuccess, const FAccelByteModelsJoinGroupResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FCancelJoinGroupRequestSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FGetGroupMembersListByGroupIdSuccess, const FAccelByteModelsGetGroupMemberListResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FGetGroupMembersListByGroupIdSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FLeaveGroupSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserGroupInfoByUserIdSuccess, const FAccelByteModelsGetUserGroupInfoResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FInviteUserToGroupSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
@@ -43,11 +43,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FKickGroupMemberSuccess, const FAccelByteModel
 // Group Roles (permissions)
 DECLARE_DYNAMIC_DELEGATE_OneParam(FGetMemberRolesSuccess, const FAccelByteModelsGetMemberRolesListResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAssignMemberRoleSuccess, const FAccelByteModelsGetUserGroupInfoResponse&, Response);
-DECLARE_DYNAMIC_DELEGATE(FDeleteMemberRoleSuccess);
-
-// Group Member Request
-DECLARE_DYNAMIC_DELEGATE_OneParam(FGetGroupJoinRequestsSuccess, const FAccelByteModelsGetMemberRequestsListResponse&, Response);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FGetGroupInvitationRequestsSuccess, const FAccelByteModelsGetMemberRequestsListResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDeleteMemberRoleSuccess, const FAccelByteModelsGetUserGroupInfoResponse&, Response);
 #pragma endregion /Dynamic Delegates
 
 
@@ -154,7 +150,7 @@ public:
 	void UpdateGroup(
 		const FString& GroupId,
 		const bool bCompletelyReplace,
-		FAccelByteModelsGroupUpdatable& RequestContent,
+		const FAccelByteModelsGroupUpdatable RequestContent,
 		const FUpdateGroupSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
@@ -194,7 +190,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void UpdateGroupCustomAttributes(
 		const FString& GroupId,
-		FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
+		const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
 		const FUpdateGroupCustomAttributesSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
@@ -215,7 +211,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void UpdateGroupCustomRule(
 		const FString& GroupId,
-		FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
+		const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
 		const FUpdateGroupCustomRuleSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
@@ -552,45 +548,7 @@ public:
 		const FDErrorHandler& OnError);
 #pragma endregion /Group Roles (permissions)
 
-	#pragma region Group Member Request
-	/**
-	 * @brief Get list of join requests in a specific group.
-	 * - Required valid user authentication.
-	 * - Required Member Role Permission: "GROUP:JOIN [READ]".
-	 * - Group members needs to have permission (+belong to the group) to access this endpoint.
-	 * 
-	 * Action code:: 73501
-	 * 
-	 * @param GroupId of the group you want to see the join requests from.
-	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
-	 * @param OnSuccess Paginated.
-	 * @param OnError 
-	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
-	void GetGroupJoinRequests(
-		const FString& GroupId,
-		const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const FGetGroupJoinRequestsSuccess& OnSuccess,
-		const FDErrorHandler& OnError);
-
-	/**
-	 * @brief Get group invitation request list for the user calling this endpoint.
-	 * - Required valid user authentication.
-	 * - Checks any group invitation for this user.
-	 *
-	 * Action code:: 73502
-	 *
-	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
-	 * @param OnSuccess Paginated.
-	 * @param OnError
-	 */
-	void GetGroupInvitationRequests(
-		const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const FGetGroupInvitationRequestsSuccess& OnSuccess,
-		const FDErrorHandler& OnError);
-
-	#pragma endregion /Group MemberRequest
-
+	
 private:
 	FApiClientPtr ApiClientPtr;
 };

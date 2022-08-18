@@ -14,9 +14,16 @@
 UENUM(BlueprintType)
 enum class EAccelByteGroupListSortBy : uint8
 {
-	/** @brief Default == ascending. Can change to "desc". Anything != "desc" will remain default */
-	ASCENDING = 0,
-	DESCENDING
+	NONE = 0,
+	LISTORDER,
+	LISTORDER_ASC,
+	LISTORDER_DESC,
+	CREATED_AT,
+	CREATED_AT_ASC,
+	CREATED_AT_DESC,
+	UPDATED_AT,
+	UPDATED_AT_ASC,
+	UPDATED_AT_DESC,
 };
 
 /** @brief For CreateGroup request: Only joinGroup || inviteUser are accepted. */
@@ -49,15 +56,6 @@ enum class EAccelByteGroupType : uint8
 	PRIVATE,
 };
 
-UENUM(BlueprintType)
-enum class EAccelByteGroupRequestType : uint8
-{
-	NONE = 0,
-	INVITE,
-	JOIN,
-	JOINED
-};
-
 /**
  * @brief a TArray element from FAccelByteModelsGetMemberRequestsListResponse.Data[].
  * Shared with:
@@ -76,7 +74,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMemberRequestResponse
 	FString UserId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestResponse")
-	EAccelByteGroupRequestType RequestType{};
+	FString RequestType{};
 };
 
 /**
@@ -275,24 +273,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupUpdatable
 	FString GroupIcon{};
 };
 
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUserGroupInformationResponse
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsUserGroupInformationResponse")
-	FString GroupId {};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsUserGroupInformationResponse")
-	FString UserId {};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsUserGroupInformationResponse")
-	FString Status {};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsUserGroupInformationResponse")
-	TArray<FString> MemberRoleId{};
-};
-
 /**
  * @brief Shared Model for group member requests for:
  * - GetGroupMembersList
@@ -307,12 +287,12 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMemberRequestGroupResponse
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestGroupResponse")
+	FString GroupId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestGroupResponse")
-	FString GroupId {};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestGroupResponse")
-	FString UserId {};
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
@@ -373,64 +353,20 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGetGroupMembersListByGroupIdRequest : public FAccelByteModelsLimitOffsetRequest
 {
 	GENERATED_BODY()
-
+	
 	/** @brief Default == ascending. Can change to "desc". Anything != "desc" will remain default */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupMembersListByGroupIdRequest")
-	EAccelByteGroupListSortBy SortBy {};
-};
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsGetGroupMemberListResponse
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupMemberListResponse")
-	TArray<FAccelByteModelsUserGroupInformationResponse> data{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupMemberListResponse")
-	FAccelByteModelsPaging Paging {};
+	FString Order{};
 };
 
 /** @brief AKA "SearchGroupListResponse"{}; GroupInformation + Paging */
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsGetGroupListResponse
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGetGroupListResponse : public FAccelByteModelsGroupInformation
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupListResponse")
-	TArray<FAccelByteModelsGroupInformation> data{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupListResponse")
 	FAccelByteModelsPaging Paging{};
-};
-
-/** @brief Member Role Permission*/
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsMemberRolePermission
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRolePermission")
-	int Action = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRolePermission")
-	FString ResourceName{};
-};
-
-/** @brief Member Role*/
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsMemberRole
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRole")
-	FString MemberRoleId{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRole")
-	FString MemberRoleName{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRole")
-	TArray<FAccelByteModelsMemberRolePermission> MemberRolePermissions{};
 };
 
 /** @brief Paginated */
@@ -438,12 +374,18 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGetMemberRolesListResponse
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRolesListResponse")
+	FAccelByteModelsPaging Paging{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRolesListResponse")
-	FAccelByteModelsPaging Paging {};
+	FString MemberRoleId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRolesListResponse")
-	TArray<FAccelByteModelsMemberRole> Data{};
+	FString MemberRoleName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRolesListResponse")
+	TArray<FString> MemberRolePermissions{};
 };
 
 /**
@@ -486,7 +428,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetMemberRequestsListResponse
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRequestsListResponse")
-	TArray<FAccelByteModelsMemberRequestResponse> Data{};
+	TArray<FAccelByteModelsRuleInformation> Data{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRequestsListResponse")
 	FAccelByteModelsPaging Paging{};

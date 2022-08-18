@@ -296,18 +296,6 @@ public:
 		uint32 Limit = 10);
 
 	/**
-	* @brief Query game session by user ids
-	*
-	* @param UserIds List of user id
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserGetByUserIdsResult.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void GetGameSessionsByUserIds(
-		const TArray<FString>& UserIds,
-		THandler<FAccelByteModelsSessionBrowserGetByUserIdsResult> const& OnSuccess,
-		FErrorHandler const& OnError);
-
-	/**
 	* @brief RegisterPlayer to game session
 	*
 	* @param SessionId id of the session
