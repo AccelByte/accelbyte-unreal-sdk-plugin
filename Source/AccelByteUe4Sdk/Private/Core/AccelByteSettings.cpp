@@ -25,14 +25,13 @@ UAccelByteSettingsProd::UAccelByteSettingsProd()
 
 static const FString DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
 
-static FString GetDefaultClientAPIUrl(FString const& SpecificServerUrl, FString const& BaseUrl, FString const& DefaultServerPath)
+FString GetClientConfigUrlValue(const FString& SectionPath, const FString& Key, const FString& BaseUrl, const FString& DefaultPrefix)
 {
-	if (SpecificServerUrl.IsEmpty())
-	{
-		return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultServerPath);
-	}
+	FString Value;
 
-	return SpecificServerUrl;
+	if (GConfig->GetString(*SectionPath, *Key, Value, GEngineIni)) return Value;
+
+	return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultPrefix);
 }
 
 void Settings::LoadSettings(const FString& SectionPath)
@@ -51,69 +50,46 @@ void Settings::LoadSettings(const FString& SectionPath)
 	LoadFallback(SectionPath, TEXT("PublisherNamespace"), PublisherNamespace);
 	LoadFallback(SectionPath, TEXT("RedirectURI"), RedirectURI);
 
-	GConfig->GetString(*SectionPath, TEXT("IamServerUrl"), IamServerUrl, GEngineIni);
-	IamServerUrl = GetDefaultClientAPIUrl(IamServerUrl, BaseUrl, TEXT("iam"));
+	IamServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("IamServerUrl"), BaseUrl, TEXT("iam"));
 
-	GConfig->GetString(*SectionPath, TEXT("PlatformServerUrl"), PlatformServerUrl, GEngineIni);
-	PlatformServerUrl = GetDefaultClientAPIUrl(PlatformServerUrl, BaseUrl, TEXT("platform"));
+	PlatformServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("PlatformServerUrl"), BaseUrl, TEXT("platform"));
 	
-	GConfig->GetString(*SectionPath, TEXT("LobbyServerUrl"), LobbyServerUrl, GEngineIni);
-	if (LobbyServerUrl.IsEmpty())
-	{
-		const FString LobbyBaseUrl = BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
-		LobbyServerUrl = FString::Printf(TEXT("%s/%s"), *LobbyBaseUrl, TEXT("lobby/"));
-	}
-
-	GConfig->GetString(*SectionPath, TEXT("BasicServerUrl"), BasicServerUrl, GEngineIni);
-	BasicServerUrl = GetDefaultClientAPIUrl(BasicServerUrl, BaseUrl, TEXT("basic"));
-
-	GConfig->GetString(*SectionPath, TEXT("CloudStorageServerUrl"), CloudStorageServerUrl, GEngineIni);
-	CloudStorageServerUrl = GetDefaultClientAPIUrl(CloudStorageServerUrl, BaseUrl, TEXT("social"));
-
-	GConfig->GetString(*SectionPath, TEXT("GameProfileServerUrl"), GameProfileServerUrl, GEngineIni);
-	GameProfileServerUrl = GetDefaultClientAPIUrl(GameProfileServerUrl, BaseUrl, TEXT("social"));
-
-	GConfig->GetString(*SectionPath, TEXT("GroupServerUrl"), GroupServerUrl, GEngineIni);
-	GroupServerUrl = GetDefaultClientAPIUrl(GroupServerUrl, BaseUrl, TEXT("group"));
-
-	GConfig->GetString(*SectionPath, TEXT("StatisticServerUrl"), StatisticServerUrl, GEngineIni);
-	StatisticServerUrl = GetDefaultClientAPIUrl(StatisticServerUrl, BaseUrl, TEXT("social"));
-
-	GConfig->GetString(*SectionPath, TEXT("QosManagerServerUrl"), QosManagerServerUrl, GEngineIni);
-	QosManagerServerUrl = GetDefaultClientAPIUrl(QosManagerServerUrl, BaseUrl, TEXT("qosm"));
-
-	GConfig->GetString(*SectionPath, TEXT("LeaderboardServerUrl"), LeaderboardServerUrl, GEngineIni);
-	LeaderboardServerUrl = GetDefaultClientAPIUrl(LeaderboardServerUrl, BaseUrl, TEXT("leaderboard"));
-
-	GConfig->GetString(*SectionPath, TEXT("GameTelemetryServerUrl"), GameTelemetryServerUrl, GEngineIni);
-	GameTelemetryServerUrl = GetDefaultClientAPIUrl(GameTelemetryServerUrl, BaseUrl, TEXT("game-telemetry"));
-
-	GConfig->GetString(*SectionPath, TEXT("AgreementServerUrl"), AgreementServerUrl, GEngineIni);
-	AgreementServerUrl = GetDefaultClientAPIUrl(AgreementServerUrl, BaseUrl, TEXT("agreement"));
-
-	GConfig->GetString(*SectionPath, TEXT("CloudSaveServerUrl"), CloudSaveServerUrl, GEngineIni);
-	CloudSaveServerUrl = GetDefaultClientAPIUrl(CloudSaveServerUrl, BaseUrl, TEXT("cloudsave"));
-
-	GConfig->GetString(*SectionPath, TEXT("AchievementServerUrl"), AchievementServerUrl, GEngineIni);
-	AchievementServerUrl = GetDefaultClientAPIUrl(AchievementServerUrl, BaseUrl, TEXT("achievement"));
-
-	GConfig->GetString(*SectionPath, TEXT("SessionBrowserServerUrl"), SessionBrowserServerUrl, GEngineIni);
-	SessionBrowserServerUrl = GetDefaultClientAPIUrl(SessionBrowserServerUrl, BaseUrl, TEXT("sessionbrowser"));
-
-	GConfig->GetString(*SectionPath, TEXT("UGCServerUrl"), UGCServerUrl, GEngineIni);
-	UGCServerUrl = GetDefaultClientAPIUrl(UGCServerUrl, BaseUrl, TEXT("ugc"));
+	const FString LobbyBaseUrl = BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
+	LobbyServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("LobbyServerUrl"), LobbyBaseUrl, TEXT("lobby/"));
 	
-	GConfig->GetString(*SectionPath, TEXT("SeasonPassServerUrl"), SeasonPassServerUrl, GEngineIni);
-	SeasonPassServerUrl = GetDefaultClientAPIUrl(SeasonPassServerUrl, BaseUrl, TEXT("seasonpass"));
+	BasicServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("BasicServerUrl"), BaseUrl, TEXT("basic"));
 
-	GConfig->GetString(*SectionPath, TEXT("ReportingServerUrl"), ReportingServerUrl, GEngineIni);
-	ReportingServerUrl = GetDefaultClientAPIUrl(ReportingServerUrl, BaseUrl, TEXT("reporting"));
+	CloudStorageServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("CloudStorageServerUrl"), BaseUrl, TEXT("social"));
 
-	GConfig->GetString(*SectionPath, TEXT("SessionServerUrl"), SessionServerUrl, GEngineIni);
-	SessionServerUrl = GetDefaultClientAPIUrl(SessionServerUrl, BaseUrl, TEXT("session"));
+	GameProfileServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("GameProfileServerUrl"), BaseUrl, TEXT("social"));
+
+	GroupServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("GroupServerUrl"), BaseUrl, TEXT("group"));
+
+	StatisticServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("StatisticServerUrl"), BaseUrl, TEXT("social"));
+
+	QosManagerServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("QosManagerServerUrl"), BaseUrl, TEXT("qosm"));
+
+	LeaderboardServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("LeaderboardServerUrl"), BaseUrl, TEXT("leaderboard"));
+
+	GameTelemetryServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("GameTelemetryServerUrl"), BaseUrl, TEXT("game-telemetry"));
+
+	AgreementServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("AgreementServerUrl"), BaseUrl, TEXT("agreement"));
+
+	CloudSaveServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("CloudSaveServerUrl"), BaseUrl, TEXT("cloudsave"));
+
+	AchievementServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("AchievementServerUrl"), BaseUrl, TEXT("achievement"));
+
+	SessionBrowserServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SessionBrowserServerUrl"), BaseUrl, TEXT("sessionbrowser"));
+
+	UGCServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("UGCServerUrl"), BaseUrl, TEXT("ugc"));
 	
-	GConfig->GetString(*SectionPath, TEXT("MatchmakingV2ServerUrl"), MatchmakingV2ServerUrl, GEngineIni);
-	MatchmakingV2ServerUrl = GetDefaultClientAPIUrl(MatchmakingV2ServerUrl, BaseUrl, TEXT("match2"));
+	SeasonPassServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SeasonPassServerUrl"), BaseUrl, TEXT("seasonpass"));
+
+	ReportingServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ReportingServerUrl"), BaseUrl, TEXT("reporting"));
+
+	SessionServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SessionServerUrl"), BaseUrl, TEXT("session"));
+	
+	MatchmakingV2ServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("MatchmakingV2ServerUrl"), BaseUrl, TEXT("match2"));
 
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 
@@ -147,7 +123,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 	}
 	else
 	{
-		QosPingTimeout = .6;
+		QosPingTimeout = .6f;
 	}
 }
 

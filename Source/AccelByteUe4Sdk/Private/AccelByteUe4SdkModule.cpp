@@ -91,9 +91,9 @@ void FAccelByteUe4SdkModule::SetEnvironment(ESettingsEnvironment const Environme
 {
 	LoadClientSettings(Environment);
 	LoadServerSettings(Environment);
+	SettingsEnvironment = Environment;
 	if (EnvironmentChangedDelegate.IsBound())
 	{
-		SettingsEnvironment = Environment;
 		EnvironmentChangedDelegate.Broadcast(Environment);
 	}
 }
@@ -169,7 +169,7 @@ bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Envir
 		return bResult;
 	}
 	
-	FRegistry::Settings = ClientSettings;
+	FRegistry::Settings.Reset(Environment);
 	FRegistry::Credentials.SetClientCredentials(Environment);
 
 	return bResult;
@@ -190,7 +190,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 		return bResult;
 	}
 	
-	FRegistry::ServerSettings = ServerSettings;
+	FRegistry::ServerSettings.Reset(Environment);
 	FRegistry::ServerCredentials.SetClientCredentials(Environment);
 	
 	return bResult;

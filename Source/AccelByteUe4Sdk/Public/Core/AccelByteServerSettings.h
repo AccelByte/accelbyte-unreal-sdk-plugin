@@ -15,28 +15,27 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API ServerSettings
 {
 public:
-	FString ClientId;
-	FString ClientSecret;
-	FString Namespace;
-	FString PublisherNamespace;
-    FString RedirectURI;
-	FString BaseUrl;
-	FString IamServerUrl;
-	FString DSMControllerServerUrl;
-	FString StatisticServerUrl;
-	FString PlatformServerUrl;
-	FString QosManagerServerUrl;
-	FString GameTelemetryServerUrl;
-	FString AchievementServerUrl;
-	FString MatchmakingServerUrl;
-	FString LobbyServerUrl;
-	FString CloudSaveServerUrl;
-	FString SeasonPassServerUrl;
-	FString SessionBrowserServerUrl;
-	FString SessionServerUrl;
-
-	float QosPingTimeout{.6};
-
+	FString SessionServerUrl{};
+	FString ClientId{};
+	FString ClientSecret{};
+	FString Namespace{};
+	FString PublisherNamespace{};
+    FString RedirectURI{};
+	FString BaseUrl{};
+	FString IamServerUrl{};
+	FString DSMControllerServerUrl{};
+	FString StatisticServerUrl{};
+	FString PlatformServerUrl{};
+	FString QosManagerServerUrl{};
+	FString GameTelemetryServerUrl{};
+	FString AchievementServerUrl{};
+	FString MatchmakingServerUrl{};
+	FString LobbyServerUrl{};
+	FString CloudSaveServerUrl{};
+	FString SeasonPassServerUrl{};
+	FString SessionBrowserServerUrl{};
+	float QosPingTimeout{.6f};
+	
 	void Reset(ESettingsEnvironment const Environment);
 
 	ServerSettings& operator=(ServerSettings const& Other) = default;
@@ -62,67 +61,67 @@ public:
 	UAccelByteServerSettings();
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	bool ForceEnableSettings;
+	bool ForceEnableSettings{false};
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString ClientId;
+	FString ClientId{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString ClientSecret;
+	FString ClientSecret{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString Namespace;
+	FString Namespace{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString PublisherNamespace;
+	FString PublisherNamespace{};
 
     UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-    FString RedirectURI;
+    FString RedirectURI{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString BaseUrl;
+	FString BaseUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString IamServerUrl;
+	FString IamServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString DSMControllerServerUrl;
+	FString DSMControllerServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString StatisticServerUrl;
+	FString StatisticServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString PlatformServerUrl;
+	FString PlatformServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString QosManagerServerUrl;
+	FString QosManagerServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString GameTelemetryServerUrl;
+	FString GameTelemetryServerUrl{};
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString AchievementServerUrl;
+	FString AchievementServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString MatchmakingServerUrl;
+	FString MatchmakingServerUrl{};
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString LobbyServerUrl;
+	FString LobbyServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString CloudSaveServerUrl;
+	FString CloudSaveServerUrl{};
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString SeasonPassServerUrl;
+	FString SeasonPassServerUrl{};
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString SessionBrowserServerUrl;
+	FString SessionBrowserServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	FString SessionServerUrl;
+	FString SessionServerUrl{};
 
-	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
-	float QosPingTimeout;
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")	
+	float QosPingTimeout{.6f};
 };
 
 UCLASS(Config = Engine)

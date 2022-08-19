@@ -15,38 +15,38 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API Settings
 {
 public:
-	FString ClientId;
-	FString ClientSecret;
-	FString Namespace;
-	FString PublisherNamespace;
-	FString RedirectURI;
-	FString BaseUrl;
-	FString IamServerUrl;
-	FString PlatformServerUrl;
-	FString LobbyServerUrl;
-	FString BasicServerUrl;
-	FString CloudStorageServerUrl;
-	FString GameProfileServerUrl;
-	FString GroupServerUrl;
-	FString StatisticServerUrl;
-	FString QosManagerServerUrl;
-	FString LeaderboardServerUrl;
-	FString CloudSaveServerUrl;
-	FString GameTelemetryServerUrl;
-	FString AgreementServerUrl;
-	FString AchievementServerUrl;
-	FString SessionBrowserServerUrl;
-	FString TurnManagerServerUrl;
-	FString UGCServerUrl;
-	FString SeasonPassServerUrl;
-	FString ReportingServerUrl;
-	FString SessionServerUrl;
-	FString MatchmakingV2ServerUrl;
-	FString AppId;
-	float QosLatencyPollIntervalSecs{0};
-	float QosServerLatencyPollIntervalSecs{0};
-	float QosPingTimeout{.6};
-	bool bEnableHttpCache;
+	FString ClientId{};
+	FString ClientSecret{};
+	FString Namespace{};
+	FString PublisherNamespace{};
+	FString RedirectURI{};
+	FString BaseUrl{};
+	FString IamServerUrl{};
+	FString PlatformServerUrl{};
+	FString LobbyServerUrl{};
+	FString BasicServerUrl{};
+	FString CloudStorageServerUrl{};
+	FString GameProfileServerUrl{};
+	FString GroupServerUrl{};
+	FString StatisticServerUrl{};
+	FString QosManagerServerUrl{};
+	FString LeaderboardServerUrl{};
+	FString CloudSaveServerUrl{};
+	FString GameTelemetryServerUrl{};
+	FString AgreementServerUrl{};
+	FString AchievementServerUrl{};
+	FString SessionBrowserServerUrl{};
+	FString TurnManagerServerUrl{};
+	FString UGCServerUrl{};
+	FString SeasonPassServerUrl{};
+	FString ReportingServerUrl{};
+	FString SessionServerUrl{};
+	FString MatchmakingV2ServerUrl{};
+	FString AppId{};
+	float QosLatencyPollIntervalSecs{.0f};
+	float QosServerLatencyPollIntervalSecs{.0f};
+	float QosPingTimeout{.6f};
+	bool bEnableHttpCache{false};
 	
 	/** @brief Ensure a minimum # secs for Qos Latency polling */
 	constexpr static float MinNumSecsQosLatencyPolling = {60*10}; // 10m
@@ -76,77 +76,77 @@ public:
 	UAccelByteSettings();
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString ClientId;
+	FString ClientId{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString ClientSecret;
+	FString ClientSecret{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString Namespace;
+	FString Namespace{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString PublisherNamespace;
+	FString PublisherNamespace{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString RedirectURI;
+	FString RedirectURI{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString BaseUrl;
+	FString BaseUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString IamServerUrl;
+	FString IamServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString PlatformServerUrl;
+	FString PlatformServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString LobbyServerUrl;
+	FString LobbyServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString CloudStorageServerUrl;
+	FString CloudStorageServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString BasicServerUrl;
+	FString BasicServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString GameProfileServerUrl;
+	FString GameProfileServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString GroupServerUrl;
+	FString GroupServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString StatisticServerUrl;
+	FString StatisticServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString QosManagerServerUrl;
+	FString QosManagerServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString LeaderboardServerUrl;
+	FString LeaderboardServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString CloudSaveServerUrl;
+	FString CloudSaveServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString GameTelemetryServerUrl;
+	FString GameTelemetryServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString AgreementServerUrl;
+	FString AgreementServerUrl{};
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString AchievementServerUrl;
+	FString AchievementServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString SessionBrowserServerUrl;
+	FString SessionBrowserServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString TurnManagerServerUrl;
+	FString TurnManagerServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString UGCServerUrl;
+	FString UGCServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString ReportingServerUrl;
-
+	FString ReportingServerUrl{};
+	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString SessionServerUrl;
 
@@ -154,20 +154,20 @@ public:
 	FString MatchmakingV2ServerUrl;
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString AppId;
+	FString AppId{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	float QosLatencyPollIntervalSecs;
+	float QosLatencyPollIntervalSecs{.0f};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	float QosServerLatencyPollIntervalSecs;
+	float QosServerLatencyPollIntervalSecs{.0f};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	float QosPingTimeout;
+	float QosPingTimeout{.6f};
 	
 	// Enable token for client side http caching
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	bool bEnableHttpCache{ false };
+	bool bEnableHttpCache{false};
 };
 
 UCLASS(Config = Engine)
