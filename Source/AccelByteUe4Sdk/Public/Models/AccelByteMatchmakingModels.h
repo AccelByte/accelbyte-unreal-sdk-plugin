@@ -151,7 +151,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2Ticket
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchFoundNotif")
-	FString Ticket_id{};
+	FString TicketId{};
 };
 
 USTRUCT(BlueprintType)
@@ -166,10 +166,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchFoundNotif
 	FString Namespace{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchFoundNotif")
-	FDateTime Created_at{};
+	FDateTime CreatedAt{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchFoundNotif")
-	FString Match_pool{};
+	FString MatchPool{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchFoundNotif")
 	TArray<FAccelByteModelsV2GameSessionTeam> Teams{};
@@ -184,19 +184,19 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2StartMatchmakingNotif
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | StartMatchmakingNotif")
-	FString Ticket_id{};
+	FString TicketId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | StartMatchmakingNotif")
-	FString Party_id{};
+	FString PartyId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | StartMatchmakingNotif")
 	FString Namespace{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | StartMatchmakingNotif")
-	FDateTime Created_at{0};
+	FDateTime CreatedAt{0};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | StartMatchmakingNotif")
-	FString Match_pool{};
+	FString MatchPool{};
 };
 
 USTRUCT(BlueprintType)

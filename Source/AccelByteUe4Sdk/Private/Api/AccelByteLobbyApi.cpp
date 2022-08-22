@@ -1492,6 +1492,8 @@ void Lobby::UnbindV2GameSessionEvents()
 void Lobby::UnbindV2MatchmakingEvents()
 {
 	V2MatchmakingMatchFoundNotif.Unbind();
+	V2MatchmakingExpiredNotif.Unbind();
+	V2MatchmakingStartNotif.Unbind();
 }
 
 void Lobby::OnConnected()
