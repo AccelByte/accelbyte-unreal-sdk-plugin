@@ -190,6 +190,28 @@ public:
 	*/
 	void DeleteChannel(FString const& ChannelId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
+	/** @brief Public user can access without token or if token specified, requires valid user token.   
+	*
+	* @param Name Content Name.
+	* @param Creator Creator Name.
+	* @param Type Content Type.
+	* @param Subtype Content Subtype.
+	* @param Tags Content Tags.
+	* @param IsOfficial Filter only official contents
+	* @param UserId User Id 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param SortBy Sorting criteria, name,download,like,date. default=date.
+	* @param OrderBy Sorting order: asc, desc. default=desc
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/
+	void SearchContents(const FString& Name, const FString& Creator, const FString& Type, const FString& Subtype,
+		const TArray<FString>& Tags, bool IsOfficial, const FString& UserId,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess, FErrorHandler const& OnError,
+		EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC,
+		int32 Limit = 1000, int32 Offset = 0);
+
 	/** @brief Update like/unlike status to a content
 	*
 	* @param ContentId The content id that will be updated.
@@ -199,7 +221,50 @@ public:
 	* **/
 	void UpdateLikeStatusToContent(const FString& ContentId, bool bLikeStatus,
 		THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse> const& OnSuccess, FErrorHandler const& OnError);
-	
+
+	/** @brief Get list of followers.
+	*
+	* @param UserId The id of the user that will be given it's followers.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of user per page, Default value : 1000.
+	* @param Offset The offset number to retrieve, Default value : 0.
+	*/
+	void GetListFollowers(const FString& UserId, THandler<FAccelByteModelsUGCGetListFollowersPagingResponse> const& OnSuccess, FErrorHandler const& OnError,
+		int32 Limit = 1000, int32 Offset = 0);
+
+	/** @brief Update follow/unfollow status to a user.
+	*
+	* @param UserId The id of the user that will be updated.
+	* @param bFollowStatus The new follow status value.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void UpdateFollowStatusToUser(const FString& UserId, bool bFollowStatus, THandler<FAccelByteModelsUGCUpdateFollowStatusToUserResponse> const& OnSuccess, FErrorHandler const& OnError);
+
+	/** @brief Search contents specific to a channel.   
+	*
+	* @param ChannelId Channel Id.
+	* @param Name Content Name.
+	* @param Creator Creator Name.
+	* @param Type Content Type.
+	* @param Subtype Content Subtype.
+	* @param Tags Content Tags.
+	* @param IsOfficial Filter only official contents
+	* @param UserId User Id 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param SortBy Sorting criteria, name,download,like,date. default=date.
+	* @param OrderBy Sorting order: asc, desc. default=desc
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/
+	void SearchContentsSpecificToChannel(const FString& ChannelId, const FString& Name, const FString& Creator, const FString& Type, const FString& Subtype,
+		const TArray<FString>& Tags, bool IsOfficial, const FString& UserId,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess, FErrorHandler const& OnError,
+		EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC,
+		int32 Limit = 1000, int32 Offset = 0);
+
 	private:
 	UGC() = delete;
 	UGC(UGC const&) = delete;

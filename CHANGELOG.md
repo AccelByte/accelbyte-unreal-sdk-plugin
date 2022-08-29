@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [16.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.1.0%0D16.0.1) (2022-08-29)
+
+
+### Bug Fixes
+
+* **Lobby:** fix crash on connecting to lobby ([d6d02e3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d6d02e3795d11cdf969c5ede29b19c92321adc48))
+
+### [15.1.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.1.3%0D16.0.0) (2022-08-18)
+
+
+### Features
+
+* **entitlement:** add platform iap sync for single item ([ea9b7de](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ea9b7de133a97c8f992bddc3535e5e6d1b6db237))
+* iam phase 2 statement & substitute implementation ([86c0c06](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/86c0c069ebdf266809dc585656152fefa0a2e4af))
+* IAM Phase 3 Statement & Substitute Implementation ([6550a69](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6550a692f9ddfb3ddd26910077ec00148f4ad1a7))
+* **lobby:** refactor LobbyMessageToJson function, handle trailing comma on array of object and an object value ([44ea8d7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/44ea8d77fa846c49b5f632bcff8124b205e46f29))
+* **qos:** get ping timeout from GConfig ([d00b6eb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d00b6ebf8bd360a69d7d9bd749b739dd6b06e649))
+* SDK Implementation for UGC service - Get follower count ([028a408](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/028a4087575b753233113494c62b9472946bdb1d))
+* SDK Implementation for UGC service - Get list content ([2a4baa4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2a4baa4bd25f8b66ec4e645caead3309e7c6e266))
+* SDK Implementation for UGC service - Query by Tags ([3ea6b16](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3ea6b167d78f25f23bb03d094de19c027a3cb837))
+
+
+### Bug Fixes
+
+* Cannot remember "device_token" if comes from request header, rename header device_token to device-token ([b4128eb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b4128eb608e50dca9a1139c1d49be0d2bea39573))
+* **settings:** URL didn't change when switching environment ([3801b40](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3801b40345c19282dfe827dd3257f13d108f66a5))
+* SortBy in GetItemByCriteria and UrlEncoded in Query Param Array ([8fd45dc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8fd45dc70f98fcc1e1aa20d39d411ca3c345ce15))
+
 ### [16.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.0.1%0D16.0.0) (2022-08-18)
 
 
@@ -46,6 +74,13 @@ All notable changes to this project will be documented in this file. See [standa
 * **party:** Set Deprecation Variable, Function, and Delegate for PartyLeaveNotif. ([72283eb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/72283eb57dac1ac7c0904080689f6953bfbe436a))
 * SortBy in GetItemByCriteria and UrlEncoded in Query Param Array ([3a15458](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3a1545846e21f7badd09434a024681cb38116021))
 * **statistic:** wrong query params in GetUserStatItems ([b5a1395](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b5a139579e9e6a0abacda2f16b5f095539676758))
+
+### [15.1.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.1.3%0D15.1.2) (2022-08-18)
+
+
+### Bug Fixes
+
+* **settings:** URL didn't change when switching environment ([3801b40](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3801b40345c19282dfe827dd3257f13d108f66a5))
 
 ### [15.1.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/15.1.2%0D15.1.1) (2022-08-05)
 

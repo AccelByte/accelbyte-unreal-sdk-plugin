@@ -628,6 +628,23 @@ namespace AccelByte
 			 */
 			void UpdateUserV3(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
+			/**
+			 * @brief This function for getting publisher user.
+			 *
+			 * @param UserId Targeted User ID.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FGetPublisherUserResponse.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void GetPublisherUser(const FString& UserId, const THandler<FGetPublisherUserResponse>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function for OAuth2 token verification API.
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+
 		private:
 			User() = delete;
 			User(User const&) = delete;
