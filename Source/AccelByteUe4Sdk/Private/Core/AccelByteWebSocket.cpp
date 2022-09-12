@@ -7,6 +7,8 @@
 #include "Core/IWebSocketFactory.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
+#include "Core/AccelByteServerCredentials.h"
+#include "Core/AccelByteCredentials.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteWebsocket, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteWebsocket);
@@ -23,7 +25,25 @@ AccelByteWebSocket::AccelByteWebSocket(
 	, PingDelay(PingDelay)
 	, TotalTimeout(TotalTimeout)
 	, MaxBackoffDelay(MaxBackoffDelay)
-	, Creds(Credentials)
+	, ClientCreds(&Credentials)
+	, WsState(EWebSocketState::Closed)
+	, WsEvents(EWebSocketEvent::None)
+{
+	TickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByteWebSocket::Tick);
+	TickerDelegateHandle.Reset();
+}
+
+AccelByteWebSocket::AccelByteWebSocket(
+	const ServerCredentials& Credentials,
+	float PingDelay /*= 30.f*/,
+	float InitialBackoffDelay /*= 1.f*/,
+	float MaxBackoffDelay /*= 30.f*/,
+	float TotalTimeout /*= 60.f */)
+	: InitialBackoffDelay(InitialBackoffDelay)
+	, PingDelay(PingDelay)
+	, TotalTimeout(TotalTimeout)
+	, MaxBackoffDelay(MaxBackoffDelay)
+	, ServerCreds(&Credentials)
 	, WsState(EWebSocketState::Closed)
 	, WsEvents(EWebSocketEvent::None)
 {
@@ -33,10 +53,13 @@ AccelByteWebSocket::AccelByteWebSocket(
 
 AccelByteWebSocket::~AccelByteWebSocket()
 {
-	if(UObjectInitialized())
+	if (UObjectInitialized())
 	{
 		Disconnect(true);
 	}
+
+	ClientCreds = nullptr;
+	ServerCreds = nullptr;
 }
 
 void AccelByteWebSocket::SetupWebSocket()
@@ -61,8 +84,16 @@ void AccelByteWebSocket::SetupWebSocket()
 	}
 
 	TMap<FString, FString> Headers = UpgradeHeaders;
-	Headers.Add("Authorization", "Bearer " + Creds.GetAccessToken());
-	
+
+	if (ClientCreds != nullptr)
+	{
+		Headers.Add("Authorization", "Bearer " + ClientCreds->GetAccessToken());
+	}
+	else if (ServerCreds != nullptr)
+	{
+		Headers.Add("Authorization", "Bearer " + ServerCreds->GetClientAccessToken());
+	}
+
 	WebSocket = WebSocketFactory->CreateWebSocket(Url, Protocol, Headers);
 
 	WebSocket->OnMessage().AddRaw(this, &AccelByteWebSocket::OnMessageReceived);
@@ -109,7 +140,7 @@ TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> AccelByteWebSocket::Create(
 )
 {
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	TSharedRef<AccelByteWebSocket, ESPMode::ThreadSafe> Ws = MakeShared<AccelByteWebSocket, ESPMode::ThreadSafe>(Credentials);
+	TSharedRef<AccelByteWebSocket, ESPMode::ThreadSafe> Ws = MakeShared<AccelByteWebSocket, ESPMode::ThreadSafe>(Credentials, PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
 		
 	Ws->Url = Url;
 	Ws->Protocol = Protocol;
@@ -119,6 +150,31 @@ TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> AccelByteWebSocket::Create(
 	Ws->SetupWebSocket();
 
 	return Ws;	
+}
+
+TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> AccelByteWebSocket::Create(
+	const FString& Url,
+	const FString& Protocol,
+	const ServerCredentials& Credentials,
+	const TMap<FString, FString>& UpgradeHeaders,
+	const TSharedRef<IWebSocketFactory> WebSocketFactory,
+	float PingDelay /*= 30.f*/,
+	float InitialBackoffDelay /*= 1.f*/,
+	float MaxBackoffDelay /*= 30.f*/,
+	float TotalTimeout /*= 60.f */
+)
+{
+	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
+	TSharedRef<AccelByteWebSocket, ESPMode::ThreadSafe> Ws = MakeShared<AccelByteWebSocket, ESPMode::ThreadSafe>(Credentials, PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
+
+	Ws->Url = Url;
+	Ws->Protocol = Protocol;
+	Ws->UpgradeHeaders = UpgradeHeaders;
+	Ws->WebSocketFactory = WebSocketFactory;
+
+	Ws->SetupWebSocket();
+
+	return Ws;
 }
 
 void AccelByteWebSocket::Connect()

@@ -265,6 +265,96 @@ public:
 		EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC,
 		int32 Limit = 1000, int32 Offset = 0);
 
+	/** @brief Get contents by content Ids
+	*
+	* @param ContentIds Content Ids Array  
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void GetContentBulk(const TArray<FString>& ContentIds, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess,
+		FErrorHandler const& OnError);
+
+	/** @brief Get user's generated contents
+	*
+	* @param UserId User Id 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/	
+	void GetUserContent(const FString& UserId, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess, FErrorHandler const& OnError,
+		int32 Limit = 1000, int32 Offset = 0);
+
+	/** @brief Upload screenshots for content.   
+	*
+	* @param ContentId Content Id.
+	* @param UserId User Id
+	* @param ScreenshotsRequest Screenshots Request  
+	*	Supported file extensions: pjp, jpg, jpeg, jfif, bmp, png.
+	*	Maximum description length: 1024.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void UploadContentScreenshot(const FString& ContentId, const FString& UserId, FAccelByteModelsUGCScreenshotsRequest ScreenshotsRequest,
+		THandler<FAccelByteModelsUGCUpdateContentScreenshotResponse> const& OnSuccess, FErrorHandler const& OnError);
+
+	/** @brief Get contents from followed creators.
+	* 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed. 
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/	
+	void GetFollowedContent(THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess, FErrorHandler const& OnError,
+		int32 Limit = 1000, int32 Offset = 0);
+
+	/** @brief Get followed creators.   
+	*
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/	
+	void GetFollowedUsers(THandler<FAccelByteModelsUGCFollowedUsersResponse> const& OnSuccess, FErrorHandler const& OnError,
+		int32 Limit = 1000, int32 Offset = 0);
+
+	/** @brief Get liked contents.   
+	*
+	* @param Tags Content Tags. 
+	* @param Name Content Name. 
+	* @param Type Content Type.
+	* @param Subtype Content Subtype.
+	* @param IsOfficial Filter only official contents
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	* @param SortBy Sorting criteria, name,download,like,date. default=date.
+	* @param OrderBy Sorting order: asc, desc. default=desc	
+	*/	
+	void GetLikedContent(const TArray<FString>& Tags, const FString& Name, const FString& Type, const FString& Subtype, bool IsOfficial,
+		THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess, FErrorHandler const& OnError,
+		int32 Limit = 1000, int32 Offset = 0, EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC);
+
+	/** @brief Get creator stats: number of total like by other user, number of total following and follower user.   
+	*
+	* @param UserId User Id 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void GetCreator(const FString& UserId, THandler<FAccelByteModelsUGCGetListFollowersResponse> const& OnSuccess, FErrorHandler const& OnError);
+
+	/** @brief Get all user groups 
+	*
+	* @param UserId User Id 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/	
+	void GetGroups(const FString& UserId, THandler<FAccelByteModelsUGCGetGroupsResponse> const& OnSuccess, FErrorHandler const& OnError,
+		int32 Limit = 1000, int32 Offset = 0);
+	
 	private:
 	UGC() = delete;
 	UGC(UGC const&) = delete;

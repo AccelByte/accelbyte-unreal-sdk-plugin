@@ -43,15 +43,28 @@ struct FSetReadyConsentRequest
 	FString matchId;
 };
 
+USTRUCT(BlueprintType)
+struct FSetRejectConsentRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Matchmaking | Models | Reject Consent")
+	FString matchId;
+};
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDStartMatchmakingResponse, FAccelByteModelsMatchmakingResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDCancelMatchmakingResponse, FAccelByteModelsMatchmakingResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDSetReadyConsentResponse, FAccelByteModelsReadyConsentRequest, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDSetRejectConsentResponse, FAccelByteModelsRejectConsentRequest, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDMatchmakingNotif, FAccelByteModelsMatchmakingNotice, Notif);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDSetReadyConsentNotif, FAccelByteModelsReadyConsentNotice, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDSetRejectConsentNotif, FAccelByteModelsRejectConsentNotice, Notif);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDRematchmakingNotif, FAccelByteModelsRematchmakingNotice, Notif);
 
@@ -86,6 +99,12 @@ public:
 		FDSetReadyConsentResponse OnResponse,
 		FDErrorHandler OnError);
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Api")
+	void SetRejectConsent(
+		FSetRejectConsentRequest const& Request,
+		FDSetRejectConsentResponse OnResponse,
+		FDErrorHandler OnError);
+
 	//Notification
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Delegate")
@@ -93,6 +112,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Delegate")
 	void SetOnSetReadyConsent(FDSetReadyConsentNotif OnNotif);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Delegate")
+	void SetOnSetRejectConsent(FDSetRejectConsentNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking | Delegate")
 	void SetOnRematchmaking(FDRematchmakingNotif OnNotif);

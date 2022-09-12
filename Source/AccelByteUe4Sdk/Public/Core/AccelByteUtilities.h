@@ -103,6 +103,15 @@ private:
 class ACCELBYTEUE4SDK_API FAccelByteUtilities
 {
 public:
+	static constexpr uint8 FieldRemovalFlagObjects = 1 << 0;
+	static constexpr uint8 FieldRemovalFlagArrays  = 1 << 1;
+	static constexpr uint8 FieldRemovalFlagStrings = 1 << 2;
+	static constexpr uint8 FieldRemovalFlagDates   = 1 << 3;
+	static constexpr uint8 FieldRemovalFlagNumbers = 1 << 4;
+	static constexpr uint8 FieldRemovalFlagNull    = 1 << 5;
+	static constexpr uint8 FieldRemovalFlagNested  = 1 << 6;
+	static constexpr uint8 FieldRemovalFlagAll     = 0xFF;
+
 	template<typename CharType = TCHAR, template<typename> class PrintPolicy = TPrettyJsonPrintPolicy, typename InStructType>
 	static bool TArrayUStructToJsonString(const TArray<InStructType>& InArray, FString& OutJsonString, int64 CheckFlags = 0, int64 SkipFlags = 0, int32 Indent = 0)
 	{
@@ -198,6 +207,138 @@ public:
 		return QueryParamValue;	
 	}
 
+	/**
+	 * Remove fields which have empty values according to the given flags. Defaults to removing empty objects/arrays, blank
+	 * strings, and recursing on object and array field values.
+	 */
+	static void RemoveEmptyFieldsFromJson(
+		const TSharedPtr<FJsonObject>& JsonObjectPtr,
+		const uint8 Flags = FieldRemovalFlagObjects | FieldRemovalFlagStrings | FieldRemovalFlagArrays | FieldRemovalFlagNested,
+		const TArray<FString>& ExcludedFieldNames = {})
+	{
+// Macro to make field removal flag bit logic more readable
+#define HAS_FIELD_REMOVAL_FLAG(FlagName) ((Flags & FieldRemovalFlag##FlagName) != 0)
+
+		TArray<FString> FieldsToRemove;
+		TMap<FString, TSharedPtr<FJsonValue>> FieldsToReplace;
+
+		// Remove empty field so it doesn't get updated in BE
+		for(auto& KeyValuePair : JsonObjectPtr->Values)
+		{
+			if(!KeyValuePair.Value.IsValid() || ExcludedFieldNames.Contains(KeyValuePair.Key))
+			{
+				continue;
+			}
+
+			bool bRemoveField = false;
+			switch (KeyValuePair.Value->Type)
+			{
+			case EJson::Array:
+			{
+				TArray<TSharedPtr<FJsonValue>> OriginalArray = KeyValuePair.Value->AsArray();
+				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Arrays) && OriginalArray.Num() == 0;
+
+				if(bRemoveField || !HAS_FIELD_REMOVAL_FLAG(Nested))
+				{
+					break;
+				}
+
+				// If the array is not empty, we want to look for nested objects which might have empty values inside them
+				TArray<TSharedPtr<FJsonValue>> NewArray;
+				for(const auto& NestedValue : OriginalArray)
+				{
+					// Skipping over any array item that is not an object
+					if(NestedValue->Type != EJson::Object)
+					{
+						NewArray.Add(NestedValue);
+						continue;
+					}
+
+					TSharedPtr<FJsonObject> NestedObject = NestedValue->AsObject();
+					RemoveEmptyFieldsFromJson(NestedObject, Flags, ExcludedFieldNames);
+
+					if(HAS_FIELD_REMOVAL_FLAG(Objects) && NestedObject->Values.Num() == 0)
+					{
+						continue;
+					}
+					NewArray.Add(MakeShared<FJsonValueObject>(NestedObject));
+				}
+
+				if(HAS_FIELD_REMOVAL_FLAG(Arrays) && NewArray.Num() == 0)
+				{
+					bRemoveField = true;
+					break;
+				}
+				FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueArray>(NewArray));
+
+				break;
+			}
+			case EJson::Object:
+			{
+				TSharedPtr<FJsonObject> Object = KeyValuePair.Value->AsObject();
+				TArray<FString> Keys;
+				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Objects) && Object->Values.Num() == 0;
+
+				if(bRemoveField || !HAS_FIELD_REMOVAL_FLAG(Nested))
+				{
+					break;
+				}
+
+				RemoveEmptyFieldsFromJson(Object, Flags, ExcludedFieldNames);
+				if(HAS_FIELD_REMOVAL_FLAG(Objects) && Object->Values.Num() == 0)
+				{
+					bRemoveField = true;
+					break;
+				}
+				FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueObject>(Object));
+
+				break;
+			}
+			case EJson::String:
+			{
+				const FString Value = KeyValuePair.Value->AsString();
+
+				// Removing string fields if the dates flag is set and the string is equal to an uninitialized datetime (aka 0 ticks)
+				bRemoveField =
+					(HAS_FIELD_REMOVAL_FLAG(Strings) && Value.IsEmpty()) ||
+					(HAS_FIELD_REMOVAL_FLAG(Dates) && Value.Equals(FDateTime(0).ToString()));
+
+				break;
+			}
+			case EJson::Number:
+			{
+				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Numbers) && KeyValuePair.Value->AsNumber() == 0;
+				break;
+			}
+			case EJson::Null:
+			{
+				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Null);
+				break;
+			}
+
+			// Redundant technically, but for readability explicitly says that we don't care about the other members of EJson
+			default: break;
+			}
+
+			if(bRemoveField)
+			{
+				FieldsToRemove.Add(KeyValuePair.Key);
+			}
+		}
+
+		for(const FString& Key : FieldsToRemove)
+		{
+			JsonObjectPtr->RemoveField(Key);
+		}
+
+		for(const auto& KeyValuePair : FieldsToReplace)
+		{
+			JsonObjectPtr->SetField(KeyValuePair.Key, KeyValuePair.Value);
+		}
+
+#undef HAS_FIELD_REMOVAL_FLAG
+	}
+
 	static TMap<FString, FString> CreateQueryParamsAndSkipIfValueEmpty(TMap<FString, FString> Map)
 	{
 		TMap<FString, FString> Query = {};
@@ -232,6 +373,10 @@ public:
 		return true;
 	}
 	
+	static FString GetDeviceId();
+
+	static FString XOR(const FString& Input, const FString& Key);
+
 private:
 	static void AppendQueryParam(FString& Query, FString const& Param, FString const& Value)
 	{
@@ -241,6 +386,8 @@ private:
 			Query.Append(FString::Printf(TEXT("%s=%s"), *Param, *Value));
 		}		
 	}
+
+	static FString LocalDeviceId();
 };
 
 USTRUCT(BlueprintType)

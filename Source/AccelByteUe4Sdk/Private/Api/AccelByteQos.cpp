@@ -7,6 +7,7 @@
 #include "Networking.h"
 #include "Api/AccelByteQosManagerApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 
 namespace AccelByte
 {
@@ -31,7 +32,7 @@ namespace Api
 	
 	void Qos::OnLoginSuccess(const FOauth2Token& Response)
 	{
-		GetServerLatencies(THandler<TArray<TPair<FString, float>>>(), FErrorHandler());
+		GetServerLatencies(nullptr, nullptr);
 	}
 
 	void Qos::GetServerLatencies(
@@ -86,6 +87,12 @@ namespace Api
 	{
 		TSharedRef<TArray<TPair<FString, float>>> SuccessLatencies = MakeShared<TArray<TPair<FString, float>>>();
 		TSharedRef<TArray<FString>> FailedLatencies = MakeShared<TArray<FString>>();
+
+#if PLATFORM_ANDROID
+		UE_LOG(LogAccelByte, Warning, TEXT("Android device does not support UE UDP Echo"));
+		OnSuccess.ExecuteIfBound(*SuccessLatencies);
+		return;
+#endif
 
 		int32 Count = QosServerList.Servers.Num();
 		

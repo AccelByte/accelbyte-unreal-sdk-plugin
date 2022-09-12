@@ -13,6 +13,7 @@ namespace AccelByte
 {
 	class Credentials;
 	class Settings;
+	class ServerCredentials;
 
 enum class EWebSocketState
 {
@@ -45,7 +46,7 @@ ENUM_CLASS_FLAGS(EWebSocketEvent);
 
 class ACCELBYTEUE4SDK_API AccelByteWebSocket
 {
-	public:
+public:
 	DECLARE_MULTICAST_DELEGATE(FConnectDelegate)
 	DECLARE_MULTICAST_DELEGATE_OneParam(FMessageReceiveDelegate, const FString&)
 	DECLARE_MULTICAST_DELEGATE_OneParam(FConnectionErrorDelegate, const FString&)
@@ -59,6 +60,14 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 		float TotalTimeout = 60.f
 	);
 	
+	AccelByteWebSocket(
+		const ServerCredentials& Credentials,
+		float PingDelay = 30.f,
+		float InitialBackoffDelay = 1.f,
+		float MaxBackoffDelay = 30.f,
+		float TotalTimeout = 60.f
+	);
+
 	~AccelByteWebSocket();
 
 	FConnectDelegate& OnConnected();
@@ -75,6 +84,21 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 		const FString& Url,
 		const FString& Protocol,
 		const Credentials& Credentials,
+		const TMap<FString, FString>& UpgradeHeaders,
+		const TSharedRef<IWebSocketFactory> WebSocketFactory,
+		float PingDelay = 30.f,
+		float InitialBackoffDelay = 1.f,
+		float MaxBackoffDelay = 30.f,
+		float TotalTimeout = 60.f
+	);
+
+	/**
+	 * Create a websocket using server credentials. Used to create a socket for DSHub.
+	 */
+	static TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> Create(
+		const FString& Url,
+		const FString& Protocol,
+		const ServerCredentials& Credentials,
 		const TMap<FString, FString>& UpgradeHeaders,
 		const TSharedRef<IWebSocketFactory> WebSocketFactory,
 		float PingDelay = 30.f,
@@ -117,7 +141,19 @@ private:
 	bool bDisconnectOnNextTick {false};
 	TSharedPtr<IWebSocketFactory> WebSocketFactory;
 
-	const Credentials& Creds;
+	/**
+	 * Pointer to a client credentials instance for authenticating this websocket. Since we don't want the websocket to
+	 * own the credentials instance, but we also want to be able to have it nullable in favor of server credentials. Do
+	 * not delete this pointer!
+	 */
+	const Credentials* ClientCreds = nullptr;
+	
+	/**
+	 * Pointer to a server credentials instance for authenticating this websocket. Since we don't want the websocket to
+	 * own the credentials instance, but we also want to be able to have it nullable in favor of client credentials. Do
+	 * not delete this pointer!
+	 */
+	const ServerCredentials* ServerCreds = nullptr;
 	
 	FString Url;
 	FString Protocol;

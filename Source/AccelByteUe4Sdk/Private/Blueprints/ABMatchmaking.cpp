@@ -68,6 +68,25 @@ void UABMatchmaking::SetReadyConsent(
 	ApiClientPtr->Lobby.SendReadyConsentRequest(Request.matchId);
 }
 
+void UABMatchmaking::SetRejectConsent(
+	FSetRejectConsentRequest const& Request,
+	FDSetRejectConsentResponse OnResponse,
+	FDErrorHandler OnError) 
+{
+	ApiClientPtr->Lobby.SetRejectConsentResponseDelegate(
+		Api::Lobby::FRejectConsentResponse::CreateLambda(
+			[OnResponse](FAccelByteModelsRejectConsentRequest const& Response)
+			{
+				OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+	ApiClientPtr->Lobby.SendRejectConsentRequest(Request.matchId);
+}
+
 void UABMatchmaking::SetOnMatchmaking(FDMatchmakingNotif OnNotif)
 {
 	ApiClientPtr->Lobby.SetMatchmakingNotifDelegate(
@@ -83,6 +102,16 @@ void UABMatchmaking::SetOnSetReadyConsent(FDSetReadyConsentNotif OnNotif)
 	ApiClientPtr->Lobby.SetReadyConsentNotifDelegate(
 		Api::Lobby::FReadyConsentNotif::CreateLambda(
 			[OnNotif](FAccelByteModelsReadyConsentNotice const& Notif)
+			{
+				OnNotif.ExecuteIfBound(Notif);
+			}));
+}
+
+void UABMatchmaking::SetOnSetRejectConsent(FDSetRejectConsentNotif OnNotif)
+{
+	ApiClientPtr->Lobby.SetRejectConsentNotifDelegate(
+		Api::Lobby::FRejectConsentNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsRejectConsentNotice const& Notif)
 			{
 				OnNotif.ExecuteIfBound(Notif);
 			}));

@@ -15,6 +15,10 @@
 #include "Core/AccelByteOauth2Api.h"
 #include "Api/AccelByteQos.h"
 #include "Core/AccelByteUtilities.h"
+#include "Core/IAccelByteDataStorage.h"
+#include "Core/AccelByteDataStorageBinaryFile.h"
+#include "AccelByteUe4SdkModule.h"
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUser, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUser);
@@ -75,9 +79,7 @@ void User::LoginWithOtherPlatform(
 		THandler<FOauth2Token>::CreateLambda(
 			[this, PlatformType, OnSuccess, OnError](const FOauth2Token& Result)
 		{
-			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
-			OnSuccess.ExecuteIfBound();
-					
+			OnLoginSuccess(OnSuccess, Result);
 		}), FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
@@ -105,9 +107,7 @@ void User::LoginWithOtherPlatform(
 		THandler<FOauth2Token>::CreateLambda(
 			[this, PlatformType, OnSuccess, OnError](const FOauth2Token& Result)
 		{
-			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
-			OnSuccess.ExecuteIfBound();
-					
+			OnLoginSuccess(OnSuccess, Result);
 		}), FCustomErrorHandler::CreateLambda([this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 		{
 			FErrorOauthInfo ErrorOauthInfo;
@@ -142,9 +142,7 @@ void User::LoginWithOtherPlatformId(
 		THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 		{
-			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
-			OnSuccess.ExecuteIfBound();
-					
+			OnLoginSuccess(OnSuccess, Result);
 		}), FCustomErrorHandler::CreateLambda([this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 		{
 			FErrorOauthInfo ErrorOauthInfo;
@@ -377,6 +375,46 @@ void AccelByte::Api::User::LoginWithRefreshToken(const FString& RefreshToken, co
 		}));
 }
 
+bool IsTokenExpired(FRefreshInfo RefreshInfo)
+{
+	return RefreshInfo.Expiration <= FDateTime::UtcNow();
+}
+
+void User::TryRelogin(const FString& PlatformUserID, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+#if PLATFORM_WINDOWS
+	FReport::Log(FString(__FUNCTION__));
+
+	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(PlatformUserID, THandler<TPair<FString, FString>>::CreateLambda(
+		[this, OnSuccess, OnError](TPair<FString, FString> Pair)
+		{
+			if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
+			{
+				OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::CachedTokenNotFound, TEXT("The cached token is not found. Cannot continue the previous login session. Please login again."));
+				return;
+			}
+
+			auto Decoded = FAccelByteUtilities::XOR(Pair.Value, FAccelByteUtilities::GetDeviceId());
+			FRefreshInfo RefreshInfo;
+			if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
+			{
+				OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::UnableToSerializeCachedToken, TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."));
+				return;
+			}
+
+			if (IsTokenExpired(RefreshInfo))
+			{
+				OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::CachedTokenExpired, TEXT("Your previous login session is expired. Please login again."));
+				return;
+			}
+
+			this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError);
+		}));
+#else
+	OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::CachedTokenNotFound, TEXT("Cannot relogin using cached token on other platforms."));
+#endif
+}
+
 void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const
 {
 	FReport::Log(FString(__FUNCTION__)); 
@@ -425,6 +463,29 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Res
 	// Callbacks
 	CredentialsRef.OnLoginSuccess().Broadcast(Response); // Sets auth tokens, inits qosScheduler
 	OnSuccess.ExecuteIfBound();
+
+#ifndef PLATFORM_WINDOWS // the following code is working on Windows only at the moment
+	return;
+#endif
+
+	if (Response.Platform_user_id.IsEmpty() || Response.Refresh_token.IsEmpty())
+	{
+		return;
+	}
+
+	// Store the refresh token
+	FRefreshInfo Info;
+	Info.RefreshToken = Response.Refresh_token;
+	Info.Expiration = FDateTime::UtcNow() + FTimespan::FromSeconds(Response.Refresh_expires_in);
+	FString SerializedInfo;
+	FJsonObjectConverter::UStructToJsonObjectString(Info, SerializedInfo);
+
+	auto XorInfo = FAccelByteUtilities::XOR(SerializedInfo, FAccelByteUtilities::GetDeviceId());
+	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(Response.Platform_user_id, XorInfo,
+		THandler<bool>::CreateLambda([this, OnSuccess, Response](bool IsSuccess)
+		{
+			// On Save Refresh Token Success
+		}));
 }
 
 void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -1400,6 +1461,24 @@ void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnEr
 			OnSuccess.ExecuteIfBound();
 		}),
 		OnError);
+}
+
+void User::GetUserInformation(const FString& UserId, const THandler<FGetUserInformationResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/information"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace, *UserId);
+	FString Verb            = TEXT("GET");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

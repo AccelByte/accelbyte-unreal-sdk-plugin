@@ -320,6 +320,80 @@ FString FAccelByteUtilities::GetAuthenticatorString(EAccelByteLoginAuthFactorTyp
 	}
 }
 
+FString FAccelByteUtilities::LocalDeviceId()
+{
+	FString NewDeviceId;
+
+	//check then read file
+	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	CurrentDirectory.Append(TEXT("DeviceIdHelper/DeviceId.txt"));
+	CurrentDirectory.ReplaceInline(TEXT("/"), TEXT("\\"));
+	FFileHelper::LoadFileToString(NewDeviceId, *CurrentDirectory);
+
+	//generate one if still empty
+	if (NewDeviceId.IsEmpty())
+	{
+		FString FilePath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+		FilePath.Append("DeviceIdHelper/DeviceId.txt");
+
+		TCHAR valid[] = { '0', '1', '2', '3', '4', '5', '6','7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+						'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+
+		for (int i = 0; i < 30; i++)
+		{
+			NewDeviceId = NewDeviceId + valid[FMath::RandRange(0, 35)];
+		}
+
+		FFileHelper::SaveStringToFile(NewDeviceId, *FilePath);
+	}
+	return NewDeviceId;
+}
+
+FString FAccelByteUtilities::GetDeviceId()
+{
+	FString DeviceId = FPlatformMisc::GetDeviceId();
+	if (DeviceId.IsEmpty())
+	{
+		PRAGMA_DISABLE_DEPRECATION_WARNINGS
+			const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
+		PRAGMA_ENABLE_DEPRECATION_WARNINGS
+			FString MacAddressString;
+		for (TArray<uint8>::TConstIterator it(MacAddr); it; ++it)
+		{
+			MacAddressString += FString::Printf(TEXT("%02x"), *it);
+		}
+		DeviceId = FMD5::HashAnsiString(*MacAddressString);
+
+		if (DeviceId.IsEmpty())
+		{
+			DeviceId = *LocalDeviceId();
+		}
+	}
+	return DeviceId;
+}
+
+FString FAccelByteUtilities::XOR(const FString& Input, const FString& Key)
+{
+	TArray<uint8> AccumulateResult;
+
+	TArray<uint8> ByteArray;
+	ByteArray.AddUninitialized(Input.Len());
+	StringToBytes(Input, ByteArray.GetData(), Input.Len());
+
+	TArray<uint8> ByteArrayKey;
+	ByteArrayKey.AddUninitialized(Key.Len());
+	StringToBytes(Key, ByteArrayKey.GetData(), Key.Len());
+
+	for (int i = 0; i < Input.Len(); i++)
+	{
+		AccumulateResult.Add((TCHAR)(ByteArray[i] ^ ByteArrayKey[i % ByteArrayKey.Num()]));
+	}
+
+	FString Output = BytesToString(AccumulateResult.GetData(), AccumulateResult.Num());
+	return Output;
+}
+
+
 void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));

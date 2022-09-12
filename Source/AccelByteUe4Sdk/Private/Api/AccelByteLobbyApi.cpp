@@ -17,6 +17,7 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteMessageParser.h"
+#include "JsonUtilities.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -56,6 +57,7 @@ namespace Api
 		const FString MatchmakingStart = TEXT("startMatchmakingRequest");
 		const FString MatchmakingCancel = TEXT("cancelMatchmakingRequest");
 		const FString ReadyConsent = TEXT("setReadyConsentRequest");
+		const FString RejectConsent = TEXT("setRejectConsentRequest");
 
 		// Custom Game
 		const FString CreateDS = TEXT("createDSRequest");
@@ -140,8 +142,10 @@ namespace Api
 		const FString MatchmakingStart = TEXT("startMatchmakingResponse");
 		const FString MatchmakingCancel = TEXT("cancelMatchmakingResponse");
 		const FString ReadyConsent = TEXT("setReadyConsentResponse");
+		const FString RejectConsent = TEXT("setRejectConsentResponse");
 		const FString MatchmakingNotif = TEXT("matchmakingNotif");
 		const FString ReadyConsentNotif = TEXT("setReadyConsentNotif");
+		const FString RejectConsentNotif = TEXT("setRejectConsentNotif");
 		const FString RematchmakingNotif = TEXT("rematchmakingNotif");
 		const FString DsNotif = TEXT("dsNotif");
 
@@ -188,6 +192,9 @@ namespace Api
 		
 		// Refresh Token
 		const FString RefreshToken = TEXT("refreshTokenResponse");
+
+		// V2 session notif
+		const FString SessionNotif = TEXT("messageSessionNotif");
 	}
 
 	namespace Prefix
@@ -207,7 +214,6 @@ namespace Api
 	{
 		const FString Response = TEXT("Response");
 		const FString Notif = TEXT("Notif"); // Note: current usage is not yet uniformized -> Notif/Notification
-
 	}
 
 	enum Response : uint8
@@ -242,6 +248,7 @@ namespace Api
 		MatchmakingStart,
 		MatchmakingCancel,
 		ReadyConsent,
+		RejectConsent,
 
 		// Custom Game
 		CreateDS,
@@ -308,6 +315,7 @@ namespace Api
 		// Matchmaking
 		MatchmakingNotif,
 		ReadyConsentNotif,
+		RejectConsentNotif,
 		RematchmakingNotif,
 		DsNotif,
 
@@ -335,7 +343,7 @@ namespace Api
 * Helper macro to enforce uniform naming, easier pair initialization, and readibility
 */
 #define FORM_STRING_ENUM_PAIR(Type, MessageType) \
-    { LobbyResponse::MessageType, Type::MessageType } \
+	{ LobbyResponse::MessageType, Type::MessageType } \
 
 	TMap<FString, Response> Lobby::ResponseStringEnumMap{
 		FORM_STRING_ENUM_PAIR(Response,PartyInfo),
@@ -359,6 +367,7 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Response,MatchmakingStart),
 		FORM_STRING_ENUM_PAIR(Response,MatchmakingCancel),
 		FORM_STRING_ENUM_PAIR(Response,ReadyConsent),
+		FORM_STRING_ENUM_PAIR(Response,RejectConsent),
 		FORM_STRING_ENUM_PAIR(Response,RequestFriends),
 		FORM_STRING_ENUM_PAIR(Response,RequestFriendsByPublicId),
 		FORM_STRING_ENUM_PAIR(Response,Unfriend),
@@ -399,6 +408,7 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Notif,UserUnbannedNotification),
 		FORM_STRING_ENUM_PAIR(Notif,MatchmakingNotif),
 		FORM_STRING_ENUM_PAIR(Notif,ReadyConsentNotif),
+		FORM_STRING_ENUM_PAIR(Notif,RejectConsentNotif),
 		FORM_STRING_ENUM_PAIR(Notif,RematchmakingNotif),
 		FORM_STRING_ENUM_PAIR(Notif,DsNotif),
 		FORM_STRING_ENUM_PAIR(Notif,AcceptFriendsNotif),
@@ -901,6 +911,14 @@ FString Lobby::SendReadyConsentRequest(FString MatchId)
 		FString::Printf(TEXT("matchId: %s\n"), *MatchId));
 }
 
+FString Lobby::SendRejectConsentRequest(FString MatchId)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(RejectConsent, Matchmaking,
+		FString::Printf(TEXT("matchId: %s\n"), *MatchId));
+}
+
 FString Lobby::RequestDS(FString const& SessionID, FString const& GameMode, FString const& ClientVersion,  FString const& Region, FString const& Deployment, FString const& ServerName)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1299,6 +1317,10 @@ void Lobby::UnbindEvent()
 	UnbindBlockResponseEvents();
 
 	UnbindSessionAttributeEvents();
+
+	UnbindV2PartyEvents();
+	UnbindV2GameSessionEvents();
+	UnbindV2MatchmakingEvents();
 	
 	UserBannedNotification.Unbind();
 	UserUnbannedNotification.Unbind();
@@ -1398,6 +1420,7 @@ void Lobby::UnbindMatchmakingNotifEvents()
 
 	MatchmakingNotif.Unbind();
 	ReadyConsentNotif.Unbind();
+	RejectConsentNotif.Unbind();
 	RematchmakingNotif.Unbind();
 	DsNotif.Unbind();
 }
@@ -1409,10 +1432,12 @@ void Lobby::UnbindMatchmakingResponseEvents()
 	MatchmakingStartResponse.Unbind();
 	MatchmakingCancelResponse.Unbind();
 	ReadyConsentResponse.Unbind();
+	RejectConsentResponse.Unbind();
 
 	OnMatchmakingStartError.Unbind();
 	OnMatchmakingCancelError.Unbind();
 	OnReadyConsentError.Unbind();
+	OnRejectConsentError.Unbind();
 }
 
 void Lobby::UnbindChatNotifEvents()
@@ -1458,6 +1483,34 @@ void Lobby::UnbindSessionAttributeEvents()
 	OnGetAllSessionAttributeError.Unbind();
 }
 
+void Lobby::UnbindV2PartyEvents()
+{
+	V2PartyInvitedNotif.Unbind();
+	V2PartyJoinedNotif.Unbind();
+	V2PartyKickedNotif.Unbind();
+	V2PartyRejectedNotif.Unbind();
+	V2PartyMembersChangedNotif.Unbind();
+	V2PartyUpdatedNotif.Unbind();
+}
+
+void Lobby::UnbindV2GameSessionEvents()
+{
+	V2GameSessionInvitedNotif.Unbind();
+	V2GameSessionJoinedNotif.Unbind();
+	V2GameSessionMembersChangedNotif.Unbind();
+	V2GameSessionUpdatedNotif.Unbind();
+	V2DSStatusChangedNotif.Unbind();
+	V2GameSessionKickedNotif.Unbind();
+	V2GameSessionRejectedNotif.Unbind();
+}
+
+void Lobby::UnbindV2MatchmakingEvents()
+{
+	V2MatchmakingMatchFoundNotif.Unbind();
+	V2MatchmakingExpiredNotif.Unbind();
+	V2MatchmakingStartNotif.Unbind();
+}
+
 void Lobby::OnConnected()
 {
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
@@ -1486,7 +1539,7 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 }
-
+	
 FString Lobby::SendRawRequest(const FString& MessageType, const FString& MessageIDPrefix, const FString& CustomPayload)
 {
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
@@ -1783,6 +1836,7 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MatchmakingStart	, FAccelByteModelsMatchmakingResponse, FMatchmakingResponse);
 		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MatchmakingCancel, FAccelByteModelsMatchmakingResponse, FMatchmakingResponse);
 		CASE_RESPONSE_MESSAGE_ID(ReadyConsent, FAccelByteModelsReadyConsentRequest);
+		CASE_RESPONSE_MESSAGE_ID(RejectConsent, FAccelByteModelsRejectConsentRequest);
 		// Custom Game
 		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(CreateDS			, FAccelByteModelsLobbyBaseResponse, FBaseResponse);
 		// Friends
@@ -1859,6 +1913,143 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 			HandleNotif<Model>(LobbyResponse::MessageType, MessageType, ParsedJsonString, ReceivedMessageType);\
 			break; \
 		} \
+		
+template <typename PayloadType, typename CallbackType>
+void DispatchV2JsonNotif(const FString& Payload, CallbackType ResponseCallback)
+{
+	FString PayloadJsonString;
+	if(!FBase64::Decode(Payload, PayloadJsonString))
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Unable to decode payload from notification\n%s"), *Payload);
+		return;
+	}
+
+	UE_LOG(LogAccelByteLobby, Log, TEXT("MPv2 notif json:\n%s"), *PayloadJsonString);
+	
+	PayloadType Result;
+	if(FJsonObjectConverter::JsonObjectStringToUStruct(PayloadJsonString, &Result, 0, 0))
+	{
+		ResponseCallback.ExecuteIfBound(Result);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Unable to json parse payload from notification\n%s"), *Payload);
+	}
+}
+
+void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
+{
+	FAccelByteModelsSessionNotificationMessage Notif;
+	if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif, 0, 0) == false)
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
+		return;
+	}
+
+	switch(FAccelByteUtilities::GetUEnumValueFromString<EV2SessionNotifTopic>(Notif.Topic))
+	{
+	case EV2SessionNotifTopic::OnPartyInvited:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2PartyInvitedEvent>(Notif.Payload, V2PartyInvitedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnPartyMembersChanged:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2PartyMembersChangedEvent>(Notif.Payload, V2PartyMembersChangedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnPartyJoined:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2PartyUserJoinedEvent>(Notif.Payload, V2PartyJoinedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnPartyRejected:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2PartyUserRejectedEvent>(Notif.Payload, V2PartyRejectedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnPartyKicked:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2PartyUserKickedEvent>(Notif.Payload, V2PartyKickedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnSessionInvited:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserInvitedEvent>(Notif.Payload, V2GameSessionInvitedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnSessionJoined:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserJoinedEvent>(Notif.Payload, V2GameSessionJoinedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnSessionMembersChanged:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionMembersChangedEvent>(Notif.Payload, V2GameSessionMembersChangedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnSessionKicked:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserKickedEvent>(Notif.Payload, V2GameSessionKickedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnSessionRejected:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserRejectedEvent>(Notif.Payload, V2GameSessionRejectedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnDSStatusChanged:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2DSStatusChangedNotif>(Notif.Payload, V2DSStatusChangedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnPartyUpdated:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2PartySession>(Notif.Payload, V2PartyUpdatedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnGameSessionUpdated:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2GameSession>(Notif.Payload, V2GameSessionUpdatedNotif);
+		break;
+	}
+	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
+	}
+}
+
+void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message)
+{
+	UE_LOG(LogAccelByteLobby, Log, TEXT("Received MMv2 notification with topic : %s"), *Message.Topic);
+	
+	switch (FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotifTopic>(Message.Topic))
+	{
+		case EV2MatchmakingNotifTopic::OnMatchFound:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2MatchFoundNotif>(Message.Payload, V2MatchmakingMatchFoundNotif);
+			break;
+		}
+		case EV2MatchmakingNotifTopic::OnMatchmakingStarted:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2StartMatchmakingNotif>(Message.Payload, V2MatchmakingStartNotif);
+			break;
+		}
+		case EV2MatchmakingNotifTopic::OnMatchmakingTicketExpired:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2MatchmakingExpiredNotif>(Message.Payload, V2MatchmakingExpiredNotif);
+			break;
+		}
+		default: UE_LOG(LogAccelByteLobby, Warning, TEXT("Unknown matchmaking v2 notification topic : %s"), *Message.Topic);
+	}
+}
+
+void Lobby::InitializeV2MatchmakingNotifDelegates()
+{
+	MatchmakingV2NotifDelegates = {
+		{EV2MatchmakingNotifTopic::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotifTopic::OnMatchmakingStarted, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+		{EV2MatchmakingNotifTopic::OnMatchmakingTicketExpired, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+	};
+}
 
 void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
 {
@@ -1950,12 +2141,21 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 					return;
 				}
 			}
+
+			EV2MatchmakingNotifTopic MMNotifEnum = FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotifTopic>(NotificationMessage.Topic);
+			if(MMNotifEnum != EV2MatchmakingNotifTopic::Invalid && MatchmakingV2NotifDelegates.Contains(MMNotifEnum))
+			{
+				MatchmakingV2NotifDelegates[MMNotifEnum].ExecuteIfBound(NotificationMessage);
+				break;
+			}
+				
 			MessageNotif.ExecuteIfBound(NotificationMessage);
 			break;
 		}
 		// Matchmaking
 		CASE_NOTIF(MatchmakingNotif		, FAccelByteModelsMatchmakingNotice);
 		CASE_NOTIF(ReadyConsentNotif	, FAccelByteModelsReadyConsentNotice);
+		CASE_NOTIF(RejectConsentNotif	, FAccelByteModelsRejectConsentNotice);
 		CASE_NOTIF(RematchmakingNotif	, FAccelByteModelsRematchmakingNotice);
 		CASE_NOTIF(DsNotif				, FAccelByteModelsDsNotice);
 		// Friends + Notification
@@ -2080,7 +2280,11 @@ void Lobby::OnMessage(const FString& Message)
 	const FString ReceivedMessageType = ParsedJsonObj->GetStringField(JsonTypeIdentifier);
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Type: %s"), *ReceivedMessageType);
 
-	if (ReceivedMessageType.Contains(Suffix::Response))
+	if (ReceivedMessageType.Equals(LobbyResponse::SessionNotif))
+	{
+		HandleV2SessionNotif(ParsedJsonString);
+	}
+	else if (ReceivedMessageType.Contains(Suffix::Response))
 	{
 		HandleMessageResponse(ReceivedMessageType, ParsedJsonString, ParsedJsonObj);
 	}
@@ -2255,6 +2459,7 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, TimeSinceLastReconnect{.0f}
 	, TimeSinceConnectionLost{.0f}
 {
+	InitializeV2MatchmakingNotifDelegates();
 }
 
 Lobby::~Lobby()

@@ -383,6 +383,9 @@ namespace AccelByte
 		NetworkError = 14005,
 		IsNotLoggedIn = 14006,
 		WebSocketConnectFailed = 14201,
+		CachedTokenNotFound = 14301,
+		UnableToSerializeCachedToken = 14302,
+		CachedTokenExpired = 14303,
 		//
 		//GameServer-side Error Code List
 		//

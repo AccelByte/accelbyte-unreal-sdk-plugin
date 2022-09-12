@@ -56,6 +56,9 @@ struct ACCELBYTEUE4SDK_API FOauth2Token
 	float Expires_in{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
+	float Refresh_expires_in{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
 	bool Is_comply{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
@@ -105,4 +108,16 @@ struct ACCELBYTEUE4SDK_API FJwkSet
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | JWKSet")
 	TArray<FJsonObjectWrapper> keys{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FRefreshInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FRefreshInfo")
+	FString RefreshToken {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FRefreshInfo")
+	FDateTime Expiration {0}; //Stored as UTC Now + TimeSpan Expiration Time
 };

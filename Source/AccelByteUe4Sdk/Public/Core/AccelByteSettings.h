@@ -40,6 +40,8 @@ public:
 	FString UGCServerUrl{};
 	FString SeasonPassServerUrl{};
 	FString ReportingServerUrl{};
+	FString SessionServerUrl{};
+	FString MatchmakingV2ServerUrl{};
 	FString AppId{};
 	float QosLatencyPollIntervalSecs{.0f};
 	float QosServerLatencyPollIntervalSecs{.0f};
@@ -144,6 +146,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString ReportingServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString SessionServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString MatchmakingV2ServerUrl{};
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AppId{};
@@ -258,6 +266,12 @@ public:
 	static FString GetReportingServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetSessionServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetMatchmakingV2ServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetAppId();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -334,6 +348,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetReportingServerUrl(const FString& ReportingServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetSessionServerUrl(const FString& SessionServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetSeasonPassServerUrl(const FString& SeasonPassServerUrl);

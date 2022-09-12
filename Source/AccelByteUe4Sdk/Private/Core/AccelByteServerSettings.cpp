@@ -71,6 +71,13 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	SessionBrowserServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("SessionBrowserServerUrl"), BaseUrl, TEXT("sessionbrowser"));
 
+	SessionServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("SessionServerUrl"), BaseUrl, TEXT("session"));
+
+	const FString DSHubBaseUrl = BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
+	DSHubServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("DSHubServerUrl"), DSHubBaseUrl, TEXT("dshub/"));
+
+	MatchmakingV2ServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("MatchmakingV2ServerUrl"), BaseUrl, TEXT("match2"));
+
 	FString QosPingTimeoutString;
 	LoadFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString);
 	if (QosPingTimeoutString.IsNumeric())
@@ -195,6 +202,21 @@ FString UAccelByteBlueprintsServerSettings::GetSessionBrowserServerUrl()
 	return FRegistry::ServerSettings.SessionBrowserServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetSessionServerUrl()
+{
+	return FRegistry::ServerSettings.SessionServerUrl;
+}
+
+FString UAccelByteBlueprintsServerSettings::GetDSHubServerUrl()
+{
+	return FRegistry::ServerSettings.DSHubServerUrl;
+}
+
+FString UAccelByteBlueprintsServerSettings::GetMatchmakingV2ServerUrl()
+{
+	return FRegistry::ServerSettings.MatchmakingV2ServerUrl;
+}
+
 float UAccelByteBlueprintsServerSettings::GetQosPingTimeout()
 {
 	return FRegistry::ServerSettings.QosPingTimeout;
@@ -278,6 +300,21 @@ void UAccelByteBlueprintsServerSettings::SetSeasonPassServerUrl(const FString & 
 void UAccelByteBlueprintsServerSettings::SetSessionBrowserServerUrl(const FString & SessionBrowserUrl)
 {
 	FRegistry::ServerSettings.SessionBrowserServerUrl = SessionBrowserUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetSessionServerUrl(const FString& SessionUrl)
+{
+	FRegistry::ServerSettings.SessionServerUrl = SessionUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetDSHubServerUrl(const FString& DSHubServerUrl)
+{
+	FRegistry::ServerSettings.DSHubServerUrl = DSHubServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl)
+{
+	FRegistry::ServerSettings.MatchmakingV2ServerUrl = MatchmakingV2ServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetQosPingTimeout(const float& QosPingTimeout)

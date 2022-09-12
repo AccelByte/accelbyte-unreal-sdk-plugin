@@ -89,6 +89,11 @@ void UAccelByteBlueprintsLobby::SendReadyConsentRequest(const FString& MatchId)
 	FRegistry::Lobby.SendReadyConsentRequest(MatchId);
 }
 
+void UAccelByteBlueprintsLobby::SendRejectConsentRequest(const FString& MatchId)
+{
+	FRegistry::Lobby.SendRejectConsentRequest(MatchId);
+}
+
 
 // Friends
 void UAccelByteBlueprintsLobby::RequestFriend(FString UserId)
@@ -427,6 +432,15 @@ void UAccelByteBlueprintsLobby::SetReadyConsentResponseDelegate(FReadyConsentRes
 	FRegistry::Lobby.SetReadyConsentResponseDelegate(OnReadyConsentResponseDelegate);
 }
 
+void UAccelByteBlueprintsLobby::SetRejectConsentResponseDelegate(FRejectConsentResponse OnRejectConsentResponse)
+{
+	AccelByte::Api::Lobby::FRejectConsentResponse OnRejectConsentResponseDelegate =
+		AccelByte::Api::Lobby::FRejectConsentResponse::CreateLambda([OnRejectConsentResponse](const FAccelByteModelsRejectConsentRequest& Result){
+		OnRejectConsentResponse.ExecuteIfBound(Result);
+	});
+	FRegistry::Lobby.SetRejectConsentResponseDelegate(OnRejectConsentResponseDelegate);
+}
+
 void UAccelByteBlueprintsLobby::SetMatchmakingNotifDelegate(FMatchmakingNotice OnMatchmakingNotice)
 {
     AccelByte::Api::Lobby::FMatchmakingNotif OnInfoPartyResponseDelegate =
@@ -443,6 +457,15 @@ void UAccelByteBlueprintsLobby::SetReadyConsentNotifDelegate(FReadyConsentNotice
 		OnReadyConsentNotice.ExecuteIfBound(Result);
 	});
 	FRegistry::Lobby.SetReadyConsentNotifDelegate(OnReadyConsentNotifDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetRejectConsentNotifDelegate(FRejectConsentNotice OnRejectConsentNotice)
+{
+	AccelByte::Api::Lobby::FRejectConsentNotif OnRejectConsentNotifDelegate =
+		AccelByte::Api::Lobby::FRejectConsentNotif::CreateLambda([OnRejectConsentNotice](const FAccelByteModelsRejectConsentNotice& Result) {
+		OnRejectConsentNotice.ExecuteIfBound(Result);
+	});
+	FRegistry::Lobby.SetRejectConsentNotifDelegate(OnRejectConsentNotifDelegate);
 }
 
 void UAccelByteBlueprintsLobby::SetRematchmakingNotifDelegate(FRematchmakingNotice OnRematchmakingNotice)

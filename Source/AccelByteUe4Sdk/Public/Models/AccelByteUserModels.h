@@ -360,7 +360,7 @@ struct ACCELBYTEUE4SDK_API FSimpleUserData
 // backward compatibility with previous AccelByte SDK codes
 // remove this if you are using FUserData from Unreal PhysicsCore
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
-using FUserData = FAccountUserData{};
+using FUserData = FAccountUserData;
 #endif
 
 USTRUCT(BlueprintType)
@@ -1021,4 +1021,58 @@ struct ACCELBYTEUE4SDK_API FGetPublisherUserResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkedPlatform")
 	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FPlatformUserInformation
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString DisplayName {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString EmailAddress {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString LinkedAt  {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString PlatformId  {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString PlatformUserId  {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString XboxUserId {};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FGetUserInformationResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString Country {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString DisplayName  {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	TArray<FString> EmailAddresses {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString PhoneNumber {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	TArray<FPlatformUserInformation> PlatformUsers  {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString Username   {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString XboxUserId {};
 };

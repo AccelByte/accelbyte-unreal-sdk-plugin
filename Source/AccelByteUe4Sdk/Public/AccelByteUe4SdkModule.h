@@ -8,6 +8,7 @@
 #include "Modules/ModuleManager.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/IAccelByteDataStorage.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEnvironmentChangedDelegate, const ESettingsEnvironment);
 
@@ -15,6 +16,7 @@ namespace AccelByte
 {
 	class Settings;
 	class ServerSettings;
+	class IAccelByteDataStorage;
 }
 
 class IAccelByteUe4SdkModuleInterface : public IModuleInterface
@@ -36,4 +38,5 @@ public:
 	virtual AccelByte::ServerSettings const& GetServerSettings() const = 0;
 	virtual ESettingsEnvironment const& GetSettingsEnvironment() const = 0;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() = 0;
+	virtual AccelByte::IAccelByteDataStorage * GetLocalDataStorage() = 0;
 };

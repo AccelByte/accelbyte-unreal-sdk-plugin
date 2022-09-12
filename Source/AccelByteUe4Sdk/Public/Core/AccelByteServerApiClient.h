@@ -21,9 +21,12 @@
 #include "GameServerApi/AccelByteServerSessionBrowserApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerUserApi.h"
+#include "GameServerApi/AccelByteServerSessionApi.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteServerApiBase.h"
+#include "GameServerApi/AccelByteServerDSHubApi.h"
+#include "GameServerApi/AccelByteServerMatchmakingV2Api.h"
 
 using namespace AccelByte;
 
@@ -54,6 +57,9 @@ public:
 	GameServerApi::ServerSessionBrowser ServerSessionBrowser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerStatistic ServerStatistic{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerUser ServerUser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerSession ServerSession{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerDSHub ServerDSHub{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 
 	template<typename T, typename... U>
 	T GetServerApi(U&&... Args)

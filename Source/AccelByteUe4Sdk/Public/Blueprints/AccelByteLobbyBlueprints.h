@@ -69,6 +69,8 @@ public:
 	static void SendCancelMatchmaking(const FString& GameMode);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
 	static void SendReadyConsentRequest(const FString& MatchId);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
+	static void SendRejectConsentRequest(const FString& MatchId);
 
     // Party 
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&, Result);
@@ -104,6 +106,8 @@ public:
     DECLARE_DYNAMIC_DELEGATE_OneParam(FMatchmakingNotice, const FAccelByteModelsMatchmakingNotice&, Result);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FReadyConsentResponse, const FAccelByteModelsReadyConsentRequest&, Result);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FReadyConsentNotice, const FAccelByteModelsReadyConsentNotice&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FRejectConsentResponse, const FAccelByteModelsRejectConsentRequest&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FRejectConsentNotice, const FAccelByteModelsRejectConsentNotice&, Result);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FRematchmakingNotice, const FAccelByteModelsRematchmakingNotice&, Result);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FDsNotice, const FAccelByteModelsDsNotice&, Result);
 
@@ -197,7 +201,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
 	static void SetReadyConsentNotifDelegate(FReadyConsentNotice OnReadyConsentNotice);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
+	static void SetRejectConsentNotifDelegate(FRejectConsentNotice OnRejectConsentNotice);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
 	static void SetReadyConsentResponseDelegate(FReadyConsentResponse OnReadyConsentResponse);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
+	static void SetRejectConsentResponseDelegate(FRejectConsentResponse OnRejectConsentResponse);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
 	static void SetRematchmakingNotifDelegate(FRematchmakingNotice OnRematchmakingNotice);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")

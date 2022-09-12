@@ -21,6 +21,36 @@ enum class EAvailability : uint8
 	Invisible = 3
 };
 
+/** @brief Matchmaking v2 notification topics enums. */
+UENUM(BlueprintType)
+enum class EV2MatchmakingNotifTopic : uint8
+{
+	Invalid,
+	OnMatchFound,
+	OnMatchmakingStarted,
+	OnMatchmakingTicketExpired,
+};
+
+/** @brief Matchmaking v2 notification topics enums. */
+UENUM(BlueprintType)
+enum class EV2SessionNotifTopic : uint8
+{
+	Invalid,
+	OnPartyInvited,
+	OnPartyMembersChanged,
+	OnPartyJoined,
+	OnPartyRejected,
+	OnPartyKicked,
+	OnSessionInvited,
+	OnSessionJoined,
+	OnSessionMembersChanged,
+	OnSessionKicked,
+	OnSessionRejected,
+	OnDSStatusChanged,
+	OnPartyUpdated,
+	OnGameSessionUpdated,
+};
+
 // Emulate namespace with long class names
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyType
@@ -642,6 +672,24 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsNotificationMessage
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionNotificationMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Topic{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Payload{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FDateTime SentAt{0};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsFreeFormNotificationRequest
 {
 	GENERATED_BODY()
@@ -774,6 +822,32 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsReadyConsentRequest
 // Ready Consent Notice
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsReadyConsentNotice
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString MatchId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString UserId{};
+};
+
+// Reject Consent Request
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRejectConsentRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Code{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString MatchId{};
+};
+
+// Reject Consent Notice
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRejectConsentNotice
 {
 	GENERATED_BODY()
 

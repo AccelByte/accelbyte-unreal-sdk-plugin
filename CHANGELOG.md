@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [16.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.2.0%0D16.1.0) (2022-09-12)
+
+
+### Features
+
+* binary storage & refresh token caching ([dbd72a8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dbd72a87f786d8dc4cc391a549b21bb3f4ebcd21))
+* IAM Phase 4 Statement & Substitute Implementation ([76def47](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/76def475d2a1dd8a79cac0fb20028ab342ceca3b))
+* **lobby:** NOT BREAKING CHANGE: add reject consent function ([2bdc7f3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2bdc7f3efb74417c4db9ce1b246ddd497849604a))
+* **MPv2:** Add multiplayer v2 APIs ([13618a1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/13618a13842719c1f3e7adcac68c7d90748fb606))
+* SDK Implementation for UGC service ([f13ff02](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f13ff026fcabb3092be9e886cbcd27f6b0d78aae))
+
+
+### Bug Fixes
+
+* **module:** prevent application stopped and crash reporting when a service is not deployed yet ([67994bc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/67994bcf76f6a2ec1fe3eabb4f260d30d5419293))
+* PopulatedItemInfo inherits ItemInfo model ([4d9841c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4d9841cf452fa7d91f70198a55ebfab7ef7fcf25))
+
 ## [16.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.1.0%0D16.0.1) (2022-08-29)
 
 

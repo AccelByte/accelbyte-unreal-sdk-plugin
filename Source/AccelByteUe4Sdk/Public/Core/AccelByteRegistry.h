@@ -46,6 +46,8 @@ namespace Api
 	class Currency;
 	class Miscellaneous;
 	class Reward;
+	class Session;
+	class MatchmakingV2;
 }
 
 namespace GameServerApi
@@ -63,6 +65,9 @@ namespace GameServerApi
 	class ServerSeasonPass;
 	class ServerSessionBrowser;
 	class ServerUser;
+	class ServerSession;
+	class ServerDSHub;
+	class ServerMatchmakingV2;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -101,6 +106,8 @@ public:
 	static Api::Currency Currency;
 	static Api::Miscellaneous Miscellaneous;
 	static Api::Reward Reward;
+	static Api::Session Session;
+	static Api::MatchmakingV2 MatchmakingV2;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;
@@ -113,7 +120,10 @@ public:
 	static GameServerApi::ServerCloudSave ServerCloudSave;
 	static GameServerApi::ServerSeasonPass ServerSeasonPass;
 	static GameServerApi::ServerSessionBrowser ServerSessionBrowser;
-	static GameServerApi::ServerUser ServerUser; 
+	static GameServerApi::ServerUser ServerUser;
+	static GameServerApi::ServerSession ServerSession;
+	static GameServerApi::ServerDSHub ServerDSHub;
+	static GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

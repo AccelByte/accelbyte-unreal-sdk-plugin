@@ -10,6 +10,8 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteLobbyModels.h"
+#include "Models/AccelByteMatchmakingModels.h"
+#include "Models/AccelByteSessionModels.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 
@@ -49,6 +51,7 @@ struct FLobbyMessageMetaData
 	
 enum Response : uint8;
 enum Notif : uint8;
+
 /**
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
@@ -271,6 +274,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FReadyConsentResponse, const FAccelByteModelsReadyConsentRequest&);
 
+	/**
+	 * @brief delegate for handling reject consent response
+	 */
+	DECLARE_DELEGATE_OneParam(FRejectConsentResponse, const FAccelByteModelsRejectConsentRequest&);
+	
     /**
      * @brief delegate for handling matchmaking notification
      */
@@ -280,6 +288,11 @@ public:
 	 * @brief delegate for handling ready consent notification
 	 */
 	DECLARE_DELEGATE_OneParam(FReadyConsentNotif, const FAccelByteModelsReadyConsentNotice&);
+
+	/*
+	 * @brief delegate for handling reject consent notification
+	 */
+	DECLARE_DELEGATE_OneParam(FRejectConsentNotif, const FAccelByteModelsRejectConsentNotice&);
 
 	/*
 	 * @brief delegate for handling rematchmaking notification
@@ -430,7 +443,86 @@ public:
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_OneParam(FDisconnectNotif, const FAccelByteModelsDisconnectNotif&)
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
+
+	/**
+	 * @brief Delegate for party members changed event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyMembersChangedNotif, FAccelByteModelsV2PartyMembersChangedEvent);
+
+	/**
+	 * @brief Delegate for user invited to party event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyInvitedNotif, FAccelByteModelsV2PartyInvitedEvent);
+
+	/**
+	 * @brief Delegate for user rejected invitation event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyRejectedNotif, FAccelByteModelsV2PartyUserRejectedEvent);
+
+	/**
+	 * @brief Delegate for user joined party event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyJoinedNotif, FAccelByteModelsV2PartyUserJoinedEvent);
+
+	/**
+	 * @brief Delegate for user kicked from party event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyKickedNotif, FAccelByteModelsV2PartyUserKickedEvent);
+
+	/*
+	 * @brief Delegate for party updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyUpdatedNotif, FAccelByteModelsV2PartySession);
+
+	/**
+	 * @brief Delegate for user invited to game session event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionInvitedNotif, FAccelByteModelsV2GameSessionUserInvitedEvent);
+
+	/**
+	 * @brief Delegate for user joined game session event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionJoinedNotif, FAccelByteModelsV2GameSessionUserJoinedEvent);
+
+	/**
+	 * @brief Delegate for game session members changed event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionMembersChangedNotif, FAccelByteModelsV2GameSessionMembersChangedEvent);
+
+	/**
+	 * @brief Delegate for game session updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionUpdatedNotif, FAccelByteModelsV2GameSession);
 	
+	/**
+	 * @brief Delegate for game session updated event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionKickedNotif, FAccelByteModelsV2GameSessionUserKickedEvent);
+
+	/**
+	 * @brief Delegate for game session invite rejected event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionRejectedNotif, FAccelByteModelsV2GameSessionUserRejectedEvent);
+
+	/**
+	* @brief Delegate for game session when DS status is changed.
+	*/
+	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif)
+
+	/**
+	* @brief Delegate for notif when match is found.
+	*/
+	DECLARE_DELEGATE_OneParam(FV2MatchmakingMatchFoundNotif, FAccelByteModelsV2MatchFoundNotif)
+
+	/**
+	* @brief Delegate for notification when party leader started matchmaking
+	*/
+	DECLARE_DELEGATE_OneParam(FV2MatchmakingStartNotif, FAccelByteModelsV2StartMatchmakingNotif)
+
+	/**
+	* @brief Delegate for notification when party leader started matchmaking
+	*/
+	DECLARE_DELEGATE_OneParam(FV2MatchmakingExpiredNotif, FAccelByteModelsV2MatchmakingExpiredNotif)
 public:
     /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
@@ -690,6 +782,13 @@ public:
 	FString SendReadyConsentRequest(FString MatchId);
 
 	/**
+	* @brief send reject consent request
+	*
+	* @param MatchId The id of a match user ready to play.
+	*/
+	FString SendRejectConsentRequest(FString MatchId);
+
+	/**
 	* @brief Request Dedicated custom server
 	*
 	* @param SessionID Session ID of the game session.
@@ -892,6 +991,21 @@ public:
 	*/
 	void UnbindSessionAttributeEvents();
 
+	/**
+	 * @brief Unbind all V2 party delegates set previously.
+	 */
+	void UnbindV2PartyEvents();
+
+	/**
+	 * @brief Unbind all V2 party delegates set previously.
+	 */
+	void UnbindV2GameSessionEvents();
+
+	/**
+	 * @brief Unbind all V2 matchmaking delegates set previously.
+	 */
+	void UnbindV2MatchmakingEvents();
+
 	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
 	{
 		ConnectSuccess = OnConnectSuccess;
@@ -975,6 +1089,70 @@ public:
 	void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
 	{
 		MessageNotif = OnNotificationMessage;
+	}
+	void SetV2PartyInvitedNotifDelegate(const FV2PartyInvitedNotif& OnPartyInvitedNotif)
+	{
+		V2PartyInvitedNotif = OnPartyInvitedNotif;
+	}
+	void SetV2PartyMembersChangedNotifDelegate(const FV2PartyMembersChangedNotif& OnPartyMembersChanged)
+	{
+		V2PartyMembersChangedNotif = OnPartyMembersChanged;
+	}
+	void SetV2PartyJoinedNotifDelegate(const FV2PartyJoinedNotif& OnPartyJoinedNotif)
+	{
+		V2PartyJoinedNotif = OnPartyJoinedNotif;
+	}
+	void SetV2PartyRejectedNotifDelegate(const FV2PartyRejectedNotif& OnPartyRejectedNotif)
+	{
+		V2PartyRejectedNotif = OnPartyRejectedNotif;
+	}
+	void SetV2PartyKickedNotifDelegate(const FV2PartyKickedNotif& OnPartyKickedNotif)
+	{
+		V2PartyKickedNotif = OnPartyKickedNotif;
+	}
+	void SetV2GameSessionInvitedNotifDelegate(const FV2GameSessionInvitedNotif& OnGameSessionInvitedNotif)
+	{
+		V2GameSessionInvitedNotif = OnGameSessionInvitedNotif;
+	}
+	void SetV2GameSessionJoinedNotifDelegate(const FV2GameSessionJoinedNotif& OnGameSessionJoinedNotif)
+	{
+		V2GameSessionJoinedNotif = OnGameSessionJoinedNotif;
+	}
+	void SetV2GameSessionMembersChangedNotifDelegate(const FV2GameSessionMembersChangedNotif& OnGameSessionMembersChangedNotif)
+	{
+		V2GameSessionMembersChangedNotif = OnGameSessionMembersChangedNotif;
+	}
+	void SetV2GameSessionUpdatedNotifDelegate(const FV2GameSessionUpdatedNotif& OnGameSessionUpdatedNotif)
+	{
+		V2GameSessionUpdatedNotif = OnGameSessionUpdatedNotif;
+	}
+	void SetV2GameSessionKickedNotifDelegate(const FV2GameSessionKickedNotif& OnGameSessionKickedNotif)
+	{
+		V2GameSessionKickedNotif = OnGameSessionKickedNotif;
+	}
+	void SetV2GameSessionRejectedNotifDelegate(const FV2GameSessionRejectedNotif& OnGameSessionRejectedNotif)
+	{
+		V2GameSessionRejectedNotif = OnGameSessionRejectedNotif;
+	}
+	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
+	{
+		V2DSStatusChangedNotif = OnDSStatusChangedNotif;
+	}
+	void SetV2PartyUpdatedNotifDelegate(const FV2PartyUpdatedNotif& OnPartyUpdatedNotif)
+	{
+		V2PartyUpdatedNotif = OnPartyUpdatedNotif;
+	}
+	void SetV2MatchmakingMatchFoundNotifDelegate(const FV2MatchmakingMatchFoundNotif& OnMatchFoundNotif)
+	{
+		V2MatchmakingMatchFoundNotif = OnMatchFoundNotif;
+	}
+	void SetV2MatchmakingStartNotifDelegate(const FV2MatchmakingStartNotif& OnMatchmakingStartNotif)
+	{
+		V2MatchmakingStartNotif = OnMatchmakingStartNotif;
+	}
+	void SetV2MatchmakingExpiredNotifDelegate(const FV2MatchmakingExpiredNotif& OnMatchmakingExpiredNotif)
+	{
+		V2MatchmakingExpiredNotif = OnMatchmakingExpiredNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -1310,6 +1488,18 @@ public:
 	};
 
 	/**
+	* @brief set reject consent response notification
+	*
+	* @param OnRejectConsentResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
+	*/
+	void SetRejectConsentResponseDelegate(FRejectConsentResponse OnRejectConsentResponse, FErrorHandler OnError = {})
+	{
+		RejectConsentResponse = OnRejectConsentResponse;
+		OnRejectConsentError = OnError;
+	};
+
+	/**
 	* @brief set matchmaking notification
 	*
 	* @param OnMatchmakingNotification set delegate .
@@ -1327,6 +1517,16 @@ public:
 	void SetReadyConsentNotifDelegate(FReadyConsentNotif OnReadyConsentNotification)
 	{
 		ReadyConsentNotif = OnReadyConsentNotification;
+	};
+
+	/**
+	* @brief set reject consent notification
+	*
+	* @param OnRejectConsentNotification set delegate .
+	*/
+	void SetRejectConsentNotifDelegate(FRejectConsentNotif OnRejectConsentNotification)
+	{
+		RejectConsentNotif = OnRejectConsentNotification;
 	};
 
 	/**
@@ -1715,7 +1915,14 @@ private:
 #pragma region Message Parsing
 	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj, const TSharedPtr<FLobbyMessageMetaData>& MessageMeta);
 	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
-	static TMap<FString, Response> ResponseStringEnumMap; 
+	
+	void HandleV2SessionNotif(const FString& ParsedJsonString);
+	void HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message);
+
+	void InitializeV2MatchmakingNotifDelegates();
+	TMap<EV2MatchmakingNotifTopic, FMessageNotif> MatchmakingV2NotifDelegates;
+	
+	static TMap<FString, Response> ResponseStringEnumMap;
 	static TMap<FString, Notif> NotifStringEnumMap;
 #pragma endregion
 
@@ -1774,6 +1981,7 @@ private:
 	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingStartResponseMap;
 	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingCancelResponseMap;
 	TMap<FString, FReadyConsentResponse> MessageIdReadyConsentResponseMap;
+	TMap<FString, FRejectConsentResponse> MessageIdRejectConsentResponseMap;
 
 	// Custom Game
 	TMap<FString, FBaseResponse> MessageIdCreateDSResponseMap;
@@ -1847,12 +2055,35 @@ private:
 	FUserBannedNotification UserBannedNotification;
 	FUserUnbannedNotification UserUnbannedNotification;
 
+	// session v2
+	FV2PartyInvitedNotif V2PartyInvitedNotif;
+	FV2PartyMembersChangedNotif V2PartyMembersChangedNotif;
+	FV2PartyJoinedNotif V2PartyJoinedNotif;
+	FV2PartyRejectedNotif V2PartyRejectedNotif;
+	FV2PartyKickedNotif V2PartyKickedNotif;
+	FV2PartyUpdatedNotif V2PartyUpdatedNotif;
+
+	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
+	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
+	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
+	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;
+	FV2GameSessionKickedNotif V2GameSessionKickedNotif;
+	FV2GameSessionRejectedNotif V2GameSessionRejectedNotif;
+
+	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
+
+	FV2MatchmakingMatchFoundNotif V2MatchmakingMatchFoundNotif;
+	FV2MatchmakingStartNotif V2MatchmakingStartNotif;
+	FV2MatchmakingExpiredNotif V2MatchmakingExpiredNotif;
+
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;
 	FMatchmakingResponse MatchmakingCancelResponse;
 	FReadyConsentResponse ReadyConsentResponse;
+	FRejectConsentResponse RejectConsentResponse;
     FMatchmakingNotif MatchmakingNotif;
 	FReadyConsentNotif ReadyConsentNotif;
+	FRejectConsentNotif RejectConsentNotif;
 	FRematchmakingNotif RematchmakingNotif;
 	FDsNotif DsNotif;
 
@@ -1939,6 +2170,7 @@ private:
 	FErrorHandler OnMatchmakingStartError;
 	FErrorHandler OnMatchmakingCancelError;
 	FErrorHandler OnReadyConsentError;
+	FErrorHandler OnRejectConsentError;
 	FErrorHandler OnRequestFriendsError;
 	FErrorHandler OnRequestFriendsByPublicIdError;
 	FErrorHandler OnUnfriendError;
@@ -1957,6 +2189,5 @@ private:
 	FErrorHandler OnRefreshTokenError;
 	FErrorHandler OnCreateDSError;
 };
-
 } // Namespace Api
 } // Namespace AccelByte

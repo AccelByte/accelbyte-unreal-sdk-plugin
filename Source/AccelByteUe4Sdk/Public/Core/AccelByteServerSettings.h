@@ -33,8 +33,12 @@ public:
 	FString CloudSaveServerUrl{};
 	FString SeasonPassServerUrl{};
 	FString SessionBrowserServerUrl{};
+	FString SessionServerUrl{};
+	FString DSHubServerUrl{};
+	FString MatchmakingV2ServerUrl{};
+
 	float QosPingTimeout{.6f};
-	
+
 	void Reset(ESettingsEnvironment const Environment);
 
 	ServerSettings& operator=(ServerSettings const& Other) = default;
@@ -117,7 +121,16 @@ public:
 	FString SessionBrowserServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	FString SessionServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	float QosPingTimeout{.6f};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	FString DSHubServerUrl{};
+	
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	FString MatchmakingV2ServerUrl{};
 };
 
 UCLASS(Config = Engine)
@@ -201,6 +214,15 @@ public:
 	static FString GetSessionBrowserServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetSessionServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetDSHubServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetMatchmakingV2ServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static float GetQosPingTimeout();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -237,7 +259,7 @@ public:
 	static void SetAchievementServerUrl(const FString& AchievementServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
-	static void SetMatchmakingServerUrl(const FString& AchievementServerUrl);
+	static void SetMatchmakingServerUrl(const FString& MatchmakingServerurl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetLobbyServerUrl(const FString& LobbyServerUrl);
@@ -246,10 +268,19 @@ public:
 	static void SetCloudSaveServerUrl(const FString& CloudServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
-	static void SetSeasonPassServerUrl(const FString& CloudServerUrl);
+	static void SetSeasonPassServerUrl(const FString& SessionPassServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
-	static void SetSessionBrowserServerUrl(const FString& CloudServerUrl);
+	static void SetSessionBrowserServerUrl(const FString& SessionBrowserServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetSessionServerUrl(const FString& SessionServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetDSHubServerUrl(const FString& DSHubServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl);
 
 	/**
 	 * @brief

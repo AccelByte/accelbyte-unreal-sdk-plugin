@@ -12,6 +12,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/Version.h"
 #include "Interfaces/IPluginManager.h"
+#include "Core/AccelByteDataStorageBinaryFile.h"
 
 #if WITH_EDITOR
 #include "ISettingsModule.h"
@@ -30,11 +31,14 @@ public:
 	virtual AccelByte::ServerSettings const& GetServerSettings() const override;
 	virtual ESettingsEnvironment const& GetSettingsEnvironment() const override;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() override;
+	virtual IAccelByteDataStorage * GetLocalDataStorage() override;
+
 private:
 	AccelByte::Settings ClientSettings{};
 	AccelByte::ServerSettings ServerSettings{};
 	ESettingsEnvironment SettingsEnvironment{ESettingsEnvironment::Default};
 	FEnvironmentChangedDelegate EnvironmentChangedDelegate{};
+	TSharedPtr<IAccelByteDataStorage> LocalDataStorage = nullptr;
 	
 	// For registering settings in UE4 editor
 	void RegisterSettings();
@@ -66,6 +70,8 @@ void FAccelByteUe4SdkModule::StartupModule()
 	RegisterSettings();
 	LoadSettingsFromConfigUObject();
 	LoadServerSettingsFromConfigUObject();
+
+	LocalDataStorage = MakeShared<DataStorageBinaryFile>();
 
 #if UE_BUILD_DEVELOPMENT
 	CheckServicesCompatibility();
@@ -259,7 +265,11 @@ void FAccelByteUe4SdkModule::GetVersionInfo(FString const& Url, TFunction<void(F
 
 			FString const Content = ResponsePtr->GetContentAsString();
 
-			ensureAlwaysMsgf(!Content.IsEmpty(), TEXT("Version info empty: %s"), *RequestPtr->GetURL());
+			if (Content.IsEmpty())
+			{
+				UE_LOG(LogAccelByte, Warning, TEXT("Version info empty:%s"), *RequestPtr->GetURL());
+				return;
+			}
 
 			FVersionInfo VersionInfo;
 			FJsonObjectConverter::JsonObjectStringToUStruct(Content, &VersionInfo, 0, 0);
@@ -309,6 +319,18 @@ void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
 FEnvironmentChangedDelegate& FAccelByteUe4SdkModule::OnEnvironmentChanged()
 {
 	return EnvironmentChangedDelegate;
+}
+
+IAccelByteDataStorage * FAccelByteUe4SdkModule::GetLocalDataStorage()
+{
+	if (LocalDataStorage.IsValid())
+	{
+		return LocalDataStorage.Get();
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)

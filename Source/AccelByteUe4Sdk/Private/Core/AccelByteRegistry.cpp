@@ -33,6 +33,8 @@
 #include "Api/AccelByteCurrencyApi.h"
 #include "Api/AccelByteMiscellaneousApi.h"
 #include "Api/AccelByteRewardApi.h"
+#include "Api/AccelByteSessionApi.h"
+#include "Api/AccelByteMatchmakingV2Api.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -46,6 +48,9 @@
 #include "GameServerApi/AccelByteServerSeasonPassApi.h"
 #include "GameServerApi/AccelByteServerSessionBrowserApi.h"
 #include "GameServerApi/AccelByteServerUserApi.h"
+#include "GameServerApi/AccelByteServerSessionApi.h"
+#include "GameServerApi/AccelByteServerDSHubApi.h"
+#include "GameServerApi/AccelByteServerMatchmakingV2Api.h"
 
 using namespace AccelByte;
 
@@ -81,6 +86,8 @@ Api::Reporting FRegistry::Reporting(FRegistry::Credentials, FRegistry::Settings,
 Api::Currency FRegistry::Currency(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Miscellaneous FRegistry::Miscellaneous(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Reward FRegistry::Reward(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+Api::Session FRegistry::Session(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+Api::MatchmakingV2 FRegistry::MatchmakingV2(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::TurnManager FRegistry::TurnManager(FRegistry::Credentials, FRegistry::Settings, HttpRetryScheduler);
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
@@ -95,3 +102,6 @@ GameServerApi::ServerCloudSave FRegistry::ServerCloudSave(FRegistry::ServerCrede
 GameServerApi::ServerSeasonPass FRegistry::ServerSeasonPass(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerSessionBrowser FRegistry::ServerSessionBrowser(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerUser FRegistry::ServerUser(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
+GameServerApi::ServerSession FRegistry::ServerSession(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
+GameServerApi::ServerDSHub FRegistry::ServerDSHub(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
+GameServerApi::ServerMatchmakingV2 FRegistry::ServerMatchmakingV2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);

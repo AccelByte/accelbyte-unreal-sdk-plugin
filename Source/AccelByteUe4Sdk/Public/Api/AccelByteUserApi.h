@@ -11,7 +11,6 @@
 #include "Models/AccelByteUserModels.h"
 #include "Core/AccelByteApiBase.h"
 
-
 namespace AccelByte
 {
 	namespace Api
@@ -195,6 +194,15 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+
+			/**
+			 * @brief Relogin using the previously logged-in platform account. WINDOWS ONLY
+			 *
+			 * @param PlatformUserID The user ID that used previously and used .
+			 * @param OnSuccess This will be called when the provided Platform User Account is acknowledged and not expired yet. Continue the session.
+			 * @param OnError This will be called when the Platform User Account that provided is not known yet — OR it existed but already expired.
+			 */
+			void TryRelogin(const FString& PlatformUserID, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Create Headless Account And Login
@@ -644,6 +652,15 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+
+			/**
+			 * @brief This function for getting user information .
+			 *
+			 * @param UserId Targeted User ID.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FGetUserInformationResponse.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void GetUserInformation(const FString& UserId, const THandler<FGetUserInformationResponse>& OnSuccess, const FErrorHandler& OnError);
 
 		private:
 			User() = delete;

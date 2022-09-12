@@ -487,7 +487,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	FAccelByteModelsItemRecurring Recurring{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FString> ItemIds{}; 
+	TArray<FString> ItemIds{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	TMap<FString, int32> ItemQty{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	TArray<FString> BoundItemIds{};
@@ -535,131 +538,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	FAccelByteModelItemOptionBoxConfig OptionBoxConfig{};	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FJsonObjectWrapper LocalExt{};
-
+	bool Fresh{};	
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TMap<FString, int32> ItemQty{};
+	FJsonObjectWrapper LocalExt{};
 
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsPopulatedItemInfo
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPopulatedItemInfo : public FAccelByteModelsItemInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString Title{};
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString Description{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString LongDescription{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString ItemId{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString AppId{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString AppType{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString BaseAppId{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString Sku{};
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString Namespace{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString Name{};
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	EAccelByteEntitlementType EntitlementType{EAccelByteEntitlementType::NONE};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	int32 UseCount{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	bool Stackable{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString CategoryPath{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	EAccelByteItemStatus Status{EAccelByteItemStatus::NONE};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	EAccelByteItemType ItemType{EAccelByteItemType::NONE};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString TargetNamespace{};
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString TargetCurrencyCode{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString TargetItemId{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FAccelByteModelsItemImage> Images{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString ThumbnailUrl{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FAccelByteModelsItemRegionDataItem> RegionData{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FString> ItemIds{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FString> Tags{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FString> Features{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	int32 MaxCountPerUser{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	int32 MaxCount{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString Clazz{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString BoothName{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	int32 DisplayOrder{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FJsonObjectWrapper Ext{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString Region{};
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString Language{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FDateTime CreatedAt{0};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FDateTime UpdatedAt{0};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | FAccelByteModelsPopulatedItemInfo")
 	TArray<FAccelByteModelsItemInfo> Items{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FJsonObjectWrapper LocalExt{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TMap<FString, int32> ItemQty{};
 };
 
 USTRUCT(BlueprintType)
