@@ -442,6 +442,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUserInvitedEvent
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserInvitedEvent")
 		FString SessionID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserInvitedEvent")
+		FString SenderID{};
 };
 
 USTRUCT(BlueprintType)

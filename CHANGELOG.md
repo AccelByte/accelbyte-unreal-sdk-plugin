@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [16.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.2.1%0D16.2.0) (2022-09-15)
+
 ## [16.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.2.0%0D16.1.0) (2022-09-12)
 
 
