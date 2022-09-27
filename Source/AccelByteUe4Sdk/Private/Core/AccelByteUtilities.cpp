@@ -7,7 +7,6 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteUserModels.h"
-
 #include <memory>
 
 // enclosing with namespace because of collision with Unreal types
@@ -353,23 +352,36 @@ FString FAccelByteUtilities::GetDeviceId()
 {
 	FString DeviceId = FPlatformMisc::GetDeviceId();
 	if (DeviceId.IsEmpty())
-	{
-		PRAGMA_DISABLE_DEPRECATION_WARNINGS
-			const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
-		PRAGMA_ENABLE_DEPRECATION_WARNINGS
-			FString MacAddressString;
-		for (TArray<uint8>::TConstIterator it(MacAddr); it; ++it)
-		{
-			MacAddressString += FString::Printf(TEXT("%02x"), *it);
-		}
+	{ 
+		FString MacAddressString = FAccelByteUtilities::GetMacAddress(); 
 		DeviceId = FMD5::HashAnsiString(*MacAddressString);
 
 		if (DeviceId.IsEmpty())
 		{
 			DeviceId = *LocalDeviceId();
 		}
-	}
+	} 
 	return DeviceId;
+}
+
+FString FAccelByteUtilities::GetMacAddress()
+{
+	FString MacAddressString = TEXT("");
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
+		const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
+	for (TArray<uint8>::TConstIterator it(MacAddr); it; ++it)
+	{
+		MacAddressString += FString::Printf(TEXT("%02x"), *it);
+	}
+	return MacAddressString;
+}
+
+FString FAccelByteUtilities::GetPlatformName()
+{
+	FString PlatformName = TEXT("");
+	PlatformName = UGameplayStatics::GetPlatformName();
+	return PlatformName;
 }
 
 FString FAccelByteUtilities::XOR(const FString& Input, const FString& Key)

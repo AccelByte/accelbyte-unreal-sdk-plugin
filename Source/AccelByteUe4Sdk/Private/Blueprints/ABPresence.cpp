@@ -42,7 +42,7 @@ void UABPresence::BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request
 		Request.bCountOnly);
 }
 
-void UABPresence::SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError) 
+void UABPresence::SetPresenceStatus(FAccelBytePresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetUserPresenceResponseDelegate(
 	Api::Lobby::FSetUserPresenceResponse::CreateLambda(

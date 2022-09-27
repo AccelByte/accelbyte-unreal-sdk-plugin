@@ -44,7 +44,7 @@ void DataStorageBinaryFile::DeleteItem(const FString & Key, const FVoidHandler O
 	StringToBytes(SerializedText, ByteArray.GetData(), SerializedText.Len());
 
 	FString Path = CompleteAbsoluteFilePath(FileName);
-	FFileHelper::SaveStringToFile(SerializedText, *Path);
+	FFileHelper::SaveArrayToFile(ByteArray, *Path);
 	OnDone.ExecuteIfBound();
 }
 

@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [17.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/17.0.0%0D16.2.1) (2022-09-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* renamed FPresenceStatus to FAccelBytePresenceStatus to resolve conflict
+* Wallet::GetWalletInfoByCurrencyCode returns new adjusted model
+
+### Features
+
+* AccelByteUe4Sdk Plug-in's Wallet::GetWalletInfoByCurrencyCode returns a partial response ([c551113](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c55111352b3be5985156ae1371e7069a3e6ed473))
+* **extension:** add new item type called extension ([0659bdd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0659bdd5b57b2174e6edc392c2546172870d89bd))
+* Improve Store Category search results to display all items from its sub-categories ([2218624](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2218624d6a71e8e659b174f595546a82ad5918d1))
+* **lobby:** NOT BREAKING CHANGE: add reject consent function ([6fbcf78](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6fbcf788ca6b4209d49ea6114ad11a123ee0a6ed))
+* providing mac address & platform name methods to fulfill client requirement ([0a5fef5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0a5fef52cd979044d2a661420b4f7433687e694d))
+* Temporarily cache telemetry data into the Local disk storage ([0ec3fe3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0ec3fe30069b2cf7bc95e9a7ac02621799d93d29))
+* walletapi support old walkflow and multiple platform ([18f814a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/18f814a1906590ccd7544752eecdd683bedcec12))
+
+
+### Bug Fixes
+
+* Conflicting FPresenceStatus used in both AccelByte SDK and Vivox SDK ([068d1ed](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/068d1ed272a6a01622e5c9f17d99f30cde6e65aa))
+* Fix data corruption after item deletion ([0189662](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/01896623640085f88bcb7085794b537f48802817))
+* PopulatedItemInfo inherits ItemInfo model ([3b68192](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3b68192be031322fcff8f588b058b97ebc54cb42))
+* support get wallet info old workflow ([fe387c8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fe387c8393732abc52a14d5321e5f3ece44cca56))
+* update current user from register and unregister player to session browser ([cdcd755](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cdcd7555b3a97da78e242851312049fce2268c25))
+
 ### [16.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.2.1%0D16.2.0) (2022-09-15)
 
 ## [16.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/16.2.0%0D16.1.0) (2022-09-12)

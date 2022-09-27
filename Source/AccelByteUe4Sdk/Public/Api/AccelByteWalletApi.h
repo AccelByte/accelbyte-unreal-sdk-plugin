@@ -40,6 +40,15 @@ public:
 	void GetWalletInfoByCurrencyCode(FString const& CurrencyCode, THandler<FAccelByteModelsWalletInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+     * @brief Get user's wallet information for a specific currency code.
+	 *
+	 * @param CurrencyCode The currency code.
+	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsWalletResponse&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetWalletInfoByCurrencyCodeV2(FString const& CurrencyCode, THandler<FAccelByteModelsWalletInfoResponse> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get user's wallet transactions list for a specific currency code.
 	 * 
 	 * @param CurrencyCode The currency code.

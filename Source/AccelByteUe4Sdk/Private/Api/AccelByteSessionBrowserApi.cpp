@@ -192,11 +192,27 @@ namespace Api
 	}
 
 	void SessionBrowser::UpdateGameSession(FString const& SessionId
+		, uint32 MaxPlayer
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
+	{
+		FAccelByteModelsSessionBrowserUpdateRequest UpdateSessionRequest;
+		UpdateSessionRequest.Game_max_player = MaxPlayer;
+
+		UpdateGameSession(SessionId, UpdateSessionRequest, OnSuccess, OnError);
+	}
+
+	void SessionBrowser::UpdateGameSession(FString const& SessionId
 		, FAccelByteModelsSessionBrowserUpdateRequest const& UpdateSessionRequest
 		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 		, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
+		if(UpdateSessionRequest.Game_current_player != 0)
+		{
+			FReport::LogDeprecated(FString(__FUNCTION__),
+				TEXT("Update player count deprecated from UpdateGameSession. Use register/unregister player to update player count"));
+		}
 
 		if (SessionId.IsEmpty())
 		{
@@ -207,12 +223,6 @@ namespace Api
 		if (UpdateSessionRequest.Game_max_player == 0)
 		{
 			OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Max player must greather then 0"));
-			return;
-		}
-		
-		if (UpdateSessionRequest.Game_max_player < UpdateSessionRequest.Game_current_player)
-		{
-			OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Max players should NOT be less than current players"));
 			return;
 		}
 

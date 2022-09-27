@@ -24,3 +24,14 @@ void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCode(const FString& Curr
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
+
+void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCodeV2(const FString& CurrencyCode, const FGetWalletInfoResponseSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::Wallet.GetWalletInfoByCurrencyCodeV2(CurrencyCode, THandler<FAccelByteModelsWalletInfoResponse>::CreateLambda([OnSuccess](const FAccelByteModelsWalletInfoResponse& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}

@@ -24,7 +24,8 @@ enum class EAccelByteItemType : uint8
 	SUBSCRIPTION,
 	SEASON,
 	MEDIA,
-	OPTIONBOX
+	OPTIONBOX,
+	EXTENSION
 };
 
 UENUM(BlueprintType)
@@ -588,6 +589,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemCriteria
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemCriteria")
 	FString CategoryPath{};
+
+	/** @brief Default == false. Can change to "true". Anything != "true" will remain default */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemCriteria")
+	bool IncludeSubCategoryItem{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemCriteria")
 	FString BaseAppId{};
@@ -1495,7 +1500,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTimeLimitedBalance
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | TimeLimitedBalance")
 	FDateTime ExpiredAt{0};
 	
-};
+}; 
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
@@ -1503,17 +1508,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
-	FString Id{};
+	FString Id{}; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
-	FString Namespace{};
+	FString Namespace{}; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
-	FString UserId{};
+	FString UserId{}; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	FString CurrencyCode{};
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	FString CurrencySymbol{};
 
@@ -1525,15 +1530,54 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	TArray<FAccelByteModelsTimeLimitedBalance> TimeLimitedBalances{};
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	FDateTime CreatedAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	FDateTime UpdatedAt{0};
+ 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
+	int32 TotalPermanentBalance{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
-	EAccelByteItemStatus Status{EAccelByteItemStatus::NONE};
+	int32 TotalTimeLimitedBalance{};
+	 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
+	EAccelByteItemStatus Status{ EAccelByteItemStatus::NONE };
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfoResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	FString CurrencyCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	FString CurrencySymbol{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	int32 Balance{}; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	TArray<FAccelByteModelsWalletInfo> WalletInfos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	EAccelByteItemStatus WalletStatus{EAccelByteItemStatus::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	EAccelByteItemStatus Status{ EAccelByteItemStatus::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
+	FString Id{};
 };
 
 USTRUCT(BlueprintType)
@@ -1553,6 +1597,52 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreditUserWalletRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
 	EAccelByteWalletTable Origin{EAccelByteWalletTable::System};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletCreditResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	FString Id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	FString CurrencySymbol {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	FString CurrencyCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	int32 Balance{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	FString BalanceOrigin {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	TArray<FAccelByteModelsTimeLimitedBalance> timeLimitedBalances {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	int32 TotalPermanentBalance{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	int32 TotalTimeLimitedBalance {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
+	EAccelByteItemStatus Status{ EAccelByteItemStatus::NONE };
+};
+
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsDebitUserWalletRequest

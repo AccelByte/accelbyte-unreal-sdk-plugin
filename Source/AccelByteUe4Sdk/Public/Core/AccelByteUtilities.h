@@ -375,6 +375,10 @@ public:
 	
 	static FString GetDeviceId();
 
+	static FString GetMacAddress();
+
+	static FString GetPlatformName();
+
 	static FString XOR(const FString& Input, const FString& Key);
 
 private:

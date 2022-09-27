@@ -26,7 +26,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API GameTelemetry
 {
 public:
-	GameTelemetry(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	GameTelemetry(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~GameTelemetry();
 
 	/**
@@ -71,20 +71,28 @@ public:
 	void Shutdown();
 
 private:
-	void SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	void SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	bool PeriodicTelemetry(float DeltaTime);
+	void LoadCachedEvents();
+	void AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody> Telemetry);
+	void OnLoginSuccess(FOauth2Token const& Response);
+	void RemoveEventsFromCache();
+	bool JobArrayQueueAsJsonString(FString& OutJsonString);
+	bool EventsJsonToArray(FString& InJsonString, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray);
+	FString GetTelemetryKey();
 
 	GameTelemetry() = delete;
 	GameTelemetry(GameTelemetry const&) = delete;
 	GameTelemetry(GameTelemetry&&) = delete;
 
 	FHttpRetryScheduler& HttpRef;
-	Credentials const& CredentialsRef;
+	Credentials& CredentialsRef;
 	Settings const& SettingsRef;
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;
-	TQueue<TTuple<FAccelByteModelsTelemetryBody, FVoidHandler, FErrorHandler>> JobQueue;
+	TQueue<TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>> JobQueue;
+	TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventPtrArray;
 	bool bTelemetryJobStarted = false;
 	FTimespan const MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;

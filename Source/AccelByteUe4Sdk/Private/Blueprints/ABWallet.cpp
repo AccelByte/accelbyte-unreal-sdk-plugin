@@ -29,3 +29,22 @@ void UABWallet::GetWalletInfoByCurrencyCode(
 				OnError.ExecuteIfBound(Code, Message);
 			}));
 }
+
+void UABWallet::GetWalletInfoByCurrencyCodeV2(
+	FString const& CurrencyCode,
+	FDAccelByteModelsWalletInfosResponse OnSuccess,
+	FDErrorHandler OnError) 
+{
+	ApiClientPtr->Wallet.GetWalletInfoByCurrencyCodeV2(
+		CurrencyCode,
+		THandler<FAccelByteModelsWalletInfoResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsWalletInfoResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}

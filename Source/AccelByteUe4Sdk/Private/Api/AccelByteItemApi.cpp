@@ -191,6 +191,7 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
 		{ TEXT("sortBy"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(SortByStringArray)  },
 		{ TEXT("storeId"), StoreId },
+		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true"):TEXT("false")},
 	});
 	
 	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);

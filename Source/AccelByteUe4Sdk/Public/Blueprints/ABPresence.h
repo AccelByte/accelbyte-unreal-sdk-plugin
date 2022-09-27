@@ -14,7 +14,7 @@
 using namespace AccelByte;
 
 USTRUCT(BlueprintType)
-struct FPresenceStatus
+struct FAccelBytePresenceStatus
 {
 	GENERATED_BODY()
 
@@ -62,7 +62,7 @@ public:
 	void BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence | Api")
-	void SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError);
+	void SetPresenceStatus(FAccelBytePresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError);
 
 //Notification
 public:

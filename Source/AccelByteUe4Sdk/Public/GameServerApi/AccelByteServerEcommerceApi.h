@@ -83,6 +83,17 @@ public:
 	void CreditUserWallet(const FString& UserId, const FString& CurrencyCode, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	 * @brief Credit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
+	 *
+	 * @param UserId The user who will receive credit.
+	 * @param CurrencyCode The currency code.
+	 * @param CreditUserWalletRequest The request to credit a user wallet.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletCreditResponse&.
+	 * @param OnError This will be called when the operation fails.
+	 */
+	void CreditUserWalletV2(const FString& UserId, const FString& CurrencyCode, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest, const THandler<FAccelByteModelsWalletCreditResponse>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
 	 * @brief Revoke Entitlement from a User (Many)
 	 *
 	 * @param UserId The user id who have the entitlements
@@ -142,6 +153,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletInfo&.
 	* @param OnError This will be called when the operation fails.
 	*/
+	// This end point will be deprecated, old wallet id means one currency, but now it only means one wallet, so we wanna use currency and source instead it. 
 	void DebitUserWallet(const FString& UserId, const FString& WalletId, const FAccelByteModelsDebitUserWalletRequest& DebitUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**

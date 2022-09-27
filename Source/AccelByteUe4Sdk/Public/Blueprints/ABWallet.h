@@ -16,6 +16,7 @@ using namespace AccelByte;
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsWalletInfoResponse, FAccelByteModelsWalletInfo, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsWalletInfosResponse, FAccelByteModelsWalletInfoResponse, Response);
 
 #pragma endregion 
 
@@ -29,6 +30,9 @@ public:
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Wallet | Api")
 	void GetWalletInfoByCurrencyCode(FString const& CurrencyCode, FDAccelByteModelsWalletInfoResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Wallet | Api")
+	void GetWalletInfoByCurrencyCodeV2(FString const& CurrencyCode, FDAccelByteModelsWalletInfosResponse OnSuccess, FDErrorHandler OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;

@@ -16,8 +16,12 @@ class UAccelByteBlueprintsWallet : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
-	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetWalletByCurrencyCodeSuccess, const FAccelByteModelsWalletInfo&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetWalletInfoResponseSuccess, const FAccelByteModelsWalletInfoResponse&, Result);
+	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Wallet | Api ")
 	static void GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Wallet | Api ")
+	static void GetWalletInfoByCurrencyCodeV2(const FString& CurrencyCode, const FGetWalletInfoResponseSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 };

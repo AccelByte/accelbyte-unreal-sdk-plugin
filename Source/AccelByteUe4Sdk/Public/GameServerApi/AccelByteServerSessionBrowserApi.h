@@ -150,7 +150,8 @@ public:
 		FErrorHandler const& OnError);
 
 	/**
-	* @brief Update the session to Session Browser.
+	* @brief Update the session to Session Browser. Current player count can not be updated from update session.
+	* CurrentPlayerCount will be updated automatically when register / unregister players.
 	*
 	* @param SessionId id of the session want to update.
 	* @param CurrentPlayerCount current number of player in the session.
@@ -162,6 +163,20 @@ public:
 		FString const& SessionId,
 		uint32 MaxPlayer,
 		uint32 CurrentPlayerCount,
+		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
+		FErrorHandler const& OnError);
+
+	/**
+	* @brief Update the session to Session Browser.
+	*
+	* @param SessionId id of the session want to update.
+	* @param MaxPlayer maximum number of player can join the session.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void UpdateGameSession(
+		FString const& SessionId,
+		uint32 MaxPlayer,
 		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
 		FErrorHandler const& OnError);
 
