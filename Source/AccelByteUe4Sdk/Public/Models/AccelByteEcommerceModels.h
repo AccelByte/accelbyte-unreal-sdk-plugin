@@ -349,7 +349,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelItemPredicate
 	FString Comparison{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FString AnyOf{};
+	int32 AnyOf{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	TArray<FString> Values{};
@@ -365,7 +365,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelItemConditionGroup
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FAccelByteModelItemPredicate> Predicate{};
+	TArray<FAccelByteModelItemPredicate> Predicates{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FString Operator{};
@@ -377,7 +377,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelItemPurchaseCondition
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	TArray<FAccelByteModelItemConditionGroup> FAccelByteModelItemConditionGroups{};
+	TArray<FAccelByteModelItemConditionGroup> ConditionGroups{};
 };
 
 USTRUCT(BlueprintType)
