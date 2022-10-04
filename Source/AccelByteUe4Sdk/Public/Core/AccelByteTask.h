@@ -182,6 +182,11 @@ public:
 	virtual bool Start() { return true; }
 
 	/**
+	 * @brief Pause the Task in the middle of the process.
+	 */
+	virtual EAccelByteTaskState Pause() { return EAccelByteTaskState::Paused; }
+
+	/**
 	 * @brief Stop the Task in the middle of the process.
 	 */
 	virtual bool Cancel() 

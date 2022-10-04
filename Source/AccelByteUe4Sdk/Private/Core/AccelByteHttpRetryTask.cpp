@@ -70,6 +70,7 @@ namespace AccelByte
 	{
 		if (TaskState != EAccelByteTaskState::Paused)
 		{
+			TaskState = EAccelByteTaskState::Paused;
 			BearerAuthRejectedRefreshHandle = BearerAuthRejectedRefresh.Add(THandler<FString>::CreateLambda([&](const FString& AccessToken) 
 			{
 				BearerAuthUpdated(AccessToken);
@@ -78,7 +79,7 @@ namespace AccelByte
 		}
 		PauseTime = TaskTime;
 
-		return EAccelByteTaskState::Paused;
+		return FAccelByteTask::Pause();
 	}
 
 	void FHttpRetryTask::Tick(double CurrentTime)
@@ -235,18 +236,22 @@ namespace AccelByte
 	void FHttpRetryTask::BearerAuthUpdated(const FString& AccessToken)
 	{
 		bIsBeenRunFromPause = true;
+		if (TaskState != EAccelByteTaskState::Paused)
+		{
+			return;
+		}
 
 		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("BearerAuthUpdated"));
 		if (AccessToken.IsEmpty())
 		{
-			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Bearer token is empty, Task is canceled"));
+			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Bearer token is empty, Task will be canceled"));
 			Cancel();
 			return;
 		}
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 		Request->SetHeader(TEXT("Authorization"), Authorization);
 
-		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Bearer token is empty, Task is canceled"));
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Bearer token updated, Task will be resumed"));
 		TaskState = EAccelByteTaskState::Retrying;
 		NextRetryTime = FPlatformTime::Seconds();
 	}

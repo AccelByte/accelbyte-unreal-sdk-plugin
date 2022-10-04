@@ -10,7 +10,6 @@
 #include "Core/AccelByteDefines.h"
 #include "Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Engine.h"
 #include "AccelByteServerCredentials.generated.h"
 
 namespace AccelByte

@@ -30,7 +30,7 @@ namespace AccelByte
 		virtual bool Finish() override;
 		bool FinishFromCached(const FHttpResponsePtr& Response);
 
-		EAccelByteTaskState Pause();
+		virtual EAccelByteTaskState Pause() override;
 
 		FHttpRequestPtr GetHttpRequest() const { return Request; };
 

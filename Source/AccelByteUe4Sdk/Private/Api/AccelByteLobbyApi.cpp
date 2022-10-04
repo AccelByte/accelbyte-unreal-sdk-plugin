@@ -462,7 +462,8 @@ void Lobby::Disconnect(bool ForceCleanup)
 	FReport::Log(FString(__FUNCTION__));
 
 	ChannelSlug = "";
-	CredentialsRef.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
+	CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
+	TokenRefreshDelegateHandle.Reset();
 	if(WebSocket.IsValid())
 	{
 		WebSocket->Disconnect(ForceCleanup);
@@ -1515,7 +1516,18 @@ void Lobby::OnConnected()
 {
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
 
-	CredentialsRef.OnTokenRefreshed().Add(RefreshTokenDelegate);
+	TokenRefreshDelegateHandle = CredentialsRef.OnTokenRefreshed().AddLambda(
+		[this](bool bSuccess)
+		{
+			if (bSuccess)
+			{
+				RefreshToken(CredentialsRef.GetAccessToken());
+			}
+			else
+			{
+				Disconnect(true);
+			}
+		});
 		
 	ConnectSuccess.ExecuteIfBound();
 }
@@ -1533,7 +1545,8 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 		Disconnect();
 	}
 
-	CredentialsRef.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
+	CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
+	TokenRefreshDelegateHandle.Reset();
 
 	BanNotifReceived = false;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
@@ -2173,13 +2186,53 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 		{
 			BanNotifReceived = true;
 			FAccelByteModelsUserBannedNotification Result;
-			CredentialsRef.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
-			if (const bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0))
+			//CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
+			if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0))
 			{
-				HttpRef.BearerAuthRejected();
+				if (Result.UserId == CredentialsRef.GetUserId())
+				{
+					HttpRef.BearerAuthRejected();
+				}
+				
 				if (ReceivedMessageType.Equals(LobbyResponse::UserBannedNotification))
 				{
 					UserBannedNotification.ExecuteIfBound(Result);
+
+					const int64 UtcNow = FDateTime::UtcNow().ToUnixTimestamp();
+					FDateTime BanEndDate{0};
+					FDateTime::ParseIso8601(*Result.EndDate, BanEndDate);
+					float BanDuration = BanEndDate.ToUnixTimestamp() - UtcNow;
+					double ScheduledTime = FPlatformTime::Seconds() + BanDuration;
+
+					FString Key = FString::Printf(TEXT("%s-%s"), *Result.UserId, *FAccelByteUtilities::GetUEnumValueAsString(Result.Ban));
+
+					FUnbanScheduleRef* Schedule = UnbanSchedules.Find(Key);
+					if (!Schedule || ScheduledTime < (*Schedule)->ScheduledTime)
+					{
+						if (Schedule)
+						{
+							FTickerAlias::GetCoreTicker().RemoveTicker((*Schedule)->DelegateHandle);
+							UnbanSchedules.Remove(Key);
+						}
+
+						TSharedRef<FAccelByteModelsUserBannedNotification> Data = MakeShared<FAccelByteModelsUserBannedNotification>(Result);
+						FUnbanScheduleRef NewSchedule = MakeShared<FUnbanSchedule>();
+						NewSchedule->DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
+							[this, Data, ScheduledTime](float DeltaTime)
+							{
+								double CurrentTime = FPlatformTime::Seconds();
+								if (CurrentTime >= ScheduledTime)
+								{
+									Data->Enable = false;
+									UserUnbannedNotification.ExecuteIfBound(*Data);
+									return false;
+								}
+								return true;
+							})
+							, 0.2f);
+						NewSchedule->ScheduledTime = ScheduledTime;
+						UnbanSchedules.Add(Key, NewSchedule);
+					}
 				}
 				else if (ReceivedMessageType.Equals(LobbyResponse::UserUnbannedNotification))
 				{

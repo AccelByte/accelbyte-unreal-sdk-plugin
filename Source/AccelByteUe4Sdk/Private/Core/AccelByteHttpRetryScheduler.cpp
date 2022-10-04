@@ -126,6 +126,24 @@ void FHttpRetryScheduler::PauseBearerAuthRequest()
 {
 	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler PAUSED"));
 	State = EState::Paused;
+	TQueue<FAccelByteTaskPtr, EQueueMode::Spsc> TempQueue;
+	
+	while (FAccelByteTaskPtr *TaskPtr = TaskQueue.Peek())
+	{
+		FAccelByteTaskPtr Task = *TaskPtr;
+		
+		TaskQueue.Pop();
+		Task->Pause();
+		TempQueue.Enqueue(Task);
+	}
+
+	while (FAccelByteTaskPtr *TaskPtr = TempQueue.Peek())
+	{
+		FAccelByteTaskPtr Task = *TaskPtr;
+		
+		TempQueue.Pop();
+		TaskQueue.Enqueue(Task);
+	}
 }
   
 void FHttpRetryScheduler::ResumeBearerAuthRequest(const FString& AccessToken)

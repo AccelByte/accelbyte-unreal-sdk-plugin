@@ -96,8 +96,26 @@ const FString& Credentials::GetOAuthClientSecret() const
 
 void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime)
 {
-	UserSessionExpire = CurrentTime + (NewAuthToken.Expires_in*FMath::FRandRange(0.7, 0.9));
-	UserRefreshTime = UserSessionExpire;
+	UserSessionExpire = CurrentTime + (NewAuthToken.Expires_in * FMath::FRandRange(0.7, 0.9));
+	
+	double BanExpire = DBL_MAX;
+	const int64 UtcNowTimestamp = FDateTime::UtcNow().ToUnixTimestamp();
+	for (auto& Ban : NewAuthToken.Bans)
+	{
+		const int64 BanEndTimestamp = Ban.EndDate.ToUnixTimestamp();
+		if (!Ban.Enabled || BanEndTimestamp < UtcNowTimestamp)
+		{
+			continue;
+		}
+		
+		const double BanDuration = CurrentTime + (BanEndTimestamp - UtcNowTimestamp);
+		if (BanDuration < BanExpire)
+		{
+			BanExpire = BanDuration;
+		}
+	}
+	
+	UserRefreshTime = UserSessionExpire < BanExpire ? UserSessionExpire : BanExpire;
 	AuthToken = NewAuthToken;
 	UserSessionState = ESessionState::Valid;
 }
@@ -193,39 +211,40 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	case ESessionState::Valid:
 		if (UserRefreshTime <= CurrentTime)
 		{
-			Oauth2::GetTokenWithRefreshToken(
-				ClientId, ClientSecret,
-				AuthToken.Refresh_token,
-				THandler<FOauth2Token>::CreateLambda([this, CurrentTime](const FOauth2Token& Result)
-			{
-				SetAuthToken(Result, CurrentTime);
-				if (RefreshTokenAdditionalActions.IsBound()) 
+			Oauth2::GetTokenWithRefreshToken(ClientId, ClientSecret
+				, AuthToken.Refresh_token
+				, THandler<FOauth2Token>::CreateLambda([this](const FOauth2Token& Result)
 				{
-					RefreshTokenAdditionalActions.Broadcast();
-					RefreshTokenAdditionalActions.Clear();
-				}
-					
-				TokenRefreshedEvent.Broadcast();
-			}),
-				FErrorHandler::CreateLambda([this, CurrentTime](int32 ErrorCode, const FString& ErrorMessage)
-			{
-				if (UserRefreshBackoff <= 0.0)
+					SetAuthToken(Result, FPlatformTime::Seconds());
+					if (RefreshTokenAdditionalActions.IsBound()) 
+					{
+						RefreshTokenAdditionalActions.Broadcast(true);
+						RefreshTokenAdditionalActions.Clear();
+					}
+						
+					TokenRefreshedEvent.Broadcast(true);
+				})
+				, FErrorHandler::CreateLambda([this](int32 ErrorCode, const FString& ErrorMessage)
 				{
-					UserRefreshBackoff = 10.0;
-				}
+					if (UserRefreshBackoff <= 0.0)
+					{
+						UserRefreshBackoff = 10.0;
+					}
 
-				UserRefreshBackoff *= 2.0;
-				UserRefreshBackoff += FMath::FRandRange(1.0, 60.0);
-				ScheduleRefreshToken(CurrentTime + UserRefreshBackoff);
+					UserRefreshBackoff *= 2.0;
+					UserRefreshBackoff += FMath::FRandRange(1.0, 60.0);
+					ScheduleRefreshToken(FPlatformTime::Seconds() + UserRefreshBackoff);
 
-				if (RefreshTokenAdditionalActions.IsBound())
-				{
-					RefreshTokenAdditionalActions.Broadcast();
-					RefreshTokenAdditionalActions.Clear();
-				}
-					
-				UserSessionState = ESessionState::Expired;
-			}));
+					if (RefreshTokenAdditionalActions.IsBound())
+					{
+						RefreshTokenAdditionalActions.Broadcast(false);
+						RefreshTokenAdditionalActions.Clear();
+					}
+						
+					UserSessionState = ESessionState::Expired;
+					TokenRefreshedEvent.Broadcast(false);
+				})
+			);
 
 			UserSessionState = ESessionState::Refreshing;
 		}
@@ -286,10 +305,16 @@ void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)
 	UE_LOG(LogAccelByteCredentials, Verbose, TEXT("BearerAuthRejectedRefreshToken"));
 	HttpRef.PauseBearerAuthRequest();
 
-	RefreshTokenAdditionalActions.Add(FVoidHandler::CreateLambda([&]()
+	RefreshTokenAdditionalActions.AddLambda([&](bool bSuccess)
 		{
-			HttpRef.ResumeBearerAuthRequest(GetAccessToken());
-		}));
+			FString UpdatedToken = TEXT("");
+			if (bSuccess)
+			{
+				UpdatedToken = GetAccessToken();
+			}
+			
+			HttpRef.ResumeBearerAuthRequest(UpdatedToken);
+		});
 
 	ScheduleRefreshToken(FPlatformTime::Seconds());
 }

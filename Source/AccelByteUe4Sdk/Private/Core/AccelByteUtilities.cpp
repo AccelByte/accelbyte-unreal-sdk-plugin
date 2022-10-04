@@ -8,6 +8,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteUserModels.h"
 #include <memory>
+#include "Kismet/GameplayStatics.h"
 
 // enclosing with namespace because of collision with Unreal types
 namespace openssl

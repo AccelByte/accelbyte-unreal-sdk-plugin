@@ -11,7 +11,6 @@
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteDefines.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Engine.h"
 #include "AccelByteCredentials.generated.h"
 
 namespace AccelByte
@@ -26,8 +25,8 @@ class FHttpRetryScheduler;
 class ACCELBYTEUE4SDK_API Credentials
 {
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoginSuccessDelegate, const FOauth2Token& /*Response*/);
-	DECLARE_MULTICAST_DELEGATE(FRefreshTokenAdditionalActions);
-	DECLARE_EVENT(Credentials, FTokenRefreshedEvent);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshTokenAdditionalActions, bool);
+	DECLARE_EVENT_OneParam(Credentials, FTokenRefreshedEvent, bool);
 
 public:
 	enum class ESessionState

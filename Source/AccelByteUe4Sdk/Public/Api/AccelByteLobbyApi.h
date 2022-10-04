@@ -1948,11 +1948,29 @@ private:
 	FConnectionClosed ConnectionClosed;
 	TSharedPtr<IAccelByteTokenGenerator> TokenGenerator;
 
-	const FVoidHandler RefreshTokenDelegate = FVoidHandler::CreateLambda([&]()
+	FDelegateHandle TokenRefreshDelegateHandle;
+
+#pragma region Unban Schedule
+	struct FUnbanSchedule
 	{
-		RefreshToken(CredentialsRef.GetAccessToken());
-	});
+		virtual ~FUnbanSchedule()
+		{
+			if (DelegateHandle.IsValid())
+			{
+				FTickerAlias::GetCoreTicker().RemoveTicker(DelegateHandle);
+			}
+		}
+		
+		FDelegateHandleAlias DelegateHandle;
+		double ScheduledTime;
+	};
+
+	typedef TSharedRef<FUnbanSchedule> FUnbanScheduleRef;
+	typedef TSharedPtr<FUnbanSchedule> FUnbanSchedulePtr;
 	
+	TMap<FString, FUnbanScheduleRef> UnbanSchedules;
+#pragma endregion
+
 #pragma region Message Id - Response Map
 	TMap<FString, FPartyInfoResponse> MessageIdPartyInfoResponseMap;
 	TMap<FString, FPartyCreateResponse> MessageIdPartyCreateResponseMap;
@@ -2133,8 +2151,7 @@ private:
 	// Refresh Token
 	FRefreshTokenResponse RefreshTokenResponse;
 #pragma endregion
-
-
+	
 	struct PartyStorageWrapper
 	{
 		FString PartyId;

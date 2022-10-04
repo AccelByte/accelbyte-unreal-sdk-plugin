@@ -13,7 +13,8 @@
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteUtilities.h"
 #include "Http.h"
-
+#include "Engine/GameEngine.h"
+#include "GameFramework/GameState.h"
 
 namespace AccelByte
 {
