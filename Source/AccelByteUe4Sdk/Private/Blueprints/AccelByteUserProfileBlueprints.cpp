@@ -64,3 +64,25 @@ void UAccelByteBlueprintsUserProfile::GenerateUploadURLForUserContent(const FStr
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
+
+void UAccelByteBlueprintsUserProfile::GetPrivateCustomAttributes(const FGetPrivateCustomAttributesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::UserProfile.GetPrivateCustomAttributes(AccelByte::THandler<FJsonObjectWrapper>::CreateLambda([OnSuccess](const FJsonObjectWrapper& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUserProfile::UpdatePrivateCustomAttributes(const FJsonObjectWrapper PrivateCustomAttributesUpdateRequest, const FUpdatePrivateCustomAttributesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::UserProfile.UpdatePrivateCustomAttributes(*PrivateCustomAttributesUpdateRequest.JsonObject, AccelByte::THandler<FJsonObjectWrapper>::CreateLambda([OnSuccess](const FJsonObjectWrapper& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}

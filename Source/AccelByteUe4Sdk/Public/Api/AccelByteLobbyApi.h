@@ -195,6 +195,16 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyPromoteLeaderResponse, const FAccelByteModelsPartyPromoteLeaderResponse&);
 
+	/**
+	* @brief delegate for handling sending a notification to a party member
+	*/
+	DECLARE_DELEGATE_OneParam(FPartySendNotifResponse, const FAccelByteModelsPartySendNotifResponse&);
+
+	/**
+	* @brief delegate for handling notification from a party member
+	*/
+	DECLARE_DELEGATE_OneParam(FPartyNotif, const FAccelByteModelsPartyNotif&);
+
     // Chat
     /**
      * @brief delegate for handling private message response
@@ -673,6 +683,15 @@ public:
 	FString SendPartyPromoteLeaderRequest(const FString& UserId);
 
 	/**
+	* @brief Send notification to party member 
+	*
+	* @param UserId The target user ID to send to.
+	* @param Topic The topic of the request. Can use this as ID to know how to marshal the payload
+	* @param Payload The Payload of the request. Can be JSON string
+	*/
+	FString SendNotificationToPartyMember(const FString& Topic, const FString& Payload);
+
+	/**
 	* @brief Set the party's member limit.
 	* 
 	* @param PartyId The party id to be set.
@@ -1074,6 +1093,10 @@ public:
 	{
 		PartyKickNotif = OnInvitePartyKickedNotice;
 	}
+	void SetPartyNotifDelegate(FPartyNotif OnPartyNotif) 
+	{
+		PartyNotif = OnPartyNotif;
+	}
 	void SetPrivateMessageNotifDelegate(FPersonalChatNotif OnPersonalChatNotif)
 	{
 		PersonalChatNotif = OnPersonalChatNotif;
@@ -1350,6 +1373,17 @@ public:
 	{
 		PartyPromoteLeaderResponse = OnPartyPromoteLeaderResponse;
 		OnPartyPromoteLeaderError = OnError;
+	};
+
+	/**
+	* @brief set party send notification response
+	*
+	* @param OnPartySendNotifResponse set delegate .
+	*/
+	void SetPartySendNotifResponseDelegate(FPartySendNotifResponse OnPartySendNotifResponse, FErrorHandler OnError = {}) 
+	{
+		PartySendNotifResponse = OnPartySendNotifResponse;
+		OnPartySendNotifError = OnError;
 	};
 
 	// Chat
@@ -1888,7 +1922,7 @@ public:
 
 	static FString LobbyMessageToJson(const FString& Message);
 
-	void ClearLobbyErrorMessages();
+	static void ClearLobbyErrorMessages();
 
 private:
 	Lobby(Lobby const&) = delete; // Copy constructor
@@ -1926,7 +1960,7 @@ private:
 	static TMap<FString, Notif> NotifStringEnumMap;
 #pragma endregion
 
-	TMap<FString, FString> LobbyErrorMessages;
+	static TMap<FString, FString> LobbyErrorMessages;
 	const float LobbyTickPeriod = 0.5;
 	const float PingDelay;
 	float InitialBackoffDelay;
@@ -1984,6 +2018,7 @@ private:
 	TMap<FString, FPartyDeleteCodeResponse> MessageIdPartyDeleteCodeResponseMap;
 	TMap<FString, FPartyJoinViaCodeResponse> MessageIdPartyJoinViaCodeResponseMap;
 	TMap<FString, FPartyPromoteLeaderResponse> MessageIdPartyPromoteLeaderResponseMap;
+	TMap<FString, FPartySendNotifResponse> MessageIdPartySendNotifResponseMap;
 
 	// Chat
 	TMap<FString, FPersonalChatResponse> MessageIdPersonalChatResponseMap;
@@ -2053,6 +2088,8 @@ private:
 	FPartyDeleteCodeResponse PartyDeleteCodeResponse;
 	FPartyJoinViaCodeResponse PartyJoinViaCodeResponse;
 	FPartyPromoteLeaderResponse PartyPromoteLeaderResponse;
+	FPartySendNotifResponse PartySendNotifResponse;
+	FPartyNotif PartyNotif;
 
     // Chat
     FPersonalChatResponse PersonalChatResponse;
@@ -2178,6 +2215,7 @@ private:
 	FErrorHandler OnPartyDeleteCodeError;
 	FErrorHandler OnPartyJoinViaCodeError;
 	FErrorHandler OnPartyPromoteLeaderError;
+	FErrorHandler OnPartySendNotifError;
 	FErrorHandler OnPersonalChatError;
 	FErrorHandler OnPartyChatError;
 	FErrorHandler OnJoinDefaultChannelChatError;

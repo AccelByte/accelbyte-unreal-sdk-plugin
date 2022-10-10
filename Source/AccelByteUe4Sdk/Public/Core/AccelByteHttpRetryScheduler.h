@@ -57,6 +57,12 @@ public:
 
 	static void SetHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode, const FHttpResponseCodeHandler& Handler);
 	static bool RemoveHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode);
+
+	static void SetHeaderNamespace(const FString& Value) { HeaderNamespace = Value; }
+	static void SetHeaderSDKVersion(const FString& Value) { HeaderSDKVersion = Value; }
+	static void SetHeaderOSSVersion(const FString& Value) { HeaderOSSVersion = Value; }
+	static void SetHeaderGameClientVersion(const FString& Value) { HeaderGameClientVersion = Value; }
+
 protected:
 	static TMap<EHttpResponseCodes::Type, FHttpResponseCodeHandler> ResponseCodeDelegates;
 
@@ -78,6 +84,12 @@ protected:
 	};
 
 	EState State{EState::Uninitialized};
+
+	//Custom Metadata Header
+	static FString HeaderNamespace;
+	static FString HeaderSDKVersion;
+	static FString HeaderOSSVersion;
+	static FString HeaderGameClientVersion;
 };
 
 typedef TSharedRef<FHttpRetryScheduler, ESPMode::ThreadSafe> FHttpRetrySchedulerRef;	

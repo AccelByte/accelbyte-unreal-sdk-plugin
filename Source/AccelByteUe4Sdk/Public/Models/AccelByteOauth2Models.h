@@ -53,6 +53,9 @@ struct ACCELBYTEUE4SDK_API FOauth2Token
 	FString Access_token{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
+	FString Auth_Trust_Id{};	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
 	FString Refresh_token{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")

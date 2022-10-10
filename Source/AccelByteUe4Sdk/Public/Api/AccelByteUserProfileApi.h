@@ -163,6 +163,23 @@ public:
 	void GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError,
 		EAccelByteUploadCategory Category = EAccelByteUploadCategory::DEFAULT);
 
+	/**
+	 * @brief Get user's own private custom attribute profile information. If it doesn't exist, that will be an error.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetPrivateCustomAttributes(const THandler<FJsonObjectWrapper>& OnSuccess, const FErrorHandler& OnError);
+	
+	/**
+	 * @brief Update user's own private custom attributes profile information. If it doesn't exist, that will be an error.
+	 *
+	 * @param PrivateCustomAttributesUpdateRequest Request object which consists private custom attributes profile information.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdatePrivateCustomAttributes(const FJsonObject& PrivateCustomAttributesUpdateRequest, const THandler<FJsonObjectWrapper>& OnSuccess, const FErrorHandler& OnError);
+
 private:
 	UserProfile() = delete;
 	UserProfile(UserProfile const&) = delete;

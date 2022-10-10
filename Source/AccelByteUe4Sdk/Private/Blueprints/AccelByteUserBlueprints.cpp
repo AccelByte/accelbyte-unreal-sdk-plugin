@@ -83,10 +83,10 @@ void UBPUser::Upgrade(const FString& Username, const FString& Password, const FD
 	);
 }
 
-void UBPUser::SendUpgradeVerificationCode(const FString & Username, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::SendUpgradeVerificationCode(const FString & EmailAddress, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	FRegistry::User.SendUpgradeVerificationCode(
-		Username,
+		EmailAddress,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
@@ -119,20 +119,20 @@ void UBPUser::Verify(const FString& VerificationCode, const FDHandler& OnSuccess
 	);
 }
 
-void UBPUser::SendResetPasswordCode(const FString& Username, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::SendResetPasswordCode(const FString& EmailAddress, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	
 	FRegistry::User.SendResetPasswordCode(
-		Username, 
+		EmailAddress, 
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
 
-void UBPUser::ResetPassword(const FString& VerificationCode, const FString& Username, const FString& NewPassword, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::ResetPassword(const FString& VerificationCode, const FString& EmailAddress, const FString& NewPassword, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	FRegistry::User.ResetPassword(
-		VerificationCode, Username, NewPassword,
+		VerificationCode, EmailAddress, NewPassword,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);

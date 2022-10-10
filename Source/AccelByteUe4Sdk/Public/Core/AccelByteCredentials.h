@@ -54,7 +54,8 @@ public:
 	void ScheduleRefreshToken(double NextRefreshTime);
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
 	void SetErrorOAuth(const FErrorOauthInfo ErrorOAuthInfo);
-
+	void SetAccountUserData(const FAccountUserData& InAccountUserData);
+	
 	FTokenRefreshedEvent& OnTokenRefreshed();
 
 	const FString& GetOAuthClientId() const;
@@ -68,7 +69,8 @@ public:
 	const FString& GetUserDisplayName() const;
 	const FString& GetNamespace() const;
 	const FString& GetUserEmailAddress() const;
-	const FString& GetLinkingToken() const; 
+	const FString& GetLinkingToken() const;
+	const FAccountUserData& GetAccountUserData() const;
 	
 	ESessionState GetSessionState() const;
 	bool IsSessionValid() const;
@@ -84,7 +86,6 @@ private:
 	FErrorOauthInfo ErrorOAuth; 
 	
 	double UserSessionExpire;
-	FString UserEmailAddress;
 	ESessionState UserSessionState;
 
 	double UserRefreshTime;
@@ -95,6 +96,8 @@ private:
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FTokenRefreshedEvent TokenRefreshedEvent;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;
+	FUserData UserData;
+	FAccountUserData AccountUserData;
 
 	static const FString DefaultSection;
 

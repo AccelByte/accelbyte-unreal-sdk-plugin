@@ -27,7 +27,12 @@ void Oauth2::GetTokenWithAuthorizationCode(const FString& ClientId, const FStrin
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetContentAsString(FString::Printf(TEXT("grant_type=authorization_code&code=%s&redirect_uri=%s"), *AuthorizationCode, *RedirectUri));
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("grant_type"), TEXT("authorization_code")},
+		{TEXT("code"), AuthorizationCode },
+		{TEXT("redirect_uri"), RedirectUri },
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
@@ -45,12 +50,14 @@ void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&device_id=%s");
-	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
-	const FString EncodedPassword =  FGenericPlatformHttp::UrlEncode(Password);
-	const FString EncodedDeviceId = FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId());
-	Request->SetContentAsString(FString::Printf(Format, *EncodedUsername, *EncodedPassword, *EncodedDeviceId));
-
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("grant_type"), TEXT("password")},
+		{TEXT("username"), FGenericPlatformHttp::UrlEncode(Username) },
+		{TEXT("password"), FGenericPlatformHttp::UrlEncode(Password) },
+		{TEXT("device_id"),  FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())		 },
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
+	
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
@@ -68,13 +75,15 @@ void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
-	
-	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&device_id=%s");
-	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
-	const FString EncodedPassword =  FGenericPlatformHttp::UrlEncode(Password);
-	const FString EncodedDeviceId = FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId());
-	Request->SetContentAsString(FString::Printf(Format, *EncodedUsername, *EncodedPassword, *EncodedDeviceId));
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("grant_type"), TEXT("password")},
+		{TEXT("username"), FGenericPlatformHttp::UrlEncode(Username) },
+		{TEXT("password"), FGenericPlatformHttp::UrlEncode(Password) },
+		{TEXT("device_id"),  FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())		 },
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
 
+	
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
@@ -143,9 +152,12 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FStri
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
-	Request->SetContentAsString(FString::Printf(TEXT("platform_token=%s&createHeadless=%s"), *FGenericPlatformHttp::UrlEncode(PlatformToken),
-		bCreateHeadless ? TEXT("true") : TEXT("false")));
-
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("platform_token"), FGenericPlatformHttp::UrlEncode(PlatformToken)},
+		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
+		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress()) }
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
@@ -159,7 +171,11 @@ void Oauth2::GetTokenWithRefreshToken(const FString& ClientId, const FString& Cl
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetContentAsString(FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"), *RefreshId));
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("grant_type"), TEXT("refresh_token")},
+		{TEXT("refresh_token"), RefreshId},
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
@@ -211,8 +227,14 @@ void Oauth2::GetTokenWithAuthorizationCodeV3(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetContentAsString(FString::Printf(TEXT("grant_type=authorization_code&code=%s&redirect_uri=%s"), *AuthorizationCode, *RedirectUri));
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("grant_type"), TEXT("authorization_code") },
+		{TEXT("code"), AuthorizationCode },
+		{TEXT("redirect_uri"), RedirectUri },
+	}, TEXT(""));
 
+	Request->SetContentAsString(Content);
+	
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
@@ -229,14 +251,14 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FS
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-
-	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&namespace=%s&extend_exp=%s");
-	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
-	const FString EncodedPassword =  FGenericPlatformHttp::UrlEncode(Password);
-	const FString Namespace =  FGenericPlatformHttp::UrlEncode(*FRegistry::Settings.Namespace);
-	const FString Extend_exp = bRememberMe ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
-	
-	Request->SetContentAsString(FString::Printf(Format, *EncodedUsername, *EncodedPassword, *Namespace, *Extend_exp));
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("grant_type"), TEXT("password")},
+		{TEXT("username"), FGenericPlatformHttp::UrlEncode(Username)},
+		{TEXT("password"), FGenericPlatformHttp::UrlEncode(Password)},
+		{TEXT("namespace"), FGenericPlatformHttp::UrlEncode(*FRegistry::Settings.Namespace)},
+		{TEXT("extend_exp"), bRememberMe ? TEXT("true") : TEXT("false") },
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
@@ -252,15 +274,18 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FS
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
-
-	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&namespace=%s&extend_exp=%s");
-	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
-	const FString EncodedPassword =  FGenericPlatformHttp::UrlEncode(Password);
-	const FString Namespace =  FGenericPlatformHttp::UrlEncode(*FRegistry::Settings.Namespace);
-	const FString Extend_exp = bRememberMe ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
+	Request->SetHeader(TEXT("Auth-Trust-Id"), FAccelByteUtilities::GetAuthTrustId());
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("grant_type"), TEXT("password")},
+		{TEXT("username"), FGenericPlatformHttp::UrlEncode(Username)},
+		{TEXT("password"), FGenericPlatformHttp::UrlEncode(Password)},
+		{TEXT("namespace"), FGenericPlatformHttp::UrlEncode(*FRegistry::Settings.Namespace)},
+		{TEXT("extend_exp"), bRememberMe ? TEXT("true") : TEXT("false") },
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
 	
-	Request->SetContentAsString(FString::Printf(Format, *EncodedUsername, *EncodedPassword, *Namespace, *Extend_exp));
-
+	
+	
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
@@ -278,9 +303,14 @@ void Oauth2::VerifyAndRememberNewDevice(const FString& ClientId, const FString& 
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
-	const FString RememberThisDevice = bRememberDevice ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
-	Request->SetContentAsString(FString::Printf(TEXT("mfaToken=%s&factor=%s&code=%s&rememberDevice=%s"), *MfaToken, *Factor, *Code, *RememberThisDevice));
-
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("mfaToken"), MfaToken},
+		{TEXT("factor"), Factor},
+		{TEXT("code"), Code},
+		{TEXT("rememberDevice"), bRememberDevice ? TEXT("true") : TEXT("false") },
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
+	
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
@@ -309,11 +339,14 @@ void Oauth2::AuthenticationWithPlatformLink(const FString& ClientId, const FStri
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-	Request->SetContentAsString(FString::Printf(TEXT("username=%s&password=%s&linkingToken=%s&client_id=%s"),
-		*FGenericPlatformHttp::UrlEncode(Username),
-		*FGenericPlatformHttp::UrlEncode(Password),
-		*LinkingToken, *ClientId));
-
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("username"), FGenericPlatformHttp::UrlEncode(Username)},
+		{TEXT("password"), FGenericPlatformHttp::UrlEncode(Password)},
+		{TEXT("linkingToken"), LinkingToken},
+		{TEXT("client_id"), ClientId},
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
+	
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	

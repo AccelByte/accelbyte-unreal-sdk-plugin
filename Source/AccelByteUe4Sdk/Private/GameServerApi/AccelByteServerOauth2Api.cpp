@@ -80,6 +80,7 @@ void ServerOauth2::ForgetAllCredentials()
 void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response) const
 {
 	CredentialsRef.SetClientToken(Response.Access_token, Response.Expires_in, Response.Namespace);
+	FHttpRetryScheduler::SetHeaderNamespace(Response.Namespace);
 	OnSuccess.ExecuteIfBound();
 }
 

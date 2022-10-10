@@ -50,7 +50,7 @@ static FString SearchStrings[] =
 	TEXT("username"),
 };
 
-void User::FinalPreLoginEvents() const
+void User::FinalPreLoginEvents()
 {
 	if (CredentialsRef.GetSessionState() == Credentials::ESessionState::Valid)
 		CredentialsRef.ForgetAll();
@@ -62,7 +62,7 @@ void User::LoginWithOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	const FString& PlatformToken,
 	const FVoidHandler& OnSuccess,
-	const FErrorHandler& OnError) const
+	const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
@@ -93,7 +93,7 @@ void User::LoginWithOtherPlatform(
 	const FString& PlatformToken,
 	const FVoidHandler& OnSuccess,
 	const FCustomErrorHandler& OnError,
-	bool bCreateHeadless) const
+	bool bCreateHeadless)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -128,7 +128,7 @@ void User::LoginWithOtherPlatformId(
 	const FString& PlatformToken,
 	const FVoidHandler& OnSuccess,
 	const FCustomErrorHandler& OnError,
-	bool bCreateHeadless) const
+	bool bCreateHeadless)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -162,14 +162,13 @@ void User::LoginWithUsername(
 	const FString& Username,
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
-	const FErrorHandler& OnError) const
+	const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
 		TEXT("When 2FA enabled This method should change to User::LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)"));
 
-	CredentialsRef.SetUserEmailAddress(Username);
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
 	Oauth2::GetTokenWithPasswordCredentials(
@@ -194,13 +193,12 @@ void User::LoginWithUsername(
 	const FString& Username,
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
-	const FCustomErrorHandler& OnError) const
+	const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	CredentialsRef.SetUserEmailAddress(Username);
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
-	
+    	
 	Oauth2::GetTokenWithPasswordCredentials(
 		CredentialsRef.GetOAuthClientId(),
 		CredentialsRef.GetOAuthClientSecret(),
@@ -209,7 +207,8 @@ void User::LoginWithUsername(
 		THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler					
+			OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+
 		}),
 		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 		{
@@ -224,14 +223,13 @@ void User::LoginWithUsernameV3(
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
 	const FErrorHandler& OnError,
-	const bool bRememberMe) const
+	const bool bRememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
 		TEXT("When 2FA enabled This method should change to User::LoginWithUsernameV3(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, const bool RememberMe)"));
 
-	CredentialsRef.SetUserEmailAddress(Username);
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
 	Oauth2::GetTokenWithPasswordCredentialsV3(
@@ -257,11 +255,10 @@ void User::LoginWithUsernameV3(
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
 	const FCustomErrorHandler& OnError,
-	const bool bRememberMe) const
+	const bool bRememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	CredentialsRef.SetUserEmailAddress(Username);
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
 	Oauth2::GetTokenWithPasswordCredentialsV3(
@@ -282,7 +279,7 @@ void User::LoginWithUsernameV3(
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
+void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -304,7 +301,7 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 }
 
 void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code,
-	const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberDevice) const
+	const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberDevice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -327,7 +324,7 @@ void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByt
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler & OnError) const
+void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -352,12 +349,12 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
+void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	LoginWithRefreshToken(CredentialsRef.GetRefreshToken(), OnSuccess, OnError);
 }
 
-void AccelByte::Api::User::LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
+void AccelByte::Api::User::LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -415,7 +412,7 @@ void User::TryRelogin(const FString& PlatformUserID, const FVoidHandler& OnSucce
 #endif
 }
 
-void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const
+void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
 	
@@ -433,7 +430,7 @@ void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FC
 		})); 
 }
 
-void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const
+void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -455,14 +452,35 @@ void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username, const
 #pragma endregion /Login Methods
 	
 
-void User::OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response) const
+void User::OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response)
 {
 	// Set auth token before anything: Set before anything to prevent race condition issues.
 	CredentialsRef.SetAuthToken(Response, FPlatformTime::Seconds());
+
+	if (Response.Auth_Trust_Id != TEXT(""))
+	{
+		FAccelByteUtilities::SetAuthTrustId(Response.Auth_Trust_Id);
+	}
 	
-	// Callbacks
-	CredentialsRef.OnLoginSuccess().Broadcast(Response); // Sets auth tokens, inits qosScheduler
-	OnSuccess.ExecuteIfBound();
+	FVoidHandler CallbackFunction = FVoidHandler::CreateLambda([this, OnSuccess, Response]() {
+		CredentialsRef.OnLoginSuccess().Broadcast(Response); // Sets auth tokens, inits qosScheduler
+		OnSuccess.ExecuteIfBound();
+	});
+
+	GetData(THandler<FAccountUserData>::CreateLambda(
+			[CallbackFunction](const FAccountUserData& AccountUserData)
+			{
+				CallbackFunction.Execute();
+			})
+		, FErrorHandler::CreateLambda(
+			[CallbackFunction](int ErrorCode, const FString& ErrorMessage)
+			{
+				FReport::Log(FString::Printf(TEXT("[AccelByte] Error GetData after Login Success, Error Code: %d Message: %s"), ErrorCode, *ErrorMessage));
+				CallbackFunction.Execute();
+			})
+		);
+
+	FHttpRetryScheduler::SetHeaderNamespace(Response.Namespace);
 
 #ifndef PLATFORM_WINDOWS // the following code is working on Windows only at the moment
 	return;
@@ -620,7 +638,13 @@ void User::GetData(const THandler<FAccountUserData>& OnSuccess, const FErrorHand
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(THandler<FAccountUserData>::CreateLambda(
+		[this, OnSuccess](const FAccountUserData& AccountUserData)
+		{
+			CredentialsRef.SetAccountUserData(AccountUserData);
+			OnSuccess.ExecuteIfBound(AccountUserData);
+		}),
+		OnError), FPlatformTime::Seconds());
 }
 
 void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
@@ -739,7 +763,7 @@ void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess, const 
 	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
 }
 
-void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void User::SendUpgradeVerificationCode(const FString& EmailAddress, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -747,7 +771,7 @@ void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandl
 	{
 		EVerificationContext::upgradeHeadlessAccount,
 		TEXT(""),
-		Username
+		EmailAddress
 	};
 
 	SendVerificationCode(SendUpgradeVerificationCodeRequest, OnSuccess, OnError);
@@ -878,7 +902,7 @@ void User::Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::SendResetPasswordCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void User::SendResetPasswordCode(const FString& EmailAddress, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -886,7 +910,7 @@ void User::SendResetPasswordCode(const FString& Username, const FVoidHandler& On
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
-	FString Content         = FString::Printf(TEXT("{\"emailAddress\": \"%s\"}"), *Username);
+	FString Content         = FString::Printf(TEXT("{\"emailAddress\": \"%s\"}"), *EmailAddress);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -898,13 +922,13 @@ void User::SendResetPasswordCode(const FString& Username, const FVoidHandler& On
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::ResetPassword(const FString& VerificationCode, const FString& Username, const FString& NewPassword, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void User::ResetPassword(const FString& VerificationCode, const FString& EmailAddress, const FString& NewPassword, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FResetPasswordRequest ResetPasswordRequest;
 	ResetPasswordRequest.Code           = VerificationCode;
-	ResetPasswordRequest.EmailAddress   = Username;
+	ResetPasswordRequest.EmailAddress   = EmailAddress;
 	ResetPasswordRequest.NewPassword    = NewPassword;
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/reset"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
 	FString Verb            = TEXT("POST");
@@ -1448,7 +1472,7 @@ void User::GetPublisherUser(const FString& UserId, const THandler<FGetPublisherU
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnError) const
+void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 

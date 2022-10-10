@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [18.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/18.0.0%0D17.0.2) (2022-10-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* Renamed some variables in item info model
+* renamed FPresenceStatus to FAccelBytePresenceStatus to resolve conflict
+
+### Features
+
+* adjustment for improve entitlement track log ([e496799](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e496799a9f6dccd39d4f470f7bba2581802cc411))
+* banning by device ID (PS, XBOX) ([270b46a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/270b46a010cb3385499b7ff8b4901d51658650cf))
+* Bruteforce protection upon game login ([676e9dc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/676e9dcb8142d594e29c271650ce33429632e504))
+* expose Get and Update PrivateCustomAttributes ([d05434a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d05434ab03fce0a70d397973d24a29d40efa6b3e))
+* **HTTP:** adding custom metadata header to HTTP request ([7189399](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/71893991bd024b0db1600fac656c0c8367ae5461))
+* **lobby:** add send party notif ([9a685cd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9a685cd08a27bb19113725a94b94d35e9c650891))
+* **lobby:** support for role based matchmaking ([64e1c66](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/64e1c669492c4f76a83c19b59c7ea892e365a0a8))
+* **lobby:** support rejected status on role based matchmaking ([41d704c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/41d704c35f48faa21d71a912bb30ef80f3af4062))
+* update to cover isse When invoke Credentials::GetUserEmailAddress() in AccelByte SDK for UE4 after sign-in, it returns username instead of email address. ([719591d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/719591d6ee0ec6ee4abc6b80fe8d4df810023960))
+
+
+### Bug Fixes
+
+* conflicting FPresenceStatus used in both AccelByte SDK and Vivox SDK ([8683789](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/86837896e2071d4258197309007bffdc2856e76e))
+* **login:** wrong implementation on get user data on successful login ([50ddfd5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/50ddfd526066d31f7f7e4a0c1f8b8a2c65ddabf0))
+* support get wallet info old workflow ([5a9b40e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5a9b40ee40da7a4e96ab6d2cc95d91b133350c11))
+* update current user from register and unregister player to session browser ([a1e14b6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a1e14b618c98f1b34f587d0484bd87283d7b8bf8))
+
+
+### Refactors
+
+* change LobbyErrorMessage to static ([6051dc0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6051dc0903f2253307b6d2b7b126fce7e46fe4e2))
+
+
+* Merge remote-tracking branch 'remotes/origin/hotfix/17.0.0' into hotfix/resolve-conflict-17.0.0-release-candidate ([8d2e154](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8d2e154c778c4aebf0ea2ffd66a823cb1af006b0))
+
 ### [17.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/17.0.2%0D17.0.1) (2022-10-04)
 
 

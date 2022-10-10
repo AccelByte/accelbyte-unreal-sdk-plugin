@@ -237,18 +237,23 @@ void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& It
 }
 
 void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError,
-	TArray<FString> Options)
+	TArray<FString> Options, FString const& RequestId )
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FAccelByteModelsConsumeUserEntitlementRequest ConsumeUserEntitlementRequest;
 	ConsumeUserEntitlementRequest.UseCount = UseCount;
 	ConsumeUserEntitlementRequest.Options = Options;
+	ConsumeUserEntitlementRequest.RequestId = RequestId;
 
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s/decrement"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *EntitlementId);
 
 	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(ConsumeUserEntitlementRequest, Content);
+	TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(ConsumeUserEntitlementRequest);
+	FAccelByteUtilities::RemoveEmptyStrings(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
+	
 
 	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }

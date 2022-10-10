@@ -135,9 +135,11 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	* @param OnError This will be called when the operation failed.
 	* @param Options Options of consumed entitlements.
+	* @param RequestId Request id(Optional), A unique tracking ID provided by the developer, can just left it empty if they don't want to track
+	* When a request id is submitted, it will return original successful response
 	*/
 	void ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError,
-		TArray<FString> Options = {});
+		TArray<FString> Options = {}, FString const& RequestId = {} );
 	
 	/**
 	* @brief Create Distribution Receiver.

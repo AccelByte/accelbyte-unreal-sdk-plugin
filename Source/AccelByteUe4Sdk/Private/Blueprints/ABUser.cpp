@@ -310,12 +310,12 @@ void UABUser::Verify(
 }
 
 void UABUser::SendUpgradeVerificationCode(
-	FString const& Username,
+	FString const& EmailAddress,
 	FDHandler OnSuccess,
 	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.SendUpgradeVerificationCode(
-		Username,
+		EmailAddress,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -356,12 +356,12 @@ void UABUser::UpgradeAndVerify(
 #pragma region RESET_PASSWORD
 
 void UABUser::SendResetPasswordCode(
-	FString const& Username,
+	FString const& EmailAddress,
 	FDHandler OnSuccess,
 	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.SendResetPasswordCode(
-		Username,
+		EmailAddress,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -376,14 +376,14 @@ void UABUser::SendResetPasswordCode(
 
 void UABUser::ResetPassword(
 	FString const& VerificationCode,
-	FString const& Username,
+	FString const& EmailAddress,
 	FString const& NewPassword,
 	FDHandler OnSuccess,
 	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.ResetPassword(
 		VerificationCode,
-		Username,
+		EmailAddress,
 		NewPassword,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()

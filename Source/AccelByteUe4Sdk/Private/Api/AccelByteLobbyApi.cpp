@@ -40,6 +40,7 @@ namespace Api
 		const FString PartyDeleteCode = TEXT("partyDeleteCodeRequest");
 		const FString PartyJoinViaCode = TEXT("partyJoinViaCodeRequest");
 		const FString PartyPromoteLeader = TEXT("partyPromoteLeaderRequest");
+		const FString PartySendNotif = TEXT("partySendNotifRequest");
 
 		// Chat
 		const FString PersonalChat = TEXT("personalChatRequest");
@@ -118,6 +119,8 @@ namespace Api
 		const FString PartyDeleteCode = TEXT("partyDeleteCodeResponse");
 		const FString PartyJoinViaCode = TEXT("partyJoinViaCodeResponse");
 		const FString PartyPromoteLeader = TEXT("partyPromoteLeaderResponse");
+		const FString PartySendNotif = TEXT("partySendNotifResponse");
+		const FString PartyNotif = TEXT("partyNotif");
 
 		// Chat
 		const FString PersonalChat = TEXT("personalChatResponse");
@@ -233,6 +236,7 @@ namespace Api
 		PartyDeleteCode,
 		PartyJoinViaCode,
 		PartyPromoteLeader,
+		PartySendNotif,
 
 		// Chat
 		PersonalChat,
@@ -298,6 +302,7 @@ namespace Api
 		PartyDataUpdateNotif,
 		PartyMemberConnectNotif,
 		PartyMemberDisconnectNotif,
+		PartyNotif,
 
 		// Chat
 		PersonalChatNotif,
@@ -358,6 +363,7 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Response,PartyDeleteCode),
 		FORM_STRING_ENUM_PAIR(Response,PartyJoinViaCode),
 		FORM_STRING_ENUM_PAIR(Response,PartyPromoteLeader),
+		FORM_STRING_ENUM_PAIR(Response,PartySendNotif),
 		FORM_STRING_ENUM_PAIR(Response,PersonalChat),
 		FORM_STRING_ENUM_PAIR(Response,PartyChat),
 		FORM_STRING_ENUM_PAIR(Response,JoinChannelChat),
@@ -397,6 +403,7 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Notif,PartyRejectNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyKickNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyDataUpdateNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyMemberConnectNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyMemberDisconnectNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PersonalChatNotif),
@@ -659,6 +666,14 @@ FString Lobby::SendPartyPromoteLeaderRequest(const FString& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyPromoteLeader, Party
 		, FString::Printf(TEXT("newLeaderUserId: %s\n"), *UserId))
+}
+
+FString Lobby::SendNotificationToPartyMember(const FString& Topic, const FString& Payload) 
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartySendNotif, Party,
+		FString::Printf(TEXT("topic: %s\npayload: %s"), *Topic, *Payload));
 }
 
 void Lobby::SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
@@ -1380,6 +1395,7 @@ void Lobby::UnbindPartyNotifEvents()
 	PartyJoinNotif.Unbind();
 	PartyRejectNotif.Unbind();
 	PartyKickNotif.Unbind();
+	PartyNotif.Unbind();
 	PartyMemberConnectNotif.Unbind();
 	PartyMemberDisconnectNotif.Unbind();
 }
@@ -1828,6 +1844,7 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE_MESSAGE_ID(PartyDeleteCode	, FAccelByteModelsPartyDeleteCodeResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyJoinViaCode	, FAccelByteModelsPartyJoinResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyPromoteLeader	, FAccelByteModelsPartyPromoteLeaderResponse);
+		CASE_RESPONSE_MESSAGE_ID(PartySendNotif		, FAccelByteModelsPartySendNotifResponse);
 		// Chat
 		CASE_RESPONSE_MESSAGE_ID(PersonalChat	, FAccelByteModelsPersonalMessageResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyChat		, FAccelByteModelsPartyMessageResponse);
@@ -2108,6 +2125,31 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 		CASE_NOTIF(PartyJoinNotif, FAccelByteModelsPartyJoinNotice);
 		CASE_NOTIF(PartyRejectNotif, FAccelByteModelsPartyRejectNotice);
 		CASE_NOTIF(PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice);
+		case Notif::PartyNotif:
+		{
+			const FString PayloadKey(TEXT("payload"));
+			const TSharedPtr<FJsonObject>* ObjectValue;
+			if (ParsedJsonObj->TryGetObjectField(PayloadKey, ObjectValue))
+			{
+				FString StringValue;
+				TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>> JsonWriter = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&StringValue, /*Indent=*/0);
+				if (!FJsonSerializer::Serialize(ObjectValue->ToSharedRef(), JsonWriter))
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("PartyNotif: unable to serialize payload as string: %s"), *ParsedJsonString);
+					return;
+				}
+				ParsedJsonObj->SetStringField(PayloadKey, StringValue);
+			}
+
+			FAccelByteModelsPartyNotif Notification;
+			if (!FJsonObjectConverter::JsonObjectToUStruct(ParsedJsonObj.ToSharedRef(), &Notification, 0, 0))
+			{
+				UE_LOG(LogAccelByteLobby, Log, TEXT("PartyNotif: unable to deserialize to struct: %s"), *ParsedJsonString);
+				return;
+			}
+			PartyNotif.ExecuteIfBound(Notification);
+			break;
+		}
 		CASE_NOTIF(PartyDataUpdateNotif, FAccelByteModelsPartyDataNotif);
 		CASE_NOTIF(PartyMemberConnectNotif, FAccelByteModelsPartyMemberConnectionNotice);
 		CASE_NOTIF(PartyMemberDisconnectNotif, FAccelByteModelsPartyMemberConnectionNotice);
@@ -2527,6 +2569,8 @@ Lobby::~Lobby()
 		ConnectionClosed.Unbind();
 	}
 }
+
+TMap<FString, FString> Lobby::LobbyErrorMessages{};
 
 } // Namespace Api
 } // Namespace AccelByte

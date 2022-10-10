@@ -20,6 +20,11 @@ int FHttpRetryScheduler::MaximumDelay = 30;
 int FHttpRetryScheduler::TotalTimeout = 60;
 int FHttpRetryScheduler::PauseTimeout = 60;
 
+FString FHttpRetryScheduler::HeaderNamespace = TEXT("");
+FString FHttpRetryScheduler::HeaderSDKVersion = TEXT("");
+FString FHttpRetryScheduler::HeaderOSSVersion = TEXT("");
+FString FHttpRetryScheduler::HeaderGameClientVersion = TEXT("");
+
 TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> FHttpRetryScheduler::ResponseCodeDelegates{};
 
 typedef FHttpRetryScheduler::FBearerAuthRejectedRefresh FBearerAuthRejectedRefresh;
@@ -64,6 +69,13 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 		, FHttpRetryScheduler::ResponseCodeDelegates );
 
 	FAccelByteHttpRetryTaskPtr HttpRetryTaskPtr(StaticCastSharedPtr< FHttpRetryTask >(Task));
+
+	//Http header
+	Request->SetHeader("Namespace", HeaderNamespace);
+	Request->SetHeader("Game-Client-Version", HeaderGameClientVersion);
+	Request->SetHeader("AccelByte-SDK-Version", HeaderSDKVersion);
+	Request->SetHeader("AccelByte-OSS-Version", HeaderOSSVersion);
+
 	if (State == EState::Paused && Request->GetHeader("Authorization").Contains("Bearer"))
 	{
 		HttpRetryTaskPtr->Pause();

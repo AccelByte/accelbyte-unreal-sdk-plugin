@@ -89,7 +89,7 @@ public:
 	void Verify(FString const& VerificationCode, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void SendUpgradeVerificationCode(FString const& Username, FDHandler OnSuccess, FDErrorHandler OnError);
+	void SendUpgradeVerificationCode(FString const& EmailAddress, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void UpgradeAndVerify(FString const& Username, FString const& Password, FString const& VerificationCode, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
@@ -97,10 +97,10 @@ public:
 //Reset Password
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void SendResetPasswordCode(FString const& Username, FDHandler OnSuccess, FDErrorHandler OnError);
+	void SendResetPasswordCode(FString const& EmailAddress, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void ResetPassword(FString const& VerificationCode, FString const& Username, FString const& NewPassword, FDHandler OnSuccess, FDErrorHandler OnError);
+	void ResetPassword(FString const& VerificationCode, FString const& EmailAddress, FString const& NewPassword, FDHandler OnSuccess, FDErrorHandler OnError);
 
 //Update
 public:

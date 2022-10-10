@@ -52,6 +52,7 @@ private:
 	static FVersion GetPluginVersion();
 	void GetVersionInfo(FString const& Url, TFunction<void(FVersionInfo)> Callback) const;
 	void CheckServicesCompatibility() const;
+	void SetDefaultHttpCustomHeader(FString const& Namespace);
 };
 
 void FAccelByteUe4SdkModule::StartupModule()
@@ -177,6 +178,7 @@ bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Envir
 	
 	FRegistry::Settings.Reset(Environment);
 	FRegistry::Credentials.SetClientCredentials(Environment);
+	SetDefaultHttpCustomHeader(ClientSettings.Namespace);
 
 	return bResult;
 }
@@ -198,6 +200,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 	
 	FRegistry::ServerSettings.Reset(Environment);
 	FRegistry::ServerCredentials.SetClientCredentials(Environment);
+	SetDefaultHttpCustomHeader(ServerSettings.Namespace);
 	
 	return bResult;
 }
@@ -332,5 +335,15 @@ IAccelByteDataStorage * FAccelByteUe4SdkModule::GetLocalDataStorage()
 		return nullptr;
 	}
 }
+
+void FAccelByteUe4SdkModule::SetDefaultHttpCustomHeader(FString const& Namespace)
+{
+	AccelByte::FHttpRetryScheduler::SetHeaderNamespace(Namespace);
+	AccelByte::FHttpRetryScheduler::SetHeaderSDKVersion(GetPluginVersion().ToString());
+	FString ProjectVersion;
+	GConfig->GetString(TEXT("/Script/EngineSettings.GeneralProjectSettings"), TEXT("ProjectVersion"), ProjectVersion, GGameIni);
+	AccelByte::FHttpRetryScheduler::SetHeaderGameClientVersion(ProjectVersion);
+}
+
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)

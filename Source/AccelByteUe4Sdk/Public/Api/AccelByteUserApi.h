@@ -39,7 +39,7 @@ namespace AccelByte
 			 * @brief These events happen before every login event, such as clearing CredentialRef post-auth info.
 			 * - Call this last, just before the actual login call.
 			 */
-			void FinalPreLoginEvents() const;
+			void FinalPreLoginEvents() ;
 			
 
 			#pragma region Login Methods
@@ -55,7 +55,7 @@ namespace AccelByte
 				const FString& Username,
 				const FString& Password,
 				const FVoidHandler& OnSuccess,
-				const FErrorHandler& OnError) const;
+				const FErrorHandler& OnError);
 
 			/**
 			* @brief Log in with email/username account with 2FA enable
@@ -69,7 +69,7 @@ namespace AccelByte
 				const FString& Username,
 				const FString& Password,
 				const FVoidHandler& OnSuccess,
-				const FCustomErrorHandler& OnError) const;
+				const FCustomErrorHandler& OnError);
 
 			/**
 			* @brief Log in with email/username account using v3 endpoint.
@@ -85,7 +85,7 @@ namespace AccelByte
 				const FString& Password,
 				const FVoidHandler& OnSuccess,
 				const FErrorHandler& OnError,
-				const bool bRememberMe = false) const;
+				const bool bRememberMe = false);
 
 			/**
 			* @brief Log in with email/username account using v3 endpoint with 2FA enable
@@ -101,7 +101,7 @@ namespace AccelByte
 				const FString& Password,
 				const FVoidHandler& OnSuccess,
 				const FCustomErrorHandler& OnError,
-				const bool bRememberMe = false) const;
+				const bool bRememberMe = false);
 
 			/**
 			 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
@@ -115,7 +115,7 @@ namespace AccelByte
 				EAccelBytePlatformType PlatformType,
 				const FString& PlatformToken,
 				const FVoidHandler& OnSuccess,
-				const FErrorHandler& OnError) const;
+				const FErrorHandler& OnError);
 
 			/**
 			* @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc. with 2FA enable
@@ -131,7 +131,7 @@ namespace AccelByte
 				const FString& PlatformToken,
 				const FVoidHandler& OnSuccess,
 				const FCustomErrorHandler& OnError,
-				bool bCreateHeadless = true) const;
+				bool bCreateHeadless = true);
 
 			/**
 			* @brief Log in with another platform Id account e.g. Steam, Google, Twitch, etc especially to support OIDC (with 2FA enable)
@@ -147,7 +147,7 @@ namespace AccelByte
 				const FString& PlatformToken,
 				const FVoidHandler& OnSuccess,
 				const FCustomErrorHandler& OnError,
-				bool bCreateHeadless = true) const;
+				bool bCreateHeadless = true);
 			
 			/**
 			 * @brief Log in with device ID (anonymous log in).
@@ -155,7 +155,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+			void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Verify log in with new device when user enabled 2FA.
@@ -168,7 +168,7 @@ namespace AccelByte
 			 * @param bRememberDevice
 			 */
 			void VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code,
-				const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberDevice = false) const;
+				const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberDevice = false);
 
 			/**
 			 * @brief Log in from Accelbyte Launcher.
@@ -176,7 +176,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+			void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief login with refresh token
@@ -184,7 +184,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+			void LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief login with refresh token
@@ -193,7 +193,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+			void LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Relogin using the previously logged-in platform account. WINDOWS ONLY
@@ -210,7 +210,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const;
+			void CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError);
 			
 			/**
 			 * @brief Authentication With Platform Link And Login
@@ -220,7 +220,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void AuthenticationWithPlatformLinkAndLogin(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const;
+			void AuthenticationWithPlatformLinkAndLogin(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError);
 
 			#pragma endregion /Login Methods
 			
@@ -231,7 +231,7 @@ namespace AccelByte
 			 * @param OnSuccess
 			 * @param Response 
 			 */
-			void OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response) const;
+			void OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response);
 
 			/**
 			 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
@@ -337,32 +337,32 @@ namespace AccelByte
 			/**
 			 * @brief Send a request to reset user's password. For some reason the endpoint uses HTTP basic authentication instead of bearer, because you know... our IAM is very inconsistent.
 			 *
-			 * @param Username User email address or phone number.
+			 * @param EmailAddress User email address or phone number.
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void SendResetPasswordCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void SendResetPasswordCode(const FString& EmailAddress, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Reset user's password with sent verification code.
 			 *
 			 * @ref SendPasswordResetCode()
-			 * @param Username User email address or phone number.
+			 * @param EmailAddress User email address or phone number.
 			 * @param VerificationCode Code sent to the email address.
 			 * @param NewPassword The new password.
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void ResetPassword(const FString& VerificationCode, const FString& Username, const FString& NewPassword, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void ResetPassword(const FString& VerificationCode, const FString& EmailAddress, const FString& NewPassword, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function should be done before user upgrade their headless account. After this function successfully called, obtain the verification code from the submitted email. Then call UpgradeHeadlessAccountWithVerificationCode function afterwards.
 			 *
-			 * @param LoginId Email or phone number that will be used to upgrade the headless account.
+			 * @param EmailAddress Email or phone number that will be used to upgrade the headless account.
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			*/
-			void SendUpgradeVerificationCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void SendUpgradeVerificationCode(const FString& EmailAddress, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Send request verification code with Change email context. User should login with email and password first to get access token.
@@ -651,7 +651,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+			void VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function for getting user information .

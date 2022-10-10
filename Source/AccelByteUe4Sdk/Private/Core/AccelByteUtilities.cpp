@@ -406,6 +406,17 @@ FString FAccelByteUtilities::XOR(const FString& Input, const FString& Key)
 	return Output;
 }
 
+FString FAccelByteUtilities::GetAuthTrustId()
+{ 
+	FString AuthTrustId{};
+	FPlatformMisc::GetStoredValue(AccelByteStored(), AccelByteStoredSectionIAM(), AccelByteStoredKeyAuthTrustId(), AuthTrustId);
+	return AuthTrustId;
+}
+
+void FAccelByteUtilities::SetAuthTrustId(const FString& AuthTrustId)
+{ 
+	FPlatformMisc::SetStoredValue(AccelByteStored(), AccelByteStoredSectionIAM(), AccelByteStoredKeyAuthTrustId(), AuthTrustId);
+}
 
 void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
 {

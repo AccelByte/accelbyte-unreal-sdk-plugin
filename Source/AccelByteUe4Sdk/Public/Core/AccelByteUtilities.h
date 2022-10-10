@@ -182,16 +182,22 @@ public:
 
 	static FString GetAuthenticatorString(EAccelByteLoginAuthFactorType Authenticator);
 	
-	static FString CreateQueryParams(TMap<FString, FString> Map)
+	static FString CreateQueryParams(TMap<FString, FString> Map, FString SuffixChar = TEXT("?"))
 	{
 		FString Query = TEXT("");
 		for (auto kvp : Map)
 		{
-			AppendQueryParam(Query, kvp.Key, kvp.Value);
+			FString Param = kvp.Key;
+			FString Value = kvp.Value;
+			if (!Param.IsEmpty() && !Value.IsEmpty())
+			{			
+				Query.Append(Query.IsEmpty() ? SuffixChar : TEXT("&"));
+				Query.Append(FString::Printf(TEXT("%s=%s"), *Param, *Value));
+			}	
 		}
 		return Query;
 	}
-
+ 
 	static FString CreateQueryParamValueUrlEncodedFromArray(const TArray<FString>& Array, const FString& Delimiter = TEXT(","))
 	{
 		FString QueryParamValue = TEXT("");
@@ -381,17 +387,17 @@ public:
 
 	static FString XOR(const FString& Input, const FString& Key);
 
+	static FString GetAuthTrustId();
+
+	static void SetAuthTrustId(const FString& AuthTrustId);
+
 private:
-	static void AppendQueryParam(FString& Query, FString const& Param, FString const& Value)
-	{
-		if (!Param.IsEmpty() && !Value.IsEmpty())
-		{			
-			Query.Append(Query.IsEmpty() ? TEXT("?") : TEXT("&"));
-			Query.Append(FString::Printf(TEXT("%s=%s"), *Param, *Value));
-		}		
-	}
 
 	static FString LocalDeviceId();
+
+	static FString AccelByteStored() { return FString(TEXT("AccelByteStored")); } 
+	static FString AccelByteStoredSectionIAM() { return FString(TEXT("IAM")); }
+	static FString AccelByteStoredKeyAuthTrustId() { return FString(TEXT("auth-trust-id")); }
 };
 
 USTRUCT(BlueprintType)

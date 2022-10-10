@@ -7,6 +7,7 @@
 #include "Core/AccelByteOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "AccelByteUe4SdkModule.h"
+#include "Core/AccelByteReport.h"
 
 using namespace AccelByte::Api;
 
@@ -22,7 +23,6 @@ Credentials::Credentials()
 	, ClientSecret()
 	, AuthToken()
 	, UserSessionExpire(0)
-	, UserEmailAddress()
 	, UserSessionState(ESessionState::Invalid)
 	, UserRefreshTime(0.0)
 	, UserExpiredTime(0.0)
@@ -122,7 +122,8 @@ void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTim
 
 void Credentials::SetUserEmailAddress(const FString& EmailAddress)
 {
-	UserEmailAddress = EmailAddress;
+	AccelByte::FReport::LogDeprecated( FString(__FUNCTION__),
+		TEXT("Deprecated, this method could not be used to set email address, use GetData instead."));
 }
 
 const FString& Credentials::GetAccessToken() const
@@ -194,13 +195,18 @@ const FString& Credentials::GetUserDisplayName() const
 }
 
 const FString& Credentials::GetUserEmailAddress() const
-{
-	return UserEmailAddress;
+{ 
+	return AccountUserData.EmailAddress;
 }
 
 const FString& Credentials::GetLinkingToken() const
 {
 	return ErrorOAuth.LinkingToken;
+}
+
+const FAccountUserData& Credentials::GetAccountUserData() const
+{
+	return AccountUserData;
 }
 
 void Credentials::PollRefreshToken(double CurrentTime)
@@ -278,6 +284,11 @@ void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 void Credentials::SetErrorOAuth(const FErrorOauthInfo NewErrorOAuthInfo)
 {
 	ErrorOAuth = NewErrorOAuthInfo;
+}
+
+void Credentials::SetAccountUserData(const FAccountUserData& InAccountUserData)
+{
+	AccountUserData = InAccountUserData;
 }
 	
 Credentials::FOnLoginSuccessDelegate& Credentials::OnLoginSuccess()

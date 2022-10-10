@@ -458,6 +458,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyPromoteLeaderResponse
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartySendNotifResponse 
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Code{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPartySetLimitRequest
 {
 	GENERATED_BODY()
@@ -701,6 +709,19 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFreeFormNotificationRequest
 	FString Message{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyNotif 
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Sender{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Topic{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Payload{};
+};
+
 // ------------------------------------------------------------------------------------------------
 // Matchmaking
 // ------------------------------------------------------------------------------------------------
@@ -714,6 +735,7 @@ enum class EAccelByteMatchmakingStatus : uint8
 	Cancel		UMETA(DisplayName = "cancel"),
 	Done		UMETA(DisplayName = "done"),
 	Unavailable UMETA(DisplayName = "unavailable"),
+	Rejected	UMETA(DisplayName = "rejected"),
 };
 
 USTRUCT(BlueprintType)
@@ -761,6 +783,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FAccelByteModelsMatchingAllies MatchingAllies{};
+	
+	// rejected status message
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Message{};
+
+	// rejected status error code
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	int32 ErrorCode{};
 };
 
 // DS Notification
@@ -1377,3 +1407,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRefreshTokenResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FString Code{};
 };
+
+namespace AccelByte
+{
+namespace MatchExtraAttributes
+{
+/** @brief attribute to start role based matchmaking */
+const FString Role = TEXT("role");
+}
+
+namespace SessionAttributeKeys
+{
+const FString Role = TEXT("role");
+}
+}

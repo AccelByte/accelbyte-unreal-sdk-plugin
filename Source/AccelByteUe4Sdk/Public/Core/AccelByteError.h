@@ -374,6 +374,11 @@ namespace AccelByte
 		DedicatedServerNotFoundException = 9014183,
 		DedicatedServerConfigNotFoundException = 9014123,
 		//
+		// Matchmaking Error Code List
+		//
+		MatchmakingRoleBasedEmptyRole = 510401,
+		MatchmakingRoleBasedWrongRole = 510402,
+		//
 		//Client side Error Code List
 		//
 		UnknownError = 14000,

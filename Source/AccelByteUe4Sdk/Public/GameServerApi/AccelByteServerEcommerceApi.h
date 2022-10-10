@@ -121,8 +121,12 @@ public:
 	* @param UseCount How many that will be consumed
 	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsEntitlementInfo&.
 	* @param OnError This will be called when the operation fails.
+	* @param Options Options of consumed entitlements.
+	* @param RequestId Request id(Optional), A unique tracking ID provided by the developer, can just left it empty if they don't want to track
+	* When a request id is submitted, it will return original successful response
 	*/
-	void ConsumeUserEntitlement(const FString& UserId, const FString& EntitlementId, int32 UseCount, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+	void ConsumeUserEntitlement(const FString& UserId, const FString& EntitlementId, int32 UseCount, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError,
+		TArray<FString> Options = {}, FString const& RequestId = {});
 
 	/**
 	* @brief Disable Entitlement from a User. Like a revoke, but it can be enabled by calling func EnableUserEntitlement

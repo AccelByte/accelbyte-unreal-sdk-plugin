@@ -36,4 +36,13 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGenerateUploadURLForUserContentSuccess, const FAccelByteModelsUserProfileUploadURLResult&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
 	static void GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, const FGenerateUploadURLForUserContentSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetPrivateCustomAttributesSuccess, const FJsonObjectWrapper&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
+	static void GetPrivateCustomAttributes(const FGetPrivateCustomAttributesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FUpdatePrivateCustomAttributesSuccess, const FJsonObjectWrapper&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
+	static void UpdatePrivateCustomAttributes(const FJsonObjectWrapper PrivateCustomAttributesUpdateRequest,
+											  const FUpdatePrivateCustomAttributesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 };
