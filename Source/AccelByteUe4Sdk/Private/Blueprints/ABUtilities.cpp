@@ -3,10 +3,28 @@
 // and restrictions contact your company contract manager.
 
 #include "Blueprints/ABUtilities.h"
+#include "Dom/JsonObject.h"
 
 FString UABUtilities::DateTimeToString(const FDateTime& DateTime)
 {
 	return DateTime.ToIso8601();
+}
+
+FString UABUtilities::GetJsonObjectAsJsonString(const FJsonObjectWrapper& ObjectWrapper)
+{
+	if (!ObjectWrapper.JsonString.IsEmpty())
+	{
+		return ObjectWrapper.JsonString;
+	}
+	else
+	{
+		FString JsonString = TEXT("");
+		if (ObjectWrapper.JsonObject.IsValid())
+		{
+			ObjectWrapper.JsonObjectToString(JsonString);
+		}
+		return JsonString;
+	}
 }
 
 bool UABUtilities::GetJsonValueAsString(const FJsonObjectWrapper& ObjectWrapper, const FString& Key, FString& OutString)

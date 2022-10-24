@@ -172,7 +172,17 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void CreateChannel(FString const& ChannelName, THandler<FAccelByteModelsUGCChannelResponse> const& OnSuccess, FErrorHandler const& OnError);
-	
+
+	/** @brief Update a player's channel with specific channel name.
+	*
+	* @param ChannelId The id of the channel that will be updated.
+	* @param ChannelName The name of the channel.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCChannelResponse.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void UpdateChannel(FString const& ChannelId, FString const& ChannelName,
+	                   THandler<FAccelByteModelsUGCChannelResponse> const& OnSuccess, FErrorHandler const& OnError);
+
 	/** @brief Get all of the player's channels.
 	*
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCChannelsPagingResponse.

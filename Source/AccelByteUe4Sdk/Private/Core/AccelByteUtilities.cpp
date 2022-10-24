@@ -7,6 +7,8 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteUserModels.h"
+#include "Misc/CommandLine.h"
+#include "Misc/CString.h"
 #include <memory>
 #include "Kismet/GameplayStatics.h"
 
@@ -411,6 +413,54 @@ FString FAccelByteUtilities::GetAuthTrustId()
 	FString AuthTrustId{};
 	FPlatformMisc::GetStoredValue(AccelByteStored(), AccelByteStoredSectionIAM(), AccelByteStoredKeyAuthTrustId(), AuthTrustId);
 	return AuthTrustId;
+}
+
+bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, FString& Value)
+{
+	const auto CommandParams = FCommandLine::Get();
+	TArray<FString> Tokens;
+	TArray<FString> Switches;
+	FCommandLine::Parse(CommandParams, Tokens, Switches);
+	for (auto Param : Switches)
+	{
+		if (Param.Contains(Key))
+		{
+			TArray<FString> ArraySplit;
+			Param.ParseIntoArray(ArraySplit, TEXT("="), 1);
+			if (ArraySplit.Num() == 2 && ArraySplit[1].IsEmpty() == false)
+			{
+				Value = ArraySplit[1];
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, int& Value)
+{
+	FString TempResult = "";
+	bool bIsSuccess = GetValueFromCommandLineSwitch(Key, TempResult);
+	if (bIsSuccess == false)
+	{
+		return false;
+	}
+
+	Value = FCString::Atoi(*TempResult);
+	return true;
+}
+
+bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, bool& Value)
+{
+	FString TempResult = "";
+	bool bIsSuccess = GetValueFromCommandLineSwitch(Key, TempResult);
+	if (bIsSuccess == false)
+	{
+		return false;
+	}
+
+	Value = TempResult.ToBool();
+	return true;
 }
 
 void FAccelByteUtilities::SetAuthTrustId(const FString& AuthTrustId)

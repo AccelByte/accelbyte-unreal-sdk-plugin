@@ -391,6 +391,23 @@ public:
 
 	static void SetAuthTrustId(const FString& AuthTrustId);
 
+	/// Parse command line to obtain an argument that:
+	/// * intialized by dash (-)
+	/// * contain a value that following equal sign (=)
+	/// Assuming the switch is case insesitive
+	/// Example: -serverip=127.0.0.1
+	///    key or switch is the serverip
+	///    value is 127.0.0.1
+	///
+	/// @param Key The key of switch argument.
+	/// @param Value The operation result will be returned through this parameter.
+	///
+	/// @return True if value from the second parameter is returned and
+	/// @return False if no value/args can be found
+	static bool GetValueFromCommandLineSwitch(const FString& Key, FString& Value);
+	static bool GetValueFromCommandLineSwitch(const FString& Key, int& Value);
+	static bool GetValueFromCommandLineSwitch(const FString& Key, bool& Value);
+
 private:
 
 	static FString LocalDeviceId();

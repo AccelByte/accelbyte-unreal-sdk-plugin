@@ -395,6 +395,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserSeasonInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
 	int32 TotalExp{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
+	int32 AccumulatedXpBoost{};
 };
 
 

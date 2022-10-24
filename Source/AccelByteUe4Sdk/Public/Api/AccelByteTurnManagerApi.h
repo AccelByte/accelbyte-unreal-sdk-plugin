@@ -40,6 +40,14 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Get credential to authenticate with the turn server.
+	*
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsTurnServerCredential.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetTurnCredential(const FString &Region, const FString &Ip, int port, const THandler<FAccelByteModelsTurnServerCredential>& OnSuccess, const FErrorHandler& OnError);
 	
 private:
 	FHttpRetryScheduler & HttpRef;

@@ -18,6 +18,9 @@ public:
 		static FString DateTimeToString(const FDateTime& DateTime);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Utilities")
+		static FString GetJsonObjectAsJsonString(const FJsonObjectWrapper& ObjectWrapper);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Utilities")
 	static bool GetJsonValueAsString(const FJsonObjectWrapper& ObjectWrapper, const FString& Key, FString& OutString);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Utilities")

@@ -29,7 +29,8 @@ enum class EAccelByteV2SessionMemberStatus : uint8
 	LEFT,
 	DROPPED,
 	REJECTED,
-	KICKED
+	KICKED,
+	TIMEOUT
 };
 
 UENUM(BlueprintType)

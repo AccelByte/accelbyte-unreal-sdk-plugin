@@ -88,12 +88,6 @@ namespace Api
 		TSharedRef<TArray<TPair<FString, float>>> SuccessLatencies = MakeShared<TArray<TPair<FString, float>>>();
 		TSharedRef<TArray<FString>> FailedLatencies = MakeShared<TArray<FString>>();
 
-#if PLATFORM_ANDROID
-		UE_LOG(LogAccelByte, Warning, TEXT("Android device does not support UE UDP Echo"));
-		OnSuccess.ExecuteIfBound(*SuccessLatencies);
-		return;
-#endif
-
 		int32 Count = QosServerList.Servers.Num();
 		
 		if (Count > 0)

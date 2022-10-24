@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 namespace AccelByte
 {
 class MessageParser

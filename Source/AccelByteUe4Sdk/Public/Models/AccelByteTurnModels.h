@@ -42,3 +42,24 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTurnServerList
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | QosServerList")
 	TArray<FAccelByteModelsTurnServer> Servers{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsTurnServerCredential
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Ip{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	int Port{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Region{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Username{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Password{};
+};

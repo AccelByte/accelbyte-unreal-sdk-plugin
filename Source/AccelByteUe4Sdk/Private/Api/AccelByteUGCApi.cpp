@@ -334,6 +334,31 @@ void UGC::CreateChannel(FString const& ChannelName
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void UGC::UpdateChannel(FString const& ChannelId
+	, FString const& ChannelName
+	, THandler<FAccelByteModelsUGCChannelResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 Limit

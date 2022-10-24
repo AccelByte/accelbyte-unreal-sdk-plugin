@@ -29,6 +29,7 @@ enum class EV2MatchmakingNotifTopic : uint8
 	OnMatchFound,
 	OnMatchmakingStarted,
 	OnMatchmakingTicketExpired,
+	OnMatchmakingTicketCanceled,
 };
 
 /** @brief Matchmaking v2 notification topics enums. */

@@ -83,6 +83,25 @@ namespace Api
 		}));
 	}
 
+	void TurnManager::GetTurnCredential(const FString &Region, const FString &Ip, int port, const THandler<FAccelByteModelsTurnServerCredential>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/turn/secret/%s/%s/%d"), *GetTurnManagerServerUrl(), *Region, *Ip, port);
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
 	FString TurnManager::GetTurnManagerServerUrl() const
 	{
 		return SettingsRef.TurnManagerServerUrl.IsEmpty() ? FString::Printf(TEXT("%s/turnmanager"), *SettingsRef.BaseUrl) : SettingsRef.TurnManagerServerUrl;

@@ -220,6 +220,40 @@ namespace AccelByte
 
 			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
+
+		void ServerSeasonPass::BulkGetUserSessionProgression(const TArray<FString>& UserIds, const THandler<TArray<FAccelByteModelsUserSeasonInfo>>& OnSuccess, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/seasons/current/users/bulk/progression"), *SettingsRef.SeasonPassServerUrl, *CredentialsRef.GetClientNamespace());
+			FString Verb = TEXT("POST");
+			FString ContentType = TEXT("application/json");
+			FString Accept = TEXT("application/json");
+
+			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+			Request->SetURL(Url);
+			Request->SetHeader(TEXT("Authorization"), Authorization);
+			Request->SetVerb(Verb);
+			Request->SetHeader(TEXT("Content-Type"), ContentType);
+			Request->SetHeader(TEXT("Accept"), Accept);
+
+			FString Content{};
+			FJsonObject DataJson; 
+			TArray<TSharedPtr<FJsonValue>> UserIdArray{};
+			for (FString UserId : UserIds)
+			{
+				UserIdArray.Add(MakeShareable(new FJsonValueString(UserId)));
+			}
+			DataJson.SetArrayField("userIds", UserIdArray);
+			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+			FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+			Request->SetContentAsString(Content);
+
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		}
+
 		
 	}
 }

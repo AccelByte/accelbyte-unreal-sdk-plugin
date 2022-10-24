@@ -88,6 +88,14 @@ namespace AccelByte
 			*/			
 			void QueryUserSeasonExp(const FString& UserId, const THandler<FAccelByteModelsQueryUserSeasonExp>& OnSuccess, const FErrorHandler& OnError);
 
+			/** @brief Bulk get current user session progression 
+			*
+			* @param UserIds The User IDs to check user season progression
+			* @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUserSeasonInfo>.
+			* @param OnError This will be called when the operation failed.
+			*/			
+			void BulkGetUserSessionProgression(const TArray<FString>& UserIds, const THandler<TArray<FAccelByteModelsUserSeasonInfo>>& OnSuccess, const FErrorHandler& OnError);
+
 		private:
 			ServerSeasonPass() = delete;
 			ServerSeasonPass(const ServerSeasonPass&) = delete;

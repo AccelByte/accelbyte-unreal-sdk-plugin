@@ -533,6 +533,11 @@ public:
 	* @brief Delegate for notification when party leader started matchmaking
 	*/
 	DECLARE_DELEGATE_OneParam(FV2MatchmakingExpiredNotif, FAccelByteModelsV2MatchmakingExpiredNotif)
+
+	/**
+	* @brief Delegate for notification when party leader canceled matchmaking
+	*/
+	DECLARE_DELEGATE_OneParam(FV2MatchmakingCanceledNotif, FAccelByteModelsV2MatchmakingCanceledNotif)
 public:
     /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
@@ -1176,6 +1181,10 @@ public:
 	void SetV2MatchmakingExpiredNotifDelegate(const FV2MatchmakingExpiredNotif& OnMatchmakingExpiredNotif)
 	{
 		V2MatchmakingExpiredNotif = OnMatchmakingExpiredNotif;
+	}
+	void SetV2MatchmakingCanceledNotifDelegate(const FV2MatchmakingCanceledNotif& OnMatchmakingCanceledNotif)
+	{
+		V2MatchmakingCanceledNotif = OnMatchmakingCanceledNotif;
 	}
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
@@ -2130,6 +2139,7 @@ private:
 	FV2MatchmakingMatchFoundNotif V2MatchmakingMatchFoundNotif;
 	FV2MatchmakingStartNotif V2MatchmakingStartNotif;
 	FV2MatchmakingExpiredNotif V2MatchmakingExpiredNotif;
+	FV2MatchmakingCanceledNotif V2MatchmakingCanceledNotif;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;

@@ -218,6 +218,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingExpiredNotif
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCanceledNotif
+{
+	GENERATED_BODY()
+		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCanceledNotif")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCanceledNotif")
+	TArray<FString> UserIDs{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingTicketPlayerData
 {
 	GENERATED_BODY()

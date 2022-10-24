@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [19.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/19.0.0%0D18.0.0) (2022-10-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* renamed some variable in item info model
+
+### Features
+
+* **ABUtilities:** add function to get JsonString ([d5b4933](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d5b49333326ef29601d323083a61904ed74026fe))
+* Bulk get user season progression API ([2e4adcd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2e4adcda4d06f80e4935b1f89735def68e5b9f75))
+* command line args switch parser ([398952d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/398952da6cfb9d43a18b3b4f21fbcea81c96d60a))
+* expose update channel public endpoint ([cbdaf3a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cbdaf3aae1658b1c026ed0f70f8a170c1a7f0054))
+* implement get credential turn server ([c84b33f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c84b33fba54c54912752dbf210ab5cb0278987fe))
+* **qos:** re-enable udpecho on android ([3084896](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3084896b169945f069d8c30f63db285cf97a6691))
+* **Session:** add TIMEOUT in session member status enum ([7574d07](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7574d074d96e594a1c2361fd073ebf668ca212cc))
+
+
+### Bug Fixes
+
+* add some missing headers ([5ca5fec](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5ca5fec1ca6b4471952493a2476debb4ab4324da))
+
+
+### Reverts
+
+* Revert "feat(session)!: Add session and party info in Game and Party session member changed notif and DS status change notif" ([86d4a06](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/86d4a06838436e0db4d8177ac2c9535869a0c905))
+
+
+* Merge remote-tracking branch 'remotes/origin/hotfix/17.0.0' into hotfix/resolve-conflict-17.0.0-master ([256353b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/256353bfa2cf774233ded2e0b818a244bf2ba7c6))
+
 ## [18.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/18.0.0%0D17.0.2) (2022-10-10)
 
 
