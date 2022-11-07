@@ -693,6 +693,9 @@ struct ACCELBYTEUE4SDK_API FBaseUserInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
 	FString PublisherAvatarUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+	FString Username{};
 };
 
 USTRUCT(BlueprintType)

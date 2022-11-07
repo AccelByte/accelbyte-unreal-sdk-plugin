@@ -30,7 +30,9 @@ enum class EAccelByteV2SessionMemberStatus : uint8
 	DROPPED,
 	REJECTED,
 	KICKED,
-	TIMEOUT
+	TIMEOUT,
+	DISCONNECTED,
+	TERMINATED
 };
 
 UENUM(BlueprintType)
@@ -63,6 +65,14 @@ enum class EAccelByteV2SessionQueryComparisonOp : uint8
 	LESS_THAN_EQUAL,
 	CONTAINS,
 	NOT_CONTAINS
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteV2SessionType : uint8
+{
+	Unknown = 0,
+	GameSession,
+	PartySession
 };
 
 USTRUCT(BlueprintType)
@@ -134,6 +144,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2BaseSession
 		FAccelByteModelsV2SessionConfiguration Configuration{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
 		int64 Version{};
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | BaseSession")
+		EAccelByteV2SessionType SessionType{};
+	FAccelByteModelsV2BaseSession(EAccelByteV2SessionType Type) : SessionType(Type) {}
+	FAccelByteModelsV2BaseSession() : SessionType(EAccelByteV2SessionType::Unknown) {}
 };
 
 USTRUCT(BlueprintType)
@@ -157,18 +171,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionDSInformation
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSStatusChangedNotif
-{
-	GENERATED_BODY();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
-	FAccelByteModelsServerInfo GameServer{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
-	FString SessionID{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
-	FString Error{};
-};
-
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSession : public FAccelByteModelsV2BaseSession
 {
 	GENERATED_BODY()
@@ -180,6 +182,21 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSession : public FAccelByteMode
 		FString BackfillTicketID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSession")
 		FString MatchPool{};
+	FAccelByteModelsV2GameSession() : FAccelByteModelsV2BaseSession(EAccelByteV2SessionType::GameSession) {}
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSStatusChangedNotif
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+		FAccelByteModelsServerInfo GameServer{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+		FString SessionID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+		FString Error{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSStatusChangedNotif")
+		FAccelByteModelsV2GameSession Session{};
 };
 
 USTRUCT(BlueprintType)
@@ -239,6 +256,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest
 	// Optional, invitation timeout before the invitation is automatically rejected.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
 		int64 InviteTimeout{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
+		FString MatchPool{};
 };
 
 USTRUCT(BlueprintType)
@@ -253,6 +273,8 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySession : public FAccelByteModelsV2BaseSession
 {
 	GENERATED_BODY()
+	
+	FAccelByteModelsV2PartySession() : FAccelByteModelsV2BaseSession(EAccelByteV2SessionType::PartySession) {}
 };
 
 USTRUCT(BlueprintType)
@@ -405,6 +427,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyMembersChangedEvent
 		FString LeaderID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyMembersChangedEvent")
 		TArray<FAccelByteModelsV2SessionUser> Members{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyMembersChangedEvent")
+		FAccelByteModelsV2PartySession Session{};
 };
 
 USTRUCT(BlueprintType)
@@ -469,6 +493,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionMembersChangedEvent
 		FString JoinerID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionMembersChangedEvent")
 		FString LeaderID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionMembersChangedEvent")
+		FAccelByteModelsV2GameSession Session{};
 };
 
 USTRUCT(BlueprintType)

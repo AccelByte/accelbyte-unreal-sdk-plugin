@@ -51,7 +51,9 @@ enum class EAccelByteEntitlementClass : uint8
 	APP,
 	ENTITLEMENT,
 	CODE,
-	MEDIA
+	SUBSCRIPTION, 
+	MEDIA,
+	OPTIONBOX
 };
 
 UENUM(BlueprintType)

@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [20.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.0.0%0D19.0.0) (2022-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Session:** Rename FAccelByteModelsV2PartyMembersChangedEvent field from Party to Session
+* **session:** model list
+-  FAccelByteModelsV2DSStatusChangedNotif.GameServer -> moved to inside FAccelByteModelsV2DSStatusChangedNotif.Session.DSInformation
+-  FAccelByteModelsV2PartyMembersChangedEvent.PartyID -> moved inside FAccelByteModelsV2PartyMembersChangedEvent.Party.ID
+-  FAccelByteModelsV2PartyMembersChangedEvent.Members -> moved inside FAccelByteModelsV2PartyMembersChangedEvent.Party.Members
+- FAccelByteModelsV2GameSessionMembersChangedEvent.SessionID -> moved inside FAccelByteModelsV2GameSessionMembersChangedEvent.Session.ID
+- FAccelByteModelsV2GameSessionMembersChangedEvent.Members-> moved inside FAccelByteModelsV2GameSessionMembersChangedEvent.Session.Members
+
+### Features
+
+* add match pool field to game session create and update request models ([acb7a2f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/acb7a2fdec8f03223183d7a8cf015ce5745984fb))
+* added username field in the FBaseUserInfo function, used when call public get bulk user info API ([300cb95](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/300cb95853b6f6b77a76f6d9182df1c06650dd54))
+* implement get credential turn server ([f1cbae9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f1cbae9e7261257847bf6cab50492edbf8405638))
+* OPTIONBOX on EAccelByteEntitlementClass ([3e1a0fd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3e1a0fd9649131d572f65d381cbec4397e9f3157))
+* **Session:** add DISCONNECTED and TERMINATED member status enum ([3e57137](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3e571371193d8bde7a05f662ed60b2c9cb90dc51))
+* **session:** add missing to avoid breaking changes ([0045cc1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0045cc10ff7638467dd75196d55f3503121c2eb0))
+* **session:** Add session and party info in Game and Party session member changed notif and DS status change notif ([649674a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/649674a6d76df03877132ff98299513fed36e665))
+* **Session:** add TIMEOUT in session member status enum ([622e63b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/622e63b2410af380eb91b3287682663d0a526d50))
+
+
+### Bug Fixes
+
+* crash when static casting session model ([0a05535](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0a055355997bd7ba99b4228a1a49f64e80be9bfc))
+* **Session:** Rename FAccelByteModelsV2PartyMembersChangedEvent field from Party to Session ([a11c1a0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a11c1a0b0cd04d32798da75edf2a71059b557d48))
+
 ## [19.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/19.0.0%0D18.0.0) (2022-10-24)
 
 
