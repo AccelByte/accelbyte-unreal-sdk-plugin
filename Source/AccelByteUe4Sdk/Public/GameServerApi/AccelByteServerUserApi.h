@@ -64,6 +64,17 @@ namespace AccelByte
 			void BanSingleUser(const FString& UserId, const FBanUserRequest& BanUser,
 							   const THandler<FBanUserResponse>& OnSuccess, const FErrorHandler& OnError);
 
+			/**
+			 * @brief This function will get user's bans with specific time duration.
+			 * @param UserId Id of user that ban's data will be get.
+			 * @param Before Only user bans created before the date returned. The date is in ISO-8601
+			 * @param After Only user bans created after the date returned. The date is in ISO-8601
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FGetUserBansResponse.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void GetUserBans(const FString& UserId, const FDateTime& Before, const FDateTime& After,
+							const THandler<FGetUserBansResponse>& OnSuccess, const FErrorHandler& OnError);
+
 		private:
 			ServerUser() = delete;
 			ServerUser(const ServerUser&) = delete;

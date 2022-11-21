@@ -25,7 +25,8 @@ enum class EAccelByteItemType : uint8
 	SEASON,
 	MEDIA,
 	OPTIONBOX,
-	EXTENSION
+	EXTENSION,
+	LOOTBOX
 };
 
 UENUM(BlueprintType)
@@ -53,7 +54,8 @@ enum class EAccelByteEntitlementClass : uint8
 	CODE,
 	SUBSCRIPTION, 
 	MEDIA,
-	OPTIONBOX
+	OPTIONBOX,
+	LOOTBOX
 };
 
 UENUM(BlueprintType)
@@ -248,6 +250,14 @@ enum class EAccelBytePredicateType : uint8
 	SeasonTierPredicate
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteLootBoxRewardType : uint8
+{
+	PROBABILITY_GROUP,
+	REWARD_GROUP,
+	REWARD
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -407,6 +417,46 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelItemOptionBoxConfig
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemLootBoxItem
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemLootBoxItem")
+	FString ItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemLootBoxItem")
+	FString ItemSku{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemLootBoxItem")
+	FString ItemType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemLootBoxItem")
+	int32 Count{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemReward
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemReward")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemReward")
+	EAccelByteLootBoxRewardType Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemReward")
+	TArray<FAccelByteModelsItemLootBoxItem> LootBoxItems{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemReward")
+	int32 Weight{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemReward")
+	int32 Odds{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemLootBoxConfig
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemReward")
+	int32 RewardCount{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemReward")
+	TArray<FAccelByteModelsItemReward> Rewards{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 {
 	GENERATED_BODY()
@@ -546,6 +596,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FJsonObjectWrapper LocalExt{};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FAccelByteModelsItemLootBoxConfig LootBoxConfig{};
 };
 
 USTRUCT(BlueprintType)
@@ -759,6 +811,21 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementItemSnapshot
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo | ItemSnapshot ")
 	FAccelByteModelItemOptionBoxConfig OptionBoxConfig{};	
+}; 
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementReward
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | Reward ")
+	FString ItemId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | Reward ")
+	FString ItemSku{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | Reward ")
+	int32 Count{};
 };
 
 USTRUCT(BlueprintType)
@@ -843,6 +910,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
 	bool Replayed{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
+	TArray<FAccelByteModelsEntitlementReward> Rewards{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
+	FAccelByteModelsItemLootBoxConfig LootBoxConfig{};
 };
 
 USTRUCT(BlueprintType)

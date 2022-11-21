@@ -1015,6 +1015,16 @@ struct ACCELBYTEUE4SDK_API FBanUserResponse
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FGetUserBansResponse
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanSearchResponse")
+		TArray<FBanUserResponse> Data{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanSearchResponse")
+		FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FGetPublisherUserResponse
 {
 	GENERATED_BODY()

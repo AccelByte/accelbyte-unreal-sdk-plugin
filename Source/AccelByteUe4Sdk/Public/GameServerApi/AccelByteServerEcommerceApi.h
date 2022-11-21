@@ -178,7 +178,15 @@ public:
 	* @param OnError This will be called when the operation fails.
 	*/
 	void BulkGetItemsBySkus(TArray<FString> const& Skus, THandler<TArray<FAccelByteModelsBulkGetItemsBySkus>> const& OnSuccess, FErrorHandler const& OnError);
-	
+
+	/**
+	* @brief List stores in a namespace.
+	*
+	* @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsPlatformStore>&.
+	* @param OnError This will be called when the operation fails.
+	*/
+	void ListStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess, FErrorHandler const& OnError);
+
 private:
 	ServerCredentials const& CredentialsRef;
 	ServerSettings const& SettingsRef;

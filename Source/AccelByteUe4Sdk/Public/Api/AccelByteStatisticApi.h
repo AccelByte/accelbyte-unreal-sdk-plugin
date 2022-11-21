@@ -59,6 +59,17 @@ public:
 	void GetUserStatItems(const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	* @brief Get user's specified stat items and specifying statCodes and tags to get from. Returned stat items will only contain
+	* stat items specified by statCodes and tags (inclusive)
+	*
+	* @param StatCodes Specify statCodes for stat items to get from this method
+	* @param Tags Specify tags for for stat items to get from this method
+	* @param OnSuccess This will be called when the operation succeeded. Thre result is an FAccelByteModelsUserStatItemPagingSlicedResult
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetUserStatItems(const FString& UserId, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
 	* @brief Increment this user stat items.
 	*
 	* @param Data array consist of increased value and stat code.
@@ -104,6 +115,18 @@ public:
 	*/	
 	void UpdateUserStatItemsValue(const FString& StatCode, const FString& AdditionalKey, const FAccelByteModelsPublicUpdateUserStatItem& UpdateUserStatItem,
 		const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Public bulk fetch multiple user's statitem value for a given namespace and statCode.
+	*
+	* @param StatCode StatCode.
+	* @param UserIds List of UserIds.
+	* @param UpdateUserStatItem This is the UpdateUserStatItem that will be stored in the slot.
+	* @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsStatItemValueResponse>.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void BulkFetchStatItemsValue(const FString StatCode, const TArray<FString>& UserIds,  
+		const THandler<TArray<FAccelByteModelsStatItemValueResponse>>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Statistic() = delete;

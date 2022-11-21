@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [20.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.1.0%0D20.0.0) (2022-11-21)
+
+
+### Features
+
+* E-Commerce Loot box ([59a9de6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/59a9de6cabb097145319cc1d1892888751e0c256))
+* expose get all stats from specified user and Get user's specified stat items ([9c874ae](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9c874ae1879d7976934d3ab6a4fbb6917c867956))
+* Expose Get Store List for DS ([e834c2a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e834c2ab064085dd770fd395a37fcb9cc0d80621))
+* **iam:** expose the Admin Get User's Bans endpoint ([6fddbb3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6fddbb3b45ad6a36b7e59d65cda7c103c33a6f30))
+* **session:** add missing to avoid breaking changes ([975666e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/975666e798e286e91397d1b8605757606fd758f4))
+
 ## [20.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.0.0%0D19.0.0) (2022-11-07)
 
 

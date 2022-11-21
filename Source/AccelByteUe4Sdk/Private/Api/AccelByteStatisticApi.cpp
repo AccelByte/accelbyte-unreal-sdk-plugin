@@ -75,8 +75,15 @@ namespace Api
 	{
 		FReport::Log(FString(__FUNCTION__));
 
+		Statistic::GetUserStatItems(CredentialsRef.GetUserId(), StatCodes, Tags, OnSuccess, OnError);
+	}
+
+	void Statistic::GetUserStatItems(const FString& UserId, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -94,7 +101,7 @@ namespace Api
 			Url.Append(TEXT("statCodes="));
 			Url.Append(FGenericPlatformHttp::UrlEncode(FString::Join(StatCodes, TEXT(","))));
 		}
-		
+
 		if (Tags.Num() > 0)
 		{
 			if (bIsBeginning)
@@ -239,6 +246,32 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 	
+	void Statistic::BulkFetchStatItemsValue(const FString StatCode, const TArray<FString>& UserIds, const THandler<TArray<FAccelByteModelsStatItemValueResponse>>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statitems/bulk"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Content;		 
+
+		FString QueryParams = FAccelByteUtilities::CreateQueryParams({
+			{ TEXT("statCode"), StatCode },
+			{ TEXT("userIds"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(UserIds)  },
+			});
+		Url.Append(QueryParams);
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
 
 } // Namespace Api
 } // Namespace AccelByte
