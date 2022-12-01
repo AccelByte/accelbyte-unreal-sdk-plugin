@@ -53,6 +53,7 @@ enum class EAccelByteSearchType : uint8
 UENUM(BlueprintType)
 enum class EBanType : uint8
 {
+	EMPTY,
 	LOGIN,
 	CHAT_SEND,
 	CHAT_ALL,
@@ -66,6 +67,7 @@ enum class EBanType : uint8
 UENUM(BlueprintType)
 enum class EBanReason : uint8
 {
+	EMPTY,
 	VIOLENCE,
 	HARASSMENT,
 	HATEFUL_CONDUCT,

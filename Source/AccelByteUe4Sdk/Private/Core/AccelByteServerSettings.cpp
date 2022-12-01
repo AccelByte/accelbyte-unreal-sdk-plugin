@@ -73,6 +73,8 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	SessionServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("SessionServerUrl"), BaseUrl, TEXT("session"));
 
+	ChatServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("ChatServerUrl"), BaseUrl, TEXT("chat"));
+
 	const FString DSHubBaseUrl = BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
 	DSHubServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("DSHubServerUrl"), DSHubBaseUrl, TEXT("dshub/"));
 
@@ -187,6 +189,11 @@ FString UAccelByteBlueprintsServerSettings::GetLobbyServerUrl()
 	return FRegistry::ServerSettings.LobbyServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetChatServerUrl()
+{
+	return FRegistry::ServerSettings.ChatServerUrl;
+}
+
 FString UAccelByteBlueprintsServerSettings::GetCloudSaveServerUrl()
 {
 	return FRegistry::ServerSettings.CloudSaveServerUrl;
@@ -285,6 +292,11 @@ void UAccelByteBlueprintsServerSettings::SetMatchmakingServerUrl(const FString& 
 void UAccelByteBlueprintsServerSettings::SetLobbyServerUrl(const FString & LobbyServerUrl)
 {
 	FRegistry::ServerSettings.LobbyServerUrl = LobbyServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetChatServerUrl(const FString& ChatServerUrl)
+{
+	FRegistry::ServerSettings.ChatServerUrl = ChatServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetCloudSaveServerUrl(const FString & CloudSaveServerUrl)

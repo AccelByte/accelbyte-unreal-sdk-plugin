@@ -234,6 +234,16 @@ private:
 	template <typename DataStruct>
 	static void SerializeAndRemoveEmptyValues(const DataStruct& Model, FString& OutputString, bool bIncludeTeams = true)
 	{
+		TSharedPtr<FJsonObject> JsonObjectPtr;
+		SerializeAndRemoveEmptyValues(Model, JsonObjectPtr, bIncludeTeams);
+
+		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
+	}
+
+	template <typename DataStruct>
+	static void SerializeAndRemoveEmptyValues(const DataStruct& Model, TSharedPtr<FJsonObject>& OutJsonObjectPtr, bool bIncludeTeams = true)
+	{
 		auto JsonObjectPtr = FJsonObjectConverter::UStructToJsonObject(Model);
 
 		RemoveEmptyEnumValue(JsonObjectPtr, TEXT("joinability"));
@@ -248,8 +258,7 @@ private:
 
 		FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll, ExcludedFieldNamesForRemoval);
 
-		auto Writer = TJsonWriterFactory<>::Create(&OutputString);
-		FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
+		OutJsonObjectPtr = JsonObjectPtr;
 	}
 };
 }

@@ -30,6 +30,7 @@ public:
 	FString AchievementServerUrl{};
 	FString MatchmakingServerUrl{};
 	FString LobbyServerUrl{};
+	FString ChatServerUrl{};
 	FString CloudSaveServerUrl{};
 	FString SeasonPassServerUrl{};
 	FString SessionBrowserServerUrl{};
@@ -123,7 +124,10 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString SessionServerUrl{};
 
-	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString ChatServerUrl{};
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	float QosPingTimeout{.6f};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
@@ -205,6 +209,9 @@ public:
 	static FString GetLobbyServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetChatServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetCloudSaveServerUrl();
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -263,6 +270,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetLobbyServerUrl(const FString& LobbyServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetChatServerUrl(const FString& ChatServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetCloudSaveServerUrl(const FString& CloudServerUrl);

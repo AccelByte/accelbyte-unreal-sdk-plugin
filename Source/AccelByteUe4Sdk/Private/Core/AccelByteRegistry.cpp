@@ -16,6 +16,7 @@
 #include "Api/AccelByteFulfillmentApi.h"
 #include "Api/AccelByteCloudStorageApi.h"
 #include "Api/AccelByteLobbyApi.h"
+#include "Api/AccelByteChatApi.h"
 #include "Api/AccelByteGameProfileApi.h"
 #include "Api/AccelByteStatisticApi.h"
 #include "Api/AccelByteQosManagerApi.h"
@@ -44,6 +45,7 @@
 #include "GameServerApi/AccelByteServerAchievementApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "GameServerApi/AccelByteServerLobby.h"
+#include "GameServerApi/AccelByteServerChatApi.h"
 #include "GameServerApi/AccelByteServerCloudSaveApi.h"
 #include "GameServerApi/AccelByteServerSeasonPassApi.h"
 #include "GameServerApi/AccelByteServerSessionBrowserApi.h"
@@ -70,6 +72,7 @@ Api::Wallet FRegistry::Wallet(FRegistry::Credentials, FRegistry::Settings, FRegi
 Api::Fulfillment FRegistry::Fulfillment(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::CloudStorage FRegistry::CloudStorage(FRegistry::Credentials, FRegistry::Settings);
 Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+Api::Chat FRegistry::Chat(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::QosManager FRegistry::QosManager(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
@@ -98,6 +101,7 @@ GameServerApi::ServerGameTelemetry FRegistry::ServerGameTelemetry(FRegistry::Ser
 GameServerApi::ServerAchievement FRegistry::ServerAchievement(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerMatchmaking FRegistry::ServerMatchmaking(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerLobby FRegistry::ServerLobby(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
+GameServerApi::ServerChat FRegistry::ServerChat(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerCloudSave FRegistry::ServerCloudSave(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerSeasonPass FRegistry::ServerSeasonPass(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerSessionBrowser FRegistry::ServerSessionBrowser(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);

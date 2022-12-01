@@ -68,7 +68,17 @@ void Session::CreateGameSession(
 		(CreateRequest.Teams.Num() > 1 || CreateRequest.Teams[0].UserIDs.Num() > 0);
 
 	FString Content{};
-	SerializeAndRemoveEmptyValues(CreateRequest, Content, bIncludeTeams);
+	TSharedPtr<FJsonObject> ContentJsonObject;
+	SerializeAndRemoveEmptyValues(CreateRequest, ContentJsonObject, bIncludeTeams);
+
+	// manually add TextChat field if value is set in request
+	if(CreateRequest.TextChat.IsSet())
+	{
+		ContentJsonObject->SetBoolField("textChat", CreateRequest.TextChat.GetValue());
+	}
+
+	auto Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(ContentJsonObject.ToSharedRef(), Writer);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -230,8 +240,18 @@ void Session::CreateParty(
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Content = TEXT("");
-	SerializeAndRemoveEmptyValues(CreateRequest, Content);
+	FString Content{};
+	TSharedPtr<FJsonObject> ContentJsonObject;
+	SerializeAndRemoveEmptyValues(CreateRequest, ContentJsonObject);
+
+	// manually add TextChat field if value is set in request
+	if(CreateRequest.TextChat.IsSet())
+	{
+		ContentJsonObject->SetBoolField("textChat", CreateRequest.TextChat.GetValue());
+	}
+
+	auto Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(ContentJsonObject.ToSharedRef(), Writer);
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/party"),
 		*SettingsRef.SessionServerUrl, *CredentialsRef.GetNamespace());

@@ -24,6 +24,7 @@ public:
 	FString IamServerUrl{};
 	FString PlatformServerUrl{};
 	FString LobbyServerUrl{};
+	FString ChatServerUrl{};
 	FString BasicServerUrl{};
 	FString CloudStorageServerUrl{};
 	FString GameProfileServerUrl{};
@@ -119,6 +120,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString QosManagerServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString ChatServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString LeaderboardServerUrl{};
@@ -224,6 +228,9 @@ public:
 	static FString GetLobbyServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetChatServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetCloudStorageServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -306,6 +313,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetLobbyServerUrl(const FString& LobbyServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetChatServerUrl(const FString& ChatServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetCloudStorageServerUrl(const FString& CloudStorageServerUrl);

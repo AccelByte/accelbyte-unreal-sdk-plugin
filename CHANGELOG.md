@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [20.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.1.1%0D20.1.0) (2022-12-01)
+
+
+### Features
+
+* Add new chat service APIs ([deb61e6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/deb61e6ceb5ea9ea2405a1a8b56317482a7d34a1))
+* **session:** add ENDED and UNKNOWN status in EAccelByteV2GameSessionDsStatus ([2a3cbb9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2a3cbb92f9b76b2bf44a8bdb9e18b694344f8c66))
+
+
+### Bug Fixes
+
+* **session:** remove TextChat field from FAccelByteModelsV2GameSessionBaseRequest. ([f1c5016](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f1c50167f8379bd9be2d27771f6f08c71d84850a))
+
 ## [20.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.1.0%0D20.0.0) (2022-11-21)
 
 

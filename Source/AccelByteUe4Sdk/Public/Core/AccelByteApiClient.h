@@ -10,6 +10,7 @@
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "Api/AccelByteCategoryApi.h"
+#include "Api/AccelByteChatApi.h"
 #include "Api/AccelByteCloudSaveApi.h"
 #include "Api/AccelByteCloudStorageApi.h"
 #include "Api/AccelByteCurrencyApi.h"
@@ -65,6 +66,7 @@ public:
 	Api::Fulfillment Fulfillment{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::CloudStorage CloudStorage{*CredentialsRef, FRegistry::Settings};
 	Api::Lobby Lobby{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Chat Chat{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::GameProfile GameProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Statistic Statistic{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::QosManager QosManager{*CredentialsRef, FRegistry::Settings, *HttpRef};

@@ -29,6 +29,7 @@ namespace Api
 	class Fulfillment;
 	class CloudStorage;
 	class Lobby;
+	class Chat;
 	class GameProfile;
 	class Statistic;
 	class QosManager;
@@ -61,6 +62,7 @@ namespace GameServerApi
 	class ServerAchievement;
 	class ServerMatchmaking;
 	class ServerLobby;
+	class ServerChat;
 	class ServerCloudSave;
 	class ServerSeasonPass;
 	class ServerSessionBrowser;
@@ -89,6 +91,7 @@ public:
 	static Api::Fulfillment Fulfillment;
 	static Api::CloudStorage CloudStorage;
 	static Api::Lobby Lobby;
+	static Api::Chat Chat;
 	static Api::GameProfile GameProfile;
 	static Api::Statistic Statistic;
 	static Api::QosManager QosManager;
@@ -117,6 +120,7 @@ public:
 	static GameServerApi::ServerAchievement ServerAchievement;
 	static GameServerApi::ServerMatchmaking ServerMatchmaking;
 	static GameServerApi::ServerLobby ServerLobby;
+	static GameServerApi::ServerChat ServerChat;
 	static GameServerApi::ServerCloudSave ServerCloudSave;
 	static GameServerApi::ServerSeasonPass ServerSeasonPass;
 	static GameServerApi::ServerSessionBrowser ServerSessionBrowser;

@@ -42,7 +42,9 @@ enum class EAccelByteV2GameSessionDsStatus : uint8
 	NEED_TO_REQUEST,
 	REQUESTED,
 	AVAILABLE,
-	FAILED_TO_REQUEST
+	FAILED_TO_REQUEST,
+	ENDED,
+	UNKNOWN
 };
 
 UENUM(BlueprintType)
@@ -115,6 +117,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionConfiguration
 		FString ClientVersion{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
 		TArray<FString> RequestedRegions{};
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | SessionConfiguration")
+		bool TextChat{false};
 };
 
 USTRUCT(BlueprintType)
@@ -146,6 +150,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2BaseSession
 		int64 Version{};
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | BaseSession")
 		EAccelByteV2SessionType SessionType{};
+	
 	FAccelByteModelsV2BaseSession(EAccelByteV2SessionType Type) : SessionType(Type) {}
 	FAccelByteModelsV2BaseSession() : SessionType(EAccelByteV2SessionType::Unknown) {}
 };
@@ -200,7 +205,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSStatusChangedNotif
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionBaseRequest
 {
 	GENERATED_BODY();
 	
@@ -262,7 +267,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUpdateRequest : public FAccelByteModelsV2GameSessionCreateRequest
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest : public FAccelByteModelsV2GameSessionBaseRequest
+{
+	GENERATED_BODY();
+
+	// Optional, Also create group chat attached to this game session
+		TOptional<bool> TextChat{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUpdateRequest : public FAccelByteModelsV2GameSessionBaseRequest
 {
 	GENERATED_BODY();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateRequest")
@@ -315,6 +329,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyCreateRequest
 		int64 InviteTimeout{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
 		EAccelByteV2SessionConfigurationServerType Type{EAccelByteV2SessionConfigurationServerType::EMPTY};
+
+		TOptional<bool> TextChat{};
 };
 
 USTRUCT(BlueprintType)
