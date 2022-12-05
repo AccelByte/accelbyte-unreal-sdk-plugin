@@ -124,9 +124,7 @@ public:
 private:
 	Item() = delete;
 	Item(Item const&) = delete;
-	Item(Item&&) = delete;
-
-	FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
+	Item(Item&&) = delete; 
 };
 
 } // Namespace Api

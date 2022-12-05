@@ -15,13 +15,13 @@ namespace AccelByte
 
 		if (!Request.IsValid())
 		{
-			UE_LOG(LogAccelByte, Log, TEXT("INVALID REQ HTTP"));
+			UE_LOG(LogAccelByte, Verbose, TEXT("INVALID REQ HTTP"));
 			return;
 		}
 
-		UE_LOG(LogAccelByte, Log, TEXT("HTTP REQ %s %s, %p"), *Request->GetVerb(), *Request->GetURL(), Request.Get());
+		UE_LOG(LogAccelByte, Verbose, TEXT("HTTP REQ %s %s, %p"), *Request->GetVerb(), *Request->GetURL(), Request.Get());
 
-		if (UE_LOG_ACTIVE(LogAccelByte, Verbose))
+		if (UE_LOG_ACTIVE(LogAccelByte, VeryVerbose))
 		{
 			FString LogMessage = "";
 			LogMessage += "\n---";
@@ -40,7 +40,7 @@ namespace AccelByte
 			}
 			LogMessage += "\n---\n";
 
-			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *LogMessage);
+			UE_LOG(LogAccelByte, VeryVerbose, TEXT("%s"), *LogMessage);
 		}
 	}
 
@@ -50,7 +50,7 @@ namespace AccelByte
 		
 		if (!Response.IsValid())
 		{
-			UE_LOG(LogAccelByte, Log, TEXT("INVALID RSP HTTP"));
+			UE_LOG(LogAccelByte, Verbose, TEXT("INVALID RSP HTTP"));
 			return;
 		}
 
@@ -66,10 +66,10 @@ namespace AccelByte
 		}
 		else
 		{
-			UE_LOG(LogAccelByte, Log, TEXT("%s"), *ShortLogMessage);
+			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *ShortLogMessage);
 		}
 
-		if (UE_LOG_ACTIVE(LogAccelByte, Verbose))
+		if (UE_LOG_ACTIVE(LogAccelByte, VeryVerbose))
 		{
 			FString LogMessage = "";
 			LogMessage += "\n---";
@@ -81,7 +81,7 @@ namespace AccelByte
 			LogMessage += "\n\n" + Response->GetContentAsString();
 			LogMessage += "\n---\n";
 
-			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *LogMessage);
+			UE_LOG(LogAccelByte, VeryVerbose, TEXT("%s"), *LogMessage);
 		}
 	}
 
@@ -89,7 +89,7 @@ namespace AccelByte
 	{
 		if (!UObjectInitialized()) return;
 
-		UE_LOG(LogAccelByte, Log, TEXT("%s"), *Message);
+		UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *Message);
 	}
 
 	void FReport::LogDeprecated(FString FunctionName, FString Message)

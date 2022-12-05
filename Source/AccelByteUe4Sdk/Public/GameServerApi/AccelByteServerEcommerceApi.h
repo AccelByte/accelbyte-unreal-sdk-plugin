@@ -187,6 +187,15 @@ public:
 	*/
 	void ListStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess, FErrorHandler const& OnError);
 
+	/**
+	* @brief Query items by criteria within a store.
+	*
+	* @param ItemCriteria Struct of item criteria 
+	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
+	* @param OnError This will be called when the operation fails.
+	*/
+	void QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2& ItemCriteria, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess, FErrorHandler const& OnError);
+
 private:
 	ServerCredentials const& CredentialsRef;
 	ServerSettings const& SettingsRef;

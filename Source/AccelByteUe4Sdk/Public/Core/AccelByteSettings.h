@@ -44,6 +44,9 @@ public:
 	FString SessionServerUrl{};
 	FString MatchmakingV2ServerUrl{};
 	FString AppId{};
+	FString CustomerName{};
+	FString SettingsEnvironment{};
+	FString HeartBeatData{};
 	float QosLatencyPollIntervalSecs{.0f};
 	float QosServerLatencyPollIntervalSecs{.0f};
 	float QosPingTimeout{.6f};
@@ -159,6 +162,15 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AppId{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString CustomerName{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString SettingsEnvironment{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString HeartBeatData{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	float QosLatencyPollIntervalSecs{.0f};
@@ -280,6 +292,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetAppId();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetCustomerName();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetHeartBeatData();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static float GetQosLatencyPollIntervalSecs();

@@ -9,6 +9,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "CoreUObject.h"
 #include "Api/AccelByteGameTelemetryApi.h"
+#include "Api/AccelByteHeartBeatApi.h"
 #include "Core/AccelByteReport.h"
 #include "Core/Version.h"
 #include "Interfaces/IPluginManager.h"
@@ -60,8 +61,8 @@ void FAccelByteUe4SdkModule::StartupModule()
 #if WITH_EDITOR
 	FModuleManager::Get().LoadModuleChecked("Settings");
 #endif
-	FModuleManager::Get().LoadModuleChecked("Http");
-	FModuleManager::Get().LoadModuleChecked("Websockets");
+	FModuleManager::Get().LoadModuleChecked("HTTP");
+	FModuleManager::Get().LoadModuleChecked("WebSockets");
 	FModuleManager::Get().LoadModuleChecked("Json");
 	FModuleManager::Get().LoadModuleChecked("JsonUtilities");
 	FModuleManager::Get().LoadModuleChecked("Projects");
@@ -81,12 +82,14 @@ void FAccelByteUe4SdkModule::StartupModule()
 	FRegistry::HttpRetryScheduler.Startup();
 	FRegistry::Credentials.Startup();
 	FRegistry::GameTelemetry.Startup();
+	FRegistry::HeartBeat.Startup();
 	FRegistry::ServerCredentials.Startup();
 }
 
 void FAccelByteUe4SdkModule::ShutdownModule()
 {
 	FRegistry::ServerCredentials.Shutdown();
+	FRegistry::HeartBeat.Shutdown();
 	FRegistry::GameTelemetry.Shutdown();
 	FRegistry::Credentials.Shutdown();
 	FRegistry::HttpRetryScheduler.Shutdown();
@@ -190,7 +193,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 	ServerSettings.Reset(Environment);
 
 	bResult &= NullCheckConfig(ServerSettings.ClientId, TEXT("Client ID"));
-	bResult &= NullCheckConfig(ServerSettings.ClientSecret, TEXT("Client Secret"));
+	bResult &= NullCheckConfig(ServerSettings.Namespace, TEXT("Namespace"));
 	bResult &= NullCheckConfig(ServerSettings.BaseUrl, TEXT("Base URL"));
 	
 	if (!bResult)

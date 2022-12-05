@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [20.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.2.0%0D20.1.1) (2022-12-05)
+
+
+### Features
+
+* add heartbeat service ([4e4121d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4e4121df286e67d51d2d322be86d065a33104ee7))
+* add missing header ([0569272](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0569272297e90f7e8ca42638a751623b6c557b6e))
+* Exposing Get Item By Criteria in DS ([93642a8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/93642a87cd287e69fe441f65efb3be962f2cdcdf))
+* Make the PSN sync endpoint to be able to receive multiple service labels ([f206035](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f2060354f6d27f6717bdf03ae303ae2cd9b38b8d))
+* update implementation to support Unreal Engine 5.1 ([c18cf19](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c18cf19d084aaefde5380afb8a18056924be416e))
+
+
+### Bug Fixes
+
+* **logging:** change verbosity level in the logging with AccelByteReport ([fed313a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fed313a3cde430b56d994e69f1e80b9c777ec173))
+* **settings:** unable to use public OAuth credentials type for Server Settings ([d559f69](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d559f697543a166cf280d35cf8f34c883af46ac4))
+
 ### [20.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.1.1%0D20.1.0) (2022-12-01)
 
 

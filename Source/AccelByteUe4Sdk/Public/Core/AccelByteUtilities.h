@@ -6,6 +6,7 @@
 
 #include "Core/AccelByteError.h"
 #include "JsonObjectConverter.h"
+#include "Models/AccelByteEcommerceModels.h"
 
 #include "AccelByteUtilities.generated.h"
 
@@ -407,6 +408,7 @@ public:
 	static bool GetValueFromCommandLineSwitch(const FString& Key, FString& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, int& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, bool& Value);
+	static FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
 
 private:
 

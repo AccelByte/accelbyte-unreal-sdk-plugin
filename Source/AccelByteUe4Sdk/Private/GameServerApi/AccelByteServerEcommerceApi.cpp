@@ -56,13 +56,11 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId, bool bActiveO
 	}
 	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
 	{
-		FString stringValue = *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass);
-		QueryParams.Add("entitlementClazz", stringValue);
+		QueryParams.Add("entitlementClazz", FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass));
 	}
 	if (AppType != EAccelByteAppType::NONE)
 	{
-		FString stringValue = *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType);
-		QueryParams.Add("appType", stringValue);
+		QueryParams.Add("appType", FAccelByteUtilities::GetUEnumValueAsString(AppType));
 	}
 
 	// Converting TMap QueryParams as one line QueryString 
@@ -431,5 +429,63 @@ void ServerEcommerce::ListStores(THandler<TArray<FAccelByteModelsPlatformStore>>
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2& ItemCriteria, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/byCriteria"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace());
+
+	TArray<FString> SortByStringArray = {};
+	if (ItemCriteria.SortBy.Num() > 0 )
+	{		 
+		for (auto SortByEnum : ItemCriteria.SortBy)
+		{
+			if (SortByEnum != EAccelByteItemListSortBy::NONE)
+			{
+				SortByStringArray.Add(FAccelByteUtilities::ConvertItemSortByToString(SortByEnum));
+			}
+		} 
+	} 
+	FString AvailableDateRounded{}; 
+	FString AvailableDateDecimal{};
+	ItemCriteria.AvailableDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
+	FString AvailableDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
+	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
+		{ TEXT("storeId"), ItemCriteria.StoreId },
+		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
+		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true"):TEXT("false") },
+		{ TEXT("itemType"), ItemCriteria.ItemType != EAccelByteItemType::NONE ?
+		 	FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType) : TEXT("") },
+		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ?
+				FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType) : TEXT("")  },
+		{ TEXT("baseAppId"), ItemCriteria.BaseAppId },
+		{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(ItemCriteria.Tags) },
+		{ TEXT("features"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(ItemCriteria.Features)  },
+		{ TEXT("activeOnly"), ItemCriteria.ActiveOnly ? TEXT("true"):TEXT("false") },
+		{ TEXT("region"), ItemCriteria.Region },
+		{ TEXT("availableDate"), AvailableDate },
+		{ TEXT("targetNamespace"), ItemCriteria.TargetNamespace },
+		{ TEXT("offset"), ItemCriteria.Offset > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Offset) : TEXT("") },
+		{ TEXT("limit"), ItemCriteria.Limit > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Limit) : TEXT("") },
+		{ TEXT("sortBy"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(SortByStringArray)  },
+		});
+	Url.Append(QueryParams);
+	
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 } // Namespace GameServerApi
 } // Namespace AccelByte

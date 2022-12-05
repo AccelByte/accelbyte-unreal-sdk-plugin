@@ -57,6 +57,18 @@ public:
 	 */
 	void DeleteGameSession(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Update a member of this session's status with the one provided. Requires permission
+	 * 'ADMIN:NAMESPACE:{namespace}:SESSION:GAME' to be set with the 'UPDATE' action.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param MemberId ID of the member to update status for
+	 * @param Status Status to set for this member
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void UpdateMemberStatus(FString const& GameSessionID, FString const& MemberID, const EAccelByteV2SessionMemberStatus& Status, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;

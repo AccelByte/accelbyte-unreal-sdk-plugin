@@ -299,6 +299,23 @@ public:
 	*/	
 	void GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Ids, THandler<TArray<FAccelByteModelsEntitlementOwnershipItemIds>> const& OnSuccess, FErrorHandler const& OnError);
 
+	/**
+	* @brief Synchronize with DLC entitlements in PSN Store.
+	*
+	* @param PlaystationModel Playstation's DLC Model Sync Request  
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void SyncWithDLCEntitlementInPSNStore(const FAccelByteModelsPlayStationDLCSync& PlaystationModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	* @brief Synchronize with entitlements in PSN Store.
+	*
+	* @param PlaystationModel Playstation's IAP Model Sync Request  
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStationIAPSync& PlaystationModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	
 private:
 	Entitlement() = delete;

@@ -45,25 +45,37 @@ void Entitlement::QueryUserEntitlements(
 	FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType,
 	TArray<FString> const& Features)
 { 
-
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
  	
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
+ 	TMap<FString, FString> QueryParams = {
 		{ TEXT("entitlementName"), EntitlementName },
-		{ "itemId", FString::Join(ItemIds, TEXT("&itemId=")) },
-		{ "features", FString::Join(Features, TEXT("&features=")) },
-		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
-		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ?
-				*FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass) : TEXT("")},
-		{ TEXT("appType"), AppType != EAccelByteAppType::NONE ?
-				*FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType) : TEXT("")},
-	});
-	Url.Append(QueryParams);
-
-	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
+		{ TEXT("itemId"), FString::Join(ItemIds, TEXT("&itemId=")) },
+		{ TEXT("features"), FString::Join(Features, TEXT("&features=")) }
+	};
+	
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+	
+	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
+	{
+		QueryParams.Add(TEXT("entitlementClazz"), FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass));
+	}
+	
+	if (AppType != EAccelByteAppType::NONE)
+	{
+		QueryParams.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(AppType));
+	}
+	
+	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void Entitlement::GetUserEntitlementById(FString const& Entitlementid, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError)
@@ -254,7 +266,6 @@ void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId, int32 con
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 	
-
 	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }
 
@@ -584,6 +595,41 @@ void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Id
 	
 	// Api Request 
 	HttpClient.ApiRequest("GET", Url, {}, Content, OnSuccess, OnError); 
+}
+
+void Entitlement::SyncWithDLCEntitlementInPSNStore(const FAccelByteModelsPlayStationDLCSync& PSNModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__)); 
+
+	FString Content = TEXT("");
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/psn/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+
+	FJsonObject DataJson;
+	DataJson.SetStringField("serviceLabel", FString::FromInt(PSNModel.ServiceLabel));
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+	
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
+}
+
+void Entitlement::SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStationIAPSync& PlaystationModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__)); 
+
+	FString Content = TEXT("");
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/psn/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+
+	FJsonObject DataJson;
+	DataJson.SetStringField("productId", PlaystationModel.ProductId);
+	DataJson.SetStringField("price", FString::FromInt(PlaystationModel.Price));
+	DataJson.SetStringField("currencyCode", PlaystationModel.CurrencyCode);
+	DataJson.SetStringField("serviceLabel", FString::FromInt(PlaystationModel.ServiceLabel));
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+	
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }
 
 } // Namespace Api

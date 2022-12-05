@@ -95,6 +95,20 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 
+	if (!GConfig->GetString(*DefaultSection, TEXT("CustomerName"), CustomerName, GEngineIni))
+	{
+		CustomerName = PublisherNamespace;
+	}
+	
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+	JsonObject->SetStringField("customer", CustomerName);
+	JsonObject->SetStringField("pn", PublisherNamespace);
+	JsonObject->SetStringField("environment", SettingsEnvironment);
+	JsonObject->SetStringField("game", Namespace);
+
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&HeartBeatData);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
 	FString QosLatencyPollIntervalSecsString;
 	LoadFallback(SectionPath, TEXT("QosLatencyPollIntervalSecs"), QosLatencyPollIntervalSecsString);
 	if (QosLatencyPollIntervalSecsString.IsNumeric())
@@ -143,16 +157,20 @@ void Settings::Reset(ESettingsEnvironment const Environment)
 	switch (Environment)
 	{
 	case ESettingsEnvironment::Development :
+		SettingsEnvironment = "dev";
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsDev");
 		break;
 	case ESettingsEnvironment::Certification:
+		SettingsEnvironment = "cert";
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsCert");
 		break;
 	case ESettingsEnvironment::Production:
+		SettingsEnvironment = "prod";
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsProd");
 		break;
 	case ESettingsEnvironment::Default:
 	default:
+		SettingsEnvironment = "default";
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
 		break;
 	}
@@ -283,6 +301,16 @@ FString UAccelByteBlueprintsSettings::GetMatchmakingV2ServerUrl()
 FString UAccelByteBlueprintsSettings::GetAppId()
 {
 	return FRegistry::Settings.AppId;
+}
+
+FString UAccelByteBlueprintsSettings::GetCustomerName()
+{
+	return FRegistry::Settings.CustomerName;
+}
+
+FString UAccelByteBlueprintsSettings::GetHeartBeatData()
+{
+	return FRegistry::Settings.HeartBeatData;
 }
 
 float UAccelByteBlueprintsSettings::GetQosLatencyPollIntervalSecs()

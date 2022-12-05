@@ -521,3 +521,33 @@ void FAccelByteNetUtilities::UploadTo(const FString& Url, const TArray<uint8>& D
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	
 }
+
+FString FAccelByteUtilities::ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy)
+{ 
+	switch (SortBy)
+	{
+	case EAccelByteItemListSortBy::NAME:
+		return FGenericPlatformHttp::UrlEncode(TEXT("name"));
+	case EAccelByteItemListSortBy::NAME_DESC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("name:desc"));
+	case EAccelByteItemListSortBy::CREATEDAT:
+		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt"));
+	case EAccelByteItemListSortBy::CREATEDAT_ASC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt:asc"));
+	case EAccelByteItemListSortBy::CREATEDAT_DESC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt:desc"));
+	case EAccelByteItemListSortBy::UPDATEDAT:
+		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt"));
+	case EAccelByteItemListSortBy::UPDATEDAT_ASC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt:asc"));
+	case EAccelByteItemListSortBy::UPDATEDAT_DESC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt:desc"));
+	case EAccelByteItemListSortBy::DISPLAYORDER:
+		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder"));
+	case EAccelByteItemListSortBy::DISPLAYORDER_ASC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder:asc"));
+	case EAccelByteItemListSortBy::DISPLAYORDER_DESC:
+		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder:desc"));
+	}
+	return TEXT("");
+}

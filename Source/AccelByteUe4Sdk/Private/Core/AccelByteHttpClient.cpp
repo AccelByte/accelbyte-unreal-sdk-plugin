@@ -42,10 +42,23 @@ namespace AccelByte
 
 		for (const auto& Kvp : ParamsData)
 		{
-			Result.Append(FString::Printf(TEXT("%s%s=%s"),
-			                              (i++ == 0 ? TEXT("") : TEXT("&")),
-			                              *FGenericPlatformHttp::UrlEncode(Kvp.Key),
-			                              *FGenericPlatformHttp::UrlEncode(Kvp.Value)));
+			if (Kvp.Key.IsEmpty() || Kvp.Value.IsEmpty())
+			{
+				continue;
+			}
+
+			TArray<uint8> KeyBytes;
+			KeyBytes.AddUninitialized(Kvp.Key.Len());
+			StringToBytes(Kvp.Key, KeyBytes.GetData(), Kvp.Key.Len());
+			FString EncodedKey = FGenericPlatformHttp::IsURLEncoded(KeyBytes) ? Kvp.Key : FGenericPlatformHttp::UrlEncode(Kvp.Key);
+
+			TArray<uint8> ValueBytes;
+			ValueBytes.AddUninitialized(Kvp.Value.Len());
+			StringToBytes(Kvp.Value, ValueBytes.GetData(), Kvp.Value.Len());
+			FString EncodedValue = FGenericPlatformHttp::IsURLEncoded(ValueBytes) ? Kvp.Value : FGenericPlatformHttp::UrlEncode(Kvp.Value);
+			
+			Result.Append(FString::Printf(TEXT("%s%s=%s"), i++ == 0 ? TEXT("") : TEXT("&")
+			                              , *EncodedKey, *EncodedValue));
 		}
 
 		return Result;
