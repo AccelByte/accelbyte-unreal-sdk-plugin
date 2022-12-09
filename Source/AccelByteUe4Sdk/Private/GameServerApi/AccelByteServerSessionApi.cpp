@@ -27,6 +27,48 @@ ServerSession::ServerSession(
 ServerSession::~ServerSession()
 {}
 
+void ServerSession::CreateGameSession(
+	FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest,
+	THandler<FAccelByteModelsV2GameSession> const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesession"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetClientNamespace());
+
+	const bool bIncludeTeams = CreateRequest.Teams.Num() > 0 &&
+		(CreateRequest.Teams.Num() > 1 || CreateRequest.Teams[0].UserIDs.Num() > 0);
+
+	TSharedPtr<FJsonObject> CreateRequestJsonObject;
+	Api::Session::SerializeAndRemoveEmptyValues(CreateRequest, CreateRequestJsonObject, bIncludeTeams);
+
+	// manually add TextChat field if value is set in request
+	if (CreateRequest.TextChat.IsSet())
+	{
+		CreateRequestJsonObject->SetBoolField(TEXT("textChat"), CreateRequest.TextChat.GetValue());
+	}
+
+	FString Content;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	if (!FJsonSerializer::Serialize(CreateRequestJsonObject.ToSharedRef(), Writer))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to serialize create request body to JSON object"));
+		return;
+	}
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void ServerSession::GetGameSessionDetails(
 	FString const& GameSessionID,
 	THandler<FAccelByteModelsV2GameSession> const& OnSuccess,
@@ -98,7 +140,43 @@ void ServerSession::DeleteGameSession(
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void ServerSession::UpdateMemberStatus(FString const& GameSessionID, FString const& MemberID, const EAccelByteV2SessionMemberStatus& Status, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void ServerSession::SendGameSessionInvite(
+	FString const& GameSessionID,
+	FString const& UserID,
+	FVoidHandler const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/invite"),
+		*SettingsRef.SessionServerUrl, *CredentialsRef.GetClientNamespace(), *GameSessionID);
+
+	const FAccelByteModelsV2SessionInviteRequest Invite = {UserID};
+	FString Content{};
+	if (!FJsonObjectConverter::UStructToJsonObjectString(Invite, Content))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to convert request JSON into a string"));
+		return;
+	}
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(TEXT("POST"));
+	Request->SetContentAsString(Content);
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void ServerSession::UpdateMemberStatus(
+	FString const& GameSessionID,
+	FString const& MemberID,
+	EAccelByteV2SessionMemberStatus const& Status,
+	FVoidHandler const& OnSuccess,
+	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 

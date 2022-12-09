@@ -30,6 +30,16 @@ private:
 
 public:
 	/**
+	 * @brief Create a new game session.
+	 *
+	 * @param CreateRequest The game session create request body.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest, THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError);
+
+
+	/**
 	 * @brief Get details for a game session by ID
 	 *
 	 * @param GameSessionID The ID of the session.
@@ -56,6 +66,16 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 */
 	void DeleteGameSession(FString const& GameSessionID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Send an invite to a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param UserID The ID of the user to invite.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void SendGameSessionInvite(FString const& GameSessionID, FString const& UserID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update a member of this session's status with the one provided. Requires permission

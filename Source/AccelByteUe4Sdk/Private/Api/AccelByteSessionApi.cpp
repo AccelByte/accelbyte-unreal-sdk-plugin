@@ -72,9 +72,9 @@ void Session::CreateGameSession(
 	SerializeAndRemoveEmptyValues(CreateRequest, ContentJsonObject, bIncludeTeams);
 
 	// manually add TextChat field if value is set in request
-	if(CreateRequest.TextChat.IsSet())
+	if (CreateRequest.TextChat.IsSet())
 	{
-		ContentJsonObject->SetBoolField("textChat", CreateRequest.TextChat.GetValue());
+		ContentJsonObject->SetBoolField(TEXT("textChat"), CreateRequest.TextChat.GetValue());
 	}
 
 	auto Writer = TJsonWriterFactory<>::Create(&Content);

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [20.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.2.1%0D20.2.0) (2022-12-09)
+
+
+### Features
+
+* **MPv2:** add new server calls to create game sessions and send invites to game sessions ([ae0418d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ae0418dd6afe3dd0044043cd559d0a4b26d027ea))
+
 ## [20.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.2.0%0D20.1.1) (2022-12-05)
 
 

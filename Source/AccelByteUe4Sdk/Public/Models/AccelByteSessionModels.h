@@ -272,7 +272,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest : public F
 	GENERATED_BODY();
 
 	// Optional, Also create group chat attached to this game session
-		TOptional<bool> TextChat{};
+	TOptional<bool> TextChat{};
 };
 
 USTRUCT(BlueprintType)
