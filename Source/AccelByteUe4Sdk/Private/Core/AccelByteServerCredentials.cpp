@@ -5,9 +5,9 @@
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteOauth2Api.h"
-#include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "AccelByteUe4SdkModule.h"
+#include "Core/AccelByteRegistry.h"
 
 using namespace AccelByte::Api;
 
@@ -128,25 +128,28 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 		case ESessionState::Valid:
 			if (GetRefreshTime() <= CurrentTime)
 			{
-				Oauth2::GetTokenWithClientCredentials(
-					ClientId, ClientSecret,
-					THandler<FOauth2Token>::CreateLambda([this, CurrentTime](const FOauth2Token& Result)
+				Oauth2::GetTokenWithClientCredentials(FRegistry::ServerSettings.IamServerUrl
+					, ClientId
+					, ClientSecret
+					, THandler<FOauth2Token>::CreateLambda(
+						[this, CurrentTime](const FOauth2Token& Result)
 						{
 							ClientSessionState = ESessionState::Valid;
 							SetClientToken(Result.Access_token, Result.Expires_in, Result.Namespace);
-						}),
-						FErrorHandler::CreateLambda([&](int32 Code, const FString& Message) 
-							{ 
-								if (ClientRefreshBackoff <= 0.0)
-								{
-									ClientRefreshBackoff = 10.0;
-								}
+						})
+					, FErrorHandler::CreateLambda(
+						[&](int32 Code, const FString& Message) 
+						{ 
+							if (ClientRefreshBackoff <= 0.0)
+							{
+								ClientRefreshBackoff = 10.0;
+							}
 
-								ClientRefreshBackoff *= 2.0;
-								ClientRefreshBackoff += FMath::FRandRange(1.0, 60.0);
-								ScheduleRefreshToken(ClientRefreshBackoff);
-								ClientSessionState = ESessionState::Expired; 
-							}));
+							ClientRefreshBackoff *= 2.0;
+							ClientRefreshBackoff += FMath::FRandRange(1.0, 60.0);
+							ScheduleRefreshToken(ClientRefreshBackoff);
+							ClientSessionState = ESessionState::Expired; 
+						}));
 
 				ClientSessionState = ESessionState::Refreshing;
 			}

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [20.2.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.2.2%0D20.2.1) (2022-12-14)
+
+
+### Bug Fixes
+
+* incorrect IAM url used during refresh token ([ea27755](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ea277553daff6186faf51ef1858353dc798b556c))
+
 ### [20.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.2.1%0D20.2.0) (2022-12-09)
 
 

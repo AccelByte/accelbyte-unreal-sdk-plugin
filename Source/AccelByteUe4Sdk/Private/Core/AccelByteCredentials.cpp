@@ -8,6 +8,7 @@
 #include "Models/AccelByteOauth2Models.h"
 #include "AccelByteUe4SdkModule.h"
 #include "Core/AccelByteReport.h"
+#include "Core/AccelByteRegistry.h"
 
 using namespace AccelByte::Api;
 
@@ -217,7 +218,9 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	case ESessionState::Valid:
 		if (UserRefreshTime <= CurrentTime)
 		{
-			Oauth2::GetTokenWithRefreshToken(ClientId, ClientSecret
+			Oauth2::GetTokenWithRefreshToken(FRegistry::Settings.IamServerUrl
+				, ClientId
+				, ClientSecret
 				, AuthToken.Refresh_token
 				, THandler<FOauth2Token>::CreateLambda([this](const FOauth2Token& Result)
 				{

@@ -67,23 +67,25 @@ void User::LoginWithOtherPlatform(
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
-		TEXT("When 2FA enabled This method should change to User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken,	const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)"));
+		TEXT("When 2FA is enabled then this method should be changed to the method using FCustomErrorHandler"));
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithOtherPlatformToken(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		FAccelByteUtilities::GetPlatformString(PlatformType),
-		PlatformToken,
-		THandler<FOauth2Token>::CreateLambda(
-			[this, PlatformType, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result);
-		}), FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+	Oauth2::GetTokenWithOtherPlatformToken(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, FAccelByteUtilities::GetPlatformString(PlatformType)
+		, PlatformToken
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, PlatformType, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result);
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -99,26 +101,29 @@ void User::LoginWithOtherPlatform(
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithOtherPlatformToken(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		FAccelByteUtilities::GetPlatformString(PlatformType),
-		PlatformToken,
-		THandler<FOauth2Token>::CreateLambda(
-			[this, PlatformType, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result);
-		}), FCustomErrorHandler::CreateLambda([this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-		{
-			FErrorOauthInfo ErrorOauthInfo;
-			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
-			if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
+	Oauth2::GetTokenWithOtherPlatformToken(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, FAccelByteUtilities::GetPlatformString(PlatformType)
+		, PlatformToken
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, PlatformType, OnSuccess](const FOauth2Token& Result)
 			{
-				FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
-			}
-			CredentialsRef.SetErrorOAuth(ErrorOauthInfo);
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-		}), bCreateHeadless);
+				OnLoginSuccess(OnSuccess, Result);
+			})
+		, FCustomErrorHandler::CreateLambda(
+			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				FErrorOauthInfo ErrorOauthInfo;
+				TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
+				if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
+				{
+					FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
+				}
+				CredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+			})
+		, bCreateHeadless);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -134,26 +139,29 @@ void User::LoginWithOtherPlatformId(
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithOtherPlatformToken(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		PlatformId,
-		PlatformToken,
-		THandler<FOauth2Token>::CreateLambda(
+	Oauth2::GetTokenWithOtherPlatformToken(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, PlatformId
+		, PlatformToken
+		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result);
-		}), FCustomErrorHandler::CreateLambda([this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-		{
-			FErrorOauthInfo ErrorOauthInfo;
-			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
-			if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
 			{
-				FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
-			}
-			CredentialsRef.SetErrorOAuth(ErrorOauthInfo);
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-		}), bCreateHeadless);
+				OnLoginSuccess(OnSuccess, Result);
+			})
+		, FCustomErrorHandler::CreateLambda(
+			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				FErrorOauthInfo ErrorOauthInfo;
+				TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
+				if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
+				{
+					FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
+				}
+				CredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+			})
+		, bCreateHeadless);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -167,24 +175,25 @@ void User::LoginWithUsername(
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
-		TEXT("When 2FA enabled This method should change to User::LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)"));
+		TEXT("When 2FA is enabled then this method should be changed to the method using FCustomErrorHandler"));
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithPasswordCredentials(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		Username,
-		Password,
-		THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler					
-		}),
-		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+	Oauth2::GetTokenWithPasswordCredentials(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, Username
+		, Password
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler					
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 	
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -199,21 +208,22 @@ void User::LoginWithUsername(
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
     	
-	Oauth2::GetTokenWithPasswordCredentials(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		Username,
-		Password,
-		THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+	Oauth2::GetTokenWithPasswordCredentials(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, Username
+		, Password
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler
 
-		}),
-		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-		}));
+			})
+		, FCustomErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+			}));
 	
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -232,20 +242,22 @@ void User::LoginWithUsernameV3(
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithPasswordCredentialsV3(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		Username,
-		Password,
-		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
-		}),
-		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}),
-		bRememberMe);
+	Oauth2::GetTokenWithPasswordCredentialsV3(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, Username
+		, Password
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			})
+		, bRememberMe);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -261,20 +273,22 @@ void User::LoginWithUsernameV3(
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithPasswordCredentialsV3(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		Username,
-		Password,
-		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
-		}),
-		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-		}),
-		bRememberMe);
+	Oauth2::GetTokenWithPasswordCredentialsV3(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, Username
+		, Password
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+			})
+		, FCustomErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+			})
+		, bRememberMe);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -285,17 +299,19 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithDeviceId(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
-		}),
-		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+	Oauth2::GetTokenWithDeviceId(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -305,21 +321,23 @@ void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByt
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyAndRememberNewDevice(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		MfaToken,
-		AuthFactorType,
-		Code,
-	THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
-		}),
-		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-		}),
-		bRememberDevice);
+	Oauth2::VerifyAndRememberNewDevice(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, MfaToken
+		, AuthFactorType
+		, Code
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+			})
+		, FCustomErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+			})
+		, bRememberDevice);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -332,19 +350,20 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithAuthorizationCode(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		AuthorizationCode,
-		SettingsRef.RedirectURI,
-		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler			
-		}),
-		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+	Oauth2::GetTokenWithAuthorizationCode(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, AuthorizationCode
+		, SettingsRef.RedirectURI
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler			
+			})
+		, FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -354,22 +373,24 @@ void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHand
 	LoginWithRefreshToken(CredentialsRef.GetRefreshToken(), OnSuccess, OnError);
 }
 
-void AccelByte::Api::User::LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void User::LoginWithRefreshToken(const FString& RefreshToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::GetTokenWithRefreshToken(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		RefreshToken,
-		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler
-		}),
-		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+	Oauth2::GetTokenWithRefreshToken(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, RefreshToken
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 }
 
 bool IsTokenExpired(FRefreshInfo RefreshInfo)
@@ -416,38 +437,41 @@ void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FC
 {
 	FReport::Log(FString(__FUNCTION__)); 
 	
-	Oauth2::CreateHeadlessAccountAndResponseToken(
-		SettingsRef.ClientId,
-		SettingsRef.ClientSecret, 
-		CredentialsRef.GetLinkingToken(),
-		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler
-		}),		
-		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-		})); 
+	Oauth2::CreateHeadlessAccountAndResponseToken(SettingsRef.IamServerUrl
+		, SettingsRef.ClientId
+		, SettingsRef.ClientSecret 
+		, CredentialsRef.GetLinkingToken()
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+			})	
+		, FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+			})); 
 }
 
 void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::AuthenticationWithPlatformLink(
-		SettingsRef.ClientId,
-		SettingsRef.ClientSecret,
-		Username,
-		Password,
-		CredentialsRef.GetLinkingToken(),
-		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result); // Curry to general handler
-		}),		
-		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-		}));
+	Oauth2::AuthenticationWithPlatformLink(SettingsRef.IamServerUrl
+		, SettingsRef.ClientId
+		, SettingsRef.ClientSecret
+		, Username
+		, Password
+		, CredentialsRef.GetLinkingToken()
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+			})		
+		, FCustomErrorHandler::CreateLambda(
+			[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+			}));
 }
 #pragma endregion /Login Methods
 	
@@ -510,16 +534,17 @@ void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::RevokeUserToken(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		CredentialsRef.GetAccessToken(),
-		FVoidHandler::CreateLambda([this, OnSuccess]() 
-		{
-			ForgetAllCredentials();
-			OnSuccess.ExecuteIfBound();
-		}),
-		OnError);
+	Oauth2::RevokeUserToken(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, CredentialsRef.GetAccessToken()
+		, FVoidHandler::CreateLambda(
+			[this, OnSuccess]() 
+			{
+				ForgetAllCredentials();
+				OnSuccess.ExecuteIfBound();
+			})
+		, OnError);
 }
 
 void User::ForgetAllCredentials()
@@ -1476,15 +1501,16 @@ void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnEr
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyToken(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		CredentialsRef.GetAccessToken(),
-		FVoidHandler::CreateLambda([this, OnSuccess]() 
-		{
-			OnSuccess.ExecuteIfBound();
-		}),
-		OnError);
+	Oauth2::VerifyToken(SettingsRef.IamServerUrl
+		, CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
+		, CredentialsRef.GetAccessToken()
+		, FVoidHandler::CreateLambda(
+			[this, OnSuccess]() 
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, OnError);
 }
 
 void User::GetUserInformation(const FString& UserId, const THandler<FGetUserInformationResponse>& OnSuccess, const FErrorHandler& OnError)
