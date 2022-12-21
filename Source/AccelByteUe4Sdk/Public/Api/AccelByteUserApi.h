@@ -662,6 +662,15 @@ namespace AccelByte
 			 */
 			void GetUserInformation(const FString& UserId, const THandler<FGetUserInformationResponse>& OnSuccess, const FErrorHandler& OnError);
 
+			/**
+			 * @brief This function for generating one time code.
+			 *
+			 * @param PlatformType Specify platform type that chosen by user to log in.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FGeneratedOneTimeCode.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void GenerateOneTimeCode(EAccelBytePlatformType PlatformType, const THandler<FGeneratedOneTimeCode>& OnSuccess, const FErrorHandler& OnError);
+			
 		private:
 			User() = delete;
 			User(User const&) = delete;

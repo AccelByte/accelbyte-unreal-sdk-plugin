@@ -481,6 +481,28 @@ public:
 	 */
 	static void VerifyToken(const FString& IamUrl, const FString& ClientId, const FString& ClientSecret, const FString& Token,
 					 const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Generate one time linking code. 
+	 * 
+	 * @param AccessToken user Access Token or rather, Session Id.
+	 * @param PlatformId The PlatformId. The platform ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void GenerateOneTimeCode(const FString& AccessToken, const FString& PlatformId, const THandler<FGeneratedOneTimeCode>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Generate one time linking code. 
+	 * 
+	 * @param IamUrl The IAM service URL used to call the API.
+	 * @param AccessToken user Access Token or rather, Session Id.
+	 * @param PlatformId The PlatformId. The platform ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void GenerateOneTimeCode(const FString& IamUrl, const FString& AccessToken, const FString& PlatformId, const THandler<FGeneratedOneTimeCode>& OnSuccess, const FErrorHandler& OnError);
+
 private:
 	Oauth2() = delete; // static class can't have instance
 	Oauth2(Oauth2 const&) = delete;

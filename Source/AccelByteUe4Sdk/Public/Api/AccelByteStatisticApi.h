@@ -128,6 +128,29 @@ public:
 	void BulkFetchStatItemsValue(const FString StatCode, const TArray<FString>& UserIds,  
 		const THandler<TArray<FAccelByteModelsStatItemValueResponse>>& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	* @brief Reset user's statitem value for a given namespace and user.
+	* User's statitem value will be reset to the default value defined in the statistic configuration.
+	*
+	* @param StatCode StatCode.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUpdateUserStatItemValueResponse.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void ResetUserStatItemValue(const FString& StatCode, const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError);
+
+#if !UE_BUILD_SHIPPING
+	/**
+	* @brief Bulk reset multiple user's statitems value.
+	* User's statitem value will be reset to the default value defined in the statistic configuration.
+	*
+	* @param UserStatItemValue Array of UserId and StatCode.
+	* @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUpdateUserStatItemsResponse>.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void BulkResetMultipleUserStatItemsValue(const TArray<FAccelByteModelsResetUserStatItemValue>& UserStatItemValue,
+			const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess, const FErrorHandler& OnError);
+#endif // !UE_BUILD_SHIPPING
+	
 private:
 	Statistic() = delete;
 	Statistic(Statistic const&) = delete;

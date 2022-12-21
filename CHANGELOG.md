@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [20.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.3.0%0D20.2.2) (2022-12-19)
+
+
+### Features
+
+* Account linking with one-time code ([131d8de](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/131d8de158645aa2c74b445c34e473217b165958))
+* Add new chat service APIs ([07335d4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/07335d44a286f46747987dd7b0ce9c573229509d))
+* BulkResetMultipleUserStatItemsValue to support OSS ([d542574](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d5425744e1ad13124b3683a78b5c0fce7bd1515b))
+* expose to support OSS, Reset stats from a specified user ([2098dcb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2098dcbf18e69a9eefb1b637fa10f71b6314f3e9))
+* **session:** add ENDED and UNKNOWN status in EAccelByteV2GameSessionDsStatus ([9afdd28](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9afdd280735451c1a23262f1c2221988e2b68b83))
+* **settings:** sanitize base url on load ([212f82d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/212f82d026ac6b21186407ba975c8e3e13ec6ed1))
+* **Utilities:** disable jwttoken for nintendo switch ([411564e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/411564e6023bf1ee2261662bf2437af0571634b4))
+
+
+### Bug Fixes
+
+* disable HeartBeat in DS ([9de6efd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9de6efdb03fd1d4ff4336c054667bcdb8d767027))
+* **heartbeat:** fix compile errors with FRegistry::HeartBeat on Linux ([fc0a0b6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fc0a0b62aa8417d8fdacdd26555c8c6023189305))
+* **session:** remove TextChat field from FAccelByteModelsV2GameSessionBaseRequest. ([69a602e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/69a602e490ea2e6cb204a0431338e8e8c022180a))
+
+
+### Documentations
+
+* add initial documentation files ([392531d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/392531d8fd1bdd9f15f6e094b27176a75a7ecb95))
+* implement script for automated build ([2e5a96a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2e5a96a611de81835c26b0eb7132e06cb92f1a42))
+
 ### [20.2.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.2.2%0D20.2.1) (2022-12-14)
 
 

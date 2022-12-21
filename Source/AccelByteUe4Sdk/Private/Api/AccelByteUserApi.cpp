@@ -1531,5 +1531,20 @@ void User::GetUserInformation(const FString& UserId, const THandler<FGetUserInfo
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType, const THandler<FGeneratedOneTimeCode>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__)); 
+
+	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType); 	
+	Oauth2::GenerateOneTimeCode(
+		CredentialsRef.GetAccessToken(),
+		PlatformString,
+		THandler<FGeneratedOneTimeCode>::CreateLambda([this, OnSuccess](const FGeneratedOneTimeCode& Result) 
+		{
+			OnSuccess.ExecuteIfBound(Result);
+		}),
+		OnError);
+}
+ 
 } // Namespace Api
 } // Namespace AccelByte

@@ -295,3 +295,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsStatItemValueResponse
 	FString UserId{};	 
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsResetUserStatItemValue
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | ResetUserStatItemValue")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | ResetUserStatItemValue")
+	FString StatCode{};
+};
+

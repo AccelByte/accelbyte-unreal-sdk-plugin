@@ -1,0 +1,3 @@
+[submodule "Doxygen/docs-builder"]
+	path = Doxygen/docs-builder
+	url = git@bitbucket.org:accelbyte/docs-builder.git

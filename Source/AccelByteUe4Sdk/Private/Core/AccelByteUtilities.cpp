@@ -12,6 +12,7 @@
 #include <memory>
 #include "Kismet/GameplayStatics.h"
 
+#if !PLATFORM_SWITCH
 // enclosing with namespace because of collision with Unreal types
 namespace openssl
 {
@@ -55,6 +56,7 @@ public:
 private:
 	EVP_MD_CTX* Context;
 };
+#endif
 
 
 int32 constexpr RS256_SIGNATURE_LENGTH = 342;
@@ -141,6 +143,7 @@ FJwt::FJwt(FString JwtString)
 
 EJwtResult FJwt::VerifyWith(FRsaPublicKey Key) const
 {
+#if !PLATFORM_SWITCH
 	if (!IsValid())
 	{
 		return EJwtResult::MalformedJwt;
@@ -213,8 +216,11 @@ EJwtResult FJwt::VerifyWith(FRsaPublicKey Key) const
 	{
 		return EJwtResult::SignatureMismatch;
 	}
-	
 	return EJwtResult::Ok;
+#else
+	FReport::Log(TEXT("VerifyWith is disabled on nintendo switch!"));
+	return EJwtResult::MalformedJwt;
+#endif
 }
 
 TSharedPtr<FJsonObject> const& FJwt::Header() const
@@ -237,7 +243,6 @@ bool FJwt::IsValid() const
 		&& PayloadJsonPtr != nullptr
 		&& JwtString.Len() - PayloadEnd - 1 == RS256_SIGNATURE_LENGTH;
 }
-
 
 void FAccelByteUtilities::RemoveEmptyStrings(TSharedPtr<FJsonObject> JsonPtr)
 {

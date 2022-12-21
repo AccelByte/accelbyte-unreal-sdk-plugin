@@ -62,6 +62,7 @@ public:
 protected:
 	void LoadSettings(const FString& SectionPath);
 	void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value);
+	void LoadBaseUrlFallback(const FString& SectionPath, FString& Value);
 };
 
 typedef TSharedRef<Settings, ESPMode::ThreadSafe> SettingsRef;

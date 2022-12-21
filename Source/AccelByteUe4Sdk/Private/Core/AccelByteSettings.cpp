@@ -4,6 +4,7 @@
 
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 
 using namespace AccelByte;
 
@@ -46,7 +47,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
 	}
 	LoadFallback(SectionPath, TEXT("Namespace"), Namespace);
-	LoadFallback(SectionPath, TEXT("BaseUrl"), BaseUrl);
+	LoadBaseUrlFallback(SectionPath, BaseUrl);
 	LoadFallback(SectionPath, TEXT("PublisherNamespace"), PublisherNamespace);
 	LoadFallback(SectionPath, TEXT("RedirectURI"), RedirectURI);
 
@@ -148,6 +149,26 @@ void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FStr
 	if (!GConfig->GetString(*SectionPath, *Key, Value, GEngineIni))
 	{
 		GConfig->GetString(*DefaultSection, *Key, Value, GEngineIni);
+	}
+}
+
+void Settings::LoadBaseUrlFallback(const FString& SectionPath, FString& Value)
+{
+	LoadFallback(*SectionPath, TEXT("BaseUrl"), Value);
+
+	FRegexPattern UrlRegex(TEXT("^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$"));
+	FRegexMatcher Matcher(UrlRegex, Value);
+
+	if(Matcher.FindNext())
+	{
+		while (Value.EndsWith(TEXT("/")))
+		{
+			Value.RemoveAt(Value.Len() - 1);
+		}
+	}
+	else
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Invalid Base URL: %s"), *Value);
 	}
 }
 

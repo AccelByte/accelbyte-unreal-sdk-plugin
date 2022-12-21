@@ -635,5 +635,32 @@ void Oauth2::VerifyToken(const FString& IamUrl
 		FPlatformTime::Seconds());
 }
 
+void Oauth2::GenerateOneTimeCode(const FString& AccessToken
+	, const FString& PlatformId
+	, const THandler<FGeneratedOneTimeCode>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	GenerateOneTimeCode(FRegistry::Settings.IamServerUrl, AccessToken, PlatformId, OnSuccess, OnError);
+}
+	
+void Oauth2::GenerateOneTimeCode(const FString& IamUrl
+	, const FString& AccessToken
+	, const FString& PlatformId
+	, const THandler<FGeneratedOneTimeCode>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb(TEXT("POST")); 
+	Request->SetURL(FString::Printf(TEXT("%s/v3/link/code/request"), *IamUrl));
+	Request->SetHeader(TEXT("Authorization"), TEXT("Bearer " + AccessToken));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetContentAsString(FString::Printf(TEXT("platformId=%s"), *PlatformId));
+	
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
+}
+
 } // Namespace Api
 } // Namespace AccelByte

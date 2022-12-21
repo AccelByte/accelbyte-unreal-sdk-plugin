@@ -1091,3 +1091,18 @@ struct ACCELBYTEUE4SDK_API FGetUserInformationResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
 	FString XboxUserId {};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FGeneratedOneTimeCode
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GeneratedOneTimeCode")
+	FString OneTimeLinkCode{}; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GeneratedOneTimeCode")
+	FString OneTimeLinkURL{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GeneratedOneTimeCode")
+	int32 Exp{}; 
+};
