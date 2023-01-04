@@ -19,9 +19,9 @@ namespace AccelByte
 {
 
 ServerCredentials::ServerCredentials()
-	: ClientAccessToken()
-	, ClientNamespace()
-	, ClientSessionState(ESessionState::Invalid)
+	: AccessToken()
+	, Namespace()
+	, UserId()
 {
 }
 
@@ -29,15 +29,8 @@ const FString ServerCredentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.
 
 void ServerCredentials::ForgetAll()
 {
-	ClientAccessToken = FString();
-
-	ClientSessionState = ESessionState::Invalid;
-}
-
-void ServerCredentials::SetClientCredentials(const FString& InClientId, const FString& InClientSecret)
-{
-	ClientId = InClientId;
-	ClientSecret = InClientSecret;
+	BaseCredentials::ForgetAll();
+	AccessToken = FString();
 }
 
 void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environment)
@@ -71,24 +64,14 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 	}
 }
 
-const FString& ServerCredentials::GetOAuthClientId() const
+void ServerCredentials::SetClientToken(const FString& InAccessToken, double ExpiresIn, const FString& InNamespace)
 {
-	return ClientId;
-}
+	AccessToken = InAccessToken;
+	ExpireTime = ExpiresIn;
+	ScheduleRefreshToken(ExpireTime);
+	Namespace = InNamespace;
 
-	const FString& ServerCredentials::GetOAuthClientSecret() const
-{
-	return ClientSecret;
-}
-
-void ServerCredentials::SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace)
-{
-	ClientAccessToken = AccessToken;
-	ClientExpireTime = ExpiresIn;
-	ScheduleRefreshToken(ClientExpireTime);
-	ClientNamespace = Namespace;
-
-	ClientSessionState = ESessionState::Valid;
+	SessionState = ESessionState::Valid;
 
 	if (!PollRefreshTokenHandle.IsValid()) {
 		PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
@@ -122,7 +105,7 @@ void ServerCredentials::RemoveFromTicker(FDelegateHandleAlias& handle)
 }
 void ServerCredentials::PollRefreshToken(double CurrentTime)
 {
-	switch (ClientSessionState)
+	switch (SessionState)
 	{
 		case ESessionState::Expired:
 		case ESessionState::Valid:
@@ -134,24 +117,24 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 					, THandler<FOauth2Token>::CreateLambda(
 						[this, CurrentTime](const FOauth2Token& Result)
 						{
-							ClientSessionState = ESessionState::Valid;
+							SessionState = ESessionState::Valid;
 							SetClientToken(Result.Access_token, Result.Expires_in, Result.Namespace);
 						})
 					, FErrorHandler::CreateLambda(
 						[&](int32 Code, const FString& Message) 
 						{ 
-							if (ClientRefreshBackoff <= 0.0)
+							if (RefreshBackoff <= 0.0)
 							{
-								ClientRefreshBackoff = 10.0;
+								RefreshBackoff = 10.0;
 							}
 
-							ClientRefreshBackoff *= 2.0;
-							ClientRefreshBackoff += FMath::FRandRange(1.0, 60.0);
-							ScheduleRefreshToken(ClientRefreshBackoff);
-							ClientSessionState = ESessionState::Expired; 
+							RefreshBackoff *= 2.0;
+							RefreshBackoff += FMath::FRandRange(1.0, 60.0);
+							ScheduleRefreshToken(RefreshBackoff);
+							SessionState = ESessionState::Expired;
 						}));
 
-				ClientSessionState = ESessionState::Refreshing;
+				SessionState = ESessionState::Refreshing;
 			}
 
 			break;
@@ -161,9 +144,9 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 	}
 }
 
-void ServerCredentials::ScheduleRefreshToken(double RefreshTime)
+void ServerCredentials::ScheduleRefreshToken(double NextRefreshTime)
 {
-	ClientRefreshTime = FPlatformTime::Seconds() + (RefreshTime * FMath::FRandRange(0.7, 0.9));;
+	RefreshTime = FPlatformTime::Seconds() + (NextRefreshTime * FMath::FRandRange(0.7, 0.9));;
 }
 
 void ServerCredentials::SetMatchId(const FString& GivenMatchId)
@@ -171,34 +154,45 @@ void ServerCredentials::SetMatchId(const FString& GivenMatchId)
 	MatchId = GivenMatchId;
 }
 
-ServerCredentials::ESessionState ServerCredentials::GetSessionState() const
-{
-	return ClientSessionState;
-}
 
 const FString& ServerCredentials::GetClientAccessToken() const
 {
-	return ClientAccessToken;
+	return GetAccessToken();
+}
+
+const FString& ServerCredentials::GetAccessToken() const
+{
+	return AccessToken;
 }
 
 const FString& ServerCredentials::GetClientNamespace() const
 {
-	return ClientNamespace;
+	return GetNamespace();
+}
+
+const FString& ServerCredentials::GetNamespace() const
+{
+	return Namespace;
 }
 
 const double ServerCredentials::GetExpireTime() const
 {
-	return ClientExpireTime;
+	return ExpireTime;
 }
 
 const double ServerCredentials::GetRefreshTime() const
 {
-	return ClientRefreshTime;
+	return RefreshTime;
 }
 
 const FString& ServerCredentials::GetMatchId() const
 {
 	return MatchId;
+}
+
+const FString& ServerCredentials::GetUserId() const
+{
+	return UserId;
 }
 
 } // Namespace AccelByte

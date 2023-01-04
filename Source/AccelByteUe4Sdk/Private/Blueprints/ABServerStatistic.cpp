@@ -111,3 +111,22 @@ void UABServerStatistic::IncrementUserStatItems(
 				OnError.ExecuteIfBound(Code, Message);
 			}));
 }
+
+void UABServerStatistic::GetGlobalStatItemsByStatCode(
+	FString const& StatCode, 
+	FDGlobalStatItemDelegate OnSuccess, 
+	FDErrorHandler OnError)
+{
+	ApiClientPtr->ServerStatistic.GetGlobalStatItemsByStatCode(
+		StatCode,
+		THandler<FAccelByteModelsGlobalStatItemValueResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsGlobalStatItemValueResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}

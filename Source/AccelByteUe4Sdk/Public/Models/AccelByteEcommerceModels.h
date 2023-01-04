@@ -2244,3 +2244,90 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemPagingSlicedResultV2
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemPagingSlicedResult")
 	FAccelByteModelsPaging Paging {};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSectionInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FString Title{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FString Description{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FString LongDescription{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FString SectionId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FString ViewId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	bool Active{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FDateTime StartDate{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FDateTime EndDate{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	TArray<FAccelByteModelsItemInfo> CurrentRotationItems{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FDateTime CurrentRotationExpireAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	FJsonObjectWrapper LocalExt{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsViewInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FString Title{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FString Description{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FString LongDescription{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FString ViewId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	int32 DisplayOrder{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
+	FJsonObjectWrapper LocalExt{};
+};

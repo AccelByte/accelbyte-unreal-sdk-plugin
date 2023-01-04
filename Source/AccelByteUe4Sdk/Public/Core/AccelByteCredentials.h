@@ -4,12 +4,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core/AccelByteBaseCredentials.h"
 #include "Models/AccelByteOauth2Models.h"
-#include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteEnvironment.h"
-#include "Core/AccelByteDefines.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteCredentials.generated.h"
 
@@ -22,77 +19,54 @@ class FHttpRetryScheduler;
 /**
  * @brief Singleston class for storing credentials.
  */
-class ACCELBYTEUE4SDK_API Credentials
+class ACCELBYTEUE4SDK_API Credentials : public BaseCredentials
 {
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoginSuccessDelegate, const FOauth2Token& /*Response*/);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshTokenAdditionalActions, bool);
 	DECLARE_EVENT_OneParam(Credentials, FTokenRefreshedEvent, bool);
 
 public:
-	enum class ESessionState
-	{
-		Invalid,
-		Expired,
-		Refreshing,
-		Valid,
-	};
+	using BaseCredentials::SetClientCredentials;
 
-public:
 	Credentials();
-	~Credentials();
+	virtual ~Credentials();
 
 	/** @brief The user was just authed: At this point, Credential auth tokens are already set. */
 	FOnLoginSuccessDelegate& OnLoginSuccess();
 	
 	/** @brief Forgets post-auth info, but pre-auth (such as setting email) will remain. */
-	void ForgetAll();
-	void SetClientCredentials(const FString& InClientId, const FString& InClientSecret);
-	void SetClientCredentials(const ESettingsEnvironment Environment);
+	virtual void ForgetAll() override;
+	virtual void SetClientCredentials(const ESettingsEnvironment Environment) override;
 	void SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime);
 	void SetUserEmailAddress(const FString& EmailAddress);
-	void PollRefreshToken(double CurrentTime);
-	void ScheduleRefreshToken(double NextRefreshTime);
+	virtual void PollRefreshToken(double CurrentTime) override;
+	virtual void ScheduleRefreshToken(double NextRefreshTime) override;
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
 	void SetErrorOAuth(const FErrorOauthInfo ErrorOAuthInfo);
 	void SetAccountUserData(const FAccountUserData& InAccountUserData);
 	
 	FTokenRefreshedEvent& OnTokenRefreshed();
 
-	const FString& GetOAuthClientId() const;
-	const FString& GetOAuthClientSecret() const;
-
 	const FOauth2Token& GetAuthToken() const;
 	const FString& GetRefreshToken() const;
-	const FString& GetAccessToken() const;
-	const FString& GetUserId() const;
+	virtual const FString& GetAccessToken() const override;
+	virtual const FString& GetUserId() const override;
 	const FString& GetPlatformUserId() const;
 	const FString& GetUserDisplayName() const;
-	const FString& GetNamespace() const;
+	virtual const FString& GetNamespace() const override;
 	const FString& GetUserEmailAddress() const;
 	const FString& GetLinkingToken() const;
 	const FAccountUserData& GetAccountUserData() const;
 	
-	ESessionState GetSessionState() const;
 	bool IsSessionValid() const;
 	bool IsComply() const;
 
-	void Startup();
-	void Shutdown();
+	virtual void Startup() override;
+	virtual void Shutdown() override;
 
 private:
-	FString ClientId;
-	FString ClientSecret;
 	FOauth2Token AuthToken;
-	FErrorOauthInfo ErrorOAuth; 
 	
-	double UserSessionExpire;
-	ESessionState UserSessionState;
-
-	double UserRefreshTime;
-	double UserExpiredTime;
-	double UserRefreshBackoff;
-
-	FDelegateHandleAlias PollRefreshTokenHandle;
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FTokenRefreshedEvent TokenRefreshedEvent;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;

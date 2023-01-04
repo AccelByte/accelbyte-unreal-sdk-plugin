@@ -50,6 +50,7 @@ namespace Api
 	class Session;
 	class MatchmakingV2;
 	class HeartBeat;
+	class StoreDisplay;
 }
 
 namespace GameServerApi
@@ -113,6 +114,7 @@ public:
 	static Api::Session Session;
 	static Api::MatchmakingV2 MatchmakingV2;
 	static Api::HeartBeat HeartBeat;
+	static Api::StoreDisplay StoreDisplay;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;

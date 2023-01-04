@@ -157,6 +157,17 @@ public:
 	*/ 				
 	void DeleteUserStatItems(const FString& UserId, const FString& StatCode, const FString& AdditionalKey,
 		const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Get global stat items by specifying statCodes.
+	*
+	* @param StatCode The StatCode of the global stat items
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsGlobalStatItemValueResponse.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetGlobalStatItemsByStatCode(const FString& StatCode, const THandler<FAccelByteModelsGlobalStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError);
+
+
 private:
 	ServerStatistic() = delete;
 	ServerStatistic(ServerStatistic const&) = delete;

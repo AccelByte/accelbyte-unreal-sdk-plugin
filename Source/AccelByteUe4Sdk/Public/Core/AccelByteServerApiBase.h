@@ -6,6 +6,7 @@
 
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteServerSettings.h"
+#include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 
 using namespace AccelByte;
@@ -24,6 +25,7 @@ protected:
 	ServerCredentials const& ServerCredentialsRef;
 	ServerSettings const& ServerSettingsRef;
 	FHttpRetryScheduler& HttpRef;
+	FHttpClient HttpClient;
 };
 
 }

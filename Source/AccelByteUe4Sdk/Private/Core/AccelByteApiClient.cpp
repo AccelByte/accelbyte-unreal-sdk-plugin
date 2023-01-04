@@ -33,15 +33,24 @@ FApiClient::~FApiClient()
 	
 	if (!bUseSharedCredentials)
 	{
-		FFunctionGraphTask::CreateAndDispatchWhenReady(
-			[Credentials=CredentialsRef, HttpScheduler=HttpRef]()
-			{
-				Credentials->Shutdown();
-				HttpScheduler->Shutdown();
-			}
-			, TStatId()
-			, nullptr
-			, ENamedThreads::GameThread);
+		const bool bShouldExecuteImmediately = IsInGameThread() || !FTaskGraphInterface::IsRunning();
+		if (bShouldExecuteImmediately)
+		{
+			CredentialsRef->Shutdown();
+			HttpRef->Shutdown();
+		}
+		else
+		{
+			FFunctionGraphTask::CreateAndDispatchWhenReady(
+				[Credentials = CredentialsRef, HttpScheduler = HttpRef]()
+				{
+					Credentials->Shutdown();
+			HttpScheduler->Shutdown();
+				}
+				, TStatId()
+					, nullptr
+					, ENamedThreads::GameThread);
+		}
 	}
 }
 

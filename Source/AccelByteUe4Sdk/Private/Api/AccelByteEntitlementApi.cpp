@@ -33,7 +33,6 @@ void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString 
 
 	TArray<FString> ItemIdsArray = { ItemId };
 	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType, Features);
-
 }
 
 void Entitlement::QueryUserEntitlements(
@@ -47,13 +46,41 @@ void Entitlement::QueryUserEntitlements(
 { 
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
- 	
- 	TMap<FString, FString> QueryParams = {
-		{ TEXT("entitlementName"), EntitlementName },
-		{ TEXT("itemId"), FString::Join(ItemIds, TEXT("&itemId=")) },
-		{ TEXT("features"), FString::Join(Features, TEXT("&features=")) }
-	};
+	TArray<FString> TempItemIds;
+
+	for (const auto& ItemId : ItemIds)
+	{
+		if (!ItemId.IsEmpty())
+		{
+			TempItemIds.Add(FGenericPlatformHttp::UrlEncode(ItemId));
+		}
+	}
+
+	TArray<FString> TempFeatures;
+	for (const auto& Feature : Features)
+	{
+		if (!Feature.IsEmpty())
+		{
+			TempFeatures.Add(FGenericPlatformHttp::UrlEncode(Feature));
+		}
+	}
+	
+	TMap<FString, FString> QueryParams;
+
+	if (!EntitlementName.IsEmpty())
+	{
+		QueryParams.Add( TEXT("entitlementName"), FGenericPlatformHttp::UrlEncode(EntitlementName));
+	}
+
+	if (TempItemIds.Num() > 0)
+	{
+		QueryParams.Add(TEXT("itemId"), FString::Join(TempItemIds, TEXT("&itemId=")));
+	}
+
+	if (TempFeatures.Num() > 0)
+	{
+		QueryParams.Add(TEXT("features"), FString::Join(TempFeatures, TEXT("&features=")));
+	}
 	
 	if (Offset > 0)
 	{
@@ -67,15 +94,27 @@ void Entitlement::QueryUserEntitlements(
 	
 	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
 	{
-		QueryParams.Add(TEXT("entitlementClazz"), FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass));
+		QueryParams.Add(TEXT("entitlementClazz"),FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass)));
 	}
 	
 	if (AppType != EAccelByteAppType::NONE)
 	{
-		QueryParams.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(AppType));
+		QueryParams.Add(TEXT("appType"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(AppType)));
 	}
 	
-	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements?%s")
+			, *SettingsRef.PlatformServerUrl
+			, *CredentialsRef.GetNamespace()
+			, *CredentialsRef.GetUserId()
+			, *FString::JoinBy(QueryParams
+				, TEXT("&")
+				, [](const TTuple<FString, FString>& Element)
+				{
+					return FString::Printf(TEXT("%s=%s"), *Element.Key, *Element.Value);
+				})
+		);
+	
+	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
 }
 
 void Entitlement::GetUserEntitlementById(FString const& Entitlementid, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError)

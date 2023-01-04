@@ -4,49 +4,27 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
-#include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteBaseSettings.h"
 #include "AccelByteServerSettings.generated.h"
 
 namespace AccelByte
 {
 
-class ACCELBYTEUE4SDK_API ServerSettings
+class ACCELBYTEUE4SDK_API ServerSettings : public BaseSettings
 {
 public:
-	FString ClientId{};
-	FString ClientSecret{};
-	FString Namespace{};
-	FString PublisherNamespace{};
-    FString RedirectURI{};
-	FString BaseUrl{};
-	FString IamServerUrl{};
 	FString DSMControllerServerUrl{};
-	FString StatisticServerUrl{};
-	FString PlatformServerUrl{};
-	FString QosManagerServerUrl{};
-	FString GameTelemetryServerUrl{};
-	FString AchievementServerUrl{};
 	FString MatchmakingServerUrl{};
-	FString LobbyServerUrl{};
 	FString ChatServerUrl{};
-	FString CloudSaveServerUrl{};
-	FString SeasonPassServerUrl{};
-	FString SessionBrowserServerUrl{};
-	FString SessionServerUrl{};
 	FString DSHubServerUrl{};
-	FString MatchmakingV2ServerUrl{};
 
-	float QosPingTimeout{.6f};
-
-	void Reset(ESettingsEnvironment const Environment);
+	virtual void Reset(ESettingsEnvironment const Environment) override;
 
 	ServerSettings& operator=(ServerSettings const& Other) = default;
 
 protected:
-	void LoadSettings(const FString& SectionPath);
-	void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value);
+	virtual void LoadSettings(const FString& SectionPath) override;
+	virtual void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value) override;
 };
 
 typedef TSharedRef<ServerSettings, ESPMode::ThreadSafe> ServerSettingsRef;

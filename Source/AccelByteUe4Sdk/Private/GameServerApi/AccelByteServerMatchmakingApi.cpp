@@ -153,6 +153,27 @@ void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName, const 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void ServerMatchmaking::RebalanceMatchmakingBasedOnMMR(const FString& MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/rebalance"), *SettingsRef.MatchmakingServerUrl, *CredentialsRef.GetClientNamespace());
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *MatchId);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Contents);
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void ServerMatchmaking::ActivateSessionStatusPolling(const FString& MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError, uint32 IntervalSec)
 {
 	if (!bStatusPollingActive)

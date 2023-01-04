@@ -4,11 +4,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Models/AccelByteOauth2Models.h"
-#include "Core/AccelByteEnvironment.h"
-#include "Core/AccelByteDefines.h"
-#include "Containers/Ticker.h"
+#include "Core/AccelByteBaseCredentials.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteServerCredentials.generated.h"
 
@@ -18,60 +14,41 @@ namespace AccelByte
 /**
  * @brief Singleston class for storing server credentials.
  */
-class ACCELBYTEUE4SDK_API ServerCredentials
+class ACCELBYTEUE4SDK_API ServerCredentials : public BaseCredentials
 {
 public:
-	enum class ESessionState
-	{
-		Invalid,
-		Expired,
-		Refreshing,
-		Valid,
-	};
+	using BaseCredentials::SetClientCredentials;
 
-public:
 	ServerCredentials();
 
-	void ForgetAll();
-	void SetClientCredentials(const FString& InClientId, const FString& InClientSecret);
-	void SetClientCredentials(const ESettingsEnvironment Environment);
+	virtual void ForgetAll() override;
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
-	void ScheduleRefreshToken(double RefreshTime);
 	void SetMatchId(const FString& GivenMatchId);
 
-	void Startup();
-	void Shutdown();
-	void PollRefreshToken(double CurrentTime);
+	virtual void SetClientCredentials(const ESettingsEnvironment Environment) override;
+	virtual void ScheduleRefreshToken(double RefreshTime) override;
+	virtual void PollRefreshToken(double CurrentTime) override;
 
-	const FString& GetOAuthClientId() const;
-	const FString& GetOAuthClientSecret() const;
-	
-	/**
-	 * @brief Get access token expiration in UTC.
-	 */
+	virtual void Startup() override;
+	virtual void Shutdown() override;
+
 	const FString& GetClientAccessToken() const;
+	virtual const FString& GetAccessToken() const override;
 	const FString& GetClientNamespace() const;
+	virtual const FString& GetNamespace() const override;
 	const double GetExpireTime() const;
 	const double GetRefreshTime() const;
 	const FString& GetMatchId() const;
-	ESessionState GetSessionState() const;
+	virtual const FString& GetUserId() const override;
 
 private:
-	FString ClientId;
-	FString ClientSecret;
-	FString ClientAccessToken;
-	FString ClientNamespace;
-
-	double ClientExpireTime;
-	double ClientRefreshTime;
-	double ClientRefreshBackoff;
-
+	FString AccessToken;
+	FString Namespace;
 	FString MatchId;
+	FString UserId;
 	
-	ESessionState ClientSessionState;
 	static const FString DefaultSection;
 
-	FDelegateHandleAlias PollRefreshTokenHandle;
 	void RemoveFromTicker(FDelegateHandleAlias& handle);
 };
 

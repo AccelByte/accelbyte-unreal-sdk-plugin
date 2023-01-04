@@ -13,6 +13,7 @@ FServerApiBase::FServerApiBase( ServerCredentials const& InCredentialsRef
 	: ServerCredentialsRef{InCredentialsRef}
 	, ServerSettingsRef{InSettingsRef}
 	, HttpRef{InHttpRef}
+	, HttpClient(InCredentialsRef, InSettingsRef, InHttpRef)
 {
 }
 

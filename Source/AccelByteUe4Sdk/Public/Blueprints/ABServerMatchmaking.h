@@ -40,6 +40,9 @@ public:
 	void QuerySessionStatus(FString const& MatchId, FDMatchmakingResultDelegate OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
+	void RebalanceMatchmakingBasedOnMMR(FString const& MatchId, FDMatchmakingResultDelegate OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
 	void ActivateSessionStatusPolling(FString const& MatchId, int IntervalSec, FDMatchmakingResultDelegate OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")

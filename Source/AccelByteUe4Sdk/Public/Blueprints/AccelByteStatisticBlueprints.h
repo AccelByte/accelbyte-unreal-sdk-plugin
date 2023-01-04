@@ -31,5 +31,10 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FBulkAddUserStatItemValueSuccess, const TArray<FAccelByteModelsBulkStatItemOperationResult>&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 		static void IncrementUserStatItems(const TArray<FAccelByteModelsBulkStatItemInc>& Data, const FBulkAddUserStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGlobalStatItemDelegate, const FAccelByteModelsGlobalStatItemValueResponse&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
+		static void GetGlobalStatItemsByStatCode(const FString& StatCode, const FGlobalStatItemDelegate& OnSuccess, const FBlueprintErrorHandler& OnError);
+
 };
 

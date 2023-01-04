@@ -39,6 +39,7 @@
 #include "Api/AccelByteSessionApi.h"
 #include "Api/AccelByteMatchmakingV2Api.h"
 #include "Core/AccelByteApiBase.h"
+#include "Api/AccelByteStoreDisplayApi.h"
 
 using namespace AccelByte;
 namespace AccelByte
@@ -86,6 +87,7 @@ public:
 	Api::TurnManager TurnManager{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Session Session{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::MatchmakingV2 MatchmakingV2{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::StoreDisplay StoreDisplay{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)

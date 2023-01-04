@@ -104,3 +104,25 @@ void UABStatistic::IncrementUserStatItems(
 		)
 	);
 }
+
+void UABStatistic::GetGlobalStatItemsByStatCode(
+	FString const& StatCode,
+	FDModelsGlobalStatItemDelegate const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->Statistic.GetGlobalStatItemsByStatCode(
+		StatCode,
+		THandler<FAccelByteModelsGlobalStatItemValueResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsGlobalStatItemValueResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}

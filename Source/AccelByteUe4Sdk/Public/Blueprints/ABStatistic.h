@@ -27,6 +27,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserStatItemPagingSlicedResultResponse
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayModelsBulkStatItemOperationResultResponse, FArrayModelsBulkStatItemOperationResultResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGlobalStatItemDelegate, FAccelByteModelsGlobalStatItemValueResponse, Response);
+
 #pragma endregion
 
 UCLASS(Blueprintable, BlueprintType)
@@ -64,6 +66,13 @@ public:
 		FDArrayModelsBulkStatItemOperationResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
+	void GetGlobalStatItemsByStatCode(
+		FString const& StatCode, 
+		FDModelsGlobalStatItemDelegate const& OnSuccess,
+		FDErrorHandler const& OnError);
+
 
 private:
 	FApiClientPtr ApiClientPtr;

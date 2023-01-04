@@ -87,6 +87,15 @@ public:
 	void QuerySessionStatus(const FString MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError);
 
 	/*
+	 * @brief Rebalance matchmaking based on MMR
+	 *
+	 * @param MatchId The match/session ID.
+	 * @param OnSuccess This will be called when the operation succeeded. Will return model FAccelByteModelsMatchmakingResult.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void RebalanceMatchmakingBasedOnMMR(const FString& MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError);
+
+	/*
 	 * @brief Activate session data polling in a certain time interval.
 	 *
 	 * @param MatchId The match/session ID.

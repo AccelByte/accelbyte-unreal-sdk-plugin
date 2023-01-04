@@ -64,21 +64,23 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void Statistic::GetAllUserStatItems(const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+	void Statistic::GetAllUserStatItems(const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError, int32 Limit, int32 Offset)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		Statistic::GetUserStatItems({}, {}, OnSuccess, OnError);
+		Statistic::GetUserStatItems({}, {}, OnSuccess, OnError, Limit, Offset);
 	}
 
-	void Statistic::GetUserStatItems(const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError)
+	void Statistic::GetUserStatItems(const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError,
+		int32 Limit, int32 Offset)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		Statistic::GetUserStatItems(CredentialsRef.GetUserId(), StatCodes, Tags, OnSuccess, OnError);
+		Statistic::GetUserStatItems(CredentialsRef.GetUserId(), StatCodes, Tags, OnSuccess, OnError, Limit, Offset);
 	}
 
-	void Statistic::GetUserStatItems(const FString& UserId, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+	void Statistic::GetUserStatItems(const FString& UserId, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError,
+		int32 Limit, int32 Offset)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -89,33 +91,13 @@ namespace Api
 		FString Accept = TEXT("application/json");
 		FString Content;
 
-		bool bIsBeginning = true;
-
-		if (StatCodes.Num() > 0)
-		{
-			if (bIsBeginning)
-			{
-				Url.Append(TEXT("?"));
-				bIsBeginning = false;
-			}
-			Url.Append(TEXT("statCodes="));
-			Url.Append(FGenericPlatformHttp::UrlEncode(FString::Join(StatCodes, TEXT(","))));
-		}
-
-		if (Tags.Num() > 0)
-		{
-			if (bIsBeginning)
-			{
-				Url.Append(TEXT("?"));
-				bIsBeginning = false;
-			}
-			else
-			{
-				Url.Append(TEXT("&"));
-			}
-			Url.Append(TEXT("tags="));
-			Url.Append(FGenericPlatformHttp::UrlEncode(FString::Join(Tags, TEXT(","))));
-		}
+		FString QueryParams = FAccelByteUtilities::CreateQueryParams({ 
+                { TEXT("statCodes"), FString::Join(StatCodes, TEXT(",")) },
+				{ TEXT("tags"), 	FString::Join(Tags, TEXT(",")) }, 
+				{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
+				{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
+			});
+		Url.Append(QueryParams); 
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
@@ -291,6 +273,33 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Contents);
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	void Statistic::GetGlobalStatItemsByStatCode(const FString& StatCode, const THandler<FAccelByteModelsGlobalStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		if (StatCode.IsEmpty())
+		{
+			OnError.ExecuteIfBound(404, TEXT("Url is invalid. StatCode is empty."));
+			return;
+		}
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/globalstatitems/%s"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *StatCode);
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Content;
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 

@@ -18,7 +18,8 @@ enum class EAvailability : uint8
 	Offline = 0,
 	Online = 1,
 	Busy = 2,
-	Invisible = 3
+	Invisible = 3,
+	Away = 4
 };
 
 /** @brief Matchmaking v2 notification topics enums. */
@@ -1121,6 +1122,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUserStatusNotif
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
 	int32 Offline{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
+	int32 Away{};
 };
 
 // ------------------------------------------------------------------------------------------------

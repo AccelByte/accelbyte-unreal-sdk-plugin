@@ -2,6 +2,84 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [20.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.4.0%0D20.3.0) (2023-01-03)
+
+
+### Features
+
+* add handler for unidentified enum values in Json ([0ebfc58](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0ebfc583a19da5c16e88fc41e886bf9b8150a429))
+* add userId to addToTopic and removeFromTopic event ([82cfecf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/82cfecfee20da0c0e87e55c4f0534d9ee387d6b9))
+* ecommerce display & section (Rotation Shop Items) ([57c6ccc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/57c6ccc3a5c63522c579c995e6d91f83dc9bf484))
+* facilitate pagination param (offset and limit) for GetAllUserStatItems ([830fbf6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/830fbf650d009f38977818ae35ec346a5ea16472))
+* **lobby:** add away availability in lobby presence ([efa9833](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/efa9833ad92d64824b292bcef71f2c899316369c))
+* **lobby:** use custom json object string converter to handle unidentified enum ([7107ec9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7107ec9f28a1127d2c0c36d1c759e4209ea4d3b3))
+* **matchmaking:** implement MMR Rebalance endpoint in server matchmaking ([5bc95de](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5bc95de3260f5af271c7eee1818950380f6b7517))
+* **Statistic:** Add get globalstatitembystatcode ([35c6f9d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/35c6f9dacd14f4e76f69d36ad9f8f5f34ef8b0fb))
+* **Statistic:** Add new struct for globalstat ([f96e942](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f96e942dca343babf5ffcf0ade792b6801a49338))
+* **storage:** specify log directory as data storage destination for non-windows platform ([9c63703](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9c63703f3402e18e63dc30c876d1f033a7ef106f))
+* **utilities:** bring back and add advance query ([b765f62](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b765f6247830eeaa62c1e7a905e94398a2bbf252))
+* **utilities:** bring back and add advance query ([91b043b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/91b043b6b6b636593049b8e20e40bee1f5c2db10))
+* **utilities:** bring back and add advance query ([20b88e7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/20b88e73b349d3865e4d5505ccc01dbb69383639))
+* **utilities:** bring back and add advance query ([fa89ac6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fa89ac66064f40a8fdd72954aab5eb52e8ff7e65))
+* **utilities:** bring back and add advance query ([42c30cf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/42c30cf898c7491fb200d842d7de6c5277ac9b25))
+* **utilities:** bring back and add advance query ([15d277c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/15d277cbb27919c149b8d440e917373e56c77599))
+* **utilities:** bring back and add advance query ([fcebfb8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fcebfb846c50704e8c486cadbb63091cac5523ab))
+* **utilities:** bring back and add advance query ([133befd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/133befd0319daf9fc6025b05cc47657bf88ea3fd))
+* validate HTTP responses when expecting JSON ([6d6b207](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6d6b2078aca9a55b6e7299e54e64d0438b977f46))
+
+
+### Bug Fixes
+
+* **advanced query:** change data type to receive different data type ([1ba7fd4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1ba7fd4719b2a45e19c6ace64782bb2d1f3f5dcf))
+* **advanced query:** change data type to receive different data type ([b44d955](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b44d9550f598a789e09d30dc84ba67571bf9f76e))
+* **advanced query:** change data type to receive different data type ([314bca9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/314bca935a41445ffa01304e576b114f58bdbdc0))
+* **advanced query:** change data type to receive different data type ([8fdf78f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8fdf78fb8c57f1cc783acffb6082eef36464815e))
+* **advanced query:** change data type to receive different data type ([cf9f05d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cf9f05d5f13d2e1ba0da47f7fde881503fbe2e1b))
+* **advanced query:** change data type to receive different data type ([91bba7c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/91bba7c8bc88769474aaf3b6820b4efc6ac2d52a))
+* **advanced query:** change data type to receive different data type ([b85534a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b85534ac1f27ace434b831cada95a8399bf79760))
+* **advanced query:** change data type to receive different data type ([079308e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/079308e4731251d49d9733644c11ecccb9743afe))
+* **advanced query:** change error log to warning ([8246505](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8246505dd1e4093bf62750e07a160496674365a4))
+* **advanced query:** change error log to warning ([4bba2df](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4bba2df962ead37738365d0dbbb775b8827f05bb))
+* **advanced query:** change error log to warning ([fd04cd1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fd04cd116ce033fd580f109af68fedb97e0d69cb))
+* **advanced query:** change function name and change 'And' and 'Or' functions to return bool ([1817a99](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1817a9998a5410ccdcc8dbae25f1d86e9bdee6e3))
+* **advanced query:** change function name and change 'And' and 'Or' functions to return bool ([c5d2710](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c5d2710a8d1eb26a43dcac292edac11a32554f4c))
+* **advanced query:** change function name and change 'And' and 'Or' functions to return bool ([f46f32c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f46f32c1cfeaa5fe3c908eeb6b877f0854373126))
+* **advanced query:** change function name and change 'And' and 'Or' functions to return bool ([2cfe9aa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2cfe9aad4dd231f94e3e78e98e33b8ac1217dc9e))
+* **advanced query:** change function name and change 'And' and 'Or' functions to return bool ([930b24b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/930b24b609d65e542e30672a41e17743688043b5))
+* **advanced query:** change function name and change 'And' and 'Or' functions to return bool ([883ae03](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/883ae03b68d55b5ecbb89b42848dc7280c22f439))
+* **advanced query:** change implementation flow and move it to new files ([ae9155e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ae9155ea856f43fbc740891466108a3ff3097a87))
+* **advanced query:** change implementation flow and move it to new files ([0768ccd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0768ccd5fe66518255f927bd63ee1a8ccbcc7ddc))
+* **advanced query:** change implementation flow and move it to new files ([f3b06bf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f3b06bfbfa288c89999bc4a4751e7dce96eb04ad))
+* **advanced query:** change implementation flow and move it to new files ([5385469](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5385469e466ccda182b384f4468e443800a73f70))
+* **advanced query:** change implementation flow and move it to new files ([e71a2a1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e71a2a111fdbfc77621d98ec372d224abab0c97e))
+* **advanced query:** change implementation flow and move it to new files ([7da7863](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7da7863ec7e93ba85789ce10ca7b9a3172f8fe85))
+* **advanced query:** change implementation flow and move it to new files ([18822c4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/18822c4e840cc64a854fc09c0ff1551eb00b43a3))
+* **advanced query:** change implementation flow and move it to new files ([3c1400a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3c1400a331f2f90c7a07ed2a21f2bbd20218c0d2))
+* **advanced query:** change start function using sharedRef ([fd4b1cb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fd4b1cb7636bc681b86a48273dc63d0c752789e9))
+* **advanced query:** change start function using sharedRef ([4eaedc0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4eaedc06c6a738fc8dfb6887951df05aa4493b6e))
+* **advanced query:** change start function using sharedRef ([d84d6bd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d84d6bd55b13485eb3c6700c109da3f6c1ab7470))
+* **advanced query:** change start function using sharedRef ([9c94b77](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9c94b77526951bc6d9f2be8eb59b542ae7ab1356))
+* **advanced query:** change start function using sharedRef ([14c7277](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/14c72775e998290993320b67cbbd196277f803df))
+* **advanced query:** change start function using sharedRef ([c0266f6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c0266f67a3de103552ecf14d913ab19a06474bdd))
+* **advanced query:** change start function using sharedRef ([1462648](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1462648217f2a6bd4972246ab6525eea7e05e6cf))
+* **advanced query:** change start function using sharedRef ([74bcdb1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/74bcdb1b83215642ba523c07237ceffc075e2164))
+* **advanced query:** clean up after rebasing from master ([4114d9f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4114d9f727e918bcafedd24441f8ec43c6c102ad))
+* **advanced query:** clean up after rebasing from master ([20afff7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/20afff7df298ab9fefe2f889d72be538e02e5398))
+* **advanced query:** clean up after rebasing from master ([319d005](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/319d005434e67aa96c90170bccc511e98e1c96e4))
+* **advanced query:** clean up after rebasing from master ([44cb514](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/44cb514541b43647647a1a25679a54f9090a95a3))
+* **advanced query:** clean up after rebasing from master ([0990868](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/09908687170193f656a9dc686549ea32b537012e))
+* **advanced query:** rebasing from master again ([3dffe76](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3dffe76986b51a9f28f44f40d3b6b70b3da6add0))
+* **crash:** fix crash on shutdown due to task graph and tickers being destroyed ([e87d52b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e87d52b3303f4bddd2f1191222106098b161992a))
+* **entitlement:** unable to query user entitlements with multiple itemIds ([0361039](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/036103960cb7b148bff0f9e383fd31c9f46f92f4))
+* **heartbeat:** fix compile errors with FRegistry::HeartBeat on Linux ([a0e260a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a0e260a703b13ae88ea4be56aca03e38b69aed30))
+* remove unused namespace declare ([b4d7afe](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b4d7afe958e7e5e28fa02b8f3a5baebcf478ccb5))
+* **Statistic:** Initialize FDateTime With 0 ([91d9767](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/91d9767458b37e7f73e4229aac38f3803dacaeea))
+
+
+### Refactors
+
+* **Statistic:** Change variable name ([5a99d59](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5a99d59416105f1f5be190ece28fbb52a2581af3))
+
 ## [20.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.3.0%0D20.2.2) (2022-12-19)
 
 

@@ -330,6 +330,33 @@ void ServerStatistic::DeleteUserStatItems(const FString& UserId, const FString& 
 	Request->SetContentAsString(Content);
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void ServerStatistic::GetGlobalStatItemsByStatCode(const FString& StatCode, const THandler<FAccelByteModelsGlobalStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (StatCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(404, TEXT("Url is invalid. StatCode is empty."));
+		return;
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/globalstatitems/%s"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetClientNamespace(), *StatCode);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
 	
 } // Namespace Api
 } // Namespace AccelByte

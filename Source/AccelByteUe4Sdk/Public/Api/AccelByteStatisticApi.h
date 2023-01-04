@@ -34,6 +34,7 @@ public:
 	/**
 	* @brief Create a stat item.
 	*
+	* @param StatCodes Specify statCodes for stat items to get from this method
 	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsBulkStatItemOperationResult.
 	* @param OnError This will be called when the operation failed.
 	*/
@@ -44,8 +45,10 @@ public:
 		*
 		* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsUserStatItemPagingSlicedResult.
 		* @param OnError This will be called when the operation failed.
+		* @param Limit Page size, default value is 20.
+		* @param Offset Page number, default value is 0.
 	*/
-	void GetAllUserStatItems(const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+	void GetAllUserStatItems(const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError, int32 Limit = 20, int32 Offset = 0);
 
 	/**
 		* @brief Get this user stat items by specifying statCodes and tags to get from. Returned stat items will only contain
@@ -55,19 +58,26 @@ public:
 		* @param Tags Specify tags for for stat items to get from this method
 		* @param OnSuccess This will be called when the operation succeeded. Thre result is an FAccelByteModelsUserStatItemPagingSlicedResult
 		* @param OnError This will be called when the operation failed.
+		* @param Limit Page size, default value is 20.
+		* @param Offset Page number, default value is 0.
 	*/
-	void GetUserStatItems(const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserStatItems(const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError,
+		int32 Limit = 20, int32 Offset = 0);
 
 	/**
 	* @brief Get user's specified stat items and specifying statCodes and tags to get from. Returned stat items will only contain
 	* stat items specified by statCodes and tags (inclusive)
 	*
+	* @param UserId The Id of a user that will be given his stat items 
 	* @param StatCodes Specify statCodes for stat items to get from this method
 	* @param Tags Specify tags for for stat items to get from this method
 	* @param OnSuccess This will be called when the operation succeeded. Thre result is an FAccelByteModelsUserStatItemPagingSlicedResult
 	* @param OnError This will be called when the operation failed.
+	* @param Limit Page size, default value is 20.
+	* @param Offset Page number, default value is 0.
 	*/
-	void GetUserStatItems(const FString& UserId, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserStatItems(const FString& UserId, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError,
+		int32 Limit = 20, int32 Offset = 0);
 
 	/**
 	* @brief Increment this user stat items.
@@ -121,7 +131,6 @@ public:
 	*
 	* @param StatCode StatCode.
 	* @param UserIds List of UserIds.
-	* @param UpdateUserStatItem This is the UpdateUserStatItem that will be stored in the slot.
 	* @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsStatItemValueResponse>.
 	* @param OnError This will be called when the operation failed.
 	*/
@@ -137,6 +146,15 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void ResetUserStatItemValue(const FString& StatCode, const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Get global stat items by specifying statCodes. 
+	* 
+	* @param StatCode The StatCode of the global stat items
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsGlobalStatItemValueResponse.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetGlobalStatItemsByStatCode(const FString& StatCode, const THandler<FAccelByteModelsGlobalStatItemValueResponse>& OnSuccess, const FErrorHandler& OnError);
 
 #if !UE_BUILD_SHIPPING
 	/**

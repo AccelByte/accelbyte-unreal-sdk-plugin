@@ -564,6 +564,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUpdateUserTopicNotif
 	//! User id of action initiator (add to topic / remove from topic) 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
 	FString SenderId {};
+	
+	//! Affected user id that added to topic or removed from topic
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
+	FString UserId {};
 
 	//! Is this topic a channel 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
@@ -571,7 +575,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUpdateUserTopicNotif
 
 	FORCEINLINE bool operator==(const FAccelByteModelsChatUpdateUserTopicNotif& Other) const
 	{
-		return Type == Other.Type && Name == Other.Name && TopicId == Other.TopicId && SenderId == Other.SenderId && IsChannel == Other.IsChannel;
+		return Type == Other.Type && Name == Other.Name && TopicId == Other.TopicId && SenderId == Other.SenderId && IsChannel == Other.IsChannel && UserId == Other.UserId;
 	}
 };
 

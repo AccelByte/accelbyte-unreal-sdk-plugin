@@ -16,6 +16,10 @@ DataStorageBinaryFile::DataStorageBinaryFile(FString DirectoryPath)
 {
 	FDirectoryPath DirPath;
 	DirPath.Path = FPaths::ConvertRelativePathToFull(DirectoryPath);
+#if !(PLATFORM_WINDOWS)
+	//This is the only directory that allow us to write. This hardcode is mandatory & unavoidable
+	DirPath.Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectLogDir());
+#endif
 	this->AbsoluteFileDirectory = DirPath;
 }
 

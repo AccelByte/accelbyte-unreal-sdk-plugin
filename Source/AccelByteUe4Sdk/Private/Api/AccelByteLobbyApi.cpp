@@ -1726,7 +1726,7 @@ void HandleResponse(const FString& MessageType, ResponseCallbackType ResponseCal
 	bool bSuccess = false;
 	if (lobbyResponseCode == 0)
 	{
-		bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0);
+		bSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Result);
 	}
 	else
 	{
@@ -1852,7 +1852,7 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		case (Response::JoinChannelChat):
 		{
 			FAccelByteModelsJoinDefaultChannelResponse Result;
-			if (const bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0))
+			if (const bool bParseSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Result))
 			{
 				ChannelSlug = Result.ChannelSlug;
 				JoinDefaultChannelChatResponse.ExecuteIfBound(Result);
@@ -1882,7 +1882,7 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		case (Response::GetFriendshipStatus):
 		{
 			FAccelByteModelsGetFriendshipStatusStringResponse StringResult;
-			bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &StringResult, 0, 0);
+			bool bParseSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &StringResult);
 			if (bParseSuccess)
 			{
 				FAccelByteModelsGetFriendshipStatusResponse Result;
@@ -1926,7 +1926,7 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 	, const FString& ParsedJsonString, const FString& ReceivedMessageType) {
 	ensure(ReceivedMessageType.Equals(MessageType));
 	DataStruct Result;
-	if (const bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0)) {
+	if (const bool bSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Result)) {
 		ResponseCallback.ExecuteIfBound(Result);
 	}
 
@@ -1957,7 +1957,7 @@ void DispatchV2JsonNotif(const FString& Payload, CallbackType ResponseCallback)
 	UE_LOG(LogAccelByteLobby, Log, TEXT("MPv2 notif json:\n%s"), *PayloadJsonString);
 	
 	PayloadType Result;
-	if(FJsonObjectConverter::JsonObjectStringToUStruct(PayloadJsonString, &Result, 0, 0))
+	if(FAccelByteUtilities::JsonObjectStringToUStruct(PayloadJsonString, &Result))
 	{
 		ResponseCallback.ExecuteIfBound(Result);
 	}
@@ -1970,7 +1970,7 @@ void DispatchV2JsonNotif(const FString& Payload, CallbackType ResponseCallback)
 void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 {
 	FAccelByteModelsSessionNotificationMessage Notif;
-	if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif, 0, 0) == false)
+	if (FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Notif) == false)
 	{
 		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
 		return;
@@ -2100,7 +2100,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 		case (Notif::ConnectedNotif):
 		{
 			FAccelByteModelsLobbySessionId SessionId;
-			bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &SessionId, 0, 0);
+			bool bSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &SessionId);
 			if (bSuccess)
 			{
 				LobbySessionId = SessionId;
@@ -2112,7 +2112,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 		case (Notif::PartyMemberLeaveNotif):
 		{
 				FAccelByteModelsLeavePartyNotice PartyLeaveResult;
-				bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &PartyLeaveResult, 0, 0);
+				bool bSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &PartyLeaveResult);
 				if (bSuccess)
 				{
 					if (PartyLeaveNotif.IsBound())
@@ -2196,7 +2196,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			}
 			else
 			{
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &NotificationMessage, 0, 0) == false)
+				if (FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &NotificationMessage) == false)
 				{
 					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the whole MessageNotif to the struct\nNotification: %s"), *ParsedJsonString);
 					return;
@@ -2235,7 +2235,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			BanNotifReceived = true;
 			FAccelByteModelsUserBannedNotification Result;
 			//CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
-			if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0))
+			if (FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Result))
 			{
 				if (Result.UserId == CredentialsRef.GetUserId())
 				{

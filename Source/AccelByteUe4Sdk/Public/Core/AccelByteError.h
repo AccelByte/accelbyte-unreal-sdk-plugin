@@ -572,42 +572,52 @@ namespace AccelByte
 #endif
 	}
 
-	inline void HandleHttpResultOk(FHttpResponsePtr Response, const FVoidHandler& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const FVoidHandler& OnSuccess)
 	{
 		OnSuccess.ExecuteIfBound();
+		return true;
 	}
 
 	template<typename T>
-	inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<TArray<T>>& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const THandler<TArray<T>>& OnSuccess)
 	{
 		TArray<T> Result;
-		FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+		bool bSuccess = FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+		if (bSuccess)
+		{
+			OnSuccess.ExecuteIfBound(Result);
+		}
+		return bSuccess;
 
-		OnSuccess.ExecuteIfBound(Result);
 	}
 
 	template<>
-	inline void HandleHttpResultOk<uint8>(FHttpResponsePtr Response, const THandler<TArray<uint8>>& OnSuccess)
+	inline bool HandleHttpResultOk<uint8>(FHttpResponsePtr Response, const THandler<TArray<uint8>>& OnSuccess)
 	{
 		OnSuccess.ExecuteIfBound(Response->GetContent());
+		return true;
 	}
 
 	template<typename T>
-	inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<T>& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const THandler<T>& OnSuccess)
 	{
 		typename std::remove_const<typename std::remove_reference<T>::type>::type Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-
-		OnSuccess.ExecuteIfBound(Result);
+		bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+		if (bSuccess)
+		{
+			OnSuccess.ExecuteIfBound(Result);
+		}
+		return bSuccess;
 	}
 
 	template<>
-	inline void HandleHttpResultOk<FString>(FHttpResponsePtr Response, const THandler<FString>& OnSuccess)
+	inline bool HandleHttpResultOk<FString>(FHttpResponsePtr Response, const THandler<FString>& OnSuccess)
 	{
 		OnSuccess.ExecuteIfBound(Response->GetContentAsString());
+		return true;
 	}
 
-	inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess)
 	{
 		// custom http result for LobbyServer.GetPartyStorage
 		FString jsonString = Response->GetContentAsString();
@@ -632,16 +642,24 @@ namespace AccelByte
 		jsonString.InsertAt(startIndex, "\"");
 		jsonString.InsertAt(endIndex, "\"");
 		FAccelByteModelsPartyDataNotif PartyData;
-		FJsonObjectConverter::JsonObjectStringToUStruct(jsonString, &PartyData, 0, 0);
-		OnSuccess.ExecuteIfBound(PartyData);
+		bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(jsonString, &PartyData, 0, 0);
+		if (bSuccess)
+		{
+			OnSuccess.ExecuteIfBound(PartyData);
+		}
+		return bSuccess;
 	}
 
-	inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FJsonObject>& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FJsonObject>& OnSuccess)
 	{
 		TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
-		FJsonSerializer::Deserialize(Reader, JsonObject);
-		OnSuccess.ExecuteIfBound(*JsonObject.Get());
+		bool bSuccess = FJsonSerializer::Deserialize(Reader, JsonObject);
+		if (bSuccess)
+		{
+			OnSuccess.ExecuteIfBound(*JsonObject.Get());
+		}
+		return bSuccess;
 	}
 
 	template<typename T>
@@ -653,7 +671,10 @@ namespace AccelByte
 		{
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
-				HandleHttpResultOk(Response, OnSuccess);
+				if (!HandleHttpResultOk(Response, OnSuccess))
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), "Invalid JSON response");
+				}
 				return;
 			}
 
@@ -679,7 +700,10 @@ namespace AccelByte
 		{
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
-				HandleHttpResultOk(Response, OnSuccess);
+				if (!HandleHttpResultOk(Response, OnSuccess))
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), "Invalid JSON response", FJsonObject{});
+				}
 				return;
 			}
 

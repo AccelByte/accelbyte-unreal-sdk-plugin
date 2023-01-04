@@ -61,3 +61,16 @@ void UAccelByteBlueprintsStatistic::IncrementUserStatItems(const TArray<FAccelBy
 		OnError.ExecuteIfBound(Code, Message);
 	}));
 }
+
+void UAccelByteBlueprintsStatistic::GetGlobalStatItemsByStatCode(const FString& StatCode, const FGlobalStatItemDelegate& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::Statistic.GetGlobalStatItemsByStatCode(StatCode,
+		THandler<FAccelByteModelsGlobalStatItemValueResponse>::CreateLambda([OnSuccess](const FAccelByteModelsGlobalStatItemValueResponse& Result)
+		{
+			OnSuccess.ExecuteIfBound(Result);
+		}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}));
+}

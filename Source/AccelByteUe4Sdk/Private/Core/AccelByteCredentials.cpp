@@ -20,14 +20,7 @@ namespace AccelByte
 {
 
 Credentials::Credentials()
-	: ClientId()
-	, ClientSecret()
-	, AuthToken()
-	, UserSessionExpire(0)
-	, UserSessionState(ESessionState::Invalid)
-	, UserRefreshTime(0.0)
-	, UserExpiredTime(0.0)
-	, UserRefreshBackoff(0.0)
+	: AuthToken()
 {
 }
 
@@ -40,18 +33,8 @@ const FString Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelB
 
 void Credentials::ForgetAll()
 {
+	BaseCredentials::ForgetAll();
 	AuthToken = {};
-	UserSessionExpire = 0;
-	UserRefreshBackoff = 0.0;
-	UserRefreshTime = 0.0;
-	UserExpiredTime = 0.0;
-	UserSessionState = ESessionState::Invalid;
-}
-
-void Credentials::SetClientCredentials(const FString& InClientId, const FString& InClientSecret)
-{
-	ClientId = InClientId;
-	ClientSecret = InClientSecret;
 }
 
 void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
@@ -85,15 +68,6 @@ void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 	}
 }
 
-const FString& Credentials::GetOAuthClientId() const
-{
-	return ClientId;
-}
-
-const FString& Credentials::GetOAuthClientSecret() const
-{
-	return ClientSecret;
-}
 
 void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime)
 {
@@ -116,9 +90,9 @@ void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTim
 		}
 	}
 	
-	UserRefreshTime = UserSessionExpire < BanExpire ? UserSessionExpire : BanExpire;
+	RefreshTime = UserSessionExpire < BanExpire ? UserSessionExpire : BanExpire;
 	AuthToken = NewAuthToken;
-	UserSessionState = ESessionState::Valid;
+	SessionState = ESessionState::Valid;
 }
 
 void Credentials::SetUserEmailAddress(const FString& EmailAddress)
@@ -147,14 +121,9 @@ const FString& Credentials::GetPlatformUserId() const
 	return AuthToken.Platform_user_id;
 }
 
-Credentials::ESessionState Credentials::GetSessionState() const
-{
-	return UserSessionState;
-}
-
 bool Credentials::IsSessionValid() const
 {
-	return UserSessionState == ESessionState::Valid;
+	return SessionState == ESessionState::Valid;
 }
 
 bool Credentials::IsComply() const
@@ -180,7 +149,11 @@ void Credentials::Shutdown()
 {
 	if (PollRefreshTokenHandle.IsValid())
 	{
-		FTickerAlias::GetCoreTicker().RemoveTicker(PollRefreshTokenHandle);
+		// Core ticker by this point in engine shutdown has already been torn down - only remove ticker if this is not an engine shutdown
+		if (!IsEngineExitRequested())
+		{
+			FTickerAlias::GetCoreTicker().RemoveTicker(PollRefreshTokenHandle);
+		}
 		PollRefreshTokenHandle.Reset();
 	}
 }
@@ -212,11 +185,11 @@ const FAccountUserData& Credentials::GetAccountUserData() const
 
 void Credentials::PollRefreshToken(double CurrentTime)
 {
-	switch (UserSessionState)
+	switch (SessionState)
 	{
 	case ESessionState::Expired:
 	case ESessionState::Valid:
-		if (UserRefreshTime <= CurrentTime)
+		if (RefreshTime <= CurrentTime)
 		{
 			Oauth2::GetTokenWithRefreshToken(FRegistry::Settings.IamServerUrl
 				, ClientId
@@ -235,14 +208,14 @@ void Credentials::PollRefreshToken(double CurrentTime)
 				})
 				, FErrorHandler::CreateLambda([this](int32 ErrorCode, const FString& ErrorMessage)
 				{
-					if (UserRefreshBackoff <= 0.0)
+					if (RefreshBackoff <= 0.0)
 					{
-						UserRefreshBackoff = 10.0;
+						RefreshBackoff = 10.0;
 					}
 
-					UserRefreshBackoff *= 2.0;
-					UserRefreshBackoff += FMath::FRandRange(1.0, 60.0);
-					ScheduleRefreshToken(FPlatformTime::Seconds() + UserRefreshBackoff);
+				RefreshBackoff *= 2.0;
+				RefreshBackoff += FMath::FRandRange(1.0, 60.0);
+				ScheduleRefreshToken(FPlatformTime::Seconds() + RefreshBackoff);
 
 					if (RefreshTokenAdditionalActions.IsBound())
 					{
@@ -250,12 +223,12 @@ void Credentials::PollRefreshToken(double CurrentTime)
 						RefreshTokenAdditionalActions.Clear();
 					}
 						
-					UserSessionState = ESessionState::Expired;
+					SessionState = ESessionState::Expired;
 					TokenRefreshedEvent.Broadcast(false);
 				})
 			);
 
-			UserSessionState = ESessionState::Refreshing;
+			SessionState = ESessionState::Refreshing;
 		}
 
 		break;
@@ -265,9 +238,9 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	}
 }
 
-void Credentials::ScheduleRefreshToken(double RefreshTime)
+void Credentials::ScheduleRefreshToken(double LRefreshTime)
 {
-	UserRefreshTime = RefreshTime;
+	RefreshTime = LRefreshTime;
 }
 
 const FOauth2Token& Credentials::GetAuthToken() const

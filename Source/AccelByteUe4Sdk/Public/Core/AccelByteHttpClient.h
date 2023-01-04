@@ -14,8 +14,8 @@ using namespace AccelByte;
 namespace AccelByte
 {
 
-	class Credentials;
-	class Settings;
+	class BaseCredentials;
+	class BaseSettings;
 
 	/**
 	 * @brief HTTP client for building API
@@ -23,7 +23,7 @@ namespace AccelByte
 	class ACCELBYTEUE4SDK_API FHttpClient final
 	{
 	public:
-		FHttpClient(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+		FHttpClient(BaseCredentials const& InCredentialsRef, BaseSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 		~FHttpClient();
 
 		/**
@@ -389,8 +389,8 @@ namespace AccelByte
 
 	private:
 		FHttpRetryScheduler& HttpRef;
-		Credentials const& CredentialsRef;
-		Settings const& SettingsRef;
+		BaseCredentials const& CredentialsRef;
+		BaseSettings const& SettingsRef;
 
 		FString FormatApiUrl(const FString& Url) const;
 

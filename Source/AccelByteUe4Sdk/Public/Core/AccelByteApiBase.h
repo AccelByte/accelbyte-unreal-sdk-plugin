@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteSettings.h"
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 

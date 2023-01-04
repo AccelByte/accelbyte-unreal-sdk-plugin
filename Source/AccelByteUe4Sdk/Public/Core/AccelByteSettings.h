@@ -4,64 +4,44 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core/AccelByteBaseSettings.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Core/AccelByteEnvironment.h"
 
 #include "AccelByteSettings.generated.h" 
 
 namespace AccelByte
 {
-class ACCELBYTEUE4SDK_API Settings
+class ACCELBYTEUE4SDK_API Settings : public BaseSettings
 {
 public:
-	FString ClientId{};
-	FString ClientSecret{};
-	FString Namespace{};
-	FString PublisherNamespace{};
-	FString RedirectURI{};
-	FString BaseUrl{};
-	FString IamServerUrl{};
-	FString PlatformServerUrl{};
-	FString LobbyServerUrl{};
 	FString ChatServerUrl{};
 	FString BasicServerUrl{};
 	FString CloudStorageServerUrl{};
 	FString GameProfileServerUrl{};
 	FString GroupServerUrl{};
-	FString StatisticServerUrl{};
-	FString QosManagerServerUrl{};
 	FString LeaderboardServerUrl{};
-	FString CloudSaveServerUrl{};
-	FString GameTelemetryServerUrl{};
 	FString AgreementServerUrl{};
-	FString AchievementServerUrl{};
-	FString SessionBrowserServerUrl{};
 	FString TurnManagerServerUrl{};
 	FString UGCServerUrl{};
-	FString SeasonPassServerUrl{};
 	FString ReportingServerUrl{};
-	FString SessionServerUrl{};
-	FString MatchmakingV2ServerUrl{};
 	FString AppId{};
 	FString CustomerName{};
 	FString SettingsEnvironment{};
 	FString HeartBeatData{};
 	float QosLatencyPollIntervalSecs{.0f};
 	float QosServerLatencyPollIntervalSecs{.0f};
-	float QosPingTimeout{.6f};
 	bool bEnableHttpCache{false};
 	
 	/** @brief Ensure a minimum # secs for Qos Latency polling */
 	constexpr static float MinNumSecsQosLatencyPolling = {60*10}; // 10m
 	
-	void Reset(ESettingsEnvironment const Environment);
+	virtual void Reset(ESettingsEnvironment const Environment) override;
 
 	Settings& operator=(Settings const& Other) = default;
 
 protected:
-	void LoadSettings(const FString& SectionPath);
-	void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value);
+	virtual void LoadSettings(const FString& SectionPath) override;
+	virtual void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value) override;
 	void LoadBaseUrlFallback(const FString& SectionPath, FString& Value);
 };
 

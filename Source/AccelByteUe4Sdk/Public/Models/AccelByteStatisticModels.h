@@ -273,6 +273,27 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateUserStatItemValueResponse
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalStatItemValueResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
+	FString StatCode {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
+	FString StatName {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
+	FString Namespace {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
+	int32 Value {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
+	FDateTime CreatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
+	FDateTime UpdatedAt {0};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsStatItemValueResponse
 {
 	GENERATED_BODY()
@@ -288,9 +309,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsStatItemValueResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
 	TArray<FString> Tags{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
-	FDateTime CreatedAt {};
+	FDateTime CreatedAt {0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
-	FDateTime UpdatedAt {};
+	FDateTime UpdatedAt {0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
 	FString UserId{};	 
 };

@@ -113,6 +113,25 @@ void UABServerMatchmaking::QuerySessionStatus(
 			}));
 }
 
+void UABServerMatchmaking::RebalanceMatchmakingBasedOnMMR(
+	FString const& MatchId,
+	FDMatchmakingResultDelegate OnSuccess,
+	FDErrorHandler OnError)
+{
+	ApiClientPtr->ServerMatchmaking.RebalanceMatchmakingBasedOnMMR(
+		MatchId,
+		THandler<FAccelByteModelsMatchmakingResult>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsMatchmakingResult& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
 void UABServerMatchmaking::ActivateSessionStatusPolling(
 	FString const& MatchId,
 	int IntervalSec,

@@ -39,8 +39,11 @@ class ACCELBYTEUE4SDK_API DataStorageBinaryFile : public IAccelByteDataStorage
 {
 
 public:
-	//
+#if PLATFORM_WINDOWS
 	DataStorageBinaryFile(FString DirectoryPath = FPaths::ProjectContentDir());
+#else
+	DataStorageBinaryFile(FString DirectoryPath = TEXT(""));
+#endif
 	virtual ~DataStorageBinaryFile() {}
 
 	/**

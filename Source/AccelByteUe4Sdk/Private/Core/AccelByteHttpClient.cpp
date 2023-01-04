@@ -6,8 +6,8 @@
 
 namespace AccelByte
 {
-	FHttpClient::FHttpClient(Credentials const& InCredentialsRef
-		, Settings const& InSettingsRef
+	FHttpClient::FHttpClient(BaseCredentials const& InCredentialsRef
+		, BaseSettings const& InSettingsRef
 		, FHttpRetryScheduler& InHttpRef)
 		: HttpRef{InHttpRef}
 		, CredentialsRef{InCredentialsRef}

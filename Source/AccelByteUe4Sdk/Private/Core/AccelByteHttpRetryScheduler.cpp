@@ -260,7 +260,11 @@ void FHttpRetryScheduler::Shutdown()
 
 	if (PollRetryHandle.IsValid())
 	{
-		FTickerAlias::GetCoreTicker().RemoveTicker(PollRetryHandle);
+		// Core ticker by this point in engine shutdown has already been torn down - only remove ticker if this is not an engine shutdown
+		if (!IsEngineExitRequested())
+		{
+			FTickerAlias::GetCoreTicker().RemoveTicker(PollRetryHandle);
+		}
 		PollRetryHandle.Reset();
 	}
 
