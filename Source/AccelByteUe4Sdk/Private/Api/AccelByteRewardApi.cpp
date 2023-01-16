@@ -14,9 +14,7 @@ namespace Api
 Reward::Reward(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 Reward::~Reward()
@@ -29,105 +27,82 @@ FString Reward::ConvertRewardSortByToString(EAccelByteRewardListSortBy const& So
 		case EAccelByteRewardListSortBy::NAMESPACE:
 			return TEXT("namespace");
 		case EAccelByteRewardListSortBy::NAMESPACE_ASC:
-			return TEXT("namespace%3Aasc");
+			return TEXT("namespace:asc");
 		case EAccelByteRewardListSortBy::NAMESPACE_DESC:
-			return TEXT("namespace%3Adesc");
+			return TEXT("namespace:desc");
 		case EAccelByteRewardListSortBy::REWARDCODE:
 			return TEXT("rewardcode");
 		case EAccelByteRewardListSortBy::REWARDCODE_ASC:
-			return TEXT("rewardcode%3Aasc");
+			return TEXT("rewardcode:asc");
 		case EAccelByteRewardListSortBy::REWARDCODE_DESC:
-			return TEXT("rewardcode%3Adesc");
+			return TEXT("rewardcode:desc");
+		default:
+			return TEXT("");
 	}
-	return TEXT("");
 }
 
-void Reward::GetRewardByRewardCode(FString const& RewardCode, THandler<FAccelByteModelsRewardInfo> const& OnSuccess, FErrorHandler const& OnError)
+void Reward::GetRewardByRewardCode(FString const& RewardCode
+	, THandler<FAccelByteModelsRewardInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/byCode"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace());
-	Url.Append(FString::Printf(TEXT("?rewardCode=%s"), *RewardCode));
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/byCode")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace());
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	const TMap<FString, FString> QueryParams = {
+		{TEXT("rewardCode"), *RewardCode}};
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Reward::GetRewardByRewardId(FString const& RewardId, THandler<FAccelByteModelsRewardInfo> const& OnSuccess, FErrorHandler const& OnError)
+void Reward::GetRewardByRewardId(FString const& RewardId
+	, THandler<FAccelByteModelsRewardInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *RewardId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/%s")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *RewardId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Reward::QueryRewards(FString const& EventTopic, int32 Offset, int32 Limit, EAccelByteRewardListSortBy const& SortBy, THandler<FAccelByteModelsQueryReward> const& OnSuccess, FErrorHandler const& OnError)
+void Reward::QueryRewards(FString const& EventTopic
+	, int32 Offset
+	, int32 Limit
+	, EAccelByteRewardListSortBy const& SortBy
+	, THandler<FAccelByteModelsQueryReward> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/byCriteria"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace());
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Query = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/byCriteria")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace());
 
+	TMap<FString, FString> QueryParams;
 	if (!EventTopic.IsEmpty())
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("eventTopic=%s"), *EventTopic));
+		QueryParams.Add(TEXT("eventTopic"), *EventTopic);
 	}
 	if (Offset >= 0)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
 	}
 	if (Limit >= 0)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
 	}
 	if (SortBy != EAccelByteRewardListSortBy::NONE)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("sortBy=%s"), *ConvertRewardSortByToString(SortBy)));
+		QueryParams.Add(TEXT("sortBy"), *ConvertRewardSortByToString(SortBy));
 	}
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *Query));
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 	
 } // Namespace Api

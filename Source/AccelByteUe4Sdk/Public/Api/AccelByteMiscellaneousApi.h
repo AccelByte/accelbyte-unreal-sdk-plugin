@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiBase.h"
 
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -17,24 +18,22 @@ class Settings;
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API Miscellaneous
+class ACCELBYTEUE4SDK_API Miscellaneous : public FApiBase
 {
 public:
 	Miscellaneous(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Miscellaneous();
 
 	/**
-	* @brief Get server current time.
-	*
-	* @param OnSuccess This will be called when the operation succeeded. The result is FTime.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void GetServerCurrentTime(const THandler<FTime>& OnSuccess, const FErrorHandler& OnError);
-private:
-	FHttpRetryScheduler& HttpRef;
-	Credentials const& CredentialsRef;
-	Settings const& SettingsRef;
+	 * @brief Get server current time.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FTime.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetServerCurrentTime(const THandler<FTime>& OnSuccess
+		, const FErrorHandler& OnError);
 
+private:
 	Miscellaneous() = delete;
 	Miscellaneous(Miscellaneous const&) = delete;
 	Miscellaneous(Miscellaneous&&) = delete;

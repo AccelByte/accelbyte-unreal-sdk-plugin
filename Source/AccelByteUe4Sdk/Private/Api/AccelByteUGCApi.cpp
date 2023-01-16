@@ -18,9 +18,7 @@ namespace Api
 UGC::UGC(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 UGC::~UGC(){}
@@ -32,30 +30,19 @@ void UGC::CreateContent(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ChannelId);
 
-	FAccelByteModelsUGCRequest Req = CreateRequest;	
-	if (Req.ContentType.IsEmpty())
+	FAccelByteModelsUGCRequest Request = CreateRequest;
+	if (Request.ContentType.IsEmpty())
 	{
-		Req.ContentType = TEXT("application/octet-stream");
+		Request.ContentType = TEXT("application/octet-stream");
 	}
 
-	FJsonObjectConverter::UStructToJsonObjectString(Req, Content);
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 
 void UGC::CreateContent(FString const& ChannelId
@@ -91,30 +78,20 @@ void UGC::ModifyContent(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId, *ContentId);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ChannelId
+		, *ContentId);
 
-	FAccelByteModelsUGCRequest Req = ModifyRequest;	
-	if (Req.ContentType.IsEmpty())
+	FAccelByteModelsUGCRequest Request = ModifyRequest;
+	if (Request.ContentType.IsEmpty())
 	{
-		Req.ContentType = TEXT("application/octet-stream");
+		Request.ContentType = TEXT("application/octet-stream");
 	}
-	
-	FJsonObjectConverter::UStructToJsonObjectString(Req, Content);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
 }
 
 void UGC::ModifyContent(FString const& ChannelId
@@ -150,22 +127,14 @@ void UGC::DeleteContent(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId, *ContentId);
-	FString Verb = TEXT("DELETE");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ChannelId
+		, *ContentId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UGC::GetContentByContentId(FString const& ContentId
@@ -180,22 +149,12 @@ void UGC::GetContentByContentId(FString const& ContentId
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ContentId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ContentId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UGC::GetContentByShareCode(FString const& ShareCode
@@ -204,22 +163,12 @@ void UGC::GetContentByShareCode(FString const& ShareCode
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ShareCode);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ShareCode);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UGC::GetContentPreview(FString const& ContentId
@@ -228,36 +177,28 @@ void UGC::GetContentPreview(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/preview"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ContentId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/preview")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ContentId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UGC::GetContentPreview(FString const& ContentId
 	, THandler<TArray<uint8>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
-	GetContentPreview(ContentId, THandler<FAccelByteModelsUGCPreview>::CreateLambda([OnSuccess](FAccelByteModelsUGCPreview const& Response)
-	{
-		TArray<uint8> Bytes;
-		if(FBase64::Decode(Response.Preview, Bytes))
-			OnSuccess.ExecuteIfBound(Bytes);
-		else
-			UE_LOG(LogAccelByte, Warning, TEXT("Cannot decode preview string : %s"), *Response.Preview);
-	}), OnError);
+	GetContentPreview(ContentId, THandler<FAccelByteModelsUGCPreview>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCPreview const& Response)
+			{
+				TArray<uint8> Bytes;
+				if(FBase64::Decode(Response.Preview, Bytes))
+					OnSuccess.ExecuteIfBound(Bytes);
+				else
+					UE_LOG(LogAccelByte, Warning, TEXT("Cannot decode preview string : %s"), *Response.Preview);
+			})
+		, OnError);
 }
 
 void UGC::GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSuccess
@@ -267,22 +208,21 @@ void UGC::GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSucce
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags?limit=%d&offset=%d"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, Limit, Offset);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 void UGC::GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuccess
@@ -292,22 +232,21 @@ void UGC::GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuc
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/types?limit=%d&offset=%d"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, Limit, Offset);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/types")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 void UGC::CreateChannel(FString const& ChannelName
@@ -316,22 +255,14 @@ void UGC::CreateChannel(FString const& ChannelName
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId());
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	const FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
 void UGC::UpdateChannel(FString const& ChannelId
@@ -341,22 +272,13 @@ void UGC::UpdateChannel(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ChannelId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	const FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
 void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
@@ -366,22 +288,22 @@ void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const&
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels?limit=%d&offset=%d"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), Limit, Offset);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 void UGC::DeleteChannel(FString const& ChannelId
@@ -390,22 +312,13 @@ void UGC::DeleteChannel(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId);
-	FString Verb = TEXT("DELETE");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ChannelId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UGC::SearchContents(const FString& Name
@@ -424,12 +337,9 @@ void UGC::SearchContents(const FString& Name
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
 
 	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
 		{ TEXT("sortby"), FAccelByteUtilities::GetUEnumValueAsString(SortBy) },
@@ -446,15 +356,7 @@ void UGC::SearchContents(const FString& Name
 	});
 	Url.Append(QueryParams);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UGC::UpdateLikeStatusToContent(const FString& ContentId, bool bLikeStatus
@@ -463,22 +365,14 @@ void UGC::UpdateLikeStatusToContent(const FString& ContentId, bool bLikeStatus
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/like"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ContentId);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json"); 
-	FString Content = FString::Printf(TEXT("{\"likeStatus\": %s}"), bLikeStatus ? TEXT("true") : TEXT("false"));
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/like")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ContentId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	const FString Content = FString::Printf(TEXT("{\"likeStatus\": %s}"), bLikeStatus ? TEXT("true") : TEXT("false"));
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 	
 void UGC::GetListFollowers(const FString& UserId
@@ -489,28 +383,22 @@ void UGC::GetListFollowers(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/followers"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *UserId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json"); 
-	FString Content{};
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/followers")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId);
 
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
-	});
-	Url.Append(QueryParams);
+	TMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 void UGC::UpdateFollowStatusToUser(const FString& UserId
@@ -520,22 +408,14 @@ void UGC::UpdateFollowStatusToUser(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/follow"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *UserId);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json"); 
-	FString Content = FString::Printf(TEXT("{\"followStatus\": %s}"), bFollowStatus ? TEXT("true") : TEXT("false")); 
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/follow")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	const FString Content = FString::Printf(TEXT("{\"followStatus\": %s}"), bFollowStatus ? TEXT("true") : TEXT("false"));
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 	
 void UGC::SearchContentsSpecificToChannel(const FString& ChannelId 
@@ -556,12 +436,10 @@ void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/channels/%s/contents"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ChannelId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/channels/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ChannelId);
 
 	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
 		{ TEXT("sortby"), FAccelByteUtilities::GetUEnumValueAsString(SortBy) },
@@ -578,15 +456,7 @@ void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 	});
 	Url.Append(QueryParams);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UGC::GetContentBulk(const TArray<FString>& ContentIds
@@ -595,25 +465,14 @@ void UGC::GetContentBulk(const TArray<FString>& ContentIds
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/bulk"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/bulk")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
+
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
-	FJsonObjectConverter::UStructToJsonObjectString(ContentRequest, Content); 
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ContentRequest, OnSuccess, OnError);
 }
 
 void UGC::GetUserContent(const FString& UserId
@@ -624,27 +483,22 @@ void UGC::GetUserContent(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *UserId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("")  },
-		});
-	Url.Append(QueryParams);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 
@@ -656,24 +510,13 @@ void UGC::UploadContentScreenshot(const FString& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents/%s/screenshots"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace,
-		*UserId, *ContentId);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
-	FJsonObjectConverter::UStructToJsonObjectString(ScreenshotsRequest, Content);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents/%s/screenshots")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId
+		, *ContentId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ScreenshotsRequest, OnSuccess, OnError);
 }
 	
 void UGC::GetFollowedContent(THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
@@ -683,27 +526,21 @@ void UGC::GetFollowedContent(THandler<FAccelByteModelsUGCContentPageResponse> co
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/followed"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("")  },
-		});
-	Url.Append(QueryParams);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/followed")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 	
 void UGC::GetFollowedUsers(THandler<FAccelByteModelsUGCFollowedUsersResponse> const& OnSuccess
@@ -713,27 +550,21 @@ void UGC::GetFollowedUsers(THandler<FAccelByteModelsUGCFollowedUsersResponse> co
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/followed"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("")  },
-		});
-	Url.Append(QueryParams);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/followed")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 void UGC::GetLikedContent(const TArray<FString>& Tags
@@ -749,13 +580,11 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 	, EAccelByteUgcOrderBy OrderBy)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/liked"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/liked")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
+
 	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
 		{ TEXT("tags"), 	FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(Tags, TEXT("&Tags=")) },
 		{ TEXT("name"), FGenericPlatformHttp::UrlEncode(Name) },
@@ -769,15 +598,7 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 		});
 	Url.Append(QueryParams);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UGC::GetCreator(const FString& UserId
@@ -786,22 +607,12 @@ void UGC::GetCreator(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *UserId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 	
 void UGC::GetGroups(const FString& UserId
@@ -812,27 +623,22 @@ void UGC::GetGroups(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/groups"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *UserId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("")  },
-		});
-	Url.Append(QueryParams);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/groups")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	TMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 }

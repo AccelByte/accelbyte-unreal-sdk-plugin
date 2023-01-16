@@ -43,9 +43,7 @@ void DataStorageBinaryFile::DeleteItem(const FString & Key, const FVoidHandler O
 	FString SerializedText;
 	FJsonObjectConverter::UStructToJsonObjectString<FBinaryFileStructure>(*StructurePtr.Get(), SerializedText);
 	
-	TArray<uint8> ByteArray;
-	ByteArray.AddUninitialized(SerializedText.Len());
-	StringToBytes(SerializedText, ByteArray.GetData(), SerializedText.Len());
+	TArray<uint8> ByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(SerializedText);
 
 	FString Path = CompleteAbsoluteFilePath(FileName);
 	FFileHelper::SaveArrayToFile(ByteArray, *Path);
@@ -60,9 +58,7 @@ void DataStorageBinaryFile::SaveItem(const FString & Key, const TArray<uint8>& I
 void DataStorageBinaryFile::SaveItem(const FString & Key, const FString & Item, const THandler<bool>& OnDone, const FString & FileName)
 {
 	uint8* Output = new uint8[Item.Len()];
-	TArray<uint8> ByteArray;
-	ByteArray.AddUninitialized(Item.Len());
-	StringToBytes(Item, ByteArray.GetData(), Item.Len());
+	TArray<uint8> ByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(Item);
 	OnDone.ExecuteIfBound(SaveToFile(FileName, Key, ByteArray));
 }
 
@@ -111,7 +107,7 @@ void DataStorageBinaryFile::GetItem(const FString & Key, const THandler<TPair<FS
 	auto ValuePtr = StructurePtr->Segments.Find(Key);
 	if (ValuePtr != nullptr && ValuePtr->Content.Num() > 0)
 	{
-		Result.Value = BytesToString(&ValuePtr->Content[0], ValuePtr->Content.Num());
+		Result.Value = FAccelByteArrayByteFStringConverter::BytesToFString(ValuePtr->Content, false);
 		Result.Key = Key;
 	}
 	OnDone.Execute(Result);
@@ -130,7 +126,7 @@ void DataStorageBinaryFile::GetItem(const FString & Key, const THandler<TPair<FS
 	auto ValuePtr = StructurePtr->Segments.Find(Key);
 	if (ValuePtr != nullptr && ValuePtr->Content.Num() > 0)
 	{
-		FString Value = BytesToString(&ValuePtr->Content[0], ValuePtr->Content.Num());
+		FString Value = FAccelByteArrayByteFStringConverter::BytesToFString(ValuePtr->Content, false);
 		Result.Value.JsonObjectFromString(Value);
 		Result.Key = Key;
 	}
@@ -157,7 +153,7 @@ TOptional<FString> DataStorageBinaryFile::LoadFromFile(const FString& FileName)
 	bool LoadOK = FFileHelper::LoadFileToArray(Result, *Path);
 	if (LoadOK && Result.Num() > 0)
 	{
-		Output = BytesToString(&Result[0], Result.Num());
+		Output = FAccelByteArrayByteFStringConverter::BytesToFString(Result, false);
 	}
 	return Output;
 }
@@ -190,9 +186,7 @@ bool DataStorageBinaryFile::SaveToFile(const FString& FileName, const FString& K
 	FString SerializedText;
 	FJsonObjectConverter::UStructToJsonObjectString<FBinaryFileStructure>(*StructurePtr.Get(), SerializedText);
 
-	TArray<uint8> ByteArray;
-	ByteArray.AddUninitialized(SerializedText.Len());
-	StringToBytes(SerializedText, ByteArray.GetData(), SerializedText.Len());
+	TArray<uint8> ByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(SerializedText);
 
 	FString Path = CompleteAbsoluteFilePath(FileName);
 	return FFileHelper::SaveArrayToFile(ByteArray, *Path);

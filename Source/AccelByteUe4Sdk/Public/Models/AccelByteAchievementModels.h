@@ -259,3 +259,36 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedUserAchievement
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedUserAchievement")
 	FAccelByteModelsPaging Paging{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicTag
+{
+	GENERATED_BODY()
+
+	/** @brief Name of Public Tag data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicTag")
+	FString Name{};
+	
+	/** @brief Namespace of the Public Tag belongs to */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicTag")
+	FString Namespace{};
+
+	/** @brief Public Tag creation time (ISO 8601) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicTag")
+	FString CreatedAt{};
+};
+
+/** @brief Data Model for List of Public Tags */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedPublicTag
+{
+	GENERATED_BODY()
+
+	/** @brief List of Public Tag data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedPublicTag")
+	TArray<FAccelByteModelsPublicTag> Data{};
+
+	/** @brief Paging data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedPublicTag")
+	FAccelByteModelsPaging Paging{};
+};

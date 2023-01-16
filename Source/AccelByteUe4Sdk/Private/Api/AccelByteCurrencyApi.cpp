@@ -18,41 +18,30 @@ namespace Api
 Currency::Currency(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 Currency::~Currency()
 {}
 
-void Currency::GetCurrencyList(const FString& Namespace, const THandler<TArray<FAccelByteModelsCurrencyList>>& OnSuccess, const FErrorHandler& OnError,
-	EAccelByteCurrencyType CurrencyType)
+void Currency::GetCurrencyList(const FString& Namespace
+	, const THandler<TArray<FAccelByteModelsCurrencyList>>& OnSuccess
+	, const FErrorHandler& OnError
+	, EAccelByteCurrencyType CurrencyType)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/currencies"), *SettingsRef.PlatformServerUrl, *Namespace);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/currencies")
+		, *SettingsRef.PlatformServerUrl
+		, *Namespace);
 
+	TMap<FString, FString> QueryParams = {};
 	if (CurrencyType != EAccelByteCurrencyType::NONE)
 	{
-		FString Query = FString::Printf(TEXT("currencyType=%s"), *FAccelByteUtilities::GetUEnumValueAsString(CurrencyType));
-		Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+		QueryParams.Add(TEXT("currencyType"), *FAccelByteUtilities::GetUEnumValueAsString(CurrencyType));
 	}
-	
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 } // Namespace Api

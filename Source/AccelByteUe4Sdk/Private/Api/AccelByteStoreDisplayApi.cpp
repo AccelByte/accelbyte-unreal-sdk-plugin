@@ -13,61 +13,63 @@
 
 namespace AccelByte
 {
-	namespace Api
-	{
-		StoreDisplay::StoreDisplay(Credentials const& InCredentialsRef
-				, Settings const& InSettingsRef
-				, FHttpRetryScheduler& InHttpRef)
-				: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-		{
-		}
-		StoreDisplay::~StoreDisplay(){}
-
-		void StoreDisplay::GetAllViews(FString const& StoreId
-			, FString const& Language
-			, THandler<TArray<FAccelByteModelsViewInfo>> const& OnSuccess
-			, FErrorHandler const& OnError)
-		{
-			FReport::Log(FString(__FUNCTION__));
-
-			FString Verb = TEXT("GET");
-			FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/views"),
-				*SettingsRef.PlatformServerUrl,
-				*CredentialsRef.GetNamespace(),
-				*CredentialsRef.GetUserId());
-
-			const TMap<FString, FString> Params = FAccelByteUtilities::CreateQueryParamsAndSkipIfValueEmpty({
-				{ TEXT("storeId"), StoreId },
-				{ TEXT("language"), Language },
-			});
+namespace Api
+{
 	
-			HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
-		}
-
-		void StoreDisplay::ListActiveSectionContents(FString const& StoreId
-			, FString const& ViewId
-			, FString const& Region
-			, FString const& Language
-			, THandler<TArray<FAccelByteModelsSectionInfo>> const& OnSuccess
-			, FErrorHandler const& OnError)
-		{
-			FReport::Log(FString(__FUNCTION__));
-
-			FString Verb = TEXT("GET");
-			FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/sections"),
-				*SettingsRef.PlatformServerUrl,
-				*CredentialsRef.GetNamespace(),
-				*CredentialsRef.GetUserId());
-
-			const TMap<FString, FString> Params = FAccelByteUtilities::CreateQueryParamsAndSkipIfValueEmpty({
-				{ TEXT("storeId"), StoreId },
-				{ TEXT("viewId"), ViewId },
-				{ TEXT("region"), Region },
-				{ TEXT("language"), Language },
-			});
+StoreDisplay::StoreDisplay(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+{
+}
 	
-			HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
-		}
-	
-	} // Namespace Api
+StoreDisplay::~StoreDisplay(){}
+
+void StoreDisplay::GetAllViews(FString const& StoreId
+	, FString const& Language
+	, THandler<TArray<FAccelByteModelsViewInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Verb = TEXT("GET");
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/views")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	const TMap<FString, FString> Params = {
+		{ TEXT("storeId"), StoreId },
+		{ TEXT("language"), Language },
+	};
+
+	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+}
+
+void StoreDisplay::ListActiveSectionContents(FString const& StoreId
+	, FString const& ViewId
+	, FString const& Region
+	, FString const& Language
+	, THandler<TArray<FAccelByteModelsSectionInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Verb = TEXT("GET");
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/sections")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	const TMap<FString, FString> Params = {
+		{ TEXT("storeId"), StoreId },
+		{ TEXT("viewId"), ViewId },
+		{ TEXT("region"), Region },
+		{ TEXT("language"), Language },
+	};
+
+	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+}
+
+} // Namespace Api
 } // Namespace AccelByte

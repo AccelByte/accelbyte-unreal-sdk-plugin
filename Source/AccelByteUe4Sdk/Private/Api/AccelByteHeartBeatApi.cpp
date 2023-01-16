@@ -16,8 +16,10 @@ namespace AccelByte
 {
 namespace Api
 {
-	HeartBeat::HeartBeat(Settings& InSettingRef, FHttpRetryScheduler& InHttpRef)
-		: HttpRef { InHttpRef }, SettingRef { InSettingRef }
+	HeartBeat::HeartBeat(Credentials const& InCredentialsRef,
+		Settings const& InSettingsRef,
+		FHttpRetryScheduler& InHttpRef)
+		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	{}
 
 	HeartBeat::~HeartBeat()
@@ -109,19 +111,15 @@ namespace Api
 
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Url = TEXT("https://heartbeat.accelbyte.io/add");
-		FString Verb = TEXT("POST");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
+		const FString Url = TEXT("https://heartbeat.accelbyte.io/add");
 
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-		Request->SetContentAsString(SettingRef.HeartBeatData);
+		TMap<FString, FString> Headers = {
+			{TEXT("Content-Type"), TEXT("application/json")},
+			{TEXT("Accept"), TEXT("application/json")}
+		};
 		
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(HeartBeatResponseDelegate, OnHeartBeatError), FPlatformTime::Seconds());
+		HttpClient.Request(TEXT("POST"), Url, SettingsRef.HeartBeatData, Headers, HeartBeatResponseDelegate, OnHeartBeatError);
+
 		return true;
 	}
 

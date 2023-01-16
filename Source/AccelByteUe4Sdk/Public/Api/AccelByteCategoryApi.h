@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteEcommerceModels.h"
@@ -20,16 +21,12 @@ namespace Api
  * The category has tree data structure.
  * Each category has path, for example "/equipments/armor/legs". Items are grouped into a category. The root is equivalent to "/".
  */
-class ACCELBYTEUE4SDK_API Category
+class ACCELBYTEUE4SDK_API Category : public FApiBase
 {
 public:
 	Category(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Category();
-private:
-	FHttpRetryScheduler& HttpRef;
-	Credentials const& CredentialsRef;
-	Settings const& SettingsRef;
-public:
+
 	/**
 	 * @brief This function gets root categories that exist in the specified namespace.
 	 *
@@ -37,7 +34,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetRootCategories(FString const& Language, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess, FErrorHandler const& OnError);
+	void GetRootCategories(FString const& Language
+		, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief This function gets the category from a store in the specified namespace.
@@ -47,7 +46,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsCategoryInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetCategory(FString const& CategoryPath, FString const& Language, THandler<FAccelByteModelsCategoryInfo> const& OnSuccess, FErrorHandler const& OnError);
+	void GetCategory(FString const& CategoryPath
+		, FString const& Language
+		, THandler<FAccelByteModelsCategoryInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief This function gets the subcategories from a category in the specified namespace.
@@ -57,7 +59,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetChildCategories(FString const& Language, FString const& CategoryPath, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess, FErrorHandler const& OnError);
+	void GetChildCategories(FString const& Language
+		, FString const& CategoryPath
+		, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get every subcategories from a category in the specified namespace.
@@ -67,7 +72,11 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetDescendantCategories(FString const& Language, FString const& CategoryPath, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess, FErrorHandler const& OnError);
+	void GetDescendantCategories(FString const& Language
+		, FString const& CategoryPath
+		, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	Category() = delete;
 	Category(Category const&) = delete;

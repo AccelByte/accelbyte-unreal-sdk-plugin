@@ -17,10 +17,9 @@ FAccelByteModelsV2GameSessionQuery::FAccelByteModelsV2GameSessionQuery()
 	ComparisonField->Set##JsonType##Field(AttributeName, Value);                                                       \
 	AddToQuery(ComparisonFieldName, ComparisonField);                                                                  \
 
-void FAccelByteModelsV2GameSessionQuery::AddParam(
-	const FString& AttributeName,
-	const EAccelByteV2SessionQueryComparisonOp Comparison,
-	const FString& AttributeValue) const
+void FAccelByteModelsV2GameSessionQuery::AddParam(const FString& AttributeName
+	, const EAccelByteV2SessionQueryComparisonOp Comparison
+	, const FString& AttributeValue) const
 {
 	if(Comparison != EAccelByteV2SessionQueryComparisonOp::EQUAL &&
 		Comparison != EAccelByteV2SessionQueryComparisonOp::NOT_EQUAL)
@@ -32,10 +31,9 @@ void FAccelByteModelsV2GameSessionQuery::AddParam(
 	SET_SESSION_QUERY_FIELD(String, AttributeValue);
 }
 
-void FAccelByteModelsV2GameSessionQuery::AddParam(
-	const FString& AttributeName,
-	const EAccelByteV2SessionQueryComparisonOp Comparison,
-	const double AttributeValue) const
+void FAccelByteModelsV2GameSessionQuery::AddParam(const FString& AttributeName
+	, const EAccelByteV2SessionQueryComparisonOp Comparison
+	, const double AttributeValue) const
 {
 	if(Comparison != EAccelByteV2SessionQueryComparisonOp::EQUAL &&
 		Comparison != EAccelByteV2SessionQueryComparisonOp::NOT_EQUAL &&
@@ -51,10 +49,9 @@ void FAccelByteModelsV2GameSessionQuery::AddParam(
 	SET_SESSION_QUERY_FIELD(Number, AttributeValue);
 }
 
-void FAccelByteModelsV2GameSessionQuery::AddParam(
-	const FString& AttributeName,
-	const EAccelByteV2SessionQueryComparisonOp Comparison,
-	const TArray<FString>& AttributeValue) const
+void FAccelByteModelsV2GameSessionQuery::AddParam(const FString& AttributeName
+	, const EAccelByteV2SessionQueryComparisonOp Comparison
+	, const TArray<FString>& AttributeValue) const
 {
 	if(Comparison != EAccelByteV2SessionQueryComparisonOp::CONTAINS &&
 		Comparison != EAccelByteV2SessionQueryComparisonOp::NOT_CONTAINS)
@@ -72,12 +69,11 @@ void FAccelByteModelsV2GameSessionQuery::AddParam(
 	SET_SESSION_QUERY_FIELD(Array, JsonArray);
 }
 
-void FAccelByteModelsV2GameSessionQuery::AddParam(
-	const FString& AttributeName,
-	const EAccelByteV2SessionQueryComparisonOp Comparison,
-	const TArray<double>& AttributeValue) const
+void FAccelByteModelsV2GameSessionQuery::AddParam(const FString& AttributeName
+	, const EAccelByteV2SessionQueryComparisonOp Comparison
+	, const TArray<double>& AttributeValue) const
 {
-	if(Comparison != EAccelByteV2SessionQueryComparisonOp::CONTAINS &&
+	if (Comparison != EAccelByteV2SessionQueryComparisonOp::CONTAINS &&
 		Comparison != EAccelByteV2SessionQueryComparisonOp::NOT_CONTAINS)
 	{
 		UE_LOG(LogAccelByte, Warning, TEXT("Invalid session query operator/type combination!"));
@@ -95,7 +91,8 @@ void FAccelByteModelsV2GameSessionQuery::AddParam(
 
 #undef SET_SESSION_QUERY_FIELD
 
-TSharedPtr<FJsonObject> FAccelByteModelsV2GameSessionQuery::InitializeComparisonField(const EAccelByteV2SessionQueryComparisonOp Op, FString& OutFieldName) const
+TSharedPtr<FJsonObject> FAccelByteModelsV2GameSessionQuery::InitializeComparisonField(const EAccelByteV2SessionQueryComparisonOp Op
+	, FString& OutFieldName) const
 {
 	if(!JsonWrapper.JsonObject->HasTypedField<EJson::Object>(TEXT("query")))
 	{
@@ -141,7 +138,8 @@ TSharedPtr<FJsonObject> FAccelByteModelsV2GameSessionQuery::InitializeComparison
 	return QueryObject->GetObjectField(OutFieldName);
 }
 
-void FAccelByteModelsV2GameSessionQuery::AddToQuery(const FString& ComparisonFieldName, const TSharedPtr<FJsonObject>& ComparisonField) const
+void FAccelByteModelsV2GameSessionQuery::AddToQuery(const FString& ComparisonFieldName
+	, const TSharedPtr<FJsonObject>& ComparisonField) const
 {
 	// #NOTE: The AddToQuery method should only ever be called after InitializeComparisonField has been called, but
 	// putting this here just in case something changes in the future

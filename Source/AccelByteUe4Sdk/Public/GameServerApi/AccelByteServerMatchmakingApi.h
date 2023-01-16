@@ -8,6 +8,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteDefines.h"
+#include "Core/AccelByteServerApiBase.h"
 #include "Models/AccelByteMatchmakingModels.h"
 
 namespace AccelByte
@@ -18,31 +19,27 @@ namespace GameServerApi
 {
 
 /**
-	* @brief Matchmaking API to manage user's in-game profiles's matchmaking.
-	*/
-class ACCELBYTEUE4SDK_API ServerMatchmaking
+ * @brief Matchmaking API to manage user's in-game profiles's matchmaking.
+ */
+class ACCELBYTEUE4SDK_API ServerMatchmaking : public FServerApiBase
 {
 public:
 	ServerMatchmaking(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerMatchmaking();
-private:
-	ServerCredentials const& CredentialsRef;
-	ServerSettings const& SettingsRef;
-	FHttpRetryScheduler& HttpRef;
 
-public:
-
-	/*
+	/**
 	 * @brief Enqueue Game Server to Joinable Session Queue. This will make this server joinable by other parties while already in a session.
 	 *
 	 * @param MatchmakingResult The session's data (get this data from QuerySessionStatus)
 	 * @param OnSuccess This will be called when the operation succeeded. Will return model FAccelByteModelsMatchmakingResult.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void EnqueueJoinableSession(const FAccelByteModelsMatchmakingResult& MatchmakingResult, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void EnqueueJoinableSession(const FAccelByteModelsMatchmakingResult& MatchmakingResult
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 
 
-	/*
+	/**
 	 * @brief Dequeue Game Server from Joinable Session Queue. This will make this server not joinable to other parties while already in a session.
 	 *
 	 * @note If you're implementing the player count in the Server, call this once you treat the server as full already and don't want it to be used as matchmaking target for DSM.
@@ -51,9 +48,11 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void DequeueJoinableSession(const FString& MatchId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DequeueJoinableSession(const FString& MatchId
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 
-	/*
+	/**
 	 * @brief Add a user to session data.
 	 *
 	 * @param ChannelName The Channel's Name.
@@ -63,9 +62,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param PartyId optional, the party ID of the user to be added. if not listed user will be added to a new party.
 	 */
-	void AddUserToSession(const FString& ChannelName, const FString& MatchId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& PartyId = TEXT(""));
+	void AddUserToSession(const FString& ChannelName
+		, const FString& MatchId
+		, const FString& UserId
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError
+		, const FString& PartyId = TEXT(""));
 
-	/*
+	/**
 	 * @brief Remove a user from session data.
 	 *
 	 * @param ChannelName The Channel's Name.
@@ -75,27 +79,36 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Body optional, the session's data
 	 */
-	void RemoveUserFromSession(const FString& ChannelName, const FString& MatchId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FAccelByteModelsMatchmakingResult& Body = FAccelByteModelsMatchmakingResult());
+	void RemoveUserFromSession(const FString& ChannelName
+		, const FString& MatchId
+		, const FString& UserId
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError
+		, const FAccelByteModelsMatchmakingResult& Body = FAccelByteModelsMatchmakingResult());
 
-	/*
+	/**
 	 * @brief Get the session's data status
 	 *
 	 * @param MatchId the match/session ID
 	 * @param OnSuccess This will be called when the operation succeeded. Will return model FAccelByteModelsMatchmakingResult.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void QuerySessionStatus(const FString MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError);
+	void QuerySessionStatus(const FString MatchId
+		, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
+		, const FErrorHandler& OnError);
 
-	/*
+	/**
 	 * @brief Rebalance matchmaking based on MMR
 	 *
 	 * @param MatchId The match/session ID.
 	 * @param OnSuccess This will be called when the operation succeeded. Will return model FAccelByteModelsMatchmakingResult.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void RebalanceMatchmakingBasedOnMMR(const FString& MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError);
+	void RebalanceMatchmakingBasedOnMMR(const FString& MatchId
+		, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
+		, const FErrorHandler& OnError);
 
-	/*
+	/**
 	 * @brief Activate session data polling in a certain time interval.
 	 *
 	 * @param MatchId The match/session ID.
@@ -103,12 +116,16 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IntervalSec the interval of every session data get call in second.
 	 */
-	void ActivateSessionStatusPolling(const FString& MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError, uint32 IntervalSec = 5);
+	void ActivateSessionStatusPolling(const FString& MatchId
+		, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
+		, const FErrorHandler& OnError
+		, uint32 IntervalSec = 5);
 
-	/*
+	/**
 	 * @brief Deactivate session data polling.
 	 */
 	void DeactivateStatusPolling();
+	
 private:
 	ServerMatchmaking() = delete;
 	ServerMatchmaking(ServerMatchmaking const&) = delete;

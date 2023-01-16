@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 #include "HttpManager.h"
 #include "Interfaces/IHttpResponse.h"
+#include "Core/AccelByteLRUCache.h"
+#include "Models/AccelByteGeneralModels.h"
 
 namespace AccelByte
 {
@@ -20,15 +22,11 @@ class FAccelByteMemoryPoolAllocation;
 template<typename T>
 class FAccelByteMemoryDynamicAllocation;
 
-
 template<typename T>
-struct FChunkInfo
+struct FChunkInfo : public FAccelByteCacheWrapper<T>
 {
 public:
-	FName Key;
-	T Data;
-	size_t Length;
-	FAccelByteMemory<T>* Pool;
+	FAccelByteMemory<T>* Pool = nullptr;
 };
 
 
@@ -81,18 +79,7 @@ public:
 	* @param Key Identifier of the data
 	* @return The pointer of the data if found, otherwise nullptr will be returned
 	*/
-	virtual const T* Get(const FName& Key) = 0;
-	
-	/**
-	* @brief Approximate the size of the data that will be stored or held by the Memory class
-	*
-	* @param Data Reference to the data
-	* @return Size of the data
-	*/
-	inline const size_t GetRequiredMemorySize(T& Data)
-	{
-		return sizeof(Data);
-	}
+	virtual const TSharedPtr<T> Get(const FName& Key) = 0;
 
 	inline const size_t GetCurrentMemoryPoolSize() { return CurrentMemoryPoolSize; }
 	inline const size_t GetMemoryPoolLeft() { return MemoryParameter.PoolSize - CurrentMemoryPoolSize; }
@@ -134,28 +121,6 @@ protected:
 	
 	TArray<FChunkInfo<T>> ChunkList;
 };
-
-// Override specific for HTTP response size
-template<>
-inline const size_t FAccelByteMemory<FHttpRequestPtr>::GetRequiredMemorySize(FHttpRequestPtr& Data)
-{
-	size_t Output = 0;
-
-	if (Data->GetResponse().IsValid())
-	{
-		Output += Data->GetResponse()->GetContentLength();
-	}
-	Output += Data->GetContentLength();
-	return Output;
-}
-
-// Override specific for FString size
-template<>
-inline const size_t FAccelByteMemory<FString>::GetRequiredMemorySize(FString& Data)
-{
-	return Data.GetAllocatedSize();
-}
-
 
 template<typename T>
 class FAccelByteMemoryFactory
@@ -221,12 +186,12 @@ public:
 		}
 	}
 
-	inline const T* Get(const FName& Key) override
+	inline const TSharedPtr<T> Get(const FName& Key) override
 	{
 		auto Index = this->FindIndexFromChunkList(Key);
 		if (Index >= 0)
 		{
-			return &this->ChunkList[Index].Data;
+			return this->ChunkList[Index].Data;
 		}
 		return nullptr;
 	}
@@ -282,9 +247,14 @@ public:
 			return nullptr;
 		}
 
-		FChunkInfo<T> Result{ Key, Data, this->GetRequiredMemorySize(Data), this };
+		FChunkInfo<T> Result;
+		Result.Key = Key;
+		Result.Data = MakeShareable<T>(new T(Data));
+		Result.Length = FAccelByteLRUCache<T>::GetRequiredSize(Data);
+		Result.Pool = this;
+
 		int Index = this->ChunkList.Add(Result);
-		Result.Length = this->GetRequiredMemorySize(this->ChunkList[Index].Data);
+		Result.Length = FAccelByteLRUCache<T>::GetRequiredSize(*this->ChunkList[Index].Data);
 
 		this->CurrentChunkCount += 1;
 		this->CurrentMemoryPoolSize += Result.Length;
@@ -303,12 +273,12 @@ public:
 		}
 	}
 
-	inline const T* Get(const FName& Key) override
+	inline const TSharedPtr<T> Get(const FName& Key) override
 	{
 		auto Index = this->FindIndexFromChunkList(Key);
 		if (Index >= 0)
 		{
-			return &this->ChunkList[Index].Data;
+			return this->ChunkList[Index].Data;
 		}
 		return nullptr;
 	}
@@ -327,6 +297,5 @@ private:
 		return true;
 	}
 };
-
 }
 }

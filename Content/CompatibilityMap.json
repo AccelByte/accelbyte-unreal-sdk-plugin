@@ -1,47 +1,47 @@
 {
   "iam": {
-    "minVersion": "5.25.3",
-    "maxVersion": "5.25.3"
+    "minVersion": "5.26.0",
+    "maxVersion": "5.26.0"
   },
   "agreement": {
-    "minVersion": "1.25.3",
-    "maxVersion": "1.25.3"
+    "minVersion": "1.25.4",
+    "maxVersion": "1.25.4"
   },
   "basic": {
-    "minVersion": "2.4.1",
-    "maxVersion": "2.4.1"
+    "minVersion": "2.4.2",
+    "maxVersion": "2.4.2"
   },
   "platform": {
-    "minVersion": "4.21.0",
-    "maxVersion": "4.21.0"
+    "minVersion": "4.22.0",
+    "maxVersion": "4.22.0"
   },
   "social": {
-    "minVersion": "1.32.0",
-    "maxVersion": "1.32.0"
+    "minVersion": "1.32.1",
+    "maxVersion": "1.32.1"
   },
   "leaderboard": {
-    "minVersion": "2.17.0",
-    "maxVersion": "2.17.0"
+    "minVersion": "2.18.0",
+    "maxVersion": "2.18.0"
   },
   "achievement": {
-    "minVersion": "2.13.0",
-    "maxVersion": "2.13.0"
+    "minVersion": "2.13.1",
+    "maxVersion": "2.13.1"
   },
   "cloudsave": {
-    "minVersion": "3.4.0",
-    "maxVersion": "3.4.0"
+    "minVersion": "3.5.0",
+    "maxVersion": "3.5.0"
   },
   "ugc": {
-    "minVersion": "2.7.0",
-    "maxVersion": "2.7.0"
+    "minVersion": "2.8.0",
+    "maxVersion": "2.8.0"
   },
   "lobby": {
-    "minVersion": "3.13.0",
-    "maxVersion": "3.13.0"
+    "minVersion": "3.13.1",
+    "maxVersion": "3.13.1"
   },
   "group": {
-    "minVersion": "2.13.0",
-    "maxVersion": "2.13.0"
+    "minVersion": "2.14.0",
+    "maxVersion": "2.14.0"
   },
   "qosm": {
     "minVersion": "1.17.0",

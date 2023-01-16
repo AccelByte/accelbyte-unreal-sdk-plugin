@@ -16,7 +16,8 @@ class Settings;
 namespace Api
 {
 
-/** @brief Provide APIs to access Group [Management] service.
+/**
+ * @brief Provide APIs to access Group [Management] service.
  * - While authed, Namespace is automatically passed to all Requests.
  */
 class ACCELBYTEUE4SDK_API Group : public FApiBase
@@ -43,10 +44,9 @@ public:
 	 * - Result is simply a FAccelByteModelsGroupInformationResponse + pagination info.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetGroupList(
-		const FAccelByteModelsGetGroupListRequest& RequestContent,
-		const THandler<FAccelByteModelsGetGroupListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	void GetGroupList(const FAccelByteModelsGetGroupListRequest& RequestContent
+		, const THandler<FAccelByteModelsGetGroupListResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Creates a new group.
@@ -72,10 +72,9 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void CreateGroup(
-		const FAccelByteModelsCreateGroupRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	void CreateGroup(const FAccelByteModelsCreateGroupRequest& RequestContent
+		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Get single single group info (by groupId).
@@ -89,10 +88,9 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetGroup(
-		const FString& GroupId,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	void GetGroup(const FString& GroupId
+		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Update existing group.
@@ -112,12 +110,11 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateGroup(
-		const FString& GroupId,
-		const bool bCompletelyReplace,
-		const FAccelByteModelsGroupUpdatable& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	void UpdateGroup(const FString& GroupId
+		, const bool bCompletelyReplace
+		, const FAccelByteModelsGroupUpdatable& RequestContent
+		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Delete existing group.
@@ -131,10 +128,9 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void DeleteGroup(
-		const FString& GroupId,
-		const FVoidHandler& OnSuccess,
-		const FErrorHandler& OnError);
+	void DeleteGroup(const FString& GroupId
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Replaces current group custom attributes entirely.
@@ -151,11 +147,10 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateGroupCustomAttributes(
-		const FString& GroupId,
-		const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	void UpdateGroupCustomAttributes(const FString& GroupId
+		, const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent
+		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Update custom (arbitrary) group rule.
@@ -171,11 +166,10 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError Called upon failed op.
 	 */
-	void UpdateGroupCustomRule(
-		const FString& GroupId,
-		const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	void UpdateGroupCustomRule(const FString& GroupId
+		, const FAccelByteModelsUpdateCustomRulesRequest& RequestContent
+		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Update predefined group rule.
@@ -194,12 +188,11 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError Called upon failed op.
 	 */
-	void UpdateGroupPredefinedRule(
-		const FString& GroupId,
-		const EAccelByteAllowedAction& AllowedAction,
-		const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	void UpdateGroupPredefinedRule(const FString& GroupId
+		, const EAccelByteAllowedAction& AllowedAction
+		, const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent
+		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Delete predefined group rule, based on the allowed action.
@@ -217,124 +210,116 @@ public:
 	 * - Void Result
 	 * @param OnError Called upon failed op.
 	 */
-	void DeleteGroupPredefinedRule(
-		const FString& GroupId,
-		const EAccelByteAllowedAction& AllowedAction,
-		const FVoidHandler& OnSuccess,
-		const FErrorHandler& OnError);
+	void DeleteGroupPredefinedRule(const FString& GroupId
+		, const EAccelByteAllowedAction& AllowedAction
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 	#pragma endregion /Group (multi-member actions)
-	
 
 	#pragma region Group Member (individuals)
 	/**
-	* @brief Accepts an invitation from a 3rd-party group's group member to group up.
-	* - Required valid user authentication.
-	* - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
-	* - Checks if the user who access this endpoint already joined the specific group.
-	* - Deletes all requests (invite / join request) for the user who accesses this endpoint.
-	* - Existing members will receive notification of the newly-accepted member.
-	* 
-	* Action code: 73401
-	* 
-	* @param GroupId of the group that invited you, that you are accepting the invite to.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void AcceptGroupInvitation(
-		const FString& GroupId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Accepts an invitation from a 3rd-party group's group member to group up.
+	 * - Required valid user authentication.
+	 * - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
+	 * - Checks if the user who access this endpoint already joined the specific group.
+	 * - Deletes all requests (invite / join request) for the user who accesses this endpoint.
+	 * - Existing members will receive notification of the newly-accepted member.
+	 * 
+	 * Action code: 73401
+	 * 
+	 * @param GroupId of the group that invited you, that you are accepting the invite to.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void AcceptGroupInvitation(const FString& GroupId
+		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
-	* @brief Rejects an invitation from a 3rd-party group's group member to group up.
-	* - Required valid user authentication.
-	* - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
-	* - Checks if the user who access this endpoint already joined the specific group.
-	* 
-	* Action code: 73402
-	* 
-	* @param GroupId of the group that invited you, that you are rejecting the invite from.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void RejectGroupInvitation(
-		const FString& GroupId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Rejects an invitation from a 3rd-party group's group member to group up.
+	 * - Required valid user authentication.
+	 * - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
+	 * - Checks if the user who access this endpoint already joined the specific group.
+	 * 
+	 * Action code: 73402
+	 * 
+	 * @param GroupId of the group that invited you, that you are rejecting the invite from.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void RejectGroupInvitation(const FString& GroupId
+		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Join into specific group and become a group member.
-	* - Required valid user authentication.
-	* - Checks the the the group type based on the groupID.
-	* - Checks if the user who access this endpoint already joined the specific group.
-	* - Returns status field, for whether the user JOINED or REQUESTED to join the specific group.
-	* 
-	* - More Info:
-	*   - User cannot join to the group with PRIVATE type.
-	*   - Joining PUBLIC group type will create join request and need approval.
-	*       from the privileged group member to accept the request to become the member.
-	*   - Joining OPEN group type will make this user become member of that group immediately.
-	* 
-	* Action code: 73403
-	* 
-	* @param GroupId of the group you want to join.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void JoinGroup(
-		const FString& GroupId,
-		const THandler<FAccelByteModelsJoinGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Join into specific group and become a group member.
+	 * - Required valid user authentication.
+	 * - Checks the the the group type based on the groupID.
+	 * - Checks if the user who access this endpoint already joined the specific group.
+	 * - Returns status field, for whether the user JOINED or REQUESTED to join the specific group.
+	 * 
+	 * - More Info:
+	 *   - User cannot join to the group with PRIVATE type.
+	 *   - Joining PUBLIC group type will create join request and need approval.
+	 *       from the privileged group member to accept the request to become the member.
+	 *   - Joining OPEN group type will make this user become member of that group immediately.
+	 * 
+	 * Action code: 73403
+	 * 
+	 * @param GroupId of the group you want to join.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void JoinGroup(const FString& GroupId
+		, const THandler<FAccelByteModelsJoinGroupResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Cancel the Join group request.
-	* - Required valid user authentication.
-	* 
-	* Action code: 73411
-	* 
-	* @param GroupId of the !Open group type you asked to join, but now want to cancel.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void CancelJoinGroupRequest(
-        const FString& GroupId,
-        const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-        const FErrorHandler& OnError);
+	 * @brief Cancel the Join group request.
+	 * - Required valid user authentication.
+	 * 
+	 * Action code: 73411
+	 * 
+	 * @param GroupId of the !Open group type you asked to join, but now want to cancel.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void CancelJoinGroupRequest(const FString& GroupId
+        , const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
+        , const FErrorHandler& OnError);
 
 	/**
-	* @brief Get list of group members (by GroupId).
-	* - Required valid user authentication.
-	* 
-	* Action code: 73410
-	* 
-	* @param GroupId of the group you want to get a members list from.
-	* @param RequestContent
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void GetGroupMembersListByGroupId(
-		const FString& GroupId,
-		const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent,
-		const THandler<FAccelByteModelsGetGroupMemberListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Get list of group members (by GroupId).
+	 * - Required valid user authentication.
+	 * 
+	 * Action code: 73410
+	 * 
+	 * @param GroupId of the group you want to get a members list from.
+	 * @param RequestContent
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void GetGroupMembersListByGroupId(const FString& GroupId
+		, const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent
+		, const THandler<FAccelByteModelsGetGroupMemberListResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Leave the group you're currently in.
-	* - Required valid user authentication.
-	* - Admin is not allowed to leave the group.
-	* - Will also give response if user does not belong to any group.
-	* - Admin is not allowed to leave the group.
-	*   - If an Admin wants to leave the group, see DeleteGroup.
-	* - Still gives response if the user does not belong to any group.
-	* 
-	* Action code: 73404
-	* 
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void LeaveGroup(
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Leave the group you're currently in.
+	 * - Required valid user authentication.
+	 * - Admin is not allowed to leave the group.
+	 * - Will also give response if user does not belong to any group.
+	 * - Admin is not allowed to leave the group.
+	 *   - If an Admin wants to leave the group, see DeleteGroup.
+	 * - Still gives response if the user does not belong to any group.
+	 * 
+	 * Action code: 73404
+	 * 
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void LeaveGroup(const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Get list of group members by group id.
@@ -353,10 +338,9 @@ public:
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
 	 */
-	void GetUserGroupInfoByUserId(
-		const FString& UserId,
-		const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	void GetUserGroupInfoByUserId(const FString& UserId
+		, const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Invite the other user to your group.
@@ -371,128 +355,119 @@ public:
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
 	 */
-	void InviteUserToGroup(
-		const FString UserId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	void InviteUserToGroup(const FString UserId
+		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Accept [other] user's group join request.
-	* - Required valid user auth.
-	* - Required Member Role Permission: "GROUP:JOIN [CREATE]".
-	* - If specific user was not asked to join this specific group,
-	*     response will return error that they "need a join request".
-	* - Will also check if specific user *already* joined the specific group.
-	* - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
-	*     - Rather than an OPEN group (where players can just join without permission).
-	* 
-	* Action code: 73407
-	*
-	* @param UserId of the user who wants to join your group.
-	* @param OnSuccess Called upon successful op.
-	* - Returns { GroupId, UserId }
-	* @param OnError Called upon failed op.
-	*/
-	void AcceptGroupJoinRequest(
-		const FString UserId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Accept [other] user's group join request.
+	 * - Required valid user auth.
+	 * - Required Member Role Permission: "GROUP:JOIN [CREATE]".
+	 * - If specific user was not asked to join this specific group,
+	 *     response will return error that they "need a join request".
+	 * - Will also check if specific user *already* joined the specific group.
+	 * - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
+	 *     - Rather than an OPEN group (where players can just join without permission).
+	 * 
+	 * Action code: 73407
+	 *
+	 * @param UserId of the user who wants to join your group.
+	 * @param OnSuccess Called upon successful op.
+	 * - Returns { GroupId, UserId }
+	 * @param OnError Called upon failed op.
+	 */
+	void AcceptGroupJoinRequest(const FString UserId
+		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
-	* @brief Reject [other] user's group join request.
-	* - Required valid user auth.
-	* - Required Member Role Permission: "GROUP:JOIN [CREATE]".
-	* - If specific user was not asked to join this specific group,
-	*     response will return error that they "need a join request".
-	* - Will also check if specific user *already* joined the specific group.
-	* - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
-	*     - Rrather than an OPEN group players can just join.
-	* 
-	* Action code: 73408
-	*
-	* @param UserId of the user you do NOT want to join your group.
-	* @param OnSuccess Called upon successful op.
-	* - Returns { GroupId, UserId }
-	* @param OnError Called upon failed op.
-	*/
-	void RejectGroupJoinRequest(
-		const FString UserId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Reject [other] user's group join request.
+	 * - Required valid user auth.
+	 * - Required Member Role Permission: "GROUP:JOIN [CREATE]".
+	 * - If specific user was not asked to join this specific group,
+	 *     response will return error that they "need a join request".
+	 * - Will also check if specific user *already* joined the specific group.
+	 * - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
+	 *     - Rrather than an OPEN group players can just join.
+	 * 
+	 * Action code: 73408
+	 *
+	 * @param UserId of the user you do NOT want to join your group.
+	 * @param OnSuccess Called upon successful op.
+	 * - Returns { GroupId, UserId }
+	 * @param OnError Called upon failed op.
+	 */
+	void RejectGroupJoinRequest(const FString UserId
+		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Kick a group member out of the group.
-	* - Required valid user auth.
-	* - Required Member Role Permission: "GROUP:KICK [CREATE]".
-	* - Validates the kicker's: member, group info and role perms.
-	* 
-	* Action code: 73409
-	*
-	* @param UserId of the user you want to kick from your group.
-	* @param OnSuccess Called upon successful op.
-	* - Returns { GroupId, KickedUserId }
-	* @param OnError Called upon failed op.
-	*/
-	void KickGroupMember(
-		const FString UserId,
-		const THandler<FAccelByteModelsKickGroupMemberResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Kick a group member out of the group.
+	 * - Required valid user auth.
+	 * - Required Member Role Permission: "GROUP:KICK [CREATE]".
+	 * - Validates the kicker's: member, group info and role perms.
+	 * 
+	 * Action code: 73409
+	 *
+	 * @param UserId of the user you want to kick from your group.
+	 * @param OnSuccess Called upon successful op.
+	 * - Returns { GroupId, KickedUserId }
+	 * @param OnError Called upon failed op.
+	 */
+	void KickGroupMember(const FString UserId
+		, const THandler<FAccelByteModelsKickGroupMemberResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 	#pragma endregion /Group Member (individuals)
-
 
 	#pragma region Group Roles (permissions)
 	/**
-	* @brief Get list of [group] member roles.
-	* - Required Member Role Permission: "GROUP:ROLE [READ]".
-	* 
-	* Action code: 73201
-	*
-	* @param RequestContent { Limit=1, Offset=0 }
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void GetMemberRoles(
-		const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const THandler<FAccelByteModelsGetMemberRolesListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Get list of [group] member roles.
+	 * - Required Member Role Permission: "GROUP:ROLE [READ]".
+	 * 
+	 * Action code: 73201
+	 *
+	 * @param RequestContent { Limit=1, Offset=0 }
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void GetMemberRoles(const FAccelByteModelsLimitOffsetRequest& RequestContent
+		, const THandler<FAccelByteModelsGetMemberRolesListResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
-	* @brief Assign a role to a group member.
-	* - AKA AddMemberRole.
-	* - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
-	* 
-	* Action code: 73204
-	*
-	* @param MemberRoleId of the role you want to assign.
-	* @param RequestContent { UserId } of the user you want to assign the role to.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void AssignMemberRole(
-		const FString& MemberRoleId,
-		const FAccelByteModelsUserIdWrapper& RequestContent,
-		const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Assign a role to a group member.
+	 * - AKA AddMemberRole.
+	 * - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
+	 * 
+	 * Action code: 73204
+	 *
+	 * @param MemberRoleId of the role you want to assign.
+	 * @param RequestContent { UserId } of the user you want to assign the role to.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void AssignMemberRole(const FString& MemberRoleId
+		, const FAccelByteModelsUserIdWrapper& RequestContent
+		, const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Remove a role from a group member.
-	* - AKA RevokeMemberRole, RemoveMemberRole.
-	* - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
-	* 
-	* Action code: 73204
-	*
-	* @param MemberRoleId of the role you want to delete.
-	* @param RequestContent { UserId } of the user you want to delete the role from.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void DeleteMemberRole(
-		const FString& MemberRoleId,
-		const FAccelByteModelsUserIdWrapper& RequestContent,
-		const FVoidHandler& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Remove a role from a group member.
+	 * - AKA RevokeMemberRole, RemoveMemberRole.
+	 * - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
+	 * 
+	 * Action code: 73204
+	 *
+	 * @param MemberRoleId of the role you want to delete.
+	 * @param RequestContent { UserId } of the user you want to delete the role from.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void DeleteMemberRole(const FString& MemberRoleId
+		, const FAccelByteModelsUserIdWrapper& RequestContent
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 	#pragma endregion /Group Roles (permissions)
-
 
 	#pragma region Member Requests
 	/**
@@ -508,11 +483,10 @@ public:
 	 * @param OnSuccess Paginated.
 	 * @param OnError 
 	 */
-	void GetGroupJoinRequests(
-		const FString& GroupId,
-		const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	void GetGroupJoinRequests(const FString& GroupId
+		, const FAccelByteModelsLimitOffsetRequest& RequestContent
+		, const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get group invitation request list for the user calling this endpoint.
@@ -525,10 +499,9 @@ public:
 	 * @param OnSuccess Paginated.
 	 * @param OnError 
 	 */
-	void GetGroupInvitationRequests(
-		const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	void GetGroupInvitationRequests(const FAccelByteModelsLimitOffsetRequest& RequestContent
+		, const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 	#pragma endregion /Member Requests
 	
 private:

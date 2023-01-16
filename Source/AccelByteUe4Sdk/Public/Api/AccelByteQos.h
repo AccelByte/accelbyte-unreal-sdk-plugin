@@ -5,9 +5,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteSettings.h"
 #include "Core/AccelByteDefines.h"
 #include "Models/AccelByteQosModels.h"
 
@@ -36,29 +36,35 @@ public:
 	 * @param OnSuccess If polling, this will also call every ping update success.
 	 * @param OnError If polling, this will also call every ping update error.
 	 */
-	void GetServerLatencies(
-		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
-		const FErrorHandler& OnError);
+	void GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Check server latencies (ping) per-region that have status ACTIVE
-	* @param OnSuccess If polling, this will also call every ping update success.
-	* @param OnError If polling, this will also call every ping update error.
-	*/
-	void GetActiveServerLatencies(
-		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Check server latencies (ping) per-region that have status ACTIVE
+	 * @param OnSuccess If polling, this will also call every ping update success.
+	 * @param OnError If polling, this will also call every ping update error.
+	 */
+	void GetActiveServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
+		, const FErrorHandler& OnError);
 
-	/** @brief Start the latency polling schedulers */
+	/**
+	 * @brief Start the latency polling schedulers
+	 */
 	void StartLatencyPollers();
 
-	/** @brief Wrapper for RemoveFromTicker() for PolllatenciesHandle and PollServerLatenciesHandle. */
+	/**
+	 * @brief Wrapper for RemoveFromTicker() for PollLatenciesHandle and PollServerLatenciesHandle.
+	 */
 	void StopLatencyPollers();
 
-	/** @brief Check whether latency polling schedulers are active */
+	/**
+	 * @brief Check whether latency polling schedulers are active
+	 */
 	bool AreLatencyPollersActive();
 
-	/** @brief Get cached latencies data */
+	/**
+	 * @brief Get cached latencies data
+	 */
 	const TArray<TPair<FString, float>>& GetCachedLatencies();
 	
 private:
@@ -94,14 +100,14 @@ private:
 
 	/**
 	 * @brief For each server, ping them and record add to Latency TArray.
-	 * - Then, ping each region and cache returend Latencies.
+	 * - Then, ping each region and cache returned Latencies.
 	 * @param QosServerList
 	 * @param OnSuccess
+	 * @param OnError
 	 */
-	void PingRegionsSetLatencies(
-		const FAccelByteModelsQosServerList& QosServerList,
-		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
-		const FErrorHandler& OnError);
+	void PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServerList
+		, const THandler<TArray<TPair<FString, float>>>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Sets QosServers, using this cache for future calls.
@@ -113,10 +119,9 @@ private:
 	 * @param OnPingRegionsSuccess Only calls back if bPingRegionsOnSuccess
 	 * @param OnError
 	 */
-	void CallGetQosServers(
-		const bool bPingRegionsOnSuccess,
-		const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess,
-		const FErrorHandler& OnError);
+	void CallGetQosServers(const bool bPingRegionsOnSuccess
+		, const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Poll every x second to refresh Latencies (pings) with cached (via QosServers) regions.

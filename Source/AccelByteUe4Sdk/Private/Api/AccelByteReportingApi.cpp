@@ -1,4 +1,4 @@
-// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -15,27 +15,18 @@ namespace Api
 Reporting::Reporting(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 Reporting::~Reporting()
 {}
 
-void Reporting::SubmitReport(const FAccelByteModelsReportingSubmitData ReportData, const THandler<FAccelByteModelsReportingSubmitResponse>& OnSuccess, const FErrorHandler & OnError)
+void Reporting::SubmitReport(const FAccelByteModelsReportingSubmitData ReportData
+	, const THandler<FAccelByteModelsReportingSubmitResponse>& OnSuccess
+	, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports"), *SettingsRef.ReportingServerUrl, *CredentialsRef.GetNamespace());
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
-
-	FJsonObjectConverter::UStructToJsonObjectString(ReportData, Content);
-	
 	if(ReportData.ObjectId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("ObjectID is Empty, You Should Fill it with UUID v4 without hyphen format"));
@@ -47,93 +38,106 @@ void Reporting::SubmitReport(const FAccelByteModelsReportingSubmitData ReportDat
 		OnError.ExecuteIfBound(404, TEXT("ObjectId doesn't follow the UUID V4 without hyphen format, You Should Fill it with UUID v4 without hyphen format"));
 		return;
 	}
-	
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports")
+		, *SettingsRef.ReportingServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ReportData, OnSuccess, OnError);
 }
 
-void Reporting::GetReasons(const FString & ReasonGroup, int32 const& Offset, int32 const& Limit, const THandler<FAccelByteModelsReasonsResponse>& OnSuccess, const FErrorHandler & OnError)
+void Reporting::SubmitChatReport(const FAccelByteModelsReportingSubmitDataChat& ReportData
+	, const THandler<FAccelByteModelsReportingSubmitResponse>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	if(ReportData.ChatId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(404, TEXT("Chat report failed! ChatId cannot be empty."));
+		return;
+	}
+	if(ReportData.UserId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(404, TEXT("Chat report failed! UserId cannot be empty."));
+		return;
+	}
+	if(ReportData.ChatTopicId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(404, TEXT("Chat report failed! ChatTopicId cannot be empty."));
+		return;
+	}
+	
+	FAccelByteModelsReportingSubmitDataChatRequest Request;
+	Request.Category = EAccelByteReportingCategory::CHAT;
+	Request.Comment = ReportData.Comment;
+	Request.Reason = ReportData.Reason;
+	Request.ObjectId = ReportData.ChatId;
+	Request.ObjectType = "chat";
+	Request.UserID = ReportData.UserId;
+
+	FAccelByteModelsReportingAdditionalInfoChat Additions;
+	Additions.TopicId = ReportData.ChatTopicId;
+	Additions.ChatCreatedAt = ReportData.ChatCreatedAt.ToIso8601();
+
+	Request.AdditionalInfo = Additions;
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports")
+	, *SettingsRef.ReportingServerUrl
+	, *CredentialsRef.GetNamespace());
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+}
+
+void Reporting::GetReasons(const FString & ReasonGroup
+	, int32 const& Offset
+	, int32 const& Limit
+	, const THandler<FAccelByteModelsReasonsResponse>& OnSuccess
+	, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasons"), *SettingsRef.ReportingServerUrl, *SettingsRef.Namespace);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
 
-	FString Query = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasons")
+		, *SettingsRef.ReportingServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> QueryParams;
 	if (!ReasonGroup.IsEmpty())
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("group=%s"), *ReasonGroup));
+		QueryParams.Add(TEXT("group"), *ReasonGroup);
 	}
 	if (Offset > 0)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
 	}
 	if (Limit > 0)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
 	}
 
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *Query));
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
-void Reporting::GetReasonGroups(int32 const& Offset, int32 const& Limit, const THandler<FAccelByteModelsReasonGroupsResponse>& OnSuccess, const FErrorHandler& OnError)
+void Reporting::GetReasonGroups(int32 const& Offset
+	, int32 const& Limit
+	, const THandler<FAccelByteModelsReasonGroupsResponse>& OnSuccess
+	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasonGroups"), *SettingsRef.ReportingServerUrl, *SettingsRef.Namespace);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
 
-	FString Query = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasonGroups")
+		, *SettingsRef.ReportingServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> QueryParams;
 	if (Offset > 0)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
 	}
 	if (Limit > 0)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
 	}
 
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *Query));
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 } // Namespace Api

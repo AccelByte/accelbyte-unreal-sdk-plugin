@@ -65,7 +65,7 @@ public:
 	Api::Item Item{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Wallet Wallet{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Fulfillment Fulfillment{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::CloudStorage CloudStorage{*CredentialsRef, FRegistry::Settings};
+	Api::CloudStorage CloudStorage{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Lobby Lobby{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Chat Chat{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::GameProfile GameProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};

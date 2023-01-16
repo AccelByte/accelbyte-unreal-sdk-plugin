@@ -8,7 +8,6 @@
 
 #include "Delegates/DelegateCombinations.h"
 #include "HttpManager.h"
-#include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteTask.h"
 #include "Core/AccelByteHttpCache.h"
 #include "Core/AccelByteDefines.h"
@@ -27,7 +26,7 @@ public:
 	 * @brief A delegate to handle specified HTTP status code when the HTTP request succeeded
 	 *			and then will return a task state as the next command for the scheduler to do
 	 *			various things on the task that track the HTTP request
-	 *			- Completed, Cancelled and Failed state will finish the task
+	 *			- Completed, CancelledUAccelByteBlueprintsCredentials and Failed state will finish the task
 	 *			- Running, Pending and Retrying state will retry the task
 	 *			- Paused state will pause the task
 	 *
@@ -62,6 +61,8 @@ public:
 	static void SetHeaderSDKVersion(const FString& Value) { HeaderSDKVersion = Value; }
 	static void SetHeaderOSSVersion(const FString& Value) { HeaderOSSVersion = Value; }
 	static void SetHeaderGameClientVersion(const FString& Value) { HeaderGameClientVersion = Value; }
+
+	Core::FAccelByteHttpCache& GetHttpCache() { return HttpCache; }
 
 protected:
 	static TMap<EHttpResponseCodes::Type, FHttpResponseCodeHandler> ResponseCodeDelegates;

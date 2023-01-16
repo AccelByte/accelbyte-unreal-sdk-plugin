@@ -18,7 +18,7 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FQueryAchievementsSuccess, const FAccelByteModelsPaginatedPublicAchievement&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api ")
-	static void QueryAchievements(const FString& Language, const EAccelByteAchievementListSortBy& SortBy, const FQueryAchievementsSuccess& OnSuccess, const FDErrorHandler& OnError, const int32& Offset, const int32& Limit);
+	static void QueryAchievements(const FString& Language, const EAccelByteAchievementListSortBy& SortBy, const FQueryAchievementsSuccess& OnSuccess, const FDErrorHandler& OnError, const int32& Offset, const int32& Limit,const FString& TagQuery);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetAchievementSuccess, const FAccelByteModelsMultiLanguageAchievement&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api ")
@@ -26,8 +26,12 @@ public:
 	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FQueryUserAchievementsSuccess, const FAccelByteModelsPaginatedUserAchievement&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api ")
-	static void QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy, const FQueryUserAchievementsSuccess& OnSuccess, const FDErrorHandler& OnError, const int32& Offset, const int32& Limit);
+	static void QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy, const FQueryUserAchievementsSuccess& OnSuccess, const FDErrorHandler& OnError, const int32& Offset, const int32& Limit, bool preferUnlocked,const FString& TagQuery);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api ")
 	static void UnlockAchievement(const FString& AchievementCode, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetTagSuccess, const FAccelByteModelsPaginatedPublicTag&, Result);
+	UFUNCTION(BlueprintCallable, Category="AccelByte | Achievement | Api")
+	static void GetTags(const FString& Name, const EAccelByteAchievementListSortBy& SortBy,const FGetTagSuccess& OnSuccess, const FDErrorHandler& OnError, const int32& Offset, const int32& Limit);
 };

@@ -16,12 +16,12 @@ namespace AccelByte
 {
 namespace Api
 {
+	
 GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
 	, ShuttingDown(false)
 {
 	CredentialsRef.OnLoginSuccess().AddRaw(this, &GameTelemetry::OnLoginSuccess);
@@ -55,7 +55,9 @@ void GameTelemetry::SetImmediateEventList(TArray<FString> const& EventNames)
 	ImmediateEvents = TSet<FString>(EventNames);
 }
 
-void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if (ShuttingDown)
 	{
@@ -133,9 +135,8 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 		}
 		EventPtrArray.Empty();
 
-		SendProtectedEvents(
-			TelemetryBodies,
-			FVoidHandler::CreateLambda(
+		SendProtectedEvents(TelemetryBodies
+			, FVoidHandler::CreateLambda(
 				[this, OnSuccessCallbacks]()
 				{
 					RemoveEventsFromCache();
@@ -143,8 +144,8 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 					{
 						OnSuccessCallback.ExecuteIfBound();
 					}
-				}),
-			FErrorHandler::CreateLambda(
+				})
+			, FErrorHandler::CreateLambda(
 				[OnErrorCallbacks](int32 Code, FString Message)
 				{
 					for (auto& OnErrorCallback : OnErrorCallbacks)
@@ -156,7 +157,9 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 	return true;
 }
 
-void GameTelemetry::SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void GameTelemetry::SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if (ShuttingDown)
 	{
@@ -165,13 +168,10 @@ void GameTelemetry::SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTeleme
 
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/protected/events"), *SettingsRef.GameTelemetryServerUrl);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/v1/protected/events")
+		, *SettingsRef.GameTelemetryServerUrl);
 
+	FString Content = TEXT("");
 	TArray<TSharedPtr<FJsonValue>> JsonArray;
 	for (auto const& Event : Events)
 	{
@@ -186,15 +186,7 @@ void GameTelemetry::SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTeleme
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonArray, Writer);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
 void GameTelemetry::LoadCachedEvents()
@@ -214,13 +206,13 @@ void GameTelemetry::LoadCachedEvents()
 			TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventList;
 			if (EventsJsonToArray(Pair.Value, EventList))
 			{
-				SendProtectedEvents(
-					EventList,
-					FVoidHandler::CreateLambda([this]()
-					{
-						RemoveEventsFromCache();
-					}),
-					FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage) {}));
+				SendProtectedEvents(EventList
+					, FVoidHandler::CreateLambda(
+						[this]()
+						{
+							RemoveEventsFromCache();
+						})
+					, FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage) {}));
 			}
 		}));
 }
@@ -235,10 +227,9 @@ void GameTelemetry::AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody>
 	FString TelemetryValues;
 	EventPtrArray.Add(Telemetry);
 	JobArrayQueueAsJsonString(TelemetryValues);
-	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(
-		TelemetryKey,
-		TelemetryValues,
-		THandler<bool>::CreateLambda([](bool IsSuccess){}));
+	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(TelemetryKey
+		, TelemetryValues
+		, THandler<bool>::CreateLambda([](bool IsSuccess){}));
 }
 
 void GameTelemetry::RemoveEventsFromCache()
@@ -248,9 +239,8 @@ void GameTelemetry::RemoveEventsFromCache()
 	{
 		return;
 	}
-	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->DeleteItem(
-		TelemetryKey,
-		FVoidHandler::CreateLambda([](){}));
+	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->DeleteItem(TelemetryKey
+		, FVoidHandler::CreateLambda([](){}));
 }
 
 bool GameTelemetry::JobArrayQueueAsJsonString(FString& OutJsonString)
@@ -276,7 +266,8 @@ bool GameTelemetry::JobArrayQueueAsJsonString(FString& OutJsonString)
 	return true;
 }
 
-bool GameTelemetry::EventsJsonToArray(FString& InJsonString, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray)
+bool GameTelemetry::EventsJsonToArray(FString& InJsonString
+	, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray)
 {
 	TSharedPtr<FJsonObject> JsonObjectPtr{ MakeShared<FJsonObject>() };
 

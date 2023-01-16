@@ -17,7 +17,8 @@ namespace AccelByte
 {
 namespace Api
 {
-class ACCELBYTEUE4SDK_API MatchmakingV2 : FApiBase
+
+class ACCELBYTEUE4SDK_API MatchmakingV2 : public FApiBase
 {
 public:
 	MatchmakingV2(Credentials const& InCredentialsRef, Settings const& InSettingRef, FHttpRetryScheduler& InHttpRef);
@@ -31,11 +32,10 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 * @param Optionals optional variables we can set for matchmaking process.
 	 */
-	void CreateMatchTicket(
-		const FString& MatchPool,
-		const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess,
-		const FErrorHandler& OnError,
-		const FAccelByteModelsV2MatchTicketOptionalParams& Optionals = {});
+	void CreateMatchTicket(const FString& MatchPool
+		, const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess
+		, const FErrorHandler& OnError
+		, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals = {});
 
 	/**
 	 * @brief Get the match ticket details, will get the status of match ticket if it's already matched
@@ -45,10 +45,9 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 */
-	void GetMatchTicketDetails(
-		const FString& TicketId,
-		const THandler<FAccelByteModelsV2MatchmakingGetTicketDetailsResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	void GetMatchTicketDetails(const FString& TicketId
+		, const THandler<FAccelByteModelsV2MatchmakingGetTicketDetailsResponse>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Delete the match ticket. Will cancel the matchmaking process on success.
@@ -57,10 +56,9 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 */
-	void DeleteMatchTicket(
-	const FString& TicketId,
-	const FVoidHandler& OnSuccess,
-	const FErrorHandler& OnError);
+	void DeleteMatchTicket(const FString& TicketId
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 	
 private:
 	MatchmakingV2() = delete;
@@ -68,5 +66,6 @@ private:
 	MatchmakingV2(MatchmakingV2&&) = delete;
 	
 };
+
 }
 }

@@ -120,6 +120,11 @@ public:
 	*/
 	void GetItem(const FString& Key, const THandler<TPair<FString, FJsonObjectWrapper>>& OnDone, const FString& TableName = TEXT("DefaultFileName")) override;
 
+	/**
+	* @brief Helper function
+	*/
+	FDirectoryPath GetAbsoluteFileDirectory() { return AbsoluteFileDirectory; }
+
 protected:
 	/**
 	* @brief The main storage directory.

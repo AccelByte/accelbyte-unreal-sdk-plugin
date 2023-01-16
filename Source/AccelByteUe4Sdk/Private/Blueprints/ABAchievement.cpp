@@ -15,7 +15,8 @@ void UABAchievement::QueryAchievements(
 	FDModelsPaginatedPublicAchievementResponse const& OnSuccess,
 	FDErrorHandler const& OnError,
 	int32 const& Offset,
-	int32 const& Limit
+	int32 const& Limit,
+	FString const& TagQuery
 )
 {
 	ApiClientPtr->Achievement.QueryAchievements(
@@ -34,7 +35,8 @@ void UABAchievement::QueryAchievements(
 			}
 		),
 		Offset,
-		Limit
+		Limit,
+		TagQuery
 	);
 }
 
@@ -67,7 +69,8 @@ void UABAchievement::QueryUserAchievements(
 	FDErrorHandler const& OnError,
 	int32 const& Offset,
 	int32 const& Limit,
-	bool PreferUnlocked
+	bool PreferUnlocked,
+	FString const& TagQuery
 )
 {
 	ApiClientPtr->Achievement.QueryUserAchievements(
@@ -86,7 +89,8 @@ void UABAchievement::QueryUserAchievements(
 		),
 		Offset,
 		Limit,
-		PreferUnlocked
+		PreferUnlocked,
+		TagQuery
 	);
 }
 
@@ -111,4 +115,27 @@ void UABAchievement::UnlockAchievement(
 			}
 		)
 	);
+}
+
+void UABAchievement::GetTags(
+	FString const& Name,
+	EAccelByteAchievementListSortBy const& SortBy,
+	FDModelsPaginatedPublicTagResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	int32 const& Offset, int32 const& Limit)
+{
+	ApiClientPtr->Achievement.GetTags(
+		Name,
+		SortBy,
+		THandler<FAccelByteModelsPaginatedPublicTag>::CreateLambda(
+			[OnSuccess](FAccelByteModelsPaginatedPublicTag const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int const Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		),Offset,Limit);
 }

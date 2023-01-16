@@ -24,16 +24,14 @@ const FString DSMCServerClaimedTopic = TEXT("serverClaimed");
 const FString MMV2BackfillProposalTopic = TEXT("BACKFILL_PROPOSAL");
 
 ServerDSHub::ServerDSHub(
-	ServerCredentials& InCredentialsRef,
+	ServerCredentials const& InCredentialsRef,
 	ServerSettings const& InSettingsRef,
 	FHttpRetryScheduler& InHttpRef,
 	float InPingDelay,
 	float InInitialBackoffDelay,
 	float InMaxBackoffDelay,
 	float InTotalTimeout)
-	: CredentialsRef(InCredentialsRef)
-	, SettingsRef(InSettingsRef)
-	, HttpRef(InHttpRef)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, PingDelay(InPingDelay)
 	, InitialBackoffDelay(InInitialBackoffDelay)
 	, MaxBackoffDelay(InMaxBackoffDelay)
@@ -69,7 +67,7 @@ void ServerDSHub::Connect(const FString& InBoundServerName)
 
 	WebSocket->Connect();
 
-	UE_LOG(LogAccelByteDSHub, Log, TEXT("Connecting to %s"), *SettingsRef.DSHubServerUrl);
+	UE_LOG(LogAccelByteDSHub, Log, TEXT("Connecting to %s"), *ServerSettingsRef.DSHubServerUrl);
 }
 
 void ServerDSHub::Disconnect(bool bForceCleanup /*= false*/)
@@ -122,9 +120,9 @@ void ServerDSHub::CreateWebSocket()
 	Headers.Add(DSHubServerNameHeader, BoundServerName);
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 
-	WebSocket = AccelByteWebSocket::Create(*SettingsRef.DSHubServerUrl,
+	WebSocket = AccelByteWebSocket::Create(*ServerSettingsRef.DSHubServerUrl,
 		TEXT("wss"),
-		CredentialsRef,
+		ServerCredentialsRef,
 		Headers,
 		TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()),
 		PingDelay,

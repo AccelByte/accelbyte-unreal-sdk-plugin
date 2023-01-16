@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteServerApiBase.h"
 #include "Models/AccelByteDSHubModels.h"
 #include "Models/AccelByteMatchmakingModels.h"
 
@@ -31,10 +32,10 @@ DECLARE_DELEGATE_OneParam(FOnV2BackfillProposalNotification, const FAccelByteMod
  * @brief DS Hub API for communication from dedicated server to backend.
  * Unlike other servers which use HTTP, DS hub server uses WebSocket (RFC 6455).
  */
-class ACCELBYTEUE4SDK_API ServerDSHub
+class ACCELBYTEUE4SDK_API ServerDSHub : public FServerApiBase
 {
 public:
-	ServerDSHub(ServerCredentials& InCredentialsRef
+	ServerDSHub(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
 		, FHttpRetryScheduler& InHttpRef
 		, float InPingDelay = 30.f
@@ -83,10 +84,6 @@ public:
 	void UnbindDelegates();
 
 private:
-	ServerCredentials& CredentialsRef;
-	ServerSettings const& SettingsRef;
-	FHttpRetryScheduler& HttpRef;
-
 	float PingDelay{};
 	float InitialBackoffDelay{};
 	float MaxBackoffDelay{};

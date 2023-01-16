@@ -5,9 +5,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Misc/DateTime.h"
 #include "Containers/Queue.h"
 #include "Containers/Set.h"
+#include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteDefines.h"
@@ -21,9 +21,9 @@ namespace Api
 {
 
 /**
-  * @brief Send telemetry data securely and the user should be logged in first.
+ * @brief Send telemetry data securely and the user should be logged in first.
  */
-class ACCELBYTEUE4SDK_API GameTelemetry
+class ACCELBYTEUE4SDK_API GameTelemetry : public FApiBase
 {
 public:
 	GameTelemetry(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -53,41 +53,52 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void Send(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	void Send(FAccelByteModelsTelemetryBody TelemetryBody
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Flush pending telemetry events
-	*/
+	 * @brief Flush pending telemetry events
+	 */
 	void Flush();
 
 	/**
-	* @brief Startup module
-	*/
+	 * @brief Startup module
+	 */
 	void Startup();
 
 	/**
-	* @brief Shutdown module
-	*/
+	 * @brief Shutdown module
+	 */
 	void Shutdown();
 
 private:
-	void SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	void SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+	
 	bool PeriodicTelemetry(float DeltaTime);
+	
 	void LoadCachedEvents();
+	
 	void AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody> Telemetry);
+	
 	void OnLoginSuccess(FOauth2Token const& Response);
+	
 	void RemoveEventsFromCache();
+	
 	bool JobArrayQueueAsJsonString(FString& OutJsonString);
-	bool EventsJsonToArray(FString& InJsonString, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray);
+	
+	bool EventsJsonToArray(FString& InJsonString
+		, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray);
+	
 	FString GetTelemetryKey();
 
 	GameTelemetry() = delete;
 	GameTelemetry(GameTelemetry const&) = delete;
 	GameTelemetry(GameTelemetry&&) = delete;
 
-	FHttpRetryScheduler& HttpRef;
 	Credentials& CredentialsRef;
-	Settings const& SettingsRef;
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;

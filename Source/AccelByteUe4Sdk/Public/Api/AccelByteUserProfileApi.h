@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiBase.h"
 #include "UObject/NoExportTypes.h"
 #include "Models/AccelByteUserProfileModels.h"
 #include "Core/AccelByteError.h"
@@ -20,23 +21,20 @@ namespace Api
 /**
  * @brief API to create, update, and get user's profile.
  */
-class ACCELBYTEUE4SDK_API UserProfile
+class ACCELBYTEUE4SDK_API UserProfile : public FApiBase
 {
 public:
 	UserProfile(const Credentials& Credentials, const Settings& Settings, FHttpRetryScheduler& InHttpRef);
 	~UserProfile();
-private:
-	FHttpRetryScheduler& HttpRef;
-	Credentials const& CredentialsRef;
-	Settings const& SettingsRef;
-public:
+
 	/**
 	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
 	 * 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get other user's public profile information. If it doesn't exist, that will be an error.
@@ -45,16 +43,20 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsPublicUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetPublicUserProfileInfo(FString UserId, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetPublicUserProfileInfo(FString UserId
+		, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief Batch get multiple user public profile informations.
+	 * @brief Batch get multiple user public profile information.
 	 *
 	 * @param UserIds Multiple user ids, separated by comma.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void BatchGetPublicUserProfileInfos(FString UserIds, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess, const FErrorHandler& OnError);
+	void BatchGetPublicUserProfileInfos(FString UserIds
+		, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.
@@ -62,16 +64,19 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetCustomAttributes(const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError);
+	void GetCustomAttributes(const THandler<FJsonObject>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.
-	*
-	* @param UserId The id of the user.
-	* @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void GetPublicCustomAttributes(const FString& UserId, const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError);
+	 * @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.
+	 *
+	 * @param UserId The id of the user.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetPublicCustomAttributes(const FString& UserId
+		, const THandler<FJsonObject>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
@@ -80,7 +85,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest
+		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Update user's current custom attributes profile information. If it doesn't exist, that will be an error.
@@ -89,7 +96,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateCustomAttributes(const FJsonObject& CustomAttributesUpdateRequest, const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError);
+	void UpdateCustomAttributes(const FJsonObject& CustomAttributesUpdateRequest
+		, const THandler<FJsonObject>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Create complete player profile. If it already exist, that will be an error.
@@ -98,7 +107,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest
+		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get User Profile Public Info By PublicId.
@@ -107,7 +118,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserProfilePublicInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetUserProfilePublicInfoByPublicId(const FString& PublicId, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FCustomErrorHandler& OnError);
+	void GetUserProfilePublicInfoByPublicId(const FString& PublicId
+		, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess
+		, const FCustomErrorHandler& OnError);
 
 	/**
 	 * @brief Create complete player profile. If it already exist, that will be an error.
@@ -117,8 +130,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void CreateUserProfile(const FString& UserId, FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest,
-	                       const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void CreateUserProfile(const FString& UserId
+		, FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest
+		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
@@ -128,8 +143,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateUserProfile(const FString& UserId, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest,
-	                       const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void UpdateUserProfile(const FString& UserId
+		, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest
+		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
@@ -138,8 +155,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetUserProfile(const FString& UserId, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess,
-	                    const FErrorHandler& OnError);
+	void GetUserProfile(const FString& UserId
+		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Generate an upload URL. It's valid for 10 minutes..
@@ -149,7 +167,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GenerateUploadURL(const FString& Folder, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError);
+	void GenerateUploadURL(const FString& Folder
+		, EAccelByteFileType FileType
+		, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Generate an upload URL for user content. It's valid for 10 minutes. There are 2 kinds of storage limitation per user : maximum file count and maximum file size.
@@ -160,8 +181,11 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Category Upload category. Supported categories: default, reporting. Default value : default.
 	 */
-	void GenerateUploadURLForUserContent(const FString& UserId, EAccelByteFileType FileType, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess, FErrorHandler const& OnError,
-		EAccelByteUploadCategory Category = EAccelByteUploadCategory::DEFAULT);
+	void GenerateUploadURLForUserContent(const FString& UserId
+		, EAccelByteFileType FileType
+		, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, EAccelByteUploadCategory Category = EAccelByteUploadCategory::DEFAULT);
 
 	/**
 	 * @brief Get user's own private custom attribute profile information. If it doesn't exist, that will be an error.
@@ -169,7 +193,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetPrivateCustomAttributes(const THandler<FJsonObjectWrapper>& OnSuccess, const FErrorHandler& OnError);
+	void GetPrivateCustomAttributes(const THandler<FJsonObjectWrapper>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Update user's own private custom attributes profile information. If it doesn't exist, that will be an error.
@@ -178,7 +203,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdatePrivateCustomAttributes(const FJsonObject& PrivateCustomAttributesUpdateRequest, const THandler<FJsonObjectWrapper>& OnSuccess, const FErrorHandler& OnError);
+	void UpdatePrivateCustomAttributes(const FJsonObject& PrivateCustomAttributesUpdateRequest
+		, const THandler<FJsonObjectWrapper>& OnSuccess
+		, const FErrorHandler& OnError);
 
 private:
 	UserProfile() = delete;

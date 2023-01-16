@@ -25,14 +25,16 @@ namespace AccelByte
 		return FString::Format(*Url, UrlArgs);
 	}
 
-	void FHttpClient::AddApiAuthorizationIfAvailable(TMap<FString, FString>& Headers) const
+	bool FHttpClient::AddApiAuthorizationIfAvailable(TMap<FString, FString>& Headers) const
 	{
 		const FString AccessToken = CredentialsRef.GetAccessToken();
 
 		if (!AccessToken.IsEmpty())
 		{
 			Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *AccessToken));
+			return true;
 		}
+		return false;
 	}
 
 	FString FHttpClient::EncodeParamsData(const TMap<FString, FString>& ParamsData) const
@@ -66,5 +68,22 @@ namespace AccelByte
 
 	FHttpClient::~FHttpClient()
 	{
+	}
+
+	bool FHttpClient::IsValidUrl(const FString& Url)
+	{
+		FRegexPattern UrlRegex(TEXT(REGEX_URL));
+		FRegexMatcher Matcher(UrlRegex, Url);
+		return Matcher.FindNext();
+	}
+
+	void FHttpClient::ExecuteError(const FErrorHandler& OnError, const FString& ErrorText)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), ErrorText);
+	}
+
+	void FHttpClient::ExecuteError(const FCustomErrorHandler& OnError, const FString& ErrorText)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), ErrorText, FJsonObject{});
 	}
 }

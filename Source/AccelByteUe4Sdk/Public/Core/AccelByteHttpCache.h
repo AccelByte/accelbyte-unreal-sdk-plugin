@@ -6,37 +6,40 @@
 
 #include "CoreMinimal.h"
 #include "HttpManager.h"
+#include "Misc/ScopeLock.h"
+#include "Misc/ScopeTryLock.h"
 #include "Core/AccelByteLRUCache.h"
+#include "Models/AccelByteGeneralModels.h"
 
 namespace AccelByte
 {
 
 	namespace Core
 	{
-		struct FAccelByteHttpCacheItem
-		{
-			// Platform time until cached response is stale (in seconds)
-			double ExpireTime{0};
-
-			// Completed request with valid response
-			FHttpRequestPtr Request;
-		};
-
 		class ACCELBYTEUE4SDK_API FAccelByteHttpCache
 		{
 		public:
 
+			FAccelByteHttpCache();
 			virtual ~FAccelByteHttpCache();
 
 			bool TryRetrieving(FHttpRequestPtr& Out, FHttpResponsePtr& OutCachedResponse);
 			bool TryStoring(const FHttpRequestPtr& Request);
 			void ClearCache();
 
+			/**
+			 * @brief To be called by CreateHttpResultHandler to obtain the CacheItem
+			 *
+			 * @param The CompletedRequest
+			 * @return Return pointer to the cache , else return nullpointer if invalid
+			*/
+			FAccelByteHttpCacheItem* GetSerializedHttpCache(const FHttpRequestPtr& Request);
+
 		protected:
 
 			static int MaxAgeCacheThreshold;
 
-			FAccelByteLRUCache<FAccelByteHttpCacheItem> CachedItems;
+			TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> CachedItems;
 
 			static FName ConstructKey(const FHttpRequestPtr& Request);
 
@@ -46,6 +49,8 @@ namespace AccelByte
 				FRESH,
 				WAITING_REFRESH //if the cached item has an ETag value and it still has a chance to get 304 response from the cloud storage provider
 			};
+
+			FCriticalSection CacheCritSection;
 
 		public:
 

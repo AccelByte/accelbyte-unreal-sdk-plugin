@@ -12,6 +12,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteDefines.h"
+#include "Core/AccelByteServerApiBase.h"
 
 namespace AccelByte
 {
@@ -23,7 +24,7 @@ namespace GameServerApi
 /**
  * @brief Send telemetry data securely and server should be logged in first.
  */
-class ACCELBYTEUE4SDK_API ServerGameTelemetry
+class ACCELBYTEUE4SDK_API ServerGameTelemetry : public FServerApiBase
 {
 public:
 	ServerGameTelemetry(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -53,11 +54,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void Send(FAccelByteModelsTelemetryBody TelemetryBody
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Flush pending telemetry events
-	*/
+	 * @brief Flush pending telemetry events
+	 */
 	void Flush();
 
 private:
@@ -67,7 +70,9 @@ private:
 		FVoidHandler OnSuccess;
 		FErrorHandler OnError;
 
-		FJob(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandler OnSuccess, FErrorHandler OnError)
+		FJob(FAccelByteModelsTelemetryBody TelemetryBody
+			, FVoidHandler OnSuccess
+			, FErrorHandler OnError)
 			: TelemetryBody{TelemetryBody}
 			, OnSuccess{OnSuccess}
 			, OnError{OnError}
@@ -75,16 +80,15 @@ private:
 		}
 	};
 
-	void SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
+	
 	bool PeriodicTelemetry(float DeltaTime);
 
 	ServerGameTelemetry() = delete;
 	ServerGameTelemetry(ServerGameTelemetry const&) = delete;
 	ServerGameTelemetry(ServerGameTelemetry&&) = delete;
-
-	ServerCredentials const& CredentialsRef;
-	ServerSettings const& SettingsRef;
-	FHttpRetryScheduler& HttpRef;
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;

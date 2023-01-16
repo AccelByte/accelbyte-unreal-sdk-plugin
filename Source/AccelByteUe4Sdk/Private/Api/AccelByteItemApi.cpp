@@ -147,7 +147,7 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 			}
 		} 
 	}
-	const TMap<FString, FString> Params = FAccelByteUtilities::CreateQueryParamsAndSkipIfValueEmpty({
+	const TMap<FString, FString> Params = {
 		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
 		{ TEXT("region"), ItemCriteria.Region },
 		{ TEXT("language"), ItemCriteria.Language },
@@ -162,7 +162,7 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 		{ TEXT("sortBy"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(SortByStringArray)  },
 		{ TEXT("storeId"), StoreId },
 		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true"):TEXT("false")},
-	});
+	};
 	
 	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
 }
@@ -215,7 +215,11 @@ void Item::SearchItem(FString const& Language
 	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
 }
 
-void Item::GetItemBySku(FString const& Sku, FString const& Language, FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError)
+void Item::GetItemBySku(FString const& Sku
+	, FString const& Language
+	, FString const& Region
+	, THandler<FAccelByteModelsItemInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -322,7 +326,7 @@ void Item::GetItemDynamicData(FString const& ItemId
 		, *CredentialsRef.GetNamespace()
 		, *ItemId);
 
-	HttpClient.ApiRequest(Verb, Url, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
 
 void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
@@ -341,7 +345,7 @@ void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> cons
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	HttpClient.ApiRequest(Verb, Url, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
 	
 } // Namespace Api

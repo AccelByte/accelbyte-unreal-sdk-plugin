@@ -16,85 +16,84 @@ namespace Api
 Leaderboard::Leaderboard(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
-	Leaderboard::~Leaderboard()
-	{}
+Leaderboard::~Leaderboard()
+{}
 
-	void Leaderboard::GetRankings(FString const& LeaderboardCode, EAccelByteLeaderboardTimeFrame const& TimeFrame, uint32 Offset, uint32 Limit, THandler<FAccelByteModelsLeaderboardRankingResult> const& OnSuccess, FErrorHandler const& OnError)
+void Leaderboard::GetRankings(FString const& LeaderboardCode
+	, EAccelByteLeaderboardTimeFrame const& TimeFrame
+	, uint32 Offset
+	, uint32 Limit
+	, THandler<FAccelByteModelsLeaderboardRankingResult> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString TimeFrameString = "";
+
+	switch (TimeFrame)
 	{
-		FReport::Log(FString(__FUNCTION__));
-
-		FString TimeFrameString = "";
-		switch (TimeFrame)
-		{
-		case EAccelByteLeaderboardTimeFrame::ALL_TIME:
-			TimeFrameString = "alltime";
-			break;
-		case EAccelByteLeaderboardTimeFrame::CURRENT_SEASON:
-			TimeFrameString = "season";
-			break;
-		case EAccelByteLeaderboardTimeFrame::CURRENT_MONTH:
-			TimeFrameString = "month";
-			break;
-		case EAccelByteLeaderboardTimeFrame::CURRENT_WEEK:
-			TimeFrameString = "week";
-			break;
-		case EAccelByteLeaderboardTimeFrame::TODAY:
-			TimeFrameString = "today";
-			break;
-		default:
-			break;
-		}
-			FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/%s"), *SettingsRef.LeaderboardServerUrl, *SettingsRef.Namespace, *LeaderboardCode, *TimeFrameString);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-		
-		if (Offset > 0 || Limit > 0)
-		{
-			Url.Append("?");
-			if (Offset > 0)
-			{
-				Url.Append(FString::Printf(TEXT("offset=%d&"), Offset));
-			}
-			if (Limit > 0)
-			{
-				Url.Append(FString::Printf(TEXT("limit=%d"), Limit));
-			}
-		}
-
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-		
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	case EAccelByteLeaderboardTimeFrame::ALL_TIME:
+		TimeFrameString = "alltime";
+		break;
+	case EAccelByteLeaderboardTimeFrame::CURRENT_SEASON:
+		TimeFrameString = "season";
+		break;
+	case EAccelByteLeaderboardTimeFrame::CURRENT_MONTH:
+		TimeFrameString = "month";
+		break;
+	case EAccelByteLeaderboardTimeFrame::CURRENT_WEEK:
+		TimeFrameString = "week";
+		break;
+	case EAccelByteLeaderboardTimeFrame::TODAY:
+		TimeFrameString = "today";
+		break;
+	default:
+		break;
 	}
 
-	void Leaderboard::GetUserRanking(FString const& UserId, FString const& LeaderboardCode, THandler<FAccelByteModelsUserRankingData> const& OnSuccess, FErrorHandler const& OnError)
-	{
-		FReport::Log(FString(__FUNCTION__));
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/%s")
+		, *SettingsRef.LeaderboardServerUrl
+		, *SettingsRef.Namespace
+		, *LeaderboardCode
+		, *TimeFrameString);
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s"), *SettingsRef.LeaderboardServerUrl, *SettingsRef.Namespace, *LeaderboardCode, *UserId);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-		
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-		
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	TMap<FString, FString> QueryParams;
+
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
 	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+	
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/json")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
+}
+
+void Leaderboard::GetUserRanking(FString const& UserId
+	, FString const& LeaderboardCode
+	, THandler<FAccelByteModelsUserRankingData> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s")
+		, *SettingsRef.LeaderboardServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *LeaderboardCode
+		, *UserId);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
 
 } // Namespace Api
 } // Namespace AccelByte

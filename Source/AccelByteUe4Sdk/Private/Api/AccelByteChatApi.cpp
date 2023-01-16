@@ -337,28 +337,25 @@ namespace AccelByte
 
 #pragma endregion
 
-		Chat::Chat(
-			Credentials& InCredentialsRef,
-			Settings const& InSettingsRef,
-			FHttpRetryScheduler& InHttpRef,
-			float PingDelay,
-			float InitialBackoffDelay,
-			float MaxBackoffDelay,
-			float TotalTimeout,
-			TSharedPtr<IWebSocket> WebSocket)
-			:
-			HttpRef{InHttpRef},
-			CredentialsRef{InCredentialsRef},
-			SettingsRef{InSettingsRef},
-			PingDelay(PingDelay),
-			InitialBackoffDelay(InitialBackoffDelay),
-			MaxBackoffDelay(MaxBackoffDelay),
-			TotalTimeout(TotalTimeout),
-			BackoffDelay(InitialBackoffDelay),
-			RandomizedBackoffDelay(InitialBackoffDelay),
-			TimeSinceLastPing(0.f),
-			TimeSinceLastReconnect(0.f),
-			TimeSinceConnectionLost(0)
+		Chat::Chat(Credentials& InCredentialsRef
+			, Settings const& InSettingsRef
+			, FHttpRetryScheduler& InHttpRef
+			, float PingDelay
+			, float InitialBackoffDelay
+			, float MaxBackoffDelay
+			, float TotalTimeout
+			, TSharedPtr<IWebSocket> WebSocket)
+			: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+			, ChatCredentialsRef{InCredentialsRef}
+			, PingDelay{PingDelay}
+			, InitialBackoffDelay{InitialBackoffDelay}
+			, MaxBackoffDelay{MaxBackoffDelay}
+			, TotalTimeout{TotalTimeout}
+			, BackoffDelay{InitialBackoffDelay}
+			, RandomizedBackoffDelay{InitialBackoffDelay}
+			, TimeSinceLastPing{0.0f}
+			, TimeSinceLastReconnect{0.0f}
+			, TimeSinceConnectionLost{0}
 		{
 		}
 
@@ -408,7 +405,7 @@ namespace AccelByte
 		void Chat::Disconnect()
 		{
 			FReport::Log(FString(__FUNCTION__));
-			CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
+			ChatCredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
 			if (WebSocket.IsValid())
 			{
 				WebSocket->Disconnect();
@@ -435,7 +432,7 @@ namespace AccelByte
 		void Chat::OnConnected()
 		{
 			UE_LOG(LogAccelByteChat, Display, TEXT("Connected"));
-			TokenRefreshDelegateHandle = CredentialsRef.OnTokenRefreshed().AddLambda([this](bool bSuccess)
+			TokenRefreshDelegateHandle = ChatCredentialsRef.OnTokenRefreshed().AddLambda([this](bool bSuccess)
 			{
 				if (bSuccess)
 				{
@@ -455,7 +452,9 @@ namespace AccelByte
 			ConnectError.ExecuteIfBound(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed), ErrorMessages::Default.at(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed)) + TEXT(" Reason: ") + Error);
 		}
 
-		void Chat::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
+		void Chat::OnClosed(int32 StatusCode
+			, const FString& Reason
+			, bool WasClean)
 		{
 			if (StatusCode >= 4000 && !bBanNotifReceived)
 			{
@@ -564,7 +563,9 @@ namespace AccelByte
 		*@tparam [in out] IdResponseMap map containing cached id message and it's respective success delegate
 		*/
 		template <typename FSuccessModel, typename FOnSuccess, typename FOnError>
-		void HandleSuccessErrorResponse(const FOnError& OnError, const TSharedPtr<FJsonObject>& MessageAsJsonObj, TMap<FString, FOnSuccess>& IdResponseMap)
+		void HandleSuccessErrorResponse(const FOnError& OnError
+			, const TSharedPtr<FJsonObject>& MessageAsJsonObj
+			, TMap<FString, FOnSuccess>& IdResponseMap)
 		{
 			TSharedPtr<FJsonValue> IDValue = MessageAsJsonObj->TryGetField(ChatToken::Json::Field::MessageId);
 			const FString MessageId = IDValue.Get()->AsString();
@@ -627,7 +628,12 @@ namespace AccelByte
 #define MODEL_RESPONSE(MessageType) FAccelByteModelsChat ## MessageType ## Response
 #define CASE_RESPONSE_ID(MessageType) CASE_RESPONSE_ID_EXPLICIT_MODEL(MessageType, MODEL_RESPONSE(MessageType))
 
-		void Chat::ProcessFragmentedMessage(const FString& InMessage, const FString& InEnvelopeStart, const FString& InEnvelopeEnd, FString& InOutEnvelopeBuffer, FString& OutMessage, bool& OutIsMessageEnd)
+		void Chat::ProcessFragmentedMessage(const FString& InMessage
+			, const FString& InEnvelopeStart
+			, const FString& InEnvelopeEnd
+			, FString& InOutEnvelopeBuffer
+			, FString& OutMessage
+			, bool& OutIsMessageEnd)
 		{
 			OutMessage = "";
 			if(!InEnvelopeStart.IsEmpty() || !InEnvelopeStart.IsEmpty())
@@ -743,7 +749,7 @@ namespace AccelByte
 				{
 					bBanNotifReceived = true;
 					FAccelByteModelsChatUserBanUnbanNotif Data;
-					CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
+					ChatCredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
 					TSharedPtr<FJsonObject> Result = MessageAsJsonObj->GetObjectField(ChatToken::Json::Field::Params);
 					if (const bool bParseSuccess = FJsonObjectConverter::JsonObjectToUStruct(Result.ToSharedRef(), &Data, 0, 0))
 					{
@@ -814,14 +820,16 @@ namespace AccelByte
 		// Macro to reduce boiler plate code for sending request through websocket that cant be done using template function
 #define SEND_REQUEST(MessageType) SEND_REQUEST_EXPLICIT_MODEL(MessageType, REQUEST_MODEL(MessageType))
 
-		void Chat::CreatePersonalTopic(const FString& TargetUserId, const FChatActionTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::CreatePersonalTopic(const FString& TargetUserId
+			, const FChatActionTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 
 			const FString Self = CredentialsRef.GetUserId();
 			FJsonDomBuilder::FObject Params;
 			Params.Set(ChatToken::Json::Field::Type, ChatToken::Json::Value::ChatGroupTypePrivate);
-			Params.Set(ChatToken::Json::Field::Namespace, SettingsRef.Namespace);
+			Params.Set(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
 			FJsonDomBuilder::FArray Members;
 			Members.Add(Self);
 			Members.Add(TargetUserId);
@@ -830,9 +838,14 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(CreateTopic)
 		}
 
-		void Chat::CreateGroupTopic(const FAccelByteModelsChatCreateTopicRequest& Request, const FChatActionTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::CreateGroupTopic(const FAccelByteModelsChatCreateTopicRequest& Request
+			, const FChatActionTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
+
+			FReport::LogDeprecated(FString(__FUNCTION__),
+				TEXT("Manual topic creation is deprecated - please use V2 Sessions to auto-create chat topics"));
 
 			if (Request.Members.Num() == 0)
 			{
@@ -855,17 +868,21 @@ namespace AccelByte
 
 			TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
 			FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsChatCreateTopicRequest::StaticStruct(), &ToSendRequest, Params, 0, 0);
-			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, SettingsRef.Namespace);
+			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
 			Params.Get().SetStringField(ChatToken::Json::Field::Type, ChatToken::Json::Value::ChatGroupTypePublic);
 			SEND_CONTENT_CACHE_ID(CreateTopic)
 		}
 
-		void Chat::UpdateTopic(const FAccelByteModelsChatUpdateTopicRequest& Request, const FChatActionTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::UpdateTopic(const FAccelByteModelsChatUpdateTopicRequest& Request
+			, const FChatActionTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			SEND_REQUEST(UpdateTopic)
 		}
 
-		void Chat::DeleteTopic(const FString& ToDeleteTopicId, const FChatActionTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::DeleteTopic(const FString& ToDeleteTopicId
+			, const FChatActionTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
@@ -873,17 +890,23 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(DeleteTopic)
 		}
 
-		void Chat::AddUserToTopic(const FAccelByteModelsChatAddUserToTopicRequest& Request, const FAddRemoveUserFromTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::AddUserToTopic(const FAccelByteModelsChatAddUserToTopicRequest& Request
+			, const FAddRemoveUserFromTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			SEND_REQUEST(AddUserToTopic)
 		}
 
-		void Chat::RemoveUserFromTopic(const FAccelByteModelsChatRemoveUserFromTopicRequest& Request, const FAddRemoveUserFromTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::RemoveUserFromTopic(const FAccelByteModelsChatRemoveUserFromTopicRequest& Request
+			, const FAddRemoveUserFromTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			SEND_REQUEST(RemoveUserFromTopic)
 		}
 
-		void Chat::JoinTopic(const FString& TopicId, const FChatActionTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::JoinTopic(const FString& TopicId
+			, const FChatActionTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
@@ -891,7 +914,9 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(JoinTopic)
 		}
 
-		void Chat::QuitTopic(const FString& TopicId, const FChatActionTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::QuitTopic(const FString& TopicId
+			, const FChatActionTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
@@ -899,7 +924,10 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(QuitTopic)
 		}
 
-		void Chat::SendChat(const FString& TopicId, const FString& Message, const FSendChatResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::SendChat(const FString& TopicId
+			, const FString& Message
+			, const FSendChatResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 
@@ -916,16 +944,20 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(SendChat)
 		}
 
-		void Chat::QueryTopic(const FAccelByteModelsChatQueryTopicRequest& Request, const FQueryTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::QueryTopic(const FAccelByteModelsChatQueryTopicRequest& Request
+			, const FQueryTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
 			FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsChatQueryTopicRequest::StaticStruct(), &Request, Params, 0, 0);
-			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, SettingsRef.Namespace);
+			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
 			SEND_CONTENT_CACHE_ID(QueryTopic)
 		}
 
-		void Chat::QueryTopicById(const FString& TopicId, const FQueryTopicByIdResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::QueryTopicById(const FString& TopicId
+			, const FQueryTopicByIdResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
@@ -934,40 +966,51 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(QueryTopicById)
 		}
 
-		void Chat::QueryPersonalTopic(int Offset, int Limit, const FQueryTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::QueryPersonalTopic(int Offset
+			, int Limit
+			, const FQueryTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
-			Params.Set(ChatToken::Json::Field::Namespace, SettingsRef.Namespace);
+			Params.Set(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
 			Params.Set(ChatToken::Json::Field::Offset, Offset);
 			Params.Set(ChatToken::Json::Field::Limit, Limit);
 			SEND_CONTENT_CACHE_ID(QueryPersonalTopic)
 		}
 
-		void Chat::QueryGroupTopic(const FAccelByteModelsChatQueryTopicRequest& Request, const FQueryTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::QueryGroupTopic(const FAccelByteModelsChatQueryTopicRequest& Request
+			, const FQueryTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
 			FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsChatQueryTopicRequest::StaticStruct(), &Request, Params, 0, 0);
-			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, SettingsRef.Namespace);
+			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
 			SEND_CONTENT_CACHE_ID(QueryGroupTopic)
 		}
 
-		void Chat::QueryPublicTopic(const FAccelByteModelsChatQueryTopicRequest& Request, const FQueryPublicTopicResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::QueryPublicTopic(const FAccelByteModelsChatQueryTopicRequest& Request
+			, const FQueryPublicTopicResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
 			FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsChatQueryTopicRequest::StaticStruct(), &Request, Params, 0, 0);
-			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, SettingsRef.Namespace);
+			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
 			SEND_CONTENT_CACHE_ID(QueryPublicTopic)
 		}
 
-		void Chat::QueryChat(const FAccelByteModelsChatQueryChatRequest& Request, const FQueryChatResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::QueryChat(const FAccelByteModelsChatQueryChatRequest& Request
+			, const FQueryChatResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			SEND_REQUEST(QueryChat)
 		}
 
-		void Chat::ReadChat(const TSet<FString>& ChatIds, const FReadChatResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::ReadChat(const TSet<FString>& ChatIds
+			, const FReadChatResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
@@ -981,7 +1024,9 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(ReadChat)
 		}
 
-		void Chat::BlockUser(const FString& UserId, const FChatBlockUserResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::BlockUser(const FString& UserId
+			, const FChatBlockUserResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
@@ -989,7 +1034,9 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(BlockUser);
 		}
 
-		void Chat::UnblockUser(const FString& UserId, const FChatUnblockUserResponse& OnSuccess, const FErrorHandler& OnError)
+		void Chat::UnblockUser(const FString& UserId
+			, const FChatUnblockUserResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
@@ -997,7 +1044,9 @@ namespace AccelByte
 			SEND_CONTENT_CACHE_ID(UnblockUser);
 		}
 
-		FString Chat::RefreshToken(const FString& AccessToken, const FChatRefreshTokenResponse& OnSuccess, const FErrorHandler& OnError)
+		FString Chat::RefreshToken(const FString& AccessToken
+			, const FChatRefreshTokenResponse& OnSuccess
+			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
@@ -1014,7 +1063,8 @@ namespace AccelByte
 #undef MESSAGE_SUCCESS_HANDLER
 #undef ID_RESPONSE_MAP
 
-		FString Chat::SendWebSocketContent(const FString& Method, const TSharedRef<FJsonObject>& Params)
+		FString Chat::SendWebSocketContent(const FString& Method
+			, const TSharedRef<FJsonObject>& Params)
 		{
 			if (WebSocket.IsValid() && WebSocket->IsConnected())
 			{

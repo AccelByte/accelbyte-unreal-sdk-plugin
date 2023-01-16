@@ -15,71 +15,71 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
+void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId
+	, const FString& ClientSecret
+	, const THandler<FOauth2Token>& OnSuccess
+	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url             = FString::Printf(TEXT("%s/v3/oauth/token"), *SettingsRef.IamServerUrl);
-	FString Verb            = TEXT("POST");
-	FString ContentType     = TEXT("application/x-www-form-urlencoded");
-	FString Accept          = TEXT("application/json");
+	const FString Url       = FString::Printf(TEXT("%s/v3/oauth/token"), *ServerSettingsRef.IamServerUrl);
 	FString Content         = FString::Printf(TEXT("grant_type=client_credentials"));
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+	const TMap<FString, FString> Headers = {
+		{TEXT("Authorization"), Authorization},
+		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.Request(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
-void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess
+	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetAccessTokenWithClientCredentialsGrant(
-		CredentialsRef.GetOAuthClientId(),
-		CredentialsRef.GetOAuthClientSecret(),
-		THandler<FOauth2Token>::CreateLambda([this, OnSuccess](const FOauth2Token& Result)
-		{
-			OnLoginSuccess(OnSuccess, Result);
-		}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+	GetAccessTokenWithClientCredentialsGrant(ServerCredentialsRef.GetOAuthClientId()
+		, ServerCredentialsRef.GetOAuthClientSecret()
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess](const FOauth2Token& Result)
+			{
+				OnLoginSuccess(OnSuccess, Result);
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 }
 
-void ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess, FErrorHandler const& OnError) const
+void ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url             = FString::Printf(TEXT("%s/v3/oauth/jwks"), *SettingsRef.IamServerUrl);
-	FString Verb            = TEXT("GET");
-	FString Accept          = TEXT("application/json");
+	const FString Url = FString::Printf(TEXT("%s/v3/oauth/jwks")
+		, *ServerSettingsRef.IamServerUrl);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Accept"), Accept);
+	TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")}
+	};
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.Request(TEXT("GET"), Url, FString(), Headers, OnSuccess, OnError);
 }
 
 void ServerOauth2::ForgetAllCredentials()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	CredentialsRef.ForgetAll();
+	ServerCredentialsRef.ForgetAll();
 }
 
-void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response) const
+void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess
+	, const FOauth2Token& Response) const
 {
-	CredentialsRef.SetClientToken(Response.Access_token, Response.Expires_in, Response.Namespace);
+	ServerCredentialsRef.SetClientToken(Response.Access_token, Response.Expires_in, Response.Namespace);
 	FHttpRetryScheduler::SetHeaderNamespace(Response.Namespace);
 	OnSuccess.ExecuteIfBound();
 }
@@ -87,9 +87,8 @@ void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2To
 ServerOauth2::ServerOauth2(ServerCredentials& InCredentialsRef
 	, ServerSettings& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
-	, HttpRef{InHttpRef}
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, ServerCredentialsRef{InCredentialsRef}
 {}
 
 ServerOauth2::~ServerOauth2()

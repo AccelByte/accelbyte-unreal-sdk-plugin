@@ -12,59 +12,20 @@
 #include <unordered_map>
 
 #include "Models/AccelByteLobbyModels.h"
+#include "Models/AccelByteErrorModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteHttpCache.h"
+#include "Core/AccelByteTypeConverter.h"
 #include "AccelByteError.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE(FDHandler);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FDErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
 
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FErrorInfo
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-	int32 NumericErrorCode{-1};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-	int32 ErrorCode{-1};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-	int32 Code{-1};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-	FString ErrorMessage{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-	FString Message{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-	FString Error{};
-};
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FErrorOauthInfo
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	int32 ErrorCode{-1};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString ErrorMessage{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Error{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Error_description{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Error_uri{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Mfa_token{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	TArray<FString> Factors{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Default_factor{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString LinkingToken{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString PlatformId{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString ClientId{};
-};
-
 namespace AccelByte
 {
+	// forward declaration
+	class FHttpRetryScheduler;
+
 #if (ENGINE_MAJOR_VERSION == 5) || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION > 25)
 	template <typename T> using THandler = TDelegate<void(const T&)>;
 	template <typename T1, typename T2> using THandlerPayloadModifier = TDelegate<T1(T2)>;
@@ -572,17 +533,18 @@ namespace AccelByte
 #endif
 	}
 
-	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const FVoidHandler& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, TArray<uint8> Payload, const FVoidHandler& OnSuccess)
 	{
 		OnSuccess.ExecuteIfBound();
 		return true;
 	}
 
 	template<typename T>
-	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const THandler<TArray<T>>& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, TArray<uint8> Payload, const THandler<TArray<T>>& OnSuccess)
 	{
+		FString String = Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString();
 		TArray<T> Result;
-		bool bSuccess = FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+		bool bSuccess = FJsonObjectConverter::JsonArrayStringToUStruct(String, &Result, 0, 0);
 		if (bSuccess)
 		{
 			OnSuccess.ExecuteIfBound(Result);
@@ -592,17 +554,20 @@ namespace AccelByte
 	}
 
 	template<>
-	inline bool HandleHttpResultOk<uint8>(FHttpResponsePtr Response, const THandler<TArray<uint8>>& OnSuccess)
+	inline bool HandleHttpResultOk<uint8>(FHttpResponsePtr Response, TArray<uint8> Payload, const THandler<TArray<uint8>>& OnSuccess)
 	{
-		OnSuccess.ExecuteIfBound(Response->GetContent());
+		TArray<uint8> Integers = Response == nullptr ? Payload : Response->GetContent();
+		OnSuccess.ExecuteIfBound(Integers);
 		return true;
 	}
 
 	template<typename T>
-	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const THandler<T>& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, TArray<uint8> Payload, const THandler<T>& OnSuccess)
 	{
+		FString String = Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString();
+
 		typename std::remove_const<typename std::remove_reference<T>::type>::type Result;
-		bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+		bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(String, &Result, 0, 0);
 		if (bSuccess)
 		{
 			OnSuccess.ExecuteIfBound(Result);
@@ -611,16 +576,17 @@ namespace AccelByte
 	}
 
 	template<>
-	inline bool HandleHttpResultOk<FString>(FHttpResponsePtr Response, const THandler<FString>& OnSuccess)
+	inline bool HandleHttpResultOk<FString>(FHttpResponsePtr Response, TArray<uint8> Payload, const THandler<FString>& OnSuccess)
 	{
-		OnSuccess.ExecuteIfBound(Response->GetContentAsString());
+		FString String = Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString();
+		OnSuccess.ExecuteIfBound(String);
 		return true;
 	}
 
-	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, TArray<uint8> Payload, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess)
 	{
 		// custom http result for LobbyServer.GetPartyStorage
-		FString jsonString = Response->GetContentAsString();
+		FString jsonString = Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString();
 		int index = jsonString.Find("\"updatedAt\"");
 		int startIndex = 0, endIndex = 0;
 
@@ -650,10 +616,12 @@ namespace AccelByte
 		return bSuccess;
 	}
 
-	inline bool HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FJsonObject>& OnSuccess)
+	inline bool HandleHttpResultOk(FHttpResponsePtr Response, TArray<uint8> Payload, const THandler<FJsonObject>& OnSuccess)
 	{
+		FString String = Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString();
+
 		TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(String);
 		bool bSuccess = FJsonSerializer::Deserialize(Reader, JsonObject);
 		if (bSuccess)
 		{
@@ -663,15 +631,15 @@ namespace AccelByte
 	}
 
 	template<typename T>
-	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FErrorHandler& OnError)
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
-			[OnSuccess, OnError]
+			[OnSuccess, OnError, Scheduler]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 		{
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
-				if (!HandleHttpResultOk(Response, OnSuccess))
+				if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
 				{
 					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), "Invalid JSON response");
 				}
@@ -684,6 +652,19 @@ namespace AccelByte
 				return;
 			}
 
+			// If response is nulltpr then search the actual response in the cache
+			if (!Response.IsValid() && Scheduler != nullptr)
+			{
+				FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+				if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+				{
+					//Cache->SerializableRequestAndResponse.ResponsePayload.Num() != 0
+					auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
+					HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
+					return;
+				}
+			}
+
 			int32 Code;
 			FString Message;
 			HandleHttpError(Request, Response, Code, Message);
@@ -692,15 +673,15 @@ namespace AccelByte
 	}
 
 	template<typename T>
-	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FCustomErrorHandler& OnError)
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FCustomErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
-			[OnSuccess, OnError]
+			[OnSuccess, OnError, Scheduler]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 		{
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
-				if (!HandleHttpResultOk(Response, OnSuccess))
+				if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
 				{
 					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), "Invalid JSON response", FJsonObject{});
 				}
@@ -712,6 +693,19 @@ namespace AccelByte
                 OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.", FJsonObject{});
                 return;
             }
+
+			// If response is nulltpr then search the actual response in the cache
+			if (!Response.IsValid() && Scheduler != nullptr)
+			{
+				FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+				if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+				{
+					//Cache->SerializableRequestAndResponse.ResponsePayload.Num() != 0
+					auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
+					HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
+					return;
+				}
+			}
 
 			int32 Code;
 			FString Message;

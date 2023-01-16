@@ -16,30 +16,26 @@ namespace Api
 Miscellaneous::Miscellaneous(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 Miscellaneous::~Miscellaneous()
 {}
 
-	void Miscellaneous::GetServerCurrentTime(const THandler<FTime>& OnSuccess, const FErrorHandler& OnError)
-	{
-		FReport::Log(FString(__FUNCTION__));
+void Miscellaneous::GetServerCurrentTime(const THandler<FTime>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
 
-		FString Url = FString::Printf(TEXT("%s/v1/public/misc/time"), *SettingsRef.BasicServerUrl);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-		
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	}
+	const FString Url = FString::Printf(TEXT("%s/v1/public/misc/time"), *SettingsRef.BasicServerUrl);
+
+	const FString Accept = TEXT("application/json");
+
+	const TMap<FString, FString> Headers = {
+		{TEXT("Accept"), Accept}
+	};
+
+	HttpClient.Request(TEXT("GET"), Url, TEXT(""), Headers, OnSuccess, OnError);
+}
 
 } // Namespace Api
 } // Namespace AccelByte

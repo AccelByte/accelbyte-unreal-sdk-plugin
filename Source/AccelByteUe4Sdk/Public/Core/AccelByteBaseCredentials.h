@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Core/AccelByteError.h"
+#include "Models/AccelByteErrorModels.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteDefines.h"
 #include "Engine.h"

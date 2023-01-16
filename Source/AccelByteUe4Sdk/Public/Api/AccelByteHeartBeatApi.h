@@ -5,22 +5,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteDefines.h"
-#include "Core/AccelByteSettings.h"
 
 namespace AccelByte
 {
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API HeartBeat
+class ACCELBYTEUE4SDK_API HeartBeat : public FApiBase
 {
 public:
 	DECLARE_DELEGATE(FHeartBeatResponse);
 
-	HeartBeat(Settings& InSettingRef, FHttpRetryScheduler& InHttpRef);
+	HeartBeat(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~HeartBeat();
 
 	/**
@@ -39,13 +39,15 @@ public:
 	* @param OnHeartBeatResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetHeartBeatResponseDelegate(FHeartBeatResponse OnHeartBeatResponse, FErrorHandler OnError = {});
+	void SetHeartBeatResponseDelegate(FHeartBeatResponse OnHeartBeatResponse
+		, FErrorHandler OnError = {});
 
 	/** Enables or disables heart beat */
 	void SetHeartBeatEnabled(bool bEnable);
 
 	// Check whether heart beat is enabled
-	bool IsHeartBeatEnabled() const { return bEnableHeartBeat; };
+	bool IsHeartBeatEnabled() const { return bEnableHeartBeat; }
+
 private:
 	bool SendHeartBeatEvent(float DeltaTime);
 	void StartHeartBeatScheduler();
@@ -54,9 +56,6 @@ private:
 	HeartBeat() = delete;
 	HeartBeat(HeartBeat const&) = delete;
 	HeartBeat(HeartBeat&&) = delete;
-
-	FHttpRetryScheduler& HttpRef;
-	Settings& SettingRef;
 
 	bool bEnableHeartBeat = false;
 	bool bShuttingDown = false;

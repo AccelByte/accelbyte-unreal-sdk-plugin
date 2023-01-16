@@ -18,9 +18,7 @@ namespace GameServerApi
 ServerGameTelemetry::ServerGameTelemetry(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
-	, HttpRef(InHttpRef)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 ServerGameTelemetry::~ServerGameTelemetry()
@@ -50,7 +48,9 @@ void ServerGameTelemetry::SetImmediateEventList(const TArray<FString>& EventName
 	ImmediateEvents = TSet<FString>(EventNames);
 }
 
-void ServerGameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void ServerGameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
+	, const FVoidHandler& OnSuccess
+	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -95,32 +95,36 @@ bool ServerGameTelemetry::PeriodicTelemetry(float DeltaTime)
 		Jobs->Add(DequeueResult);
 	}
 
-	SendProtectedEvents(TelemetryBodies, FVoidHandler::CreateLambda([Jobs]()
-	{
-		for (auto& Job : *Jobs)
-		{
-			auto _ = Job->OnSuccess.ExecuteIfBound();
-		}
-	}), FErrorHandler::CreateLambda([Jobs](int32 Code, FString Message)
-	{
-		for (auto& Job : *Jobs)
-		{
-			auto _ = Job->OnError.ExecuteIfBound(Code, Message);
-		}
-	}));
+	SendProtectedEvents(TelemetryBodies
+		, FVoidHandler::CreateLambda(
+			[Jobs]()
+			{
+				for (auto& Job : *Jobs)
+				{
+					auto _ = Job->OnSuccess.ExecuteIfBound();
+				}
+			})
+		, FErrorHandler::CreateLambda(
+			[Jobs](int32 Code, FString Message)
+			{
+				for (auto& Job : *Jobs)
+				{
+					auto _ = Job->OnError.ExecuteIfBound(Code, Message);
+				}
+			}));
 
 	return true;
 }
 
-void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events
+	, const FVoidHandler& OnSuccess
+	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/protected/events"), *SettingsRef.GameTelemetryServerUrl);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	const FString Url = FString::Printf(TEXT("%s/v1/protected/events")
+		, *ServerSettingsRef.GameTelemetryServerUrl);
+
 	FString Content = TEXT("");
 
 	TArray<TSharedPtr<FJsonValue>> JsonArray;
@@ -134,18 +138,10 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 
 		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));
 	}
-	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonArray, Writer);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
 } 

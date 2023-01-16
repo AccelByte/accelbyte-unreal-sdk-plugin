@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [20.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.5.0%0D20.4.0) (2023-01-16)
+
+
+### Features
+
+* achievement query using tag and new get public tag endpoint ([2ac2d8e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2ac2d8e8a3c6c6a9ded9187b836efd42c9604c33))
+* add ApiRequest methods with Headers in FHttpClient ([5c5adf8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5c5adf8f8b228503f7a2661a91b4a073d4e7022a))
+* Add validation in the HTTP API calls to check empty auth token and invalid url ([725d3f3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/725d3f372c9273d53be2864a984c9e9fe8bfc76c))
+* **cache:** HTTP threadsafe ([7cf0270](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7cf0270c03d7ef8ff4d80fed92ecff6ffa6451c0))
+* **HTTP:** result handler parsing request/response from cache ([dd3705b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dd3705bd7ce700d414c94432316f1afca6e8724a))
+* **lobby:** update all Lobby responses to inherit LobbyBaseResponse class ([d951b13](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d951b13c0e64c9138846949b8320f9260d15843f))
+* **Reporting:** add chat reporting ([626a447](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/626a44765784b9ce748c770f5ce89e358d6cb2d3))
+* **session:** add player and DS status V2 ([80e4c2a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/80e4c2a6dacda41e811a74aeae85b685f04aad78))
+
+
+### Bug Fixes
+
+* empty values in required configurations only shown as warnings ([641e62d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/641e62d3147d1bc6300601a91672370e1648cd59))
+* failed GetCountryFromIP API because empty Bearer authorization header ([77224c4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/77224c4056ba98935859a5c9da47bedd6f21bc2a))
+* **SessionBrowser:** add missing query param in ServerSessionBrowser::GetGameSessions ([ad65469](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ad6546934b0a632127470d5653776ec9301f2f62))
+
 ## [20.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.4.0%0D20.3.0) (2023-01-03)
 
 

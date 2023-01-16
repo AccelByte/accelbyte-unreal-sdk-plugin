@@ -6,6 +6,9 @@
 
 #include "Core/AccelByteBaseCredentials.h"
 #include "Models/AccelByteOauth2Models.h"
+#include "Models/AccelByteErrorModels.h"
+#include "Models/AccelByteUserModels.h"
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteCredentials.generated.h"

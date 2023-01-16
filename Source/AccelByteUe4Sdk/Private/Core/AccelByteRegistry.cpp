@@ -72,7 +72,7 @@ Api::Order FRegistry::Order(FRegistry::Credentials, FRegistry::Settings, FRegist
 Api::Item FRegistry::Item(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Wallet FRegistry::Wallet(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Fulfillment FRegistry::Fulfillment(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::CloudStorage FRegistry::CloudStorage(FRegistry::Credentials, FRegistry::Settings);
+Api::CloudStorage FRegistry::CloudStorage(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Chat FRegistry::Chat(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
@@ -94,7 +94,7 @@ Api::Reward FRegistry::Reward(FRegistry::Credentials, FRegistry::Settings, FRegi
 Api::Session FRegistry::Session(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::MatchmakingV2 FRegistry::MatchmakingV2(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::TurnManager FRegistry::TurnManager(FRegistry::Credentials, FRegistry::Settings, HttpRetryScheduler);
-Api::HeartBeat FRegistry::HeartBeat(FRegistry::Settings, FRegistry::HttpRetryScheduler);
+Api::HeartBeat FRegistry::HeartBeat(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::StoreDisplay FRegistry::StoreDisplay(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);

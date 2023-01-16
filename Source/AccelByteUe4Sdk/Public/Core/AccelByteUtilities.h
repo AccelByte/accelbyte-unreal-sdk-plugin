@@ -345,19 +345,6 @@ public:
 
 #undef HAS_FIELD_REMOVAL_FLAG
 	}
-
-	static TMap<FString, FString> CreateQueryParamsAndSkipIfValueEmpty(TMap<FString, FString> Map)
-	{
-		TMap<FString, FString> Query = {};
-		for (auto kvp : Map)
-		{
-			if (!kvp.Key.IsEmpty() && !kvp.Value.IsEmpty())
-			{
-				Query.Add(kvp.Key, kvp.Value);
-			}
-		}
-		return Query;
-	}
 	
 	template<typename ObjectType> 
 	static bool UStructArrayToJsonObjectString(TArray<ObjectType> Objects, FString& OutString)

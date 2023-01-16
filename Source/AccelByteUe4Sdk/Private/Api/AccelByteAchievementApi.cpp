@@ -7,7 +7,6 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "JsonUtilities.h"
 #include "Core/AccelByteSettings.h"
 
 namespace AccelByte
@@ -18,9 +17,7 @@ namespace Api
 Achievement::Achievement(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 Achievement::~Achievement()
@@ -33,70 +30,53 @@ FString Achievement::ConvertAchievementSortByToString(const EAccelByteAchievemen
 	case EAccelByteAchievementListSortBy::LISTORDER:
 		return TEXT("listOrder");
 	case EAccelByteAchievementListSortBy::LISTORDER_ASC:
-		return TEXT("listOrder%3Aasc");
+		return TEXT("listOrder:asc");
 	case EAccelByteAchievementListSortBy::LISTORDER_DESC:
-		return TEXT("listOrder%3Adesc");
+		return TEXT("listOrder:desc");
 	case EAccelByteAchievementListSortBy::CREATED_AT:
 		return TEXT("createdAt");
 	case EAccelByteAchievementListSortBy::CREATED_AT_ASC:
-		return TEXT("createdAt%3Aasc");
+		return TEXT("createdAt:asc");
 	case EAccelByteAchievementListSortBy::CREATED_AT_DESC:
-		return TEXT("createdAt%3Adesc");
+		return TEXT("createdAt:desc");
 	case EAccelByteAchievementListSortBy::UPDATED_AT:
 		return TEXT("updatedAt");
 	case EAccelByteAchievementListSortBy::UPDATED_AT_ASC:
-		return TEXT("updatedAt%3Aasc");
+		return TEXT("updatedAt:asc");
 	case EAccelByteAchievementListSortBy::UPDATED_AT_DESC:
-		return TEXT("updatedAt%3Adesc");
+		return TEXT("updatedAt:desc");
+	default:
+		return TEXT("");
 	}
-	return TEXT("");
 }
 
-void Achievement::QueryAchievements(const FString& Language, const EAccelByteAchievementListSortBy& SortBy, const THandler<FAccelByteModelsPaginatedPublicAchievement>& OnSuccess, const FErrorHandler& OnError,
-	const int32& Offset, const int32& Limit)
+void Achievement::QueryAchievements(
+	const FString& Language,
+	const EAccelByteAchievementListSortBy& SortBy,
+	const THandler<FAccelByteModelsPaginatedPublicAchievement>& OnSuccess,
+	const FErrorHandler& OnError,
+	const int32& Offset, const int32& Limit, const FString& TagQuery)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace());
-	FString Verb            = TEXT("GET");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Query			= TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements")
+		, *SettingsRef.AchievementServerUrl
+		, *CredentialsRef.GetNamespace());
 
-	if (!Language.IsEmpty())
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("language=%s"), *Language));
-	}
-	if (SortBy != EAccelByteAchievementListSortBy::NONE)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("sortBy=%s"), *ConvertAchievementSortByToString(SortBy)));
-	}
-	if (Offset >= 0)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
-	}
-	if (Limit >= 0)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
-	}
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *Query));
+	const TMap<FString, FString> QueryParams = {
+		{TEXT("language"), Language.IsEmpty() ? TEXT("") : Language},
+		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+		{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : *TagQuery}
+	};
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Achievement::GetAchievement(const FString& AchievementCode, const THandler<FAccelByteModelsMultiLanguageAchievement>& OnSuccess, const FErrorHandler& OnError)
+void Achievement::GetAchievement(const FString& AchievementCode
+	, const THandler<FAccelByteModelsMultiLanguageAchievement>& OnSuccess
+	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -106,66 +86,42 @@ void Achievement::GetAchievement(const FString& AchievementCode, const THandler<
 		return;
 	}
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements/%s"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace(), *AchievementCode);
-	FString Verb			= TEXT("GET");
-	FString ContentType		= TEXT("application/json");
-	FString Accept			= TEXT("application/json");
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements/%s")
+		, *SettingsRef.AchievementServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *AchievementCode);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy, const THandler<FAccelByteModelsPaginatedUserAchievement>& OnSuccess, const FErrorHandler& OnError,
-	const int32& Offset, const int32& Limit, bool PreferUnlocked)
+void Achievement::QueryUserAchievements(
+	const EAccelByteAchievementListSortBy& SortBy,
+	const THandler<FAccelByteModelsPaginatedUserAchievement>& OnSuccess,
+	const FErrorHandler& OnError,
+	const int32& Offset, const int32& Limit, bool PreferUnlocked, const FString& TagQuery)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Query = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
+		, *SettingsRef.AchievementServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
 
-	if (SortBy != EAccelByteAchievementListSortBy::NONE)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("sortBy=%s"), *ConvertAchievementSortByToString(SortBy)));
-	}
-	if (Offset >= 0)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
-	}
-	if (Limit >= 0)
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
-	}
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("preferUnlocked=%s"), PreferUnlocked ? TEXT("true"):TEXT("false")));
-	}
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *Query));
+	const TMap<FString, FString> QueryParams = {
+		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+		{TEXT("preferUnlocked"), PreferUnlocked ? TEXT("true") : TEXT("false")},
+		{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : *TagQuery}
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
+	};
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Achievement::UnlockAchievement(const FString& AchievementCode, const FVoidHandler OnSuccess, const FErrorHandler& OnError)
+void Achievement::UnlockAchievement(const FString& AchievementCode
+	, const FVoidHandler OnSuccess
+	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -175,20 +131,29 @@ void Achievement::UnlockAchievement(const FString& AchievementCode, const FVoidH
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/%s/unlock"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *AchievementCode);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/%s/unlock")
+		, *SettingsRef.AchievementServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *AchievementCode);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+}
+	
+void Achievement::GetTags(FString const& Name, EAccelByteAchievementListSortBy const& SortBy, THandler<FAccelByteModelsPaginatedPublicTag> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset, int32 const& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace());
+	const FString Verb = TEXT("GET");
+
+	const TMap<FString, FString> QueryParams = {
+		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+	};
+	
+	HttpClient.ApiRequest(Verb,Url,QueryParams,OnSuccess,OnError);
 }
 
 } // Namespace Api

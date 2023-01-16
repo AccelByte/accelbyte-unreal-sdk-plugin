@@ -34,8 +34,13 @@ public:
 	 * @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
 	 * @param PopulateBundle Whether populate bundled items if it's a bundle, default value is false.
 	 */
-	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess, FErrorHandler const& OnError,
-		const FString& StoreId = TEXT(""), bool bPopulateBundle = false);
+	void GetItemById(FString const& ItemId
+		, FString const& Language
+		, FString const& Region
+		, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess
+		, FErrorHandler const& OnError
+		, const FString& StoreId = TEXT("")
+		, bool bPopulateBundle = false);
 
 	/**
 	 * @brief Get one item information from an online store.
@@ -46,7 +51,11 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPopulatedItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	 void GetItemByAppId(FString const& AppId, FString const& Language, FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError);
+	 void GetItemByAppId(FString const& AppId
+	 	, FString const& Language
+	 	, FString const& Region
+	 	, THandler<FAccelByteModelsItemInfo> const& OnSuccess
+	 	, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get an array of items with specific criteria/filter from online store.
@@ -63,9 +72,13 @@ public:
 	 * Note that It will only one available published store in each game namespace, if you assigned this with other, means you will be able to expose items on draft store.
 	 * Nonetheless it will only user who has SANDBOX role (set on AP) and has permission and ability to hit this end point with other StoreId value.
 	 */
-	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit,
-		THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError,
-		TArray<EAccelByteItemListSortBy> SortBy = { }, FString const& StoreId = TEXT(""));
+	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
+		, int32 const& Offset
+		, int32 const& Limit
+		, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, TArray<EAccelByteItemListSortBy> SortBy = {}
+		, FString const& StoreId = TEXT(""));
 
 	/**
 	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
@@ -78,7 +91,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError);
+	void SearchItem(FString const& Language
+		, FString const& Keyword
+		, int32 const& Offset
+		, int32 const& Limit
+		, FString const& Region
+		, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get Item information by SKU number from an online store.
@@ -89,7 +108,11 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetItemBySku(FString const& Sku, FString const& Language,FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError);
+	void GetItemBySku(FString const& Sku
+		, FString const& Language
+		, FString const& Region
+		, THandler<FAccelByteModelsItemInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get Dynamic Data information from specified Item
@@ -98,28 +121,35 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemDynamicData&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetItemDynamicData(FString const& ItemId, THandler<FAccelByteModelsItemDynamicData> const& OnSuccess, FErrorHandler const& OnError);
+	void GetItemDynamicData(FString const& ItemId
+		, THandler<FAccelByteModelsItemDynamicData> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
-	* @brief Get Item information by SKU number from an online store.
-	*
-	* @param ItemIds ItemId array.
-	* @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
-	* @param Language ISO 639-1 language tag, e.g., "en, "zh".
-	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
-	* @param OnError This will be called when the operation failed.
-	* @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
-	*/
-	void BulkGetLocaleItems(const TArray<FString>& ItemIds, const FString& Region, const FString& Language,
-		THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess, FErrorHandler const& OnError, const FString& StoreId = TEXT(""));
+	 * @brief Get Item information by SKU number from an online store.
+	 *
+	 * @param ItemIds ItemId array.
+	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
+	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
+	 * @param OnError This will be called when the operation failed.
+	 * @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
+	 */
+	void BulkGetLocaleItems(const TArray<FString>& ItemIds
+		, const FString& Region
+		, const FString& Language
+		, THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess
+		, FErrorHandler const& OnError
+		, const FString& StoreId = TEXT(""));
 
 	/**
-	* @brief Get list all stores in a namespace..
-	*
-	* @param OnSuccess This will be called when the operation succeeded. The result is array of FAccelByteModelsPlatformStore.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess, FErrorHandler const& OnError);
+	 * @brief Get list all stores in a namespace..
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is array of FAccelByteModelsPlatformStore.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	Item() = delete;

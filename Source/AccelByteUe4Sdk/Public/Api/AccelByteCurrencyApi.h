@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Http.h"
+#include "Core/AccelByteApiBase.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h" 
@@ -20,16 +20,12 @@ namespace Api
 /**
  * @brief Currency API for getting information from Currency
  */
-class ACCELBYTEUE4SDK_API Currency
+class ACCELBYTEUE4SDK_API Currency : public FApiBase
 {
 public:
 	Currency(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Currency();
-private:
-	FHttpRetryScheduler& HttpRef;
-	Credentials const& CredentialsRef;
-	Settings const& SettingsRef;
-public:
+
 	/**
 	 * @brief Get currency list information for a specific namespace.
 	 *
@@ -38,8 +34,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param CurrencyType The Currency type.
 	 */
-	void GetCurrencyList(FString const& Namespace, THandler<TArray<FAccelByteModelsCurrencyList>> const& OnSuccess, FErrorHandler const& OnError,
-		EAccelByteCurrencyType CurrencyType = EAccelByteCurrencyType::NONE);
+	void GetCurrencyList(FString const& Namespace
+		, THandler<TArray<FAccelByteModelsCurrencyList>> const& OnSuccess
+		, FErrorHandler const& OnError
+		, EAccelByteCurrencyType CurrencyType = EAccelByteCurrencyType::NONE);
 
 private:
 	Currency() = delete;

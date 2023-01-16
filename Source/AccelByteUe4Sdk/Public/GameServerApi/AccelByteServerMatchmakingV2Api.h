@@ -9,7 +9,6 @@
 #include "Core/AccelByteServerApiBase.h"
 #include "Models/AccelByteMatchmakingModels.h"
 
-
 namespace AccelByte
 {
 
@@ -19,6 +18,7 @@ class FHttpRetryScheduler;
 
 namespace GameServerApi
 {
+
 class ACCELBYTEUE4SDK_API ServerMatchmakingV2 : public FServerApiBase
 {
 public:
@@ -34,7 +34,11 @@ public:
 	 * @param OnSuccess Delegate fired when the accept request has gone through
 	 * @param OnError Delegate fired when the accept request fails
 	 */
-	void AcceptBackfillProposal(const FString& BackfillTicketId, const FString& ProposalId, bool bStopBackfilling, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void AcceptBackfillProposal(const FString& BackfillTicketId
+		, const FString& ProposalId
+		, bool bStopBackfilling
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Reject a proposal from the matchmaking V2 service to backfill a session.
@@ -45,7 +49,11 @@ public:
 	 * @param OnSuccess Delegate fired when the reject request has gone through
 	 * @param OnError Delegate fired when the reject request fails
 	 */
-	void RejectBackfillProposal(const FString& BackfillTicketId, const FString& ProposalId, bool bStopBackfilling, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void RejectBackfillProposal(const FString& BackfillTicketId
+		, const FString& ProposalId
+		, bool bStopBackfilling
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 
 private:
 	ServerMatchmakingV2() = delete;

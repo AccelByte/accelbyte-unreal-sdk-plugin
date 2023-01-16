@@ -15,97 +15,89 @@ namespace AccelByte
 namespace Api
 {
 
-	TurnManager::TurnManager(Credentials const& InCredentialsRef
-		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef)
-		: HttpRef{InHttpRef}
-		, CredentialsRef{InCredentialsRef}
-		, SettingsRef{InSettingsRef}
-	{}
+TurnManager::TurnManager(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+{}
 
-	TurnManager::~TurnManager()
-	{}
+TurnManager::~TurnManager()
+{}
 
-	void TurnManager::GetTurnServers(const THandler<FAccelByteModelsTurnServerList>& OnSuccess, const FErrorHandler& OnError)
-	{
-		FReport::Log(FString(__FUNCTION__));
+void TurnManager::GetTurnServers(const THandler<FAccelByteModelsTurnServerList>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/public/turn"), *GetTurnManagerServerUrl());
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-		
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	}
+	const FString Url = FString::Printf(TEXT("%s/public/turn"), *GetTurnManagerServerUrl());
 
-	void TurnManager::GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer>& OnSuccess, const FErrorHandler& OnError)
-	{
-		GetTurnServers(THandler<FAccelByteModelsTurnServerList>::CreateLambda([this, OnError, OnSuccess](const FAccelByteModelsTurnServerList& Result)
-		{
-			if(Result.Servers.Num() == 0)
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void TurnManager::GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	GetTurnServers(THandler<FAccelByteModelsTurnServerList>::CreateLambda(
+			[this, OnError, OnSuccess](const FAccelByteModelsTurnServerList& Result)
 			{
-				OnError.ExecuteIfBound(400, TEXT("turn server is empty"));
-			}
-			else
-			{
-				FastestPing = 1000;
-				Counter = 0;
-				for (int i=0;i< Result.Servers.Num();i++)
+				if(Result.Servers.Num() == 0)
 				{
-                    auto Server = Result.Servers[i];
-					int Count = Result.Servers.Num();
-                    FUDPPing::UDPEcho(FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Qos_port), 10.00, FIcmpEchoResultDelegate::CreateLambda([this, Server, Count, OnSuccess](FIcmpEchoResult &PingResult)
-                    {
-                    	Counter++;
-                    	if(FastestPing > PingResult.Time)
-                    	{
-                    		FastestPing = PingResult.Time;
-                    		ClosestServer = Server;
-                    	}
-                    	if(Counter == Count)
-                    	{
-                    		OnSuccess.ExecuteIfBound(ClosestServer);
-                    	}
-                    }));
-                }
-			}
-		}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
-	}
+					OnError.ExecuteIfBound(400, TEXT("turn server is empty"));
+				}
+				else
+				{
+					FastestPing = 1000;
+					Counter = 0;
+					for (int i=0;i< Result.Servers.Num();i++)
+					{
+		                auto Server = Result.Servers[i];
+						int Count = Result.Servers.Num();
+		                FUDPPing::UDPEcho(FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Qos_port), 10.00, FIcmpEchoResultDelegate::CreateLambda([this, Server, Count, OnSuccess](FIcmpEchoResult &PingResult)
+		                {
+		                    Counter++;
+		                    if(FastestPing > PingResult.Time)
+		                    {
+                    			FastestPing = PingResult.Time;
+                    			ClosestServer = Server;
+		                    }
+		                    if(Counter == Count)
+		                    {
+                    			OnSuccess.ExecuteIfBound(ClosestServer);
+		                    }
+		                }));
+		            }
+				}
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
+}
 
-	void TurnManager::GetTurnCredential(const FString &Region, const FString &Ip, int port, const THandler<FAccelByteModelsTurnServerCredential>& OnSuccess, const FErrorHandler& OnError)
-	{
-		FReport::Log(FString(__FUNCTION__));
+void TurnManager::GetTurnCredential(const FString &Region
+	, const FString &Ip
+	, int Port
+	, const THandler<FAccelByteModelsTurnServerCredential>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/turn/secret/%s/%s/%d"), *GetTurnManagerServerUrl(), *Region, *Ip, port);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-		
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	}
+	const FString Url = FString::Printf(TEXT("%s/turn/secret/%s/%s/%d")
+		, *GetTurnManagerServerUrl()
+		, *Region
+		, *Ip
+		, Port);
 
-	FString TurnManager::GetTurnManagerServerUrl() const
-	{
-		return SettingsRef.TurnManagerServerUrl.IsEmpty() ? FString::Printf(TEXT("%s/turnmanager"), *SettingsRef.BaseUrl) : SettingsRef.TurnManagerServerUrl;
-	}
-	
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FString TurnManager::GetTurnManagerServerUrl() const
+{
+	return SettingsRef.TurnManagerServerUrl.IsEmpty()
+		? FString::Printf(TEXT("%s/turnmanager"), *SettingsRef.BaseUrl)
+		: SettingsRef.TurnManagerServerUrl;
+}
+
 } // Namespace Api
 } // Namespace AccelByte

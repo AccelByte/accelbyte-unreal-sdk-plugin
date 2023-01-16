@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteCloudStorageModels.h"
@@ -20,22 +21,20 @@ namespace Api
  * Each player has configurable slot(s) that controlled by admin.
  * The configuration affects the amount of slot that owned by user and the allowed size for each slot (byte).
  */
-class ACCELBYTEUE4SDK_API CloudStorage
+class ACCELBYTEUE4SDK_API CloudStorage : FApiBase
 {
 public:
-	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef);
+	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~CloudStorage();
-private:
-	Credentials const& CredentialsRef;
-	Settings const& SettingsRef;
-public:
+
 	/**
 	 * @brief This function gets list of slot(s) those owned by the player.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsSlot>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnSuccess, const FErrorHandler& OnError);
+	void GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief This function creates a slot for an uploaded binary data.
@@ -49,7 +48,14 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	void CreateSlot(TArray<uint8> BinaryData
+		, const FString& FileName
+		, const TArray<FString>& Tags
+		, const FString& Label
+		, const FString& CustomAttribute
+		, const THandler<FAccelByteModelsSlot>& OnSuccess
+		, FHttpRequestProgressDelegate OnProgress
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function updates a stored slot.
@@ -64,7 +70,15 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateSlot(FString SlotId, const TArray<uint8> BinaryData, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	void UpdateSlot(FString SlotId
+		, const TArray<uint8> BinaryData
+		, const FString& FileName
+		, const TArray<FString>& Tags
+		, const FString& Label
+		, const FString& CustomAttribute
+		, const THandler<FAccelByteModelsSlot>& OnSuccess
+		, FHttpRequestProgressDelegate OnProgress
+		, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief This function updates stored slot's metadata. This function is DEPRECATED.
@@ -78,7 +92,14 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	void UpdateSlotMetadata(const FString& SlotId
+		, const FString& FileName
+		, const TArray<FString>& Tags
+		, const FString& Label
+		, const FString& CustomAttribute
+		, const THandler<FAccelByteModelsSlot>& OnSuccess
+		, FHttpRequestProgressDelegate OnProgress
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function updates stored slot's metadata.
@@ -91,7 +112,13 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateSlotMetadata(const FString& SlotId, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	void UpdateSlotMetadata(const FString& SlotId
+		, const TArray<FString>& Tags
+		, const FString& Label
+		, const FString& CustomAttribute
+		, const THandler<FAccelByteModelsSlot>& OnSuccess
+		, FHttpRequestProgressDelegate OnProgress
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function gets the data that stored in the slot.
@@ -100,7 +127,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<uint8>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetSlot(FString SlotId, const THandler<TArray<uint8>>& OnSuccess, const FErrorHandler& OnError);
+	void GetSlot(FString SlotId
+		, const THandler<TArray<uint8>>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function delete the specified slot.
@@ -109,23 +138,29 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void DeleteSlot(FString SlotId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DeleteSlot(FString SlotId
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
 
 private:
 	CloudStorage() = delete;
 	CloudStorage(CloudStorage const&) = delete;
 	CloudStorage(CloudStorage&&) = delete;
 
-	TArray<uint8> FormDataBuilder(TArray<uint8> BinaryData,FString BoundaryGuid, FString FileName);
+	TArray<uint8> FormDataBuilder(TArray<uint8> BinaryData
+		, FString BoundaryGuid
+		, FString FileName);
 	
-	/*
+	/**
 	 * @brief Generate custom attribute form data.
 	 * 
 	 * @param CustomAttribute This is the content.
 	 * @param BoundaryGuid This is the boundary.
 	 * @param CloseFooter TRUE = the boundary will be close with extra double dash "--"; FALSE = the boundary will be left open and it can be appended with another form data.
 	*/
-	TArray<uint8> CustomAttributeFormDataBuilder(const FString& CustomAttribute, FString BoundaryGuid, bool CloseFooter);
+	TArray<uint8> CustomAttributeFormDataBuilder(const FString& CustomAttribute
+		, FString BoundaryGuid
+		, bool CloseFooter);
 };
 
 } // Namespace Api

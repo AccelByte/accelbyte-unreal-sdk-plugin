@@ -11,6 +11,7 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteQosModels.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteServerApiBase.h"
 
 namespace AccelByte
 {
@@ -22,42 +23,42 @@ namespace GameServerApi
 /**
 * @brief QosManager API to manage Qos Server(s).
 */
-class ACCELBYTEUE4SDK_API ServerQosManager
+class ACCELBYTEUE4SDK_API ServerQosManager : public FServerApiBase
 {
 public:
 	ServerQosManager(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerQosManager();
 
 	/**
-	* @brief Get List of Qos Server(s).
-	*
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsQosServerList.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError);
+	 * @brief Get List of Qos Server(s).
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsQosServerList.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Get List of Qos Server(s) that have ACTIVE status in current game namespace.
-	*
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsQosServerList.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void GetActiveQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError);
+	 * @brief Get List of Qos Server(s) that have ACTIVE status in current game namespace.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsQosServerList.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetActiveQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
-	* @brief Get List of Qos Server(s) Latencies.
-	*
-	* @param OnSuccess This will be called when the operation succeeded. The result is an array of TMap with FString as key and int32 as value.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess, const FErrorHandler& OnError);
+	 * @brief Get List of Qos Server(s) Latencies.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of TMap with FString as key and int32 as value.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	TArray<TPair<FString, float>> Latencies;
-private:
-	ServerCredentials const& CredentialsRef;
-	ServerSettings const& SettingsRef;
-	FHttpRetryScheduler& HttpRef;
 
+private:
 	ServerQosManager() = delete;
 	ServerQosManager(ServerQosManager const&) = delete;
 	ServerQosManager(ServerQosManager&&) = delete;

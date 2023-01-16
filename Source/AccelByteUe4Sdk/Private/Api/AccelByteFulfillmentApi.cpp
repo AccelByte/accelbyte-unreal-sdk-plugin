@@ -16,24 +16,25 @@ namespace Api
 Fulfillment::Fulfillment(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: HttpRef{InHttpRef}
-	, CredentialsRef{InCredentialsRef}
-	, SettingsRef{InSettingsRef}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 Fulfillment::~Fulfillment()
 {}
 
-void Fulfillment::RedeemCode(FString const& Code, FString const& Region, FString const& Language, THandler<FAccelByteModelsFulfillmentResult> OnSuccess, FErrorHandler OnError)
+void Fulfillment::RedeemCode(FString const& Code
+	, FString const& Region
+	, FString const& Language
+	, THandler<FAccelByteModelsFulfillmentResult> OnSuccess
+	, FErrorHandler OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
-	
-	FString Verb            = TEXT("POST");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
 	FString Content = FString::Printf(TEXT("{\"code\":\"%s\""), *Code);
 	if(!Region.IsEmpty())
 	{
@@ -45,15 +46,7 @@ void Fulfillment::RedeemCode(FString const& Code, FString const& Region, FString
 	}
 	Content += "}";
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-	
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
 } // Namespace Api

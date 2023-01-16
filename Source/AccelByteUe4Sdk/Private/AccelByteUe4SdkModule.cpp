@@ -242,7 +242,7 @@ bool FAccelByteUe4SdkModule::NullCheckConfig(FString const& Value, FString const
 {
 	if (Value.IsEmpty())
 	{
-		UE_LOG(LogAccelByte, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *ConfigField);
+		UE_LOG(LogAccelByte, Error, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *ConfigField);
 		return false;
 	}
 

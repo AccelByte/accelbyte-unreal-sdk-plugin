@@ -6,7 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Containers/List.h"
-#include "Core/AccelByteMemoryPool.h"
+#include "Interfaces/IHttpRequest.h"
+#include "Interfaces/IHttpResponse.h"
 
 namespace AccelByte
 {
@@ -14,25 +15,92 @@ namespace Core
 {
 
 template <typename T>
+struct FAccelByteCacheWrapper
+{
+	FName Key{};
+	TSharedPtr<T> Data = nullptr;
+	size_t Length = 0;
+};
+
+template <typename T>
 class FAccelByteLRUCache
 {
+protected:
 	size_t MAX_HTTP_LRU_CACHE_SIZE = 20 * 1024 * 1024;
 	int32 MAX_HTTP_LRU_CACHE_COUNT = 100;
+
+	bool bIsInitialized = false;
+
+	TArray<FAccelByteCacheWrapper<T>> ChunkArray;
+	TDoubleLinkedList<FAccelByteCacheWrapper<T>> ChunkDll;
+
+#pragma region DOUBLE_LINKED_LIST
 public:
-	inline FAccelByteLRUCache()
-	{
-		InitializeMemory();
-	}
+	typename TDoubleLinkedList<FAccelByteCacheWrapper<T>>::TDoubleLinkedListNode* DLLGetTail() { return ChunkDll.GetTail(); }
+	typename TDoubleLinkedList<FAccelByteCacheWrapper<T>>::TDoubleLinkedListNode* DLLGetHead() { return ChunkDll.GetHead(); }
+private:
+	void DLLSetEmpty() { ChunkDll.Empty(); }
+	int DLLGetSize() { return ChunkDll.Num(); }
+	void DLLAddHead(FAccelByteCacheWrapper<T> NewHead) { ChunkDll.AddHead(NewHead); }
+	void DLLRemoveNode(typename TDoubleLinkedList<FAccelByteCacheWrapper<T>>::TDoubleLinkedListNode* Removed) { ChunkDll.RemoveNode(Removed); }
+	void DLLRemoveNode(typename TDoubleLinkedList<FAccelByteCacheWrapper<T>>::TDoubleLinkedListNode* Removed, bool bDeleteNode) { ChunkDll.RemoveNode(Removed, bDeleteNode); }
+#pragma endregion
 
-	inline FAccelByteLRUCache(MemoryConstructionParameter Param): MemoryParameter(Param)
+#pragma region ARRAY_CONTAINER
+protected:
+	int ArrayGetNum() { return ChunkArray.Num(); }
+	FAccelByteCacheWrapper<T>& ArrayGetIndex(int Index) { return ChunkArray[Index]; }
+private:
+	void ArraySetEmpty() { ChunkArray.Empty(); }
+	void ArrayRemoveAt(int Index) { ChunkArray.RemoveAt(Index); }
+	void ArrayAdd(const FAccelByteCacheWrapper<T>* Entry)
 	{
-		InitializeMemory();
-	}
+		if (Entry == nullptr)
+		{
+			return;
+		}
+		ChunkArray.Add(*Entry);
+	};
+#pragma endregion
 
-	inline ~FAccelByteLRUCache()
-	{
-		FreeMemory();
-	}
+/**
+* @brief Private function needs to be overriden
+*/
+protected:
+#pragma region AbstractFunction
+	/**
+	* @brief LRUMemory: Clean the Memory class
+	* @brief LRUFileCache: Cleanup the stored files
+	*/
+	virtual void FreeCache() = 0;
+	
+	/**
+	* @brief LRUMemory: Clean memory specific key
+	* @brief LRUFileCache: Cleanup specific file for this key
+	*/
+	virtual void RemoveCache(const FName& Key) = 0;
+
+	/**
+	* @brief Ensure that we can free up the space before we insert to cache
+	* @return Possible to do insert operation
+	*/
+	virtual inline bool FreeCacheBeforeInsertion(T& Item) = 0;
+
+	/**
+	* @brief LRUMemory: Insert/replace to MemoryPool directly
+	* @brief LRUFileCache: Insert/rewrite to the file directly
+	* 
+	* @return Pointer to the FAccelByteCacheWrapper (LRU Memory)
+	*/
+	virtual inline const FAccelByteCacheWrapper<T>* InsertToCache(T& Item, const FName& Key) = 0;
+
+#pragma endregion
+
+/**
+* @brief Public function and accessed by HttpCache
+*/
+public:
+	virtual ~FAccelByteLRUCache() {}
 
 	/**
 	* @brief Check if the LRU class stores an item with specified key
@@ -50,9 +118,10 @@ public:
 	*/
 	inline void Empty()
 	{
-		FreeMemory();
-		ChunkList.Empty();
-		ChunkDll.Empty();
+		this->bIsInitialized = false;
+		FreeCache();
+		ArraySetEmpty();
+		DLLSetEmpty();
 	}
 
 	/**
@@ -65,85 +134,42 @@ public:
 	inline bool Remove(const FName& Key)
 	{
 		int Index = FindIndex(Key);
-		auto* Node = FindNode(Key);
+		auto* Node = DLLFindNode(Key);
 
 		if (Index >= 0 && Node != nullptr)
 		{
-			Memory->Remove(Key);
-			ChunkList.RemoveAt(Index);
-			ChunkDll.RemoveNode(Node, true);
+			RemoveCache(Key);
+			ArrayRemoveAt(Index);
+			DLLRemoveNode(Node, true);
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	* @brief Check if the LRU class stores an item with specified key
+	* @brief Write/replace an item with specified key
 	*
 	* @param Key Identifier of the data
 	* @return True if the key is found
 	*/
 	inline bool Emplace(const FName& Key, T& Item)
 	{
-		auto FreeMemoryBeforeInsertion = [this](T& Item)
-		{
-			auto Required = Memory->GetRequiredMemorySize(Item);
-			size_t Left = Memory->GetMemoryPoolLeft();
+		//// Check and remove an existing key that will be overwritten
+		Remove(Key);
 
-			bool bChunkCountIsSafe = ChunkList.Num() < MemoryParameter.ChunkCount;
-
-			if (Left >= Required && bChunkCountIsSafe)
-			{
-				return true;
-			}
-
-			auto Node = ChunkDll.GetTail();
-			while (Node != nullptr && (Required > Left || ChunkList.Num() >= MemoryParameter.ChunkCount))
-			{
-				size_t TailSize = Node->GetValue().Length;
-				Remove(ChunkDll.GetTail()->GetValue().Key);
-				Left += TailSize;
-				Node = ChunkDll.GetTail();
-			}
-
-			return (Memory->GetRequiredMemorySize(Item) <= Memory->GetMemoryPoolLeft()) && (ChunkList.Num() < MemoryParameter.ChunkCount);
-		};
-
-		auto AddToHead = [this](T& Item, const FName& Key)
-		{
-			auto Result = Memory->Insert(Item, Key);
-			if (Result == nullptr)
-			{
-				return false;
-			}
-			ChunkList.Add(*Result);
-			ChunkDll.AddHead(*Result);
-			return true;
-		};
-
-		// Check and remove an existing key that will be overwritten
-		for (int i = 0; i < ChunkList.Num(); i++)
-		{
-			if (ChunkList[i].Key.IsEqual(Key, ENameCase::CaseSensitive, true))
-			{
-				int Index = FindIndex(Key);
-				auto* Node = FindNode(Key);
-				if (Node == nullptr || Index == -1)
-				{
-					break;
-				}
-				ChunkDll.RemoveNode(Node, true);
-				ChunkList.RemoveAt(Index);
-			}
-		}
-		if (FreeMemoryBeforeInsertion(Item) == false)
+		if (FreeCacheBeforeInsertion(Item) == false)
 		{
 			return false;
 		}
-		if (AddToHead(Item, Key) == false)
+
+		// After the existing removed, it can be added to the front
+		const FAccelByteCacheWrapper<T>* Result = InsertToCache(Item, Key);
+		if (Result == nullptr)
 		{
 			return false;
 		}
+		ArrayAdd(Result);
+		DLLAddHead(*Result);
 		return true;
 	}
 
@@ -152,25 +178,34 @@ public:
 	* This function will move the data to the 'head' as the latest/recently used data.
 	*
 	* @param Key Identifier of the data
+	* @param bPeekOnly If TRUE, does not affect the order.
 	* @return Pointer to the data. Nullptr if the data is not found.
 	*/
-	inline T* Find(const FName& Key)
+	inline TSharedPtr<T> Find(const FName& Key, bool bPeekOnly = false)
 	{
 		int Index = FindIndex(Key);
-		auto* Node = FindNode(Key);
-		if (Index >= 0 && Node != nullptr)
-		{
-			// Swap the position
-			ChunkDll.RemoveNode(Node);
-			ChunkDll.AddHead(ChunkList[Index]);
+		if (Index < 0) { return nullptr; }
 
-			return &ChunkList[Index].Data;
+		if (!bPeekOnly)
+		{
+			auto* Node = DLLFindNode(Key);
+			if (Node == nullptr) { return nullptr; }
+
+			// Swap the position
+			DLLRemoveNode(Node);
+			DLLAddHead(ArrayGetIndex(Index));
 		}
 
-		return nullptr;
+		return GetTheValueFromChunkArray(Index);
 	}
 
-	inline T &operator[](const FName& Key){ return *Find(Key); }
+	inline TSharedPtr<T> operator[](const FName& Key)
+	{
+		return Find(Key);
+	}
+
+	//LRUCacheFile should override this function
+	virtual inline TSharedPtr<T> GetTheValueFromChunkArray(int Index){ return ArrayGetIndex(Index).Data; }
 
 	/**
 	* @brief Check the value only, does not affect the order of the linked list
@@ -178,51 +213,22 @@ public:
 	* @param Key Identifier of the data
 	* @return Pointer to the data. Nullptr if the data is not found.
 	*/
-	inline T* Peek(const FName& Key)
-	{
-		int Index = FindIndex(Key);
-		if (Index >= 0)
-		{
-			return &ChunkList[Index].Data;
-		}
-		return nullptr;
-	}
+	inline TSharedPtr<T> Peek(const FName& Key) { return Find(Key, true); }
+
+protected:
 
 	/**
-	* @brief Get the pointer to the latest data in the list
-	*/
-	inline typename TDoubleLinkedList<FChunkInfo<T>>::TDoubleLinkedListNode* GetHead() { return ChunkDll.GetHead(); }
-	
-private:
-	/**
-	* @brief Initialize the Memory class
-	*/
-	inline void InitializeMemory()
-	{
-		Memory = FAccelByteMemoryFactory<T>::Create(MemoryParameter);
-		bIsInitialized = true;
-	}
-
-	/**
-	* @brief Clean the Memory class
-	*/
-	inline void FreeMemory()
-	{
-		bIsInitialized = false;
-		Memory->RemoveAll();
-	}
-
-	/**
-	* @brief Find the index of the ChunkList based on the storage Key
+	* @brief Find the index of the ChunkArray based on the storage Key
 	*
 	* @param Key Identifier of the data
 	* @return Index number if it exists, otherwise return -1.
 	*/
 	inline int FindIndex(const FName& Key)
 	{
-		for (int i = 0; i < ChunkList.Num(); i++)
+		int Num = ArrayGetNum();
+		for (int i = 0; i < Num; i++)
 		{
-			if (ChunkList[i].Key.IsEqual(Key, ENameCase::CaseSensitive, true))
+			if (ArrayGetIndex(i).Key.IsEqual(Key, ENameCase::CaseSensitive, true))
 			{
 				return i;
 			}
@@ -236,9 +242,9 @@ private:
 	* @param Key Identifier of the data
 	* @return Pointer to node if it exists, otherwise return nullptr.
 	*/
-	inline typename TDoubleLinkedList<FChunkInfo<T>>::TDoubleLinkedListNode* FindNode(const FName& Key)
+	virtual inline typename TDoubleLinkedList<FAccelByteCacheWrapper<T>>::TDoubleLinkedListNode* DLLFindNode(const FName& Key)
 	{
-		auto* Node = ChunkDll.GetHead();
+		auto* Node = DLLGetHead();
 
 		while (Node != nullptr)
 		{
@@ -253,14 +259,34 @@ private:
 		return Node;
 	}
 
+public:
 
-	MemoryConstructionParameter MemoryParameter = { MemoryMethod::Dynamic, MAX_HTTP_LRU_CACHE_SIZE, MAX_HTTP_LRU_CACHE_COUNT };
-	TSharedPtr<FAccelByteMemory<T>> Memory;
-
-	TArray<FChunkInfo<T>> ChunkList;
-	TDoubleLinkedList<FChunkInfo<T>> ChunkDll;
-	bool bIsInitialized = false;
+	inline static const size_t GetRequiredSize(T& Data) { return sizeof(Data); }
+	inline static const size_t GetRequiredSize(T* Data) { return GetRequiredSize(*Data); }
 };
 
+// Override specific for HTTP response size
+template<>
+inline const size_t FAccelByteLRUCache<FHttpRequestPtr>::GetRequiredSize(FHttpRequestPtr& Data)
+{
+	size_t Output = 0;
+
+	if (Data->GetResponse().IsValid())
+	{
+		Output += Data->GetResponse()->GetContentLength();
+	}
+	Output += Data->GetContentLength();
+	return Output;
+}
+
+// Override specific for FString size
+template<>
+inline const size_t FAccelByteLRUCache<FString>::GetRequiredSize(FString& Data)
+{
+	FString TempCopy = Data;
+	return TempCopy.GetAllocatedSize();
+}
+
 }
 }
+

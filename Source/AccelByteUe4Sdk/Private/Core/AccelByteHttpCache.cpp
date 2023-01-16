@@ -5,6 +5,8 @@
 #include "Core/AccelByteHttpCache.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Kismet/GameplayStatics.h"
+#include "Core/AccelByteLRUCacheFile.h"
+#include "Core/AccelByteLRUCacheMemory.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpCache, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteHttpCache);
@@ -71,12 +73,29 @@ namespace AccelByte
 			}
 
 		}
+		FAccelByteHttpCache::FAccelByteHttpCache()
+		{
+			CachedItems = MakeShareable<FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>());
+		}
 
 		FAccelByteHttpCache::~FAccelByteHttpCache()
 		{
 			// empty
 		};
 
+		FAccelByteHttpCacheItem* FAccelByteHttpCache::GetSerializedHttpCache(const FHttpRequestPtr& Request)
+		{
+			const FName Key = ConstructKey(Request);
+			if (CachedItems->Contains(Key))
+			{
+				auto CachedItem = CachedItems->Find(Key);
+				if (CachedItem.IsValid())
+				{
+					return CachedItem.Get();
+				}
+			}
+			return nullptr;
+		}
 
 		bool FAccelByteHttpCache::IsResponseCacheable(const FHttpRequestPtr& CompletedRequest)
 		{
@@ -137,12 +156,14 @@ namespace AccelByte
 
 		bool FAccelByteHttpCache::TryRetrieving(FHttpRequestPtr& Out, FHttpResponsePtr& OutCachedResponse)
 		{
+			FScopeTryLock TryLock(&CacheCritSection);
+
 			bool bRetrieved = false;
 
 			const FName Key = ConstructKey(Out);
-			if (CachedItems.Contains(Key))
+			if (CachedItems->Contains(Key))
 			{
-				FAccelByteHttpCacheItem* CachedItem = CachedItems.Find(Key);
+				auto CachedItem = CachedItems->Find(Key);
 				if (CheckCachedItemFreshness(Key) == EHttpCacheFreshness::FRESH)
 				{
 					Out = CachedItem->Request;
@@ -170,6 +191,8 @@ namespace AccelByte
 
 		bool FAccelByteHttpCache::TryStoring(const FHttpRequestPtr& Request)
 		{
+			FScopeTryLock TryLock(&CacheCritSection);
+
 			const FHttpResponsePtr Response = Request.Get()->GetResponse();
 			if (Response != nullptr && IsResponseCacheable(Request))
 			{
@@ -201,9 +224,9 @@ namespace AccelByte
 				// IF the response from the online storage service return 304
 				// THEN we can reuse the old cache and extend the usage because the response should be same
 				if (Response->GetResponseCode() == EHttpResponseCodes::NotModified &&
-					CachedItems.Contains(Key))
+					CachedItems->Contains(Key))
 				{
-					auto CurrentCachedItem = CachedItems.Find(Key);
+					auto CurrentCachedItem = CachedItems->Find(Key);
 					
 					TArray<FString> TransferredHeaders = {
 						HTTPHeader::Cache::Control,
@@ -231,7 +254,7 @@ namespace AccelByte
 				else
 				{
 					NewCacheItem.Request = Request;
-					CachedItems.Emplace(Key, NewCacheItem);
+					CachedItems->Emplace(Key, NewCacheItem);
 					UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response for request [%s] is now cached"),*Response->GetURL());
 				}
 
@@ -242,20 +265,49 @@ namespace AccelByte
 
 		void FAccelByteHttpCache::ClearCache()
 		{
-			CachedItems.Empty();
+			CachedItems->Empty();
 		}
 
 		FAccelByteHttpCache::EHttpCacheFreshness FAccelByteHttpCache::CheckCachedItemFreshness(const FName& Key)
 		{
-			check(CachedItems.Contains(Key));
-			const FAccelByteHttpCacheItem CachedItem = CachedItems[Key];
+			const TSharedPtr<FAccelByteHttpCacheItem> CachedItemPtr = (CachedItems.Get())->operator[](Key);
+			if (!CachedItems->Contains(Key))
+			{
+				return EHttpCacheFreshness::STALE;
+			}
+			
+			if (!CachedItemPtr.IsValid())
+			{
+				return EHttpCacheFreshness::STALE;
+			}
+			const FAccelByteHttpCacheItem CachedItem = *CachedItemPtr;
+
 			const double TimeNow = FPlatformTime::Seconds();
 			bool bIsStaleResponse = false;
 			EHttpCacheFreshness Freshness = EHttpCacheFreshness::FRESH;
 
 			// check RESPONSE cache-control directive
 			const FHttpResponsePtr CachedResponse = CachedItem.Request->GetResponse();
-			const FString ResponseCacheControlHeader = CachedResponse->GetHeader(HTTPHeader::Cache::Control);
+			FString ResponseCacheControlHeader = "";
+			if (CachedResponse == nullptr)
+			{
+				for (int i = 0 ; i < CachedItem.SerializableRequestAndResponse.ResponseHeaders.Num() ; i ++)
+				{
+					const FString& Header = CachedItem.SerializableRequestAndResponse.ResponseHeaders[i];
+					if (Header.Contains(HTTPHeader::Cache::Control))
+					{
+						FString HeaderKey, Value;
+						Header.Split(":", &HeaderKey, &Value);
+						Value = Value.TrimStartAndEnd();
+
+						ResponseCacheControlHeader = Value;
+					}
+				}
+			}
+			else
+			{
+				ResponseCacheControlHeader = CachedResponse->GetHeader(HTTPHeader::Cache::Control);
+			}
 
 			if (ResponseCacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::Immutable))
 			{
@@ -306,7 +358,7 @@ namespace AccelByte
 				else
 				{
 					Freshness = EHttpCacheFreshness::STALE;
-					CachedItems.Remove(Key);
+					CachedItems->Remove(Key);
 					UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Removed stale cached item [%s]"), *Key.ToString());
 				}
 			}

@@ -21,6 +21,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsMultiLanguageAchievementResponse, FAcc
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedUserAchievementResponse, FAccelByteModelsPaginatedUserAchievement, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedPublicTagResponse, FAccelByteModelsPaginatedPublicTag, Response);
+
 #pragma endregion
 
 UCLASS(BlueprintType, Blueprintable)
@@ -38,7 +40,8 @@ public:
 		FDModelsPaginatedPublicAchievementResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 const& Offset = 0,
-		int32 const& Limit = 20
+		int32 const& Limit = 20,
+		FString const& TagQuery = TEXT("")
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
@@ -55,7 +58,8 @@ public:
 		FDErrorHandler const& OnError,
 		int32 const& Offset = 0,
 		int32 const& Limit = 20,
-		bool PreferUnlocked = true
+		bool PreferUnlocked = true,
+		FString const& TagQuery = TEXT("")
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
@@ -64,6 +68,16 @@ public:
 		FDHandler const OnSuccess,
 		FDErrorHandler const& OnError
 	);
+
+	UFUNCTION(BlueprintCallable, Category= "AccelByte | Achievement | Api")
+	void GetTags(
+		FString const& Name,
+		EAccelByteAchievementListSortBy const& SortBy,
+		FDModelsPaginatedPublicTagResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 const& Offset = 0,
+		int32 const& Limit = 20
+		);
 
 private:
 	FApiClientPtr ApiClientPtr;

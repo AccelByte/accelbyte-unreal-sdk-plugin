@@ -86,6 +86,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionUser
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionUser")
 		EAccelByteV2SessionMemberStatus Status{EAccelByteV2SessionMemberStatus::EMPTY};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionUser")
+		EAccelByteV2SessionMemberStatus StatusV2 {EAccelByteV2SessionMemberStatus::EMPTY};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionUser")
 		FDateTime UpdatedAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionUser")
 		FString PlatformID{};
@@ -173,6 +175,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionDSInformation
 		FDateTime RequestedAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSInformation")
 		EAccelByteV2GameSessionDsStatus Status{EAccelByteV2GameSessionDsStatus::EMPTY};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionDSInformation")
+		EAccelByteV2GameSessionDsStatus StatusV2 {EAccelByteV2GameSessionDsStatus::EMPTY};
 };
 
 USTRUCT(BlueprintType)
