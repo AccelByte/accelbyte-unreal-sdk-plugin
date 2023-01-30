@@ -48,11 +48,8 @@ void ServerStatistic::CreateUserStatItems(const FString& UserId
 		{
 			Contents += ",";
 		}
-		else
-		{
-			Contents += "]";
-		}
 	}
+	Contents += "]";
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }
@@ -118,11 +115,8 @@ void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsB
 		{
 			Contents += ",";
 		}
-		else
-		{
-			Contents += "]";
-		}
 	}
+	Contents += "]";
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, OnError);
 }
@@ -149,11 +143,8 @@ void ServerStatistic::IncrementUserStatItems(const FString& UserId
 		{
 			Contents += ",";
 		}
-		else
-		{
-			Contents += "]";
-		}
 	}
+	Contents += "]";
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, OnError);
 }

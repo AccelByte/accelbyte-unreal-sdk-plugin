@@ -5,6 +5,7 @@
 #include "Blueprints/AccelByteUserBlueprints.h"
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Models/AccelByteErrorModels.h"
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -13,50 +14,63 @@ using AccelByte::Api::User;
 
 void UBPUser::LoginWithUsername(const FString& Username, const FString& Password, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	FRegistry::User.LoginWithUsername(Username, Password, FVoidHandler::CreateLambda([OnSuccess]()
-	{
-		OnSuccess.ExecuteIfBound();
-	}),
-		FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
+	FRegistry::User.LoginWithUsername(Username
+		, Password
+		, FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 }
 
 void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError, bool bCreateHeadless)
 {
-	FRegistry::User.LoginWithOtherPlatform(PlatformType, Token, FVoidHandler::CreateLambda([OnSuccess]()
-	{
-		OnSuccess.ExecuteIfBound();
-	}),
-	FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}), bCreateHeadless);
+	FRegistry::User.LoginWithOtherPlatform(PlatformType
+		, Token
+		, FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			})
+		, bCreateHeadless);
 }
 
 void UBPUser::LoginWithDeviceId(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([OnSuccess]()
-	{
-		OnSuccess.ExecuteIfBound();
-	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda(
+		[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 }
 
 void UBPUser::Logout(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	FRegistry::User.Logout(FVoidHandler::CreateLambda([OnSuccess]()
-	{
-		OnSuccess.ExecuteIfBound();
-	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
+	FRegistry::User.Logout(FVoidHandler::CreateLambda(
+		[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 }
 
 void UBPUser::ForgetAllCredentials()
@@ -148,10 +162,10 @@ void UBPUser::GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FD
 
 void UBPUser::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Ticket, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	FRegistry::User.LinkOtherPlatform(
-		PlatformType, Ticket,
-		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
-		FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
+	FRegistry::User.LinkOtherPlatform(PlatformType
+		, Ticket
+		, FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
+		FOAuthErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
 	

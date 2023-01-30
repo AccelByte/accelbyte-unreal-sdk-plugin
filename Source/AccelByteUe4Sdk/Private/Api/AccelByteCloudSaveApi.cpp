@@ -151,6 +151,51 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserList, OnSuccessHttpClient, OnError);
 }
 
+void CloudSave::BulkGetUserRecords(const TArray<FString>& Keys
+	, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	if (Keys.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Keys cannot be empty!"));
+		return;
+	}
+
+	if (Keys.Num() > MAX_BULK_KEY_COUNT)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), MAX_BULK_KEY_COUNT));
+		return;
+	}
+
+	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/me/records/bulk")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess](FJsonObject const& JSONObject)
+		{
+			FListAccelByteModelsUserRecord UserRecords;
+			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField("data");
+
+			for (int32 i = 0; i < JSONArray.Num(); ++i)
+			{
+				const auto& Value = JSONArray[i];
+				const TSharedPtr<FJsonObject> JSONData = Value->AsObject().ToSharedRef();
+
+				FAccelByteModelsUserRecord UserRecord = ConvertJsonToUserRecord(*JSONData);
+				UserRecords.Data.Add(UserRecord);
+			}
+
+			OnSuccess.ExecuteIfBound(UserRecords);
+		});
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
+}
+
 void CloudSave::ReplaceUserRecord(const FString& Key
 	, bool bSetPublic
 	, const FJsonObject& RecordRequest
@@ -521,6 +566,51 @@ void CloudSave::DeleteGameRecord(FString const& Key
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void CloudSave::BulkGetGameRecords(TArray<FString> const& Keys
+	, THandler<FAccelByteModelsListGameRecords> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	if (Keys.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Keys cannot be empty!"));
+		return;
+	}
+
+	if (Keys.Num() > MAX_BULK_KEY_COUNT)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), MAX_BULK_KEY_COUNT));
+		return;
+	}
+
+	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/bulk")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess](FJsonObject const& JSONObject)
+		{
+			FAccelByteModelsListGameRecords GameRecords;
+			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField("data");
+
+			for (int32 i = 0; i < JSONArray.Num(); ++i)
+			{
+				const auto& Value = JSONArray[i];
+				const TSharedPtr<FJsonObject> JSONData = Value->AsObject().ToSharedRef();
+
+				FAccelByteModelsGameRecord GameRecord = ConvertJsonToGameRecord(*JSONData);
+				GameRecords.Data.Add(GameRecord);
+			}
+
+			OnSuccess.ExecuteIfBound(GameRecords);
+		});
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
 }
 
 FJsonObject CloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy

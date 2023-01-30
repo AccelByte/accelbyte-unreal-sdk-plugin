@@ -87,11 +87,12 @@ void Reporting::SubmitChatReport(const FAccelByteModelsReportingSubmitDataChat& 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 
-void Reporting::GetReasons(const FString & ReasonGroup
+void Reporting::GetReasons(const FString& ReasonGroup
 	, int32 const& Offset
 	, int32 const& Limit
 	, const THandler<FAccelByteModelsReasonsResponse>& OnSuccess
-	, const FErrorHandler & OnError)
+	, const FErrorHandler & OnError
+	, FString const& Title)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -99,19 +100,12 @@ void Reporting::GetReasons(const FString & ReasonGroup
 		, *SettingsRef.ReportingServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
-	if (!ReasonGroup.IsEmpty())
-	{
-		QueryParams.Add(TEXT("group"), *ReasonGroup);
-	}
-	if (Offset > 0)
-	{
-		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
-	}
-	if (Limit > 0)
-	{
-		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
-	}
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("group"), ReasonGroup },
+		{ TEXT("offset"), FString::Printf(TEXT("%d"), Offset) },
+		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
+		{ TEXT("title"), Title },
+	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
@@ -127,15 +121,10 @@ void Reporting::GetReasonGroups(int32 const& Offset
 		, *SettingsRef.ReportingServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
-	if (Offset > 0)
-	{
-		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
-	}
-	if (Limit > 0)
-	{
-		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
-	}
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("offset"),FString::Printf(TEXT("%d"), Offset) },
+		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
+	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }

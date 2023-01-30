@@ -191,8 +191,7 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	case ESessionState::Valid:
 		if (RefreshTime <= CurrentTime)
 		{
-			Oauth2::GetTokenWithRefreshToken(FRegistry::Settings.IamServerUrl
-				, ClientId
+			Oauth2::GetTokenWithRefreshToken(ClientId
 				, ClientSecret
 				, AuthToken.Refresh_token
 				, THandler<FOauth2Token>::CreateLambda([this](const FOauth2Token& Result)
@@ -257,7 +256,7 @@ void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 			}));
 }
 
-void Credentials::SetErrorOAuth(const FErrorOauthInfo NewErrorOAuthInfo)
+void Credentials::SetErrorOAuth(const FErrorOAuthInfo NewErrorOAuthInfo)
 {
 	ErrorOAuth = NewErrorOAuthInfo;
 }

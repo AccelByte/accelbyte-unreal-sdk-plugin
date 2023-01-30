@@ -45,7 +45,7 @@ public:
 	virtual void PollRefreshToken(double CurrentTime) override;
 	virtual void ScheduleRefreshToken(double NextRefreshTime) override;
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
-	void SetErrorOAuth(const FErrorOauthInfo ErrorOAuthInfo);
+	void SetErrorOAuth(const FErrorOAuthInfo ErrorOAuthInfo);
 	void SetAccountUserData(const FAccountUserData& InAccountUserData);
 	
 	FTokenRefreshedEvent& OnTokenRefreshed();

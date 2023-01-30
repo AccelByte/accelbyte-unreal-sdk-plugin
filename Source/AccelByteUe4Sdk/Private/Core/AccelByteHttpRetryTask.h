@@ -4,8 +4,10 @@
 
 #pragma once
 
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteTask.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteError.h"
 
 namespace AccelByte
 {
@@ -15,12 +17,12 @@ namespace AccelByte
 	{
 	public:
 		FHttpRetryTask(
-			FHttpRequestPtr& HttpRequest,
-			const FHttpRequestCompleteDelegate& CompleteDelegate,
-			double RequestTime,
-			double NextDelay,
-			const FVoidHandler& OnBearerAuthRejectDelegate,
-			FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh,
+			FHttpRequestPtr& InRequest,
+			const FHttpRequestCompleteDelegate& InCompleteDelegate,
+			double InRequestTime,
+			double InNextDelay,
+			const FVoidHandler& InOnBearerAuthRejectDelegate,
+			FBearerAuthRejectedRefresh& InBearerAuthRejectedRefresh,
 			TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> HandlerDelegates = {});
 		virtual ~FHttpRetryTask() override;
 

@@ -1786,7 +1786,7 @@ void HandleResponse(const FString& MessageType
 	bool bSuccess = false;
 	if (lobbyResponseCode == 0)
 	{
-		bSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Result);
+		bSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result);
 	}
 	else
 	{
@@ -1916,7 +1916,7 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType
 		case (Response::JoinChannelChat):
 		{
 			FAccelByteModelsJoinDefaultChannelResponse Result;
-			if (const bool bParseSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Result))
+			if (const bool bParseSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result))
 			{
 				ChannelSlug = Result.ChannelSlug;
 				JoinDefaultChannelChatResponse.ExecuteIfBound(Result);
@@ -1946,7 +1946,7 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType
 		case (Response::GetFriendshipStatus):
 		{
 			FAccelByteModelsGetFriendshipStatusStringResponse StringResult;
-			bool bParseSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &StringResult);
+			bool bParseSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &StringResult);
 			if (bParseSuccess)
 			{
 				FAccelByteModelsGetFriendshipStatusResponse Result;
@@ -1993,7 +1993,7 @@ void HandleNotif(const FString& MessageType
 {
 	ensure(ReceivedMessageType.Equals(MessageType));
 	DataStruct Result;
-	if (const bool bSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Result)) {
+	if (const bool bSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result)) {
 		ResponseCallback.ExecuteIfBound(Result);
 	}
 
@@ -2025,7 +2025,7 @@ void DispatchV2JsonNotif(const FString& Payload
 	UE_LOG(LogAccelByteLobby, Log, TEXT("MPv2 notif json:\n%s"), *PayloadJsonString);
 	
 	PayloadType Result;
-	if(FAccelByteUtilities::JsonObjectStringToUStruct(PayloadJsonString, &Result))
+	if(FAccelByteJsonConverter::JsonObjectStringToUStruct(PayloadJsonString, &Result))
 	{
 		ResponseCallback.ExecuteIfBound(Result);
 	}
@@ -2038,7 +2038,7 @@ void DispatchV2JsonNotif(const FString& Payload
 void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 {
 	FAccelByteModelsSessionNotificationMessage Notif;
-	if (FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Notif) == false)
+	if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif) == false)
 	{
 		UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize sessionMessageNotif to struct\nNotification: %s"), *ParsedJsonString);
 		return;
@@ -2171,7 +2171,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 		case (Notif::ConnectedNotif):
 		{
 			FAccelByteModelsLobbySessionId SessionId;
-			bool bSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &SessionId);
+			bool bSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &SessionId);
 			if (bSuccess)
 			{
 				LobbySessionId = SessionId;
@@ -2183,7 +2183,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 		case (Notif::PartyMemberLeaveNotif):
 		{
 				FAccelByteModelsLeavePartyNotice PartyLeaveResult;
-				bool bSuccess = FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &PartyLeaveResult);
+				bool bSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &PartyLeaveResult);
 				if (bSuccess)
 				{
 					if (PartyLeaveNotif.IsBound())
@@ -2267,7 +2267,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 			}
 			else
 			{
-				if (FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &NotificationMessage) == false)
+				if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &NotificationMessage) == false)
 				{
 					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the whole MessageNotif to the struct\nNotification: %s"), *ParsedJsonString);
 					return;
@@ -2306,7 +2306,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 			BanNotifReceived = true;
 			FAccelByteModelsUserBannedNotification Result;
 			//CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
-			if (FAccelByteUtilities::JsonObjectStringToUStruct(ParsedJsonString, &Result))
+			if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result))
 			{
 				if (Result.UserId == CredentialsRef.GetUserId())
 				{

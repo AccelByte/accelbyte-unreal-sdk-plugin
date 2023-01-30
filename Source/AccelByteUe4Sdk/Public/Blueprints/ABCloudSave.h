@@ -21,6 +21,10 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FAccelByteModelsUserRecord
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FAccelByteModelsGameRecord, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsListUserRecords, FListAccelByteModelsUserRecord, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsListGameRecords, FAccelByteModelsListGameRecords, Response);
+
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FJsonObjectWrapper, FDPayloadJsonObject, FJsonObjectWrapper, Response);
 
 #pragma endregion
@@ -126,6 +130,18 @@ public:
 	void DeleteGameRecord(
 		FString const& Key,
 		FDHandler const& OnSuccess,
+		FDErrorHandler const& OnError);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
+	void BulkGetUserRecords(
+		TArray<FString> const& Keys,
+		FDModelsListUserRecords const& OnSuccess,
+		FDErrorHandler const& OnError);
+		
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
+	void BulkGetGameRecords(
+		TArray<FString> const& Keys,
+		FDModelsListGameRecords const& OnSuccess,
 		FDErrorHandler const& OnError);
 
 private:

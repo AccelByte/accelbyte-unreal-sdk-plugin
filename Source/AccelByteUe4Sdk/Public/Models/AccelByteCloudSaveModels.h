@@ -104,3 +104,21 @@ struct ACCELBYTEUE4SDK_API FListAccelByteModelsUserRecord
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecordList")
 	TArray<FAccelByteModelsUserRecord> Data{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkGetRecordsByKeysRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | ListRecordRequest")
+	TArray<FString> Keys{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsListGameRecords
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | ListGameRecords")
+	TArray<FAccelByteModelsGameRecord> Data{};
+};

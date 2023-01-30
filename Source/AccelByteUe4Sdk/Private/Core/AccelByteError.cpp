@@ -246,6 +246,10 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::UserStatAlreadyExistException), TEXT("errors.net.accelbyte.platform.statistic.user_stat_already_exist") },
 		{ static_cast<int32>(ErrorCodes::StatValueOutOfRangeException), TEXT("errors.net.accelbyte.platform.statistic.stat_value_out_of_range") },
 		//
+		{ static_cast<int32>(ErrorCodes::StatisticsEmptyInputException), TEXT("errors.net.accelbyte.platform.statistics.input_empty") },
+
+
+		//
 		//SeasonPass Error Code List
 		//
 		{ static_cast<int32>(ErrorCodes::SeasonPassDefaultLanguageRequiredException), TEXT("errors.net.accelbyte.platform.seasonpass.default_language_required") },
@@ -305,6 +309,29 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::WebSocketConnectFailed), TEXT("WebSocket connect failed.") },
 		
 	};
+
+	void AddDebugMessage(FHttpRequestPtr Request, FHttpResponsePtr Response, FString& OutMessage)
+	{
+		OutMessage += "\n\nResponse";
+		OutMessage += "\nCode: " + FString::FromInt(Response->GetResponseCode());
+		OutMessage += "\nContent: \n" + Response->GetContentAsString();
+
+		OutMessage += " \n\nRequest";
+		OutMessage += "\nElapsed time (seconds): " + FString::SanitizeFloat(Request->GetElapsedTime());
+		OutMessage += "\nVerb: " + Request->GetVerb();
+		OutMessage += "\nURL: " + Request->GetURL();
+		OutMessage += "\nHeaders: \n";
+		for (auto a : Request->GetAllHeaders())
+		{
+			OutMessage += a + "\n";
+		}
+		OutMessage += "\nContent: \n";
+		for (auto a : Request->GetContent())
+		{
+			OutMessage += static_cast<char>(a);
+		}
+		OutMessage += "\n";
+	}
 
 	void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage)
 	{
@@ -366,30 +393,181 @@ namespace AccelByte
 				OutMessage += ErrorMessages::Default.at(Code);
 			}
 		}
-
-		// Debug message. Delete this code section for production
-#if 0
-		OutMessage += "\n\nResponse";
-		OutMessage += "\nCode: " + FString::FromInt(Response->GetResponseCode());
-		OutMessage += "\nContent: \n" + Response->GetContentAsString();
-
-		OutMessage += " \n\nRequest";
-		OutMessage += "\nElapsed time (seconds): " + FString::SanitizeFloat(Request->GetElapsedTime());
-		OutMessage += "\nVerb: " + Request->GetVerb();
-		OutMessage += "\nURL: " + Request->GetURL();
-		OutMessage += "\nHeaders: \n";
-		for (auto a : Request->GetAllHeaders())
-		{
-			OutMessage += a + "\n";
-		}
-		OutMessage += "\nContent: \n";
-		for (auto a : Request->GetContent())
-		{
-			OutMessage += static_cast<char>(a);
-		}
-		OutMessage += "\n";
-#endif
 	}
+
+	void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject)
+	{
+		FErrorOAuthInfo Error;
+		Error.ErrorCode = -1;
+		int32 Code = 0;
+		OutMessage = "";
+		if (Response.IsValid())
+		{
+			if (!Response->GetContentAsString().IsEmpty())
+			{
+				if(FAccelByteJsonConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error))
+				{
+					if(Error.ErrorCode != -1)
+					{
+						Code = Error.ErrorCode;
+						OutErrorObject.SetNumberField("errorCode", Error.ErrorCode);
+					}
+					else
+					{
+						Code = Response->GetResponseCode();
+					}
+					
+					if(!Error.Error_description.IsEmpty())
+					{
+						OutErrorObject.SetStringField("error_description", *Error.Error_description);
+					}
+
+					if(!Error.Error_uri.IsEmpty())
+					{
+						OutErrorObject.SetStringField("error_uri", *Error.Error_uri);
+					}
+						
+					if(!Error.Mfa_token.IsEmpty())
+					{
+						OutErrorObject.SetStringField("mfa_token", *Error.Mfa_token);
+					}
+						
+					if(Error.Factors.Num() > 0)
+					{
+						TArray<TSharedPtr<FJsonValue>> ValueArray;
+												
+						for (int i = 0; i < Error.Factors.Num(); i++)
+						{
+							TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueString(Error.Factors[i]));    
+							ValueArray.Add(Value);
+						}
+						
+						OutErrorObject.SetArrayField("factors", ValueArray);
+					}
+						
+					if(!Error.Default_factor.IsEmpty())
+					{
+						OutErrorObject.SetStringField("default_factor", *Error.Default_factor);
+					}
+
+					if(!Error.PlatformId.IsEmpty())
+					{
+						OutErrorObject.SetStringField("platformId", *Error.PlatformId);
+					}
+
+					if(!Error.LinkingToken.IsEmpty())
+					{
+						OutErrorObject.SetStringField("linkingToken", *Error.LinkingToken);
+					}
+
+					if(!Error.ClientId.IsEmpty())
+					{
+						OutErrorObject.SetStringField("clientId", *Error.ClientId);
+					}
+ 
+				}
+			}
+			else
+			{
+				Code = Response->GetResponseCode();
+			}
+		}
+		else
+		{
+			Code = (int32)ErrorCodes::NetworkError;
+		}
+
+		OutCode = Code;
+
+		if (!Error.ErrorMessage.IsEmpty())
+		{
+			OutMessage = Error.ErrorMessage;
+			OutErrorObject.SetStringField("errorMessage", *Error.ErrorMessage);
+		}
+		else if (!Error.Error.IsEmpty())
+		{
+			OutMessage = Error.Error;
+			OutErrorObject.SetStringField("error", *Error.Error);
+		}
+		else
+		{
+			auto it = ErrorMessages::Default.find(Code);
+			if (it != ErrorMessages::Default.cend())
+			{
+				OutMessage += ErrorMessages::Default.at(Code);
+			}
+		}
+		
+		if (Response.IsValid())
+		{
+			TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
+			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+			FJsonSerializer::Deserialize(Reader, JsonObject);
+			if (JsonObject.Get()->HasField("messageVariables"))
+			{				
+				OutErrorObject.SetObjectField("messageVariables", JsonObject.Get()->TryGetField("messageVariables")->AsObject());
+			}
+		}
+
+	}
+
+	void HandleHttpOAuthError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorOAuthInfo& OutErrorInfo)
+	{
+		int32 Code = 0;
+		OutMessage = "";
+		if (Response.IsValid())
+		{
+			if (!Response->GetContentAsString().IsEmpty())
+			{
+				if(FAccelByteJsonConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &OutErrorInfo))
+				{
+					if(OutErrorInfo.ErrorCode != -1)
+					{
+						Code = OutErrorInfo.ErrorCode;
+					}
+					else
+					{
+						Code = Response->GetResponseCode();
+						OutErrorInfo.ErrorCode = Code;
+					} 
+				}
+				else
+				{
+					Code = static_cast<int32>(ErrorCodes::InvalidResponse);
+				}
+			}
+			else
+			{
+				Code = Response->GetResponseCode();
+				OutErrorInfo.ErrorCode = Code;
+			}
+		}
+		else
+		{
+			Code = static_cast<int32>(ErrorCodes::NetworkError);
+		}
+
+		OutCode = Code;
+
+		if (!OutErrorInfo.ErrorMessage.IsEmpty())
+		{
+			OutMessage = OutErrorInfo.ErrorMessage;
+		}
+		else if (!OutErrorInfo.Error.IsEmpty())
+		{
+			OutMessage = OutErrorInfo.Error;
+		}
+		else
+		{
+			auto it = ErrorMessages::Default.find(Code);
+			if (it != ErrorMessages::Default.cend())
+			{
+				OutMessage += ErrorMessages::Default.at(Code);
+				OutErrorInfo.ErrorMessage = OutMessage;
+			}
+		}
+	}
+
 
 } // Namespace AccelByte
 

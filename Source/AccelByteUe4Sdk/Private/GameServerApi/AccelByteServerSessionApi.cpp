@@ -149,5 +149,79 @@ void ServerSession::UpdateMemberStatus(FString const& GameSessionID
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void ServerSession::QueryPartySessions(
+	FAccelByteModelsV2QueryPartiesRequest const& RequestContent,
+	THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess,
+	FErrorHandler const& OnError,
+	int64 Offset /* = 0 */,
+	int64 Limit /* = 20 */)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *ServerCredentialsRef.GetClientAccessToken());
+
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/parties"),
+								  *ServerSettingsRef.SessionServerUrl, *ServerCredentialsRef.GetClientNamespace());
+
+	FString ContentBody = TEXT("");
+	const TSharedPtr<FJsonObject> QueryRequestJsonObject = FJsonObjectConverter::UStructToJsonObject(RequestContent);
+	FAccelByteUtilities::RemoveEmptyStrings(QueryRequestJsonObject);
+
+	TMap<FString, FString> QueryParams{};
+	for (const TPair<FString, TSharedPtr<FJsonValue>>& KV : QueryRequestJsonObject->Values)
+	{
+		// Check if the value of this pair is a valid shared instance, if not bail
+		if (!KV.Value.IsValid())
+		{
+			continue;
+		}
+
+		// Attempt to get the value pointed to as a string, and make sure that it is not empty if we are able to grab it
+		FString ValueStr{};
+		if (!KV.Value->TryGetString(ValueStr) || ValueStr.IsEmpty())
+		{
+			continue;
+		}
+
+		// Avoid empty enum values for MemberStatus and JoinType
+		if (KV.Key.Equals(TEXT("memberStatus"), ESearchCase::IgnoreCase) || KV.Key.Equals(TEXT("joinStatus"), ESearchCase::IgnoreCase))
+		{
+			if (ValueStr.Equals(TEXT("empty"), ESearchCase::IgnoreCase))
+			{
+				continue;
+			}
+		}
+
+		// Add to the mapping of query parameters
+		QueryParams.Add(KV.Key, ValueStr);
+	}
+
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void ServerSession::GetPartyDetails(
+	FString const& PartyID,
+	THandler<FAccelByteModelsV2PartySession> const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *ServerCredentialsRef.GetClientAccessToken());
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"),
+		*ServerSettingsRef.SessionServerUrl, *ServerCredentialsRef.GetClientNamespace(), *PartyID);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 }
 }

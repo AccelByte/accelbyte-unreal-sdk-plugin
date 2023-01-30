@@ -30,14 +30,16 @@ namespace AccelByte
 	template <typename T> using THandler = TDelegate<void(const T&)>;
 	template <typename T1, typename T2> using THandlerPayloadModifier = TDelegate<T1(T2)>;
 	using FVoidHandler = TDelegate<void()>;
-	using FErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */)>;
-	using FCustomErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* ErrorObject */)>;
+	using FErrorHandler = TDelegate<void(int32 /* ErrorCode */, const FString& /* ErrorMessage */)>;
+	using FCustomErrorHandler = TDelegate<void(int32 /* ErrorCode */, const FString& /* ErrorMessage */, const FJsonObject& /* ErrorObject */)>;
+	using FOAuthErrorHandler = TDelegate<void(int32 /* ErrorCode */, const FString& /* ErrorMessage */, const FErrorOAuthInfo& /* ErrorObject */)>;
 #else
 	template <typename T> using THandler = TBaseDelegate<void, const T&>;
 	template <typename T1, typename T2> using THandlerPayloadModifier = TBaseDelegate<T1, T2>;
 	using FVoidHandler = TBaseDelegate<void>;
 	using FErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */>;
-	using FCustomErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* ErrorObject */>;
+	using FCustomErrorHandler = TBaseDelegate<void, int32 /* ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* ErrorObject */>;
+	using FOAuthErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FErrorOAuthInfo& /* ErrorObject */>;
 #endif
 
 	UENUM(BlueprintType)
@@ -293,7 +295,9 @@ namespace AccelByte
 		StatNotDecreasableException = 12273,
 		UserStatAlreadyExistException = 12274,
 		StatValueOutOfRangeException = 12275,
-		
+		//
+		StatisticsEmptyInputException = 20002,
+
 		//
 		//SeasonPass Error Code List
 		//
@@ -379,8 +383,6 @@ namespace AccelByte
 		UGCGetContentPreviewNotFoundException = 773702,
 	};
 
-
-
 	class ACCELBYTEUE4SDK_API ErrorMessages
 	{
 	public:
@@ -392,146 +394,9 @@ namespace AccelByte
 
 	ACCELBYTEUE4SDK_API void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage);
 
-	inline void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject)
-	{
-		FErrorOauthInfo Error;
-		Error.ErrorCode = -1;
-		int32 Code = 0;
-		OutMessage = "";
-		if (Response.IsValid())
-		{
-			if (!Response->GetContentAsString().IsEmpty())
-			{
-				if(FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0))
-				{
-					if(Error.ErrorCode != -1)
-					{
-						Code = Error.ErrorCode;
-						OutErrorObject.SetNumberField("errorCode", Error.ErrorCode);
-					}
-					else
-					{
-						Code = Response->GetResponseCode();
-					}
-					
-					if(!Error.Error_description.IsEmpty())
-					{
-						OutErrorObject.SetStringField("error_description", *Error.Error_description);
-					}
-
-					if(!Error.Error_uri.IsEmpty())
-					{
-						OutErrorObject.SetStringField("error_uri", *Error.Error_uri);
-					}
-						
-					if(!Error.Mfa_token.IsEmpty())
-					{
-						OutErrorObject.SetStringField("mfa_token", *Error.Mfa_token);
-					}
-						
-					if(Error.Factors.Num() > 0)
-					{
-						TArray<TSharedPtr<FJsonValue>> ValueArray;
-												
-						for (int i = 0; i < Error.Factors.Num(); i++)
-						{
-							TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueString(Error.Factors[i]));    
-							ValueArray.Add(Value);
-						}
-						
-						OutErrorObject.SetArrayField("factors", ValueArray);
-					}
-						
-					if(!Error.Default_factor.IsEmpty())
-					{
-						OutErrorObject.SetStringField("default_factor", *Error.Default_factor);
-					}
-
-					if(!Error.PlatformId.IsEmpty())
-					{
-						OutErrorObject.SetStringField("platformId", *Error.PlatformId);
-					}
-
-					if(!Error.LinkingToken.IsEmpty())
-					{
-						OutErrorObject.SetStringField("linkingToken", *Error.LinkingToken);
-					}
-
-					if(!Error.ClientId.IsEmpty())
-					{
-						OutErrorObject.SetStringField("clientId", *Error.ClientId);
-					}
- 
-				}
-			}
-			else
-			{
-				Code = Response->GetResponseCode();
-			}
-		}
-		else
-		{
-			Code = (int32)ErrorCodes::NetworkError;
-		}
-
-		OutCode = Code;
-
-		if (!Error.ErrorMessage.IsEmpty())
-		{
-			OutMessage = Error.ErrorMessage;
-			OutErrorObject.SetStringField("errorMessage", *Error.ErrorMessage);
-		}
-		else if (!Error.Error.IsEmpty())
-		{
-			OutMessage = Error.Error;
-			OutErrorObject.SetStringField("error", *Error.Error);
-		}
-		else
-		{
-			auto it = ErrorMessages::Default.find(Code);
-			if (it != ErrorMessages::Default.cend())
-			{
-				OutMessage += ErrorMessages::Default.at(Code);
-			}
-		}
-		
-		if (Response.IsValid())
-		{
-			TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
-			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
-			FJsonSerializer::Deserialize(Reader, JsonObject);
-			if (JsonObject.Get()->HasField("messageVariables"))
-			{				
-				OutErrorObject.SetObjectField("messageVariables", JsonObject.Get()->TryGetField("messageVariables")->AsObject());
-			}
-		}
-
-		// Debug message. Delete this code section for production
-#if UE_BUILD_DEBUG
-		if (Request.IsValid() && Response.IsValid())
-		{
-			OutMessage += "\n\nResponse";
-			OutMessage += "\nCode: " + FString::FromInt(Response->GetResponseCode());
-			OutMessage += "\nContent: \n" + Response->GetContentAsString();
-
-			OutMessage += " \n\nRequest";
-			OutMessage += "\nElapsed time (seconds): " + FString::SanitizeFloat(Request->GetElapsedTime());
-			OutMessage += "\nVerb: " + Request->GetVerb();
-			OutMessage += "\nURL: " + Request->GetURL();
-			OutMessage += "\nHeaders: \n";
-			for (auto a : Request->GetAllHeaders())
-			{
-				OutMessage += a + "\n";
-			}
-			OutMessage += "\nContent: \n";
-			for (auto a : Request->GetContent())
-			{
-				OutMessage += static_cast<char>(a);
-			}
-			OutMessage += "\n";
-		}
-#endif
-	}
+	ACCELBYTEUE4SDK_API void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject);
+	
+	ACCELBYTEUE4SDK_API void HandleHttpOAuthError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorOAuthInfo& OutErrorInfo);
 
 	inline bool HandleHttpResultOk(FHttpResponsePtr Response, TArray<uint8> Payload, const FVoidHandler& OnSuccess)
 	{
@@ -544,7 +409,7 @@ namespace AccelByte
 	{
 		FString String = Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString();
 		TArray<T> Result;
-		bool bSuccess = FJsonObjectConverter::JsonArrayStringToUStruct(String, &Result, 0, 0);
+		bool bSuccess = FAccelByteJsonConverter::JsonArrayStringToUStruct(String, &Result);
 		if (bSuccess)
 		{
 			OnSuccess.ExecuteIfBound(Result);
@@ -567,7 +432,7 @@ namespace AccelByte
 		FString String = Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString();
 
 		typename std::remove_const<typename std::remove_reference<T>::type>::type Result;
-		bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(String, &Result, 0, 0);
+		bool bSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(String, &Result);
 		if (bSuccess)
 		{
 			OnSuccess.ExecuteIfBound(Result);
@@ -608,7 +473,7 @@ namespace AccelByte
 		jsonString.InsertAt(startIndex, "\"");
 		jsonString.InsertAt(endIndex, "\"");
 		FAccelByteModelsPartyDataNotif PartyData;
-		bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(jsonString, &PartyData, 0, 0);
+		bool bSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(jsonString, &PartyData);
 		if (bSuccess)
 		{
 			OnSuccess.ExecuteIfBound(PartyData);
@@ -634,46 +499,126 @@ namespace AccelByte
 	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
-			[OnSuccess, OnError, Scheduler]
-		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
-		{
-			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
-				if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
+				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
-					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), "Invalid JSON response");
-				}
-				return;
-			}
-
-			if (!bFinished)
-			{
-				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.");
-				return;
-			}
-
-			// If response is nulltpr then search the actual response in the cache
-			if (!Response.IsValid() && Scheduler != nullptr)
-			{
-				FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
-				if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
-				{
-					//Cache->SerializableRequestAndResponse.ResponsePayload.Num() != 0
-					auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
-					HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
+					if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
+					{
+						OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), "Invalid JSON response");
+					}
 					return;
 				}
-			}
 
-			int32 Code;
-			FString Message;
-			HandleHttpError(Request, Response, Code, Message);
-			OnError.ExecuteIfBound(Code, Message);
-		});
+				if (!bFinished)
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.");
+					return;
+				}
+
+				// If response is nullptr then search the actual response in the cache
+				if (!Response.IsValid() && Scheduler != nullptr)
+				{
+					FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+					if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+					{
+						auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
+						HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
+						return;
+					}
+				}
+
+				int32 Code;
+				FString Message;
+				HandleHttpError(Request, Response, Code, Message);
+				OnError.ExecuteIfBound(Code, Message);
+			});
 	}
 
 	template<typename T>
 	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FCustomErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
+	{
+		return FHttpRequestCompleteDelegate::CreateLambda(
+			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
+			{
+				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+				{
+					if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
+					{
+						OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), "Invalid JSON response", FJsonObject{});
+					}
+					return;
+				}
+
+				if (!bFinished)
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.", FJsonObject{});
+					return;
+				}
+
+				// If response is nullptr then search the actual response in the cache
+				if (!Response.IsValid() && Scheduler != nullptr)
+				{
+					FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+					if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+					{
+						auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
+						HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
+						return;
+					}
+				}
+
+				int32 Code;
+				FString Message;
+				FJsonObject ErrorObject;
+				HandleHttpCustomError(Request, Response, Code, Message, ErrorObject);
+				OnError.ExecuteIfBound(Code, Message, ErrorObject);
+			});
+	}
+
+	template<typename T>
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FOAuthErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
+	{
+		return FHttpRequestCompleteDelegate::CreateLambda(
+			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
+			{
+				FErrorOAuthInfo ErrorOauthInfo;
+				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+				{
+					if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
+					{
+						OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("Invalid JSON response"), ErrorOauthInfo);
+					}
+					return;
+				}
+
+				if (!bFinished)
+				{
+	                OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), TEXT("Request not sent."), ErrorOauthInfo);
+	                return;
+	            }
+
+				// If response is nullptr then search the actual response in the cache
+				if (!Response.IsValid() && Scheduler != nullptr)
+				{
+					FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+					if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+					{
+						auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
+						HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
+						return;
+					}
+				}
+
+				int32 ErrorCode;
+				FString ErrorMessage;
+				HandleHttpOAuthError(Request, Response, ErrorCode, ErrorMessage, ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
+			});
+	}
+
+	template<typename T, typename U>
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const U& OnError, FHttpRetryScheduler* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler]
@@ -683,35 +628,32 @@ namespace AccelByte
 			{
 				if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
 				{
-					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), "Invalid JSON response", FJsonObject{});
+					OnError.ExecuteIfBound({ TEXT("InvalidResponse"), TEXT("Invalid JSON response") });
 				}
 				return;
 			}
 
 			if (!bFinished)
 			{
-                OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.", FJsonObject{});
-                return;
-            }
+				OnError.ExecuteIfBound({ TEXT("NetworkError"), TEXT("Request not sent.") });
+				return;
+			}
 
-			// If response is nulltpr then search the actual response in the cache
+			// If response is nullptr then search the actual response in the cache
 			if (!Response.IsValid() && Scheduler != nullptr)
 			{
 				FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
 				if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
-				{
-					//Cache->SerializableRequestAndResponse.ResponsePayload.Num() != 0
+				{ 
 					auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
 					HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
 					return;
 				}
 			}
 
-			int32 Code;
-			FString Message;
-			FJsonObject ErrorObject;
-			HandleHttpCustomError(Request, Response, Code, Message, ErrorObject);
-			OnError.ExecuteIfBound(Code, Message, ErrorObject);
+			HandleHttpError(Request, Response, OnError); 
 		});
 	}
+
+	
 } // Namespace AccelByte

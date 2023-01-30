@@ -58,6 +58,18 @@ public:
 		, int Port
 		, const THandler<FAccelByteModelsTurnServerCredential>& OnSuccess
 		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Send info about P2P connection type and selected turn server region to BE. This called by client.
+	 *
+	 * @param SelectedTurnServerRegion Selected turn server region
+	 * @param P2PConnectionType P2P connection type enum (host, relay, srflx, or prflx)
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SendMetric(const FString &SelectedTurnServerRegion, const EP2PConnectionType &P2PConnectionType,
+		const FVoidHandler &OnSuccess,
+		const FErrorHandler &OnError);
 	
 private:
 	FAccelByteModelsTurnServer ClosestServer;

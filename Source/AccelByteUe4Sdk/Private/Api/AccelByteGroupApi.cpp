@@ -431,6 +431,420 @@ void Group::LeaveGroup(const THandler<FAccelByteModelsMemberRequestGroupResponse
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
+
+void Group::CreateV2Group(
+	const FAccelByteModelsCreateGroupRequest& RequestContent,
+	const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace());
+
+	HttpClient.ApiRequest("POST", Url, {}, RequestContent, OnSuccess, OnError);
+}
+
+void Group::AcceptV2GroupInvitation(
+	const FString& GroupId, 
+	const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/invite/accept"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Group::RejectV2GroupInvitation(
+	const FString& GroupId, 
+	const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/invite/reject"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Group::JoinV2Group(
+	const FString& GroupId, 
+	const THandler<FAccelByteModelsJoinGroupResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/join"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Group::LeaveV2Group(
+	const FString& GroupId,
+	const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/leave"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Group::InviteUserToV2Group(
+	const FString& UserId, 
+	const FString& GroupId, 
+	const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/invite"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*UserId,
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Group::AcceptV2GroupJoinRequest(
+	const FString& UserId, 
+	const FString& GroupId, 
+	const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/join/accept"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*UserId,
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
+}
+	
+void Group::RejectV2GroupJoinRequest(
+	const FString& UserId, 
+	const FString& GroupId, 
+	const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/join/reject"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*UserId,
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Group::KickV2GroupMember(
+	const FString& UserId,
+	const FString& GroupId, 
+	const THandler<FAccelByteModelsKickGroupMemberResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/kick"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*UserId,
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Group::AssignV2MemberRole(
+	const FString& MemberRoleId, 
+	const FString& GroupId, 
+	const FAccelByteModelsUserIdWrapper& RequestContent,
+	const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/roles/%s/groups/%s/members"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*MemberRoleId,
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, RequestContent, OnSuccess, OnError);
+}
+
+void Group::DeleteV2MemberRole(
+	const FString& MemberRoleId, 
+	const FString& GroupId, 
+	const FAccelByteModelsUserIdWrapper& RequestContent,
+	const FVoidHandler& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/roles/%s/groups/%s/members"),
+		*SettingsRef.GroupServerUrl,
+		*CredentialsRef.GetNamespace(),
+		*MemberRoleId,
+		*GroupId);
+
+	HttpClient.ApiRequest("DELETE", Url, {}, RequestContent, OnSuccess, OnError);
+}
+
+void Group::GetGroupsByGroupIds(
+	const TArray<FString> GroupIds,
+	const THandler<FAccelByteModelsGetGroupListResponse>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/bulk"),
+		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
+
+	auto Request = FAccelByteModelsGetGroupsByGroupIdsRequest{GroupIds};
+	FString Content = FString("");
+	FJsonObjectConverter::UStructToJsonObjectString(Request, Content);
+
+	HttpClient.ApiRequest("POST",Url, {},Content,OnSuccess,OnError);
+}
+
+void Group::UpdateV2Group(
+	const FString& GroupId,
+	const FAccelByteModelsUpdateGroupRequest& RequestContent,
+	const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	HttpClient.ApiRequest("PATCH",Url, {}, RequestContent, OnSuccess, OnError);
+}
+
+void Group::DeleteV2Group(const FString& GroupId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	HttpClient.ApiRequest("DELETE",Url,{},OnSuccess,OnError);
+}
+
+void Group::UpdateV2GroupCustomAttributes(
+	const FString& GroupId,
+	const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
+	const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/attributes/custom"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	HttpClient.ApiRequest("PUT", Url, {}, RequestContent,OnSuccess,OnError);
+}
+
+void Group::UpdateV2GroupCustomRule(
+	const FString& GroupId,
+	const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
+	const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/rules/custom"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	HttpClient.ApiRequest("PUT", Url, {}, RequestContent,OnSuccess,OnError);
+}
+
+void Group::UpdateV2GroupPredefinedRule(
+	const FString& GroupId,
+	const EAccelByteAllowedAction& AllowedAction,
+	const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent, 
+	const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString AllowedActionStr = ConvertGroupAllowedActionToString(AllowedAction);
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/rules/defined/%s"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*GroupId,
+		*AllowedActionStr);
+
+	HttpClient.ApiRequest("PUT",Url,{},RequestContent,OnSuccess,OnError);
+}
+
+void Group::DeleteV2GroupPredefinedRule(
+	const FString& GroupId,
+	const EAccelByteAllowedAction& AllowedAction,
+	const FVoidHandler& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString AllowedActionStr = ConvertGroupAllowedActionToString(AllowedAction);
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/rules/defined/%s"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*GroupId,
+		*AllowedActionStr);
+
+	HttpClient.ApiRequest("DELETE",Url, {},OnSuccess,OnError);
+}
+
+void Group::GetUserGroupStatusInfo(
+	const FString& UserId,
+	const FString& GroupId,
+	const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
+	const FErrorHandler OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/status"),
+		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace(),*UserId,*GroupId);
+
+	HttpClient.ApiRequest("GET",Url, {},OnSuccess,OnError);
+}
+
+void Group::GetMyJoinedGroupInfo(
+	const FAccelByteModelsLimitOffsetRequest& RequestContent,
+	const THandler<FAccelByteModelsGetGroupMemberListResponse>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/me/groups"),
+		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
+	const TMap<FString, FString> QueryParams
+	{
+			{ "limit", FString::FromInt(RequestContent.Limit) },
+			{ "offset", FString::FromInt(RequestContent.Offset) }
+	};
+
+	HttpClient.ApiRequest("GET", Url,QueryParams,OnSuccess,OnError);
+}
+
+void Group::GetMyJoinGroupRequest(
+	const FAccelByteModelsLimitOffsetRequest& RequestContent,
+	const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/me/join/request"),
+		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
+
+	const TMap<FString,FString> QueryParams
+	{
+		{"limit", FString::FromInt(RequestContent.Limit)},
+		{"offset", FString::FromInt(RequestContent.Offset)}
+	};
+
+	HttpClient.ApiRequest("GET", Url, QueryParams, OnSuccess, OnError);
+}
+
+void Group::GetGroupInviteRequestList(
+	const FString& GroupId,
+	const FAccelByteModelsLimitOffsetRequest& RequestContent,
+	const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/invite/request"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	const TMap<FString,FString> QueryParams
+	{
+		{"limit", FString::FromInt(RequestContent.Limit)},
+		{"offset", FString::FromInt(RequestContent.Offset)}
+	};
+
+	HttpClient.ApiRequest("GET", Url, QueryParams, OnSuccess, OnError);
+}
+
+void Group::GetGroupJoinRequestList(
+	const FString& GroupId,
+	const FAccelByteModelsLimitOffsetRequest& RequestContent,
+	const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/join/request"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*GroupId);
+
+	const TMap<FString,FString> QueryParams
+	{
+		{"limit", FString::FromInt(RequestContent.Limit)},
+		{"offset", FString::FromInt(RequestContent.Offset)}
+	};
+
+	HttpClient.ApiRequest("GET", Url, QueryParams, OnSuccess, OnError);
+}
+
+void Group::CancelGroupMemberInvitation(
+	const FString& UserId,
+	const FString& GroupId,
+	const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/invite/cancel"),
+		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*UserId,
+		*GroupId);
+
+	HttpClient.ApiRequest("POST", Url, {}, OnSuccess, OnError);
+}
+
+void Group::GetAllMemberRoles(
+	const FAccelByteModelsLimitOffsetRequest& RequestContent,
+	const THandler<FAccelByteModelsGetMemberRolesListResponse>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/roles"),
+		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
+
+	const TMap<FString,FString> QueryParams
+	{
+		{"limit", FString::FromInt(RequestContent.Limit)},
+		{"offset", FString::FromInt(RequestContent.Offset)}
+	};
+
+	HttpClient.ApiRequest("GET", Url, QueryParams, OnSuccess, OnError);
+}
 	
 } // Namespace Api
 } // Namespace AccelByte

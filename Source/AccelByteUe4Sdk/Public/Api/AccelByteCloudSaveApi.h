@@ -21,6 +21,9 @@ namespace Api
  */
 class ACCELBYTEUE4SDK_API CloudSave : public FApiBase
 {
+	
+#define MAX_BULK_KEY_COUNT 20
+	
 public:
 	CloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~CloudSave();
@@ -90,6 +93,17 @@ public:
 	 */
 	void BulkGetPublicUserRecord(FString const& Key
 		, const TArray<FString>& UserIds
+		, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
+	
+	/**
+	 * @brief Bulk get records (arbitrary JSON data) by list of keys.
+	 *
+	 * @param Keys List Key of record.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void BulkGetUserRecords(TArray<FString> const& Keys
 		, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -243,6 +257,17 @@ public:
 	 */
 	void DeleteGameRecord(FString const& Key
 		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Bulk get game records (arbitrary JSON data) by list of keys.
+	 *
+	 * @param Keys List Key of record.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsListGameRecords&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void BulkGetGameRecords(TArray<FString> const& Keys
+		, THandler<FAccelByteModelsListGameRecords> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 private:

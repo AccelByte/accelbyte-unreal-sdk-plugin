@@ -99,5 +99,22 @@ FString TurnManager::GetTurnManagerServerUrl() const
 		: SettingsRef.TurnManagerServerUrl;
 }
 
+void TurnManager::SendMetric(const FString &SelectedTurnServerRegion, const EP2PConnectionType &P2PConnectionType,
+	const FVoidHandler &OnSuccess,
+	const FErrorHandler &OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/metrics/namespaces/%s/connected"),
+		*GetTurnManagerServerUrl(),
+		*SettingsRef.Namespace);
+
+	FAccelByteModelsTurnManagerMetric Data;
+	Data.Region = SelectedTurnServerRegion;
+	Data.Type = FAccelByteUtilities::GetUEnumValueAsString(P2PConnectionType).ToLower();
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Data,  OnSuccess, OnError);
+}
+
 } // Namespace Api
 } // Namespace AccelByte

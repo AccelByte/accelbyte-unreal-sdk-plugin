@@ -83,56 +83,56 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FBaseResponse, const FAccelByteModelsLobbyBaseResponse&); 
 
-    // Party 
-    /**
-     * @brief delegate for handling info party response.
-     */
-    DECLARE_DELEGATE_OneParam(FPartyInfoResponse, const FAccelByteModelsInfoPartyResponse&); 
+	// Party 
+	/**
+	 * @brief delegate for handling info party response.
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyInfoResponse, const FAccelByteModelsInfoPartyResponse&); 
 	
-    /**
-     * @brief delegate for handling create party response.
-     */
-    DECLARE_DELEGATE_OneParam(FPartyCreateResponse, const FAccelByteModelsCreatePartyResponse&); 
+	/**
+	 * @brief delegate for handling create party response.
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyCreateResponse, const FAccelByteModelsCreatePartyResponse&); 
 
-    /**
-     * @brief delegate for handling leave party response.
-     */
-    DECLARE_DELEGATE_OneParam(FPartyLeaveResponse, const FAccelByteModelsLeavePartyResponse&);
+	/**
+	 * @brief delegate for handling leave party response.
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyLeaveResponse, const FAccelByteModelsLeavePartyResponse&);
 
 	/**
 	 * @brief delegate for handling leave party notification. This delegate is DEPRECATED
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
 
-    /**
-     * @brief delegate for handling leave party notification.
-     */
-    DECLARE_DELEGATE_OneParam(FPartyMemberLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
+	/**
+	 * @brief delegate for handling leave party notification.
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyMemberLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
 	
-    /**
-     * @brief delegate for handling invite party response.
-     */
-    DECLARE_DELEGATE_OneParam(FPartyInviteResponse, const FAccelByteModelsPartyInviteResponse&); 
+	/**
+	 * @brief delegate for handling invite party response.
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyInviteResponse, const FAccelByteModelsPartyInviteResponse&); 
 
-    /**
-     * @brief delegate for handling party invitation notification
-     */
-    DECLARE_DELEGATE_OneParam(FPartyInviteNotif, const FAccelByteModelsInvitationNotice&);       // Passive
+	/**
+	 * @brief delegate for handling party invitation notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyInviteNotif, const FAccelByteModelsInvitationNotice&);       // Passive
 
-    /**
-     * @brief delegate for handling get party invitation notification
-     */
-    DECLARE_DELEGATE_OneParam(FPartyGetInvitedNotif, const FAccelByteModelsPartyGetInvitedNotice&);  // Passive
+	/**
+	 * @brief delegate for handling get party invitation notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyGetInvitedNotif, const FAccelByteModelsPartyGetInvitedNotice&);  // Passive
 
-    /**
-     * @brief delegate for handling join party response
-     */
-    DECLARE_DELEGATE_OneParam(FPartyJoinResponse, const FAccelByteModelsPartyJoinResponse&); 
+	/**
+	 * @brief delegate for handling join party response
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyJoinResponse, const FAccelByteModelsPartyJoinResponse&); 
 
-    /**
-     * @brief delegate for handling join party notification
-     */
-    DECLARE_DELEGATE_OneParam(FPartyJoinNotif, const FAccelByteModelsPartyJoinNotice&);              // Passive
+	/**
+	 * @brief delegate for handling join party notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyJoinNotif, const FAccelByteModelsPartyJoinNotice&);              // Passive
 
 	/**
 	 * @brief delegate for handling reject party response
@@ -144,15 +144,15 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyRejectNotif, const FAccelByteModelsPartyRejectNotice&);;              // Passive
 	
-    /**
-     * @brief delegate for handling member kicked from party event
-     */
-    DECLARE_DELEGATE_OneParam(FPartyKickResponse, const FAccelByteModelsKickPartyMemberResponse&); 
-    
-    /**
-     * @brief delegate for handling member kicked from party event notification
-     */
-    DECLARE_DELEGATE_OneParam(FPartyKickNotif, const FAccelByteModelsGotKickedFromPartyNotice&);   // Passive
+	/**
+	 * @brief delegate for handling member kicked from party event
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyKickResponse, const FAccelByteModelsKickPartyMemberResponse&); 
+	
+	/**
+	 * @brief delegate for handling member kicked from party event notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyKickNotif, const FAccelByteModelsGotKickedFromPartyNotice&);   // Passive
 
 	/**
 	 * @brief delegate for handling update data notification
@@ -204,27 +204,27 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyNotif, const FAccelByteModelsPartyNotif&);
 
-    // Chat
-    /**
-     * @brief delegate for handling private message response
-     */
-    DECLARE_DELEGATE_OneParam(FPersonalChatResponse, const FAccelByteModelsPersonalMessageResponse&);    
+	// Chat
+	/**
+	 * @brief delegate for handling private message response
+	 */
+	DECLARE_DELEGATE_OneParam(FPersonalChatResponse, const FAccelByteModelsPersonalMessageResponse&);    
 
-    /**
-     * @brief delegate for handling private message event notification
-     */
-    DECLARE_DELEGATE_OneParam(FPersonalChatNotif, const FAccelByteModelsPersonalMessageNotice&);         // Passive
+	/**
+	 * @brief delegate for handling private message event notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPersonalChatNotif, const FAccelByteModelsPersonalMessageNotice&);         // Passive
 
-    /**
-     * @brief delegate for handling party message event response
-     */
-    DECLARE_DELEGATE_OneParam(FPartyChatResponse, const FAccelByteModelsPartyMessageResponse&);
+	/**
+	 * @brief delegate for handling party message event response
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyChatResponse, const FAccelByteModelsPartyMessageResponse&);
 
-    /**
-     * @brief delegate for handling party message event notification
-     */
-    DECLARE_DELEGATE_OneParam(FPartyChatNotif, const FAccelByteModelsPartyMessageNotice&);              // Passive
-    
+	/**
+	 * @brief delegate for handling party message event notification
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyChatNotif, const FAccelByteModelsPartyMessageNotice&);              // Passive
+	
 	/**
 	 * @brief delegate for handling join default channel message event response
 	 */
@@ -240,23 +240,23 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FChannelChatNotif, const FAccelByteModelsChannelMessageNotice&);
 
-    // Presence
-    /**
-     * @brief delegate for handling user change presence status
-     */
-    DECLARE_DELEGATE_OneParam(FSetUserPresenceResponse, const FAccelByteModelsSetOnlineUsersResponse&);
+	// Presence
+	/**
+	 * @brief delegate for handling user change presence status
+	 */
+	DECLARE_DELEGATE_OneParam(FSetUserPresenceResponse, const FAccelByteModelsSetOnlineUsersResponse&);
 
-    /**
-     * @brief delegate for handling other user change their presence status event
-     */
-    DECLARE_DELEGATE_OneParam(FFriendStatusNotif, const FAccelByteModelsUsersPresenceNotice&);
+	/**
+	 * @brief delegate for handling other user change their presence status event
+	 */
+	DECLARE_DELEGATE_OneParam(FFriendStatusNotif, const FAccelByteModelsUsersPresenceNotice&);
 
-    /**
-     * @brief delegate for handling get all user presence
-     */
-    DECLARE_DELEGATE_OneParam(FGetAllFriendsStatusResponse, const FAccelByteModelsGetOnlineUsersResponse&);        
+	/**
+	 * @brief delegate for handling get all user presence
+	 */
+	DECLARE_DELEGATE_OneParam(FGetAllFriendsStatusResponse, const FAccelByteModelsGetOnlineUsersResponse&);        
 	
-    // Notification
+	// Notification
 	/**
 	 * @brief delegate for handling incoming notification
 	 */
@@ -272,7 +272,7 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FUserUnbannedNotification, const FAccelByteModelsUserBannedNotification&); //Passive
 
-    // Matchmaking
+	// Matchmaking
 	/**
 	 * @brief delegate for handling matchmaking response
 	 */
@@ -288,10 +288,10 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FRejectConsentResponse, const FAccelByteModelsRejectConsentRequest&);
 	
-    /**
-     * @brief delegate for handling matchmaking notification
-     */
-    DECLARE_DELEGATE_OneParam(FMatchmakingNotif, const FAccelByteModelsMatchmakingNotice&);
+	/**
+	 * @brief delegate for handling matchmaking notification
+	 */
+	DECLARE_DELEGATE_OneParam(FMatchmakingNotif, const FAccelByteModelsMatchmakingNotice&);
 
 	/*
 	 * @brief delegate for handling ready consent notification
@@ -449,8 +449,19 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FRefreshTokenResponse, const FAccelByteModelsRefreshTokenResponse&)
 
+	/**
+	* @brief delegate for handling successfully connecting to lobby.
+	*/
 	DECLARE_DELEGATE(FConnectSuccess);
+
+	/**
+	* @brief delegate for handling lobby connection disconnected.
+	*/
 	DECLARE_DELEGATE_OneParam(FDisconnectNotif, const FAccelByteModelsDisconnectNotif&)
+
+	/**
+	* @brief delegate for handling connection closed.
+	*/
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 
 	/**
@@ -529,16 +540,17 @@ public:
 	DECLARE_DELEGATE_OneParam(FV2MatchmakingStartNotif, FAccelByteModelsV2StartMatchmakingNotif)
 
 	/**
-	 * @brief Delegate for notification when party leader started matchmaking
-	 */
+	* @brief Delegate for notification when matchmaking ticket expired
+	*/
 	DECLARE_DELEGATE_OneParam(FV2MatchmakingExpiredNotif, FAccelByteModelsV2MatchmakingExpiredNotif)
 
 	/**
 	 * @brief Delegate for notification when party leader canceled matchmaking
 	 */
 	DECLARE_DELEGATE_OneParam(FV2MatchmakingCanceledNotif, FAccelByteModelsV2MatchmakingCanceledNotif)
+	
 public:
-    /**
+	/**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
 	 */
 	void Connect(const FString& Token = "");
@@ -573,7 +585,7 @@ public:
 	 * 
 	 * @param Message Message to be sent.
 	 */
-    FString SendPartyMessage(const FString& Message);
+	FString SendPartyMessage(const FString& Message);
 	
 	/**
 	 * @brief Request to join the default channel chat.
@@ -585,9 +597,9 @@ public:
 	 */
 	FString SendChannelMessage(const FString& Message);
 
-    //------------------------
-    // Party
-    //------------------------
+	//------------------------
+	// Party
+	//------------------------
 
 	/**
 	 * @brief Get information about current party.
@@ -599,26 +611,26 @@ public:
 	/**
 	 * @brief Create a party.
 	 */
-    FString SendCreatePartyRequest();
+	FString SendCreatePartyRequest();
 
 	/**
 	 * @brief Leave current party.
 	 */
-    FString SendLeavePartyRequest();
+	FString SendLeavePartyRequest();
 
 	/**
 	 * @brief Invite a user to party.
 	 * 
 	 * @param UserId The target user ID to be invited.
 	 */
-    FString SendInviteToPartyRequest(const FString& UserId);
+	FString SendInviteToPartyRequest(const FString& UserId);
 
-    /**
-     * @brief Set presence status on lobby service
-     *
-     * @param Availability the presence state that you want to use in the EAvailability type
-     * @param Activity any string which explains the activity of the player
-     */
+	/**
+	 * @brief Set presence status on lobby service
+	 *
+	 * @param Availability Presence state that you want to use. State is EAvailability type
+	 * @param Activity User's custom activity
+	 */
 	FString SendSetPresenceStatus(const EAvailability Availability, const FString& Activity);
 
 	/**
@@ -672,7 +684,7 @@ public:
 	/**
 	 * @brief (Obsolete) the function name is misleading, please use SendGetOnlineFriendPresenceRequest().
 	 */
-    FString SendGetOnlineUsersRequest();
+	FString SendGetOnlineUsersRequest();
 
 	/**
 	 * @brief Get list of online friends in the lobby server.
@@ -795,7 +807,7 @@ public:
 	/**
 	 * @brief Serialize the Qos Latencies obj into a stringified json object.
 	 * - Multiple regions are possible (hence the TArray).
-	 * @param SelectedLatencies 
+	 * @param SelectedLatencies Array of latencies pair, key is region name and value is latency in ms.
 	 * @return 
 	 */
 	static FString GetServerLatenciesJsonStr(TArray<TPair<FString, float>> SelectedLatencies);
@@ -863,11 +875,11 @@ public:
 	void RequestFriend(FString UserId);
 	
 	/**
-     * @brief Send friend request by public ID.
-     *
-     * @param PublicId Targeted user's PublicId.
-     */
-    void RequestFriendByPublicId(FString PublicId);
+	* @brief Send friend request by public ID.
+	*
+	* @param PublicId Targeted user's PublicId.
+	*/
+	void RequestFriendByPublicId(FString PublicId);
 
 	/**
 	 * @brief Send unfriend request.
@@ -983,8 +995,10 @@ public:
 	FString GetAllSessionAttribute();
 
 	/**
-	 * @brief Refresh access token used in lobby.
-	 */
+	* @brief Refresh access token used in lobby.
+	* 
+	* @param AccessToken New access token to use.
+	*/
 	FString RefreshToken(const FString& AccessToken);
 
 	/**
@@ -1062,18 +1076,33 @@ public:
 	 */
 	void UnbindV2MatchmakingEvents();
 
+	/**
+	 * @brief Set a trigger function when successfully connect to lobby.
+	 */
 	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
 	{
 		ConnectSuccess = OnConnectSuccess;
 	}
+
+	/**
+	 * @brief Set a trigger function when connection to lobby failed.
+	 */
 	void SetConnectFailedDelegate(const FErrorHandler& OnConnectError)
 	{
 		ConnectError = OnConnectError;
 	}
+	
+	/**
+	 * @brief Set a trigger function when connection to lobby is disconnected.
+	 */
 	void SetDisconnectNotifDelegate(const FDisconnectNotif OnDisconnectNotice)
 	{
 		DisconnectNotif = OnDisconnectNotice;
 	}
+
+	/**
+	 * @brief Set a trigger function when connection is closed.
+	 */
 	void SetConnectionClosedDelegate(const FConnectionClosed& OnConnectionClosed)
 	{
 		ConnectionClosed = OnConnectionClosed;
@@ -1116,177 +1145,317 @@ public:
 	{
 		PartyMemberDisconnectNotif = OnPartyMemberDisconnectNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when other user is invited to party
+	 * @param OnPartyInviteNotif return models called FAccelByteModelsInvitationNotice
+	 */
 	void SetPartyInviteNotifDelegate(const FPartyInviteNotif& OnPartyInviteNotif)
 	{
 		PartyInviteNotif = OnPartyInviteNotif;
 	}
 	
+	/**
+	 * @brief Set a trigger function when receiving a party invite
+	 * @param OnInvitePartyGetInvitedNotice return models called FAccelByteModelsPartyGetInvitedNotice
+	 */
 	void SetPartyGetInvitedNotifDelegate(const FPartyGetInvitedNotif& OnInvitePartyGetInvitedNotice)
 	{
 		PartyGetInvitedNotif = OnInvitePartyGetInvitedNotice;
 	}
 	
+	/**
+	 * @brief Set a trigger function when a new member joins the party
+	 * @param OnInvitePartyJoinNotice return models called FAccelByteModelsPartyJoinNotice
+	 */
 	void SetPartyJoinNotifDelegate(const FPartyJoinNotif& OnInvitePartyJoinNotice)
 	{
 		PartyJoinNotif = OnInvitePartyJoinNotice;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a party invitation is rejected
+	 * @param OnInvitePartyRejectNotice return models called FAccelByteModelsPartyRejectNotice
+	 */
 	void SetPartyInvitationRejectedNotifDelegate(const FPartyRejectNotif& OnInvitePartyRejectNotice)
 	{
 		PartyRejectNotif = OnInvitePartyRejectNotice;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when kicked from party
+	 * @param OnInvitePartyKickedNotice return models called FAccelByteModelsGotKickedFromPartyNotice
+	 */
 	void SetPartyKickNotifDelegate(const FPartyKickNotif& OnInvitePartyKickedNotice)
 	{
 		PartyKickNotif = OnInvitePartyKickedNotice;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when party data is updated
+	 * @param OnPartyNotif return models called FAccelByteModelsPartyNotif
+	 */
 	void SetPartyNotifDelegate(FPartyNotif OnPartyNotif) 
 	{
 		PartyNotif = OnPartyNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when party data is updated
+	 * @param OnPersonalChatNotif return models called FAccelByteModelsPartyNotif
+	 */
 	void SetPrivateMessageNotifDelegate(FPersonalChatNotif OnPersonalChatNotif)
 	{
 		PersonalChatNotif = OnPersonalChatNotif;
-	}
-	
+	};
+
+	/**
+	 * @brief Set a trigger function when received a party chat (v1)
+	 * @param OnPersonalChatNotif return models called FAccelByteModelsPartyMessageNotice
+	 */
 	void SetPartyChatNotifDelegate(FPartyChatNotif OnPersonalChatNotif)
 	{
 		PartyChatNotif = OnPersonalChatNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when friends presence is updated
+	 * @param OnUserPresenceNotif return models called FAccelByteModelsUsersPresenceNotice
+	 */
 	void SetUserPresenceNotifDelegate(FFriendStatusNotif OnUserPresenceNotif)
 	{
 		FriendStatusNotif = OnUserPresenceNotif;
-	}
-	
+	};
+
+	/**
+	 * @brief Set a trigger function when receiving a notification message
+	 * @param OnNotificationMessage return models called FAccelByteModelsNotificationMessage
+	 */
 	void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
 	{
 		MessageNotif = OnNotificationMessage;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when receiving invite to a party (v2)
+	 * @param OnPartyInvitedNotif return models called FAccelByteModelsV2PartyInvitedEvent
+	 */
 	void SetV2PartyInvitedNotifDelegate(const FV2PartyInvitedNotif& OnPartyInvitedNotif)
 	{
 		V2PartyInvitedNotif = OnPartyInvitedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when party members changed (v2)
+	 * @param OnPartyMembersChanged return models called FAccelByteModelsV2PartyMembersChangedEvent
+	 */
 	void SetV2PartyMembersChangedNotifDelegate(const FV2PartyMembersChangedNotif& OnPartyMembersChanged)
 	{
 		V2PartyMembersChangedNotif = OnPartyMembersChanged;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a new member joined current party (v2)
+	 * @param OnPartyJoinedNotif return models called FAccelByteModelsV2PartyUserJoinedEvent
+	 */
 	void SetV2PartyJoinedNotifDelegate(const FV2PartyJoinedNotif& OnPartyJoinedNotif)
 	{
 		V2PartyJoinedNotif = OnPartyJoinedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a party invitation is rejected (v2)
+	 * @param OnPartyRejectedNotif return models called FAccelByteModelsV2PartyUserRejectedEvent
+	 */
 	void SetV2PartyRejectedNotifDelegate(const FV2PartyRejectedNotif& OnPartyRejectedNotif)
 	{
 		V2PartyRejectedNotif = OnPartyRejectedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when getting kicked from a party (v2)
+	 * @param OnPartyKickedNotif return models called FAccelByteModelsV2PartyUserKickedEvent
+	 */
 	void SetV2PartyKickedNotifDelegate(const FV2PartyKickedNotif& OnPartyKickedNotif)
 	{
 		V2PartyKickedNotif = OnPartyKickedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when receiving invite to a game session (v2)
+	 * @param OnGameSessionInvitedNotif return models called FAccelByteModelsV2GameSessionUserInvitedEvent
+	 */
 	void SetV2GameSessionInvitedNotifDelegate(const FV2GameSessionInvitedNotif& OnGameSessionInvitedNotif)
 	{
 		V2GameSessionInvitedNotif = OnGameSessionInvitedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a new member joined the game session (v2)
+	 * @param OnGameSessionJoinedNotif return models called FAccelByteModelsV2GameSessionUserJoinedEvent
+	 */
 	void SetV2GameSessionJoinedNotifDelegate(const FV2GameSessionJoinedNotif& OnGameSessionJoinedNotif)
 	{
 		V2GameSessionJoinedNotif = OnGameSessionJoinedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a game session member changes (v2)
+	 * @param OnGameSessionMembersChangedNotif return models called FAccelByteModelsV2GameSessionMembersChangedEvent
+	 */
 	void SetV2GameSessionMembersChangedNotifDelegate(const FV2GameSessionMembersChangedNotif& OnGameSessionMembersChangedNotif)
 	{
 		V2GameSessionMembersChangedNotif = OnGameSessionMembersChangedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a game session data changes (v2)
+	 * @param OnGameSessionUpdatedNotif return models called FAccelByteModelsV2GameSession
+	 */
 	void SetV2GameSessionUpdatedNotifDelegate(const FV2GameSessionUpdatedNotif& OnGameSessionUpdatedNotif)
 	{
 		V2GameSessionUpdatedNotif = OnGameSessionUpdatedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when kicked from a game session (v2)
+	 * @param OnGameSessionKickedNotif return models called FAccelByteModelsV2GameSessionUserKickedEvent
+	 */
 	void SetV2GameSessionKickedNotifDelegate(const FV2GameSessionKickedNotif& OnGameSessionKickedNotif)
 	{
 		V2GameSessionKickedNotif = OnGameSessionKickedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when an invitation is rejected (v2)
+	 * @param OnGameSessionRejectedNotif return models called FAccelByteModelsV2GameSessionUserRejectedEvent
+	 */
 	void SetV2GameSessionRejectedNotifDelegate(const FV2GameSessionRejectedNotif& OnGameSessionRejectedNotif)
 	{
 		V2GameSessionRejectedNotif = OnGameSessionRejectedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a DS status changes (v2)
+	 * @param OnDSStatusChangedNotif return models called FAccelByteModelsV2DSStatusChangedNotif
+	 */
 	void SetV2DSStatusChangedNotifDelegate(const FV2DSStatusChangedNotif& OnDSStatusChangedNotif)
 	{
 		V2DSStatusChangedNotif = OnDSStatusChangedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a party data is updated (v2)
+	 * @param OnPartyUpdatedNotif return models called FAccelByteModelsV2PartySession
+	 */
 	void SetV2PartyUpdatedNotifDelegate(const FV2PartyUpdatedNotif& OnPartyUpdatedNotif)
 	{
 		V2PartyUpdatedNotif = OnPartyUpdatedNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when matchmaking ticket is successfully matched (v2)
+	 * @param OnMatchFoundNotif return models called FAccelByteModelsV2MatchFoundNotif
+	 */
 	void SetV2MatchmakingMatchFoundNotifDelegate(const FV2MatchmakingMatchFoundNotif& OnMatchFoundNotif)
 	{
 		V2MatchmakingMatchFoundNotif = OnMatchFoundNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when leader created a matchmaking ticket (v2)
+	 * @param OnMatchmakingStartNotif return models called FAccelByteModelsV2StartMatchmakingNotif
+	 */
 	void SetV2MatchmakingStartNotifDelegate(const FV2MatchmakingStartNotif& OnMatchmakingStartNotif)
 	{
 		V2MatchmakingStartNotif = OnMatchmakingStartNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when matchmaking ticket is expired and matchmaking stopped (v2)
+	 * @param OnMatchmakingExpiredNotif return models called FAccelByteModelsV2MatchmakingExpiredNotif
+	 */
 	void SetV2MatchmakingExpiredNotifDelegate(const FV2MatchmakingExpiredNotif& OnMatchmakingExpiredNotif)
 	{
 		V2MatchmakingExpiredNotif = OnMatchmakingExpiredNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when leader cancelled matchmaking (v2)
+	 * @param OnMatchmakingCanceledNotif return models called FAccelByteModelsV2MatchmakingCanceledNotif
+	 */
 	void SetV2MatchmakingCanceledNotifDelegate(const FV2MatchmakingCanceledNotif& OnMatchmakingCanceledNotif)
 	{
 		V2MatchmakingCanceledNotif = OnMatchmakingCanceledNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when user is banned
+	 * @param OnUserBannedNotification return models called FAccelByteModelsUserBannedNotification
+	 */
 	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
 	{
 		UserBannedNotification = OnUserBannedNotification;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when user is unbanned
+	 * @param OnUserUnbannedNotification return models called FAccelByteModelsUserBannedNotification
+	 */
 	void SetUserUnbannedNotificationDelegate(FUserUnbannedNotification OnUserUnbannedNotification)
 	{
 		UserUnbannedNotification = OnUserUnbannedNotification;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a friend request is accepted
+	 * @param OnAcceptFriendsNotif return models called FAccelByteModelsAcceptFriendsNotif
+	 */
 	void SetOnFriendRequestAcceptedNotifDelegate(const FAcceptFriendsNotif& OnAcceptFriendsNotif)
 	{
 		AcceptFriendsNotif = OnAcceptFriendsNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a friend request is received
+	 * @param OnRequestFriendsNotif return models called FAccelByteModelsRequestFriendsNotif
+	 */
 	void SetOnIncomingRequestFriendsNotifDelegate(const FRequestFriendsNotif& OnRequestFriendsNotif)
 	{
 		RequestFriendsNotif = OnRequestFriendsNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when unfriended.
+	 * @param OnUnfriendNotif return models called FAccelByteModelsUnfriendNotif
+	 */
 	void SetOnUnfriendNotifDelegate(const FUnfriendNotif& OnUnfriendNotif)
 	{
 		UnfriendNotif = OnUnfriendNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when friend request is cancelled
+	 * @param OnCancelFriendsNotif return models called FAccelByteModelsCancelFriendsNotif
+	 */
 	void SetOnCancelFriendsNotifDelegate(const FCancelFriendsNotif& OnCancelFriendsNotif)
 	{
 		CancelFriendsNotif = OnCancelFriendsNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when friend request is rejected
+	 * @param OnRejectFriendsNotif return models called FAccelByteModelsRejectFriendsNotif
+	 */
 	void SetOnRejectFriendsNotifDelegate(const FRejectFriendsNotif& OnRejectFriendsNotif) 
 	{
 		RejectFriendsNotif = OnRejectFriendsNotif;
 	}
-	
+
+	/**
+	 * @brief Set a trigger function when a lobby message failed to be parsed
+	 * @param OnParsingError return models with the error code and message
+	 */
 	void SetParsingErrorDelegate(const FErrorHandler& OnParsingError)
 	{
 		ParsingError = OnParsingError;
@@ -1680,10 +1849,10 @@ public:
 	}
 
 	/**
-	 * @brief set ready consent notification
-	 *
-	 * @param OnDsNotification set delegate .
-	 */
+	* @brief set ready consent notification
+	*
+	* @param OnDsNotification set delegate.
+	*/
 	void SetDsNotifDelegate(FDsNotif OnDsNotification)
 	{
 		DsNotif = OnDsNotification;
@@ -1691,7 +1860,10 @@ public:
 
 	/**
 	 * @brief set create DS response delegate
-	 */
+	 *
+	 * @param OnCreateDSResponse Delegate to set.
+	 * @param OnError Delegate that will be called when operation failed.
+	 * */
 	void SetCreateDSDelegate(FBaseResponse OnCreateDSResponse
 		, FErrorHandler OnError = {})
 	{
@@ -1857,17 +2029,32 @@ public:
 		OnUnblockPlayerError = OnError;
 	}
 
+	/**
+	 * @brief set a function triggered when user is blocked
+	 *
+	 * @param OnBlockPlayerNotif Delegate that will be set.
+	 * */
 	void SetBlockPlayerNotifDelegate(FBlockPlayerNotif OnBlockPlayerNotif)
 	{
 		BlockPlayerNotif = OnBlockPlayerNotif;
 	}
 
+	/**
+	 * @brief set a function triggered when user is unblocked
+	 *
+	 * @param OnUnblockPlayerNotif Delegate that will be set.
+	 * */
 	void SetUnblockPlayerNotifDelegate(FUnblockPlayerNotif OnUnblockPlayerNotif)
 	{
 		UnblockPlayerNotif = OnUnblockPlayerNotif;
 	}
 
 	// Error
+	/**
+	 * @brief set a function triggered when there is a general lobby error notification.
+	 *
+	 * @param OnErrorNotif Delegate that will be set.
+	 * */
 	void SetErrorNotifDelegate(FErrorNotif OnErrorNotif)
 	{
 		ErrorNotif = OnErrorNotif;
@@ -1959,13 +2146,13 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief Bulk Get User(s) Presence, can get specific user's presence status not limited to friend.
-	 *
-	 * @param UserIds the list of UserId you want to request.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsBulkUserStatusNotif.
-	 * @param OnError This will be called when the operation failed.
-	 * @param CountOnly Will only return the status count, without the user's data when set to true.
-	 */
+	* @brief Bulk Get User(s) Presence, can get specific user's presence status not limited to friend.
+	*
+	* @param UserIds the list of UserId you want to request.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsBulkUserStatusNotif.
+	* @param OnError This will be called when the operation failed.
+	* @param CountOnly Will only return the status count, without the user's data when set to true.
+	*/
 	void BulkGetUserPresence(const TArray<FString>& UserIds
 		, const THandler<FAccelByteModelsBulkUserStatusNotif>& OnSuccess
 		, const FErrorHandler& OnError
@@ -1984,53 +2171,62 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief  List Blocked User's Id
-	 *
-	 * @param UserId User Id of the Player.
-	 * @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
-	 * @param OnError This will be called when the operation failed.
-	 */
+	* @brief  List Blocked User's Id
+	*
+	* @param UserId User Id of the Player.
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
 	void GetListOfBlockedUsers(const FString& UserId
 		, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief List Blocked User's Id, override of GetListOfBlockedUser,
-	 * will get current user's List of Blocked User's Id
-	 *
-	 * @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
-	 * @param OnError This will be called when the operation failed.
-	 */
+	* @brief List Blocked User's Id, override of GetListOfBlockedUser,
+	* will get current user's List of Blocked User's Id
+	*
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
 	void GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief List Id of Player that blocks an User.
-	 *
-	 * @param UserId User Id of the Player.
-	 * @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
-	 * @param OnError This will be called when the operation failed.
-	 */
+	* @brief List Id of Player that blocks an User.
+	*
+	* @param UserId User Id of the Player.
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
 	void GetListOfBlockers(const FString& UserId
 		, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief List Blockers User's Id, override of GetListOfBlocker,
-	 * will get current user's List of Blocker User's Id
-	 *
-	 * @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
-	 * @param OnError This will be called when the operation failed.
-	 */
+	* @brief List Blockers User's Id, override of GetListOfBlocker,
+	* will get current user's List of Blocker User's Id
+	*
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
 	void GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess
 		, const FErrorHandler& OnError);
 
+	/**
+	* @brief (DEPRECATED) Send a freeform notification message to a user
+	* 
+	* @param SendToUserId user id to send this notification message
+	* @param Message notification message
+	* @param bAsync shou;d the message be sent even if the receiving user is offline?
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
 	void SendNotificationToUser(const FString& SendToUserId
 		, const FAccelByteModelsFreeFormNotificationRequest& Message
 		, bool bAsync
 		, const FVoidHandler& OnSuccess
 		, const FErrorHandler& OnError);
-
+	
 	/**
 	 * @brief  Write party storage (attributes) data to the targeted party ID.
 	 * Beware:
@@ -2143,7 +2339,7 @@ private:
 	FAccelByteModelsLobbySessionId LobbySessionId;
 	FConnectSuccess ConnectSuccess;
 	FErrorHandler ConnectError;
-    FErrorHandler ParsingError;
+	FErrorHandler ParsingError;
 	FDisconnectNotif DisconnectNotif;
 	FConnectionClosed ConnectionClosed;
 	TSharedPtr<IAccelByteTokenGenerator> TokenGenerator;
@@ -2231,21 +2427,21 @@ private:
 #pragma endregion
 
 #pragma region Response/Notif Delegates
-    // Party 
-    FPartyInfoResponse PartyInfoResponse;
-    FPartyCreateResponse PartyCreateResponse;
-    FPartyLeaveResponse PartyLeaveResponse;
+	// Party 
+	FPartyInfoResponse PartyInfoResponse;
+	FPartyCreateResponse PartyCreateResponse;
+	FPartyLeaveResponse PartyLeaveResponse;
 	FPartyLeaveNotif PartyLeaveNotif; // This Delegate is DEPRECATED
-    FPartyMemberLeaveNotif PartyMemberLeaveNotif;
-    FPartyInviteResponse PartyInviteResponse;
-    FPartyInviteNotif PartyInviteNotif;
-    FPartyGetInvitedNotif PartyGetInvitedNotif;
-    FPartyJoinResponse PartyJoinResponse;
-    FPartyJoinNotif PartyJoinNotif;
-    FPartyRejectResponse PartyRejectResponse;
-    FPartyRejectNotif PartyRejectNotif;
-    FPartyKickResponse PartyKickResponse;
-    FPartyKickNotif PartyKickNotif;
+	FPartyMemberLeaveNotif PartyMemberLeaveNotif;
+	FPartyInviteResponse PartyInviteResponse;
+	FPartyInviteNotif PartyInviteNotif;
+	FPartyGetInvitedNotif PartyGetInvitedNotif;
+	FPartyJoinResponse PartyJoinResponse;
+	FPartyJoinNotif PartyJoinNotif;
+	FPartyRejectResponse PartyRejectResponse;
+	FPartyRejectNotif PartyRejectNotif;
+	FPartyKickResponse PartyKickResponse;
+	FPartyKickNotif PartyKickNotif;
 	FPartyDataUpdateNotif PartyDataUpdateNotif;
 	FPartyMemberConnectNotif PartyMemberConnectNotif;
 	FPartyMemberDisconnectNotif PartyMemberDisconnectNotif;
@@ -2257,21 +2453,21 @@ private:
 	FPartySendNotifResponse PartySendNotifResponse;
 	FPartyNotif PartyNotif;
 
-    // Chat
-    FPersonalChatResponse PersonalChatResponse;
-    FPersonalChatNotif PersonalChatNotif;
-    FPartyChatResponse PartyChatResponse;
-    FPartyChatNotif PartyChatNotif;
+	// Chat
+	FPersonalChatResponse PersonalChatResponse;
+	FPersonalChatNotif PersonalChatNotif;
+	FPartyChatResponse PartyChatResponse;
+	FPartyChatNotif PartyChatNotif;
 	FJoinDefaultChannelChatResponse JoinDefaultChannelChatResponse;
 	FChannelChatResponse ChannelChatResponse;
 	FChannelChatNotif ChannelChatNotif;
 
-    // Presence
-    FSetUserPresenceResponse SetUserPresenceResponse;
-    FFriendStatusNotif FriendStatusNotif;
-    FGetAllFriendsStatusResponse GetAllFriendsStatusResponse;
+	// Presence
+	FSetUserPresenceResponse SetUserPresenceResponse;
+	FFriendStatusNotif FriendStatusNotif;
+	FGetAllFriendsStatusResponse GetAllFriendsStatusResponse;
 
-    // Notification
+	// Notification
 	FMessageNotif MessageNotif;
 	FUserBannedNotification UserBannedNotification;
 	FUserUnbannedNotification UserUnbannedNotification;
@@ -2298,12 +2494,12 @@ private:
 	FV2MatchmakingExpiredNotif V2MatchmakingExpiredNotif;
 	FV2MatchmakingCanceledNotif V2MatchmakingCanceledNotif;
 
-    // Matchmaking
+	// Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;
 	FMatchmakingResponse MatchmakingCancelResponse;
 	FReadyConsentResponse ReadyConsentResponse;
 	FRejectConsentResponse RejectConsentResponse;
-    FMatchmakingNotif MatchmakingNotif;
+	FMatchmakingNotif MatchmakingNotif;
 	FReadyConsentNotif ReadyConsentNotif;
 	FRejectConsentNotif RejectConsentNotif;
 	FRematchmakingNotif RematchmakingNotif;

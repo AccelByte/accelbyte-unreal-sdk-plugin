@@ -102,7 +102,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicUserProfileInfo
 	FString AvatarLargeUrl{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
-	TMap<FString, FJsonObjectWrapper> CustomAttributes{}; 
+	FJsonObjectWrapper CustomAttributes{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString PublicId{};

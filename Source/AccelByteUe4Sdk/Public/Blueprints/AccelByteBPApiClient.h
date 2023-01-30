@@ -35,7 +35,7 @@ using namespace AccelByte;
 using namespace AccelByte::Api;
 
 UCLASS(Blueprintable, BlueprintType)
-class UABCredentials final : public UObject
+class ACCELBYTEUE4SDK_API UABCredentials final : public UObject
 {
 	GENERATED_BODY()
 

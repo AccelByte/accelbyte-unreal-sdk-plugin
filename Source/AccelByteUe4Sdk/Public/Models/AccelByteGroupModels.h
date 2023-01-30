@@ -495,3 +495,35 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetMemberRequestsListResponse
 /** @brief For HTTP requests that want empty data, but still want a USTRUCT */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsEmptyRequest { GENERATED_BODY() };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGetGroupsByGroupIdsRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AccelByte | Group | Models | FAccelByteModelsGetMemberRequestsListResponse" )
+	TArray<FString> GroupIds{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateGroupRequest
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
+	FString GroupName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
+	FString GroupRegion{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
+	EAccelByteGroupType GroupType{EAccelByteGroupType::NONE};
+
+	/** @brief Optional */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
+	FString GroupDescription{};
+	
+	/** @brief Optional */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
+	FString GroupIcon{};
+};

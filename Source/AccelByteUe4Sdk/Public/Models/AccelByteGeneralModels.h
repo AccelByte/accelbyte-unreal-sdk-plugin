@@ -17,6 +17,24 @@ enum class EAccelBytePaginationType : uint8
 	PREVIOUS
 };
 
+UENUM(BlueprintType)
+enum class EBanReason : uint8
+{
+	EMPTY,
+	VIOLENCE,
+	HARASSMENT,
+	HATEFUL_CONDUCT,
+	OFFENSIVE_USERNAME,
+	IMPERSONATION,
+	MALICIOUS_CONTENT,
+	SEXUALLY_SUGGESTIVE,
+	SEXUAL_VIOLENCE,
+	EXTREME_VIOLENCE,
+	UNDERAGE_USER,
+	CHEATING,
+	TOS_VIOLATION
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 {
@@ -85,4 +103,11 @@ struct FAccelByteHttpCacheItem
 
 	// The raw request and response serialized
 	FAccelByteLRUHttpStruct SerializableRequestAndResponse{};
+};
+
+struct FRequestBucket
+{
+	int32 AvailableToken {0};
+
+	double ResetTokenTime{ 0.0f };
 };

@@ -99,6 +99,26 @@ public:
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	* @brief Query for party information.
+	*
+	* @param RequestContent The query parties request body.
+	* @param OnSuccess This will be called if the operation succeeded.
+	* @param OnError This will be called if the operation failed.
+	* @param Offset Pagination offset. Default 0.
+	* @param Limit Pagination limit. Default 20.
+	*/
+	void QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,  THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess, FErrorHandler const& OnError, int64 Offset = 0, int64 Limit = 20);
+
+	/**
+	* @brief Query for party information.
+	*
+	* @param PartyID ID of the party to get details from
+	* @param OnSuccess This will be called if the operation succeeded.
+	* @param OnError This will be called if the operation failed.
+	*/
+	void GetPartyDetails(FString const& PartyID, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
+
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;

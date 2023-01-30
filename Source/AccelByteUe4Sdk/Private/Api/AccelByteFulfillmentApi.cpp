@@ -35,16 +35,16 @@ void Fulfillment::RedeemCode(FString const& Code
 		, *CredentialsRef.GetNamespace()
 		, *CredentialsRef.GetUserId());
 
-	FString Content = FString::Printf(TEXT("{\"code\":\"%s\""), *Code);
-	if(!Region.IsEmpty())
-	{
-		Content += FString::Printf(TEXT(", \"region\":\"%s\""), *Region);
-	}
-	if (!Language.IsEmpty())
-	{
-		Content += FString::Printf(TEXT(", \"language\":\"%s\""), *Language);
-	}
-	Content += "}";
+	FString Content;
+	FAccelByteModelsFulFillCodeRequest CodeRequest;
+	CodeRequest.Code = Code;
+	CodeRequest.Region = Region;
+	CodeRequest.Language = Language;
+	
+	TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(CodeRequest);
+	FAccelByteUtilities::RemoveEmptyStrings(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }

@@ -29,6 +29,8 @@ public:
 	
 	~Group();
 
+#pragma region Group V1
+
 	#pragma region Group (multi-member actions)
 	/**
 	 * @brief AKA "SearchGroups"; get list of groups.
@@ -210,10 +212,12 @@ public:
 	 * - Void Result
 	 * @param OnError Called upon failed op.
 	 */
-	void DeleteGroupPredefinedRule(const FString& GroupId
-		, const EAccelByteAllowedAction& AllowedAction
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	void DeleteGroupPredefinedRule(
+		const FString& GroupId,
+		const EAccelByteAllowedAction& AllowedAction,
+		const FVoidHandler& OnSuccess,
+		const FErrorHandler& OnError);
+
 	#pragma endregion /Group (multi-member actions)
 
 	#pragma region Group Member (individuals)
@@ -503,7 +507,461 @@ public:
 		, const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess
 		, const FErrorHandler& OnError);
 	#pragma endregion /Member Requests
+
+#pragma endregion Group V1
 	
+#pragma region Group V2
+
+	#pragma region Group V2 (multi-member actions)
+
+	/**
+	 * @brief Creates a new group.
+	 * - Requires valid user authentication.
+	 *
+	 * @param RequestContent New group detail request.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is const FAccelByteModelsGroupInformationResponse&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CreateV2Group(
+		const FAccelByteModelsCreateGroupRequest& RequestContent,
+		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Gets a collection of group information.
+	 * - Requires valid user authentication
+	 *
+	 * @param GroupIds A list of group ids to get the group information from.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is const FAccelByteModelsGetGroupListResponse&. Support paging.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetGroupsByGroupIds(
+			const TArray<FString> GroupIds,
+			const THandler<FAccelByteModelsGetGroupListResponse>& OnSuccess,
+			const FErrorHandler& OnError);
+
+	/**
+	 * @brief Update existing group.
+	 * - Required valid user authentication.
+	 * - Required Member Role Permission: "GROUP [UPDATE]".
+	 * - Checks the group ID of the user based on the access token and
+	 *     compares it with the group ID in path parameter.
+	 * - Checks the member role of the user based on the access token.
+	 * - Supports partial update (empty elements will convert to null)
+	 * 
+	 * @param GroupId
+	 * @param RequestContent
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is const FAccelByteModelsGroupInformationResponse&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateV2Group(
+		const FString& GroupId,
+		const FAccelByteModelsUpdateGroupRequest& RequestContent,
+		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Delete existing group.
+	 * - Checks if groupID exists before deleting.
+	 * - Required Member Role Permission: "GROUP [DELETE]".
+	 * 
+	 * @param GroupId 
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is const FAccelByteModelsGroupInformationResponse&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void DeleteV2Group(
+		const FString& GroupId,
+		const FVoidHandler& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Replaces current group custom attributes entirely.
+	 * - Requires valid user authentication.
+	 * - Required Member Role Permission: "GROUP [UPDATE]".
+	 * - Checks group ID of the user based on the access token and compares with group ID in path param.
+	 * - Checks the member role of the user based on the access token.
+	 *   
+	 * @param GroupId 
+	 * @param RequestContent Arbitrary {}.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is const FAccelByteModelsGroupInformationResponse&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateV2GroupCustomAttributes(
+		const FString& GroupId,
+		const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
+		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Update custom (arbitrary) group rule.
+	 * - Required valid user authentication.
+	 * - Checks group ID of the user (via access token) and compares with group ID in path param.
+	 * - Checks member role of the user based on access token.
+	 * 
+	 * @param GroupId
+	 * @param RequestContent Arbitrary {}.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is const FAccelByteModelsGroupInformationResponse&.
+	 * @param OnError Called upon failed op.
+	 */
+	void UpdateV2GroupCustomRule(
+		const FString& GroupId,
+		const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
+		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Update predefined group rule.
+	 * - Required valid user authentication.
+	 * - Required Member Role Permission: "GROUP [UPDATE]".
+	 * - Checks group ID of the user (via access token) and compares with group ID in path param.
+	 * - Checks member role of the user based on access token.
+	 * - If rule action is not defined in the group, it will be added immediately.
+	 * 
+	 * @param GroupId 
+	 * @param AllowedAction eg: createGroup, joinedGroup.
+	 * @param RequestContent RuleDetail { RuleAttribute, RuleCriteria, RuleValue }.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is const FAccelByteModelsGroupInformationResponse&.
+	 * @param OnError Called upon failed op.
+	 */
+	void UpdateV2GroupPredefinedRule(
+		const FString& GroupId,
+		const EAccelByteAllowedAction& AllowedAction,
+		const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent,
+		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Delete predefined group rule, based on the allowed action.
+	 * - Required valid user authentication.
+	 * - Required Member Role Permission: "GROUP [UPDATE]".
+	 * - Checks the group ID of the user based on the access token, then
+	 *    compares it with the group ID in path parameter.
+	 * - Checks the member role of the user based on the access token.
+	 * 
+	 * @param GroupId 
+	 * @param AllowedAction eg: createGroup, joinedGroup.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Void Result
+	 * @param OnError Called upon failed op.
+	 */
+	void DeleteV2GroupPredefinedRule(
+			const FString& GroupId,
+			const EAccelByteAllowedAction& AllowedAction,
+			const FVoidHandler& OnSuccess,
+			const FErrorHandler& OnError);
+
+	/**
+	 * @brief Gets user group status information.
+	 * - Required valid user authentication
+	 * - Required Member Role Permission: "GROUP [READ]"
+	 * 
+	 * @param UserId 
+	 * @param GroupId The group id the user belongs to.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is FAccelByteModelsGetUserGroupInfoResponse&.
+	 * @param OnError This will be called when the operation fail.
+	 */
+	void GetUserGroupStatusInfo(
+		const FString& UserId,
+		const FString& GroupId,
+		const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
+		const FErrorHandler OnError);
+
+	/**
+	 * @brief Get Group Invite Request List for specific group. Group members needs to have permission and also belong to the group to access this endpoint
+	 * - Required valid user authentication
+	 * - Required Member Role Permission: "GROUP:JOIN [READ]"
+	 * 
+	 * @param GroupId 
+	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is FAccelByteModelsGetMemberRequestsListResponse.
+	 * @param OnError This will be called when the operation fail.
+	 */
+	void GetGroupInviteRequestList(
+		const FString& GroupId,
+		const FAccelByteModelsLimitOffsetRequest& RequestContent,
+		const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get Group Join Request List for specific group. Group members needs to have permission and also belong to the group to access this endpoint
+	 * - Required valid user authentication
+	 * - Required Member Role Permission: "GROUP:JOIN [READ]"
+	 * 
+	 * @param GroupId 
+	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is FAccelByteModelsGetMemberRequestsListResponse
+	 * @param OnError This will be called when the operation fail.
+	 */
+	void GetGroupJoinRequestList(
+			const FString& GroupId,
+			const FAccelByteModelsLimitOffsetRequest& RequestContent,
+			const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
+			const FErrorHandler& OnError);
+
+	/**
+	 * @brief Cancel invitation to specific user
+	 * - Required valid user authentication
+	 * - Required Member Role Permission: "GROUP:INVITE [DELETE]"
+	 * 
+	 * @param UserId user id to which the invitation will be cancelled.
+	 * @param GroupId group id which sent the invitation.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * - Result is FAccelByteModelsMemberRequestGroupResponse
+	 * @param OnError This will be called when the operation fail.
+	 */
+	void CancelGroupMemberInvitation(
+			const FString& UserId,
+			const FString& GroupId,
+			const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+			const FErrorHandler& OnError);
+
+	#pragma endregion Group V2 (multi-member actions)
+
+	#pragma region Group V2 Member (individuals)
+
+	/**
+	* @brief Accepts an invitation from a 3rd-party group's group member to group up.
+	* - Required valid user authentication.
+	* - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
+	* - Checks if the user who access this endpoint already joined the specific group.
+	* - Deletes all requests (invite / join request) for the user who accesses this endpoint.
+	* - Existing members will receive notification of the newly-accepted member.
+	*
+	* @param GroupId of the group that invited you, that you are accepting the invite to.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	void AcceptV2GroupInvitation(
+		const FString& GroupId,
+		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Rejects an invitation from a 3rd-party group's group member to group up.
+	* - Required valid user authentication.
+	* - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
+	* - Checks if the user who access this endpoint already joined the specific group.
+	* 
+	* @param GroupId of the group that invited you, that you are rejecting the invite from.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	void RejectV2GroupInvitation(
+		const FString& GroupId,
+		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Join into specific group and become a group member.
+	* - Required valid user authentication.
+	* - Checks the the the group type based on the groupID.
+	* - Checks if the user who access this endpoint already joined the specific group.
+	* - Returns status field, for whether the user JOINED or REQUESTED to join the specific group.
+	* 
+	* - More Info:
+	*   - User cannot join to the group with PRIVATE type.
+	*   - Joining PUBLIC group type will create join request and need approval.
+	*       from the privileged group member to accept the request to become the member.
+	*   - Joining OPEN group type will make this user become member of that group immediately.
+	* 
+	* @param GroupId of the group you want to join.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	void JoinV2Group(
+		const FString& GroupId,
+		const THandler<FAccelByteModelsJoinGroupResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Leave the group you're currently in.
+	* - Required valid user authentication.
+	* - Admin is not allowed to leave the group.
+	* - Will also give response if user does not belong to any group.
+	* - Admin is not allowed to leave the group.
+	*   - If an Admin wants to leave the group, see DeleteGroup.
+	* - Still gives response if the user does not belong to any group.
+	* 
+	* @param GroupId of the group you want to leave.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	void LeaveV2Group(
+		const FString& GroupId,
+		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Invite the other user to your group.
+	 * - Required valid user auth.
+	 * - Required Member Role Permission: "GROUP:INVITE [CREATE]".
+	 * - If specific user already has the join request, response will notify they have a pending accept / reject.
+	 * - Invited user will receive notification through lobby.
+	 * 
+	 * @param UserId of the user you want to invite to your group.
+	 * @param GroupId of the group.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	void InviteUserToV2Group(
+		const FString& UserId,
+		const FString& GroupId,
+		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Accept [other] user's group join request.
+	* - Required valid user auth.
+	* - Required Member Role Permission: "GROUP:JOIN [CREATE]".
+	* - If specific user was not asked to join this specific group,
+	*     response will return error that they "need a join request".
+	* - Will also check if specific user *already* joined the specific group.
+	* - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
+	*     - Rather than an OPEN group (where players can just join without permission).
+	* 
+	* @param UserId of the user who wants to join your group.
+	* @param GroupId of the group.
+	* @param OnSuccess Called upon successful op.
+	* - Returns { GroupId, UserId }
+	* @param OnError Called upon failed op.
+	*/
+	void AcceptV2GroupJoinRequest(
+		const FString& UserId,
+		const FString& GroupId,
+		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Reject [other] user's group join request.
+	* - Required valid user auth.
+	* - Required Member Role Permission: "GROUP:JOIN [CREATE]".
+	* - If specific user was not asked to join this specific group,
+	*     response will return error that they "need a join request".
+	* - Will also check if specific user *already* joined the specific group.
+	* - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
+	*     - Rrather than an OPEN group players can just join.
+	* 
+	* @param UserId of the user you do NOT want to join your group.
+	* @param GroupId of the group.
+	* @param OnSuccess Called upon successful op.
+	* - Returns { GroupId, UserId }
+	* @param OnError Called upon failed op.
+	*/
+	void RejectV2GroupJoinRequest(
+		const FString& UserId,
+		const FString& GroupId,
+		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Kick a group member out of the group.
+	* - Required valid user auth.
+	* - Required Member Role Permission: "GROUP:KICK [CREATE]".
+	* - Validates the kicker's: member, group info and role perms.
+	* 
+	* @param UserId of the user you want to kick from your group.
+	* @param OnSuccess Called upon successful op.
+	* - Returns { GroupId, KickedUserId }
+	* @param OnError Called upon failed op.
+	*/
+	void KickV2GroupMember(
+		const FString& UserId,
+		const FString& GroupId,
+		const THandler<FAccelByteModelsKickGroupMemberResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get user group joined information. If user does not belong to any group, it will return warning to give information about it
+	 * - Required valid user authentication
+	 * 
+	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
+	 * @param OnSuccess This will be called when the operation is succeeded.
+	 * @param OnError This will be called when the operation is fail.
+	 */
+	void GetMyJoinedGroupInfo(
+		const FAccelByteModelsLimitOffsetRequest& RequestContent,
+		const THandler<FAccelByteModelsGetGroupMemberListResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get My Join Request To The Groups. It will check any join request group for this user
+	 * - Required valid user authentication
+	 * 
+	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
+	 * @param OnSuccess This will be called when the operation is succeeded.
+	 * - Result is FAccelByteModelsGetGroupMemberListResponse
+	 * @param OnError This will be called when the operation is fail.
+	 */
+	void GetMyJoinGroupRequest(const FAccelByteModelsLimitOffsetRequest& RequestContent,
+		const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	#pragma endregion Group V2 Member (individuals)
+
+	#pragma region Group V2 Roles (Permission)
+
+	/**
+	* @brief Assign a role to a group member.
+	* - AKA AddMemberRole.
+	* - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
+	*
+	* @param MemberRoleId of the role you want to assign.
+	* @param GroupId of the member.
+	* @param RequestContent { UserId } of the user and group you want to assign the role to.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	void AssignV2MemberRole(
+		const FString& MemberRoleId,
+		const FString& GroupId,
+		const FAccelByteModelsUserIdWrapper& RequestContent,
+		const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Remove a role from a group member.
+	* - AKA RevokeMemberRole, RemoveMemberRole.
+	* - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
+	* 
+	* @param MemberRoleId of the role you want to delete.
+	* @param GroupId of the member.
+	* @param RequestContent { UserId } of the user you want to delete the role from.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	void DeleteV2MemberRole(
+		const FString& MemberRoleId,
+		const FString& GroupId,
+		const FAccelByteModelsUserIdWrapper& RequestContent,
+		const FVoidHandler& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get list of member roles
+	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
+	 * @param OnSuccess This will be called when the operation is succeeded.
+	 * - Result is FAccelByteModelsGetMemberRolesListResponse
+	 * @param OnError This will be called when the operation is fail.
+	 */
+	void GetAllMemberRoles(
+		const FAccelByteModelsLimitOffsetRequest& RequestContent,
+		const THandler<FAccelByteModelsGetMemberRolesListResponse>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	#pragma endregion Group V2 Roles (Permission)
+
+#pragma endregion Group V2
+
 private:
 	Group() = delete;
 	Group(Group const&) = delete;

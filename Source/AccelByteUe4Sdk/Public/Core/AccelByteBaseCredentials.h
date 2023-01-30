@@ -8,7 +8,6 @@
 #include "Models/AccelByteErrorModels.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteDefines.h"
-#include "Engine.h"
 
 namespace AccelByte
 {
@@ -53,7 +52,7 @@ public:
 protected:
 	FString ClientId;
 	FString ClientSecret;
-	FErrorOauthInfo ErrorOAuth; 
+	FErrorOAuthInfo ErrorOAuth; 
 	
 	double UserSessionExpire;
 	ESessionState SessionState;

@@ -7,7 +7,9 @@
 #include "JsonUtilities.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "AccelByteUtilities.h"
+#include "Core/AccelByteUtilities.h"
+#include "Core/AccelByteBaseCredentials.h"
+#include "Core/AccelByteBaseSettings.h"
 
 #define REGEX_BASE_URL_WITH_DOMAIN "https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,128}\\.[a-zA-Z0-9()]{1,6}"
 #define REGEX_BASE_URL_WITHOUT_DOMAIN "(?:(https?:\\/\\/)?((?:[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost))"
@@ -19,10 +21,6 @@ using namespace AccelByte;
 
 namespace AccelByte
 {
-
-	class BaseCredentials;
-	class BaseSettings;
-
 	/**
 	 * @brief HTTP client for building API
 	 */
@@ -602,6 +600,12 @@ namespace AccelByte
 
 		void ExecuteError(const FCustomErrorHandler& OnError, const FString& ErrorText);
 
+		template<typename T>
+		void ExecuteError(const THandler<T>& OnError, const FString& ErrorText)
+		{
+			OnError.ExecuteIfBound({TEXT("InvalidRequest"), ErrorText});
+		}
+		
 		FString EncodeParamsData(const TMap<FString
 			, FString>& ParamsData) const;
 

@@ -16,10 +16,6 @@ DataStorageBinaryFile::DataStorageBinaryFile(FString DirectoryPath)
 {
 	FDirectoryPath DirPath;
 	DirPath.Path = FPaths::ConvertRelativePathToFull(DirectoryPath);
-#if !(PLATFORM_WINDOWS)
-	//This is the only directory that allow us to write. This hardcode is mandatory & unavoidable
-	DirPath.Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectLogDir());
-#endif
 	this->AbsoluteFileDirectory = DirPath;
 }
 
@@ -136,6 +132,11 @@ void DataStorageBinaryFile::GetItem(const FString & Key, const THandler<TPair<FS
 
 FString DataStorageBinaryFile::CompleteAbsoluteFilePath(const FString& FileName)
 {
+#if !(PLATFORM_WINDOWS) || UE_BUILD_SHIPPING
+	//This is the only directory that allow us to write. This hardcode is mandatory & unavoidable
+	FString Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectLogDir());
+	return Path + FileName;
+#endif
 	return this->AbsoluteFileDirectory.Path + FileName;
 }
 

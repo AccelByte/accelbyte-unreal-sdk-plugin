@@ -46,8 +46,8 @@ void ServerUser::SearchUserOtherPlatformDisplayName(const FString& DisplayName
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/search")
-	                                    , *ServerSettingsRef.IamServerUrl
-	                                    , *ServerCredentialsRef.GetClientNamespace());
+		, *ServerSettingsRef.IamServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("by"), TEXT("thirdPartyPlatform")},
@@ -103,9 +103,9 @@ void ServerUser::GetUserBans(const FString& UserId
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
-	                                    , *ServerSettingsRef.IamServerUrl
-	                                    , *ServerCredentialsRef.GetClientNamespace()
-	                                    , *UserId);
+		, *ServerSettingsRef.IamServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId);
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("activeOnly"), TEXT("true")},
@@ -116,5 +116,17 @@ void ServerUser::GetUserBans(const FString& UserId
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
+void ServerUser::GetUserBanInfo(const FString& UserId, const THandler<FGetUserBansResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans?activeOnly=true")
+		, *ServerSettingsRef.IamServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId);
+	
+	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
+}
+	
 }
 }

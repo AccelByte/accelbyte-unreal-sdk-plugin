@@ -37,6 +37,7 @@ public class AccelByteUe4Sdk : ModuleRules
 			"WebSockets",
 			"Networking",
 			"SSL",
+			"OpenSSL",
 			"Icmp"
 		});
 

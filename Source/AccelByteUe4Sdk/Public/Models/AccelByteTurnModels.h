@@ -63,3 +63,25 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTurnServerCredential
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
 	FString Password{};
 };
+
+UENUM(BlueprintType)
+enum class EP2PConnectionType : uint8
+{
+	None	UMETA(DisplayName = "none"),
+	Host	UMETA(DisplayName = "host"),
+	Srflx	UMETA(DisplayName = "srflx"),
+	Prflx	UMETA(DisplayName = "prflx"),
+	Relay	UMETA(DisplayName = "relay")
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsTurnManagerMetric
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Region{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Type{};
+};

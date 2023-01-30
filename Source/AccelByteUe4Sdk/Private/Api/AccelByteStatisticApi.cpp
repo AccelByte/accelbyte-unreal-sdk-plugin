@@ -47,12 +47,8 @@ void Statistic::CreateUserStatItems(const TArray<FString>& StatCodes
 		{
 			Contents += ",";
 		}
-		else
-		{
-			Contents += "]";
-		}
 	}
-
+	Contents += "]";
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }
 
@@ -125,11 +121,8 @@ void Statistic::IncrementUserStatItems(const TArray<FAccelByteModelsBulkStatItem
 		{
 			Contents += ",";
 		}
-		else
-		{
-			Contents += "]";
-		}
 	}
+	Contents += "]";
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, OnError);
 } 

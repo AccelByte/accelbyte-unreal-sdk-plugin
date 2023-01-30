@@ -5,6 +5,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonObjectWrapper.h"
+#include "Models/AccelByteGeneralModels.h"
 #include "AccelByteErrorModels.generated.h"
 
 USTRUCT(BlueprintType)
@@ -26,7 +28,19 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FErrorOauthInfo
+struct ACCELBYTEUE4SDK_API FUserBan
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserBan")
+	EBanReason Reason{EBanReason::EMPTY};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserBan")
+	FString EndDate{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserBan")
+	FString Comment{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FErrorOAuthInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
@@ -45,10 +59,16 @@ struct ACCELBYTEUE4SDK_API FErrorOauthInfo
 	TArray<FString> Factors{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
 	FString Default_factor{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString LinkingToken{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OAuthError")
+	FString Email{};	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
 	FString PlatformId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString LinkingToken{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
 	FString ClientId{};
-};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OAuthError")
+	FUserBan UserBan{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OAuthError")
+	FJsonObjectWrapper MessageVariables{};
+}; 

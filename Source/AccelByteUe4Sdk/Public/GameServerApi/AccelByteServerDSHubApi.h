@@ -62,19 +62,38 @@ public:
 	 */
 	bool IsConnected() const;
 
+	/**
+	 * @brief set a delegate to be triggered when successfully connect to DSHub.
+	 *
+	 * @param OnConnectSuccess delegate to set.
+	 */
 	void SetOnConnectSuccess(const FConnectSuccess& OnConnectSuccess);
 
+	/**
+	 * @brief set a delegate to be triggered when error connecting to DSHub.
+	 *
+	 * @param OnConnectError delegate to set.
+	 */
 	void SetOnConnectError(const FConnectError& OnConnectError);
 
+	/**
+	 * @brief set a delegate to be triggered when DSHub connection is closed.
+	 *
+	 * @param OnConnectionClosed delegate to set.
+	 */
 	void SetOnConnectionClosed(const FConnectionClosed& OnConnectionClosed);
 
 	/**
-	 * Bind a delegate to listen to server claim notifications from DS hub
+	 * @brief Bind a delegate to listen to server claim notifications from DS hub
+	 *
+	 * @param InDelegate delegate to set.
 	 */
 	void SetOnServerClaimedNotificationDelegate(const FOnServerClaimedNotification& InDelegate);
 
 	/**
-	 * Bind a delegate to listen to backfill proposal notifications from DS hub
+	 * @brief Bind a delegate to listen to backfill proposal notifications from DS hub
+	 *
+	 * @param InDelegate delegate to set
 	 */
 	void SetOnV2BackfillProposalNotificationDelegate(const FOnV2BackfillProposalNotification& InDelegate);
 

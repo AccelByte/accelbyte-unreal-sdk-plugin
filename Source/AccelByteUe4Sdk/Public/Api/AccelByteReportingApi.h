@@ -55,12 +55,14 @@ public:
 	 * @param Limit Pagination limit.
 	 * @param OnSuccess This will be called when the operation succeeded. The response is a FAccelByteModelsReasonsResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * @param Title Query reason(s) by title.
 	 */
 	void GetReasons(const FString& ReasonGroup
 		, int32 const& Offset
 		, int32 const& Limit
 		, const THandler<FAccelByteModelsReasonsResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, FString const& Title = TEXT(""));
 		
 	/**
 	 * @brief Get Reason Groups.

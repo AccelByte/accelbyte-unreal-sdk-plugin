@@ -66,6 +66,7 @@ public:
 
 protected:
 	static TMap<EHttpResponseCodes::Type, FHttpResponseCodeHandler> ResponseCodeDelegates;
+	TMap<FString /*Endpoint*/, FRequestBucket> RequestsBucket;
 
 	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue{};
 	FDelegateHandleAlias PollRetryHandle{};
@@ -91,6 +92,7 @@ protected:
 	static FString HeaderSDKVersion;
 	static FString HeaderOSSVersion;
 	static FString HeaderGameClientVersion;
+	static int32 RateLimit;
 };
 
 typedef TSharedRef<FHttpRetryScheduler, ESPMode::ThreadSafe> FHttpRetrySchedulerRef;	

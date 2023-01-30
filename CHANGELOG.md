@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [21.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.0.0%0D20.5.0) (2023-01-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **OAuth:** Error handler signature changed and IamUrl changed as optional
+* The existing var type (TMap<FString, FJsonObjectWrapper> CustomAttributes{};) in a model (FAccelByteModelsPublicUserProfileInfo) is not compatible with server response, we need to adjust it (to FJsonObjectWrapper CustomAttributes{};) to appropriate with server response and also uniformity JsonObject SDK parsing model.
+* adjusted JsonObject variable type in FAccelByteModelsPublicUserProfileInfo model to able give json value and uniformity
+* adjusted variable type in a model to able give json value and  uniformity
+
+### Features
+
+* add response validation for Login APIs ([8bbad85](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8bbad857075b878c44293bcfc5801cdd3feee1cd))
+* **engagement:** add blueprint function ([eb07175](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/eb0717595026f8e5d6fd9a51702cd94c02052ead))
+* **engagement:** implement new endpoint bulk get user records and game records ([806557e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/806557e3115f43fab25db78f8fd0d5c805333e40))
+* group api v2 ([c0c2086](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c0c20861891de0680fb39c96c192be4ace4a0158))
+* handle Third Party Login and Banned Users and update other error login method related ([d10e698](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d10e6986d69d3807d4744a0f5767e80bcff946a0))
+* Implement get party info from the session service ([ef10432](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ef1043290d7f2e30c14449bf4773e94e8540fdc1))
+* implement HTTP Requests guard to prevent DDoS-ing ([0acc975](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0acc9752128e293ce92889bf6bfeae484e626e94))
+* **module:** Change ABCredentials class to public ([2934c41](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2934c4164aa25e1f414e848323ee03d428b2fa61))
+* provided CustomError for LoginWithDeviceId ([23279aa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/23279aa6b636dded12620e74e6a80c75aa67900b))
+* **session:** add parties field in FAccelByteModelsV2GameSessionTeam ([aa4510b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/aa4510b649e324d25f74423a9444ff42f2752e4e))
+* **storage:** data storage for shipping build windows ([8857f96](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8857f961500b940f75fc1cfda999d418d14c802a))
+* **turnmanager:** add api to send metric to turn manager ([53b9d3d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/53b9d3d39b550daa3e02b8090e48c7d819145279))
+
+
+### Bug Fixes
+
+* error when parsing unidentified enum in http result handler ([f61adfa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f61adfa5d1a4d1c634cab7c2268323dc644c843c))
+* fix missing includes ([6c8672b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6c8672b801051bc24fd3907317938cc9ad1467c0))
+* Fixing build errors from merge with 5c5adf8 - feat: add ApiRequest methods with Headers in FHttpClient ([536626d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/536626dba0f5e5aac025f80d552b958389ddafda))
+* Json case sensitive error ([d41748a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d41748a12f999e4f197b9b96d1c2d4225c44fe8c))
+* missing includes cause compile errors when unity build is disabled ([ee7adde](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ee7adde3298ebca13d1445a69218906dd3a41ce6))
+* missing includes in OAuth2 API which causes compile errors when unity build is set to false ([f7af417](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f7af417ee5dee81dff99b6f17c10566777c509d9))
+* updating HttpClient.ApiReqest to HttpClient.Request ([ca6dea1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ca6dea1d7b534ec4c7b1a161a4ac64283f9d16c6))
+* updating HttpClient.Request calls to HttpClient.ApiRequest ([8030d48](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8030d489061f0f187ae2f3283e8651b93afb7be9))
+
+
+### Documentations
+
+* Changed parameter comment mistake ([3fe4152](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3fe4152e193d033dca85d1cd8758dbdb4827ee09))
+
+
+* Merge branch 'master' of bitbucket.org:accelbyte/justice-unreal-sdk-plugin into feature/OS-8327-logindeviceid-customerror ([3ed6fd7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3ed6fd76cbf656c445d5baa8436ab3e95a0a25cd))
+* Merge branch 'master' of bitbucket.org:accelbyte/justice-unreal-sdk-plugin into feature/OS-8327-logindeviceid-customerror ([7cc3672](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7cc367259229e5c584d1e26319954327dc443733))
+* Merge branch 'master' into feature/OS-8327-logindeviceid-customerror ([1022ad4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1022ad40f4f7019c9f883c01ea1c45b5b0593712))
+
+
+### Refactors
+
+* **OAuth:** Change CustomErrorHandler with OAuthErrorHandler to handle OAuth error specifically ([3e0d2d5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3e0d2d5d050f45d86ff36e36d79a8807f38639af))
+
 ## [20.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/20.5.0%0D20.4.0) (2023-01-16)
 
 

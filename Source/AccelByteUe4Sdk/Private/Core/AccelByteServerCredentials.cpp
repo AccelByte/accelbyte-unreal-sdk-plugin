@@ -111,8 +111,7 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 		case ESessionState::Valid:
 			if (GetRefreshTime() <= CurrentTime)
 			{
-				Oauth2::GetTokenWithClientCredentials(FRegistry::ServerSettings.IamServerUrl
-					, ClientId
+				Oauth2::GetTokenWithClientCredentials(ClientId
 					, ClientSecret
 					, THandler<FOauth2Token>::CreateLambda(
 						[this, CurrentTime](const FOauth2Token& Result)
@@ -132,7 +131,8 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 							RefreshBackoff += FMath::FRandRange(1.0, 60.0);
 							ScheduleRefreshToken(RefreshBackoff);
 							SessionState = ESessionState::Expired;
-						}));
+						})
+					, FRegistry::ServerSettings.IamServerUrl);
 
 				SessionState = ESessionState::Refreshing;
 			}

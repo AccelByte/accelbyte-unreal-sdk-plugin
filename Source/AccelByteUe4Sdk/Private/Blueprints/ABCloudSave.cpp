@@ -347,3 +347,43 @@ void UABCloudSave::DeleteGameRecord(
 		)
 	);
 }
+
+void UABCloudSave::BulkGetUserRecords(TArray<FString> const& Keys,
+	FDModelsListUserRecords const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->CloudSave.BulkGetUserRecords(Keys,
+		THandler<FListAccelByteModelsUserRecord>::CreateLambda(
+			[OnSuccess](FListAccelByteModelsUserRecord const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
+void UABCloudSave::BulkGetGameRecords(TArray<FString> const& Keys,
+	FDModelsListGameRecords const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->CloudSave.BulkGetGameRecords(Keys,
+		THandler<FAccelByteModelsListGameRecords>::CreateLambda(
+			[OnSuccess](FAccelByteModelsListGameRecords const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}

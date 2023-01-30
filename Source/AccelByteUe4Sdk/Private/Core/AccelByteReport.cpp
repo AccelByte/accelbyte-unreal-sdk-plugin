@@ -94,6 +94,6 @@ namespace AccelByte
 
 	void FReport::LogDeprecated(FString FunctionName, FString Message)
 	{
-		UE_LOG(LogAccelByte, Warning, TEXT("%s. %s is deprecated and will be r"),  *Message, *FunctionName);
+		UE_LOG(LogAccelByte, Warning, TEXT("%s is marked as deprecated. Message: "), *FunctionName, *Message);
 	}
 }

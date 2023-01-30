@@ -8,23 +8,23 @@
 namespace AccelByte
 {
 	FHttpRetryTask::FHttpRetryTask(
-		FHttpRequestPtr& Request,
-		const FHttpRequestCompleteDelegate& CompleteDelegate,
-		double RequestTime,
-		double NextDelay,
-		const FVoidHandler& OnBearerAuthRejectDelegate,
-		FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh,
+		FHttpRequestPtr& InRequest,
+		const FHttpRequestCompleteDelegate& InCompleteDelegate,
+		double InRequestTime,
+		double InNextDelay,
+		const FVoidHandler& InOnBearerAuthRejectDelegate,
+		FBearerAuthRejectedRefresh& InBearerAuthRejectedRefresh,
 		TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> HandlerDelegates)
 		: FAccelByteTask{}
-		, Request{ Request }
-		, CompleteDelegate{ CompleteDelegate }
-		, RequestTime{ RequestTime }
+		, Request{ InRequest }
+		, CompleteDelegate{ InCompleteDelegate }
+		, RequestTime{ InRequestTime }
 		, PauseTime{}
 		, PauseDuration{}
-		, NextRetryTime{ NextDelay }
-		, NextDelay{ NextDelay }
-		, OnBearerAuthRejectDelegate{ OnBearerAuthRejectDelegate }
-		, BearerAuthRejectedRefresh{ BearerAuthRejectedRefresh }
+		, NextRetryTime{ InNextDelay }
+		, NextDelay{ InNextDelay }
+		, OnBearerAuthRejectDelegate{ InOnBearerAuthRejectDelegate }
+		, BearerAuthRejectedRefresh{ InBearerAuthRejectedRefresh }
 	{
 		TaskTime = RequestTime;
 		InitializeDefaultDelegates();

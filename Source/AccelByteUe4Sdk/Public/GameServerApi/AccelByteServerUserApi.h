@@ -84,6 +84,18 @@ public:
 		, const THandler<FGetUserBansResponse>& OnSuccess
 		, const FErrorHandler& OnError);
 
+
+	/**
+	 * @brief This function will get user's ban with specific time duration.
+	 * 
+	 * @param UserId Id of user that ban's data will be get.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FGetUserBansResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetUserBanInfo(const FString& UserId
+		, const THandler<FGetUserBansResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+
 private:
 	ServerUser() = delete;
 	ServerUser(const ServerUser&) = delete;

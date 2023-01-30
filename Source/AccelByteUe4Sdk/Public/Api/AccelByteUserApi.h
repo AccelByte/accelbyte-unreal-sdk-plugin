@@ -68,8 +68,8 @@ public:
 	void LoginWithUsername(const FString& Username
 		, const FString& Password
 		, const FVoidHandler& OnSuccess
-		, const FCustomErrorHandler& OnError);
-
+		, const FOAuthErrorHandler& OnError);
+	
 	/**
 	 * @brief Log in with email/username account using v3 endpoint.
 	 *
@@ -97,8 +97,25 @@ public:
 	void LoginWithUsernameV3(const FString& Username
 		, const FString& Password
 		, const FVoidHandler& OnSuccess
-		, const FCustomErrorHandler& OnError
+		, const FOAuthErrorHandler& OnError
 		, const bool bRememberMe = false);
+	
+	/**
+	 * @brief Log in with device ID (anonymous log in).
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithDeviceId(const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Log in with device ID (anonymous log in).
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FOAuthErrorHandler& OnError);
 
 	/**
 	 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
@@ -125,9 +142,9 @@ public:
 	void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
 		, const FString& PlatformToken
 		, const FVoidHandler& OnSuccess
-		, const FCustomErrorHandler& OnError
+		, const FOAuthErrorHandler& OnError
 		, bool bCreateHeadless = true);
-
+		
 	/**
 	 * @brief Log in with another platform Id account e.g. Steam, Google, Twitch, etc especially to support OIDC (with 2FA enable)
 	 *
@@ -140,17 +157,8 @@ public:
 	void LoginWithOtherPlatformId(const FString& PlatformId
 		, const FString& PlatformToken
 		, const FVoidHandler& OnSuccess
-		, const FCustomErrorHandler& OnError
+		, const FOAuthErrorHandler& OnError
 		, bool bCreateHeadless = true);
-	
-	/**
-	 * @brief Log in with device ID (anonymous log in).
-	 *
-	 * @param OnSuccess This will be called when the operation succeeded.
-	 * @param OnError This will be called when the operation failed.
-	 */
-	void LoginWithDeviceId(const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Verify log in with new device when user enabled 2FA.
@@ -160,23 +168,32 @@ public:
 	 * @param Code auth code from 3rd party authenticator or backupCode. 
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param bRememberDevice
+	 * @param bRememberDevice This will use for refresh token expiration extension, default value is false.
 	 */
 	void VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
 		, EAccelByteLoginAuthFactorType AuthFactorType
 		, const FString& Code
 		, const FVoidHandler& OnSuccess
-		, const FCustomErrorHandler& OnError
+		, const FOAuthErrorHandler& OnError
 		, bool bRememberDevice = false);
 
 	/**
-	 * @brief Log in from Accelbyte Launcher.
+	 * @brief Log in from AccelByte Launcher.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void LoginWithLauncher(const FVoidHandler& OnSuccess
 		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Log in from AccelByte Launcher.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithLauncher(const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
 
 	/**
 	 * @brief login with refresh token
@@ -199,6 +216,17 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
+	 * @brief login with refresh token
+	 *
+	 * @param RefreshToken the refresh token for login.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithRefreshToken(const FString& RefreshToken
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+	
+	/**
 	 * @brief Relogin using the previously logged-in platform account. WINDOWS ONLY
 	 *
 	 * @param PlatformUserID The user ID that used previously and used .
@@ -216,12 +244,23 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess
-		, const FCustomErrorHandler& OnError);
+		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief Create Headless Account And Login
+	 *
+	 * @param LinkingToken LinkingToken
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CreateHeadlessAccountAndLogin(const FString& LinkingToken
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
 	
 	/**
 	 * @brief Authentication With Platform Link And Login
 	 *
-	 * @param Username This is username's account exist
+	 * @param Username Username/user's email that will be validated.
 	 * @param Password This is password's account exist
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
@@ -229,7 +268,22 @@ public:
 	void AuthenticationWithPlatformLinkAndLogin(const FString& Username
 		, const FString& Password
 		, const FVoidHandler& OnSuccess
-		, const FCustomErrorHandler& OnError);
+		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief Authentication With Platform Link And Login
+	 *
+	 * @param Username Username/user's email that will be validated.
+	 * @param Password This is password's account exist
+	 * @param LinkingToken Specified Linking token 
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void AuthenticationWithPlatformLinkAndLogin(const FString& Username
+		, const FString& Password
+		, const FString& LinkingToken
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
 
 #pragma endregion /Login Methods
 	
@@ -237,8 +291,9 @@ public:
 	 * @brief General handler for LoginWith* success; mostly a multicast callback handler.
 	 * - Credentials: Inits Qos Latencies Scheduler.
 	 * - Qos: Sets CredentialsRef Auth Token.
-	 * @param OnSuccess
-	 * @param Response 
+	 * 
+	 * @param OnSuccess delegate function for successful Login.
+	 * @param Response the Login response data.
 	 */
 	void OnLoginSuccess(const FVoidHandler& OnSuccess
 		, const FOauth2Token& Response);
@@ -466,8 +521,38 @@ public:
 	void LinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, const FString& Ticket
 		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+	
+	/**
+	 * @brief This function links user's current account to their other account in other platform.
+	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
+	 * The browser will redirect the URL to a site with a code in form of parameter URL.
+	 *
+	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
+	 * @param Ticket The Ticket.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LinkOtherPlatform(EAccelBytePlatformType PlatformType
+		, const FString& Ticket
+		, const FVoidHandler& OnSuccess
 		, const FCustomErrorHandler& OnError);
-
+	
+	/**
+	 * @brief This function forced links user's current account to their other account in other platform. Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
+	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
+	 * The browser will redirect the URL to a site with a code in form of parameter URL.
+	 *
+	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
+	 * @param PlatformUserId The UserId from the other platfrom you want to link.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
+		, const FString& PlatformUserId
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+	
 	/**
 	 * @brief This function forced links user's current account to their other account in other platform. Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
 	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
@@ -788,6 +873,17 @@ private:
 	void SendVerificationCode(const FVerificationCodeRequest& Request
 		, const FVoidHandler& OnSuccess
 		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Validate Login response data and call the corresponding delegate function.
+	 * 
+	 * @param Response the Login response data.
+	 * @param OnSuccess delegate function for successful Login.
+	 * @param OnError delegate function for error Login.
+	 */
+	void ProcessLoginResponse(const FOauth2Token& Response
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
 };
 
 } // Namespace Api

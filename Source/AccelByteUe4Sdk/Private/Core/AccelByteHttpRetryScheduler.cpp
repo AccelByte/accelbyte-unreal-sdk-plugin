@@ -19,6 +19,7 @@ int FHttpRetryScheduler::InitialDelay = 1;
 int FHttpRetryScheduler::MaximumDelay = 30;
 int FHttpRetryScheduler::TotalTimeout = 60;
 int FHttpRetryScheduler::PauseTimeout = 60;
+int FHttpRetryScheduler::RateLimit = 6;
 
 FString FHttpRetryScheduler::HeaderNamespace = TEXT("");
 FString FHttpRetryScheduler::HeaderSDKVersion = TEXT("");
@@ -31,11 +32,14 @@ typedef FHttpRetryScheduler::FBearerAuthRejectedRefresh FBearerAuthRejectedRefre
 
 FHttpRetryScheduler::FHttpRetryScheduler()
 	: TaskQueue()
-{}
+{
+	GConfig->GetInt(TEXT("HTTP"), TEXT("RateLimit"), RateLimit, GEngineIni);
+}
 
 FHttpRetryScheduler::~FHttpRetryScheduler()
 {
 	TaskQueue.Empty();
+	RequestsBucket.Empty();
 }
 
 FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
@@ -89,7 +93,28 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 		}
 		else
 		{
-			Task->Start();
+			int32 AvailableToken = RateLimit;
+			double ResetTokenTime = RequestTime + 1.0f; //Reset every second
+			bool bCancelRequest = false;
+			if (FRequestBucket* LastRequest = RequestsBucket.Find(Request->GetURL()))
+			{
+				if (RequestTime < LastRequest->ResetTokenTime)
+				{
+					if (LastRequest->AvailableToken <= 0)
+					{
+						UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, rate limit reached %s"), *Request->GetURL());
+						Task->Cancel();
+						bCancelRequest = true;
+					}
+					ResetTokenTime = LastRequest->ResetTokenTime;
+					AvailableToken = LastRequest->AvailableToken;
+				}
+			}
+			if (!bCancelRequest)
+			{
+				Task->Start();
+				RequestsBucket.Emplace(Request->GetURL(), FRequestBucket{ --AvailableToken, ResetTokenTime });
+			}
 		}
 
 	}

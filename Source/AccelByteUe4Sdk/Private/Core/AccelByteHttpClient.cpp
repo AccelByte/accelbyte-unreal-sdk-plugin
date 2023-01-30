@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteHttpClient.h"
+#include "Core/AccelByteBaseCredentials.h"
 
 namespace AccelByte
 {

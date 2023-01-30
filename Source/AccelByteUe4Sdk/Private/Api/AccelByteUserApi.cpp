@@ -51,172 +51,49 @@ static FString SearchStrings[] =
 void User::FinalPreLoginEvents()
 {
 	if (UserCredentialsRef.GetSessionState() == Credentials::ESessionState::Valid)
+	{
 		UserCredentialsRef.ForgetAll();
+	}
 }
 	
 
 #pragma region Login Methods
-void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& PlatformToken
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(
-		FString(__FUNCTION__),
-		TEXT("When 2FA is enabled then this method should be changed to the method using FCustomErrorHandler"));
-
-	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
-	
-	Oauth2::GetTokenWithOtherPlatformToken(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
-		, FAccelByteUtilities::GetPlatformString(PlatformType)
-		, PlatformToken
-		, THandler<FOauth2Token>::CreateLambda(
-			[this, PlatformType, OnSuccess](const FOauth2Token& Result)
-			{
-				OnLoginSuccess(OnSuccess, Result);
-			})
-		, FErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-			}));
-
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
-}
-
-void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& PlatformToken
-	, const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError
-	, bool bCreateHeadless)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
-	
-	Oauth2::GetTokenWithOtherPlatformToken(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
-		, FAccelByteUtilities::GetPlatformString(PlatformType)
-		, PlatformToken
-		, THandler<FOauth2Token>::CreateLambda(
-			[this, PlatformType, OnSuccess](const FOauth2Token& Result)
-			{
-				OnLoginSuccess(OnSuccess, Result);
-			})
-		, FCustomErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-			{
-				FErrorOauthInfo ErrorOauthInfo;
-				TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
-				if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
-				{
-					FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
-				}
-				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-			})
-		, bCreateHeadless);
-
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
-}
-
-void User::LoginWithOtherPlatformId(const FString& PlatformId
-	, const FString& PlatformToken
-	, const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError
-	, bool bCreateHeadless)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
-	
-	Oauth2::GetTokenWithOtherPlatformToken(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
-		, PlatformId
-		, PlatformToken
-		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
-			{
-				OnLoginSuccess(OnSuccess, Result);
-			})
-		, FCustomErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-			{
-				FErrorOauthInfo ErrorOauthInfo;
-				TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorJson);
-				if (FJsonObjectConverter::JsonObjectToUStruct<FErrorOauthInfo>(JsonObject.ToSharedRef(), &ErrorOauthInfo, 0, 0) == false)
-				{
-					FReport::Log(TEXT("Cannot deserialize the whole ErrorJson to the struct "));
-				}
-				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-			})
-		, bCreateHeadless);
-
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
-}
 	
 void User::LoginWithUsername(const FString& Username
 	, const FString& Password
 	, const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError)
 {
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(
-		FString(__FUNCTION__),
-		TEXT("When 2FA is enabled then this method should be changed to the method using FCustomErrorHandler"));
+	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
-	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
-	
-	Oauth2::GetTokenWithPasswordCredentials(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
-		, Username
-		, Password
-		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
-			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler					
-			})
-		, FErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-			}));
-	
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
+		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		});
+	LoginWithUsername(Username, Password, OnSuccess, OnErrorHandler);
 }
 
 void User::LoginWithUsername(const FString& Username
 	, const FString& Password
 	, const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError)
+	, const FOAuthErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
     	
-	Oauth2::GetTokenWithPasswordCredentials(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
+	Oauth2::GetTokenWithPasswordCredentials(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler
-
+				ProcessLoginResponse(Result, OnSuccess, OnError);
 			})
-		, FCustomErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-			}));
+		, OnError
+		, SettingsRef.IamServerUrl);
 	
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -227,59 +104,38 @@ void User::LoginWithUsernameV3(const FString& Username
 	, const FErrorHandler& OnError
 	, const bool bRememberMe)
 {
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(
-		FString(__FUNCTION__),
-		TEXT("When 2FA enabled This method should change to User::LoginWithUsernameV3(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, const bool RememberMe)"));
+	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
-	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
-	
-	Oauth2::GetTokenWithPasswordCredentialsV3(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
-		, Username
-		, Password
-		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
-			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
-			})
-		, FErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-			})
-		, bRememberMe);
-
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
+		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		});
+	LoginWithUsernameV3(Username, Password, OnSuccess, OnErrorHandler, bRememberMe);
 }
 
 void User::LoginWithUsernameV3(const FString& Username
 	, const FString& Password
 	, const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError
+	, const FOAuthErrorHandler& OnError
 	, const bool bRememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithPasswordCredentialsV3(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
+	Oauth2::GetTokenWithPasswordCredentialsV3(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+				ProcessLoginResponse(Result, OnSuccess, OnError);
 			})
-		, FCustomErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-			})
-		, bRememberMe);
+		, OnError
+		, bRememberMe
+		, SettingsRef.IamServerUrl);
 
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -287,23 +143,107 @@ void User::LoginWithUsernameV3(const FString& Username
 void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError)
 {
+	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
+		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		});
+	LoginWithDeviceId(OnSuccess, OnErrorHandler);
+} 
+
+void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{ 
 	FReport::Log(FString(__FUNCTION__));
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithDeviceId(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithDeviceId(CredentialsRef.GetOAuthClientId()
+		, CredentialsRef.GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess](const FOauth2Token& Result)
 			{
 				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
 			})
-		, FErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		, OnError
+		, SettingsRef.IamServerUrl);
+
+	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
+	
+void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
+	, const FString& PlatformToken
+	, const FVoidHandler& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
+
+	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
+		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		});
+	LoginWithOtherPlatform(PlatformType, PlatformToken, OnSuccess, OnErrorHandler, true);
+}
+
+void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
+	, const FString& PlatformToken
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError
+	, bool bCreateHeadless)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
+		, FAccelByteUtilities::GetPlatformString(PlatformType)
+		, PlatformToken
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-			}));
+				ProcessLoginResponse(Result, OnSuccess, OnError);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			{
+				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
+			})
+		, bCreateHeadless
+		, SettingsRef.IamServerUrl);
+
+	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
+
+void User::LoginWithOtherPlatformId(const FString& PlatformId
+	, const FString& PlatformToken
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError
+	, bool bCreateHeadless)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
+		, PlatformId
+		, PlatformToken
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			{
+				ProcessLoginResponse(Result, OnSuccess, OnError);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			{
+				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
+			})
+		, bCreateHeadless
+		, SettingsRef.IamServerUrl);
 
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -312,28 +252,24 @@ void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
 	, EAccelByteLoginAuthFactorType AuthFactorType
 	, const FString& Code
 	, const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError
+	, const FOAuthErrorHandler& OnError
 	, bool bRememberDevice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyAndRememberNewDevice(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
+	Oauth2::VerifyAndRememberNewDevice(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
 		, Code
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+				ProcessLoginResponse(Result, OnSuccess, OnError);
 			})
-		, FCustomErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-			})
-		, bRememberDevice);
+		, OnError
+		, bRememberDevice
+		, SettingsRef.IamServerUrl);
 
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -341,26 +277,36 @@ void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
 void User::LoginWithLauncher(const FVoidHandler& OnSuccess
 	, const FErrorHandler & OnError)
 {
+	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
+
+	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
+		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		});
+	LoginWithLauncher(OnSuccess, OnErrorHandler);
+}
+	
+void User::LoginWithLauncher(const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler & OnError)
+{
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString AuthorizationCode = Environment::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), 1000);
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithAuthorizationCode(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
+	Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, AuthorizationCode
 		, SettingsRef.RedirectURI
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler			
+				ProcessLoginResponse(Result, OnSuccess, OnError);			
 			})
-		, FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-			}));
+		, OnError
+		, SettingsRef.IamServerUrl);
 
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -375,22 +321,33 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 	, const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError)
 {
+	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
+
+	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
+		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		});
+	LoginWithRefreshToken(RefreshToken, OnSuccess, OnErrorHandler);
+}
+void User::LoginWithRefreshToken(const FString& RefreshToken
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::GetTokenWithRefreshToken(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+
+	Oauth2::GetTokenWithRefreshToken(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, RefreshToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+				ProcessLoginResponse(Result, OnSuccess, OnError);
 			})
-		, FErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-			}));
+		, OnError
+		, SettingsRef.IamServerUrl);
 }
 
 bool IsTokenExpired(FRefreshInfo RefreshInfo)
@@ -411,7 +368,7 @@ void User::TryRelogin(const FString& PlatformUserID
 			{
 				if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
 				{
-					OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::CachedTokenNotFound, TEXT("The cached token is not found. Cannot continue the previous login session. Please login again."));
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("The cached token is not found. Cannot continue the previous login session. Please login again."));
 					return;
 				}
 
@@ -419,77 +376,101 @@ void User::TryRelogin(const FString& PlatformUserID
 				FRefreshInfo RefreshInfo;
 				if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
 				{
-					OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::UnableToSerializeCachedToken, TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."));
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."));
 					return;
 				}
 
 				if (IsTokenExpired(RefreshInfo))
 				{
-					OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::CachedTokenExpired, TEXT("Your previous login session is expired. Please login again."));
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenExpired), TEXT("Your previous login session is expired. Please login again."));
 					return;
 				}
 
 				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError);
 			}));
 #else
-	OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::CachedTokenNotFound, TEXT("Cannot relogin using cached token on other platforms."));
+	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("Cannot relogin using cached token on other platforms."));
 #endif
 }
 
 void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError)
+	, const FOAuthErrorHandler& OnError)
 {
-	FReport::Log(FString(__FUNCTION__)); 
-	
-	Oauth2::CreateHeadlessAccountAndResponseToken(SettingsRef.IamServerUrl
-		, SettingsRef.ClientId
-		, SettingsRef.ClientSecret 
-		, UserCredentialsRef.GetLinkingToken()
-		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
-			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler
-			})	
-		, FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-			})); 
+	CreateHeadlessAccountAndLogin(UserCredentialsRef.GetLinkingToken(), OnSuccess, OnError);
 }
 
+void User::CreateHeadlessAccountAndLogin(const FString& LinkingToken
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__)); 
+
+	Oauth2::CreateHeadlessAccountAndResponseToken(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
+		, LinkingToken
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			{
+				ProcessLoginResponse(Result, OnSuccess, OnError);
+			})	
+		, OnError
+		, SettingsRef.IamServerUrl); 
+}
+	
 void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
 	, const FString& Password
 	, const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError)
+	, const FOAuthErrorHandler& OnError)
+{
+	AuthenticationWithPlatformLinkAndLogin(Username, Password, UserCredentialsRef.GetLinkingToken(), OnSuccess, OnError);
+}
+	
+void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
+	, const FString& Password
+	, const FString& LinkingToken
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::AuthenticationWithPlatformLink(SettingsRef.IamServerUrl
-		, SettingsRef.ClientId
-		, SettingsRef.ClientSecret
+	Oauth2::AuthenticationWithPlatformLink(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
 		, Username
 		, Password
-		, UserCredentialsRef.GetLinkingToken()
+		, LinkingToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler
+				ProcessLoginResponse(Result, OnSuccess, OnError);
 			})		
-		, FCustomErrorHandler::CreateLambda(
-			[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
-			}));
+		, OnError
+		, SettingsRef.IamServerUrl);
 }
-#pragma endregion /Login Methods
-	
 
+#pragma endregion /Login Methods
+
+void User::ProcessLoginResponse(const FOauth2Token& Response
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	if (Response.Access_token.IsEmpty() || Response.Expires_in <= 0.0f)
+	{
+		FErrorOAuthInfo EmptyObject;
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("Invalid Response. Access Token is empty"), EmptyObject);
+	}
+	else
+	{
+		OnLoginSuccess(OnSuccess, Response);
+	}
+}
+	
 void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 	, const FOauth2Token& Response)
 {
 	// Set auth token before anything: Set before anything to prevent race condition issues.
 	UserCredentialsRef.SetAuthToken(Response, FPlatformTime::Seconds());
 
-	if (Response.Auth_Trust_Id != TEXT(""))
+	if (!Response.Auth_Trust_Id.IsEmpty())
 	{
 		FAccelByteUtilities::SetAuthTrustId(Response.Auth_Trust_Id);
 	}
@@ -544,17 +525,17 @@ void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::RevokeUserToken(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
+	Oauth2::RevokeToken(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, UserCredentialsRef.GetAccessToken()
 		, FVoidHandler::CreateLambda(
-			[this, OnSuccess]() 
+			[this, OnSuccess, OnError]() 
 			{
 				ForgetAllCredentials();
 				OnSuccess.ExecuteIfBound();
 			})
-		, OnError);
+		, OnError
+		, SettingsRef.IamServerUrl);
 }
 
 void User::ForgetAllCredentials()
@@ -670,7 +651,7 @@ void User::GetData(const THandler<FAccountUserData>& OnSuccess
 
 	const TDelegate<void(FAccountUserData const&)> OnSuccessHttpClient =
 		THandler<FAccountUserData>::CreateLambda(
-			[this, OnSuccess](const FAccountUserData& AccountUserData)
+			[this, OnSuccess, OnError](const FAccountUserData& AccountUserData)
 			{
 				UserCredentialsRef.SetAccountUserData(AccountUserData);
 				OnSuccess.ExecuteIfBound(AccountUserData);
@@ -936,6 +917,27 @@ void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess
 void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 	, const FString& Ticket
 	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	LinkOtherPlatform(PlatformType
+		, Ticket
+		, OnSuccess
+		, FCustomErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& Result)
+			{
+				FString JsonString;
+				TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonString);
+				TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(Result);
+				FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+				FErrorOAuthInfo ErrorOauthInfo;
+				FAccelByteJsonConverter::JsonObjectStringToUStruct(JsonString, &ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage,ErrorOauthInfo);
+			}));
+}
+	
+void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, const FString& Ticket
+	, const FVoidHandler& OnSuccess
 	, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -957,6 +959,27 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
+void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, const FString& PlatformUserId
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	ForcedLinkOtherPlatform(PlatformType
+		, PlatformUserId
+		, OnSuccess
+		, FCustomErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& Result)
+			{
+				FString JsonString;
+				TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonString);
+				TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(Result);
+				FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+				FErrorOAuthInfo ErrorOauthInfo;
+				FAccelByteJsonConverter::JsonObjectStringToUStruct(JsonString, &ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage,ErrorOauthInfo);
+			}));
+}
+	
 void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
 	, const FString& PlatformUserId
 	, const FVoidHandler& OnSuccess
@@ -1375,16 +1398,16 @@ void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnEr
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyToken(SettingsRef.IamServerUrl
-		, UserCredentialsRef.GetOAuthClientId()
+	Oauth2::VerifyToken(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, UserCredentialsRef.GetAccessToken()
 		, FVoidHandler::CreateLambda(
-			[this, OnSuccess]() 
+			[this, OnSuccess, OnError]() 
 			{
 				OnSuccess.ExecuteIfBound();
 			})
-		, OnError);
+		, OnError
+		, SettingsRef.IamServerUrl);
 }
 
 void User::GetUserInformation(const FString& UserId
@@ -1415,11 +1438,12 @@ void User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType
 	Oauth2::GenerateOneTimeCode(UserCredentialsRef.GetAccessToken()
 		, PlatformString
 		, THandler<FGeneratedOneTimeCode>::CreateLambda(
-			[this, OnSuccess](const FGeneratedOneTimeCode& Result) 
+			[this, OnSuccess, OnError](const FGeneratedOneTimeCode& Result) 
 			{
 				OnSuccess.ExecuteIfBound(Result);
 			})
-		, OnError);
+		, OnError
+		, SettingsRef.IamServerUrl);
 }
  
 } // Namespace Api

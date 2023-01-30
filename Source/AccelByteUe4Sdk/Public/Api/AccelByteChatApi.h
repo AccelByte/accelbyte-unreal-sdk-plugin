@@ -274,12 +274,12 @@ private:
 
 public:
 	/**
-	 * @brief Refresh access token used in lobby.
-	 *
-	 * @param AccessToken
-	 * @param OnSuccess
-	 * @param OnError
-	 */
+	* @brief Refresh access token used in chat.
+	*
+	* @param AccessToken new access token to be used in chat
+	* @param OnSuccess delegate to be triggered when operation success
+	* @param OnError delegate to be triggered when operation error
+	*/
 	FString RefreshToken(const FString& AccessToken
 		, const FChatRefreshTokenResponse& OnSuccess
 		, const FErrorHandler& OnError = {});
