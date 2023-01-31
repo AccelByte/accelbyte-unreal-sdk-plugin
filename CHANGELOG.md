@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [21.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.0.1%0D21.0.0) (2023-01-31)
+
+
+### Bug Fixes
+
+* missing AES_BLOCK_SIZE when compiled in UE 5.1 ([88671f5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/88671f522d5cf801191cbc10c0f70b43c851abf6))
+
 ## [21.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.0.0%0D20.5.0) (2023-01-30)
 
 

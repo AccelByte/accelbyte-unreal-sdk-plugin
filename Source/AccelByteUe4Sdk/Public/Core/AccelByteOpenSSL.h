@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/AES.h"
 
 #if !PLATFORM_SWITCH
 namespace openssl
@@ -281,7 +282,7 @@ private:
 class ACCELBYTEUE4SDK_API FAESEncryptionOpenSSL
 {
 public:
-	FAESEncryptionOpenSSL() : KeySizeInBits(256), BlockSize(AES_BLOCK_SIZE)
+	FAESEncryptionOpenSSL() : KeySizeInBits(256), BlockSize(FAES::AESBlockSize)
 #if !PLATFORM_SWITCH
 		, Cipher(nullptr)
 #endif // !PLATFORM_SWITCH
@@ -300,7 +301,7 @@ public:
 	bool GenerateRandomBytes(TArray<uint8>& OutKey, uint32& InSizeBytes);
 
 	/* generate random AES Key. */
-	void GenerateKey(uint32 InKeySizeInBytes = 32, uint32 InBlockSize = AES_BLOCK_SIZE);
+	void GenerateKey(uint32 InKeySizeInBytes = 32, uint32 InBlockSize = FAES::AESBlockSize);
 
 	/* Encrypt with AES key */
 	void Encrypt(const TArrayView<const uint8>& InPlaintext, TArray<uint8>& OutCiphertext, int32& Length);
