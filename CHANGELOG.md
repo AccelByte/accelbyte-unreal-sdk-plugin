@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [21.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.0.2%0D21.0.1) (2023-02-01)
+
+
+### Bug Fixes
+
+* **SessionBrowser:** set default create game session current_player to 0 ([83d385e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/83d385e6e53a2cbd436e42b16403bd350d938037))
+
 ### [21.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.0.1%0D21.0.0) (2023-01-31)
 
 

@@ -116,7 +116,7 @@ void SessionBrowser::CreateGameSession(EAccelByteSessionType SessionType
 	NewGameSession.Game_session_setting.Map_name = GameMapName;
 	NewGameSession.Game_session_setting.Num_bot = BotCount;
 	NewGameSession.Game_session_setting.Max_player = MaxPlayer;
-	NewGameSession.Game_session_setting.Current_player = 1;
+	NewGameSession.Game_session_setting.Current_player = 0;
 	NewGameSession.Game_session_setting.Max_internal_player = MaxSpectator;
 	NewGameSession.Game_session_setting.Current_internal_player = 0;
 	

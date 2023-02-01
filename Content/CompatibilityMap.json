@@ -1,7 +1,7 @@
 {
   "iam": {
-    "minVersion": "5.27.0",
-    "maxVersion": "5.27.0"
+    "minVersion": "5.27.1",
+    "maxVersion": "5.27.1"
   },
   "agreement": {
     "minVersion": "1.26.0",
@@ -28,8 +28,8 @@
     "maxVersion": "2.14.0"
   },
   "cloudsave": {
-    "minVersion": "3.6.0",
-    "maxVersion": "3.6.0"
+    "minVersion": "3.6.1",
+    "maxVersion": "3.6.1"
   },
   "ugc": {
     "minVersion": "2.9.0",
