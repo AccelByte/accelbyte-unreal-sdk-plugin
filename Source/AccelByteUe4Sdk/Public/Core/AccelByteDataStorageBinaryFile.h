@@ -123,13 +123,13 @@ public:
 	/**
 	* @brief Helper function
 	*/
-	FDirectoryPath GetAbsoluteFileDirectory() { return AbsoluteFileDirectory; }
+	FDirectoryPath GetAbsoluteFileDirectory();
 
 protected:
 	/**
 	* @brief The main storage directory.
 	*/
-	FDirectoryPath AbsoluteFileDirectory;
+	FDirectoryPath RelativeFileDirectory;
 
 	/**
 	* @brief Convert the filename within the storage directory into fullpath.

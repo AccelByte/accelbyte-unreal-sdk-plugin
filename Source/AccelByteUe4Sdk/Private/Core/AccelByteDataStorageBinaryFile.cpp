@@ -15,8 +15,8 @@ namespace AccelByte
 DataStorageBinaryFile::DataStorageBinaryFile(FString DirectoryPath)
 {
 	FDirectoryPath DirPath;
-	DirPath.Path = FPaths::ConvertRelativePathToFull(DirectoryPath);
-	this->AbsoluteFileDirectory = DirPath;
+	DirPath.Path = DirectoryPath;
+	this->RelativeFileDirectory = DirPath;
 }
 
 void DataStorageBinaryFile::Reset(const THandler<bool>& Result, const FString & FileName)
@@ -130,14 +130,21 @@ void DataStorageBinaryFile::GetItem(const FString & Key, const THandler<TPair<FS
 	OnDone.Execute(Result);
 }
 
-FString DataStorageBinaryFile::CompleteAbsoluteFilePath(const FString& FileName)
+FDirectoryPath DataStorageBinaryFile::GetAbsoluteFileDirectory()
 {
+	FDirectoryPath DirPath;
 #if !(PLATFORM_WINDOWS) || UE_BUILD_SHIPPING
 	//This is the only directory that allow us to write. This hardcode is mandatory & unavoidable
-	FString Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectLogDir());
-	return Path + FileName;
+	DirPath.Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectLogDir());
+#else
+	DirPath.Path = FPaths::ConvertRelativePathToFull(this->RelativeFileDirectory.Path);
 #endif
-	return this->AbsoluteFileDirectory.Path + FileName;
+	return DirPath;
+}
+
+FString DataStorageBinaryFile::CompleteAbsoluteFilePath(const FString& FileName)
+{
+	return GetAbsoluteFileDirectory().Path + FileName;
 }
 
 TOptional<FString> DataStorageBinaryFile::LoadFromFile(const FString& FileName)

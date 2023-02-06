@@ -25,10 +25,7 @@ class FAccelByteLRUCacheFile : public FAccelByteLRUCache<T>
 public:
 	const FString PREFIX_CACHE_NAME = TEXT("ACCELBYTE_LRU_CACHE");
 	const FString EXTENSION_CACHE_NAME = TEXT(".cache");
-	inline FAccelByteLRUCacheFile()
-	{
-		FreeCache();
-	}
+	inline FAccelByteLRUCacheFile(){}
 
 	inline FAccelByteLRUCacheFile(int32 MaxFileCount_, size_t MaxFileSizeBytes_)
 	{
@@ -37,10 +34,7 @@ public:
 		FAccelByteLRUCacheFile();
 	}
 
-	inline ~FAccelByteLRUCacheFile()
-	{
-		FreeCache();
-	}
+	inline ~FAccelByteLRUCacheFile(){}
 
 private:
 	int32 MaxFileCount = 100;
@@ -161,6 +155,11 @@ private:
 		FAccelByteCacheWrapper<T> Result{ Key, nullptr, Size};
 
 		TArray<uint8> ArrayByte = ToArrayByte(Item);
+		if (ArrayByte.Num() == 0)
+		{
+			return nullptr;
+		}
+
 		auto AbsPath = CompleteFilenameToAbsolute(ConvertKeyToFilename(Key));
 		bool bIsSuccess = FFileHelper::SaveArrayToFile(ArrayByte, *AbsPath);
 		
@@ -231,6 +230,9 @@ inline const TArray<uint8> FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>::ToAr
 {
 	FHttpRequestPtr RequestPtr = CacheItem.Request;
 	TArray<uint8> Output;
+
+	if (!RequestPtr.IsValid()) { return Output; }
+
 	FAccelByteLRUHttpStruct Struct;
 	Struct.SetMember(
 		RequestPtr->GetAllHeaders(),
