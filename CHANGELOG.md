@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [21.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.1.0%0D21.0.3) (2023-02-13)
+
+
+### Features
+
+* add limit and offset parameter to GetAllUserStatItems and GetUserStatItems ([625048e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/625048e5c1427fcab32dd7bf5385c8bc104a027e))
+* get game token by publisher token ([95b5d55](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/95b5d5527e56aeeff3e7a8b1ab05704479079426))
+* **Group:** Add Group V2 ([36125a1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/36125a1a2869954a739c86b98dd2a4f55ba3d369))
+* Remove some Stadia enumeration variable, because Google is shutting down Stadia. ([df94838](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/df94838255bae0f7df4fe6f3e2507353e8addc1d))
+* **ugc:** additional custom attributes ([a79b6c2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a79b6c2ea8137678a7102980f2271ce18c87817b))
+
+
+### Bug Fixes
+
+* **MMv2:** fix validation for ticket ID and match pool not aborting requests ([eccdc98](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/eccdc985da79ba61de9292a0fc7e7763ee8717ee))
+
 ### [21.0.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.0.3%0D21.0.2) (2023-02-06)
 
 

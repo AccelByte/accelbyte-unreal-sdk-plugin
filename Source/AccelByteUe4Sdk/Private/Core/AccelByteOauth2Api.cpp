@@ -552,6 +552,25 @@ void Oauth2::GenerateOneTimeCode(const FString& AccessToken
 	
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
 }
+	
+void Oauth2::GenerateGameToken(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& Code
+		, const THandler<FOauth2Token>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/token/exchange")
+							, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+	
+	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret);
+	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	Request->SetContentAsString(FString::Printf(TEXT("code=%s"), *Code));
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
+}
 
 } // Namespace Api
 } // Namespace AccelByte

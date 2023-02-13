@@ -157,8 +157,7 @@ enum class EAccelBytePlatformSync : uint8
 {
 	STEAM = 0,
 	XBOX_LIVE,
-	PLAYSTATION,
-	STADIA,
+	PLAYSTATION, 
 	EPIC_GAMES,
 	OTHER
 };
@@ -205,8 +204,7 @@ enum class EAccelByteWalletTable :uint8
 	Playstation = 0,
 	Xbox,
 	Steam,
-	Epic,
-	Stadia,
+	Epic, 
 	IOS,
 	GooglePlay,
 	Twitch,

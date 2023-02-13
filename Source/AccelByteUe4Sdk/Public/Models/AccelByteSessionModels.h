@@ -305,6 +305,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySession : public FAccelByteMod
 	GENERATED_BODY()
 	
 	FAccelByteModelsV2PartySession() : FAccelByteModelsV2BaseSession(EAccelByteV2SessionType::PartySession) {}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartySession")
+	FString Code{};
 };
 
 USTRUCT(BlueprintType)

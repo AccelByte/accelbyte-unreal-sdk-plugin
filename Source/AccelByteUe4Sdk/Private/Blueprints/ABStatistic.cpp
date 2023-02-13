@@ -36,7 +36,9 @@ void UABStatistic::CreateUserStatItems(
 
 void UABStatistic::GetAllUserStatItems(
 	FDModelsUserStatItemPagingSlicedResultResponse const& OnSuccess,
-	FDErrorHandler const& OnError
+	FDErrorHandler const& OnError,
+	int32 Limit,
+	int32 Offset
 )
 {
 	ApiClientPtr->Statistic.GetAllUserStatItems(
@@ -51,7 +53,9 @@ void UABStatistic::GetAllUserStatItems(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}
-		)
+		),
+		Limit,
+		Offset
 	);
 }
 
@@ -59,7 +63,9 @@ void UABStatistic::GetUserStatItems(
 	TArray<FString> const& StatCodes,
 	TArray<FString> const& Tags,
 	FDModelsUserStatItemPagingSlicedResultResponse const& OnSuccess,
-	FDErrorHandler const& OnError
+	FDErrorHandler const& OnError,
+	int32 Limit,
+	int32 Offset
 )
 {
 	ApiClientPtr->Statistic.GetUserStatItems(
@@ -76,7 +82,9 @@ void UABStatistic::GetUserStatItems(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}
-		)
+		),
+		Limit,
+		Offset
 	);
 }
 

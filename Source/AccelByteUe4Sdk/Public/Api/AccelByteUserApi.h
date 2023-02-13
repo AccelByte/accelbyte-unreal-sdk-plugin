@@ -864,6 +864,17 @@ public:
 	void GenerateOneTimeCode(EAccelBytePlatformType PlatformType
 		, const THandler<FGeneratedOneTimeCode>& OnSuccess
 		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief This function for generate publisher user's game token. required a code from request game token
+	 *
+	 * @param Code code from request game token..
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GenerateGameToken(const FString& Code,
+		const FVoidHandler& OnSuccess,
+		const FOAuthErrorHandler & OnError);
 	
 private:
 	User() = delete;

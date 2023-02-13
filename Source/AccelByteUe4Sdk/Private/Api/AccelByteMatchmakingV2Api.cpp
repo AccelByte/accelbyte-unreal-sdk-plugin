@@ -24,9 +24,10 @@ void MatchmakingV2::CreateMatchTicket(const FString& MatchPool
 	, const FErrorHandler& OnError
 	, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals)
 {
-	if(MatchPool.IsEmpty())
+	if (MatchPool.IsEmpty())
 	{
 		OnError.ExecuteIfBound(400, TEXT("MatchPool cannot be empty!"));
+		return;
 	}
 
 	const FString Verb = TEXT("POST");
@@ -51,9 +52,10 @@ void MatchmakingV2::GetMatchTicketDetails(const FString& TicketId
 	, const THandler<FAccelByteModelsV2MatchmakingGetTicketDetailsResponse>& OnSuccess
 	, const FErrorHandler& OnError)
 {
-	if(TicketId.IsEmpty())
+	if (TicketId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(400, TEXT("TicketId cannot be empty!"));
+		return;
 	}
 
 	const FString Verb = TEXT("GET");
@@ -69,10 +71,12 @@ void MatchmakingV2::DeleteMatchTicket(const FString& TicketId
 	, const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError)
 {
-	if(TicketId.IsEmpty())
+	if (TicketId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(400, TEXT("TicketId cannot be empty!"));
+		return;
 	}
+
 	const FString Verb = TEXT("DELETE");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/%s"),
 		*SettingsRef.MatchmakingV2ServerUrl,

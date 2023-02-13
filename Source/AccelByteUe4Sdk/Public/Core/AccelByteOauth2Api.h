@@ -500,6 +500,24 @@ public:
 		, const THandler<FGeneratedOneTimeCode>& OnSuccess
 		, const FErrorHandler& OnError
 		, const FString& IamUrl = TEXT(""));
+	
+	/**
+	 * @brief Generate publisher user's game token. Required a code from request game token. 
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The IAM service URL used to call the API.
+	 * @param Code code from request game token.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GenerateGameToken(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& Code
+		, const THandler<FOauth2Token>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
 
 private:
 	Oauth2() = delete; // static class can't have instance

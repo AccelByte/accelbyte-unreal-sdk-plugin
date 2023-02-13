@@ -1445,6 +1445,23 @@ void User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType
 		, OnError
 		, SettingsRef.IamServerUrl);
 }
+
+void User::GenerateGameToken(const FString& Code,
+	const FVoidHandler& OnSuccess,
+	const FOAuthErrorHandler & OnError)
+{
+	FReport::Log(FString(__FUNCTION__)); 
+	Oauth2::GenerateGameToken(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
+		, Code
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			{
+				ProcessLoginResponse(Result, OnSuccess, OnError);
+			})		
+		, OnError
+		, SettingsRef.IamServerUrl);
+}
  
 } // Namespace Api
 } // Namespace AccelByte

@@ -375,6 +375,58 @@ void Session::LeaveParty(FString const& PartyID
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void Session::JoinPartyByCode(FString const& PartyCode
+	, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/users/me/join/code")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
+	Content->SetStringField(TEXT("code"), PartyCode);
+
+	FString ContentString{};
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ContentString);
+	if (!FJsonSerializer::Serialize(Content, Writer))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::StatusBadRequest), TEXT("Failed to convert party code request to JSON object string!"));
+		return;
+	}
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ContentString, OnSuccess, OnError);
+}
+
+void Session::GenerateNewPartyCode(FString const& PartyID
+	, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/code")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *PartyID);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Session::RevokePartyCode(FString const& PartyID
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/code")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *PartyID);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 void Session::KickUserFromParty(FString const& PartyID
 	, FString const& UserID
 	, THandler<FAccelByteModelsV2PartySession> const& OnSuccess

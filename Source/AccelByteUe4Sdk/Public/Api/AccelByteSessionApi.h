@@ -245,6 +245,39 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Join a party using a party code.
+	 *
+	 * @param PartyCode Code used to try and join a party.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void JoinPartyByCode(FString const& PartyCode
+		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Generate a new party code for the party
+	 *
+	 * @param PartyId ID of the party that a new code should be generated for.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GenerateNewPartyCode(FString const& PartyID
+		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Revoke a party code associated with a party
+	 *
+	 * @param PartyId ID of the party that a code should be revoked for.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void RevokePartyCode(FString const& PartyID
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Kick another user from a party.
 	 *
 	 * @param PartyID The ID of the party session which the user will be kicked from.

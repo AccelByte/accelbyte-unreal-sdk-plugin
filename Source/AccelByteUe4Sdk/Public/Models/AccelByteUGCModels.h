@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonUtilities.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteUGCModels.generated.h"
 
@@ -144,6 +145,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Request")
 	TArray<FString> Tags{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Request")
+	FJsonObjectWrapper CustomAttributes{};
 };
 
 USTRUCT(BlueprintType)
@@ -198,6 +202,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Response")
 	FString UserId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Response")
+	FJsonObjectWrapper CustomAttributes{};
 };
 
 USTRUCT(BlueprintType)
@@ -273,6 +280,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCContentResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ContentResponse")
 	FString UserId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ContentResponse")
+	FJsonObjectWrapper CustomAttributes{};
 };
 
 USTRUCT(BlueprintType)
@@ -413,7 +423,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCSearchContentsResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponse")
 	FString UpdatedTime{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponse")
-	FString UserId{};	
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponse")
+	FJsonObjectWrapper CustomAttributes{};
 };
 
 USTRUCT(BlueprintType)

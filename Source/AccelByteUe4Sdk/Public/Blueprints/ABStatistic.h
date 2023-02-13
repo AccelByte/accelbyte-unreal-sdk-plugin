@@ -49,7 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 	void GetAllUserStatItems(
 		FDModelsUserStatItemPagingSlicedResultResponse const& OnSuccess,
-		FDErrorHandler const& OnError
+		FDErrorHandler const& OnError,
+		int32 Limit = 20,
+		int32 Offset = 0
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
@@ -57,7 +59,9 @@ public:
 		TArray<FString> const& StatCodes,
 		TArray<FString> const& Tags,
 		FDModelsUserStatItemPagingSlicedResultResponse const& OnSuccess,
-		FDErrorHandler const& OnError
+		FDErrorHandler const& OnError,
+		int32 Limit = 20,
+		int32 Offset = 0
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")

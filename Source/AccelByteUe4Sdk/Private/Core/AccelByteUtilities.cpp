@@ -298,9 +298,7 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 	case EAccelBytePlatformType::Twitter:
 		return "twitter";
 	case EAccelBytePlatformType::EpicGames:
-		return "epicgames";
-	case EAccelBytePlatformType::Stadia:
-		return "stadia";
+		return "epicgames"; 
 	case EAccelBytePlatformType::AwsCognito:
 		return "awscognito";
 	case EAccelBytePlatformType::Nintendo:
