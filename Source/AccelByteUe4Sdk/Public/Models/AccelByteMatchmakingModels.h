@@ -284,3 +284,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingBackfillProposalNotif
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingBackfillProposalNotif")
 	TArray<FAccelByteModelsV2MatchmakingTicket> AddedTickets{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCreateBackfillTicketResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCreateBackfillTicketResponse")
+	FString Id{};
+};

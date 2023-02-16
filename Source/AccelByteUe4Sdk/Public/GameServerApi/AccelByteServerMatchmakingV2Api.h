@@ -55,6 +55,30 @@ public:
 		, const FVoidHandler& OnSuccess
 		, const FErrorHandler& OnError);
 
+	/**
+	 * @brief Create a ticket to enable backfill on this session.
+	 *
+	 * @param MatchPool Pool that the backfill ticket should be queued in
+	 * @param SessionId ID of the session that backfill will apply to
+	 * @param OnSuccess Delegate fired when the reject request has gone through
+	 * @param OnError Delegate fired when the reject request fails
+	 */
+	void CreateBackfillTicket(const FString& MatchPool
+		, const FString& SessionId
+		, const THandler<FAccelByteModelsV2MatchmakingCreateBackfillTicketResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Remove a backfill ticket from the queue, effectively disabling backfill.
+	 *
+	 * @param BackfillTicketId ID of the backfill ticket that we wish to remove
+	 * @param OnSuccess Delegate fired when the reject request has gone through
+	 * @param OnError Delegate fired when the reject request fails
+	 */
+	void DeleteBackfillTicket(const FString& BackfillTicketId
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
+
 private:
 	ServerMatchmakingV2() = delete;
 	ServerMatchmakingV2(ServerMatchmakingV2 const&) = delete;

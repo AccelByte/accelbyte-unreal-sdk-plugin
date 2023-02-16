@@ -52,7 +52,7 @@
     "maxVersion": "6.2.0"
   },
   "game-telemetry": {
-    "minVersion": "1.17.0",
-    "maxVersion": "1.17.0"
+    "minVersion": "1.17.1",
+    "maxVersion": "1.17.1"
   }
 }
