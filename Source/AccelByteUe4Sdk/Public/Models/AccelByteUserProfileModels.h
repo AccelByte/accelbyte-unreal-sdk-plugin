@@ -67,7 +67,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileInfo
 	FString Timezone{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
-	TMap<FString, FJsonObjectWrapper> CustomAttributes{};
+	FJsonObjectWrapper CustomAttributes{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
 	FString ZipCode{};
@@ -76,7 +76,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileInfo
 	FString PublicId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
-	TMap<FString, FJsonObjectWrapper> PrivateCustomAttributes{};
+	FJsonObjectWrapper PrivateCustomAttributes{};
 };
 
 USTRUCT(BlueprintType)
@@ -147,10 +147,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileUpdateRequest
 	FString ZipCode{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
-	TMap<FString, FJsonObjectWrapper>  PrivateCustomAttributes{};
+	FJsonObjectWrapper PrivateCustomAttributes{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfoUpdate")
-	TMap<FString, FJsonObjectWrapper>  CustomAttributes{};
+	FJsonObjectWrapper CustomAttributes{};
 
 	FAccelByteModelsUserProfileUpdateRequest() = default;
 
@@ -200,10 +200,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileCreateRequest
 	FString DateOfBirth{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
-	TMap<FString, FJsonObjectWrapper> CustomAttributes{};
+	FJsonObjectWrapper CustomAttributes{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
-	TMap<FString, FJsonObjectWrapper> PrivateCustomAttributes{};
+	FJsonObjectWrapper PrivateCustomAttributes{};
 };
 
 USTRUCT(BlueprintType)

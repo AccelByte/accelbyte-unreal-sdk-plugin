@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [21.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.2.0%0D21.1.1) (2023-02-28)
+
+
+### Features
+
+* **DS:** add watchdog API ([87fee12](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/87fee12240de08ced41e1c7bcf0d84c55cdfc2a6))
+* **MMv2:** add API calls to manually queue for backfill ([921f39b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/921f39b1b80a5da34e005ee33430a6cd08831575))
+* query user achievement by user id ([9e062c7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9e062c7a987b92d39106287f151e4ad5abe7a60c))
+
 ### [21.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.1.1%0D21.1.0) (2023-02-16)
 
 

@@ -1043,21 +1043,18 @@ void User::SearchUsers(const FString& Query
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams = {};
-	QueryParams.Add("query", Query);
+	FString SearchId;
 	if (By != EAccelByteSearchType::ALL)
 	{
-		const FString SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
-		QueryParams.Add("by", *SearchId);
+		SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
 	}
-	if (Limit >= 0)
-	{
-		QueryParams.Add("limit", FString::FromInt(Limit));
-	}
-	if (Offset >= 0)
-	{
-		QueryParams.Add("offset", FString::FromInt(Offset));
-	}
+
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("query"), Query },
+		{ TEXT("by"), SearchId },
+		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
+	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }

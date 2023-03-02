@@ -10,6 +10,7 @@
 #include "CoreUObject.h"
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Api/AccelByteHeartBeatApi.h"
+#include "GameServerApi/AccelByteServerWatchdogApi.h"
 #include "Core/AccelByteReport.h"
 #include "Core/Version.h"
 #include "Interfaces/IPluginManager.h"
@@ -86,6 +87,17 @@ void FAccelByteUe4SdkModule::StartupModule()
 	FRegistry::HeartBeat.Startup();
 #endif
 	FRegistry::ServerCredentials.Startup();
+
+#if UE_SERVER
+	if (!FParse::Param(FCommandLine::Get(), TEXT("dsid")))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("dsid not provided, not connecting to watchdog"));
+	}
+	else
+	{
+		FRegistry::ServerWatchdog.Connect();
+	}
+#endif
 }
 
 void FAccelByteUe4SdkModule::ShutdownModule()

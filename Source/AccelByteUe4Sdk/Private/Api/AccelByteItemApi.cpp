@@ -52,26 +52,14 @@ void Item::GetItemById(FString const& ItemId
 		, *CredentialsRef.GetNamespace()
 		, *ItemId);
 
-	TMap<FString, FString> Params;
-
-	if (!Region.IsEmpty())
-	{
-		Params.Add(TEXT("region"), *Region);
-	}
-	if (!Language.IsEmpty())
-	{
-		Params.Add(TEXT("language"), Language);
-	}
-	if (!StoreId.IsEmpty())
-	{
-		Params.Add(TEXT("storeId"), *StoreId);
-	}
-	if (bPopulateBundle)
-	{
-		Params.Add(TEXT("populateBundle"), TEXT("true"));
-	}
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("region"), Region },
+		{ TEXT("language"), Language },
+		{ TEXT("storeId"), StoreId },
+		{ TEXT("populateBundle"), bPopulateBundle ? TEXT("true"):TEXT("false") }
+	};
 	
-	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 void Item::GetItemByAppId(FString const& AppId
@@ -99,20 +87,13 @@ void Item::GetItemByAppId(FString const& AppId
 		, *SettingsRef.PlatformServerUrl
 		, *SettingsRef.PublisherNamespace);
 
-	TMap<FString, FString> Params;
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("region"), Region },
+		{ TEXT("language"), Language },
+		{ TEXT("appId"), AppId }
+	};
 
-	Params.Add(TEXT("appId"), AppId);
-
-	if (!Region.IsEmpty())
-	{
-		Params.Add(TEXT("region"), *Region);
-	}
-	if (!Language.IsEmpty())
-	{
-		Params.Add(TEXT("language"), Language);
-	}
-
-	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
@@ -194,25 +175,15 @@ void Item::SearchItem(FString const& Language
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 	
-	TMap<FString, FString> Params;
-	
-	Params.Add(TEXT("language"), Language);
-	Params.Add(TEXT("keyword"), Keyword);
-	
-	if (!Region.IsEmpty())
-	{
-		Params.Add(TEXT("region"), *Region);
-	}
-	if (Offset > 0)
-	{
-		Params.Add(TEXT("offset"), FString::Printf(TEXT("%d"), Offset));
-	}
-	if (Limit > 0)
-	{
-		Params.Add(TEXT("limit"), FString::Printf(TEXT("%d"), Limit));
-	}
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("region"), Region },
+		{ TEXT("language"), Language },
+		{ TEXT("keyword"), Keyword },
+		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") }
+	};
 
-	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 void Item::GetItemBySku(FString const& Sku
@@ -240,20 +211,13 @@ void Item::GetItemBySku(FString const& Sku
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> Params;
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("sku"), Sku },
+		{ TEXT("region"), Region },
+		{ TEXT("language"), Language }
+	};
 	
-	Params.Add(TEXT("sku"), Sku);
-
-	if (!Region.IsEmpty())
-	{
-		Params.Add(TEXT("region"), *Region);
-	}
-	if (!Language.IsEmpty())
-	{
-		Params.Add(TEXT("language"), Language);
-	}
-
-	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
@@ -282,24 +246,14 @@ void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> Params;
-
-	Params.Add(TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")));
-
-	if (!Region.IsEmpty())
-	{
-		Params.Add(TEXT("region"), *Region);
-	}
-	if (!Language.IsEmpty())
-	{
-		Params.Add(TEXT("language"), Language);
-	}
-	if (!StoreId.IsEmpty())
-	{
-		Params.Add(TEXT("storeId"), *StoreId);
-	}
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
+		{ TEXT("region"), Region },
+		{ TEXT("language"), Language },
+		{ TEXT("storeId"), StoreId }
+	};
  
-	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 void Item::GetItemDynamicData(FString const& ItemId

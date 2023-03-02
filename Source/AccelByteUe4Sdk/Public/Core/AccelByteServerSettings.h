@@ -17,6 +17,9 @@ public:
 	FString MatchmakingServerUrl{};
 	FString ChatServerUrl{};
 	FString DSHubServerUrl{};
+	FString DSId{};
+	FString WatchdogServerUrl{};
+	int WatchdogHeartbeatInterval;
 
 	virtual void Reset(ESettingsEnvironment const Environment) override;
 
@@ -113,6 +116,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString MatchmakingV2ServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	FString WatchdogServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	int WatchdogHeartbeatInterval{15};
 };
 
 UCLASS(Config = Engine)
@@ -208,6 +217,9 @@ public:
 	static FString GetMatchmakingV2ServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetWatchdogServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static float GetQosPingTimeout();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -269,6 +281,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetWatchdogServerUrl(const FString& WatchdogServerUrl);
 
 	/**
 	 * @brief

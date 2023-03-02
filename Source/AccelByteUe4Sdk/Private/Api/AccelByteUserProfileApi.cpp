@@ -85,6 +85,8 @@ void UserProfile::GetPublicCustomAttributes(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__), "This will no longer able to use since will give security hole issue for other player/user, "
+	 "please use GetPublicUserProfileInfo instead"); 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes")
 		, *SettingsRef.BasicServerUrl

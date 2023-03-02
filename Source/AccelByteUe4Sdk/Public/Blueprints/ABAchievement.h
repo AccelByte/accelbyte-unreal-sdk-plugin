@@ -21,6 +21,12 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsMultiLanguageAchievementResponse, FAcc
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedUserAchievementResponse, FAccelByteModelsPaginatedUserAchievement, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedUserGlobalAchievementResponse, FAccelByteModelsPaginatedUserGlobalAchievement, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedGlobalAchievementContributorsResponse, FAccelByteModelsPaginatedGlobalAchievementContributors, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedGlobalAchievementUserContributedResponse, FAccelByteModelsPaginatedGlobalAchievementUserContributed, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedPublicTagResponse, FAccelByteModelsPaginatedPublicTag, Response);
 
 #pragma endregion
@@ -41,7 +47,8 @@ public:
 		FDErrorHandler const& OnError,
 		int32 const& Offset = 0,
 		int32 const& Limit = 20,
-		FString const& TagQuery = TEXT("")
+		FString const& TagQuery = TEXT(""),
+		bool bGlobal = false
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
@@ -66,6 +73,44 @@ public:
 	void UnlockAchievement(
 		FString const& AchievementCode,
 		FDHandler const OnSuccess,
+		FDErrorHandler const& OnError
+	);	
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
+	void QueryGlobalAchievements(
+		FString const& AchievementCode,
+		EAccelByteGlobalAchievementStatus const& AchievementStatus,
+		EAccelByteGlobalAchievementListSortBy const& SortBy,
+		FDModelsPaginatedUserGlobalAchievementResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 const& Offset = 0,
+		int32 const& Limit = 20
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
+	void QueryGlobalAchievementContributors(
+		FString const& AchievementCode,
+		EAccelByteGlobalAchievementContributorsSortBy const& SortBy,
+		FDModelsPaginatedGlobalAchievementContributorsResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 const& Offset = 0,
+		int32 const& Limit = 20
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
+	void QueryGlobalAchievementUserContributed(
+		FString const& AchievementCode,
+		EAccelByteGlobalAchievementContributorsSortBy const& SortBy,
+		FDModelsPaginatedGlobalAchievementUserContributedResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 const& Offset = 0,
+		int32 const& Limit = 20
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
+	void ClaimGlobalAchievements(
+		FString const& AchievementCode,
+		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 

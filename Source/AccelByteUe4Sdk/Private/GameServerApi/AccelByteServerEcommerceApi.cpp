@@ -37,6 +37,7 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -59,49 +60,21 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 			TempFeatures.Add(FGenericPlatformHttp::UrlEncode(Feature));
 		}
 	}
-	
-	TMap<FString, FString> QueryParams;
 
-	QueryParams.Add(TEXT("activeOnly"), bActiveOnly ? TEXT("true") : TEXT("false"));
-	
-	if (!EntitlementName.IsEmpty())
-	{
-		QueryParams.Add( TEXT("entitlementName"), FGenericPlatformHttp::UrlEncode(EntitlementName));
-	}
+	const TMap<FString, FString> QueryParams = {
+		{ TEXT("activeOnly"), bActiveOnly ? TEXT("true") : TEXT("false") },
+		{ TEXT("entitlementName"), FGenericPlatformHttp::UrlEncode(EntitlementName) },
+		{ TEXT("itemId"), TempItemIds.Num() > 0 ? FString::Join(TempItemIds, TEXT("&itemId=")) : TEXT("") },
+		{ TEXT("features"), TempFeatures.Num() > 0 ? FString::Join(TempFeatures, TEXT("&features=")) : TEXT("") },
+		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
+		{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ?
+				FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass)) : TEXT("") },
+		{ TEXT("appType"), AppType != EAccelByteAppType::NONE ?
+				FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(AppType)) : TEXT("")  },
+	};
 
-	if (TempItemIds.Num() > 0)
-	{
-		QueryParams.Add(TEXT("itemId"), FString::Join(TempItemIds, TEXT("&itemId=")));
-	}
-
-	if (TempFeatures.Num() > 0)
-	{
-		QueryParams.Add(TEXT("features"), FString::Join(TempFeatures, TEXT("&features=")));
-	}
-	
-	if (Offset > 0)
-	{
-		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
-	}
-	
-	if (Limit > 0)
-	{
-		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
-	}
-	
-	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
-	{
-		QueryParams.Add(TEXT("entitlementClazz"),FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass)));
-	}
-	
-	if (AppType != EAccelByteAppType::NONE)
-	{
-		QueryParams.Add(TEXT("appType"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(AppType)));
-	}
-
-	Url.Append(FAccelByteUtilities::CreateQueryParams(QueryParams));
-
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid
@@ -408,24 +381,13 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 		{ TEXT("availableDate"), AvailableDate },
 		{ TEXT("targetNamespace"), ItemCriteria.TargetNamespace },
 		{ TEXT("sortBy"), FString::Join(SortByStringArray, TEXT(","))  },
+		{ TEXT("itemType"), ItemCriteria.ItemType != EAccelByteItemType::NONE ?
+			FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType) : TEXT("") },
+		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ?
+			FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType) : TEXT("")  },
+		{ TEXT("offset"), ItemCriteria.Offset > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Offset) : TEXT("") },
+		{ TEXT("limit"), ItemCriteria.Limit > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Limit) : TEXT("") },
 		};
-
-	if (ItemCriteria.ItemType != EAccelByteItemType::NONE)
-	{
-		QueryParams.Add(TEXT("itemType"), FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType));
-	}
-	if (ItemCriteria.AppType != EAccelByteAppType::NONE)
-	{
-		QueryParams.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType));
-	}
-	if (ItemCriteria.Offset > 0)
-	{
-		QueryParams.Add(TEXT("offset"), FString::FromInt(ItemCriteria.Offset));
-	}
-	if (ItemCriteria.Limit > 0)
-	{
-		QueryParams.Add(TEXT("limit"), FString::FromInt(ItemCriteria.Limit));
-	}
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }

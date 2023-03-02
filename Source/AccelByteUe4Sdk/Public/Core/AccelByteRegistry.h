@@ -72,6 +72,7 @@ namespace GameServerApi
 	class ServerSession;
 	class ServerDSHub;
 	class ServerMatchmakingV2;
+	class ServerWatchdog;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -132,6 +133,7 @@ public:
 	static GameServerApi::ServerSession ServerSession;
 	static GameServerApi::ServerDSHub ServerDSHub;
 	static GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2;
+	static GameServerApi::ServerWatchdog ServerWatchdog;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

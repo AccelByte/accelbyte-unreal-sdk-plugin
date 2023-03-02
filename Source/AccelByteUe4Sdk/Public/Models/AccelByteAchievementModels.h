@@ -24,6 +24,48 @@ enum class EAccelByteAchievementListSortBy : uint8
 	UPDATED_AT_DESC,
 };
 
+/** @brief Enumeration for Global Achievement sorting */
+UENUM(BlueprintType)
+enum class EAccelByteGlobalAchievementListSortBy : uint8
+{
+	NONE = 0,
+	ACHIEVED_AT,
+	ACHIEVED_AT_ASC,
+	ACHIEVED_AT_DESC,
+	CREATED_AT,
+	CREATED_AT_ASC,
+	CREATED_AT_DESC
+};
+
+/** @brief Enumeration for Global Achievement status */
+UENUM(BlueprintType)
+enum class EAccelByteGlobalAchievementStatus : uint8
+{
+	NONE = 0,
+	IN_PROGRESS,
+	UNLOCKED
+};
+
+/** @brief Enumeration for Global Achievement contributors sorting */
+UENUM(BlueprintType)
+enum class EAccelByteGlobalAchievementContributorsSortBy : uint8
+{
+	NONE = 0,
+	CONTRIBUTED_VALUE,
+	CONTRIBUTED_VALUE_ASC,
+	CONTRIBUTED_VALUE_DESC
+};
+
+
+/** @brief Enumeration to convert Achievement Status sorting */
+UENUM(BlueprintType)
+enum class ConvertAchievementStatus : uint8
+{
+	NONE = 0,
+	IN_PROGRESS = 1,
+	UNLOCKED = 2
+};
+
 /** @brief Data Model for Achievement's Icon */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementIcon
@@ -84,6 +126,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicAchievement
 	/** @brief A flag that indicates Achievement is incremental or not */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
 	bool Incremental{};
+
+	/** @brief A flag that indicates Achievement is global or not */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
+	bool Global{};
 
 	/** @brief Achievement goal value */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
@@ -170,6 +216,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMultiLanguageAchievement
 	/** @brief A flag that indicates Achievement is incremental or not */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
 	bool Incremental{};
+
+	/** @brief A flag that indicates Achievement is global or not */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
+	bool Global{};
 
 	/** @brief Achievement goal value */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
@@ -260,6 +310,188 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedUserAchievement
 	FAccelByteModelsPaging Paging{};
 };
 
+/** @brief Data Model for User Global Achievement progression */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserGlobalAchievement
+{
+	GENERATED_BODY()
+
+	/** @brief Unique Id for User Achievement's identifier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	FString Id{};
+
+	/**
+	 * @brief List of the localized name of the Achievement using KV-pairs.
+	 *        The Key is the language code in ISO 639-1 and the Value is
+	 *        the localized name
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	TMap<FString, FString> Name{};
+
+	/** @brief Global Achievement code */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	FString AchievementCode{};
+
+	/** @brief Game Namespace where the Global Achievement is registered */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	FString Namespace{};
+
+	/** @brief User Global Achievement's status. (1: In-Progress, 2: Unlocked) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	ConvertAchievementStatus Status{ConvertAchievementStatus::NONE};
+
+	/** @brief The last updated value of the Global Achievement  */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	float LatestValue{};
+
+	/** @brief The time when user achieved the Global Achievement (ISO 8601) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	FDateTime AchievedAt{0};
+
+	/** @brief The time when the Global Achievement created (ISO 8601) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	FDateTime CreatedAt{0};
+
+	/** @brief The time when the Global Achievement updated (ISO 8601) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	FDateTime UpdatedAt{0};
+};
+
+/** @brief Data Model for List of User Global Achievements progression */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedUserGlobalAchievement
+{
+	GENERATED_BODY()
+
+	/** @brief List of User Global Achievements data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedUserGlobalAchievement")
+	TArray<FAccelByteModelsUserGlobalAchievement> Data{};
+
+	/** @brief Paging data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedUserGlobalAchievement")
+	FAccelByteModelsPaging Paging{};
+};
+
+/** @brief Data Model for List of Global Achievement Contributors*/
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalAchievementContributors
+{
+	GENERATED_BODY()
+
+	/** @brief Unique Id for User Achievement's identifier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributors")
+	FString Id{};
+
+	/** @brief Namespace of the Global Achievement belongs to */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributors")
+	FString Namespace{};
+
+	/** @brief Global Achievement code */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributors")
+	FString AchievementCode{};
+
+	/** @brief Global Achievement user id */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributors")
+	FString UserId{};
+
+	/** @brief Value contributed to Global Achievement */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributors")
+	int32 ContributedValue{};
+
+	/** @brief The time when the Global Achievement created (ISO 8601) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributors")
+	FDateTime CreatedAt{0};
+
+	/** @brief The time when the Global Achievement updated (ISO 8601) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributors")
+	FDateTime UpdatedAt{0};
+};
+
+/** @brief Data Model for List of Global Achievements Contributors*/
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedGlobalAchievementContributors
+{
+	GENERATED_BODY()
+
+	/** @brief List of Global Achievements Contributors data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedGlobalAchievementContributors")
+	TArray<FAccelByteModelsGlobalAchievementContributors> Data{};
+
+	/** @brief Paging data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedGlobalAchievementContributors")
+	FAccelByteModelsPaging Paging{};
+};
+
+/** @brief Data Model for List of Global Achievement Contributed by User*/
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalAchievementContributed
+{
+	GENERATED_BODY()
+
+	/** @brief Unique Id for User Achievement's identifier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributed")
+	FString Id{};
+
+	/**
+	 * @brief List of the localized name of the Achievement using KV-pairs.
+	 *        The Key is the language code in ISO 639-1 and the Value is
+	 *        the localized name
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserGlobalAchievement")
+	TMap<FString, FString> Name{};
+
+	/** @brief Namespace of the Global Achievement belongs to */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributed")
+	FString Namespace{};
+
+	/** @brief Global Achievement code */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributed")
+	FString AchievementCode{};
+
+	/** @brief Global Achievement user id */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributed")
+	FString UserId{};
+
+	/** @brief Value contributed to Global Achievement */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributed")
+	int32 ContributedValue{};
+
+	/** @brief A flag that indicates the Global Achievement can be claimed or not */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementContributed")
+	bool CanClaimReward{};
+};
+
+/** @brief Data Model for List of Global Achievements Contributors*/
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedGlobalAchievementUserContributed
+{
+	GENERATED_BODY()
+
+	/** @brief List of Global Achievements Contributed data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementUserContributed")
+	TArray<FAccelByteModelsGlobalAchievementContributed> Data{};
+
+	/** @brief Paging data */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | GlobalAchievementUserContributed")
+	FAccelByteModelsPaging Paging{};
+};
+
+/** @brief Data Model for List of Claimed Global Achievements*/
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsClaimedGlobalAchievements
+{
+	GENERATED_BODY()
+
+	/** @brief Global Achievement code */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | ClaimedGlobalAchievements")
+	FString AchievementCode{};
+
+	/** @brief The time when user achieved the Global Achievement (ISO 8601) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | ClaimedGlobalAchievements")
+	FDateTime AchievedAt{0};
+};
+
+/** @brief Data Model for Achievement Tag */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicTag
 {

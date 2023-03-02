@@ -35,7 +35,8 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
-	 * @param TagQuery A query expression consists of tags to query the achievement from
+	 * @param TagQuery A query expression consists of tags to query the achievement from.
+	 * @param bGlobal True if the configuration to display global achievements.
 	 */
 	void QueryAchievements(FString const& Language
 		, EAccelByteAchievementListSortBy const& SortBy
@@ -43,7 +44,8 @@ public:
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0
 		, int32 const& Limit = 20
-		, FString const& TagQuery = TEXT(""));
+		, FString const& TagQuery = TEXT("")
+		, bool bGlobal = false);
 
 	/**
 	 * @brief Get an specific achievement information.
@@ -76,6 +78,28 @@ public:
 		, FString const& TagQuery = TEXT(""));
 
 	/**
+	 * @brief Query other user's achievements. Include achieved and in-progress.
+	 *
+	 * @param UserId Target user id to retrieve achievement data from
+	 * @param SortBy Sorting method for the achievements result.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPaginatedUserAchievement&.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the achievements result. Default value is 0.
+	 * @param Limit The limit of the achievements result. Default value is 20.
+	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
+	 * @param TagQuery A query expression consists of tags to query the achievement from
+	 */
+
+	void QueryUserAchievementsByUserId(FString const& UserId
+		, EAccelByteAchievementListSortBy const& SortBy
+		, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20
+		, bool PreferUnlocked = true
+		, FString const& TagQuery = TEXT(""));
+
+	/**
 	 * @brief Unlock specific achievement.
 	 *
 	 * @param AchievementCode The achievement code which will be unlock.
@@ -83,7 +107,73 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void UnlockAchievement(FString const& AchievementCode
-		, FVoidHandler const OnSuccess
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get the progress list of global achievements. Include achieved and in-progress.
+	 *
+	 * @param AchievementCode The achievement code.
+	 * @param AchievementStatus The status to display the appropriate achievements.
+	 * @param SortBy Sorting method for the global achievements result.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPaginatedUserGlobalAchievement&.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the achievements result. Default value is 0.
+	 * @param Limit The limit of the achievements result. Default value is 20.
+	 * @param TagQuery A query expression consists of tags to query the achievement from
+	 */
+	void QueryGlobalAchievements(FString const& AchievementCode
+		, EAccelByteGlobalAchievementStatus const& AchievementStatus
+		, EAccelByteGlobalAchievementListSortBy const& SortBy
+		, THandler<FAccelByteModelsPaginatedUserGlobalAchievement> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20
+		, FString const& TagQuery = TEXT(""));
+
+	/**
+	 * @brief Get the list of contributors for a global achievement.
+	 *
+	 * @param AchievementCode The achievement code.
+	 * @param SortBy Sorting method for the global achievements contributors result.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPaginatedGlobalAchievementContributors&.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the achievements result. Default value is 0.
+	 * @param Limit The limit of the achievements result. Default value is 20.
+	 */
+	void QueryGlobalAchievementContributors(FString const& AchievementCode
+		, EAccelByteGlobalAchievementContributorsSortBy const& SortBy
+		, THandler<FAccelByteModelsPaginatedGlobalAchievementContributors> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20);
+
+	/**
+	 * @brief Get the list of global achievements that have been contributed by the user.
+	 *
+	 * @param AchievementCode The achievement code.
+	 * @param SortBy Sorting method for the global achievements contributors result.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPaginatedGlobalAchievementUserContributed&.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the achievements result. Default value is 0.
+	 * @param Limit The limit of the achievements result. Default value is 20.
+	 */
+	void QueryGlobalAchievementUserContributed(FString const& AchievementCode
+		, EAccelByteGlobalAchievementContributorsSortBy const& SortBy
+		, THandler<FAccelByteModelsPaginatedGlobalAchievementUserContributed> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20);
+
+	/**
+	 * @brief Claim specific global achievement.
+	 *
+	 * @param AchievementCode The global achievement code which will be claimed.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ClaimGlobalAchievements(FString const& AchievementCode
+		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -104,6 +194,9 @@ private:
 	Achievement(Achievement&&) = delete;
 
 	static FString ConvertAchievementSortByToString(EAccelByteAchievementListSortBy const& SortBy);
+	static FString ConvertGlobalAchievementSortByToString(EAccelByteGlobalAchievementListSortBy const& SortBy);
+	static FString ConvertGlobalAchievementTypeToString(EAccelByteGlobalAchievementStatus const& Status);
+	static FString ConvertGlobalAchievementContributosSortByToString(EAccelByteGlobalAchievementContributorsSortBy const& SortBy);
 };
 
 } // Namespace Api

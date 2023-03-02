@@ -90,6 +90,18 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 	{
 		QosPingTimeout = .6;
 	}
+
+	FParse::Value(FCommandLine::Get(), TEXT("dsid"), DSId);
+
+	if (!FParse::Value(FCommandLine::Get(), TEXT("watchdog_url"), WatchdogServerUrl))
+	{
+		GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), WatchdogServerUrl, GEngineIni);
+	}
+
+	if (!FParse::Value(FCommandLine::Get(), TEXT("heartbeat"), WatchdogHeartbeatInterval))
+	{
+		GConfig->GetInt(*DefaultServerSection, TEXT("WatchdogHeartbeatInterval"), WatchdogHeartbeatInterval, GEngineIni);
+	}
 #endif
 }
 
@@ -224,6 +236,11 @@ FString UAccelByteBlueprintsServerSettings::GetMatchmakingV2ServerUrl()
 	return FRegistry::ServerSettings.MatchmakingV2ServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetWatchdogServerUrl()
+{
+	return FRegistry::ServerSettings.WatchdogServerUrl;
+}
+
 float UAccelByteBlueprintsServerSettings::GetQosPingTimeout()
 {
 	return FRegistry::ServerSettings.QosPingTimeout;
@@ -327,6 +344,11 @@ void UAccelByteBlueprintsServerSettings::SetDSHubServerUrl(const FString& DSHubS
 void UAccelByteBlueprintsServerSettings::SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl)
 {
 	FRegistry::ServerSettings.MatchmakingV2ServerUrl = MatchmakingV2ServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetWatchdogServerUrl(const FString& WatchdogServerUrl)
+{
+	FRegistry::ServerSettings.WatchdogServerUrl = WatchdogServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetQosPingTimeout(const float& QosPingTimeout)

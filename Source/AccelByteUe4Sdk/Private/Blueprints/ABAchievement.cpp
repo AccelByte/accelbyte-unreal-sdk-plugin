@@ -16,7 +16,8 @@ void UABAchievement::QueryAchievements(
 	FDErrorHandler const& OnError,
 	int32 const& Offset,
 	int32 const& Limit,
-	FString const& TagQuery
+	FString const& TagQuery,
+	bool bGlobal
 )
 {
 	ApiClientPtr->Achievement.QueryAchievements(
@@ -36,7 +37,8 @@ void UABAchievement::QueryAchievements(
 		),
 		Offset,
 		Limit,
-		TagQuery
+		TagQuery,
+		bGlobal
 	);
 }
 
@@ -115,6 +117,99 @@ void UABAchievement::UnlockAchievement(
 			}
 		)
 	);
+}
+
+void UABAchievement::QueryGlobalAchievements(
+	FString const& AchievementCode,
+	EAccelByteGlobalAchievementStatus const& AchievementStatus, 
+	EAccelByteGlobalAchievementListSortBy const& SortBy, 
+	FDModelsPaginatedUserGlobalAchievementResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	int32 const& Offset, 
+	int32 const& Limit)
+{
+	ApiClientPtr->Achievement.QueryGlobalAchievements(
+		AchievementCode,
+		AchievementStatus,
+		SortBy,
+		THandler<FAccelByteModelsPaginatedUserGlobalAchievement>::CreateLambda(
+			[OnSuccess](FAccelByteModelsPaginatedUserGlobalAchievement const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int const Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+			), Offset, Limit);
+}
+
+void UABAchievement::QueryGlobalAchievementContributors(
+	FString const& AchievementCode, 
+	EAccelByteGlobalAchievementContributorsSortBy const& SortBy, 
+	FDModelsPaginatedGlobalAchievementContributorsResponse const& OnSuccess, 
+	FDErrorHandler const& OnError, 
+	int32 const& Offset, 
+	int32 const& Limit)
+{
+	ApiClientPtr->Achievement.QueryGlobalAchievementContributors(
+		AchievementCode,
+		SortBy,
+		THandler<FAccelByteModelsPaginatedGlobalAchievementContributors>::CreateLambda(
+			[OnSuccess](FAccelByteModelsPaginatedGlobalAchievementContributors const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int const Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+			), Offset, Limit);
+}
+
+void UABAchievement::QueryGlobalAchievementUserContributed(
+	FString const& AchievementCode, 
+	EAccelByteGlobalAchievementContributorsSortBy const& SortBy, 
+	FDModelsPaginatedGlobalAchievementUserContributedResponse const& OnSuccess, 
+	FDErrorHandler const& OnError, 
+	int32 const& Offset, 
+	int32 const& Limit)
+{
+	ApiClientPtr->Achievement.QueryGlobalAchievementUserContributed(
+		AchievementCode,
+		SortBy,
+		THandler<FAccelByteModelsPaginatedGlobalAchievementUserContributed>::CreateLambda(
+			[OnSuccess](FAccelByteModelsPaginatedGlobalAchievementUserContributed const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int const Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+			), Offset, Limit);
+}
+
+void UABAchievement::ClaimGlobalAchievements(
+	FString const& AchievementCode,
+	FDHandler const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->Achievement.ClaimGlobalAchievements(
+		AchievementCode,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
 }
 
 void UABAchievement::GetTags(
