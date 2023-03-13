@@ -124,6 +124,20 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FAddRemoveUserFromTopicResponse, const FAccelByteModelsChatActionUserTopicResponse&)
 
+	/**
+	 * @brief delegate for handling delete system message(s) response. 
+	 */
+	DECLARE_DELEGATE_OneParam(FDeleteSystemMessagesResponse, const FAccelByteModelsDeleteSystemMessagesResponse&)
+
+	/**
+	 * @brief delegate for handling update system message(s) response.
+	 */
+	DECLARE_DELEGATE_OneParam(FUpdateSystemMessagesResponse, const FAccelByteModelsUpdateSystemMessagesResponse&)
+	
+	/**
+     * @brief delegate for handling query system message response.
+     */
+	DECLARE_DELEGATE_OneParam(FQuerySystemMessageResponse, const FAccelByteModelsQuerySystemMessagesResponse&)
 
 	//				NOTIFICATIONS
 	/**
@@ -145,6 +159,11 @@ public:
 	 * @brief delegate for handling chat topic removal/update notification.
 	 */
 	DECLARE_DELEGATE_OneParam(FDeleteUpdateTopicNotif, const FAccelByteModelsChatUpdateTopicNotif&)
+
+	/**
+	 * @brief delegate for handling chat incoming system messages.
+	 */
+	DECLARE_DELEGATE_OneParam(FSystemMessageNotif, const FAccelByteModelsChatSystemMessageNotif&)
 
 	/*
 	* @brief delegate for handling ban / unban notification
@@ -570,6 +589,66 @@ private:
 
 #pragma endregion
 
+#pragma region SYSTEM INBOX
+
+public:
+	/**
+	 * @brief Delete system message(s) in user system inbox
+	 *
+	 * @param MessageIds - Array of system message id
+	 * @param OnSuccess - Callback for successful deleted system message(s) in user system inbox
+	 * @param OnError - Callback for failed deleted system message(s) in user system inbox
+	 */
+	void DeleteSystemMessages(TSet<FString> MessageIds
+		, const FDeleteSystemMessagesResponse& OnSuccess
+		, const FErrorHandler& OnError = {});
+
+	/**
+	 * @brief Update system message(s) in user system inbox
+	 *
+	 * @param ActionUpdateSystemMessages - Array of ActionUpdateSystemMessage containing action to mark read/unread and keep
+	 * @param OnSuccess - Callback for successful deleted system message(s) in user system inbox
+	 * @param OnError - Callback for failed updated system message(s) in user system inbox
+	 */
+	void UpdateSystemMessages(TArray<FAccelByteModelsActionUpdateSystemMessage> ActionUpdateSystemMessages
+		, const FUpdateSystemMessagesResponse& OnSuccess
+		, const FErrorHandler& OnError = {});
+
+	/**
+	 * @brief Query system messages in user's system inbox
+	 *
+	 * @param OnSuccess - Callback for successful deleted system message(s) in user system inbox
+	 * @param OnError - Callback for failed updated system message(s) in user system inbox
+	 * @param OptionalParams - Optional parameters for query inbox message
+	 */
+	void QuerySystemMessage(const FQuerySystemMessageResponse& OnSuccess
+		, const FErrorHandler& OnError = {}
+		, const FQuerySystemMessageOptions OptionalParams = {});
+
+private:
+	void SetDeleteSystemMessagesResponseDelegate(const FDeleteSystemMessagesResponse& OnDeleteInboxMessagesResponse
+		, const FErrorHandler& OnError = {})
+	{
+		DeleteSystemMessagesResponse = OnDeleteInboxMessagesResponse;
+		OnDeleteSystemMessagesError = OnError;
+	}
+
+	void SetUpdateSystemMessagesResponseDelegate(const FUpdateSystemMessagesResponse& OnUpdateSystemMessagesResponse
+		, const FErrorHandler& OnError = {})
+	{
+		UpdateSystemMessagesResponse = OnUpdateSystemMessagesResponse;
+		OnUpdateSystemMessagesError = OnError;
+	}
+
+	void SetQuerySystemMessageResponseDelegate(const FQuerySystemMessageResponse& OnQuerySystemMessagesResponse
+			, const FErrorHandler& OnError = {})
+	{
+		QuerySystemMessageResponse = OnQuerySystemMessagesResponse;
+		OnUpdateSystemMessagesError = OnError;
+	}
+
+#pragma endregion
+
 #pragma region QUERY TOPIC
 
 public:
@@ -898,6 +977,14 @@ public:
 	}
 	
 	/**
+	 * @brief Delegate setter for when user received a System message
+	 */
+	void SetSystemMessageNotifDelegate(const FSystemMessageNotif& Delegate)
+	{
+		SystemMessageNotif = Delegate;
+	}
+	
+	/**
 	 * @brief Delegate setter for when user received unban event
 	 */
 	void SetUserUnbanNotifDelegate(const FUserBanUnbanNotif& Delegate)
@@ -930,6 +1017,9 @@ private:
 	TMap<FString, FChatRefreshTokenResponse> MessageIdRefreshTokenResponseMap;
 	TMap<FString, FChatBlockUserResponse> MessageIdBlockUserResponseMap;
 	TMap<FString, FChatUnblockUserResponse> MessageIdUnblockUserResponseMap;
+	TMap<FString, FDeleteSystemMessagesResponse> MessageIdDeleteSystemMessagesResponseMap;
+	TMap<FString, FUpdateSystemMessagesResponse> MessageIdUpdateSystemMessagesResponseMap;
+	TMap<FString, FQuerySystemMessageResponse> MessageIdQuerySystemMessageResponseMap;
 
 	FChatActionTopicResponse CreateTopicResponse;
 	FSendChatResponse SendChatResponse;
@@ -949,6 +1039,9 @@ private:
 	FChatRefreshTokenResponse RefreshTokenResponse;
 	FChatBlockUserResponse BlockUserResponse;
 	FChatUnblockUserResponse UnblockUserResponse;
+	FDeleteSystemMessagesResponse DeleteSystemMessagesResponse;
+	FUpdateSystemMessagesResponse UpdateSystemMessagesResponse;
+	FQuerySystemMessageResponse QuerySystemMessageResponse;
 
 	FErrorHandler OnCreateTopicError;
 	FErrorHandler OnSendChatError;
@@ -968,6 +1061,9 @@ private:
 	FErrorHandler OnRefreshTokenError;
 	FErrorHandler OnBlockUserError;
 	FErrorHandler OnUnblockUserError;
+	FErrorHandler OnDeleteSystemMessagesError;
+	FErrorHandler OnUpdateSystemMessagesError;
+	FErrorHandler OnQuerySystemMessageError;
 
 	FChatNotif ChatNotif;
 	FReadChatNotif ReadChatNotif;
@@ -975,10 +1071,15 @@ private:
 	FAddRemoveFromTopicNotif RemoveFromTopicNotif;
 	FDeleteUpdateTopicNotif DeleteTopicNotif;
 	FDeleteUpdateTopicNotif UpdateTopicNotif;
+	FSystemMessageNotif SystemMessageNotif;
+	
 	FUserBanUnbanNotif UserBanNotif;
 	FUserBanUnbanNotif UserUnbanNotif;
 
 	FString GenerateMessageID(const FString& Prefix = TEXT("")) const;
+
+	const int32 DefaultQuerySystemMessageLimit {20};
+	const int32 DefaultQuerySystemMessageOffset {0};
 
 #pragma endregion
 

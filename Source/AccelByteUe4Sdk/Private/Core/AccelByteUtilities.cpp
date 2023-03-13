@@ -11,6 +11,7 @@
 #include "Misc/CString.h"
 #include <memory>
 #include "Kismet/GameplayStatics.h"
+#include "Misc/SecureHash.h"
 
 #if !PLATFORM_SWITCH
 // enclosing with namespace because of collision with Unreal types
@@ -325,52 +326,220 @@ FString FAccelByteUtilities::GetAuthenticatorString(EAccelByteLoginAuthFactorTyp
 	}
 }
 
-FString FAccelByteUtilities::LocalDeviceId()
+FString FAccelByteUtilities::RandomizeDeviceId()
 {
 	FString NewDeviceId;
+	TCHAR valid[] = { '0', '1', '2', '3', '4', '5', '6','7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+					'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
 
-	//check then read file
-	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-	CurrentDirectory.Append(TEXT("DeviceIdHelper/DeviceId.txt"));
-	CurrentDirectory.ReplaceInline(TEXT("/"), TEXT("\\"));
-	FFileHelper::LoadFileToString(NewDeviceId, *CurrentDirectory);
+	const int VALID_CHARACTER_NUMBER = 35;
+	const int DEVICE_ID_LENGTH = 30;
 
-	//generate one if still empty
-	if (NewDeviceId.IsEmpty())
+	for (int i = 0; i < DEVICE_ID_LENGTH; i++)
 	{
-		FString FilePath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-		FilePath.Append("DeviceIdHelper/DeviceId.txt");
-
-		TCHAR valid[] = { '0', '1', '2', '3', '4', '5', '6','7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-						'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-
-		for (int i = 0; i < 30; i++)
-		{
-			NewDeviceId = NewDeviceId + valid[FMath::RandRange(0, 35)];
-		}
-
-		FFileHelper::SaveStringToFile(NewDeviceId, *FilePath);
+		NewDeviceId = NewDeviceId + valid[FMath::RandRange(0, VALID_CHARACTER_NUMBER)];
 	}
 	return NewDeviceId;
 }
 
-FString FAccelByteUtilities::GetDeviceId()
+FString FAccelByteUtilities::EncodeHMACBase64(const FString& Message, const FString& Key)
 {
-	FString DeviceId = FPlatformMisc::GetDeviceId();
-	if (DeviceId.IsEmpty())
-	{ 
-		FString MacAddressString = FAccelByteUtilities::GetMacAddress(); 
-		DeviceId = FMD5::HashAnsiString(*MacAddressString);
+	const int BYTE_BUFFER_COUNT = 20; // Based on the inline documentation FSHA1::HMACBuffer
+	uint8 EncodeOutput[BYTE_BUFFER_COUNT];
 
-		if (DeviceId.IsEmpty())
-		{
-			DeviceId = *LocalDeviceId();
-		}
-	} 
-	return DeviceId;
+	TArray<uint8> MessageBytes = FAccelByteArrayByteFStringConverter::FStringToBytes(Message);
+	TArray<uint8> KeyBytes = FAccelByteArrayByteFStringConverter::FStringToBytes(Key);
+	FSHA1::HMACBuffer(KeyBytes.GetData(), KeyBytes.Num(), MessageBytes.GetData(), MessageBytes.Num(), EncodeOutput);
+	
+	TArray<uint8> TArrayEncodedOutput(&EncodeOutput[0], BYTE_BUFFER_COUNT);
+	//Base64 to avoid unwanted behaviour
+	return FBase64::Encode(TArrayEncodedOutput);
 }
 
-FString FAccelByteUtilities::GetMacAddress()
+FString FAccelByteUtilities::GetOrSetIfDeviceIdNotFound(const FString Default)
+{
+	static FString StaticDeviceId;
+
+	// Check to see if we already have a valid machine ID to use
+	if (StaticDeviceId.IsEmpty() && !FPlatformMisc::GetStoredValue(AccelByteStored(),
+		AccelByteStoredSectionIdentifiers(), AccelByteStoredKeyDeviceId(), StaticDeviceId))
+	{
+		// No valid device ID, use the default
+		StaticDeviceId = Default;
+
+		if (!FPlatformMisc::SetStoredValue(AccelByteStored(), AccelByteStoredSectionIdentifiers(),
+			AccelByteStoredKeyDeviceId(), StaticDeviceId))
+		{
+			// Failed to persist the machine ID - use the default
+			StaticDeviceId = Default;
+		}
+	}
+
+	return StaticDeviceId;
+}
+
+EAccelByteDevModeDeviceIdMethod FAccelByteUtilities::GetCurrentDeviceIdOverrideMethod()
+{
+	FString DeviceIdOverrideMethod = FString();
+	if (!GConfig->GetString(
+		TEXT("AccelByte.Dev"),
+		TEXT("DeviceIdOverrideMethod"),
+		DeviceIdOverrideMethod,
+		GEngineIni)
+		|| DeviceIdOverrideMethod.IsEmpty())
+	{
+		return EAccelByteDevModeDeviceIdMethod::UNSPECIFIED;
+	}
+	
+	return FAccelByteUtilities::GetUEnumValueFromString<EAccelByteDevModeDeviceIdMethod>(DeviceIdOverrideMethod);
+}
+
+FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)
+{
+	FString Output = FString();
+
+	FString PlatformDeviceId = FPlatformMisc::GetDeviceId();
+	if (PlatformDeviceId.IsEmpty())
+	{
+		//Decision to encode at the end of this function
+		FString PlainMacAddress = FAccelByteUtilities::GetMacAddress(false);
+
+		if (PlainMacAddress.IsEmpty())
+		{
+			Output = RandomizeDeviceId();
+		}
+		else
+		{
+			Output = PlainMacAddress;
+		}
+	}
+	else //IF Platform-specific DeviceID available
+	{
+		Output = PlatformDeviceId;
+	}
+
+	bool bIsShippingBuild = false;
+#if UE_BUILD_SHIPPING
+	bIsShippingBuild = true;
+#endif
+	bool bIsDevMode = !bIsShippingBuild && !IsRunningDedicatedServer();
+
+	if (bIsDevMode)
+	{
+		Output = GetDevModeDeviceId(Output);
+	}
+
+	if (bIsDeviceIdRequireEncode || !bIsDevMode)
+	{
+		Output = EncodeHMACBase64(Output, FRegistry::Settings.PublisherNamespace);
+	}
+	return Output;
+}
+
+FString FAccelByteUtilities::GetDevModeDeviceId(FString DefaultDeviceId)
+{
+#pragma region RETRIEVE_OVERRIDE_CONDITION
+	bool bUsePersistentDeviceId = false;
+	bool bIsRandomizeDeviceId = false;
+	TArray<FString> DeviceIdsFromIni = TArray<FString>();
+	FString CommandLineDeviceId = FString();
+	bool bIsCommandLineOverride = false;
+	bool bIsDiscardOverride = false;
+
+	bUsePersistentDeviceId = 
+		GConfig->GetBool(
+			TEXT("AccelByte.Dev"),
+			TEXT("UsePersistentDeviceId"),
+			bUsePersistentDeviceId,
+			GEngineIni)
+		&& bUsePersistentDeviceId;
+
+	bIsRandomizeDeviceId =
+		GConfig->GetBool(
+			TEXT("AccelByte.Dev"),
+			TEXT("RandomizeDeviceId"),
+			bIsRandomizeDeviceId,
+			GEngineIni)
+		&& bIsRandomizeDeviceId;
+
+	GConfig->GetArray(
+		TEXT("AccelByte.Dev"),
+		TEXT("DeviceId"),
+		DeviceIdsFromIni,
+		GEngineIni);
+
+	bIsCommandLineOverride = 
+		FParse::Value(FCommandLine::Get(), TEXT("deviceid"), CommandLineDeviceId)
+		&& !CommandLineDeviceId.IsEmpty();
+
+	bIsDiscardOverride =
+		GConfig->GetBool(
+			TEXT("AccelByte.Dev"),
+			TEXT("DiscardOverride"),
+			bIsDiscardOverride,
+			GEngineIni)
+		&& bIsDiscardOverride;
+#pragma endregion 
+
+	//Early return, high priority discard Override configuration
+	if (bIsDiscardOverride)
+	{
+		return DefaultDeviceId;
+	}
+
+	//File-based configuration override method
+	switch (GetCurrentDeviceIdOverrideMethod())
+	{
+	case EAccelByteDevModeDeviceIdMethod::COMMANDLINE:
+		if (bIsCommandLineOverride)
+		{
+			return CommandLineDeviceId;
+		}
+		break;
+	case EAccelByteDevModeDeviceIdMethod::PICK_RANDOM:
+		if (DeviceIdsFromIni.Num() > 0)
+		{
+			int TheChosenIndex = FMath::Rand() % DeviceIdsFromIni.Num();
+			return DeviceIdsFromIni[TheChosenIndex];
+		}
+		break;
+	case EAccelByteDevModeDeviceIdMethod::RANDOMIZE:
+		return RandomizeDeviceId();
+	case EAccelByteDevModeDeviceIdMethod::PERSISTENT:
+		return GetOrSetIfDeviceIdNotFound(DefaultDeviceId);
+	case EAccelByteDevModeDeviceIdMethod::UNSPECIFIED:
+	default:
+		break;
+	}
+
+#pragma region IF_OVERRIDE_METHOD_UNSPECIFIED
+	if (bIsCommandLineOverride)
+	{
+		return CommandLineDeviceId;
+	}
+	// Failed to get the commandline, then look for randomized
+	if (bIsRandomizeDeviceId)
+	{
+		if (DeviceIdsFromIni.Num() == 0)
+		{
+			return RandomizeDeviceId();
+		}
+
+		int TheChosenIndex = FMath::Rand() % DeviceIdsFromIni.Num();
+		return DeviceIdsFromIni[TheChosenIndex];
+	}
+
+	// Persist and use whatever deviceId we have.
+	if (bUsePersistentDeviceId)
+	{
+		return GetOrSetIfDeviceIdNotFound(DefaultDeviceId);
+	}
+#pragma endregion
+
+	return DefaultDeviceId;
+}
+
+FString FAccelByteUtilities::GetMacAddress(bool bEncoded)
 {
 	FString MacAddressString = TEXT("");
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
@@ -380,7 +549,8 @@ FString FAccelByteUtilities::GetMacAddress()
 	{
 		MacAddressString += FString::Printf(TEXT("%02x"), *it);
 	}
-	return MacAddressString;
+
+	return (bEncoded && !MacAddressString.IsEmpty()) ? EncodeHMACBase64(MacAddressString, FRegistry::Settings.PublisherNamespace) : MacAddressString;
 }
 
 FString FAccelByteUtilities::GetPlatformName()

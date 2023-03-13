@@ -210,6 +210,21 @@ void ServerStatistic::BulkResetUserStatItemsValues(const FString& UserId
 	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 
+void ServerStatistic::BulkResetMultipleUserStatItemsValue(const TArray<FAccelByteModelsResetUserStatItemValue>& UserStatItemValue
+	, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/statitems/value/reset/bulk")
+		, *ServerSettingsRef.StatisticServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
+	FString Content = TEXT("");
+	FAccelByteUtilities::TArrayUStructToJsonString(UserStatItemValue, Content);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
 void ServerStatistic::BulkUpdateUserStatItemValue(const FString& UserId
 	, const FString& AdditionalKey
 	, const TArray<FAccelByteModelsUpdateUserStatItemWithStatCode>& BulkUpdateUserStatItems

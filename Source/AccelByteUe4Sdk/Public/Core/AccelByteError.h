@@ -298,6 +298,15 @@ namespace AccelByte
 		//
 		StatisticsEmptyInputException = 20002,
 
+		// V2 sessions
+		SessionUpdateVersionMismatch = 20071,
+
+		//
+		// V2 Matchmaking
+		//
+		MatchmakingV2CreateMatchTicketConflict = 520300,
+		MatchmakingV2MatchTicketNotFound = 520303,
+
 		//
 		//SeasonPass Error Code List
 		//

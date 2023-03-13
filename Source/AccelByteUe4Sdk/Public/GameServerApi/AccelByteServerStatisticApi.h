@@ -136,6 +136,18 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
+	 * @brief Bulk reset multiple user's statitems value.
+	 * User's statitem value will be reset to the default value defined in the statistic configuration.
+	 *
+	 * @param UserStatItemValue Array of UserId and StatCode.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUpdateUserStatItemsResponse>.
+	 * @param OnError This will be called when the operation failed.
+	 */ 
+	void BulkResetMultipleUserStatItemsValue(const TArray<FAccelByteModelsResetUserStatItemValue>& UserStatItemValue
+		, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
 	* @brief Bulk update user's statitems value for given namespace and user with specific update strategy.
 	*
 	* @param UserId UserId.

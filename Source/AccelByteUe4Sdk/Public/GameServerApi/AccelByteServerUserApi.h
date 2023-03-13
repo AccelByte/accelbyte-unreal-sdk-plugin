@@ -83,8 +83,7 @@ public:
 		, const FDateTime& After
 		, const THandler<FGetUserBansResponse>& OnSuccess
 		, const FErrorHandler& OnError);
-
-
+	
 	/**
 	 * @brief This function will get user's ban with specific time duration.
 	 * 
@@ -96,6 +95,17 @@ public:
 		, const THandler<FGetUserBansResponse>& OnSuccess
 		, const FErrorHandler& OnError);
 
+	/**
+	 * @brief This function to List user by user id.
+	 * 
+	 * @param Request struct request containing user ids.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is THandler<FListUserDataResponse>&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ListUserByUserId(const FListUserDataRequest Request
+		, const THandler<FListUserDataResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+	
 private:
 	ServerUser() = delete;
 	ServerUser(const ServerUser&) = delete;

@@ -40,6 +40,10 @@ namespace AccelByte
 				const FString QueryPublicTopic = TEXT("actionQueryPublicTopic");
 				const FString QueryChat = TEXT("queryChat");
 
+				const FString DeleteSystemMessages = TEXT("actionDeleteSystemMessages");
+				const FString UpdateSystemMessages = TEXT("actionUpdateSystemMessages");
+				const FString QuerySystemMessage = TEXT("actionQuerySystemMessage");
+
 				const FString UpdateTopic = TEXT("actionUpdateTopic");
 				const FString DeleteTopic = TEXT("actionDeleteTopic");
 				const FString AddUserToTopic = TEXT("actionAddUserToTopic");
@@ -60,6 +64,7 @@ namespace AccelByte
 				const FString RemoveFromTopicNotif = TEXT("EventRemovedFromTopic");
 				const FString DeleteTopicNotif = TEXT("eventTopicDeleted");
 				const FString UpdateTopicNotif = TEXT("eventTopicUpdated");
+				const FString SystemMessageNotif  = TEXT("eventNewSystemMessage");
 
 				const FString UserBanNotif = TEXT("eventBanChat");
 				const FString UserUnbanNotif = TEXT("eventUnbanChat");
@@ -100,11 +105,20 @@ namespace AccelByte
 					const FString CreatedAt = TEXT("createdAt");
 					const FString UpdatedAt = TEXT("updatedAt");
 					const FString ReadAt = TEXT("readAt");
+					const FString ExpiredAt = TEXT("expiredAt");
+					const FString StartCreatedAt = TEXT("startCreatedAt");
+					const FString EndCreatedAt = TEXT("endCreatedAt");
 
 					const FString Data = TEXT("data");
 
 					const FString Token = TEXT("token");
 
+					const FString SystemMessageIds = TEXT("messageIds");
+					const FString SystemMessageRead = TEXT("read");
+					const FString SystemMessageKeep = TEXT("keep");
+					const FString UnreadOnly = TEXT("unreadOnly");
+					const FString Category = TEXT("category");
+					
 				}
 
 				namespace Value
@@ -142,6 +156,10 @@ namespace AccelByte
 			JoinTopicResponse,
 			QuitTopicResponse,
 
+			DeleteSystemMessagesResponse,
+			UpdateSystemMessagesResponse,
+			QuerySystemMessageResponse,
+
 			RefreshTokenResponse,
 
 			BlockUserResponse,
@@ -154,6 +172,7 @@ namespace AccelByte
 			AddToTopicNotif,
 			DeleteTopicNotif,
 			UpdateTopicNotif,
+			SystemMessageNotif,
 			
 			UserBanNotif,
 			UserUnbanNotif,
@@ -241,6 +260,7 @@ namespace AccelByte
 				FieldDataDateTimeFields.Add(ChatToken::Json::Field::CreatedAt);
 				FieldDataDateTimeFields.Add(ChatToken::Json::Field::UpdatedAt);
 				FieldDataDateTimeFields.Add(ChatToken::Json::Field::ReadAt);
+				FieldDataDateTimeFields.Add(ChatToken::Json::Field::ExpiredAt);
 
 				FString SubObjectField, RootDateTimeField;
 				if (Message->HasField(ChatToken::Json::Field::Params)) // Notif
@@ -258,30 +278,43 @@ namespace AccelByte
 				{
 					TSharedPtr<FJsonObject> SubObject = Message->GetObjectField(SubObjectField);
 					bHasDateTimeJsonField = ConvertJsonFieldTimeUnixToIso8601(SubObject, RootDateTimeField);
-					if (bHasDateTimeJsonField && SubObject->HasField(ChatToken::Json::Field::Data))
+					if (bHasDateTimeJsonField)
 					{
-						TArray<TSharedPtr<FJsonValue>> Datas;
-						//Field Data can be an array. e.g. FAccelByteModelsChatQueryTopicResponse
-						if (SubObject->HasTypedField<EJson::Array>(ChatToken::Json::Field::Data))
+						if(SubObject->HasField(ChatToken::Json::Field::ExpiredAt))
 						{
-							Datas = SubObject->GetArrayField(ChatToken::Json::Field::Data);
+							ConvertJsonFieldTimeUnixToIso8601(SubObject, ChatToken::Json::Field::ExpiredAt);
 						}
-						// or a single value. e.g. FAccelByteModelsChatQueryTopicByIdResponse
-						else if(SubObject->HasField(ChatToken::Json::Field::Data))
+						// Avoid re-converting createdAt field
+						if(RootDateTimeField != ChatToken::Json::Field::CreatedAt
+							&& SubObject->HasField(ChatToken::Json::Field::CreatedAt))
 						{
-							const TSharedPtr<FJsonValue> aSingleData = SubObject->TryGetField(ChatToken::Json::Field::Data);
-							Datas.Add(aSingleData);
+							ConvertJsonFieldTimeUnixToIso8601(SubObject, ChatToken::Json::Field::CreatedAt);
 						}
-
-						for (const TSharedPtr<FJsonValue>& Data : Datas) // multiple data
+						
+						if (SubObject->HasField(ChatToken::Json::Field::Data))
 						{
-							TSharedPtr<FJsonObject> SubDataObject = Data.Get()->AsObject();
-							for (const FString& aDataDateTimeField : FieldDataDateTimeFields) // possible several date field in a data
+							TArray<TSharedPtr<FJsonValue>> Datas;
+							//Field Data can be an array. e.g. FAccelByteModelsChatQueryTopicResponse
+							if (SubObject->HasTypedField<EJson::Array>(ChatToken::Json::Field::Data))
 							{
-								ConvertJsonFieldTimeUnixToIso8601(SubDataObject, aDataDateTimeField);
+								Datas = SubObject->GetArrayField(ChatToken::Json::Field::Data);
+							}
+							// or a single value. e.g. FAccelByteModelsChatQueryTopicByIdResponse
+							else if(SubObject->HasField(ChatToken::Json::Field::Data))
+							{
+								const TSharedPtr<FJsonValue> aSingleData = SubObject->TryGetField(ChatToken::Json::Field::Data);
+								Datas.Add(aSingleData);
+							}
+
+							for (const TSharedPtr<FJsonValue>& Data : Datas) // multiple data
+							{
+								TSharedPtr<FJsonObject> SubDataObject = Data.Get()->AsObject();
+								for (const FString& aDataDateTimeField : FieldDataDateTimeFields) // possible several date field in a data
+								{
+									ConvertJsonFieldTimeUnixToIso8601(SubDataObject, aDataDateTimeField);
+								}
 							}
 						}
-
 					}
 				}
 
@@ -317,7 +350,10 @@ namespace AccelByte
 			FORM_STRING_ENUM_PAIR_RESPONSE(JoinTopic),
 			FORM_STRING_ENUM_PAIR_RESPONSE(QuitTopic),
 			FORM_STRING_ENUM_PAIR_RESPONSE(RefreshToken),
-			
+			FORM_STRING_ENUM_PAIR_RESPONSE(DeleteSystemMessages),
+			FORM_STRING_ENUM_PAIR_RESPONSE(UpdateSystemMessages),
+			FORM_STRING_ENUM_PAIR_RESPONSE(QuerySystemMessage),
+
 			FORM_STRING_ENUM_PAIR_RESPONSE(BlockUser),
 			FORM_STRING_ENUM_PAIR_RESPONSE(UnblockUser),
 
@@ -328,6 +364,8 @@ namespace AccelByte
 			FORM_STRING_ENUM_PAIR(RemoveFromTopicNotif),
 			FORM_STRING_ENUM_PAIR(DeleteTopicNotif),
 			FORM_STRING_ENUM_PAIR(UpdateTopicNotif),
+			FORM_STRING_ENUM_PAIR(SystemMessageNotif),
+
 			FORM_STRING_ENUM_PAIR(UserBanNotif),
 			FORM_STRING_ENUM_PAIR(UserUnbanNotif),
 
@@ -502,6 +540,9 @@ namespace AccelByte
 			MessageIdRefreshTokenResponseMap.Empty();
 			MessageIdBlockUserResponseMap.Empty();
 			MessageIdUnblockUserResponseMap.Empty();
+			MessageIdUpdateSystemMessagesResponseMap.Empty();
+			MessageIdDeleteSystemMessagesResponseMap.Empty();
+			MessageIdQuerySystemMessageResponseMap.Empty();
 		}
 
 		void Chat::ClearResponseHandlers()
@@ -521,6 +562,8 @@ namespace AccelByte
 			QuitTopicResponse.Unbind();
 			BlockUserResponse.Unbind();
 			UnblockUserResponse.Unbind();
+			UpdateSystemMessagesResponse.Unbind();
+			DeleteSystemMessagesResponse.Unbind();
 		}
 
 		void Chat::ClearErrorHandlers()
@@ -540,6 +583,8 @@ namespace AccelByte
 			OnQuitTopicError.Unbind();
 			OnBlockUserError.Unbind();
 			OnUnblockUserError.Unbind();
+			OnUpdateSystemMessagesError.Unbind();
+			OnDeleteSystemMessagesError.Unbind();
 		}
 
 		void Chat::ClearNotificationHandlers()
@@ -550,6 +595,7 @@ namespace AccelByte
 			RemoveFromTopicNotif.Unbind();
 			DeleteTopicNotif.Unbind();
 			UpdateTopicNotif.Unbind();
+			SystemMessageNotif.Unbind();
 		}
 
 #pragma endregion // DELEGATE HANDLERS
@@ -735,13 +781,16 @@ namespace AccelByte
 				CASE_RESPONSE_ID(RefreshToken)
 				CASE_RESPONSE_ID_EXPLICIT_MODEL(BlockUser, FAccelByteModelsChatBlockUserResponse)
 				CASE_RESPONSE_ID_EXPLICIT_MODEL(UnblockUser, FAccelByteModelsChatUnblockUserResponse)
-
+				CASE_RESPONSE_ID_EXPLICIT_MODEL(UpdateSystemMessages, FAccelByteModelsUpdateSystemMessagesResponse)
+				CASE_RESPONSE_ID_EXPLICIT_MODEL(DeleteSystemMessages, FAccelByteModelsDeleteSystemMessagesResponse)
+				CASE_RESPONSE_ID_EXPLICIT_MODEL(QuerySystemMessage, FAccelByteModelsQuerySystemMessagesResponse)
 
 				CASE_NOTIF_EXPLICIT_MODEL(ChatNotif, FAccelByteModelsChatNotif)
 				CASE_NOTIF_EXPLICIT_MODEL(ReadChatNotif, FAccelByteModelsReadChatNotif)
 				CASE_NOTIF_EXPLICIT_MODEL(AddToTopicNotif, FAccelByteModelsChatUpdateUserTopicNotif)
 				CASE_NOTIF_EXPLICIT_MODEL(RemoveFromTopicNotif, FAccelByteModelsChatUpdateUserTopicNotif)
 				CASE_NOTIF_EXPLICIT_MODEL(DeleteTopicNotif, FAccelByteModelsChatUpdateTopicNotif)
+				CASE_NOTIF_EXPLICIT_MODEL(SystemMessageNotif, FAccelByteModelsChatSystemMessageNotif)
 				CASE_NOTIF(UpdateTopicNotif)
 				// Shadow Ban
 				case (HandleType::UserBanNotif): // intended fallthrough
@@ -942,6 +991,94 @@ namespace AccelByte
 			Params.Set(ChatToken::Json::Field::ChatMessage, Message);
 
 			SEND_CONTENT_CACHE_ID(SendChat)
+		}
+
+		void Chat::DeleteSystemMessages(TSet<FString> MessageIds, const FDeleteSystemMessagesResponse& OnSuccess,
+			const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			if (MessageIds.Num() <= 0)
+			{
+				UE_LOG(LogAccelByteChat, Warning, TEXT("Can't delete inbox message(s), MessageIds empty"));
+				return;
+			}
+
+			FJsonDomBuilder::FArray JsonMessageIds;
+			for (const FString& MessageId : MessageIds)
+			{
+				JsonMessageIds.Add(MessageId);
+			}
+
+			FJsonDomBuilder::FObject Params;
+			Params.Set(ChatToken::Json::Field::SystemMessageIds, JsonMessageIds);
+
+			SEND_CONTENT_CACHE_ID(DeleteSystemMessages)
+		}
+
+		void Chat::UpdateSystemMessages(TArray<FAccelByteModelsActionUpdateSystemMessage> ActionUpdateSystemMessages,
+			const FUpdateSystemMessagesResponse& OnSuccess, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			if (ActionUpdateSystemMessages.Num() <= 0)
+			{
+				UE_LOG(LogAccelByteChat, Warning, TEXT("Can't delete inbox message(s), MessageIds empty"));
+				return;
+			}
+
+			FJsonDomBuilder::FArray JsonActionUpdateSystemMessages;
+			for (const FAccelByteModelsActionUpdateSystemMessage& ActionUpdateSystemMessage : ActionUpdateSystemMessages)
+			{
+				FJsonDomBuilder::FObject Item;
+				Item.Set(ChatToken::Json::Field::MessageId, ActionUpdateSystemMessage.ID);
+				Item.Set(ChatToken::Json::Field::SystemMessageRead
+					, FAccelByteUtilities::GetUEnumValueAsString(ActionUpdateSystemMessage.Read));
+				Item.Set(ChatToken::Json::Field::SystemMessageKeep
+					, FAccelByteUtilities::GetUEnumValueAsString(ActionUpdateSystemMessage.Keep));
+				
+				JsonActionUpdateSystemMessages.Add(Item);
+			}
+
+			FJsonDomBuilder::FObject Params;
+			Params.Set(ChatToken::Json::Field::Data, JsonActionUpdateSystemMessages);
+
+			SEND_CONTENT_CACHE_ID(UpdateSystemMessages)
+		}
+
+		void Chat::QuerySystemMessage(const FQuerySystemMessageResponse& OnSuccess, const FErrorHandler& OnError,
+			const FQuerySystemMessageOptions OptionalParams)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			FJsonDomBuilder::FObject Params;
+
+			if(OptionalParams.Limit == 0)
+			{
+				Params.Set(ChatToken::Json::Field::Limit, DefaultQuerySystemMessageLimit);
+			}
+			if(OptionalParams.Offset < 0)
+			{
+				Params.Set(ChatToken::Json::Field::Offset, DefaultQuerySystemMessageOffset);
+			}
+			if(OptionalParams.UnreadOnly)
+			{
+				Params.Set(ChatToken::Json::Field::UnreadOnly, OptionalParams.UnreadOnly);
+			}
+			if(!OptionalParams.Category.IsEmpty())
+			{
+				Params.Set(ChatToken::Json::Field::Category, OptionalParams.Category);
+			}
+			if(OptionalParams.StartCreatedAt != FDateTime{0})
+			{
+				Params.Set(ChatToken::Json::Field::StartCreatedAt, OptionalParams.StartCreatedAt.ToUnixTimestamp());
+			}
+			if(OptionalParams.EndCreatedAt != FDateTime{0})
+			{
+				Params.Set(ChatToken::Json::Field::EndCreatedAt, OptionalParams.EndCreatedAt.ToUnixTimestamp());
+			}
+
+			SEND_CONTENT_CACHE_ID(QuerySystemMessage);
 		}
 
 		void Chat::QueryTopic(const FAccelByteModelsChatQueryTopicRequest& Request

@@ -187,6 +187,11 @@ void ServerWatchdog::SetOnWatchdogDrainReceivedDelegate(FOnWatchdogDrainReceived
 
 void ServerWatchdog::SendReadyMessage()
 {
+	if (!IsConnected())
+	{
+		return;
+	}
+
 	FString ReadyMessage = FString::Format(TEXT("{\"ready\":{\"dsid\":\"{0}\"}}"), { ServerSettingsRef.DSId });
 	WebSocket->Send(ReadyMessage);
 
@@ -200,11 +205,13 @@ void ServerWatchdog::SendReadyMessage()
 
 void ServerWatchdog::SendHeartbeat()
 {
-	if (WebSocket->IsConnected())
+	if (!IsConnected())
 	{
-		FString HeartbeatMessage = TEXT("{\"heartbeat\":{}}");
-		WebSocket->Send(HeartbeatMessage);
+		return;
 	}
+
+	FString HeartbeatMessage = TEXT("{\"heartbeat\":{}}");
+	WebSocket->Send(HeartbeatMessage);
 }
 
 bool ServerWatchdog::PeriodicHeartbeat(float DeltaTime)

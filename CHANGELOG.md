@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [21.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.3.0%0D21.2.0) (2023-03-13)
+
+
+### Features
+
+* **chat:** implement system inbox message apis ([b565030](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b565030dac5851cba0df879a7a9b6b20a7cc4eb2))
+* **deviceID:** encode the mac address & override in development phase ([93bb689](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/93bb6898aa8c67f3b6be6016eae85eafe35f12bd))
+* **MPv2:** add error codes for MMv2 ticket conflict and not found ([9e9903c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9e9903cd81f0be014e7d01a288ea3fe51a37ce51))
+* **UserProfile:** always remove empty field from update request to prevent validation issue if the field left empty ([03b9ac5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/03b9ac52bf76ebb9ee32f09603b933eaf8ddd59a))
+
+
+### Bug Fixes
+
+* DS crash when sending message to watchdog ([bd02e28](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bd02e283abb403c5be0b35df99e025c87e3a5adb))
+* **MPv2:** fix joinType not removed from request when EMPTY, and fix request capitalization changes by unreal engine. ([15e7b9c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/15e7b9c229c32904ab0c60fd178416cd0272a74d))
+
 ## [21.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.2.0%0D21.1.1) (2023-02-28)
 
 

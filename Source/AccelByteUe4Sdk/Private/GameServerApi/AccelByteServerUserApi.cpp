@@ -127,6 +127,19 @@ void ServerUser::GetUserBanInfo(const FString& UserId, const THandler<FGetUserBa
 	
 	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
 }
+
+void ServerUser::ListUserByUserId(const FListUserDataRequest Request
+	, const THandler<FListUserDataResponse>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/bulk")
+		, *ServerSettingsRef.IamServerUrl
+		, *ServerCredentialsRef.GetClientNamespace() );
+ 
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+}
 	
 }
 }

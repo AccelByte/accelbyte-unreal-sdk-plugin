@@ -875,7 +875,25 @@ public:
 	void GenerateGameToken(const FString& Code,
 		const FVoidHandler& OnSuccess,
 		const FOAuthErrorHandler & OnError);
-	
+
+	/**
+	 * @brief This function for link headless account to current full account.
+	 *
+	 * @param Request Request struct Containing chosen namespace and one time link code.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LinkHeadlessAccountToCurrentFullAccount(const FLinkHeadlessAccountRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief This function to get conflict result when link headless account to current account by one time code 
+	 *
+	 * @param OneTimeLinkCode One time link code value.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is THandler<FConflictLinkHeadlessAccountResult>&
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& OneTimeLinkCode, const THandler<FConflictLinkHeadlessAccountResult>& OnSuccess, const FErrorHandler& OnError);
+
 private:
 	User() = delete;
 	User(User const&) = delete;

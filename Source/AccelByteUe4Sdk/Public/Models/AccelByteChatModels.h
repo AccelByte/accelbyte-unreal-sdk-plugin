@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Misc/DateTime.h"
+#include "JsonUtilities.h"
 #include "Models/AccelByteUserModels.h"
 #include "AccelByteChatModels.generated.h"
 
@@ -62,7 +63,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatSendChatResponse
 
 	//! Processed time of send chat action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SendChatResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	//! Topic Id as destination for the sent chat
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SendChatResponse")
@@ -89,7 +90,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatNotif
 
 	//! Creation time of sent chat
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatNotif")
-	FDateTime CreatedAt {FDateTime(0)};
+	FDateTime CreatedAt {0};
 
 	//! Topic id where this chat belongs to
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatNotif")
@@ -145,7 +146,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatTopicQueryData
 
 	//! Last updated topic's time
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | TopicQueryData")
-	FDateTime UpdatedAt {FDateTime(0)};
+	FDateTime UpdatedAt {0};
 
 	//! ETopicType::GROUP -> Predefined TopicId alias
 	//! ETopicType::PERSONAL -> Other chat participant UserId
@@ -175,7 +176,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatQueryTopicResponse
 
 	//! Processed time of topic query
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryTopicResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	//! Matched results
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryTopicResponse")
@@ -190,7 +191,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatQueryTopicByIdResponse
 
 	//! Processed time of topic query
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryTopicByIdResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	//! Matched result
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryTopicByIdResponse")
@@ -224,7 +225,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatQueryPublicTopicResponse
 
 	//! Processed time of topic query
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryPublicTopicResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	//! Matched results
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryPublicTopicResponse")
@@ -278,7 +279,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatQueryChatData
 
 	//! Creation time of sent chat
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryChatData")
-	FDateTime CreatedAt{ FDateTime(0) };
+	FDateTime CreatedAt{ 0 };
 
 	//! Sender's UserId
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryChatData")
@@ -286,7 +287,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatQueryChatData
 
 	//! Read time of sent chat
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryChatData")
-	FDateTime ReadAt{ FDateTime(0) };
+	FDateTime ReadAt{ 0 };
 
 };
 
@@ -298,7 +299,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatQueryChatResponse
 
 	//! Processed time of chat query
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryChatResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	//! Chat query results
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QueryChatResponse")
@@ -351,7 +352,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatReadChatResponse
 
 	//! Processed time of read chat
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ReadChatResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	//! Data of read chats
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ReadChatResponse")
@@ -491,7 +492,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatActionTopicResponse
 
 	//! Processed time of action chat topic
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionTopicResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	//! Topic Id result of requested chat topic creation
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionTopicResponse")
@@ -519,7 +520,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatActionCreateTopicServerResponse
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionCreateTopicServerResponse")
 	bool IsChannel {false};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionCreateTopicServerResponse")
-	FDateTime CreatedAt {FDateTime(0)};
+	FDateTime CreatedAt {0};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionCreateTopicServerResponse")
 	FString CreatedBy {};
 };
@@ -532,7 +533,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatActionUserTopicResponse
 
 	//! Processed time of create chat topic
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionUserTopicResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	//! Topic Id result of requested chat topic creation
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionUserTopicResponse")
@@ -630,7 +631,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatBlockUserResponse
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | BlockUserResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | BlockUserResponse")
 	FString UserId{};
@@ -643,8 +644,172 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUnblockUserResponse
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | BlockUserResponse")
-	FDateTime Processed {FDateTime(0)};
+	FDateTime Processed {0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | BlockUserResponse")
 	FString UserId{};
 };
+
+#pragma region SYSTEM INBOX
+
+//!@brief Response structure of delete system inbox messages
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDeleteSystemMessagesResponse
+{
+	GENERATED_BODY()
+
+	//! Processed time of send chat action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | DeleteSystemMessagesResponse")
+	FDateTime Processed {0};
+};
+
+//!@brief Response structure of set read status system inbox messages
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateSystemMessagesResponse
+{
+	GENERATED_BODY()
+
+	//! Processed time of send chat action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateSystemMessagesResponse")
+	FDateTime Processed {0};
+};
+
+//!@brief Enum representing optional boolean for update system inbox
+UENUM(BlueprintType)
+enum class EAccelByteOptionalBool : uint8
+{
+	NONE = 0	UMETA(DisplayName = "NONE"),
+	YES			UMETA(DisplayName = "YES"),
+	NO			UMETA(DisplayName = "NO"),
+};
+
+//!@brief Model representing an action update system message
+USTRUCT(BlueprintType)
+struct FAccelByteModelsActionUpdateSystemMessage
+{
+	GENERATED_BODY()
+
+	//! Id of system message
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionUpdateSystemMessage")
+	FString ID {};
+
+	//! Status of system message (read/unread)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionUpdateSystemMessage")
+	EAccelByteOptionalBool Read { EAccelByteOptionalBool::NONE };
+
+	//! Mark message as keep to store it in user system inbox
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionUpdateSystemMessage")
+	EAccelByteOptionalBool Keep { EAccelByteOptionalBool::NONE };
+};
+
+//!@brief Notification structure for System Message
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FSystemMessageNotifMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif | Data")
+	FString Title{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif | Data")
+	FString Body{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif | Data")
+	FJsonObjectWrapper Gift{};
+	
+};
+
+//!@brief Notification structure for System Message
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatSystemMessageNotif
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif")
+	FString  MessageId {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif")
+	FString  Category {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif")
+	FString  Message {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif")
+	FDateTime  CreatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif")
+	FDateTime  ExpiredAt {0};
+
+	/**
+	 * @brief Parse Message to FAccelByteModelsChatSystemMessageNotifData UStruct
+	 * @param OutFormattedMessage Message in FAccelByteModelsChatSystemMessageNotifData UStruct
+	 * 
+	 * @result returns true when parsing success
+	 */
+	bool GetSystemMessageData(FSystemMessageNotifMessage& OutFormattedMessage) const
+	{
+		return FJsonObjectConverter::JsonObjectStringToUStruct(Message, &OutFormattedMessage, 0, 0);
+	}
+};
+
+//!@brief Response structure of set read status system inbox messages
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsQuerySystemMessagesResponseItem
+{
+	GENERATED_BODY()
+
+	//! Processed time of send chat action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FString Id {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FString Category {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FString Message {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FDateTime CreatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FDateTime UpdatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FDateTime ExpiredAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FDateTime ReadAt {0};
+
+	/**
+	 * @brief Parse Message to FAccelByteModelsChatSystemMessageNotifData UStruct
+	 * @param OutFormattedMessage Message in FAccelByteModelsChatSystemMessageNotifData UStruct
+	 * 
+	 * @result returns true when parsing success
+	 */
+	bool GetSystemMessageData(FSystemMessageNotifMessage& OutFormattedMessage) const
+	{
+		return FJsonObjectConverter::JsonObjectStringToUStruct(Message, &OutFormattedMessage, 0, 0);
+	}
+};
+
+//!@brief Response structure of set read status system inbox messages
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsQuerySystemMessagesResponse
+{
+	GENERATED_BODY()
+
+	//! Processed time of send chat action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponse")
+	TArray<FAccelByteModelsQuerySystemMessagesResponseItem> Data {};
+};
+
+//!@brief Response structure of set read status system inbox messages
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FQuerySystemMessageOptions
+{
+	GENERATED_BODY()
+
+	//! Processed time of send chat action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
+	bool UnreadOnly {false};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
+	FDateTime StartCreatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
+	FDateTime EndCreatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
+	FString Category {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
+	int32 Offset {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
+	int32 Limit {20};
+};
+
+#pragma endregion 

@@ -222,7 +222,7 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{TEXT("platform_token"), FGenericPlatformHttp::UrlEncode(PlatformToken)},
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
-		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress()) }
+		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress(true)) }
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());

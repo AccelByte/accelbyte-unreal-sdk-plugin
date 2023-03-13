@@ -184,7 +184,7 @@ void ServerSession::QueryPartySessions(
 		}
 
 		// Avoid empty enum values for MemberStatus and JoinType
-		if (KV.Key.Equals(TEXT("memberStatus"), ESearchCase::IgnoreCase) || KV.Key.Equals(TEXT("joinStatus"), ESearchCase::IgnoreCase))
+		if (KV.Key.Equals(TEXT("memberStatus"), ESearchCase::IgnoreCase) || KV.Key.Equals(TEXT("joinType"), ESearchCase::IgnoreCase))
 		{
 			if (ValueStr.Equals(TEXT("empty"), ESearchCase::IgnoreCase))
 			{
@@ -192,8 +192,19 @@ void ServerSession::QueryPartySessions(
 			}
 		}
 
-		// Add to the mapping of query parameters
-		QueryParams.Add(KV.Key, ValueStr);
+		if(KV.Key.Equals(TEXT("memberId")))
+		{
+			QueryParams.Add(TEXT("memberID"), ValueStr);
+		}
+		else if(KV.Key.Equals(TEXT("leaderId")))
+		{
+			QueryParams.Add(TEXT("leaderID"), ValueStr);
+		}
+		else
+		{
+			// Add to the mapping of query parameters
+			QueryParams.Add(KV.Key, ValueStr);
+		}
 	}
 
 	if (Offset > 0)

@@ -14,7 +14,7 @@ using AccelByte::THandler;
 using AccelByte::FErrorHandler;
 
 enum class EAccelBytePlatformType : uint8;
-
+enum class EAccelByteDevModeDeviceIdMethod : uint8;
 enum class EJwtResult
 {
 	Ok,
@@ -22,6 +22,16 @@ enum class EJwtResult
 	SignatureMismatch,
 	AlgorithmMismatch,
 	MalformedPublicKey
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteDevModeDeviceIdMethod : uint8
+{
+	UNSPECIFIED = 0,
+	COMMANDLINE = 1,
+	PICK_RANDOM = 2,
+	RANDOMIZE = 3,
+	PERSISTENT = 4
 };
 
 /**
@@ -367,9 +377,32 @@ public:
 		return true;
 	}
 
-	static FString GetDeviceId();
+	/// <summary>
+	/// Try to Get the DeviceID from current platform
+	/// Fallback if not found, using MacAddress
+	/// Fallback if not found, using a randomized deviceID
+	/// NOTE: 
+	/// DeviceID for shipping build & dedicated server are always encoded
+	/// Other than those, it can use the development mode deviceID that is configurable
+	/// </summary>
+	/// <param name="bIsDeviceIdRequireEncode"></param>
+	/// <returns>Return either plain DeviceID or encoded</returns>
+	static FString GetDeviceId(bool bIsDeviceIdRequireEncode = true);
 
-	static FString GetMacAddress();
+	/// <summary>
+	/// Encode HMAC the message using built in function from UnrealEngine and then Base64 the result
+	/// </summary>
+	/// <param name="Message">Targeted text</param>
+	/// <param name="Key">HMAC Buffer Key</param>
+	/// <returns>Encode result</returns>
+	static FString EncodeHMACBase64(const FString& Message, const FString& Key);
+
+	/// <summary>
+	/// Obtain an HMAC Buffer encoded MacAddress, using PublisherNamespace as key.
+	/// </summary>
+	/// <param name="bEncoded">Is the returned value is encoded</param>
+	/// <returns>Return either plain MacAddress or encoded</returns>
+	static FString GetMacAddress(bool bEncoded = true);
 
 	static FString GetPlatformName();
 
@@ -397,9 +430,87 @@ public:
 	static bool GetValueFromCommandLineSwitch(const FString& Key, bool& Value);
 	static FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
 
-private:
+//To allow override for testing using mock class
+protected:
+#pragma region DEVICE_ID
+	/// <summary>
+	/// Create a randomized 30 digit alpha-numberic DeviceID
+	/// </summary>
+	/// <returns></returns>
+	static FString RandomizeDeviceId();
 
-	static FString LocalDeviceId();
+	/// <summary>
+	/// Try to obtain DeviceID from a cached value
+	/// If not found using the Default parameter and also store it into the cache
+	/// </summary>
+	/// <param name="Default"></param>
+	/// <returns></returns>
+	static FString GetOrSetIfDeviceIdNotFound(FString Default = "");
+
+	/// <summary>
+	/// Get the development mode DeviceID override method from "DefaultEngine.ini"
+	/// 	Section:	[AccelByte.Dev]
+	/// 	Key:		DeviceIdOverrideMethod=(STRING)
+	/// </summary>
+	/// <returns>Parsing result</returns>
+	static EAccelByteDevModeDeviceIdMethod GetCurrentDeviceIdOverrideMethod();
+
+	/// <summary>
+	/// Obtain DeviceID for development mode
+	/// GAME CLIENT NON SHIPPING BUILD ONLY!
+	/// Can be controlled using either command-line args or configuration file.
+	/// 
+	/// IF you want to FORCEFULLY override the device ID:
+	///		Please use Command-line args.
+	///		Example:
+	/// 	"PackagedGameClient.exe -deviceid YOUR_DEVICE_ID ......"
+	/// 
+	/// ELSE use the "DefaultEngine.ini" file to control the device ID.
+	/// First of all, select the override method using this field in configuration:
+	/// ===>Section:	[AccelByte.Dev]
+	/// 	Key:		DeviceIdOverrideMethod=(STRING)
+	///		Value:
+	/// 	Supported string as enumerator = {COMMANDLINE, PICK_RANDOM, RANDOMIZE, PERSISTENT}
+	/// 	Example
+	/// 			[AccelByte.Dev]
+	/// 			DeviceIdOverrideMethod=RANDOMIZE
+	///		IF this field is wrong or left empty:
+	///			The override behavior will be done by the following method order [COMMANDLINE, PICK_RANDOM, RANDOMIZE, PERSISTENT]
+	/// 
+	/// Then specify the key/value for the list of PICK_RANDOM override method
+	/// ===>Section:	[AccelByte.Dev]
+	/// 	Key:
+	/// 		[_] DeviceId=(STRING[])
+	/// 			Example
+	/// 				[AccelByte.Dev]
+	/// 				+DeviceId=aaasdfsadfasd
+	/// 				+DeviceId=sdahssdghsgfd
+	/// 				+DeviceId=safvcgdsfgsgf
+	/// 				+DeviceId=gsdgdsfgfafsf
+	/// 
+	/// COMPILED EXAMPLE from DefaultEngine.ini
+	/// [AccelByte.Dev]
+	/// DeviceIdOverrideMethod=[COMMANDLINE, or PICK_RANDOM, or RANDOMIZE, or PERSISTENT]
+	/// +DeviceId=aaasdfsadfasd
+	/// +DeviceId=sdahssdghsgfd
+	/// +DeviceId=safvcgdsfgsgf
+	/// +DeviceId=gsdgdsfgfafsf
+	/// 
+	/// To deny all override and pretend to be shipping build:
+	/// ===>Section:	[AccelByte.Dev]
+	/// 	Key:		DiscardOverride=(BOOL)
+	/// 		Example
+	/// 			[AccelByte.Dev]
+	/// 			DiscardOverride=true
+	/// 
+	/// </summary>
+	/// <param name="Default">The default value if there is no override found</param>
+	/// <returns></returns>
+	static FString GetDevModeDeviceId(FString Default);
+
+	static FString AccelByteStoredSectionIdentifiers() { return FApp::GetProjectName() / FString(TEXT("Identifiers")); }
+	static FString AccelByteStoredKeyDeviceId() { return FString(TEXT("deviceId")); }
+#pragma endregion
 
 	static FString AccelByteStored() { return FString(TEXT("AccelByteStored")); } 
 	static FString AccelByteStoredSectionIAM() { return FString(TEXT("IAM")); }

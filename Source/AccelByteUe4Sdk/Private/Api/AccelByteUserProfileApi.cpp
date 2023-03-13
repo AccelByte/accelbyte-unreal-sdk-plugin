@@ -106,7 +106,7 @@ void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateReque
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
 }
 
 void UserProfile::UpdateCustomAttributes(const FJsonObject& CustomAttributesUpdateRequest
@@ -197,7 +197,7 @@ void UserProfile::UpdateUserProfile(const FString& UserId
 		, *CredentialsRef.GetNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
 }
 
 void UserProfile::GetUserProfile(const FString& UserId

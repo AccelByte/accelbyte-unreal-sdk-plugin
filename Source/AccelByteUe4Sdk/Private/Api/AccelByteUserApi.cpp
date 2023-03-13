@@ -1459,6 +1459,28 @@ void User::GenerateGameToken(const FString& Code,
 		, OnError
 		, SettingsRef.IamServerUrl);
 }
- 
+
+void User::LinkHeadlessAccountToCurrentFullAccount(const FLinkHeadlessAccountRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));   
+	const FString Url = FString::Printf(TEXT("%s/v3/public/users/me/headless/linkWithProgression")
+	   , *SettingsRef.IamServerUrl); 
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+}
+
+void User::GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& OneTimeLinkCode,
+	const THandler<FConflictLinkHeadlessAccountResult>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));   
+	const FString Url = FString::Printf(TEXT("%s/v3/public/users/me/headless/link/conflict")
+	   , *SettingsRef.IamServerUrl );
+   
+	const TMap<FString, FString> Params ({
+		{"oneTimeLinkCode", *OneTimeLinkCode}
+	}); 
+	HttpClient.ApiRequest(TEXT("GET"), Url, Params, FString(), OnSuccess, OnError);
+}
+	
 } // Namespace Api
 } // Namespace AccelByte

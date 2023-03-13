@@ -1087,3 +1087,87 @@ struct ACCELBYTEUE4SDK_API FGeneratedOneTimeCode
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GeneratedOneTimeCode")
 	int32 Exp{}; 
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FLinkHeadlessAccountRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | LinkHeadlessAccount")
+	TArray<FString> ChosenNamespaces{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | LinkHeadlessAccount")
+	FString OneTimeLinkCode{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FHeadlessAccount
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | HeadlessAccount")
+	FString DisplayName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | HeadlessAccount")
+	FString Email{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | HeadlessAccount")
+	TArray<FString> LinkedGames{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | HeadlessAccount")
+	FString UserName{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FConflictLinkHeadlessAccountResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ConflictLinkHeadlessAccountResult")
+	FHeadlessAccount CurrentAccount{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ConflictLinkHeadlessAccountResult")
+	FHeadlessAccount HeadlessAccount{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ConflictLinkHeadlessAccountResult")
+	bool bPlatformAlreadyLinked{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ConflictLinkHeadlessAccountResult")
+	FString PlatformId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ConflictLinkHeadlessAccountResult")
+	bool bPlatformLinkConflict{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FListUserDataRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | ListUserRequest")
+	TArray<FString> UserIds{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUserDataResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserDataResponse")
+	FString DisplayName{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserDataResponse")
+	FString EmailAddress{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserDataResponse")
+	FString Namespace{}; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserDataResponse")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FListUserDataResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | ListUserRequest")
+	TArray<FUserDataResponse> Data{};
+}; 
