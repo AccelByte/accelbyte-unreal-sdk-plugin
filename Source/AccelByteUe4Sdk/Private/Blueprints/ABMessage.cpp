@@ -122,3 +122,12 @@ void UABMessage::SetChannelMessageNotifDelegate(FDChannelChatNotif OnNotif)
 				OnNotif.ExecuteIfBound(Notif);
 			}));
 }
+
+void UABMessage::SetOnPartyChatNotification(FDPartyChatNotif OnPartyChatNotif)
+{
+	ApiClientPtr->Lobby.SetPartyChatNotifDelegate(
+		Api::Lobby::FPartyChatNotif::CreateLambda([OnPartyChatNotif](const FAccelByteModelsPartyMessageNotice& Notif)
+		{
+			OnPartyChatNotif.ExecuteIfBound(Notif);
+		}));
+}

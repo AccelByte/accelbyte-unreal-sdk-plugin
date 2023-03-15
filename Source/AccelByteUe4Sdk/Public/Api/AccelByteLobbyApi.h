@@ -711,7 +711,7 @@ public:
 	 * 
 	 * @param PartyId The party id to be set.
 	 * @param Limit The party member limit, should be above 0 and below the configured limit in admin portal.
-	 * @param OnSuccess The callback triggered when operation is successfull
+	 * @param OnSuccess The callback triggered when operation is successful
 	 * @param OnError the callback triggered when operation failed.
 	 */
 	void SetPartySizeLimit(const FString& PartyId

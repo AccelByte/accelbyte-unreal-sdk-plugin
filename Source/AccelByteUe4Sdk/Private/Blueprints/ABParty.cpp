@@ -229,6 +229,20 @@ void UABParty::PartyPromoteLeader(
 	ApiClientPtr->Lobby.SendPartyPromoteLeaderRequest(Request.userId);
 }
 
+void UABParty::SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FDHandler& OnSuccess,
+	FDErrorHandler OnError)
+{
+	ApiClientPtr->Lobby.SetPartySizeLimit(PartyId, Limit,
+	FVoidHandler::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+	FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+	{
+		OnError.ExecuteIfBound(Code, Message);
+	}));
+}
+
 void UABParty::GetPartyData(
 	FGetPartyDataRequest const& Request,
 	FDPartyGetDataResponse OnResponse,
@@ -352,6 +366,15 @@ void UABParty::SetOnPartyKick(FDPartyKickNotif OnNotif)
 			{
 				OnNotif.ExecuteIfBound(Notif);
 			}));
+}
+
+void UABParty::SetOnPartyUpdate(FDPartyUpdateNotif OnNotif)
+{
+	ApiClientPtr->Lobby.SetPartyNotifDelegate(
+		Api::Lobby::FPartyNotif::CreateLambda([OnNotif](const FAccelByteModelsPartyNotif& Notif)
+		{
+			OnNotif.ExecuteIfBound(Notif);
+		}));
 }
 
 void UABParty::SetOnPartyInvite(FDPartyInviteNotif OnNotif) 

@@ -9,6 +9,8 @@
 
 using namespace AccelByte;
 
+#pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
+
 USTRUCT(BlueprintType)
 struct FRefreshTokenRequest
 {
@@ -59,6 +61,16 @@ struct FRequestDSModel
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDRefreshTokenResponseDelegate, FAccelByteModelsRefreshTokenResponse, Response);
 
+#pragma endregion
+
+#pragma region MODEL_AND_DELEGATE_FOR_NOTIFICATION
+
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDConnectionClosedDelegate, int32, StatusCode, FString, Reason, bool, bWasClean);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDDisconnectNotifDelegate, FAccelByteModelsDisconnectNotif, Notif);
+
+#pragma endregion
+
 UCLASS(Blueprintable, BlueprintType)
 class UABLobby : public UObject
 {
@@ -74,6 +86,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	void Disconnect();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+	FString RefreshToken(FRefreshTokenRequest const& Request, FDRefreshTokenResponseDelegate OnResponse, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+	void SetRetryParameters(FSetRetryParametersRequest const& Request);
+
+	// Can not test this through lua yet, removing the UFUNCTION for now
+	void SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+	FString RequestDS(FRequestDSModel const& Request);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	void UnbindEvent();
@@ -82,21 +106,17 @@ public:
 	void SetOnConnected(FDHandler OnConnected);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Delegate")
+	void SetOnConnectFailed(const FDErrorHandler& OnConnectError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Delegate")
+	void SetOnDisconnect(const FDDisconnectNotifDelegate& OnDisconnected);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Delegate")
+	void SetOnConnectionClosed(FDConnectionClosedDelegate OnConnectionClosed);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Delegate")
 	void SetOnErrorNotification(FDErrorHandler OnErrorNotification);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	FString RefreshToken(FRefreshTokenRequest const& Request, FDRefreshTokenResponseDelegate OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	void SetRetryParameters(FSetRetryParametersRequest const& Request);
-
-	//Can not test this through lua yet, removing the UFUNCTION for now
-	void SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	FString RequestDS(FRequestDSModel const& Request);
-
 private:
-	bool bConnected{false};
 	FApiClientPtr ApiClientPtr;
 };

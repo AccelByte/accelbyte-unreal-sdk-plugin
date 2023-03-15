@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [21.3.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.3.1%0D21.3.0) (2023-03-15)
+
+
+### Bug Fixes
+
+* add missing blueprint function for lobby, party and chat v1 ([a786597](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a7865972d9935eb7c3f13d7f5746089449c98664))
+
 ## [21.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.3.0%0D21.2.0) (2023-03-13)
 
 

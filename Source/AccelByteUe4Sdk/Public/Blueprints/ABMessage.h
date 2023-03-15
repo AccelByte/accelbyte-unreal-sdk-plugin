@@ -59,6 +59,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDMessageNotif, FAccelByteModelsNotificationMe
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDChannelChatNotif, FAccelByteModelsChannelMessageNotice, Notif);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyChatNotif, FAccelByteModelsPartyMessageNotice, Notif);
+
 
 //Sub-API from AccelByte Lobby
 UCLASS(Blueprintable, BlueprintType)
@@ -106,6 +108,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message | Delegate")
 	void SetChannelMessageNotifDelegate(FDChannelChatNotif OnNotif);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Delegate")
+	void SetOnPartyChatNotification(FDPartyChatNotif OnPartyChatNotif);
 
 private:
 	FApiClientPtr ApiClientPtr;

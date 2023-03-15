@@ -15,6 +15,16 @@ void UABLobby::UnbindEvent()
 	ApiClientPtr->Lobby.UnbindEvent();
 }
 
+bool UABLobby::IsConnected() 
+{
+	return ApiClientPtr->Lobby.IsConnected();
+}
+
+void UABLobby::SetApiClient(FApiClientPtr const& NewApiClientPtr)
+{
+	ApiClientPtr = NewApiClientPtr;
+}
+
 void UABLobby::SetOnConnected(FDHandler OnConnected) 
 {
 	ApiClientPtr->Lobby.SetConnectSuccessDelegate(
@@ -25,14 +35,31 @@ void UABLobby::SetOnConnected(FDHandler OnConnected)
 			}));
 }
 
-bool UABLobby::IsConnected() 
+void UABLobby::SetOnConnectFailed(const FDErrorHandler& OnConnectError)
 {
-	return ApiClientPtr->Lobby.IsConnected();
+	ApiClientPtr->Lobby.SetConnectFailedDelegate(
+		FErrorHandler::CreateLambda([OnConnectError](int32 Code, const FString& Message)
+		{
+			OnConnectError.ExecuteIfBound(Code, Message);
+		}));
 }
 
-void UABLobby::SetApiClient(FApiClientPtr const& NewApiClientPtr)
+void UABLobby::SetOnDisconnect(const FDDisconnectNotifDelegate& OnDisconnected)
 {
-	ApiClientPtr = NewApiClientPtr;
+	ApiClientPtr->Lobby.SetDisconnectNotifDelegate(
+		Api::Lobby::FDisconnectNotif::CreateLambda([OnDisconnected](const FAccelByteModelsDisconnectNotif& Notif)
+		{
+			OnDisconnected.ExecuteIfBound(Notif);
+		}));
+}
+
+void UABLobby::SetOnConnectionClosed(FDConnectionClosedDelegate OnConnectionClosed)
+{
+	ApiClientPtr->Lobby.SetConnectionClosedDelegate(
+		Api::Lobby::FConnectionClosed::CreateLambda([OnConnectionClosed](int32  StatusCode, const FString& Reason, bool  bWasClean)
+		{
+			OnConnectionClosed.ExecuteIfBound(StatusCode, Reason, bWasClean);
+		}));
 }
 
 void UABLobby::SetOnErrorNotification(FDErrorHandler OnErrorNotification) 

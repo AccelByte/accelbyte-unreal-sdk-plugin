@@ -8,7 +8,6 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteLobbyModels.h"
 #include "Core/AccelByteMultiRegistry.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABParty.generated.h"
 
 using namespace AccelByte;
@@ -153,6 +152,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyMemberLeaveNotif, FAccelByteModelsLeave
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, Notif);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyUpdateNotif, FAccelByteModelsPartyNotif, Notif);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyInviteNotif, FAccelByteModelsInvitationNotice, Notif);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, Notif);
@@ -210,6 +211,9 @@ public:
 	void PartyPromoteLeader(FPartyPromoteLeaderRequest const& Request, FDPartyPromoteLeaderResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
+	void SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FDHandler& OnSuccess, FDErrorHandler OnError);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
 	void GetPartyData(FGetPartyDataRequest const& Request, FDPartyGetDataResponse OnResponse, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
@@ -249,6 +253,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyKick(FDPartyKickNotif OnNotif);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
+	void SetOnPartyUpdate(FDPartyUpdateNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyInvite(FDPartyInviteNotif OnNotif);
