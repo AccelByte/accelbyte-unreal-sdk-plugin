@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [21.3.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.3.2%0D21.3.1) (2023-03-17)
+
+
+### Features
+
+* **error:** add WS error code list based on RFC ([f3a54fe](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f3a54fe5495813b11eb7935b10e5526cb9f63c26))
+
 ### [21.3.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.3.1%0D21.3.0) (2023-03-15)
 
 
