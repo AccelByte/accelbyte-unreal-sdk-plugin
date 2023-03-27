@@ -359,6 +359,17 @@ void User::TryRelogin(const FString& PlatformUserID
 	, const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError)
 {
+	TryRelogin(PlatformUserID, OnSuccess, FOAuthErrorHandler::CreateLambda([OnError]
+		(int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorObject )
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	})); 
+}
+
+void User::TryRelogin(const FString& PlatformUserID
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
 #if PLATFORM_WINDOWS
 	FReport::Log(FString(__FUNCTION__));
 
@@ -368,7 +379,7 @@ void User::TryRelogin(const FString& PlatformUserID
 			{
 				if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
 				{
-					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("The cached token is not found. Cannot continue the previous login session. Please login again."));
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("The cached token is not found. Cannot continue the previous login session. Please login again."), FErrorOAuthInfo{});
 					return;
 				}
 
@@ -376,20 +387,20 @@ void User::TryRelogin(const FString& PlatformUserID
 				FRefreshInfo RefreshInfo;
 				if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
 				{
-					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."));
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."), FErrorOAuthInfo{});
 					return;
 				}
 
 				if (IsTokenExpired(RefreshInfo))
 				{
-					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenExpired), TEXT("Your previous login session is expired. Please login again."));
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenExpired), TEXT("Your previous login session is expired. Please login again."), FErrorOAuthInfo{});
 					return;
 				}
 
 				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError);
 			}));
 #else
-	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("Cannot relogin using cached token on other platforms."));
+	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("Cannot relogin using cached token on other platforms."), FErrorOAuthInfo{});
 #endif
 }
 

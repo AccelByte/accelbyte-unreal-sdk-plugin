@@ -23,6 +23,36 @@ UGC::UGC(Credentials const& InCredentialsRef
 
 UGC::~UGC(){}
 
+FString UGC::ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy)
+{
+	switch (SortBy)
+	{
+	case EAccelByteUgcSortBy::NAME:
+		return TEXT("name");
+	case EAccelByteUgcSortBy::DATE:
+		return TEXT("date");
+	case EAccelByteUgcSortBy::DOWNLOAD:
+		return TEXT("download");
+	case EAccelByteUgcSortBy::LIKE:
+		return TEXT("like");
+	default:
+		return TEXT("");
+	}
+}
+
+FString UGC::ConvertUGCOrderByToString(const EAccelByteUgcOrderBy& OrderBy)
+{
+	switch (OrderBy)
+	{
+	case EAccelByteUgcOrderBy::ASC:
+		return TEXT("asc");
+	case EAccelByteUgcOrderBy::DESC:
+		return TEXT("desc");
+	default:
+		return TEXT("");
+	}
+}
+
 void UGC::CreateContent(FString const& ChannelId
 	, FAccelByteModelsUGCRequest const& CreateRequest
 	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
@@ -72,7 +102,7 @@ void UGC::CreateContent(FString const& ChannelId
 
 void UGC::ModifyContent(FString const& ChannelId
 	, FString const& ContentId
-	, FAccelByteModelsUGCRequest const& ModifyRequest
+	, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
 	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -85,13 +115,36 @@ void UGC::ModifyContent(FString const& ChannelId
 		, *ChannelId
 		, *ContentId);
 
-	FAccelByteModelsUGCRequest Request = ModifyRequest;
+	FAccelByteModelsUGCUpdateRequest Request = ModifyRequest;
 	if (Request.ContentType.IsEmpty())
 	{
 		Request.ContentType = TEXT("application/octet-stream");
 	}
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+}
+
+void UGC::ModifyContent(FString const& ChannelId
+	, FString const& ContentId
+	, FAccelByteModelsUGCRequest const& ModifyRequest
+	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__), TEXT("The API might be removed without notice, please use ModifyContent(.., FAccelByteModelsUGCUpdateRequest const& ModifyRequest, ..) instead!!"));
+
+	FAccelByteModelsUGCUpdateRequest Req;
+	Req.Name = ModifyRequest.Name;
+	Req.Type = ModifyRequest.Type;
+	Req.SubType = ModifyRequest.SubType;
+	Req.Tags = ModifyRequest.Tags;
+	Req.Preview = FBase64::Encode(ModifyRequest.Preview);
+	Req.FileExtension = ModifyRequest.FileExtension;
+	Req.ContentType = ModifyRequest.ContentType;
+	Req.PreviewMetadata = ModifyRequest.PreviewMetadata;
+	Req.UpdateContentFile = true;
+
+	ModifyContent(ChannelId, ContentId, Req, OnSuccess, OnError);
 }
 
 void UGC::ModifyContent(FString const& ChannelId
@@ -107,7 +160,8 @@ void UGC::ModifyContent(FString const& ChannelId
 	, FString ContentType)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+	FReport::LogDeprecated(FString(__FUNCTION__), TEXT("The API might be removed without notice, please use ModifyContent(.., FAccelByteModelsUGCUpdateRequest const& ModifyRequest, ..) instead!!"));
+
 	FAccelByteModelsUGCRequest Req;
 	Req.Name = Name;
 	Req.Type = Type;
@@ -288,10 +342,21 @@ void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const&
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	GetChannels(CredentialsRef.GetUserId(), OnSuccess, OnError, Limit, Offset);
+}
+
+void UGC::GetChannels(FString const& UserId
+	, THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *UserId);
 
 	TMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -342,8 +407,8 @@ void UGC::SearchContents(const FString& Name
 		, *CredentialsRef.GetNamespace());
 
 	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("sortby"), FAccelByteUtilities::GetUEnumValueAsString(SortBy) },
-		{ TEXT("orderby"), FAccelByteUtilities::GetUEnumValueAsString(OrderBy)  },
+		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
+		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
 		{ TEXT("name"), FGenericPlatformHttp::UrlEncode(Name) },
 		{ TEXT("creator"), FGenericPlatformHttp::UrlEncode(Creator) },
 		{ TEXT("type"), FGenericPlatformHttp::UrlEncode(Type) },
@@ -442,8 +507,8 @@ void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 		, *ChannelId);
 
 	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("sortby"), FAccelByteUtilities::GetUEnumValueAsString(SortBy) },
-		{ TEXT("orderby"), FAccelByteUtilities::GetUEnumValueAsString(OrderBy)  },
+		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
+		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
 		{ TEXT("name"), FGenericPlatformHttp::UrlEncode(Name) },
 		{ TEXT("creator"), FGenericPlatformHttp::UrlEncode(Creator) },
 		{ TEXT("type"), FGenericPlatformHttp::UrlEncode(Type) },
@@ -593,8 +658,8 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false")},
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("")  },
-		{ TEXT("sortby"), FAccelByteUtilities::GetUEnumValueAsString(SortBy) },
-		{ TEXT("orderby"), FAccelByteUtilities::GetUEnumValueAsString(OrderBy)  },
+		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
+		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
 		});
 	Url.Append(QueryParams);
 

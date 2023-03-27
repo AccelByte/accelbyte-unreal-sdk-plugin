@@ -121,6 +121,19 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCTypeResponse
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPreviewMetadata
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | PreviewMetadata")
+	FString PreviewContentType{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | PreviewMetadata")
+	FString PreviewFileExtension{};
+};
+
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCRequest
 {
 	GENERATED_BODY()
@@ -145,9 +158,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Request")
 	TArray<FString> Tags{};
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Request")
 	FJsonObjectWrapper CustomAttributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Request")
+	FAccelByteModelsUGCPreviewMetadata PreviewMetadata{};
+};
+
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateRequest : public FAccelByteModelsUGCRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateRequest")
+	bool UpdateContentFile{false};
 };
 
 USTRUCT(BlueprintType)

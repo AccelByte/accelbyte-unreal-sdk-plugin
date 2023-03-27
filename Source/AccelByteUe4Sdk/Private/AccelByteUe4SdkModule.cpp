@@ -108,6 +108,7 @@ void FAccelByteUe4SdkModule::ShutdownModule()
 #endif
 	FRegistry::GameTelemetry.Shutdown();
 	FRegistry::Credentials.Shutdown();
+	FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
 	FRegistry::HttpRetryScheduler.Shutdown();
 
 	UnregisterSettings();

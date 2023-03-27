@@ -7,6 +7,14 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteEnvironment.h"
 
+UENUM(BlueprintType)
+enum class EHttpCacheType : uint8
+{
+	UNKNOWN = 0,
+	STORAGE = 1,
+	MEMORY = 2
+};
+
 namespace AccelByte
 {
 class ACCELBYTEUE4SDK_API BaseSettings
@@ -34,6 +42,7 @@ public:
 	FString SessionServerUrl{};
 	
 	float QosPingTimeout{.6f};
+	EHttpCacheType HttpCacheType = EHttpCacheType::STORAGE;
 
 	virtual void Reset(ESettingsEnvironment const Environment) = 0;
 

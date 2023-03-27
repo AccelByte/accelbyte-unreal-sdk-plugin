@@ -117,6 +117,22 @@ void UABUser::LoginWithRefreshToken(FDHandler OnSuccess
 			}));
 }
 
+void UABUser::TryRelogin(FString PlatformUserID, FDHandler OnSuccess, FDErrorHandler OnError)
+{
+	ApiClientPtr->User.TryRelogin(
+		PlatformUserID,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
 void UABUser::Logout(FDHandler OnSuccess
 	, FDErrorHandler OnError) 
 {

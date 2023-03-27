@@ -70,6 +70,32 @@ void UABUGC::CreateContent(
 	);
 }
 
+void UABUGC::ModifyContentByUpdateStruct(
+	FString const& ChannelId,
+	FString const& ContentId,
+	FAccelByteModelsUGCUpdateRequest const& UGCRequest,
+	FDModelsUGCResponse const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.ModifyContent(
+		ChannelId,
+		ContentId,
+		UGCRequest,
+		THandler<FAccelByteModelsUGCResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+				);
+}
+
 void UABUGC::ModifyContentByStruct(
 	FString const& ChannelId,
 	FString const& ContentId,

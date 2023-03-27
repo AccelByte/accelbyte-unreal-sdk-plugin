@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Core/AccelByteLRUCacheFile.h"
 #include "Core/AccelByteLRUCacheMemory.h"
+#include "Core/AccelByteRegistry.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpCache, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteHttpCache);
@@ -82,6 +83,20 @@ namespace AccelByte
 		{
 			// empty
 		};
+
+		void FAccelByteHttpCache::InitializeFromConfig()
+		{
+			switch (FRegistry::Settings.HttpCacheType)
+			{
+			case EHttpCacheType::MEMORY:
+				CachedItems = MakeShareable<FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>());
+				return;
+			case EHttpCacheType::STORAGE:
+			default:
+				CachedItems = MakeShareable<FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>());
+				return;
+			}
+		}
 
 		FAccelByteHttpCacheItem* FAccelByteHttpCache::GetSerializedHttpCache(const FHttpRequestPtr& Request)
 		{

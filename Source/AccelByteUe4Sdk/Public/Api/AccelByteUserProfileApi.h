@@ -53,8 +53,23 @@ public:
 	 * @param UserIds Multiple user ids, separated by comma.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @deprecated This method will be removed in the future, so please use BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
+	 *		, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
+	 *		, const FErrorHandler& OnError)
 	 */
-	void BatchGetPublicUserProfileInfos(FString UserIds
+	void BatchGetPublicUserProfileInfos(const FString& UserIds
+		, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Bulk get multiple user public profile information.
+	 *
+	 * @param UserIds Multiple user ids.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
 		, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
 		, const FErrorHandler& OnError);
 

@@ -679,8 +679,9 @@ UENUM(BlueprintType)
 enum class EAccelByteOptionalBool : uint8
 {
 	NONE = 0	UMETA(DisplayName = "NONE"),
-	YES			UMETA(DisplayName = "YES"),
-	NO			UMETA(DisplayName = "NO"),
+	// OPT_ prefix added for these enum members to avoid compile error in mac
+	OPT_YES		UMETA(DisplayName = "YES"),
+	OPT_NO		UMETA(DisplayName = "NO")
 };
 
 //!@brief Model representing an action update system message
@@ -700,6 +701,23 @@ struct FAccelByteModelsActionUpdateSystemMessage
 	//! Mark message as keep to store it in user system inbox
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ActionUpdateSystemMessage")
 	EAccelByteOptionalBool Keep { EAccelByteOptionalBool::NONE };
+
+	FString GetReadAsString() const
+	{
+		return GetStringFromOptionalBool(Read);
+	}
+
+	FString GetKeepAsString() const
+	{
+		return GetStringFromOptionalBool(Keep);
+	}
+
+private:
+	/** Get string representation of optional bool based on backend convention. */
+	static FString GetStringFromOptionalBool(const EAccelByteOptionalBool Value)
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(Value).Replace(TEXT("OPT_"), TEXT(""));
+	}
 };
 
 //!@brief Notification structure for System Message

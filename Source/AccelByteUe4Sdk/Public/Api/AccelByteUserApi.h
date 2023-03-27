@@ -238,6 +238,17 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
+	 * @brief Relogin using the previously logged-in platform account. WINDOWS ONLY
+	 *
+	 * @param PlatformUserID The user ID that used previously and used .
+	 * @param OnSuccess This will be called when the provided Platform User Account is acknowledged and not expired yet. Continue the session.
+	 * @param OnError This will be called when the Platform User Account that provided is not known yet — OR it existed but already expired.
+	 */
+	void TryRelogin(const FString& PlatformUserID
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+	
+	/**
 	 * @brief Create Headless Account And Login
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.

@@ -31,6 +31,7 @@ public:
 	float QosLatencyPollIntervalSecs{.0f};
 	float QosServerLatencyPollIntervalSecs{.0f};
 	bool bEnableHttpCache{false};
+	EHttpCacheType HttpCacheType {EHttpCacheType::STORAGE};
 	
 	/** @brief Ensure a minimum # secs for Qos Latency polling */
 	constexpr static float MinNumSecsQosLatencyPolling = {60*10}; // 10m
@@ -165,6 +166,9 @@ public:
 	// Enable token for client side http caching
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	bool bEnableHttpCache{false};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	EHttpCacheType HttpCacheType { EHttpCacheType::STORAGE};
 };
 
 UCLASS(Config = Engine)
@@ -293,6 +297,9 @@ public:
 	static bool IsHttpCacheEnabled();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static EHttpCacheType GetHttpCacheType();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -390,6 +397,9 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetQosPingTimeout(const float& QosPingTimeout);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetHttpCacheType(EHttpCacheType Type);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void ResetSettings(const ESettingsEnvironment Environment);

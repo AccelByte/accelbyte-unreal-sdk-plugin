@@ -1033,9 +1033,9 @@ namespace AccelByte
 				FJsonDomBuilder::FObject Item;
 				Item.Set(ChatToken::Json::Field::MessageId, ActionUpdateSystemMessage.ID);
 				Item.Set(ChatToken::Json::Field::SystemMessageRead
-					, FAccelByteUtilities::GetUEnumValueAsString(ActionUpdateSystemMessage.Read));
+					, ActionUpdateSystemMessage.GetReadAsString());
 				Item.Set(ChatToken::Json::Field::SystemMessageKeep
-					, FAccelByteUtilities::GetUEnumValueAsString(ActionUpdateSystemMessage.Keep));
+					, ActionUpdateSystemMessage.GetKeepAsString());
 				
 				JsonActionUpdateSystemMessages.Add(Item);
 			}

@@ -5,6 +5,7 @@
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
+#include "Core/AccelByteUtilities.h"
 
 using namespace AccelByte;
 
@@ -142,6 +143,15 @@ void Settings::LoadSettings(const FString& SectionPath)
 	{
 		QosPingTimeout = .6f;
 	}
+
+	//If configuration value is empty/not found, assume the caching is disabled
+	FString bEnableHttpCacheString;
+	LoadFallback(SectionPath, TEXT("bEnableHttpCache"), bEnableHttpCacheString);
+	this->bEnableHttpCache = bEnableHttpCacheString.IsEmpty() ? false : bEnableHttpCacheString.ToBool();
+
+	FString HttpCacheTypeString;
+	LoadFallback(SectionPath, TEXT("HttpCacheType"), HttpCacheTypeString);
+	this->HttpCacheType = FAccelByteUtilities::GetUEnumValueFromString<EHttpCacheType>(HttpCacheTypeString);
 }
 
 void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FString& Value)
@@ -354,6 +364,11 @@ bool UAccelByteBlueprintsSettings::IsHttpCacheEnabled()
 	return FRegistry::Settings.bEnableHttpCache;
 }
 
+EHttpCacheType UAccelByteBlueprintsSettings::GetHttpCacheType()
+{
+	return FRegistry::Settings.HttpCacheType;
+}
+
 void UAccelByteBlueprintsSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::Settings.ClientId = ClientId;
@@ -513,6 +528,11 @@ void UAccelByteBlueprintsSettings::SetQosPingTimeout(const float& QosPingTimeout
 	{
 		FRegistry::Settings.QosPingTimeout = QosPingTimeout;
 	}
+}
+
+void UAccelByteBlueprintsSettings::SetHttpCacheType(EHttpCacheType Type)
+{
+	FRegistry::Settings.HttpCacheType = Type;
 }
 
 void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment Environment)

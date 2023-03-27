@@ -58,6 +58,9 @@ public:
 	void LoginWithRefreshToken(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void TryRelogin(FString PlatformUserID, FDHandler OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void Logout(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")

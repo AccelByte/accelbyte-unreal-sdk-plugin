@@ -278,6 +278,7 @@ void FHttpRetryScheduler::Startup()
 	State = EState::Initialized;
 	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler has been INITIALIZED"));
 
+	HttpCache.InitializeFromConfig();
 	HttpCache.ClearCache();
 }
 
@@ -317,8 +318,6 @@ void FHttpRetryScheduler::Shutdown()
 		// cancel unfinished http requests, so don't hinder the shutdown
 		TaskQueue.Empty();
 	}
-
-	HttpCache.ClearCache();
 }
 
 }

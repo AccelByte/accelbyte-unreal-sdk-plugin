@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [22.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.0%0D21.3.2) (2023-03-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **chat:** Optional bool enum members changed
+* **session:** changed OnSuccess result of ServerSession::QueryPartySessions from FAccelByteModelsV2QueryPartiesResponse to FAccelByteModelsV2PaginatedPartyQueryResult
+
+### Features
+
+* **lobby:** lobby errorNotif will trigger response delegate when there is a request associated with it. ([1704af4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1704af409d9c8694803334bd9458247f73d9d36e))
+* **session:** use paginated model in server query party sessions ([2ec636f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2ec636ff526b7abc9c09bc132043c69e532e590a))
+* **UserProfile:** add bulk get user profile with array param ([06e53e5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/06e53e5d27da0ffea1997105a8113ea0f4fb09ca))
+
+
+### Bug Fixes
+
+* add missing blueprint function for lobby, party and chat v1 ([8435359](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/843535961dedfd68b98d9f9eda12d09530c40e9c))
+* **chat:** refactor optional bool model to avoid compile error in mac ([afd4d50](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/afd4d5000f92e7ccfcbfdd0283fed5af7ad0227b))
+* **HttpCache:** configurable HTTP caching mode (MEMORY & STORAGE) ([47041e6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/47041e662649a2dd23022ccd33750eefd6c3e9db))
+* **HTTPCache:** move the free cache to the SDK module shutdown ([b24e036](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b24e036449933253c9900bae9d915b823fa3d5b3))
+* **session:** keep previous ServerSession::QueryPartySessions to avoid breaking change ([002c0ad](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/002c0adef6879ba4ce0ffc74f68874f175d7ca7c))
+
 ### [21.3.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.3.2%0D21.3.1) (2023-03-17)
 
 

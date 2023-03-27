@@ -50,7 +50,26 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void UserProfile::BatchGetPublicUserProfileInfos(const FString UserIds
+void UserProfile::BatchGetPublicUserProfileInfos(const FString& UserIds
+	, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__)
+		, TEXT("The API might be removed without notice, please use BulkGetPublicUserProfileInfos instead!!"));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public")
+		, *SettingsRef.BasicServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	const TMap<FString, FString> QueryParams = {
+		{TEXT("userIds"), UserIds}
+	};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void UserProfile::BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
 	, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
 	, const FErrorHandler& OnError)
 {
@@ -61,7 +80,7 @@ void UserProfile::BatchGetPublicUserProfileInfos(const FString UserIds
 		, *CredentialsRef.GetNamespace());
 
 	const TMap<FString, FString> QueryParams = {
-		{TEXT("userIds"), UserIds}
+		{TEXT("userIds"), FString::Join(UserIds, TEXT(","))}
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);

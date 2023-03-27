@@ -70,9 +70,31 @@ public:
 	 *
 	 * @param ChannelId The id of the content's channel.
 	 * @param ContentId The id of the content that will be modified.
+	 * @param ModifyRequest Detail information for the content request that will be modified.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ModifyContent(FString const& ChannelId
+		, FString const& ContentId
+		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Modify existing content to update some information with FString preview.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ContentId The id of the content that will be modified.
 	 * @param UGCRequest Detail information for the content request that will be modified.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
+	 *
+	 * @deprecated This method will be removed in the future, so please use
+	 * 	void ModifyContent(FString const& ChannelId
+		, FString const& ContentId
+		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	 */
 	void ModifyContent(FString const& ChannelId
 		, FString const& ContentId
@@ -94,6 +116,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
 	 * @param ContentType The specific type of the content's modified. Default value is "application/octet-stream".
+	 *
+	 * @deprecated This method will be removed in the future, so please use
+	 * 	void ModifyContent(FString const& ChannelId
+		, FString const& ContentId
+		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	 */
 	void ModifyContent(FString const& ChannelId
 		, FString const& ContentId
@@ -223,6 +252,21 @@ public:
 	 * @param Offset The offset of the channel results. Default value is 0.
 	 */
 	void GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 1000
+		, int32 Offset = 0);
+
+	/**
+	 * @brief Get all of the player's channels.
+	 *
+	 * @param UserId User Id
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCChannelsPagingResponse.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit The limit of the channel results. Default value is 1000.
+	 * @param Offset The offset of the channel results. Default value is 0.
+	 */
+	void GetChannels(FString const& UserId
+		, THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
 		, int32 Offset = 0);
@@ -469,7 +513,10 @@ private:
 	UGC() = delete;
 	UGC(UGC const&) = delete;
 	UGC(UGC&&) = delete;
+
+	static FString ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy);
+	static FString ConvertUGCOrderByToString(const EAccelByteUgcOrderBy& OrderBy);
 };
-	
+
 }
 }

@@ -72,6 +72,15 @@ public:
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void ModifyContentByUpdateStruct(
+		FString const& ChannelId,
+		FString const& ContentId,
+		FAccelByteModelsUGCUpdateRequest const& UGCRequest,
+		FDModelsUGCResponse const& OnSuccess,
+		FDErrorHandler const& OnError
+	);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void ModifyContentByStruct(
 		FString const& ChannelId,
 		FString const& ContentId,

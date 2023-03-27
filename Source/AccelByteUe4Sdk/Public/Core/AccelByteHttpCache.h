@@ -23,8 +23,20 @@ namespace AccelByte
 			FAccelByteHttpCache();
 			virtual ~FAccelByteHttpCache();
 
+			/// <summary>
+			/// Obtain the value from configuration to determine which caching method is chosen.
+			/// We need to avoid access configuration (AccelByte::FRegistry.Settings) from a class constructor
+			/// Because FRegistry.Settings load the value when triggered by startup module phase
+			/// </summary>
+			void InitializeFromConfig();
+
 			bool TryRetrieving(FHttpRequestPtr& Out, FHttpResponsePtr& OutCachedResponse);
 			bool TryStoring(const FHttpRequestPtr& Request);
+
+			/// <summary>
+			/// Should not be called from destructor at all.
+			/// Call this from module shutdown only.
+			/// </summary>
 			void ClearCache();
 
 			/**

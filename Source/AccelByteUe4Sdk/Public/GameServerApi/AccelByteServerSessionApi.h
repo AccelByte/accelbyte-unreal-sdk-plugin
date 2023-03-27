@@ -108,6 +108,17 @@ public:
 	* @param Offset Pagination offset. Default 0.
 	* @param Limit Pagination limit. Default 20.
 	*/
+	void QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,  THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int64 Offset = 0, int64 Limit = 20);
+
+	/**
+	* @brief [DEPRECATED] Query for party information. Please use QueryPartySessions with paginated result.
+	*
+	* @param RequestContent The query parties request body.
+	* @param OnSuccess This will be called if the operation succeeded.
+	* @param OnError This will be called if the operation failed.
+	* @param Offset Pagination offset. Default 0.
+	* @param Limit Pagination limit. Default 20.
+	*/
 	void QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,  THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess, FErrorHandler const& OnError, int64 Offset = 0, int64 Limit = 20);
 
 	/**

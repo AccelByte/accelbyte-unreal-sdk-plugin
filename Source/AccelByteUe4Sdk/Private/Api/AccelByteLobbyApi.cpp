@@ -2362,7 +2362,32 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 		}
 		case (Notif::ErrorNotif):
 		{
-			ErrorNotif.ExecuteIfBound(ParsedJsonObj->GetIntegerField(TEXT("code")), ParsedJsonObj->GetStringField(TEXT("message")));
+			FString ErrorNotifRequestType = ParsedJsonObj->GetStringField(TEXT("requestType"));
+
+			// Handle trigger ResponseDelegates when ErrorNotif arrived with "requestType" field 
+			if(!ErrorNotifRequestType.IsEmpty())
+			{
+				// Replace "Request" at end of string with "Response"
+				const FString RequestString = {TEXT("Request")};
+				if(ErrorNotifRequestType.EndsWith(RequestString))
+				{
+					ErrorNotifRequestType = ErrorNotifRequestType.LeftChop(RequestString.Len()).Append(TEXT("Response"));
+				}
+				
+				FAccelByteModelsLobbyBaseResponse ErrorRequestResponse;
+				ErrorRequestResponse.Code = ParsedJsonObj->GetStringField(TEXT("code"));
+				ErrorRequestResponse.Id = ParsedJsonObj->GetStringField("id");
+				ErrorRequestResponse.Type = ErrorNotifRequestType;
+
+				TSharedPtr<FJsonObject> ErrorRequestJsonObject = FJsonObjectConverter::UStructToJsonObject(ErrorRequestResponse);
+				FString ErrorRequestJsonString;
+				FJsonObjectConverter::UStructToJsonObjectString(ErrorRequestResponse, ErrorRequestJsonString);
+				HandleMessageResponse(ErrorNotifRequestType,  ErrorRequestJsonString, ErrorRequestJsonObject);
+			}
+			else
+			{
+				ErrorNotif.ExecuteIfBound(ParsedJsonObj->GetIntegerField(TEXT("code")), ParsedJsonObj->GetStringField(TEXT("message")));
+			}
 			break;
 		}
 		case (Notif::SignalingP2PNotif):

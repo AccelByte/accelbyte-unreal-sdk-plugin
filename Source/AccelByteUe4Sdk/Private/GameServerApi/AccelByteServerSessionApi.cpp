@@ -151,7 +151,7 @@ void ServerSession::UpdateMemberStatus(FString const& GameSessionID
 
 void ServerSession::QueryPartySessions(
 	FAccelByteModelsV2QueryPartiesRequest const& RequestContent,
-	THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess,
+	THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess,
 	FErrorHandler const& OnError,
 	int64 Offset /* = 0 */,
 	int64 Limit /* = 20 */)
@@ -218,6 +218,22 @@ void ServerSession::QueryPartySessions(
 	}
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void ServerSession::QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,
+	THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess, FErrorHandler const& OnError, int64 Offset,
+	int64 Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("Use ServerSession::QueryPartySessions with paginated support to match backend model"));
+
+	QueryPartySessions(RequestContent,
+		THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([OnSuccess](const FAccelByteModelsV2PaginatedPartyQueryResult QueryPartiesResponse)
+		{
+			OnSuccess.ExecuteIfBound(FAccelByteModelsV2QueryPartiesResponse {QueryPartiesResponse.Data});
+		}), OnError, Offset, Limit);
 }
 
 void ServerSession::GetPartyDetails(
