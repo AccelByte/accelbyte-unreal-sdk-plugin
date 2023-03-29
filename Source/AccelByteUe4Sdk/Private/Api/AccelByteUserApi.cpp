@@ -813,7 +813,8 @@ void User::UpgradeAndVerify2(const FUpgradeAndVerifyRequest& UpgradeAndVerifyReq
 void User::Upgrade(const FString& Username
 	, const FString& Password
 	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, bool bNeedVerificationCode)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -825,7 +826,11 @@ void User::Upgrade(const FString& Username
 		, *Username
 		, *Password);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	TMap<FString, FString> Params ({
+		{"needVerificationCode", bNeedVerificationCode ? TEXT("true") : TEXT("false")}
+	});
+	
+	HttpClient.ApiRequest(TEXT("POST"), Url, Params, Content, OnSuccess, OnError);
 }
 
 void User::Upgradev2(const FString& EmailAddress

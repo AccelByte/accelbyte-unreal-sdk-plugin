@@ -393,11 +393,13 @@ public:
 	 * @param Password The Password.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	* @param bNeedVerificationCode Will send verification code to email if true, default false.
 	 */
 	void Upgrade(const FString& Username
 		, const FString& Password
 		, const THandler<FAccountUserData>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, bool bNeedVerificationCode = false);
 
 	/**
 	 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
