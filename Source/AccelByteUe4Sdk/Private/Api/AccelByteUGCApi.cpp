@@ -143,6 +143,7 @@ void UGC::ModifyContent(FString const& ChannelId
 	Req.ContentType = ModifyRequest.ContentType;
 	Req.PreviewMetadata = ModifyRequest.PreviewMetadata;
 	Req.UpdateContentFile = true;
+	Req.CustomAttributes = ModifyRequest.CustomAttributes;
 
 	ModifyContent(ChannelId, ContentId, Req, OnSuccess, OnError);
 }

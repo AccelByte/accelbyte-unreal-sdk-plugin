@@ -306,6 +306,17 @@ public:
 		, const FVoidHandler& OnSuccess
 		, const FErrorHandler& OnError);
 
+	/**
+	 * @brief Bulk Get Multiple Size of Player Record 
+	 *
+	 * @param GetPlayerRecordSizeRequest Detail information for the Player Record Request.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void BulkGetPlayerRecordSize(const FAccelByteModelsBulkGetPlayerRecordSizeRequest& GetPlayerRecordSizeRequest
+		, const THandler<FAccelByteModelsPaginatedBulkGetPlayerRecordSizeResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+
 private:
 	ServerCloudSave() = delete;
 	ServerCloudSave(ServerCloudSave const&) = delete;

@@ -29,6 +29,7 @@
 #include "ABGroup.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteEnvironment.h"
 #include "AccelByteBPApiClient.generated.h"
 
 using namespace AccelByte;
@@ -43,11 +44,67 @@ public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	void ForgetAll();
+
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	void SetAuthToken(FOauth2Token NewAuthToken, float CurrentTime);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	void SetClientCredentials(ESettingsEnvironment Environment);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	void SetUserEmailAddress(FString EmailAddress);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	void PollRefreshToken(float CurrentTime);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	void ScheduleRefreshToken(float NextRefreshTime);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	void SetErrorOAuth(FErrorOAuthInfo ErrorOAuthInfo);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	void SetAccountUserData(FAccountUserData InAccountUserData);
+
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	FOauth2Token GetAuthToken();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	FString GetRefreshToken();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	FString GetAccessToken();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	FString GetUserId();
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	FString GetPlatformUserId();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	FString GetUserDisplayName();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	FString GetNamespace();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	FString GetUserEmailAddress();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	FString GetLinkingToken();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	FAccountUserData GetAccountUserData();
+
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	bool IsSessionValid();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	bool IsComply();
 private:
 	FApiClientPtr ApiClientPtr;
 };

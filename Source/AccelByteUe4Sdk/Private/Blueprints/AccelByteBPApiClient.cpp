@@ -5,14 +5,105 @@ void UABCredentials::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-FString UABCredentials::GetAccessToken() 
+void UABCredentials::SetAuthToken(FOauth2Token NewAuthToken, float CurrentTime)
+{
+	ApiClientPtr->CredentialsRef->SetAuthToken(NewAuthToken, CurrentTime);
+}
+
+void UABCredentials::ForgetAll()
+{
+	ApiClientPtr->CredentialsRef->ForgetAll();
+}
+
+void UABCredentials::SetClientCredentials(ESettingsEnvironment Environment)
+{
+	ApiClientPtr->CredentialsRef->SetClientCredentials(Environment);
+}
+
+void UABCredentials::SetUserEmailAddress(FString EmailAddress)
+{
+	ApiClientPtr->CredentialsRef->SetUserEmailAddress(EmailAddress);
+}
+
+void UABCredentials::PollRefreshToken(float CurrentTime)
+{
+	ApiClientPtr->CredentialsRef->PollRefreshToken(CurrentTime);
+}
+
+void UABCredentials::ScheduleRefreshToken(float NextRefreshTime)
+{
+	ApiClientPtr->CredentialsRef->ScheduleRefreshToken(NextRefreshTime);
+}
+
+void UABCredentials::SetErrorOAuth(FErrorOAuthInfo ErrorOAuthInfo)
+{
+	ApiClientPtr->CredentialsRef->SetErrorOAuth(ErrorOAuthInfo);
+}
+
+void UABCredentials::SetAccountUserData(FAccountUserData InAccountUserData)
+{
+	ApiClientPtr->CredentialsRef->SetAccountUserData(InAccountUserData);
+}
+
+FOauth2Token UABCredentials::GetAuthToken()
+{
+	return ApiClientPtr->CredentialsRef->GetAuthToken();
+}
+
+FString UABCredentials::GetRefreshToken()
+{
+	return ApiClientPtr->CredentialsRef->GetRefreshToken();
+}
+
+FString UABCredentials::GetAccessToken()
 {
 	return ApiClientPtr->CredentialsRef->GetAccessToken();
 }
 
-FString UABCredentials::GetUserId() 
+FString UABCredentials::GetUserId()
 {
 	return ApiClientPtr->CredentialsRef->GetUserId();
+}
+
+FString UABCredentials::GetPlatformUserId()
+{
+	return ApiClientPtr->CredentialsRef->GetPlatformUserId();
+}
+
+FString UABCredentials::GetUserDisplayName()
+{
+	return ApiClientPtr->CredentialsRef->GetUserDisplayName();
+}
+
+FString UABCredentials::GetNamespace()
+{
+	return ApiClientPtr->CredentialsRef->GetNamespace();
+}
+
+FString UABCredentials::GetUserEmailAddress()
+{
+	return ApiClientPtr->CredentialsRef->GetUserEmailAddress();
+}
+
+FString UABCredentials::GetLinkingToken()
+{
+	return ApiClientPtr->CredentialsRef->GetLinkingToken();
+}
+
+FAccountUserData UABCredentials::GetAccountUserData()
+{
+	return ApiClientPtr->CredentialsRef->GetAccountUserData();
+}
+
+
+bool UABCredentials::IsSessionValid()
+{
+	return ApiClientPtr->CredentialsRef->IsSessionValid();
+}
+
+bool UABCredentials::IsComply()
+{
+	return ApiClientPtr->CredentialsRef->IsComply();
 }
 
 UABApiClient::UABApiClient()

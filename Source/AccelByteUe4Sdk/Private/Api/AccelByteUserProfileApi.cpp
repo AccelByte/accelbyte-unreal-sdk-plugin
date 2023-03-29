@@ -105,14 +105,11 @@ void UserProfile::GetPublicCustomAttributes(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), "This will no longer able to use since will give security hole issue for other player/user, "
-	 "please use GetPublicUserProfileInfo instead"); 
+	 "please use GetPublicUserProfileInfo instead");
 
-	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes")
-		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *UserId);
+	OnError.ExecuteIfBound(static_cast<int>(ErrorCodes::Deprecated),
+		TEXT("This will no longer able to use since will give security hole issue for other player/user, use GetPublicUserProfileInfo instead"));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest

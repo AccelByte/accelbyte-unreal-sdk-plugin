@@ -231,15 +231,6 @@ enum class EAccelByteItemListSortBy : uint8
 };
 
 UENUM(BlueprintType)
-enum class EAccelByteCycle : uint8
-{
-	WEEKLY,
-	MONTHLY,
-	QUARTERLY,
-	YEARLY 
-};
-
-UENUM(BlueprintType)
 enum class EAccelBytePredicateType : uint8
 {
 	EntitlementPredicate,
@@ -253,6 +244,24 @@ enum class EAccelByteLootBoxRewardType : uint8
 	PROBABILITY_GROUP,
 	REWARD_GROUP,
 	REWARD
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteSubscriptionSummaryStatus : uint8
+{
+	NONE = 0,
+	INIT,
+	ACTIVE,
+	CANCELLED,
+	EXPIRED 
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteSubscriptionSummarySubscribedBy : uint8
+{
+	NONE = 0,
+	USER,
+	PLATFORM 
 };
 
 #pragma endregion EnumField
@@ -706,6 +715,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementSyncBase
 		FString Region{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
 		FString Language{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementSyncBase ")
+		FString EpicGamesJwtToken{};//Used for EpicGames
 };
 
 USTRUCT(BlueprintType)
@@ -1849,6 +1860,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementSummary
 	FString Namespace{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
 	FString UserId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
@@ -1864,13 +1878,25 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementSummary
 	int32 StackedUseCount{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
-	int32 StackedQuantity{};
+	FString StoreId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
+	int32 StackedQuantity{}; // deprecated 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
 	FString CreatedAt{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
+	FDateTime UpdatedAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
 	FString GrantedCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
+	FDateTime StartDate{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
+	FDateTime EndDate{};
 };
 
 USTRUCT(BlueprintType)
@@ -1889,6 +1915,42 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreditSummary
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | CreditSummary")
 	int32 Amount{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | CreditSummary")
+	FString CurrencyCode{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSubscriptionSummary
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	FString Id{}; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	FString ItemId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	FString Sku{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	EAccelByteSubscriptionSummaryStatus Status{EAccelByteSubscriptionSummaryStatus::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	FDateTime CurrentPeriodStart{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	FDateTime CurrentPeriodEnd{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
+	EAccelByteSubscriptionSummarySubscribedBy SubscribedBy{EAccelByteSubscriptionSummarySubscribedBy::NONE};
 };
 
 USTRUCT(BlueprintType)
@@ -1907,6 +1969,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFulfillmentResult
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentResult")
 	TArray<FAccelByteModelsCreditSummary> CreditSummaries{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentResult")
+	TArray<FAccelByteModelsSubscriptionSummary> SubscriptionSummaries{};
 };
 
 #pragma endregion FulfillmentModelsField

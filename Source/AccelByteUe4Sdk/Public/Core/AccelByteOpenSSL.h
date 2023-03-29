@@ -5,21 +5,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Misc/AES.h"
 
 #if !PLATFORM_SWITCH
 namespace openssl
 {
 THIRD_PARTY_INCLUDES_START
-#include <openssl/rsa.h>
-#include <openssl/aes.h>
-#include <openssl/rand.h>
-#include <openssl/pem.h>
-#include <openssl/bn.h>
 #include <openssl/evp.h>
+#include <openssl/rsa.h>
+#include <openssl/rand.h>
 THIRD_PARTY_INCLUDES_END
 }
-#endif // !PLATFORM_SWITCH
+#endif // PLATFORM_SWITCH
 
 namespace AccelByte
 {
@@ -40,7 +36,7 @@ public:
 	}
 
 	/**
-	 * @brief Clear all saved data and states. 
+	 * @brief Clear all saved data and states.
 	 */
 	void Empty();
 
@@ -138,7 +134,7 @@ public:
 
 	/**
 	 * @brief Retrieve size of the stored RSA Key in bits value.
-	 * 
+	 *
 	 * @return Size of the stored RSA Key in bits value.
 	 */
 	int32 GetKeySizeInBits() const { return KeySizeInBits; }
@@ -151,26 +147,19 @@ public:
 	void SetKeySizeInBits(uint32 InKeySizeInBits) { KeySizeInBits = InKeySizeInBits; }
 
 	/**
-	 * @brief Retrieve maximum data size.
-	 *
-	 * @return Possible maximum data size.
-	 */
-	int32 GetMaxDataSize() { return (GetKeySizeInBytes() - RSA_PKCS1_PADDING_SIZE); }
-
-	/**
 	 * @brief Retrieve the Modulus data of the RSA Key.
 	 *
 	 * @return Modulus data in bytes.
 	 */
 	TArray<uint8>& GetModulus() { return Modulus; }
-	
+
 	/**
 	 * @brief Retrieve the Public Key of the RSA Key.
 	 *
 	 * @return Public Key in bytes.
 	 */
 	TArray<uint8>& GetPublicExponent() { return PublicExponent; }
-	
+
 	/**
 	 * @brief Retrieve the Private Key of the RSA Key.
 	 *
@@ -199,15 +188,28 @@ public:
 	 */
 	void SetPrivateExponent(const TArray<uint8>& InPrivateExponent) { PrivateExponent = InPrivateExponent; }
 
+#if !PLATFORM_SWITCH
+	/**
+	 * @brief Retrieve maximum data size.
+	 *
+	 * @return Possible maximum data size.
+	 */
+#if !defined(OPENSSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER <= 0x10200000L
+	int32 GetMaxDataSize() { return (GetKeySizeInBytes() - RSA_PKCS1_PADDING_SIZE); }
+#else
+	int32 GetMaxDataSize() { return (GetKeySizeInBytes() - 42); }
+#endif
+#endif
+
 private:
 
 #if !PLATFORM_SWITCH
 	void LoadBinaryIntoBigNum(const TArray<uint8>& InData, openssl::BIGNUM* InBigNum);
 	void BigNumToArray(const openssl::BIGNUM* InNum, TArray<uint8>& OutBytes, int32 InKeySize);
-#endif // !PLATFORM_SWITCH
 
 	bool OnSign(const FRSAKeyHandle InKey, const TArray<uint8>& InMsg, TArray<uint8>& Out);
 	bool OnVerifySignature(FRSAKeyHandle InKey, const TArray<uint8>& MsgHash, const TArray<uint8>& InMsg);
+#endif // !PLATFORM_SWITCH
 
 private:
 	enum class EState : uint8
@@ -218,10 +220,18 @@ private:
 		Initialized
 	};
 
+#if !PLATFORM_SWITCH
+#if !defined(OPENSSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER <= 0x10200000L
+	int PaddingMode = RSA_PKCS1_PADDING;
+#else
+	int PaddingMode = RSA_PKCS1_OAEP_PADDING;
+#endif
+#endif
+
 	/** Size of the RSA key in bits */
 	int32 KeySizeInBits;
 
-	/** Size of the RSA key in bytes 
+	/** Size of the RSA key in bytes
 	 * Maximum plain text length that can be encrypted with public RSA key
 	 */
 	int32 KeySizeInBytes;
@@ -239,8 +249,6 @@ private:
 
 	/* Local Private Key */
 	TArray<uint8> PrivateExponent;
-
-	int PaddingMode = RSA_PKCS1_PADDING;
 };
 
 #if !PLATFORM_SWITCH
@@ -282,7 +290,7 @@ private:
 class ACCELBYTEUE4SDK_API FAESEncryptionOpenSSL
 {
 public:
-	FAESEncryptionOpenSSL() : KeySizeInBits(256), BlockSize(FAES::AESBlockSize)
+	FAESEncryptionOpenSSL() : KeySizeInBits(256), BlockSize(AES_BLOCK_SIZE)
 #if !PLATFORM_SWITCH
 		, Cipher(nullptr)
 #endif // !PLATFORM_SWITCH
@@ -298,17 +306,20 @@ public:
 	void Empty();
 
 	void Initialize();
+
+#if !PLATFORM_SWITCH
 	bool GenerateRandomBytes(TArray<uint8>& OutKey, uint32& InSizeBytes);
+#endif // !PLATFORM_SWITCH
 
 	/* generate random AES Key. */
-	void GenerateKey(uint32 InKeySizeInBytes = 32, uint32 InBlockSize = FAES::AESBlockSize);
+	void GenerateKey(uint32 InKeySizeInBytes = 32, uint32 InBlockSize = AES_BLOCK_SIZE);
 
 	/* Encrypt with AES key */
 	void Encrypt(const TArrayView<const uint8>& InPlaintext, TArray<uint8>& OutCiphertext, int32& Length);
 
 	/* Decrypt with AES key */
 	void Decrypt(const TArrayView<const uint8>& InCiphertext, TArray<uint8>& OutPlaintext, int32& Length);
-	
+
 	/** get the AES key */
 	TArray<uint8>& GetKey() { return Key; }
 

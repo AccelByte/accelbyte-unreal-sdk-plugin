@@ -64,6 +64,9 @@ public:
 	void Logout(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void LoginByExchangeCodeForToken(FString Code, FDHandler OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void ForgetAllCredentials();
 
 //Registration

@@ -5,8 +5,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "JsonUtilities.h"
 #include "Models/AccelByteGeneralModels.h"
+#include "Models/AccelByteEcommerceModels.h"
 #include "AccelByteStatisticModels.generated.h"
 
 UENUM(BlueprintType)
@@ -75,6 +75,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsStatInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatInfo")
 	FString UpdatedAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatInfo")
+	TArray<FString> CycleIds{};
 };
 
 USTRUCT(BlueprintType)
@@ -327,3 +330,94 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsResetUserStatItemValue
 	FString StatCode{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatCycleItemInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	FString StatCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	FString StatName{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	FString CycleId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	FString CycleName{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	int32 Value{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	FDateTime CreatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	FDateTime UpdatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatCycleItemValueResponse")
+	FString UserId{};	
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatCycleItemPagingSlicedResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemPagingSlicedResult")
+	TArray<FAccelByteModelsUserStatCycleItemInfo> Data{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemPagingSlicedResult")
+	FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsStatCycleConfig
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FString Id{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	EAccelByteCycle CycleType{EAccelByteCycle::DAILY};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FString Description{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FString ResetTime{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	int32 ResetDay{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	int32 ResetDate{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	int32 ResetMonth{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	int32 SeasonPeriod{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	int32 CurrentVersion{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FString Status{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FDateTime NextReset{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FDateTime Start{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FDateTime End{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FDateTime CreatedAt{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfig")
+	FDateTime UpdatedAt{0};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsStatCycleConfigPagingResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfigPaging")
+	TArray<FAccelByteModelsStatCycleConfig> Data{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfigPaging")
+	FAccelByteModelsPaging Paging{};
+};

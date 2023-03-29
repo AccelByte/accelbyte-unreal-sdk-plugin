@@ -122,3 +122,52 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsListGameRecords
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | ListGameRecords")
 	TArray<FAccelByteModelsGameRecord> Data{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGetPlayerRecordSizeRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GetPlayerRecordSizeRequest")
+	TArray<FString> Keys{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GetPlayerRecordSizeRequest")
+	FString User_id{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkGetPlayerRecordSizeRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | BulkGetPlayerRecordSizeRequest")
+	TArray<FAccelByteModelsGetPlayerRecordSizeRequest> Data{};
+
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordSizeResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PlayerRecordSizeResponse")
+	int32 CurrentSize{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PlayerRecordSizeResponse")
+	FString Key{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PlayerRecordSizeResponse")
+	int32 RemainingSize{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PlayerRecordSizeResponse")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedBulkGetPlayerRecordSizeResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedBulkGetPlayerRecordSizeResponse")
+	TArray<FAccelByteModelsPlayerRecordSizeResponse> Data{};
+};

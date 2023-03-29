@@ -496,6 +496,8 @@ void Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase Entit
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
 			return;
 		}
+		bSyncForSingleProduct = false;
+		SyncRequestJson->SetStringField(TEXT("epicGamesJwtToken"), EntitlementSyncBase.EpicGamesJwtToken);
 		break;
 	default:
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform Sync Type is not found"));

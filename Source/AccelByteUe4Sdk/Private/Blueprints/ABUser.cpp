@@ -149,6 +149,21 @@ void UABUser::Logout(FDHandler OnSuccess
 			}));
 }
 
+void UABUser::LoginByExchangeCodeForToken(FString Code, FDHandler OnSuccess, FDErrorHandler OnError)
+{
+	ApiClientPtr->User.GenerateGameToken(Code
+		, FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& Info)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
 void UABUser::ForgetAllCredentials() 
 {
 	ApiClientPtr->User.ForgetAllCredentials();

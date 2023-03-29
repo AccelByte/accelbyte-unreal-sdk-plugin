@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [22.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.1%0D22.0.0) (2023-03-29)
+
+
+### Features
+
+* add public statistic cycle endpoint ([372b4d8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/372b4d85c60a4f0995b110ced0414653f417abd8))
+* **chat:** add get system message stats api ([5a62f1b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5a62f1b9f6e4308ca7ad77a1c2a28709ea78c34e))
+* **DS:** sdk emits StatsD metrics ([dda9b7a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dda9b7a7c9d77f331fff134c4e93b31f3a2bb58a))
+
+
+### Bug Fixes
+
+* **blueprint:** add mising login & credential function ([4bc3448](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4bc3448930842231d1affba7d18be366110f538d))
+* **lobby:** keep lobby connected if refresh token failed and disconnect when token expired ([c73639d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c73639ddc960e55361f2006ae33bf27d9a552091))
+* **UGC:** UGC missing CustomAttribute field assignment ([d90bbe5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d90bbe5ef5ecb624ea4d9e0797850916945dc500))
+
 ## [22.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.0%0D21.3.2) (2023-03-27)
 
 

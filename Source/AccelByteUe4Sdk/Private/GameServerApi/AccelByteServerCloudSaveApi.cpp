@@ -410,6 +410,42 @@ void ServerCloudSave::DeleteUserRecord(const FString& Key
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void ServerCloudSave::BulkGetPlayerRecordSize(const FAccelByteModelsBulkGetPlayerRecordSizeRequest& GetPlayerRecordSizeRequest
+	, const THandler<FAccelByteModelsPaginatedBulkGetPlayerRecordSizeResponse>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/bulk/records/size")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
+
+	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess](FJsonObject const& JsonObject)
+		{
+			FAccelByteModelsPaginatedBulkGetPlayerRecordSizeResponse PlayerRecordSizes;
+			TArray<FAccelByteModelsPlayerRecordSizeResponse> Data{};
+
+			const TArray<TSharedPtr<FJsonValue>>* JsonData;
+			JsonObject.TryGetArrayField("data", JsonData);
+			for (const TSharedPtr<FJsonValue>& JsonValue : *JsonData)
+			{
+				FAccelByteModelsPlayerRecordSizeResponse UserRecordData{};
+				auto jsonObj = JsonValue->AsObject();
+				jsonObj->TryGetNumberField("current_size", UserRecordData.CurrentSize);
+				jsonObj->TryGetStringField("key", UserRecordData.Key);
+				jsonObj->TryGetNumberField("remaining_size", UserRecordData.RemainingSize);
+				jsonObj->TryGetStringField("user_id", UserRecordData.UserId);
+				Data.Add(UserRecordData);
+			}
+			PlayerRecordSizes.Data = Data;
+
+			OnSuccess.ExecuteIfBound(PlayerRecordSizes);
+		});
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, GetPlayerRecordSizeRequest, OnSuccessHttpClient, OnError);
+}
+
 FJsonObject ServerCloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy
 	, bool SetPublic
 	, FJsonObject const& RecordRequest)

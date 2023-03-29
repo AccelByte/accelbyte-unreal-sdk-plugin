@@ -256,6 +256,77 @@ void Statistic::GetGlobalStatItemsByStatCode(const FString& StatCode
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void Statistic::GetUserStatCycleItems(
+	const FString& CycleId,
+	const THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult>& OnSuccess,
+	const FErrorHandler& OnError,
+	const int32 Limit,
+	const int32 Offset,
+	const TArray<FString> StatCodes)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statCycles/%s/statCycleitems")
+		, *SettingsRef.StatisticServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *CycleId);
+
+	TMap<FString, FString> QueryParams = {
+		{TEXT("limit"), FString::FromInt(Limit)},
+		{TEXT("offset"), FString::FromInt(Offset)},
+	};
+
+	if(StatCodes.Num() > 0)
+	{
+		QueryParams.Add(TEXT("statCodes"), FString::Join(StatCodes, TEXT(",")));
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Statistic::GetStatCycleConfig(const FString& CycleId
+	,const THandler<FAccelByteModelsStatCycleConfig>& OnSuccess
+	,const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statCycles/%s")
+		, *SettingsRef.StatisticServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CycleId);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Statistic::GetListStatCycleConfigs(const EAccelByteCycle& CycleType,
+	const THandler<FAccelByteModelsStatCycleConfigPagingResult>& OnSuccess,
+	const FErrorHandler& OnError,
+	const int32 Limit,
+	const int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statCycles")
+		, *SettingsRef.StatisticServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> QueryParams = {
+		{TEXT("limit"), FString::FromInt(Limit)},
+		{TEXT("offset"), FString::FromInt(Offset)},
+	};
+
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteCycle"), true);
+	if (EnumPtr)
+	{
+		FString EnumText = EnumPtr->GetNameStringByIndex(static_cast<int32>(CycleType));
+
+		QueryParams.Add(TEXT("cycleType"), EnumText.ToUpper());
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 #if !UE_BUILD_SHIPPING
 void Statistic::BulkResetMultipleUserStatItemsValue(const TArray<FAccelByteModelsResetUserStatItemValue>& UserStatItemValue
 		, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess

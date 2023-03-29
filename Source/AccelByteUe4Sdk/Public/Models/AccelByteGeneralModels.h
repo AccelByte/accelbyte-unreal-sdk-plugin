@@ -35,6 +35,17 @@ enum class EBanReason : uint8
 	TOS_VIOLATION
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteCycle : uint8
+{
+	DAILY,
+	WEEKLY,
+	MONTHLY,
+	QUARTERLY,
+	YEARLY,
+	ANNUALLY
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 {

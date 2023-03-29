@@ -139,6 +139,9 @@ public:
      */
 	DECLARE_DELEGATE_OneParam(FQuerySystemMessageResponse, const FAccelByteModelsQuerySystemMessagesResponse&)
 
+	/** Delegate for handling get system message stats response. */
+	DECLARE_DELEGATE_OneParam(FGetSystemMessageStatsResponse, const FAccelByteGetSystemMessageStatsResponse&)
+
 	//				NOTIFICATIONS
 	/**
 	 * @brief delegate for handling incoming chat notification.
@@ -625,6 +628,17 @@ public:
 		, const FErrorHandler& OnError = {}
 		, const FQuerySystemMessageOptions OptionalParams = {});
 
+	/**
+	 * Get system message stats (number of unread messages and date time of oldest unread message)
+	 *
+	 * @param OnSuccess - Callback for successful get system message stats
+	 * @param OnError - Callback for failed get system message stats
+	 * @param Request - Optional request parameters
+	 */
+	void GetSystemMessageStats(const FGetSystemMessageStatsResponse& OnSuccess
+		, const FErrorHandler& OnError
+		, const FAccelByteGetSystemMessageStatsRequest Request = {});
+
 private:
 	void SetDeleteSystemMessagesResponseDelegate(const FDeleteSystemMessagesResponse& OnDeleteInboxMessagesResponse
 		, const FErrorHandler& OnError = {})
@@ -645,6 +659,13 @@ private:
 	{
 		QuerySystemMessageResponse = OnQuerySystemMessagesResponse;
 		OnUpdateSystemMessagesError = OnError;
+	}
+
+	void SetGetSystemMessageStatsResponseDelegate(const FGetSystemMessageStatsResponse& OnGetSystemMessageStatsResponse
+		, const FErrorHandler& OnError = {})
+	{
+		GetSystemMessageStatsResponse = OnGetSystemMessageStatsResponse;
+		OnGetSystemMessageStatsError = OnError;
 	}
 
 #pragma endregion
@@ -1020,6 +1041,7 @@ private:
 	TMap<FString, FDeleteSystemMessagesResponse> MessageIdDeleteSystemMessagesResponseMap;
 	TMap<FString, FUpdateSystemMessagesResponse> MessageIdUpdateSystemMessagesResponseMap;
 	TMap<FString, FQuerySystemMessageResponse> MessageIdQuerySystemMessageResponseMap;
+	TMap<FString, FGetSystemMessageStatsResponse> MessageIdGetSystemMessageStatsResponseMap;
 
 	FChatActionTopicResponse CreateTopicResponse;
 	FSendChatResponse SendChatResponse;
@@ -1042,6 +1064,7 @@ private:
 	FDeleteSystemMessagesResponse DeleteSystemMessagesResponse;
 	FUpdateSystemMessagesResponse UpdateSystemMessagesResponse;
 	FQuerySystemMessageResponse QuerySystemMessageResponse;
+	FGetSystemMessageStatsResponse GetSystemMessageStatsResponse;
 
 	FErrorHandler OnCreateTopicError;
 	FErrorHandler OnSendChatError;
@@ -1064,6 +1087,7 @@ private:
 	FErrorHandler OnDeleteSystemMessagesError;
 	FErrorHandler OnUpdateSystemMessagesError;
 	FErrorHandler OnQuerySystemMessageError;
+	FErrorHandler OnGetSystemMessageStatsError;
 
 	FChatNotif ChatNotif;
 	FReadChatNotif ReadChatNotif;

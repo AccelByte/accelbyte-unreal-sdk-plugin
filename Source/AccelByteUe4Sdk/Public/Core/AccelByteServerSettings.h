@@ -19,6 +19,9 @@ public:
 	FString DSHubServerUrl{};
 	FString DSId{};
 	FString WatchdogServerUrl{};
+	FString StatsDServerUrl{};
+	int32 StatsDServerPort;
+	int32 StatsDMetricInterval;
 	int WatchdogHeartbeatInterval;
 
 	virtual void Reset(ESettingsEnvironment const Environment) override;

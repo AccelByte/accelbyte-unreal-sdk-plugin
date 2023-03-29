@@ -43,6 +43,7 @@ namespace AccelByte
 				const FString DeleteSystemMessages = TEXT("actionDeleteSystemMessages");
 				const FString UpdateSystemMessages = TEXT("actionUpdateSystemMessages");
 				const FString QuerySystemMessage = TEXT("actionQuerySystemMessage");
+				const FString GetSystemMessageStats = TEXT("actionGetSystemMessageStats");
 
 				const FString UpdateTopic = TEXT("actionUpdateTopic");
 				const FString DeleteTopic = TEXT("actionDeleteTopic");
@@ -108,6 +109,7 @@ namespace AccelByte
 					const FString ExpiredAt = TEXT("expiredAt");
 					const FString StartCreatedAt = TEXT("startCreatedAt");
 					const FString EndCreatedAt = TEXT("endCreatedAt");
+					const FString OldestUnread = TEXT("oldestUnread");
 
 					const FString Data = TEXT("data");
 
@@ -159,6 +161,7 @@ namespace AccelByte
 			DeleteSystemMessagesResponse,
 			UpdateSystemMessagesResponse,
 			QuerySystemMessageResponse,
+			GetSystemMessageStatsResponse,
 
 			RefreshTokenResponse,
 
@@ -290,7 +293,12 @@ namespace AccelByte
 						{
 							ConvertJsonFieldTimeUnixToIso8601(SubObject, ChatToken::Json::Field::CreatedAt);
 						}
-						
+						if(RootDateTimeField != ChatToken::Json::Field::OldestUnread
+							&& SubObject->HasField(ChatToken::Json::Field::OldestUnread))
+						{
+							ConvertJsonFieldTimeUnixToIso8601(SubObject, ChatToken::Json::Field::OldestUnread);
+						}
+
 						if (SubObject->HasField(ChatToken::Json::Field::Data))
 						{
 							TArray<TSharedPtr<FJsonValue>> Datas;
@@ -353,6 +361,7 @@ namespace AccelByte
 			FORM_STRING_ENUM_PAIR_RESPONSE(DeleteSystemMessages),
 			FORM_STRING_ENUM_PAIR_RESPONSE(UpdateSystemMessages),
 			FORM_STRING_ENUM_PAIR_RESPONSE(QuerySystemMessage),
+			FORM_STRING_ENUM_PAIR_RESPONSE(GetSystemMessageStats),
 
 			FORM_STRING_ENUM_PAIR_RESPONSE(BlockUser),
 			FORM_STRING_ENUM_PAIR_RESPONSE(UnblockUser),
@@ -784,6 +793,7 @@ namespace AccelByte
 				CASE_RESPONSE_ID_EXPLICIT_MODEL(UpdateSystemMessages, FAccelByteModelsUpdateSystemMessagesResponse)
 				CASE_RESPONSE_ID_EXPLICIT_MODEL(DeleteSystemMessages, FAccelByteModelsDeleteSystemMessagesResponse)
 				CASE_RESPONSE_ID_EXPLICIT_MODEL(QuerySystemMessage, FAccelByteModelsQuerySystemMessagesResponse)
+				CASE_RESPONSE_ID_EXPLICIT_MODEL(GetSystemMessageStats, FAccelByteGetSystemMessageStatsResponse)
 
 				CASE_NOTIF_EXPLICIT_MODEL(ChatNotif, FAccelByteModelsChatNotif)
 				CASE_NOTIF_EXPLICIT_MODEL(ReadChatNotif, FAccelByteModelsReadChatNotif)
@@ -1079,6 +1089,16 @@ namespace AccelByte
 			}
 
 			SEND_CONTENT_CACHE_ID(QuerySystemMessage);
+		}
+
+		void Chat::GetSystemMessageStats(const FGetSystemMessageStatsResponse& OnSuccess, const FErrorHandler& OnError,
+			const FAccelByteGetSystemMessageStatsRequest Request)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			FJsonDomBuilder::FObject Params;
+
+			SEND_CONTENT_CACHE_ID(GetSystemMessageStats);
 		}
 
 		void Chat::QueryTopic(const FAccelByteModelsChatQueryTopicRequest& Request

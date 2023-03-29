@@ -770,7 +770,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsQuerySystemMessagesResponseItem
 {
 	GENERATED_BODY()
 
-	//! Processed time of send chat action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
 	FString Id {};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
@@ -804,7 +803,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsQuerySystemMessagesResponse
 {
 	GENERATED_BODY()
 
-	//! Processed time of send chat action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponse")
 	TArray<FAccelByteModelsQuerySystemMessagesResponseItem> Data {};
 };
@@ -815,7 +813,6 @@ struct ACCELBYTEUE4SDK_API FQuerySystemMessageOptions
 {
 	GENERATED_BODY()
 
-	//! Processed time of send chat action
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
 	bool UnreadOnly {false};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
@@ -828,6 +825,29 @@ struct ACCELBYTEUE4SDK_API FQuerySystemMessageOptions
 	int32 Offset {0};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FQuerySystemMessageOptions")
 	int32 Limit {20};
+};
+
+/** Request structure of get system message stats request. */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteGetSystemMessageStatsRequest
+{
+	GENERATED_BODY()
+	// Currently the request is empty, the struct is used as placeholder for future when the request can have parameters
+};
+
+/** Response structure of get system message response. */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteGetSystemMessageStatsResponse
+{
+	GENERATED_BODY()
+
+	/** Date and time of oldest unread message. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FGetSystemMessageResponse")
+	FDateTime OldestUnread {0};
+
+	/** Total of unread messages in user system inbox. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | FGetSystemMessageResponse")
+	int32 Unread {0};
 };
 
 #pragma endregion 

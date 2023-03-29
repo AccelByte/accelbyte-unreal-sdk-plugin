@@ -6,7 +6,6 @@
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteApiBase.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteStatisticModels.h"
@@ -183,6 +182,52 @@ public:
 		, const THandler<FAccelByteModelsGlobalStatItemValueResponse>& OnSuccess
 		, const FErrorHandler& OnError);
 
+	/**
+	 * @brief Get user stat items with cycle
+	 *
+	 * @param CycleId the CycleId where the stat items belong to
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserStatCycleItemPagingSlicedResult
+	 * @param OnError This will be called when the operation failed
+	 * @param Limit Page size, default value is 20.
+	 * @param Offset Page number, default value is 0.
+	 * @param StatCodes Optional. the StatCode of the user stat item. Determine which stat code to get with the cycle id.
+	 */
+	void GetUserStatCycleItems(
+		const FString& CycleId,
+		const THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult>& OnSuccess,
+		const FErrorHandler& OnError,
+		const int32 Limit = 20,
+		const int32 Offset = 0,
+		const TArray<FString> StatCodes = TArray<FString>());
+
+	/**
+	 * @brief Get Statistic Cycle Config
+	 * 
+	 * @param CycleId The CycleId of the config
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsStatCycleConfig
+	 * @param OnError This will be called when the operation failed
+	 */
+	void GetStatCycleConfig(
+		const FString& CycleId,
+		const THandler<FAccelByteModelsStatCycleConfig>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get List of Statistic Cycle Config
+	 * 
+	 * @param CycleType 
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsStatCycleConfig
+	 * @param OnError This will be called when the operation failed
+	 * @param Limit Page size, default value is 20.
+	 * @param Offset Page number, default value is 0
+	 */
+	void GetListStatCycleConfigs(
+		const EAccelByteCycle& CycleType,
+		const THandler<FAccelByteModelsStatCycleConfigPagingResult>& OnSuccess,
+		const FErrorHandler& OnError,
+		const int32 Limit = 20,
+		const int32 Offset = 0);
+
 #if !UE_BUILD_SHIPPING
 	/**
 	 * @brief Bulk reset multiple user's statitems value.
@@ -201,6 +246,7 @@ private:
 	Statistic() = delete;
 	Statistic(Statistic const&) = delete;
 	Statistic(Statistic&&) = delete;
+	
 };
 } // Namespace Api
 } // Namespace AccelByte

@@ -365,6 +365,7 @@ namespace AccelByte
 		CachedTokenNotFound = 14301,
 		UnableToSerializeCachedToken = 14302,
 		CachedTokenExpired = 14303,
+		Deprecated = 14901,
 		//
 		//GameServer-side Error Code List
 		//

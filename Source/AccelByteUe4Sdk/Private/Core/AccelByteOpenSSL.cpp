@@ -24,7 +24,6 @@ void FRSAEncryptionOpenSSL::Initialize()
 {
 	if (State != EState::Uninitialized)
 	{
-		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::Initialize: Invalid state. Was %i, but should be Uninitialized"), State);
 		return;
 	}
 
@@ -105,10 +104,7 @@ FRSAKeyHandle FRSAEncryptionOpenSSL::GenerateNewKey(int32 InKeySizeInBits)
 	BigNumToArray(localPublicModulus, Modulus, KeySizeInBytes);
 	BigNumToArray(localPublicExponent, PublicExponent, KeySizeInBytes);
 	BigNumToArray(localPrivateExponent, PrivateExponent, KeySizeInBytes);
-
 #endif // !PLATFORM_SWITCH
-
-	check(KeySizeInBytes == GetKeySizeInBytes(Key))
 
 	Initialize();
 
@@ -127,6 +123,7 @@ FRSAKeyHandle FRSAEncryptionOpenSSL::CreateKey(const TArray<uint8>& InPublicExpo
 	Modulus = InModulus;
 
 #if !PLATFORM_SWITCH
+
 	Key = openssl::RSA_new();
 
 	openssl::BIGNUM* BN_PublicExponent = PublicExponent.Num() > 0 ? openssl::BN_new() : nullptr;
@@ -160,16 +157,16 @@ FRSAKeyHandle FRSAEncryptionOpenSSL::CreateKey(const TArray<uint8>& InPublicExpo
 	return Key;
 }
 
+#if !PLATFORM_SWITCH
 bool FRSAEncryptionOpenSSL::OnSign(const FRSAKeyHandle InKey, const TArray<uint8>& InMsg, TArray<uint8>& Out)
 {
 	bool Result = false;
-	
-#if !PLATFORM_SWITCH
+
 	bool NeedSigning = true;
 	size_t OutLength = 0;
-	
+
 	openssl::EVP_MD_CTX* RSASignCtx = openssl::EVP_MD_CTX_create();
-	if (RSASignCtx == nullptr) 
+	if (RSASignCtx == nullptr)
 	{
 		return Result;
 	}
@@ -186,7 +183,7 @@ bool FRSAEncryptionOpenSSL::OnSign(const FRSAKeyHandle InKey, const TArray<uint8
 	{
 		Out.AddUninitialized(OutLength);
 		Out[Out.Num() - 1] = 0;
-		if (EVP_DigestSignFinal(RSASignCtx, Out.GetData(), &OutLength) > 0) 
+		if (EVP_DigestSignFinal(RSASignCtx, Out.GetData(), &OutLength) > 0)
 		{
 			Result = true;
 		}
@@ -195,7 +192,7 @@ bool FRSAEncryptionOpenSSL::OnSign(const FRSAKeyHandle InKey, const TArray<uint8
 	openssl::EVP_MD_CTX_destroy(RSASignCtx);
 	RSASignCtx = nullptr;
 
-#endif // !PLATFORM_SWITCH
+
 
 	return Result;
 }
@@ -204,11 +201,10 @@ bool FRSAEncryptionOpenSSL::OnVerifySignature(FRSAKeyHandle InKey, const TArray<
 {
 	bool Result = false;
 
-#if !PLATFORM_SWITCH
 	bool NeedVerify = true;
-	
+
 	openssl::EVP_MD_CTX* m_RSAVerifyCtx = openssl::EVP_MD_CTX_create();
-	if (m_RSAVerifyCtx == nullptr) 
+	if (m_RSAVerifyCtx == nullptr)
 	{
 		return Result;
 	}
@@ -218,11 +214,11 @@ bool FRSAEncryptionOpenSSL::OnVerifySignature(FRSAKeyHandle InKey, const TArray<
 
 	NeedVerify &= openssl::EVP_DigestVerifyInit(m_RSAVerifyCtx, NULL, openssl::EVP_sha256(), NULL, RSAKeyPairSpec) > 0;
 	NeedVerify &= openssl::EVP_DigestVerifyUpdate(m_RSAVerifyCtx, InMsg.GetData(), InMsg.Num()) > 0;
-	
+
 	if (NeedVerify)
 	{
 		int AuthStatus = openssl::EVP_DigestVerifyFinal(m_RSAVerifyCtx, Signature.GetData(), Signature.Num());
-		if (AuthStatus == 1) 
+		if (AuthStatus == 1)
 		{
 			Result = true;
 		}
@@ -230,11 +226,10 @@ bool FRSAEncryptionOpenSSL::OnVerifySignature(FRSAKeyHandle InKey, const TArray<
 
 	openssl::EVP_MD_CTX_destroy(m_RSAVerifyCtx);
 	m_RSAVerifyCtx = nullptr;
-	
-#endif // !PLATFORM_SWITCH
 
 	return Result;
 }
+#endif // !PLATFORM_SWITCH
 
 bool FRSAEncryptionOpenSSL::SignMessage(const TArray<uint8>& InMsg, TArray<uint8>& Out)
 {
@@ -243,9 +238,12 @@ bool FRSAEncryptionOpenSSL::SignMessage(const TArray<uint8>& InMsg, TArray<uint8
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::SignMessage: Invalid state. Was %i, but should be Initialized"), State);
 		return false;
 	}
-
+#if PLATFORM_SWITCH
+	return false;
+#else
 	TArray<uint8> EncMsg;
-	if (OnSign(Key, InMsg, EncMsg)) {
+	if (OnSign(Key, InMsg, EncMsg))
+	{
 		FString OutStr = FBase64::Encode(EncMsg);
 		Out.AddUninitialized(OutStr.Len());
 		if (0 < StringToBytes(OutStr, Out.GetData(), OutStr.Len()))
@@ -254,6 +252,7 @@ bool FRSAEncryptionOpenSSL::SignMessage(const TArray<uint8>& InMsg, TArray<uint8
 		}
 	}
 	return false;
+#endif // PLATFORM_SWITCH
 }
 
 bool FRSAEncryptionOpenSSL::VerifySignature(const TArray<uint8>& InMsg, const TArray<uint8>& InSignature)
@@ -264,6 +263,9 @@ bool FRSAEncryptionOpenSSL::VerifySignature(const TArray<uint8>& InMsg, const TA
 		return false;
 	}
 
+#if PLATFORM_SWITCH
+	return false;
+#else
 	FString InStr = BytesToString(InSignature.GetData(), InSignature.Num());
 
 	TArray<uint8> EncMsg;
@@ -274,6 +276,7 @@ bool FRSAEncryptionOpenSSL::VerifySignature(const TArray<uint8>& InMsg, const TA
 
 	bool Result = OnVerifySignature(Key, EncMsg, InMsg);
 	return Result;
+#endif // PLATFORM_SWITCH
 }
 
 int32 FRSAEncryptionOpenSSL::EncryptPublic(const TArrayView<const uint8> InSource, TArray<uint8>& OutDestination)
@@ -284,6 +287,13 @@ int32 FRSAEncryptionOpenSSL::EncryptPublic(const TArrayView<const uint8> InSourc
 		return -1;
 	}
 
+#if PLATFORM_SWITCH
+	OutDestination.AddZeroed(InSource.Num());
+	OutDestination.SetNum(InSource.Num());
+	UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("RSA's EncryptPublic() is disabled on nintendo switch!"));
+	FMemory::Memcpy(OutDestination.GetData(), InSource.GetData(), InSource.Num());
+	return OutDestination.Num();
+#else
 	if (InSource.Num() > GetMaxDataSize())
 	{
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: The data to be encrypted exceeds the maximum for this modulus of (%d) bytes."), InSource.Num(), GetMaxDataSize());
@@ -292,16 +302,14 @@ int32 FRSAEncryptionOpenSSL::EncryptPublic(const TArrayView<const uint8> InSourc
 
 	OutDestination.SetNum(GetKeySizeInBytes());
 	int NumEncryptedBytes = -1;
-
-#if !PLATFORM_SWITCH
 	NumEncryptedBytes = openssl::RSA_public_encrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (openssl::RSA*)Key, PaddingMode);
-#endif // !PLATFORM_SWITCH
 	if (NumEncryptedBytes == -1)
 	{
+		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: not supported PaddingMode."));
 		OutDestination.Empty(0);
 	}
-
 	return NumEncryptedBytes;
+#endif // PLATFORM_SWITCH
 }
 
 int32 FRSAEncryptionOpenSSL::DecryptPublic(const TArrayView<const uint8> InSource, TArray<uint8>& OutDestination)
@@ -312,12 +320,17 @@ int32 FRSAEncryptionOpenSSL::DecryptPublic(const TArrayView<const uint8> InSourc
 		return -1;
 	}
 
-	int NumDecryptedBytes = -1;
-
-#if !PLATFORM_SWITCH
+#if PLATFORM_SWITCH
+	OutDestination.AddZeroed(InSource.Num());
+	OutDestination.SetNum(InSource.Num());
+	UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("RSA's DecryptPublic() is disabled on nintendo switch!"));
+	FMemory::Memcpy(OutDestination.GetData(), InSource.GetData(), InSource.Num());
+	return OutDestination.Num();
+#else
 	OutDestination.SetNum(GetMaxDataSize());
+
+	int NumDecryptedBytes = -1;
 	NumDecryptedBytes = openssl::RSA_public_decrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (openssl::RSA*)Key, PaddingMode);
-#endif // !PLATFORM_SWITCH
 
 	if (NumDecryptedBytes == -1)
 	{
@@ -328,6 +341,7 @@ int32 FRSAEncryptionOpenSSL::DecryptPublic(const TArrayView<const uint8> InSourc
 		OutDestination.SetNum(NumDecryptedBytes);
 	}
 	return NumDecryptedBytes;
+#endif // PLATFORM_SWITCH
 }
 
 int32 FRSAEncryptionOpenSSL::EncryptPrivate(const TArrayView<const uint8> InSource, TArray<uint8>& OutDestination)
@@ -338,6 +352,13 @@ int32 FRSAEncryptionOpenSSL::EncryptPrivate(const TArrayView<const uint8> InSour
 		return -1;
 	}
 
+#if PLATFORM_SWITCH
+	OutDestination.AddZeroed(InSource.Num());
+	OutDestination.SetNum(InSource.Num());
+	UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("RSA's EncryptPrivate() is disabled on nintendo switch!"));
+	FMemory::Memcpy(OutDestination.GetData(), InSource.GetData(), InSource.Num());
+	return OutDestination.Num();
+#else
 	if (InSource.Num() > GetMaxDataSize())
 	{
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: The data to be encrypted exceeds the maximum for this modulus of (%d) bytes."), InSource.Num(), GetMaxDataSize());
@@ -345,17 +366,17 @@ int32 FRSAEncryptionOpenSSL::EncryptPrivate(const TArrayView<const uint8> InSour
 	}
 
 	OutDestination.SetNum(GetKeySizeInBytes());
-	int NumEncryptedBytes = -1;
 
-#if !PLATFORM_SWITCH
+	int NumEncryptedBytes = -1;
 	NumEncryptedBytes = RSA_private_encrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (openssl::RSA*)Key, PaddingMode);
-#endif // !PLATFORM_SWITCH
 
 	if (NumEncryptedBytes == -1)
 	{
+		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: not supported PaddingMode."));
 		OutDestination.Empty(0);
 	}
 	return NumEncryptedBytes;
+#endif // PLATFORM_SWITCH
 }
 
 int32 FRSAEncryptionOpenSSL::DecryptPrivate(const TArrayView<const uint8> InSource, TArray<uint8>& OutDestination)
@@ -366,12 +387,17 @@ int32 FRSAEncryptionOpenSSL::DecryptPrivate(const TArrayView<const uint8> InSour
 		return -1;
 	}
 
-	int NumDecryptedBytes = -1;
-
-#if !PLATFORM_SWITCH
+#if PLATFORM_SWITCH
+	OutDestination.AddZeroed(InSource.Num());
+	OutDestination.SetNum(InSource.Num());
+	UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("RSA's DecryptPrivate() is disabled on nintendo switch!"));
+	FMemory::Memcpy(OutDestination.GetData(), InSource.GetData(), InSource.Num());
+	return OutDestination.Num();
+#else
 	OutDestination.SetNum(GetMaxDataSize());
+
+	int NumDecryptedBytes = -1;
 	NumDecryptedBytes = RSA_private_decrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (openssl::RSA*)Key, PaddingMode);
-#endif // !PLATFORM_SWITCH
 
 	if (NumDecryptedBytes == -1)
 	{
@@ -382,12 +408,14 @@ int32 FRSAEncryptionOpenSSL::DecryptPrivate(const TArrayView<const uint8> InSour
 		OutDestination.SetNum(NumDecryptedBytes);
 	}
 	return NumDecryptedBytes;
+#endif // PLATFORM_SWITCH
 }
 
 void FRSAEncryptionOpenSSL::DestroyKey(FRSAKeyHandle InKey)
 {
 #if !PLATFORM_SWITCH
-	if (nullptr == InKey) {
+	if (nullptr == InKey)
+	{
 		return openssl::RSA_free((openssl::RSA*)Key);
 	}
 	openssl::RSA_free((openssl::RSA*)InKey);
@@ -396,15 +424,16 @@ void FRSAEncryptionOpenSSL::DestroyKey(FRSAKeyHandle InKey)
 
 int32 FRSAEncryptionOpenSSL::GetKeySizeInBytes(FRSAKeyHandle InKey)
 {
-	if (nullptr == InKey) {
+	if (nullptr == InKey)
+	{
 		return KeySizeInBytes;
 	}
 
-#if !PLATFORM_SWITCH
-	return openssl::RSA_size((openssl::RSA*)InKey);
-#else
+#if PLATFORM_SWITCH
 	return KeySizeInBytes;
-#endif // !PLATFORM_SWITCH
+#else
+	return openssl::RSA_size((openssl::RSA*)InKey);
+#endif // PLATFORM_SWITCH
 }
 
 void FAESEncryptionOpenSSL::Initialize()
@@ -417,13 +446,14 @@ void FAESEncryptionOpenSSL::Initialize()
 
 #if !PLATFORM_SWITCH
 	/** Select encryption module based on cipher size (Bytes) */
-	switch (Key.Num()) {
-	case 16: Cipher = openssl::EVP_aes_128_cbc(); break;
-	case 24: Cipher = openssl::EVP_aes_192_cbc(); break;
-	//case 32: Cipher = openssl::EVP_aes_256_cbc(); break;
-	//case 32: Cipher = openssl::EVP_aes_256_cbc_hmac_sha1(); break;
-	case 32: Cipher = openssl::EVP_aes_256_cbc_hmac_sha256(); break;
-	default: return;
+	switch (Key.Num())
+	{
+		case 16: Cipher = openssl::EVP_aes_128_cbc(); break;
+		case 24: Cipher = openssl::EVP_aes_192_cbc(); break;
+		//case 32: Cipher = openssl::EVP_aes_256_cbc(); break;
+		//case 32: Cipher = openssl::EVP_aes_256_cbc_hmac_sha1(); break;
+		case 32: Cipher = openssl::EVP_aes_256_cbc_hmac_sha256(); break;
+		default: return;
 	}
 #endif // !PLATFORM_SWITCH
 
@@ -442,6 +472,7 @@ void FAESEncryptionOpenSSL::Empty()
 	State = EState::Uninitialized;
 }
 
+#if !PLATFORM_SWITCH
 bool FAESEncryptionOpenSSL::GenerateRandomBytes(TArray<uint8>& OutKey, uint32& InSizeBytes)
 {
 	bool bResult = false;
@@ -450,7 +481,6 @@ bool FAESEncryptionOpenSSL::GenerateRandomBytes(TArray<uint8>& OutKey, uint32& I
 		return bResult;
 	}
 
-#if !PLATFORM_SWITCH
 	OutKey.Empty(InSizeBytes);
 	OutKey.AddUninitialized(InSizeBytes);
 
@@ -459,10 +489,10 @@ bool FAESEncryptionOpenSSL::GenerateRandomBytes(TArray<uint8>& OutKey, uint32& I
 	{
 		OutKey.Empty();
 	}
-#endif // !PLATFORM_SWITCH
 
 	return bResult;
 }
+#endif // !PLATFORM_SWITCH
 
 void FAESEncryptionOpenSSL::GenerateKey(uint32 InKeySizeInBytes, uint32 InBlockSize)
 {
@@ -472,7 +502,8 @@ void FAESEncryptionOpenSSL::GenerateKey(uint32 InKeySizeInBytes, uint32 InBlockS
 		return;
 	}
 
-	if ((InKeySizeInBytes != 16) && (InKeySizeInBytes != 24) && (InKeySizeInBytes != 32)) {
+	if ((InKeySizeInBytes != 16) && (InKeySizeInBytes != 24) && (InKeySizeInBytes != 32))
+	{
 		return;
 	}
 
@@ -480,8 +511,17 @@ void FAESEncryptionOpenSSL::GenerateKey(uint32 InKeySizeInBytes, uint32 InBlockS
 	KeySizeInBits = KeySizeInBytes * 8;
 	BlockSize = InBlockSize;
 
-	if (!GenerateRandomBytes(Key, InKeySizeInBytes)) return;
-	if (!GenerateRandomBytes(IV, InBlockSize)) return;
+#if !PLATFORM_SWITCH
+	if (!GenerateRandomBytes(Key, InKeySizeInBytes))
+	{
+		return;
+	}
+
+	if (!GenerateRandomBytes(IV, InBlockSize))
+	{
+		return;
+	}
+#endif // !PLATFORM_SWITCH
 
 	Initialize();
 }
@@ -499,7 +539,11 @@ void FAESEncryptionOpenSSL::Decrypt(const TArrayView<const uint8>& InCiphertext,
 		OutPlaintext.AddZeroed(Length - OutPlaintext.Num());
 	}
 
-#if !PLATFORM_SWITCH
+#if PLATFORM_SWITCH
+	OutPlaintext.SetNum(InCiphertext.Num());
+	UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("AES's Decrypt() is disabled on nintendo switch!"));
+	FMemory::Memcpy(OutPlaintext.GetData(), InCiphertext.GetData(), InCiphertext.Num());
+#else
 	const uint8* const KeyPtr = Key.GetData();
 	const uint8* const InitializationVectorPtr = IV.GetData();
 
@@ -528,13 +572,13 @@ void FAESEncryptionOpenSSL::Decrypt(const TArrayView<const uint8>& InCiphertext,
 	const int FinalizeResult = openssl::EVP_DecryptFinal_ex(CipherCtx.Get(), OutPlaintext.GetData() + UpdateBytesWritten, &FinalizeBytesWritten);
 	if (FinalizeResult != 1)
 	{
-		//UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Decrypt: EVP_DecryptFinal_ex failed. Result=[%d]"), FinalizeResult);
+		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Decrypt: EVP_DecryptFinal_ex failed. Result=[%d]"), FinalizeResult);
 		return;
 	}
 
 	// Truncate message to final length
 	OutPlaintext.SetNum(UpdateBytesWritten + FinalizeBytesWritten);
-#endif // !PLATFORM_SWITCH
+#endif // PLATFORM_SWITCH
 }
 
 void FAESEncryptionOpenSSL::Encrypt(const TArrayView<const uint8>& InPlaintext, TArray<uint8>& OutCiphertext, int32& Length)
@@ -545,7 +589,16 @@ void FAESEncryptionOpenSSL::Encrypt(const TArrayView<const uint8>& InPlaintext, 
 		return;
 	}
 
-#if !PLATFORM_SWITCH
+	if (OutCiphertext.Num() < Length)
+	{
+		OutCiphertext.AddZeroed(Length - OutCiphertext.Num());
+	}
+
+#if PLATFORM_SWITCH
+	OutCiphertext.SetNum(Length);
+	UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("AES's Encrypt() is disabled on nintendo switch!"));
+	FMemory::Memcpy(OutCiphertext.GetData(), InPlaintext.GetData(), InPlaintext.Num());
+#else
 	const uint8* const KeyPtr = Key.GetData();
 	const uint8* const InitializationVectorPtr = IV.GetData();
 
@@ -555,11 +608,6 @@ void FAESEncryptionOpenSSL::Encrypt(const TArrayView<const uint8>& InPlaintext, 
 	{
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Encrypt: EVP_EncryptInit_ex failed. Result=[%d]"), InitResult);
 		return;
-	}
-
-	if (OutCiphertext.Num() < Length)
-	{
-		OutCiphertext.AddZeroed(Length - OutCiphertext.Num());
 	}
 
 	int32 UpdateBytesWritten = 0;
@@ -579,13 +627,13 @@ void FAESEncryptionOpenSSL::Encrypt(const TArrayView<const uint8>& InPlaintext, 
 	const int FinalizeResult = openssl::EVP_EncryptFinal_ex(CipherCtx.Get(), OutCiphertext.GetData() + UpdateBytesWritten, &FinalizeBytesWritten);
 	if (FinalizeResult != 1)
 	{
-		//UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Encrypt: EVP_EncryptFinal_ex failed. Result=[%d]"), FinalizeResult);
+		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Encrypt: EVP_EncryptFinal_ex failed. Result=[%d]"), FinalizeResult);
 		return;
 	}
 
 	// Truncate message to final length
 	OutCiphertext.SetNum(UpdateBytesWritten + FinalizeBytesWritten);
-#endif // !PLATFORM_SWITCH
+#endif // PLATFORM_SWITCH
 }
 
 } // Namespace AccelByte

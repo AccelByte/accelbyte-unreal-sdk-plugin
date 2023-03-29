@@ -1591,10 +1591,6 @@ void Lobby::OnConnected()
 			{
 				RefreshToken(CredentialsRef.GetAccessToken());
 			}
-			else
-			{
-				Disconnect(true);
-			}
 		});
 		
 	ConnectSuccess.ExecuteIfBound();

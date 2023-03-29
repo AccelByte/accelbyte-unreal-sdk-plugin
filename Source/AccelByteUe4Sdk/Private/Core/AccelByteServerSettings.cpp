@@ -102,6 +102,28 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 	{
 		GConfig->GetInt(*DefaultServerSection, TEXT("WatchdogHeartbeatInterval"), WatchdogHeartbeatInterval, GEngineIni);
 	}
+
+	LoadFallback(SectionPath, TEXT("StatsDUrl"), StatsDServerUrl);
+	FString StatsDPortString;
+	LoadFallback(SectionPath, TEXT("StatsDPort"), StatsDPortString);
+	if (StatsDPortString.IsNumeric())
+	{
+		StatsDServerPort = FCString::Atoi(*StatsDPortString);
+	}
+	else
+	{
+		StatsDServerPort = 8125;
+	}
+	FString StatsDMetricIntervalString;
+	LoadFallback(SectionPath, TEXT("StatsDMetricInterval"), StatsDMetricIntervalString);
+	if (StatsDMetricIntervalString.IsNumeric())
+	{
+		StatsDMetricInterval = FCString::Atoi(*StatsDMetricIntervalString);
+	}
+	else
+	{
+		StatsDMetricInterval = 60;
+	}
 #endif
 }
 
