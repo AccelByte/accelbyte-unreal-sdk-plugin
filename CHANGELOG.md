@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [22.0.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.3%0D22.0.2) (2023-04-03)
+
+
+### Bug Fixes
+
+* **openssl:** missing include in openSSL ([abc0990](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/abc0990b44f7a1f0acfaa597e116745786992127))
+* **statistic:** deprecation warning for ANY_PACKAGE in Unreal Engine 5.1 ([6549396](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6549396e1304af4c4b3c70d1ee440c3449e68f9a))
+
 ### [22.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.2%0D22.0.1) (2023-03-29)
 
 ### [22.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.1%0D22.0.0) (2023-03-29)

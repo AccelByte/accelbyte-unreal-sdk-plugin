@@ -316,11 +316,9 @@ void Statistic::GetListStatCycleConfigs(const EAccelByteCycle& CycleType,
 		{TEXT("offset"), FString::FromInt(Offset)},
 	};
 
-	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteCycle"), true);
-	if (EnumPtr)
+	FString EnumText = FAccelByteUtilities::GetUEnumValueAsString(CycleType);
+	if (!EnumText.IsEmpty())
 	{
-		FString EnumText = EnumPtr->GetNameStringByIndex(static_cast<int32>(CycleType));
-
 		QueryParams.Add(TEXT("cycleType"), EnumText.ToUpper());
 	}
 

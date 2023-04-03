@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/IEngineCrypto.h"
 
 #if !PLATFORM_SWITCH
 namespace openssl
@@ -13,6 +14,7 @@ THIRD_PARTY_INCLUDES_START
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/rand.h>
+#include <openssl/aes.h>
 THIRD_PARTY_INCLUDES_END
 }
 #endif // PLATFORM_SWITCH
