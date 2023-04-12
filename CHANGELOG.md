@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [22.0.4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.4%0D22.0.3) (2023-04-10)
+
+
+### Bug Fixes
+
+* resolve conflict 22.0.2 to release candidate branch ([3cc1c19](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3cc1c197f61baf51791fbbb7baf89382cf28a1c4))
+
 ### [22.0.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.3%0D22.0.2) (2023-04-03)
 
 
