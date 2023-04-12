@@ -11,6 +11,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "AccelByteCredentials.generated.h"
 
 namespace AccelByte
@@ -73,7 +74,9 @@ private:
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FTokenRefreshedEvent TokenRefreshedEvent;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;
-	FUserData UserData;
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
+    FUserData UserData;
+#endif
 	FAccountUserData AccountUserData;
 
 	static const FString DefaultSection;
