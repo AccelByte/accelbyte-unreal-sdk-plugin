@@ -43,6 +43,10 @@
     "minVersion": "1.18.0",
     "maxVersion": "1.18.0"
   },
+  "lobby": {
+    "minVersion": "3.18.0",
+    "maxVersion": "3.18.0"
+  },
   "dsmcontroller": {
     "minVersion": "6.2.4",
     "maxVersion": "6.2.4"
