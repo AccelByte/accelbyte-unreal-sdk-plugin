@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Misc/DateTime.h"
 #include "JsonUtilities.h"
+#include "Core/AccelByteUtilities.h"
 #include "Models/AccelByteUserModels.h"
 #include "AccelByteChatModels.generated.h"
 
