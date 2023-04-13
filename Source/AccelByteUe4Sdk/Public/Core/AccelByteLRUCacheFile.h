@@ -80,6 +80,12 @@ private:
 	*/
 	inline void FreeCache() override 
 	{
+#if FW_BUILD_ENGINE_CHANGE_MISC
+	    if (IsEngineExitRequested())
+	    {
+	        return;
+	    }
+#endif	    
 		FDirectoryPath Directory = DataStorage.GetAbsoluteFileDirectory();
 		FString AbsoluteDirPath = Directory.Path;
 		TArray<FString> Files;

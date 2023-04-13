@@ -4,6 +4,8 @@
 
 #include "Models/AccelByteSessionModels.h"
 #include "Core/AccelByteReport.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 
 FAccelByteModelsV2GameSessionQuery::FAccelByteModelsV2GameSessionQuery()
 {

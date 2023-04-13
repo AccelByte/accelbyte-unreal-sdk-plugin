@@ -11,6 +11,7 @@
 #include "Misc/CString.h"
 #include <memory>
 #include "Kismet/GameplayStatics.h"
+#include "Misc/Base64.h"
 #include "Misc/SecureHash.h"
 
 #if !PLATFORM_SWITCH

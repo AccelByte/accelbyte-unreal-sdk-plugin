@@ -3,6 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #pragma once
+#include "Containers/Queue.h"
+#include "Templates/SharedPointer.h"
 
 namespace AccelByte
 {

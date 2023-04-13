@@ -3,6 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteOpenSSL.h"
+
+#include "Misc/Base64.h"
 #include "Modules/ModuleManager.h"
 
 #if PLATFORM_WINDOWS
