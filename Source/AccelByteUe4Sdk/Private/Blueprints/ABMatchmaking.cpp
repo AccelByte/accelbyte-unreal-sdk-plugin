@@ -6,6 +6,8 @@
 #include "Api/AccelByteLobbyApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
+
 void UABMatchmaking::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

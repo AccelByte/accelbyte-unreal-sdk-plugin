@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABSessionAttribute.generated.h"
 
-using namespace AccelByte;
-
 USTRUCT(BlueprintType)
 struct FSetSessionAttributeRequest
 {
@@ -44,7 +42,7 @@ class UABSessionAttribute : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 //Request-Response
 public:
@@ -66,6 +64,6 @@ public:
 		FDErrorHandler OnError);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };
 

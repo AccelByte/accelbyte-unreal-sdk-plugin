@@ -4,7 +4,9 @@
 
 #include "Blueprints/ABServerOauth2.h"
 
-void UABServerOauth2::SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr)
+using namespace AccelByte;
+
+void UABServerOauth2::SetServerApiClient(FServerApiClientPtr const& NewServerApiClientPtr)
 {
 	ApiClientPtr = NewServerApiClientPtr;
 }

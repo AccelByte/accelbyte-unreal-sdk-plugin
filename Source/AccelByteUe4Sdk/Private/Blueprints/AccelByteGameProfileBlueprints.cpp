@@ -6,6 +6,7 @@
 #include "Api/AccelByteGameProfileApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using AccelByte::FRegistry;
 using AccelByte::FErrorHandler;
 

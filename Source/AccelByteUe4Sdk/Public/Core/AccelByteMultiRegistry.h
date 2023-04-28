@@ -8,8 +8,6 @@
 #include "Api/AccelByteUserProfileApi.h"
 #include "AccelByteServerApiClient.h"
 
-using namespace AccelByte;
-
 namespace AccelByte
 {
 

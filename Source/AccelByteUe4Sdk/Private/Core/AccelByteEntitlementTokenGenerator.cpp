@@ -7,6 +7,7 @@
 #include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteJwtWrapper.h"
 
+using namespace AccelByte;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteEntitlementTokenGenerator, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteEntitlementTokenGenerator);
 

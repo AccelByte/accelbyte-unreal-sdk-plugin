@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABMatchmaking.generated.h"
 
-using namespace AccelByte;
-
 USTRUCT(BlueprintType)
 struct FStartMatchmakingRequest
 {
@@ -77,7 +75,7 @@ class UABMatchmaking : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	//Request-Response
 public:
@@ -124,5 +122,5 @@ public:
 
 	
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

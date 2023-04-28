@@ -613,6 +613,113 @@ void CloudSave::BulkGetGameRecords(TArray<FString> const& Keys
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
 }
 
+void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
+	, THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (UserId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Record Keys Failed, UserId cannot be empty!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/public")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId);
+
+	const TMap<FString, FString> QueryParams = {
+	{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+	{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")}
+	};
+
+	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess](FJsonObject const& JsonObject)
+		{
+			FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse PlayerRecordKeys;
+			TArray<FAccelByteModelsGetPublicUserRecordKeys> Data{};
+
+			const TArray<TSharedPtr<FJsonValue>>* JsonData;
+			JsonObject.TryGetArrayField("data", JsonData);
+			for (const TSharedPtr<FJsonValue>& JsonValue : *JsonData)
+			{
+				FAccelByteModelsGetPublicUserRecordKeys RecordKeys{};
+				auto jsonObj = JsonValue->AsObject();
+				jsonObj->TryGetStringField("key", RecordKeys.Key);
+				jsonObj->TryGetStringField("user_id", RecordKeys.UserId);
+				Data.Add(RecordKeys);
+			}
+			PlayerRecordKeys.Data = Data;
+
+			TSharedPtr<FJsonObject> const* pagingJsonObject;
+			JsonObject.TryGetObjectField("paging", pagingJsonObject);
+			pagingJsonObject->Get()->TryGetStringField(TEXT("previous"), PlayerRecordKeys.Paging.Previous);
+			pagingJsonObject->Get()->TryGetStringField(TEXT("next"), PlayerRecordKeys.Paging.Next);
+			pagingJsonObject->Get()->TryGetStringField(TEXT("first"), PlayerRecordKeys.Paging.First);
+			pagingJsonObject->Get()->TryGetStringField(TEXT("last"), PlayerRecordKeys.Paging.Last);
+
+			OnSuccess.ExecuteIfBound(PlayerRecordKeys);
+		});
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
+}
+
+void CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
+	, TArray<FString> const& Keys
+	, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (UserId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Records Failed, UserId cannot be empty!"));
+		return;
+	}
+
+	if (Keys.Num() <= 0)
+	{
+		OnSuccess.ExecuteIfBound(FListAccelByteModelsUserRecord{});
+		return;
+	}
+
+	if (Keys.Num() > MAX_BULK_KEY_COUNT)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Bulk Get Other Player Public Records Failed, Keys cannot exceed %d!"), MAX_BULK_KEY_COUNT));
+		return;
+	}
+
+	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/public/bulk")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId);
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess](FJsonObject const& JSONObject)
+		{
+			FListAccelByteModelsUserRecord UserRecords;
+			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField("data");
+
+			for (const auto& JSONArrayValue : JSONArray)
+			{
+				const TSharedPtr<FJsonObject> JSONData = JSONArrayValue->AsObject().ToSharedRef();
+
+				FAccelByteModelsUserRecord UserRecord = ConvertJsonToUserRecord(*JSONData);
+				UserRecords.Data.Add(UserRecord);
+			}
+
+			OnSuccess.ExecuteIfBound(UserRecords);
+		});
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
+}
+
 FJsonObject CloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy
 	, bool bSetPublic
 	, FJsonObject const& RecordRequest)

@@ -10,11 +10,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABGroup.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-using namespace AccelByte::GameServerApi;
-
-
 #pragma region Dynamic Delegates
 // Group (multi-member actions)
 DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateGroupSuccess, const FAccelByteModelsGroupInformation&, Response);
@@ -65,7 +60,7 @@ class UABGroup final : public UObject
 	GENERATED_BODY()
 	
 public:
-	void SetApiClient(const FApiClientPtr NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 #pragma region Group V1	
 	#pragma region Group (multi-member actions)
@@ -1076,5 +1071,5 @@ public:
 #pragma endregion Group V2
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

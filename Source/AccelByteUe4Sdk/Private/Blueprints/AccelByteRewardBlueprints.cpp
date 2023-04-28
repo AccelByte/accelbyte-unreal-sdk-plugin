@@ -7,6 +7,7 @@
 #include "Api/AccelByteRewardApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using AccelByte::Api::Reward;
 using AccelByte::FErrorHandler;
 using AccelByte::THandler;

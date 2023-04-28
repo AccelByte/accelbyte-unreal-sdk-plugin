@@ -132,13 +132,14 @@ private:
 	ServerMatchmaking(ServerMatchmaking&&) = delete;
 
 	bool StatusPollingTick(float DeltaTime);
-	bool bStatusPollingActive;
+	
 	FString StatusPollingMatchId;
 	FHttpRequestCompleteDelegate OnStatusPollingResponse;
 	THandler<FAccelByteModelsMatchmakingResult> OnStatusPollingResponseSuccess;
 	FErrorHandler OnStatusPollingResponseError;
 	FTickerDelegate StatusPollingDelegate;
 	FDelegateHandleAlias StatusPollingDelegateHandle;
+	bool bStatusPollingActive;
 };
 
 } // Namespace Api

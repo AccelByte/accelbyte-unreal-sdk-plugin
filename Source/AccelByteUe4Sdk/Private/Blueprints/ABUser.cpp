@@ -1,7 +1,9 @@
 ﻿#include "Blueprints/ABUser.h"
 #include "JsonUtilities.h"
 
-void UABUser::SetApiClient(FApiClientPtr NewApiClientPtr)
+using namespace AccelByte;
+
+void UABUser::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
 }

@@ -31,8 +31,6 @@
 #include "GameServerApi/AccelByteServerWatchdogApi.h"
 #include "GameServerApi/AccelByteServerMetricExporterApi.h"
 
-using namespace AccelByte;
-
 namespace AccelByte
 {
 class ACCELBYTEUE4SDK_API FServerApiClient final

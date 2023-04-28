@@ -53,7 +53,6 @@ void DataStorageBinaryFile::SaveItem(const FString & Key, const TArray<uint8>& I
 
 void DataStorageBinaryFile::SaveItem(const FString & Key, const FString & Item, const THandler<bool>& OnDone, const FString & FileName)
 {
-	uint8* Output = new uint8[Item.Len()];
 	TArray<uint8> ByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(Item);
 	OnDone.ExecuteIfBound(SaveToFile(FileName, Key, ByteArray));
 }

@@ -8,18 +8,15 @@
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Models/AccelByteDSMModels.h"
 #include "Core/AccelByteMultiRegistry.h"
+#include "GameServerApi/AccelByteServerDSMApi.h"
 #include "ABServerDSM.generated.h"
-
-using namespace AccelByte;
-using namespace AccelByte::Api;
-using namespace AccelByte::GameServerApi;
 
 UENUM(BlueprintType)
 enum class UEnumServerType : uint8
 {
 	NONE = 0,
-	CLOUDSERVER = (uint8)EServerType::CLOUDSERVER,
-	LOCALSERVER = (uint8)EServerType::LOCALSERVER
+	CLOUDSERVER = (uint8)AccelByte::GameServerApi::EServerType::CLOUDSERVER,
+	LOCALSERVER = (uint8)AccelByte::GameServerApi::EServerType::LOCALSERVER
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDServerSessionResponseDelegate, FAccelByteModelsServerSessionResponse, Response);
@@ -30,7 +27,7 @@ class UABServerDSM final : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
+	void SetServerApiClient(AccelByte::FServerApiClientPtr const& NewServerApiClientPtr);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
@@ -70,5 +67,5 @@ public:
 	int32 GetPlayerNum();
 
 private:
-	FServerApiClientPtr ApiClientPtr;
+	AccelByte::FServerApiClientPtr ApiClientPtr;
 };

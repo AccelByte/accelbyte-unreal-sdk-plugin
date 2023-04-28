@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Misc/IEngineCrypto.h"
+#include "Misc/Base64.h"
 
 #if !PLATFORM_SWITCH
 namespace openssl

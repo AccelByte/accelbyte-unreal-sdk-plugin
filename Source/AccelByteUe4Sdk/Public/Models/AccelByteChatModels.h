@@ -8,6 +8,7 @@
 #include "Misc/DateTime.h"
 #include "JsonUtilities.h"
 #include "Models/AccelByteUserModels.h"
+#include "Core/AccelByteUtilities.h"
 #include "AccelByteChatModels.generated.h"
 
 /**

@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABBlock.h"
 
+using namespace AccelByte;
+
 void UABBlock::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

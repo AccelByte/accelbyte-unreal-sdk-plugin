@@ -10,10 +10,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABServerLobby.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-using namespace AccelByte::GameServerApi;
-
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDDataPartyResponseDelegate, FAccelByteModelsDataPartyResponse, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDataNotifDelegate, FAccelByteModelsPartyDataNotif, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPayloadModifier, FJsonObjectWrapper, Payload);
@@ -27,7 +23,7 @@ class UABServerLobby final : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
+	void SetServerApiClient(AccelByte::FServerApiClientPtr const& NewServerApiClientPtr);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Lobby | Api")
@@ -58,5 +54,5 @@ public:
 	void GetListOfBlockedUsers(FString const& UserId, FDListBlockedUserResponseDelegate OnSuccess, FDErrorHandler OnError);
 
 private:
-	FServerApiClientPtr ApiClientPtr;
+	AccelByte::FServerApiClientPtr ApiClientPtr;
 };

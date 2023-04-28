@@ -9,6 +9,7 @@
 #include "AccelByteUe4SdkModule.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using namespace AccelByte::Api;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteServerCredentials, Log, All);

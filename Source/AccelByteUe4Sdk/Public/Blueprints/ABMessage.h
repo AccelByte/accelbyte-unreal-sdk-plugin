@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABMessage.generated.h"
 
-using namespace AccelByte;
-
 USTRUCT(BlueprintType)
 struct FSendPrivateMessageRequest
 {
@@ -68,7 +66,7 @@ class UABMessage : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 //Request-Response
 public:
@@ -113,5 +111,5 @@ public:
 	void SetOnPartyChatNotification(FDPartyChatNotif OnPartyChatNotif);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

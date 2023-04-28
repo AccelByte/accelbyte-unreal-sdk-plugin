@@ -6,9 +6,9 @@
 
 #include "CoreMinimal.h"
 #include "Runtime/Launch/Resources/Version.h"
+#include "Containers/Ticker.h"
 
 #if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
-#include "Containers/Ticker.h"
 
 using FTickerAlias = FTSTicker;
 using FDelegateHandleAlias = FTSTicker::FDelegateHandle;

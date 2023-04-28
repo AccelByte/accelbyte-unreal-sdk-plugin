@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABPresence.generated.h"
 
-using namespace AccelByte;
-
 USTRUCT(BlueprintType)
 struct FAccelBytePresenceStatus
 {
@@ -51,7 +49,7 @@ class UABPresence : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 //Request-Response
 public: 
@@ -70,5 +68,5 @@ public:
 	void SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

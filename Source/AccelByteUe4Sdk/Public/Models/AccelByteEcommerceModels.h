@@ -2393,3 +2393,34 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsViewInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | ViewInfo")
 	FJsonObjectWrapper LocalExt{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSellUserEntitlementRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | SellUserEntitlementRequest")
+	int32 UseCount{}; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | SellUserEntitlementRequest")
+	FString RequestId{};
+	
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSellItemEntitlementInfo
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SellItemEntitlementInfo ")
+	FString RequestId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SellItemEntitlementInfo ")
+	bool bReplayed{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SellItemEntitlementInfo ")
+	TArray<FAccelByteModelsCreditSummary> CreditSummaries{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SellItemEntitlementInfo ")
+	FAccelByteModelsEntitlementInfo EntitlementInfo{}; 
+};

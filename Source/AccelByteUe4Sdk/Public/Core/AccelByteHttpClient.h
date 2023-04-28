@@ -17,8 +17,6 @@
 #define REGEX_PATH_AND_PARAM "(\\/?|((\\/)[^\\/\\\\]{1,512}(?:\\7[^\\/\\\\]{1,512})*(\\/?)))"
 #define REGEX_URL "^(" REGEX_BASE_URL_WITH_DOMAIN "|" REGEX_BASE_URL_WITHOUT_DOMAIN ")" REGEX_OPTIONAL_PORT REGEX_PATH_AND_PARAM "$"
 
-using namespace AccelByte;
-
 namespace AccelByte
 {
 	/**

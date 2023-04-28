@@ -11,10 +11,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteGroupBlueprints.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-using namespace AccelByte::GameServerApi;
-
 UCLASS(Blueprintable, BlueprintType)
 class UAccelByteBlueprintsGroup : public UBlueprintFunctionLibrary
 {

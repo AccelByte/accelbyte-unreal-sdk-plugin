@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABBlock.generated.h"
 
-using namespace AccelByte;
-
 USTRUCT(BlueprintType)
 struct FBlockPlayerRequest
 {
@@ -45,7 +43,7 @@ class UABBlock : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 //Request-Response
 public: 
@@ -81,6 +79,6 @@ public:
 	void SetUnblockPlayerNotifDelegate(FDUnblockPlayerNotif OnNotif);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };
 

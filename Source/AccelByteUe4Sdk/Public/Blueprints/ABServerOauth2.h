@@ -10,10 +10,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABServerOauth2.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-using namespace AccelByte::GameServerApi;
-
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDJwkSetDelegate, FJwkSet, Response);
 
 UCLASS(Blueprintable, BlueprintType)
@@ -21,7 +17,7 @@ class UABServerOauth2 final : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
+	void SetServerApiClient(AccelByte::FServerApiClientPtr const& NewServerApiClientPtr);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | OAuth2 | Api")
@@ -34,5 +30,5 @@ public:
 	void ForgetAllCredentials();
 
 private:
-	FServerApiClientPtr ApiClientPtr;
+	AccelByte::FServerApiClientPtr ApiClientPtr;
 };

@@ -14,22 +14,19 @@
 #include "ABServerStatistic.h"
 #include "AccelByteBPServerApiClient.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-
 UCLASS(Blueprintable, BlueprintType)
 class UABServerCredentials final : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	void SetServerApiClient(FServerApiClientPtr const& NewApiClientPtr);
+	void SetServerApiClient(AccelByte::FServerApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Credentials")
 	FString GetAccessToken();
 
 private:
-	FServerApiClientPtr ApiClientPtr;
+	AccelByte::FServerApiClientPtr ApiClientPtr;
 };
 
 
@@ -40,7 +37,7 @@ class UServerApiClient final : public UObject
 public:
 	UServerApiClient();
 
-	void SetServerApiClient(FServerApiClientPtr const& NewApiClientPtr);
+	void SetServerApiClient(AccelByte::FServerApiClientPtr const& NewApiClientPtr);
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerCredentials* Credentials;
@@ -66,7 +63,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerStatistic* ServerStatistic;
 private:
-	FServerApiClientPtr ApiClientPtr;
+	AccelByte::FServerApiClientPtr ApiClientPtr;
 };
 
 UCLASS(Blueprintable, BlueprintType)

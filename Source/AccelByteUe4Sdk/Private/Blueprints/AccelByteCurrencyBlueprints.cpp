@@ -8,6 +8,7 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using AccelByte::Api::Currency;
 using AccelByte::FErrorHandler;
 using AccelByte::THandler;

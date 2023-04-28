@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABCloudSave.h"
 
+using namespace AccelByte;
+
 void UABCloudSave::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
@@ -375,6 +377,50 @@ void UABCloudSave::BulkGetGameRecords(TArray<FString> const& Keys,
 	ApiClientPtr->CloudSave.BulkGetGameRecords(Keys,
 		THandler<FAccelByteModelsListGameRecords>::CreateLambda(
 			[OnSuccess](FAccelByteModelsListGameRecords const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
+void UABCloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
+	, FDModelsPaginatedBulkGetPublicUserRecordKeysResponse const& OnSuccess
+	, FDErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit)
+{
+	ApiClientPtr->CloudSave.BulkGetOtherPlayerPublicRecordKeys(UserId,
+		THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		), Offset, Limit
+	);
+}
+
+void UABCloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
+	, TArray<FString> const& Keys
+	, FDModelsListUserRecords const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->CloudSave.BulkGetOtherPlayerPublicRecords(UserId,
+		Keys,
+		THandler<FListAccelByteModelsUserRecord>::CreateLambda(
+			[OnSuccess](FListAccelByteModelsUserRecord const& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}

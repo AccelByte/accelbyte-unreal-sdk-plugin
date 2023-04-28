@@ -6,9 +6,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABCurrency.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-
 USTRUCT(BlueprintType)
 struct FArrayModelsCurrencyList
 {
@@ -25,7 +22,7 @@ class UABCurrency : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Currency | Api")
@@ -33,5 +30,5 @@ public:
 		EAccelByteCurrencyType CurrencyType = EAccelByteCurrencyType::NONE);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

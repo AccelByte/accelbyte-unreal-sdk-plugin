@@ -808,5 +808,38 @@ void Entitlement::SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStatio
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
+void Entitlement::SellUserEntitlement(FString const& EntitlementId
+	, int32 const& UseCount
+	, FString const& RequestId
+	, THandler<FAccelByteModelsSellItemEntitlementInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (EntitlementId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, EntitlementId is empty."));
+		return;
+	}
+	
+	FAccelByteModelsSellUserEntitlementRequest SellUserEntitlementRequest;
+	SellUserEntitlementRequest.UseCount = UseCount; 
+	SellUserEntitlementRequest.RequestId = RequestId;
+
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s/sell")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *EntitlementId);
+
+	FString Content;
+	TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(SellUserEntitlementRequest);
+	FAccelByteUtilities::RemoveEmptyStrings(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
+	
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
 } // Namespace Api
 }

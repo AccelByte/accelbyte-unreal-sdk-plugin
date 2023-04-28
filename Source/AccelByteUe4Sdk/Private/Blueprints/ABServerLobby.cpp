@@ -4,7 +4,9 @@
 
 #include "Blueprints/ABServerLobby.h"
 
-void UABServerLobby::SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr)
+using namespace AccelByte;
+
+void UABServerLobby::SetServerApiClient(FServerApiClientPtr const& NewServerApiClientPtr)
 {
 	ApiClientPtr = NewServerApiClientPtr;
 }

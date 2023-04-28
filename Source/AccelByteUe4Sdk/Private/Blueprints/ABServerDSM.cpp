@@ -4,7 +4,9 @@
 
 #include "Blueprints/ABServerDSM.h"
 
-void UABServerDSM::SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr)
+using namespace AccelByte;
+
+void UABServerDSM::SetServerApiClient(FServerApiClientPtr const& NewServerApiClientPtr)
 {
 	ApiClientPtr = NewServerApiClientPtr;
 }
@@ -162,7 +164,7 @@ void UABServerDSM::SetServerName(const FString Name)
 
 void UABServerDSM::SetServerType(UEnumServerType Type)
 {
-	ApiClientPtr->ServerDSM.SetServerType((EServerType)(int)Type);
+	ApiClientPtr->ServerDSM.SetServerType((GameServerApi::EServerType)(int)Type);
 }
 
 int32 UABServerDSM::GetPlayerNum()

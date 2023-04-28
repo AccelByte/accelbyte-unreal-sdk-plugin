@@ -26,7 +26,7 @@ void MatchmakingV2::CreateMatchTicket(const FString& MatchPool
 {
 	if (MatchPool.IsEmpty())
 	{
-		OnError.ExecuteIfBound(400, TEXT("MatchPool cannot be empty!"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("MatchPool cannot be empty!"));
 		return;
 	}
 
@@ -54,7 +54,7 @@ void MatchmakingV2::GetMatchTicketDetails(const FString& TicketId
 {
 	if (TicketId.IsEmpty())
 	{
-		OnError.ExecuteIfBound(400, TEXT("TicketId cannot be empty!"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("TicketId cannot be empty!"));
 		return;
 	}
 
@@ -73,7 +73,7 @@ void MatchmakingV2::DeleteMatchTicket(const FString& TicketId
 {
 	if (TicketId.IsEmpty())
 	{
-		OnError.ExecuteIfBound(400, TEXT("TicketId cannot be empty!"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("TicketId cannot be empty!"));
 		return;
 	}
 
@@ -85,6 +85,23 @@ void MatchmakingV2::DeleteMatchTicket(const FString& TicketId
 
 	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
-	
+
+void MatchmakingV2::GetMatchmakingMetrics(const FString& MatchPool,
+	const THandler<FAccelByteModelsV2MatchmakingMetrics>& OnSuccess, const FErrorHandler& OnError)
+{
+	if (MatchPool.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("MatchPool cannot be empty!"));
+		return;
+	}
+
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-pools/%s/metrics")
+		, *SettingsRef.MatchmakingV2ServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *MatchPool);
+
+	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
+}
 }
 }

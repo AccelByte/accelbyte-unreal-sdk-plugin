@@ -7,8 +7,6 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "AccelByteBPLobby.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 USTRUCT(BlueprintType)
@@ -76,7 +74,7 @@ class UABLobby : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	bool IsConnected();
@@ -94,7 +92,7 @@ public:
 	void SetRetryParameters(FSetRetryParametersRequest const& Request);
 
 	// Can not test this through lua yet, removing the UFUNCTION for now
-	void SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator);
+	void SetTokenGenerator(TSharedPtr<AccelByte::IAccelByteTokenGenerator> TokenGenerator);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	FString RequestDS(FRequestDSModel const& Request);
@@ -118,5 +116,5 @@ public:
 	void SetOnErrorNotification(FDErrorHandler OnErrorNotification);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

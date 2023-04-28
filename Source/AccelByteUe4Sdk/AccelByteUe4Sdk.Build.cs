@@ -18,6 +18,7 @@ public class AccelByteUe4Sdk : ModuleRules
 #if UE_4_24_OR_LATER || UE_5_0_OR_LATER
 		bLegacyPublicIncludePaths = false;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
+		PCHUsage = ModuleRules.PCHUsageMode.NoSharedPCHs;
 #else
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 #endif

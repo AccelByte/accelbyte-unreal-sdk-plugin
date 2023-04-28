@@ -17,6 +17,7 @@ ServerMatchmaking::ServerMatchmaking(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, bStatusPollingActive{false}
 {
 	StatusPollingDelegate = FTickerDelegate::CreateRaw(this, &ServerMatchmaking::StatusPollingTick);
 	OnStatusPollingResponse.BindLambda(

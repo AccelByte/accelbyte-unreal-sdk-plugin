@@ -4,7 +4,9 @@
 
 #include "Blueprints/ABServerSessionBrowser.h"
 
-void UABServerSessionBrowser::SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr)
+using namespace AccelByte;
+
+void UABServerSessionBrowser::SetServerApiClient(FServerApiClientPtr const& NewServerApiClientPtr)
 {
 	ApiClientPtr = NewServerApiClientPtr;
 }

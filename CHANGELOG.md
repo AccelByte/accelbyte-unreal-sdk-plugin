@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [23.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.0.0%0D22.0.4) (2023-04-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* namespace restructurization
+
+### Features
+
+* add new field ([293ad19](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/293ad1997074fe409e9ac3753898cdefc9194c65))
+* add SIGTERM catch for kill signal ([d77f512](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d77f512e4faa26049ecefac6ed9c17e7d995eeaf))
+* add uparam macro so the parameter will be treated as input instead of output. ([a1a1c80](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a1a1c805593c37203442270ea27d3b00fce1db88))
+* **MMv2:** add get matchmaking metrics endpoint and queueTime in create match ticket response ([d20457c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d20457c2e47520c982106f907531139377aaa46c))
+* support build without PCHs ([72c3c13](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/72c3c13256781ce5023f3df35b84af487198942f))
+
+
+### Bug Fixes
+
+* **chat:** add missing header file when compiling oss ([aa2f36b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/aa2f36bdcce27f69580d165a159cd6346935ae63))
+* remove using namespace accelbyte from header files ([7bcfe8f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7bcfe8f1a58773af666b85b45750a389b0ce1315))
+* resolve conflict 22.0.2 to master branch ([ec19ba3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ec19ba372812b24d6ea81bf9743dca586ae44f02))
+
+
+### Refactors
+
+* **MMv2:** change error for invalid MM request to be ErrorCodes::InvalidRequest instaed of 400 ([01bcdfa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/01bcdfae0a8f700499bc61ce5631af8a6059fe67))
+
 ### [22.0.4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/22.0.4%0D22.0.3) (2023-04-10)
 
 

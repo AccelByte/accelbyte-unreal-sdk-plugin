@@ -13,8 +13,6 @@
 #include "JsonObjectWrapper.h"
 #include "ABCloudSave.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE 
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FAccelByteModelsUserRecord, Response);
@@ -24,6 +22,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FAccelByteModelsGameRecord
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsListUserRecords, FListAccelByteModelsUserRecord, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsListGameRecords, FAccelByteModelsListGameRecords, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedBulkGetPublicUserRecordKeysResponse, FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FJsonObjectWrapper, FDPayloadJsonObject, FJsonObjectWrapper, Response);
 
@@ -35,7 +35,7 @@ class UABCloudSave : public UObject
 	GENERATED_BODY()
 	
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void SaveUserRecord(
@@ -144,6 +144,19 @@ public:
 		FDModelsListGameRecords const& OnSuccess,
 		FDErrorHandler const& OnError);
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
+	void BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
+		, FDModelsPaginatedBulkGetPublicUserRecordKeysResponse const& OnSuccess
+		, FDErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
+	void BulkGetOtherPlayerPublicRecords(FString const& UserId
+		, TArray<FString> const& Keys
+		, FDModelsListUserRecords const& OnSuccess
+		, FDErrorHandler const& OnError);
+
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

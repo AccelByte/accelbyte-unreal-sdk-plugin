@@ -7,6 +7,7 @@
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using AccelByte::Api::CloudStorage;
 using AccelByte::FErrorHandler;
 using AccelByte::THandler;

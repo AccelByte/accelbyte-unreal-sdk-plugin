@@ -1,5 +1,7 @@
 ﻿#include "Blueprints/AccelByteBPApiClient.h"
 
+using namespace AccelByte;
+
 void UABCredentials::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
@@ -139,7 +141,7 @@ UABApiClient::UABApiClient()
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
 
-void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
+void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
 	Credentials->SetApiClient(ApiClientPtr);

@@ -40,12 +40,12 @@ public:
 	/** @brief Forgets post-auth info, but pre-auth (such as setting email) will remain. */
 	virtual void ForgetAll() override;
 	virtual void SetClientCredentials(const ESettingsEnvironment Environment) override;
-	void SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime);
+	void SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime);
 	void SetUserEmailAddress(const FString& EmailAddress);
 	virtual void PollRefreshToken(double CurrentTime) override;
 	virtual void ScheduleRefreshToken(double NextRefreshTime) override;
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
-	void SetErrorOAuth(const FErrorOAuthInfo ErrorOAuthInfo);
+	void SetErrorOAuth(const FErrorOAuthInfo& ErrorOAuthInfo);
 	void SetAccountUserData(const FAccountUserData& InAccountUserData);
 	
 	FTokenRefreshedEvent& OnTokenRefreshed();
@@ -73,7 +73,6 @@ private:
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FTokenRefreshedEvent TokenRefreshedEvent;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;
-	FUserData UserData;
 	FAccountUserData AccountUserData;
 
 	static const FString DefaultSection;

@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABEntitlement.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 USTRUCT(BlueprintType)
@@ -42,7 +40,7 @@ class UABEntitlement : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
@@ -100,5 +98,5 @@ public:
 	void ValidateUserItemPurchaseCondition(TArray<FString> const& Items, FDAccelByteModelsPlatformValidateUserItemPurchaseResponse OnSuccess, FDErrorHandler OnError);
  
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

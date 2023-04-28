@@ -12,6 +12,8 @@
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
 
+#include "Engine.h"
+
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteChat, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteChat);
 

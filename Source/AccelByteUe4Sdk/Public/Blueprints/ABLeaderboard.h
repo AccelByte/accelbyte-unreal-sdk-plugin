@@ -11,8 +11,6 @@
 #include "Models/AccelByteLeaderboardModels.h"
 #include "ABLeaderboard.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsLeaderboardRankingResultResponse, FAccelByteModelsLeaderboardRankingResult, Response);
@@ -27,7 +25,7 @@ class UABLeaderboard : public UObject
 	GENERATED_BODY()
 	
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
 	void GetRankings(
@@ -48,5 +46,5 @@ public:
 	);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

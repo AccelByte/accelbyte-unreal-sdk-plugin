@@ -9,6 +9,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteUtilities.h"
+#include "Misc/Base64.h"
 
 namespace AccelByte
 {

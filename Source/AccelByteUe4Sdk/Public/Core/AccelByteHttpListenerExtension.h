@@ -22,17 +22,8 @@ class ACCELBYTEUE4SDK_API HttpListenerExtension
 public:
 	HttpListenerExtension();
 	~HttpListenerExtension();
-public:
+	
 	DECLARE_DELEGATE(FHttpNotif);
-private:
-	int32 Port;
-	FString LocalUrl;
-	FTcpListener* ListenerSocket;
-public:
-	int32 TTL;
-	FString AvailableLocalUrl;
-	FHttpNotif HttpNotif;
-public:
 	FString GetAvailableLocalUrl();
 	
 	void StartHttpListener();
@@ -42,10 +33,16 @@ public:
 		HttpNotif = OnHttpNotif;
 	}
 
+	FString AvailableLocalUrl;
+	FHttpNotif HttpNotif;
+	int32 TTL;
 private:
 	bool ListenerCallback(FSocket* Socket, const FIPv4Endpoint& Endpoint);
 	
-	void StoptHttpListener();
+	void StopHttpListener();
 	
+	FTcpListener* ListenerSocket;
+	FString LocalUrl;
+	int32 Port;
 };
 }

@@ -18,6 +18,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteMessageParser.h"
 #include "JsonUtilities.h"
+#include "Engine.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 

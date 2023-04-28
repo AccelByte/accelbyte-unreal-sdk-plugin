@@ -1,6 +1,8 @@
 ﻿#include "Blueprints/ABGroup.h"
 
-void UABGroup::SetApiClient(const FApiClientPtr NewApiClientPtr)
+using namespace AccelByte;
+
+void UABGroup::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
 }

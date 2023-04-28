@@ -4,7 +4,9 @@
 
 #include "Blueprints/ABServerMatchmaking.h"
 
-void UABServerMatchmaking::SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr)
+using namespace AccelByte;
+
+void UABServerMatchmaking::SetServerApiClient(FServerApiClientPtr const& NewServerApiClientPtr)
 {
 	ApiClientPtr = NewServerApiClientPtr;
 }

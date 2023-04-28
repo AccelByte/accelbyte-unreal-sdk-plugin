@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABFriends.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDRequestFriendsResponse, FAccelByteModelsRequestFriendsResponse, Response);
@@ -55,7 +53,7 @@ class UABFriends : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 //Request-Response
 public: 
@@ -107,5 +105,5 @@ public:
 	void SetOnRejectFriendsNotifDelegate(FDRejectFriendsNotif OnNotif);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

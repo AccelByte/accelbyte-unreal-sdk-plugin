@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteGeneralModels.h"
+#include "JsonUtilities/Public/JsonObjectWrapper.h"
 #include "AccelByteAchievementModels.generated.h"
 
 /** @brief Enumeration for Achievement sorting */
@@ -146,6 +147,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicAchievement
 	/** @brief Last updated time (ISO 8601) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
 	FString UpdatedAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
+	FJsonObjectWrapper CustomAttributes{};
 };
 
 /** @brief Pagniated Data Model for Achievement's public information */
@@ -236,6 +240,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMultiLanguageAchievement
 	/** @brief Last updated time (ISO 8601) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
 	FString UpdatedAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
+	FJsonObjectWrapper CustomAttributes{};
 };
 
 /** @brief Data Model for Achievement collection information */

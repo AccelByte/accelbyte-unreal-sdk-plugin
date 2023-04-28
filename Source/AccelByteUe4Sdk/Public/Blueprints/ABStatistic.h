@@ -11,8 +11,6 @@
 #include "Core/AccelByteError.h"
 #include "ABStatistic.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 USTRUCT(BlueprintType)
@@ -37,7 +35,7 @@ class UABStatistic : public UObject
 	GENERATED_BODY()
 	
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 	void CreateUserStatItems(
@@ -79,5 +77,5 @@ public:
 
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

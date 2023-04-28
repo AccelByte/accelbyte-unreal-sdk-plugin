@@ -12,6 +12,9 @@
 #include <memory>
 #include "Kismet/GameplayStatics.h"
 #include "Misc/SecureHash.h"
+#include "Misc/Base64.h"
+
+using namespace AccelByte;
 
 #if !PLATFORM_SWITCH
 // enclosing with namespace because of collision with Unreal types

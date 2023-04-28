@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABSignaling.generated.h"
 
-using namespace AccelByte;
-
 USTRUCT(BlueprintType)
 struct FSendSignalingMessageRequest
 {
@@ -33,7 +31,7 @@ class UABSignaling : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 //Request-Response
 public: 
@@ -46,5 +44,5 @@ public:
 	void SetSignalingP2PNotif(FDSignalingP2PNotif OnNotif);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

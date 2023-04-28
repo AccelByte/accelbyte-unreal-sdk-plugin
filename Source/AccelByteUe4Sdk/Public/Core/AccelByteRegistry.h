@@ -9,8 +9,6 @@
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteServerCredentials.h"
 
-using namespace AccelByte;
-
 namespace AccelByte
 {
 

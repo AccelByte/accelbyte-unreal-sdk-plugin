@@ -6,6 +6,7 @@
 #include "Api/AccelByteLobbyApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using AccelByte::FErrorHandler;
 
 void UAccelByteBlueprintsLobby::Connect()

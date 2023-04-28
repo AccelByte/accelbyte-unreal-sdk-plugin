@@ -10,8 +10,8 @@ namespace AccelByte
 {
 	HttpListenerExtension::HttpListenerExtension()
 	{
+		ListenerSocket = nullptr;
 		LocalUrl = "127.0.0.1";
-		ListenerSocket = NULL;
 		// Assign Port 7779 for communication between Game and Player Portal
 		Port = 7779;
 		TTL = 30;
@@ -19,10 +19,7 @@ namespace AccelByte
 
 	HttpListenerExtension::~HttpListenerExtension()
 	{
-		if (ListenerSocket != NULL) 
-		{
-			delete ListenerSocket;
-		}
+		StopHttpListener();
 	}
 
 	FString HttpListenerExtension::GetAvailableLocalUrl()
@@ -34,17 +31,15 @@ namespace AccelByte
 
 	void HttpListenerExtension::StartHttpListener()
 	{
-		if (ListenerSocket != NULL) {
-			StoptHttpListener();
-		}
+		StopHttpListener();
 
 		FIPv4Endpoint EndPoint;
-		FString LocalUrlAndPort = FString::Printf(TEXT("%s:%i"), *LocalUrl, Port);
-		FIPv4Endpoint::Parse((TEXT("%s"), *LocalUrlAndPort), EndPoint);
-		
-		ListenerSocket = new FTcpListener(EndPoint);
-		ListenerSocket->OnConnectionAccepted().BindRaw(this, &HttpListenerExtension::ListenerCallback);
-
+		const FString LocalUrlAndPort = FString::Printf(TEXT("%s:%i"), *LocalUrl, Port);
+		if (FIPv4Endpoint::Parse(LocalUrlAndPort, EndPoint))
+		{
+			ListenerSocket = new FTcpListener(EndPoint);
+			ListenerSocket->OnConnectionAccepted().BindRaw(this, &HttpListenerExtension::ListenerCallback);
+		}
 	}
 
 	bool HttpListenerExtension::ListenerCallback(FSocket* Socket, const FIPv4Endpoint& Endpoint)
@@ -72,14 +67,18 @@ namespace AccelByte
 		Socket->Close();
 
 		HttpNotif.ExecuteIfBound();
-		HttpListenerExtension::StoptHttpListener();
+		StopHttpListener();
 
 		return true;
 	} 
 	
-	void HttpListenerExtension::StoptHttpListener() 
+	void HttpListenerExtension::StopHttpListener() 
 	{
-		ListenerSocket->Stop();
-		delete ListenerSocket;
+		if(ListenerSocket)
+		{
+			ListenerSocket->Stop();
+			delete ListenerSocket;
+			ListenerSocket = nullptr;
+		}
 	}
 } 

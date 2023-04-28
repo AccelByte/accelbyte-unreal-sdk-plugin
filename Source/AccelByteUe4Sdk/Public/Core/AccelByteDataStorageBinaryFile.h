@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/EngineTypes.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "Core/IAccelByteDataStorage.h"
 #include "HAL/FileManager.h"

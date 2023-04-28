@@ -13,7 +13,8 @@ enum class EAccelByteReportingCategory : uint8
 {
 	UGC 		UMETA(DisplayName = "UGC"),
 	USER 		UMETA(DisplayName = "USER"),
-	CHAT		UMETA(DisplayName = "CHAT")
+	CHAT		UMETA(DisplayName = "CHAT"),
+	EXTENSION	UMETA(DisplayName = "EXTENSION")
 };
 
 USTRUCT(BlueprintType)
@@ -47,6 +48,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsReportingSubmitDataBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
 	FString UserID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
+	FString ExtensionCategory{};
 };
 
 USTRUCT(BlueprintType)
@@ -135,6 +139,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsReportingSubmitResponse
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
 	FString UserID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
+	FString CreatedAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
+	FString ExtensionCategory{};
 };
 
 USTRUCT(BlueprintType)

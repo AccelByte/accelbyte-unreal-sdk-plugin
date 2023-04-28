@@ -10,8 +10,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABParty.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 USTRUCT(BlueprintType)
@@ -170,7 +168,7 @@ class UABParty : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 //Request-Response
 public: 
@@ -278,5 +276,5 @@ public:
 	void SetOnPartyMemberDisconnect(FDPartyMemberDisconnectNotif OnNotif);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

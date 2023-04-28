@@ -4,7 +4,9 @@
 
 #include "Blueprints/ABServerStatistic.h"
 
-void UABServerStatistic::SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr)
+using namespace AccelByte;
+
+void UABServerStatistic::SetServerApiClient(FServerApiClientPtr const& NewServerApiClientPtr)
 {
 	ApiClientPtr = NewServerApiClientPtr;
 }

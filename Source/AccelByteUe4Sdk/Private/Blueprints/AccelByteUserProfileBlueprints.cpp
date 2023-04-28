@@ -5,6 +5,7 @@
 #include "Blueprints/AccelByteUserProfileBlueprints.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using AccelByte::Api::UserProfile;
 using AccelByte::FErrorHandler;
 using AccelByte::THandler;

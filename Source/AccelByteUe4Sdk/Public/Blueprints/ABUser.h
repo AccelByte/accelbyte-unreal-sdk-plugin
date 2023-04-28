@@ -6,10 +6,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABUser.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-
-
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDRegisterResponse, FRegisterResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccountUserDataResponse, FAccountUserData, Response);
@@ -35,7 +31,7 @@ class UABUser final : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 //Login & logout
 public:
@@ -165,5 +161,5 @@ public:
 	void GetData(FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

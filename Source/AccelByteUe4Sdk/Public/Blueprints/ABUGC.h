@@ -11,8 +11,6 @@
 #include "Models/AccelByteUGCModels.h"
 #include "ABUGC.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCResponse, FAccelByteModelsUGCResponse, Response);
@@ -47,7 +45,7 @@ class UABUGC : public UObject
 	GENERATED_BODY()
 	
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void CreateContentByStruct(
@@ -229,5 +227,5 @@ public:
 		int32 Offset = 0);
 		
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

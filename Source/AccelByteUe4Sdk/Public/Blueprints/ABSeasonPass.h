@@ -10,8 +10,6 @@
 #include "Models/AccelByteSeasonPassModels.h"
 #include "ABSeasonPass.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSeasonInfo, FAccelByteModelsSeasonInfo, Response);
@@ -28,7 +26,7 @@ class UABSeasonPass : public UObject
 	GENERATED_BODY()
 
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SeasonPass | Api")
 	void GetCurrentSeason(
@@ -64,5 +62,5 @@ public:
 	);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

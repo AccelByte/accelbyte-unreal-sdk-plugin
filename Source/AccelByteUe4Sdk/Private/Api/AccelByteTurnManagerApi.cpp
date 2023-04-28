@@ -19,6 +19,8 @@ TurnManager::TurnManager(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FastestPing{.0f}
+	, Counter{0}
 {}
 
 TurnManager::~TurnManager()

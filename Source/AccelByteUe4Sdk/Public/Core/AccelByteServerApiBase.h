@@ -9,8 +9,6 @@
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 
-using namespace AccelByte;
-
 namespace AccelByte
 {
 	

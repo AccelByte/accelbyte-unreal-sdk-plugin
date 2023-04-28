@@ -10,6 +10,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using namespace AccelByte::Api;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCredentials, Log, All);
@@ -69,7 +70,7 @@ void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 }
 
 
-void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime)
+void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime)
 {
 	UserSessionExpire = CurrentTime + (NewAuthToken.Expires_in * FMath::FRandRange(0.7, 0.9));
 	
@@ -256,7 +257,7 @@ void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 			}));
 }
 
-void Credentials::SetErrorOAuth(const FErrorOAuthInfo NewErrorOAuthInfo)
+void Credentials::SetErrorOAuth(const FErrorOAuthInfo& NewErrorOAuthInfo)
 {
 	ErrorOAuth = NewErrorOAuthInfo;
 }

@@ -4,7 +4,9 @@
 
 #include "Blueprints/ABServerAchievement.h"
 
-void UABServerAchievement::SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr)
+using namespace AccelByte;
+
+void UABServerAchievement::SetServerApiClient(FServerApiClientPtr const& NewServerApiClientPtr)
 {
 	ApiClientPtr = NewServerApiClientPtr;
 }

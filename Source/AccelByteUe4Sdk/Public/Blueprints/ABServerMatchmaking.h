@@ -10,10 +10,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABServerMatchmaking.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-using namespace AccelByte::GameServerApi;
-
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDMatchmakingResultDelegate, FAccelByteModelsMatchmakingResult, Response);
 
 UCLASS(Blueprintable, BlueprintType)
@@ -21,7 +17,7 @@ class UABServerMatchmaking final : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
+	void SetServerApiClient(AccelByte::FServerApiClientPtr const& NewServerApiClientPtr);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Matchmaking | Api")
@@ -49,5 +45,5 @@ public:
 	void DeactivateStatusPolling();
 
 private:
-	FServerApiClientPtr ApiClientPtr;
+	AccelByte::FServerApiClientPtr ApiClientPtr;
 };

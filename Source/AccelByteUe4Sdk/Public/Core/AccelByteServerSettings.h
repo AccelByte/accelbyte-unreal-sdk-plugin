@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Core/AccelByteBaseSettings.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteServerSettings.generated.h"
 
 namespace AccelByte

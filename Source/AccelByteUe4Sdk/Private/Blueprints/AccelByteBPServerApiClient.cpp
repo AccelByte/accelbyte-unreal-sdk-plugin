@@ -6,6 +6,8 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteServerCredentials.h"
 
+using namespace AccelByte;
+
 FString UABServerCredentials::GetAccessToken() 
 {
 	return ApiClientPtr->ServerCredentialsRef->GetClientAccessToken();

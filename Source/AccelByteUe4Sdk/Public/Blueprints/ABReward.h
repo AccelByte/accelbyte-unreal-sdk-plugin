@@ -11,8 +11,6 @@
 #include "Core/AccelByteError.h"
 #include "ABReward.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsRewardInfo, FAccelByteModelsRewardInfo, Response);
@@ -27,7 +25,7 @@ class UABReward : public UObject
 	GENERATED_BODY()
 	
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Reward | Api")
 	void GetRewardByRewardCode(
@@ -54,5 +52,5 @@ public:
 	);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

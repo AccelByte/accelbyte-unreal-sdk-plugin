@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABMessage.h"
 
+using namespace AccelByte;
+
 void UABMessage::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

@@ -32,16 +32,13 @@
 #include "Core/AccelByteEnvironment.h"
 #include "AccelByteBPApiClient.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-
 UCLASS(Blueprintable, BlueprintType)
 class ACCELBYTEUE4SDK_API UABCredentials final : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	void ForgetAll();
@@ -106,7 +103,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	bool IsComply();
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };
 
 
@@ -118,7 +115,7 @@ class UABApiClient final : public UObject
 public:
 	UABApiClient();
 
-	void SetApiClient(FApiClientPtr NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABCredentials* Credentials;
@@ -202,7 +199,7 @@ public:
 	UABGroup* Group;
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };
 
 

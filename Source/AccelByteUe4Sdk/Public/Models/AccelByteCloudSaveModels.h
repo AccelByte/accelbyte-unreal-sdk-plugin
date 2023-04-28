@@ -171,3 +171,27 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedBulkGetPlayerRecordSizeRespo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedBulkGetPlayerRecordSizeResponse")
 	TArray<FAccelByteModelsPlayerRecordSizeResponse> Data{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGetPublicUserRecordKeys
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PublicUserRecordKeys")
+	FString Key{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PublicUserRecordKeys")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedBulkGetPlayerRecordSizeResponse")
+	TArray<FAccelByteModelsGetPublicUserRecordKeys> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedBulkGetPlayerRecordSizeResponse")
+	FAccelByteModelsPaging Paging{};
+};

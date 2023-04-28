@@ -7,6 +7,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Models/AccelByteErrorModels.h"
 
+using namespace AccelByte;
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;

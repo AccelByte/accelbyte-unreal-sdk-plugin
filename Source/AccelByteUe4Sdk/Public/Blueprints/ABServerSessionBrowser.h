@@ -12,10 +12,6 @@
 #include "JsonObjectWrapper.h"
 #include "ABServerSessionBrowser.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-using namespace AccelByte::GameServerApi;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDServerSessionBrowserDataResponse, FAccelByteModelsSessionBrowserData, Response);
@@ -34,7 +30,7 @@ class UABServerSessionBrowser final : public UObject
 	GENERATED_BODY()
 	
 public:
-	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
+	void SetServerApiClient(AccelByte::FServerApiClientPtr const& NewServerApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void CreateGameSessionPublic(
@@ -200,5 +196,5 @@ public:
 	);
 
 private:
-	FServerApiClientPtr ApiClientPtr;
+	AccelByte::FServerApiClientPtr ApiClientPtr;
 };

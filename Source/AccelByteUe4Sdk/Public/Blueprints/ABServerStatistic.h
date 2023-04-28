@@ -10,10 +10,6 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABServerStatistic.generated.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-using namespace AccelByte::GameServerApi;
-
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayBulkStatItemOperationDelegate, TArray<FAccelByteModelsBulkStatItemOperationResult>, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserStatItemPagingSlicedDelegate, FAccelByteModelsUserStatItemPagingSlicedResult, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDGlobalStatItemDelegate, FAccelByteModelsGlobalStatItemValueResponse, Response);
@@ -23,7 +19,7 @@ class UABServerStatistic final : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetServerApiClient(FServerApiClientPtr NewServerApiClientPtr);
+	void SetServerApiClient(AccelByte::FServerApiClientPtr const& NewServerApiClientPtr);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
@@ -45,5 +41,5 @@ public:
 	void GetGlobalStatItemsByStatCode(FString const& StatCode, FDGlobalStatItemDelegate OnSuccess, FDErrorHandler OnError);
 
 private:
-	FServerApiClientPtr ApiClientPtr;
+	AccelByte::FServerApiClientPtr ApiClientPtr;
 };

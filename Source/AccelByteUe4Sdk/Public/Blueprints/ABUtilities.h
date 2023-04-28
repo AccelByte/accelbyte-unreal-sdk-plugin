@@ -33,14 +33,14 @@ public:
 		static bool GetJsonValueAsArray(const FJsonObjectWrapper& ObjectWrapper, const FString& Key, TArray<FString>& OutArray);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Utilities")
-		static void AddOrReplaceJsonStringValue(FJsonObjectWrapper& ObjectWrapper, const FString& Key, const FString& Value);
+		static void AddOrReplaceJsonStringValue(UPARAM(ref) FJsonObjectWrapper& ObjectWrapper, const FString& Key, const FString& Value);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Utilities")
-		static void AddOrReplaceJsonNumberValue(FJsonObjectWrapper& ObjectWrapper, const FString& Key, float Value);
+		static void AddOrReplaceJsonNumberValue(UPARAM(ref) FJsonObjectWrapper& ObjectWrapper, const FString& Key, float Value);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Utilities")
-		static void AddOrReplaceJsonBoolValue(FJsonObjectWrapper& ObjectWrapper, const FString& Key, bool Value);
+		static void AddOrReplaceJsonBoolValue(UPARAM(ref) FJsonObjectWrapper& ObjectWrapper, const FString& Key, bool Value);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Utilities")
-		static void AddOrReplaceJsonArrayValue(FJsonObjectWrapper& ObjectWrapper, const FString& Key, const TArray<FString>& Value);
+		static void AddOrReplaceJsonArrayValue(UPARAM(ref) FJsonObjectWrapper& ObjectWrapper, const FString& Key, const TArray<FString>& Value);
 };

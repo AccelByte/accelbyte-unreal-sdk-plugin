@@ -11,8 +11,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABFulfillment.generated.h"
 
-using namespace AccelByte;
-
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsFulfillmentResponse, FAccelByteModelsFulfillmentResult, Response);
@@ -24,12 +22,12 @@ class UABFulfillment : public UObject
 {
 	GENERATED_BODY()
 public:
-	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Fulfillment | Api")
 	void RedeemCode(FString const& Code, FString const& Region, FString const& Language, FDAccelByteModelsFulfillmentResponse OnSuccess, FDErrorHandler OnError);
 
 private:
-	FApiClientPtr ApiClientPtr;
+	AccelByte::FApiClientPtr ApiClientPtr;
 };

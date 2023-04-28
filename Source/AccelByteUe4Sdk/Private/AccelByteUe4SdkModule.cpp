@@ -12,6 +12,7 @@
 #include "Api/AccelByteHeartBeatApi.h"
 #include "GameServerApi/AccelByteServerWatchdogApi.h"
 #include "Core/AccelByteReport.h"
+#include "Core/AccelByteSignalHandler.h"
 #include "Core/Version.h"
 #include "Interfaces/IPluginManager.h"
 #include "Core/AccelByteDataStorageBinaryFile.h"
@@ -33,14 +34,14 @@ public:
 	virtual AccelByte::ServerSettings const& GetServerSettings() const override;
 	virtual ESettingsEnvironment const& GetSettingsEnvironment() const override;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() override;
-	virtual IAccelByteDataStorage * GetLocalDataStorage() override;
+	virtual AccelByte::IAccelByteDataStorage * GetLocalDataStorage() override;
 
 private:
 	AccelByte::Settings ClientSettings{};
 	AccelByte::ServerSettings ServerSettings{};
 	ESettingsEnvironment SettingsEnvironment{ESettingsEnvironment::Default};
 	FEnvironmentChangedDelegate EnvironmentChangedDelegate{};
-	TSharedPtr<IAccelByteDataStorage> LocalDataStorage = nullptr;
+	TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage = nullptr;
 	
 	// For registering settings in UE4 editor
 	void RegisterSettings();
@@ -74,19 +75,19 @@ void FAccelByteUe4SdkModule::StartupModule()
 	LoadSettingsFromConfigUObject();
 	LoadServerSettingsFromConfigUObject();
 
-	LocalDataStorage = MakeShared<DataStorageBinaryFile>();
+	LocalDataStorage = MakeShared<AccelByte::DataStorageBinaryFile>();
 
 #if UE_BUILD_DEVELOPMENT
 	CheckServicesCompatibility();
 #endif
 
-	FRegistry::HttpRetryScheduler.Startup();
-	FRegistry::Credentials.Startup();
-	FRegistry::GameTelemetry.Startup();
+	AccelByte::FRegistry::HttpRetryScheduler.Startup();
+	AccelByte::FRegistry::Credentials.Startup();
+	AccelByte::FRegistry::GameTelemetry.Startup();
 #if !UE_SERVER
-	FRegistry::HeartBeat.Startup();
+	AccelByte::FRegistry::HeartBeat.Startup();
 #endif
-	FRegistry::ServerCredentials.Startup();
+	AccelByte::FRegistry::ServerCredentials.Startup();
 
 #if UE_SERVER
 	if (!FParse::Param(FCommandLine::Get(), TEXT("dsid")))
@@ -95,21 +96,23 @@ void FAccelByteUe4SdkModule::StartupModule()
 	}
 	else
 	{
-		FRegistry::ServerWatchdog.Connect();
+		AccelByte::FRegistry::ServerWatchdog.Connect();
 	}
+
+	FAccelByteSignalHandler::Initialize();
 #endif
 }
 
 void FAccelByteUe4SdkModule::ShutdownModule()
 {
-	FRegistry::ServerCredentials.Shutdown();
+	AccelByte::FRegistry::ServerCredentials.Shutdown();
 #if !UE_SERVER
-	FRegistry::HeartBeat.Shutdown();
+	AccelByte::FRegistry::HeartBeat.Shutdown();
 #endif
-	FRegistry::GameTelemetry.Shutdown();
-	FRegistry::Credentials.Shutdown();
-	FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
-	FRegistry::HttpRetryScheduler.Shutdown();
+	AccelByte::FRegistry::GameTelemetry.Shutdown();
+	AccelByte::FRegistry::Credentials.Shutdown();
+	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
+	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();
 
 	UnregisterSettings();
 }
@@ -196,8 +199,8 @@ bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Envir
 		return bResult;
 	}
 	
-	FRegistry::Settings.Reset(Environment);
-	FRegistry::Credentials.SetClientCredentials(Environment);
+	AccelByte::FRegistry::Settings.Reset(Environment);
+	AccelByte::FRegistry::Credentials.SetClientCredentials(Environment);
 	SetDefaultHttpCustomHeader(ClientSettings.Namespace);
 
 	return bResult;
@@ -218,8 +221,8 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 		return bResult;
 	}
 	
-	FRegistry::ServerSettings.Reset(Environment);
-	FRegistry::ServerCredentials.SetClientCredentials(Environment);
+	AccelByte::FRegistry::ServerSettings.Reset(Environment);
+	AccelByte::FRegistry::ServerCredentials.SetClientCredentials(Environment);
 	SetDefaultHttpCustomHeader(ServerSettings.Namespace);
 	
 	return bResult;
@@ -327,7 +330,7 @@ void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
 		}
 
 		GetVersionInfo(
-			FRegistry::Settings.BaseUrl / ServiceName,
+			AccelByte::FRegistry::Settings.BaseUrl / ServiceName,
 			[CompatibilityMapPtr, ServiceName](FVersionInfo const VersionInfo)
 			{
 				FResult const Result = CompatibilityMapPtr->Check(ServiceName, VersionInfo.Version, true);
@@ -344,7 +347,7 @@ FEnvironmentChangedDelegate& FAccelByteUe4SdkModule::OnEnvironmentChanged()
 	return EnvironmentChangedDelegate;
 }
 
-IAccelByteDataStorage * FAccelByteUe4SdkModule::GetLocalDataStorage()
+AccelByte::IAccelByteDataStorage * FAccelByteUe4SdkModule::GetLocalDataStorage()
 {
 	if (LocalDataStorage.IsValid())
 	{

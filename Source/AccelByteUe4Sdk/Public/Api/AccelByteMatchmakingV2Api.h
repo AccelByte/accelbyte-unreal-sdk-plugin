@@ -59,6 +59,17 @@ public:
 	void DeleteMatchTicket(const FString& TicketId
 		, const FVoidHandler& OnSuccess
 		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get matchmaking matchpool's metrics.
+	 *
+	 * @param MatchPool Name of the matchpool.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GetMatchmakingMetrics(const FString& MatchPool
+		, const THandler<FAccelByteModelsV2MatchmakingMetrics>& OnSuccess
+		, const FErrorHandler& OnError);
 	
 private:
 	MatchmakingV2() = delete;

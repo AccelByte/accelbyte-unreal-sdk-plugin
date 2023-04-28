@@ -131,6 +131,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCreateTicketResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketResponse")
 	FString MatchTicketId{};
+	
+	//! Expected matchmaking queue time, in seconds
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketResponse")
+	int32 QueueTime{};
 };
 
 USTRUCT(BlueprintType)
@@ -292,4 +296,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCreateBackfillTicketResp
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCreateBackfillTicketResponse")
 	FString Id{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingMetrics
+{
+	GENERATED_BODY()
+
+	//! Expected matchmaking queue time, in seconds
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingMetrics")
+	int32 QueueTime{0};
 };

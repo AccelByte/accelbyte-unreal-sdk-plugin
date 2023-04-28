@@ -502,8 +502,7 @@ namespace AccelByte
 		{
 			TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
-			FJsonSerializer::Deserialize(Reader, JsonObject);
-			if (JsonObject.Get()->HasField("messageVariables"))
+			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.Get()->HasField("messageVariables"))
 			{				
 				OutErrorObject.SetObjectField("messageVariables", JsonObject.Get()->TryGetField("messageVariables")->AsObject());
 			}

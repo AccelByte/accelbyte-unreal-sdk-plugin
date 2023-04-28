@@ -403,6 +403,21 @@ public:
 	void SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStationIAPSync& PlaystationModel
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Sell user entitlement.
+	 *
+	 * @param EntitlementId The id of the entitlement.
+	 * @param UseCount The count be consumed.
+	 * @param RequestId The id of the request.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */	
+	void SellUserEntitlement(FString const& EntitlementId
+		, int32 const& UseCount
+		, FString const& RequestId
+		, THandler<FAccelByteModelsSellItemEntitlementInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 private:
 	Entitlement() = delete;
