@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.0.1%0D23.0.0) (2023-05-04)
+
+
+### Bug Fixes
+
+* **lobby:** add missing data members in FAccelByteModelsUsersPresenceNotice ([93f39bd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/93f39bd4de61f1d51b15426bdbb8590f8ba23715))
+
 ## [23.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.0.0%0D22.0.4) (2023-04-26)
 
 

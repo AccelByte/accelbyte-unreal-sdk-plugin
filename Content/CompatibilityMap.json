@@ -1,7 +1,7 @@
 {
   "iam": {
-    "minVersion": "5.33.0",
-    "maxVersion": "5.33.0"
+    "minVersion": "5.33.1",
+    "maxVersion": "5.33.1"
   },
   "agreement": {
     "minVersion": "1.29.0",
@@ -48,8 +48,8 @@
     "maxVersion": "3.19.0"
   },
   "dsmcontroller": {
-    "minVersion": "6.2.5",
-    "maxVersion": "6.2.5"
+    "minVersion": "6.2.6",
+    "maxVersion": "6.2.6"
   },
   "game-telemetry": {
     "minVersion": "1.17.2",
