@@ -9,6 +9,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
@@ -246,6 +247,36 @@ void ServerSession::GetPartyDetails(
 	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *ServerCredentialsRef.GetClientAccessToken());
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"),
 		*ServerSettingsRef.SessionServerUrl, *ServerCredentialsRef.GetClientNamespace(), *PartyID);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void ServerSession::BulkGetPlayerAttributes(TArray<FString> const& UserIds, THandler<TArray<FAccelByteModelsV2PlayerAttributes>> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/attributes")
+		, *ServerSettingsRef.SessionServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
+
+	TMap<FString, FString> Params{};
+	if (UserIds.Num() > 0)
+	{
+		const FString UserIdsStr = FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(UserIds);
+		Params.Add(TEXT("users"), UserIdsStr);
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, Params, FString(), OnSuccess, OnError);
+}
+
+void ServerSession::GetPlayerAttributes(FString const& UserId, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/attributes")
+		, *ServerSettingsRef.SessionServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }

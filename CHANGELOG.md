@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [23.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.1.0%0D23.0.1) (2023-05-08)
+
+
+### Features
+
+* **HttpClient:** change regex port to have 5 digits ([0b06db5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0b06db56fb004232e3ba6ce47f26bdde3acefb5b))
+* leaderboard revamp ([8e0bcf4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8e0bcf426f401e51d19bb44ba207e8f126a7b5b7))
+* **lobby:** Add Reconnecting delegate ([2332f3f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2332f3f69ef162e63d48b195af983bd095d31c7a))
+* **presence:** limiting bulk User presence to 40 ([10da775](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/10da77528616863e647052f75a517f68e617924c))
+
 ### [23.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.0.1%0D23.0.0) (2023-05-04)
 
 

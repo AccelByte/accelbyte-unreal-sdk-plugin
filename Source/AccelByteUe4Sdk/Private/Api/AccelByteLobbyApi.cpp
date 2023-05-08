@@ -17,6 +17,7 @@
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteMessageParser.h"
+#include "Core/AccelByteUtilities.h"
 #include "JsonUtilities.h"
 #include "Engine.h"
 
@@ -1157,14 +1158,27 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds
 		return;
 	}
 
+	TArray<FString> ProcessedUserIds{};
+	TArray<FString> NotProcessedUserIds{};
+
+	if (UserIds.Num() > UserIdsURLLimit)
+	{
+		ProcessedUserIds.Append(UserIds.GetData(), UserIdsURLLimit);
+		NotProcessedUserIds.Append(UserIds.GetData() + UserIdsURLLimit, UserIds.Num() - UserIdsURLLimit);
+	}
+	else
+	{
+		ProcessedUserIds = UserIds;
+	}
+
 	TMap<FString, FString> QueryParams = {
 		{TEXT("countOnly"), CountOnly ? TEXT("true") : TEXT("false")}};
 
 	FString UserIdsString;
-	for (int i = 0; i < UserIds.Num(); i++)
+	for (int i = 0; i < ProcessedUserIds.Num(); i++)
 	{
-		UserIdsString.Append(FString::Printf(TEXT("%s"), *FGenericPlatformHttp::UrlEncode(UserIds[i])));
-		if (i < UserIds.Num() - 1)
+		UserIdsString.Append(FString::Printf(TEXT("%s"), *ProcessedUserIds[i]));
+		if (i < ProcessedUserIds.Num() - 1)
 		{
 			UserIdsString.Append(TEXT(","));
 		}
@@ -1175,7 +1189,12 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds
 		, *SettingsRef.BaseUrl
 		, *CredentialsRef.GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnSuccess, NotProcessedUserIds](const FAccelByteModelsBulkUserStatusNotif& Result)
+		{
+			FAccelByteModelsBulkUserStatusNotif FinalResult = Result;
+			FinalResult.NotProcessed = NotProcessedUserIds;
+			OnSuccess.ExecuteIfBound(FinalResult);
+		}), OnError);
 }
 
 void Lobby::GetPartyStorage(const FString& PartyId
@@ -1607,8 +1626,10 @@ void Lobby::OnClosed(int32 StatusCode
 	, const FString& Reason
 	, bool WasClean)
 {
+	bool bIsReconnecting {true};
 	if (StatusCode > 4000 && !BanNotifReceived)
 	{
+		bIsReconnecting = false;
 		Disconnect();
 	}
 
@@ -1616,8 +1637,18 @@ void Lobby::OnClosed(int32 StatusCode
 	TokenRefreshDelegateHandle.Reset();
 
 	BanNotifReceived = false;
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
-	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
+	
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %s Reconnecting: %s"),
+		StatusCode, *Reason, WasClean? TEXT("true") : TEXT("false"), bIsReconnecting? TEXT("true") : TEXT("false"));
+	
+	if(!bIsReconnecting)
+	{
+		ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
+	}
+	else
+	{
+		Reconnecting.ExecuteIfBound(StatusCode, Reason, WasClean);
+	}
 }
 	
 FString Lobby::SendRawRequest(const FString& MessageType
@@ -2668,6 +2699,7 @@ Lobby::~Lobby()
 		ConnectSuccess.Unbind();
 		ConnectError.Unbind();
 		ConnectionClosed.Unbind();
+		Reconnecting.Unbind();
 	}
 }
 

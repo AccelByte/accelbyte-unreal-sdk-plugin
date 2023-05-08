@@ -77,3 +77,114 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRankingData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingData")
 	FString userId{};
 };
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsLeaderboardData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	bool Descending{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	FString IconUrl{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	bool IsDeleted{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	FString LeaderboardCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	FString Description{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	FString StatCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	TArray<FString> CyleIds{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	bool AllTime{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	FDateTime CreatedAt{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
+	FDateTime DeletedAt{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsPaginatedLeaderboardData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | PaginatedLeaderboardData")
+	TArray<FAccelByteModelsLeaderboardData> Data{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | PaginatedLeaderboardData")
+	FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsUserPointV3
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPointV3")
+	bool Hidden{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPointV3")
+	float Point{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPointV3")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPointV3")
+	FJsonObjectWrapper AdditionalData{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLeaderboardRankingResultV3
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | RankingResultV3")
+	TArray<FAccelByteModelsUserPoint> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | RankingResultV3")
+	FAccelByteModelsPaging Paging{};
+};
+
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsUserRankingV3
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingV3")
+	float Point{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingV3")
+	int Rank{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingV3")
+	bool Hidden{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingV3")
+	FJsonObjectWrapper AdditionalData{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsCycleRank
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | CycleRank")
+	FJsonObjectWrapper AdditionalData{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | CycleRank")
+	bool Hidden{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | CycleRank")
+	float Point{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | CycleRank")
+	int Rank{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | CycleRank")
+	FString CycleId{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsUserRankingDataV3
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingDataV3")
+	FAccelByteModelsUserRankingV3 AllTime{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingDataV3")
+	TArray<FAccelByteModelsCycleRank> Cycles{};
+};

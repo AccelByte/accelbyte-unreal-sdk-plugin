@@ -45,11 +45,13 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Page size, default value is 20.
 	 * @param Offset Page number, default value is 0.
+	 * @param SortBy The container to store sortby.
 	 */
 	void GetAllUserStatItems(const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
 		, const FErrorHandler& OnError
 		, int32 Limit = 20
-		, int32 Offset = 0);
+		, int32 Offset = 0
+		, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC );
 
 	/**
 	 * @brief Get this user stat items by specifying statCodes and tags to get from. Returned stat items will only contain
@@ -61,13 +63,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Page size, default value is 20.
 	 * @param Offset Page number, default value is 0.
+	 * @param SortBy The container to store sortby.
 	 */
 	void GetUserStatItems(const TArray<FString>& StatCodes
 		, const TArray<FString>& Tags
 		, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
 		, const FErrorHandler& OnError
 		, int32 Limit = 20
-		, int32 Offset = 0);
+		, int32 Offset = 0
+		, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC );
 
 	/**
 	 * @brief Get user's specified stat items and specifying statCodes and tags to get from. Returned stat items will only contain
@@ -87,7 +91,8 @@ public:
 		, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
 		, const FErrorHandler& OnError
 		, int32 Limit = 20
-		, int32 Offset = 0);
+		, int32 Offset = 0
+		, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC );
 
 	/**
 	 * @brief Increment this user stat items.
@@ -247,6 +252,7 @@ private:
 	Statistic(Statistic const&) = delete;
 	Statistic(Statistic&&) = delete;
 	
+	static FString ConvertUserStatisticSortByToString(const EAccelByteStatisticSortBy& SortBy);
 };
 } // Namespace Api
 } // Namespace AccelByte

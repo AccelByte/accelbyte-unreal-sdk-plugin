@@ -35,7 +35,10 @@ void UABServerStatistic::CreateUserStatItems(
 void UABServerStatistic::GetAllUserStatItems(
 	FString const& UserId,
 	FDUserStatItemPagingSlicedDelegate OnSuccess,
-	FDErrorHandler OnError)
+	FDErrorHandler OnError,
+	int32 Limit,
+	int32 Offset,
+	EAccelByteStatisticSortBy SortBy)
 {
 	ApiClientPtr->ServerStatistic.GetAllUserStatItems(
 		UserId,
@@ -48,7 +51,10 @@ void UABServerStatistic::GetAllUserStatItems(
 			[OnError](int Code, FString const& Message)
 			{
 				OnError.ExecuteIfBound(Code, Message);
-			}));
+			}),
+		Limit,
+		Offset,
+		SortBy);
 }
 
 void UABServerStatistic::GetUserStatItems(
@@ -56,7 +62,10 @@ void UABServerStatistic::GetUserStatItems(
 	TArray<FString> const& StatCodes,
 	TArray<FString> const& Tags,
 	FDUserStatItemPagingSlicedDelegate OnSuccess,
-	FDErrorHandler OnError)
+	FDErrorHandler OnError,
+	int32 Limit,
+	int32 Offset,
+	EAccelByteStatisticSortBy SortBy)
 {
 	ApiClientPtr->ServerStatistic.GetUserStatItems(
 		UserId,
@@ -64,6 +73,30 @@ void UABServerStatistic::GetUserStatItems(
 		Tags,
 		THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserStatItemPagingSlicedResult const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+		Limit,
+		Offset,
+		SortBy);
+}
+
+void UABServerStatistic::BulkFetchStatItemsValue(
+	FString const& StatCode, 
+	TArray<FString> const& UserIds, 
+	FDFetchUserStatistic OnSuccess,
+	FDErrorHandler OnError)
+{
+	ApiClientPtr->ServerStatistic.BulkFetchStatItemsValue(
+		StatCode,
+		UserIds,
+		THandler<TArray<FAccelByteModelsStatItemValueResponse>>::CreateLambda(
+			[OnSuccess](TArray<FAccelByteModelsStatItemValueResponse> const& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),

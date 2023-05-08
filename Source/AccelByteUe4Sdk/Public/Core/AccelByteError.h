@@ -217,6 +217,7 @@ namespace AccelByte
 		EntitlementUseCountIsInsufficientException,
 		PermanentItemAlreadyOwned,
 		EntitlementOutOfTimeRangeException,
+		EntitlementIdInvalidFormatException = 20002,
 		//
 		DistributionReceiverNotFoundException = 31241,
 		DistributionReceiverAlreadyExistsException = 31271,
@@ -300,6 +301,7 @@ namespace AccelByte
 
 		// V2 sessions
 		SessionUpdateVersionMismatch = 20071,
+		SessionPlayerAttributesNotFound = 20050,
 
 		//
 		// V2 Matchmaking

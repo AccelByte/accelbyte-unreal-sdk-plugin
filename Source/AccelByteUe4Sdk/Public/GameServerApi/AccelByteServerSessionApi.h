@@ -100,35 +100,57 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Query for party information.
-	*
-	* @param RequestContent The query parties request body.
-	* @param OnSuccess This will be called if the operation succeeded.
-	* @param OnError This will be called if the operation failed.
-	* @param Offset Pagination offset. Default 0.
-	* @param Limit Pagination limit. Default 20.
-	*/
+	 * @brief Query for party information.
+	 *
+	 * @param RequestContent The query parties request body.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Offset Pagination offset. Default 0.
+	 * @param Limit Pagination limit. Default 20.
+	 */
 	void QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,  THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int64 Offset = 0, int64 Limit = 20);
 
 	/**
-	* @brief [DEPRECATED] Query for party information. Please use QueryPartySessions with paginated result.
-	*
-	* @param RequestContent The query parties request body.
-	* @param OnSuccess This will be called if the operation succeeded.
-	* @param OnError This will be called if the operation failed.
-	* @param Offset Pagination offset. Default 0.
-	* @param Limit Pagination limit. Default 20.
-	*/
+	 * @brief [DEPRECATED] Query for party information. Please use QueryPartySessions with paginated result.
+	 *
+	 * @param RequestContent The query parties request body.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Offset Pagination offset. Default 0.
+	 * @param Limit Pagination limit. Default 20.
+	 */
 	void QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,  THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess, FErrorHandler const& OnError, int64 Offset = 0, int64 Limit = 20);
 
 	/**
-	* @brief Query for party information.
-	*
-	* @param PartyID ID of the party to get details from
-	* @param OnSuccess This will be called if the operation succeeded.
-	* @param OnError This will be called if the operation failed.
-	*/
+	 * @brief Query for party information.
+	 *
+	 * @param PartyID ID of the party to get details from
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
 	void GetPartyDetails(FString const& PartyID, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Query for attributes for given users IDs.
+	 *
+	 * @param UserIds Array of IDs of the users that you want to query attributes for
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void BulkGetPlayerAttributes(TArray<FString> const& UserIds
+		, THandler<TArray<FAccelByteModelsV2PlayerAttributes>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Query for information the given user by their ID.
+	 *
+	 * @param UserId ID of the user that you want to query attributes for
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GetPlayerAttributes(FString const& UserId
+		, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	ServerSession() = delete;

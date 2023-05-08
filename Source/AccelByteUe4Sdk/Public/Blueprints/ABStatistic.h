@@ -27,6 +27,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayModelsBulkStatItemOperationResultRespon
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGlobalStatItemDelegate, FAccelByteModelsGlobalStatItemValueResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsStatItemValueResponses, TArray<FAccelByteModelsStatItemValueResponse>, Response);
+
 #pragma endregion
 
 UCLASS(Blueprintable, BlueprintType)
@@ -49,7 +51,8 @@ public:
 		FDModelsUserStatItemPagingSlicedResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Limit = 20,
-		int32 Offset = 0
+		int32 Offset = 0,
+		EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
@@ -59,7 +62,8 @@ public:
 		FDModelsUserStatItemPagingSlicedResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Limit = 20,
-		int32 Offset = 0
+		int32 Offset = 0,
+		EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC 
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
@@ -73,7 +77,15 @@ public:
 	void GetGlobalStatItemsByStatCode(
 		FString const& StatCode, 
 		FDModelsGlobalStatItemDelegate const& OnSuccess,
-		FDErrorHandler const& OnError);
+		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
+	void BulkFetchStatItemsValue(const FString StatCode,
+		TArray<FString> const& UserIds,
+		FDModelsStatItemValueResponses const& OnSuccess,
+		FDErrorHandler const& OnError
+	);
 
 
 private:

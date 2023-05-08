@@ -135,14 +135,14 @@ void Entitlement::GetUserEntitlementById(FString const& Entitlementid
 
 void Entitlement::GetUserEntitlementOwnershipByAppId(FString const& AppId
 	, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, bool bUsePublisherNamespace)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/byAppId")
 		, *SettingsRef.PlatformServerUrl
-		, *SettingsRef.PublisherNamespace
-		, *AppId);
+		, bUsePublisherNamespace ? *SettingsRef.PublisherNamespace : *SettingsRef.Namespace);
 
 	const TMap<FString, FString> QueryParams
 	{
@@ -154,14 +154,14 @@ void Entitlement::GetUserEntitlementOwnershipByAppId(FString const& AppId
 
 void Entitlement::GetUserEntitlementOwnershipBySku(FString const& Sku
 	, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, bool bUsePublisherNamespace)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/bySku")
 		, *SettingsRef.PlatformServerUrl
-		, *SettingsRef.PublisherNamespace
-		, *Sku);
+		, bUsePublisherNamespace ? *SettingsRef.PublisherNamespace : *SettingsRef.Namespace);
 
 	const TMap<FString, FString> QueryParams
 	{
@@ -173,13 +173,13 @@ void Entitlement::GetUserEntitlementOwnershipBySku(FString const& Sku
 
 void Entitlement::GetUserEntitlementOwnershipByItemId(FString const& ItemId
 	, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, bool bUsePublisherNamespace)
 {
 	FReport::Log(FString(__FUNCTION__));
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/byItemId")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *ItemId);
+		, bUsePublisherNamespace ? *SettingsRef.PublisherNamespace : *SettingsRef.Namespace );
 
 	const TMap<FString, FString> QueryParams
 	{
@@ -193,7 +193,8 @@ void Entitlement::GetUserEntitlementOwnershipAny(TArray<FString> const ItemIds
 	, TArray<FString> const AppIds
 	, TArray<FString> const Skus
 	, THandler<FAccelByteModelsEntitlementOwnership> const OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, bool bUsePublisherNamespace)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -207,7 +208,7 @@ void Entitlement::GetUserEntitlementOwnershipAny(TArray<FString> const ItemIds
 	{
 		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/any")
 			, *SettingsRef.PlatformServerUrl
-			, *SettingsRef.PublisherNamespace);
+			, bUsePublisherNamespace ? *SettingsRef.PublisherNamespace : *SettingsRef.Namespace);
 
 		int paramCount = 0;
 		for (int i = 0; i < ItemIds.Num(); i++)
@@ -238,7 +239,8 @@ void Entitlement::GetUserEntitlementOwnershipViaToken(const FString& PublicKey
 	, const FErrorHandler& OnError
 	, const bool VerifySignature
 	, const bool VerifyExpiration
-	, const FString& VerifySub)
+	, const FString& VerifySub
+	, bool bUsePublisherNamespace)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -286,7 +288,7 @@ void Entitlement::GetUserEntitlementOwnershipViaToken(const FString& PublicKey
 				}
 			});
 		
-		GetUserEntitlementOwnershipTokenOnly(ItemIds, AppIds, Skus, ProcessOnSuccess, OnError);
+		GetUserEntitlementOwnershipTokenOnly(ItemIds, AppIds, Skus, ProcessOnSuccess, OnError, bUsePublisherNamespace);
 	}
 }
 	
@@ -294,7 +296,8 @@ void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& It
 	, const TArray<FString>& AppIds
 	, const TArray<FString>& Skus
 	, const THandler<FAccelByteModelsOwnershipToken>& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, bool bUsePublisherNamespace)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -308,7 +311,7 @@ void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& It
 	{
 		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownershipToken")
 			, *SettingsRef.PlatformServerUrl
-			, *SettingsRef.PublisherNamespace);
+			, bUsePublisherNamespace ? *SettingsRef.PublisherNamespace : *SettingsRef.Namespace);
 
 		int paramCount = 0;
 		for (int i = 0; i < ItemIds.Num(); i++)

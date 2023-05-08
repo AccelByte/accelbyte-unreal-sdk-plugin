@@ -95,5 +95,100 @@ void Leaderboard::GetUserRanking(FString const& UserId
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void Leaderboard::GetLeaderboards(uint32 Offset
+	, uint32 Limit
+	,THandler<FAccelByteModelsPaginatedLeaderboardData> const& OnSuccess
+	,FErrorHandler const& OnError )
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards")
+		, *SettingsRef.LeaderboardServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> QueryParams;
+
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Leaderboard::GetRankingsV3(FString const& LeaderboardCode, uint32 Offset, uint32 Limit, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/alltime")
+		, *SettingsRef.LeaderboardServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *LeaderboardCode);
+
+	TMap<FString, FString> QueryParams;
+
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Leaderboard::GetRankingByCycle(FString const& LeaderboardCode
+	, FString const& CycleId
+	, uint32 Offset
+	, uint32 Limit
+	, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/cycles/%s")
+		, *SettingsRef.LeaderboardServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *LeaderboardCode
+		, *CycleId);
+
+	TMap<FString, FString> QueryParams;
+
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Leaderboard::GetUserRankingV3(FString const& UserId
+	, FString const& LeaderboardCode
+	, THandler<FAccelByteModelsUserRankingDataV3> OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/users/%s")
+		, *SettingsRef.LeaderboardServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *LeaderboardCode
+		, *UserId);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+
+	
 } // Namespace Api
 } // Namespace AccelByte

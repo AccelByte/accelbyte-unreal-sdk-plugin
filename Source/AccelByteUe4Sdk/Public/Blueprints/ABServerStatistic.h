@@ -13,6 +13,7 @@
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayBulkStatItemOperationDelegate, TArray<FAccelByteModelsBulkStatItemOperationResult>, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserStatItemPagingSlicedDelegate, FAccelByteModelsUserStatItemPagingSlicedResult, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDGlobalStatItemDelegate, FAccelByteModelsGlobalStatItemValueResponse, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDFetchUserStatistic, TArray<FAccelByteModelsStatItemValueResponse>, Response);
 
 UCLASS(Blueprintable, BlueprintType)
 class UABServerStatistic final : public UObject
@@ -26,10 +27,13 @@ public:
 	void CreateUserStatItems(FString const & UserId, TArray<FString> const& StatCodes, FDArrayBulkStatItemOperationDelegate OnSuccess, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
-	void GetAllUserStatItems(FString const& UserId, FDUserStatItemPagingSlicedDelegate OnSuccess, FDErrorHandler OnError);
+	void GetAllUserStatItems(FString const& UserId, FDUserStatItemPagingSlicedDelegate OnSuccess, FDErrorHandler OnError, int32 Limit = 20, int32 Offset = 0, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
-	void GetUserStatItems(FString const& UserId, TArray<FString> const& StatCodes, TArray<FString> const& Tags, FDUserStatItemPagingSlicedDelegate OnSuccess, FDErrorHandler OnError);
+	void GetUserStatItems(FString const& UserId, TArray<FString> const& StatCodes, TArray<FString> const& Tags, FDUserStatItemPagingSlicedDelegate OnSuccess, FDErrorHandler OnError, int32 Limit = 20, int32 Offset = 0, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
+	void BulkFetchStatItemsValue(FString const& StatCode, TArray<FString> const& UserIds, FDFetchUserStatistic OnSuccess, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
 	void IncrementManyUsersStatItems(TArray<FAccelByteModelsBulkUserStatItemInc> const& Data, FDArrayBulkStatItemOperationDelegate OnSuccess, FDErrorHandler OnError);

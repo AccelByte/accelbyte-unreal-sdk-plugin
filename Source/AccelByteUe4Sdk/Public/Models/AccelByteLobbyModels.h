@@ -1053,6 +1053,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUserStatusNotif
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
 	int32 Away{};
+
+	/** @brief UserIds that not processed because of the url limit */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
+	TArray<FString> NotProcessed{};
 };
 
 // ------------------------------------------------------------------------------------------------

@@ -23,6 +23,33 @@ ServerStatistic::ServerStatistic(ServerCredentials const& InCredentialsRef
 ServerStatistic::~ServerStatistic()
 {}
 
+FString ServerStatistic::ConvertUserStatisticSortByToString(const EAccelByteStatisticSortBy& SortBy)
+{
+	switch (SortBy)
+	{
+	case EAccelByteStatisticSortBy::STAT_CODE:
+		return TEXT("statCode");
+	case EAccelByteStatisticSortBy::STAT_CODE_ASC:
+		return TEXT("statCode:asc");
+	case EAccelByteStatisticSortBy::STAT_CODE_DESC:
+		return TEXT("statCode:desc");
+	case EAccelByteStatisticSortBy::CREATED_AT:
+		return TEXT("createdAt");
+	case EAccelByteStatisticSortBy::CREATED_AT_ASC:
+		return TEXT("createdAt:asc");
+	case EAccelByteStatisticSortBy::CREATED_AT_DESC:
+		return TEXT("createdAt:desc");
+	case EAccelByteStatisticSortBy::UPDATED_AT:
+		return TEXT("updatedAt");
+	case EAccelByteStatisticSortBy::UPDATED_AT_ASC:
+		return TEXT("updatedAt:asc");
+	case EAccelByteStatisticSortBy::UPDATED_AT_DESC:
+		return TEXT("updatedAt:desc");
+	default:
+		return TEXT("");
+	}
+}
+
 void ServerStatistic::CreateUserStatItems(const FString& UserId
 	, const TArray<FString>& StatCodes
 	, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess
@@ -56,7 +83,10 @@ void ServerStatistic::CreateUserStatItems(const FString& UserId
 
 void ServerStatistic::GetAllUserStatItems(const FString& UserId
 	, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteStatisticSortBy SortBy) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -67,32 +97,37 @@ void ServerStatistic::GetUserStatItems(const FString& UserId
 	, const TArray<FString>& StatCodes
 	, const TArray<FString>& Tags
 	, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-	, const FErrorHandler & OnError)
+	, const FErrorHandler & OnError
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteStatisticSortBy SortBy)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems")
+	if (UserId.IsEmpty())
+	{
+		OnSuccess.ExecuteIfBound(FAccelByteModelsUserStatItemPagingSlicedResult{});
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems")
 		, *ServerSettingsRef.StatisticServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
 
-	TMap<FString, FString> QueryParams;
+	FString StatCodesValue = FString::Join(StatCodes, TEXT(","));
+	FString TagsValue = FString::Join(Tags, TEXT(","));
 
-	FString QueryValue;
-	for (int i = 0; i < StatCodes.Num(); i++)
-	{
-		QueryValue.Append((i == 0) ? TEXT("") : TEXT(",")).Append(StatCodes[i]);
-	}
-	QueryParams.Add(TEXT("statCodes"), QueryValue);
+	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
+			{ TEXT("statCodes"), StatCodesValue.IsEmpty() ? TEXT("") : StatCodesValue },
+			{ TEXT("tags"), TagsValue.IsEmpty() ? TEXT("") : TagsValue },
+			{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
+			{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
+			{ TEXT("sortBy"), SortBy == EAccelByteStatisticSortBy::NONE ? TEXT("") : FGenericPlatformHttp::UrlEncode(ConvertUserStatisticSortByToString(SortBy))},
+		});
+	Url.Append(QueryParams);
 
-	QueryValue = TEXT("");
-	for (int i = 0; i < Tags.Num(); i++)
-	{
-		QueryValue.Append((i == 0) ? TEXT("") : TEXT(",")).Append(Tags[i]);
-	}
-	QueryParams.Add(TEXT("tags"), QueryValue);
-
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
 }
 
 void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data
@@ -167,6 +202,39 @@ void ServerStatistic::BulkFetchUserStatItemValues(const FString& StatCode
 		{ TEXT("additionalKey"), AdditionalKey },
 	});
 	Url.Append(QueryParam);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void ServerStatistic::BulkFetchStatItemsValue(const FString& StatCode
+	, const TArray<FString>& UserIds
+	, const THandler<TArray<FAccelByteModelsStatItemValueResponse>>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (StatCode.IsEmpty())
+	{
+		OnSuccess.ExecuteIfBound(TArray<FAccelByteModelsStatItemValueResponse>{});
+		return;
+	}
+	if (UserIds.Num() <= 0)
+	{
+		OnSuccess.ExecuteIfBound(TArray<FAccelByteModelsStatItemValueResponse>{});
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/statitems/bulk")
+		, *ServerSettingsRef.StatisticServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
+
+	FString UserIdsValue = FString::Join(UserIds, TEXT(","));
+
+	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
+		{ TEXT("statCode"), StatCode.IsEmpty() ? TEXT("") : StatCode},
+		{ TEXT("userIds"), UserIdsValue.IsEmpty() ? TEXT("") : FGenericPlatformHttp::UrlEncode(UserIdsValue)},
+		});
+	Url.Append(QueryParams);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }

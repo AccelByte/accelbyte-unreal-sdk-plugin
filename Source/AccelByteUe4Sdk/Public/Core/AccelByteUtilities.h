@@ -7,11 +7,13 @@
 #include "Core/AccelByteError.h"
 #include "JsonObjectConverter.h"
 #include "Models/AccelByteEcommerceModels.h"
-
+#include "Math/NumericLimits.h"
 #include "AccelByteUtilities.generated.h"
 
 using AccelByte::THandler;
 using AccelByte::FErrorHandler;
+
+static constexpr int32 UserIdsURLLimit = 40;
 
 enum class EAccelBytePlatformType : uint8;
 enum class EAccelByteDevModeDeviceIdMethod : uint8;
@@ -324,7 +326,7 @@ public:
 			}
 			case EJson::Number:
 			{
-				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Numbers) && KeyValuePair.Value->AsNumber() == 0;
+				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Numbers) && static_cast<int32>(FMath::Floor(KeyValuePair.Value->AsNumber())) == TNumericLimits<int32>::Min();
 				break;
 			}
 			case EJson::Null:

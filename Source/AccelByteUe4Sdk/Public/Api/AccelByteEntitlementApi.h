@@ -87,10 +87,12 @@ public:
 	 * @param AppId The App ID.
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
 	 * @param OnError This will be called when the operation failed.
+	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
 	 */
 	void GetUserEntitlementOwnershipByAppId(FString const& AppId
 		, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, bool bUsePublisherNamespace = true);
 	
 	/**
 	 * @brief Get user's Entitlement ownership of the sku.
@@ -98,10 +100,12 @@ public:
 	 * @param Sku The item's SKU.
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
 	 * @param OnError This will be called when the operation failed.
+	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
 	 */
 	void GetUserEntitlementOwnershipBySku(FString const& Sku
 		, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, bool bUsePublisherNamespace = true);
 
 	/**
 	 * @brief Get user's Entitlement ownership of the ItemId.
@@ -109,10 +113,12 @@ public:
 	 * @param ItemId The item's ItemId.
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
 	 * @param OnError This will be called when the operation failed.
+	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is false (to preserve the previous behaviour).
 	 */
 	void GetUserEntitlementOwnershipByItemId(FString const& ItemId
 		, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, bool bUsePublisherNamespace = false);
 
 	/**
 	 * @brief Get user's Entitlement ownership for multiple checks.
@@ -122,12 +128,14 @@ public:
 	 * @param Skus the skus to check
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership will return true if any one parameters are owned.
 	 * @param OnError This will be called when the operation failed.
+	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
 	 */
 	void GetUserEntitlementOwnershipAny(TArray<FString> const ItemIds
 		, TArray<FString> const AppIds
 		, TArray<FString> const Skus
 		, THandler<FAccelByteModelsEntitlementOwnership> const OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, bool bUsePublisherNamespace = true);
 
 	/**
 	 * @brief Get user entitlement ownership if any of item IDs, app IDs, or SKUs are true
@@ -141,6 +149,7 @@ public:
 	 * @param VerifySignature Optional param, if true will verify the token's signature.
 	 * @param VerifyExpiration Optional param, if true will verify the token's expiration.
 	 * @param VerifySub Optional param, verify the token's sub field content.
+	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
 	 */
 	void GetUserEntitlementOwnershipViaToken(const FString& PublicKey
 		, const TArray<FString>& ItemIds
@@ -150,7 +159,8 @@ public:
 		, const FErrorHandler& OnError
 		, const bool VerifySignature = true
 		, const bool VerifyExpiration = true
-		, const FString& VerifySub = TEXT(""));
+		, const FString& VerifySub = TEXT("")
+		, bool bUsePublisherNamespace = true);
 	
 	/**
 	 * @brief Get user entitlement ownership token if any of item IDs, app IDs, or SKUs are true
@@ -160,12 +170,14 @@ public:
 	 * @param Skus the skus to check
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsOwnershipToken.
 	 * @param OnError This will be called when the operation failed.
+	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
 	 */
 	void GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& ItemIds
 		, const TArray<FString>& AppIds
 		, const TArray<FString>& Skus
 		, const THandler<FAccelByteModelsOwnershipToken>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, bool bUsePublisherNamespace = true);
 	
 	/**
 	 * @brief Consume a use entitlement.

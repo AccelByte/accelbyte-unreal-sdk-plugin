@@ -1107,6 +1107,14 @@ public:
 	{
 		ConnectionClosed = OnConnectionClosed;
 	}
+
+	/**
+	 * @brief Set a trigger function when connection is closed and reconnecting.
+	 */
+	void SetReconnectingDelegate(const FConnectionClosed& OnReconnecting)
+	{
+		Reconnecting = OnReconnecting;
+	}
 	
 	/**
 	 * @brief Set a trigger function when a party member leave from the party. This function is DEPRECATED
@@ -2342,6 +2350,7 @@ private:
 	FErrorHandler ParsingError;
 	FDisconnectNotif DisconnectNotif;
 	FConnectionClosed ConnectionClosed;
+	FConnectionClosed Reconnecting;
 	TSharedPtr<IAccelByteTokenGenerator> TokenGenerator;
 
 	FDelegateHandle TokenRefreshDelegateHandle;

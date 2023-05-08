@@ -8,6 +8,7 @@
 #include "JsonObjectWrapper.h"
 #include "AccelByteDSMModels.h"
 #include "AccelByteGeneralModels.h"
+#include "Math/NumericLimits.h"
 #include "AccelByteSessionModels.generated.h"
 
 UENUM(BlueprintType)
@@ -106,13 +107,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionConfiguration
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
 		FString Name{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
-		int64 MinPlayers{};
+		int64 MinPlayers{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
-		int64 MaxPlayers{};
+		int64 MaxPlayers{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
-		int64 InactiveTimeout{};
+		int64 InactiveTimeout{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
-		int64 InviteTimeout{};
+		int64 InviteTimeout{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
 		FString Deployment{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
@@ -151,7 +152,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2BaseSession
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
 		FAccelByteModelsV2SessionConfiguration Configuration{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession")
-		int64 Version{};
+		int64 Version{TNumericLimits<int32>::Min()};
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | BaseSession")
 		EAccelByteV2SessionType SessionType{};
 	
@@ -266,19 +267,19 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionBaseRequest
 
 	// Optional, maximum player of the session if set will override configuration from session template
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
-		int64 MaxPlayers{};
+		int64 MaxPlayers{TNumericLimits<int32>::Min()};
 
 	// Optional, minimum player of session if set will override configuration from session template
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
-		int64 MinPlayers{};
+		int64 MinPlayers{TNumericLimits<int32>::Min()};
 
 	// Optional, timeout in seconds to kick a user if disconnected from lobby.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
-		int64 InactiveTimeout{};
+		int64 InactiveTimeout{TNumericLimits<int32>::Min()};
 
 	// Optional, invitation timeout before the invitation is automatically rejected.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
-		int64 InviteTimeout{};
+		int64 InviteTimeout{TNumericLimits<int32>::Min()};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
 		FString MatchPool{};
@@ -298,7 +299,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUpdateRequest : public F
 {
 	GENERATED_BODY();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateRequest")
-		int64 Version{};
+		int64 Version{TNumericLimits<int32>::Min()};
 };
 
 USTRUCT(BlueprintType)
@@ -341,13 +342,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
 		FString ConfigurationName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
-		int64 MaxPlayers{};
+		int64 MaxPlayers{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
-		int64 MinPlayers{};
+		int64 MinPlayers{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
-		int64 InactiveTimeout{};
+		int64 InactiveTimeout{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
-		int64 InviteTimeout{};
+		int64 InviteTimeout{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
 		EAccelByteV2SessionConfigurationServerType Type{EAccelByteV2SessionConfigurationServerType::EMPTY};
 
@@ -363,17 +364,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyUpdateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
 		EAccelByteV2SessionJoinability Joinability{EAccelByteV2SessionJoinability::EMPTY};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
-		int64 Version{};
+		int64 Version{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
 		EAccelByteV2SessionConfigurationServerType Type{EAccelByteV2SessionConfigurationServerType::EMPTY};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
-		int64 InactiveTimeout{};
+		int64 InactiveTimeout{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
-		int64 InviteTimeout{};
+		int64 InviteTimeout{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
-		int64 MinPlayers{};
+		int64 MinPlayers{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
-		int64 MaxPlayers{};
+		int64 MaxPlayers{TNumericLimits<int32>::Min()};
 };
 
 USTRUCT(BlueprintType)
@@ -582,4 +583,55 @@ struct FAccelByteModelsV2QueryPartiesResponse
 	GENERATED_BODY()
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyQueryPartiesResponse")
 		TArray<FAccelByteModelsV2PartySession> Data{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PlayerAttributesPlatform
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesPlatform")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesPlatform")
+	FString UserID{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PlayerAttributes
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributes")
+	FString UserID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributes")
+	FString CurrentPlatform{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributes")
+	FJsonObjectWrapper Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributes")
+	bool CrossplayEnabled{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributes")
+	TArray<FAccelByteModelsV2PlayerAttributesPlatform> Platforms{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2StorePlayerAttributesRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesRequest")
+	FString CurrentPlatform{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesRequest")
+	FJsonObjectWrapper Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesRequest")
+	bool CrossplayEnabled{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesRequest")
+	TArray<FAccelByteModelsV2PlayerAttributesPlatform> Platforms{};
 };

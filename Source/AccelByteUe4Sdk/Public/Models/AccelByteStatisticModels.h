@@ -32,6 +32,21 @@ enum class EAccelByteStatisticUpdateStrategy : uint8
 	MIN
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteStatisticSortBy : uint8
+{
+	NONE = 0,
+	STAT_CODE,
+	STAT_CODE_ASC,
+	STAT_CODE_DESC,
+	CREATED_AT,
+	CREATED_AT_ASC,
+	CREATED_AT_DESC,
+	UPDATED_AT,
+	UPDATED_AT_ASC,
+	UPDATED_AT_DESC
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsStatInfo
 {
@@ -108,6 +123,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
 	float Value{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
+	FJsonObjectWrapper AdditionalData{};
 };
 
 USTRUCT(BlueprintType)
@@ -317,6 +335,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsStatItemValueResponse
 	FDateTime UpdatedAt {0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
 	FString UserId{};	 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
+	FJsonObjectWrapper AdditionalData{};	 
 };
 
 USTRUCT(BlueprintType)
@@ -420,4 +440,14 @@ struct FAccelByteModelsStatCycleConfigPagingResult
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | FAccelByteModelsStatCycleConfigPaging")
 	FAccelByteModelsPaging Paging{};
+};
+
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsMultipleStatSortBy
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatSortBy")
+	TArray<EAccelByteStatisticSortBy> SortBy { EAccelByteStatisticSortBy::UPDATED_AT_ASC };
 };

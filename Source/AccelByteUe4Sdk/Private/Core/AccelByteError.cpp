@@ -167,6 +167,7 @@ namespace AccelByte
 		//
 		{ static_cast<int32>(ErrorCodes::DistributionReceiverNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.distribution_receiver_not_found") },
 		{ static_cast<int32>(ErrorCodes::DistributionReceiverAlreadyExistsException), TEXT("errors.net.accelbyte.platform.entitlement.distribution_receiver_already_exists") },
+		{ static_cast<int32>(ErrorCodes::EntitlementIdInvalidFormatException), TEXT("errors.net.accelbyte.platform.constraint.UUIDv4WithoutHyphen") },
 		//
 		//Order Error Code List
 		//

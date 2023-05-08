@@ -48,10 +48,16 @@ public:
 	 * @param UserId
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsUserStatItemPagingSlicedResult.
 	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Page size, default value is 20.
+	 * @param Offset Page number, default value is 0.
+	 * @param SortBy Sorting method for the statistic result.
 	 */
 	void GetAllUserStatItems(const FString& UserId
 		, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC);
 
 	/**
 	 * @brief Get a user stat items by specifying statCodes and tags to get from. Returned stat items will only contain
@@ -62,12 +68,18 @@ public:
 	 * @param Tags Specify tags for for stat items to get from this method
 	 * @param OnSuccess Specify tags for for stat items to get from this method
 	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Page size, default value is 20.
+	 * @param Offset Page number, default value is 0.
+	 * @param SortBy Sorting method for the statistic result.
 	 */
 	void GetUserStatItems(const FString& UserId
 		, const TArray<FString>& StatCodes
 		, const TArray<FString>& Tags
 		, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC );
 
 	/**
 	 * @brief Bulk add stat item(s) value from specified user id(s) by stat code(s).
@@ -107,6 +119,19 @@ public:
 		, const TArray<FString>& UserIds
 		, const FString& AdditionalKey
 		, const THandler<TArray<FAccelByteModelsFetchUser>>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Bulk fetch multiple user's stat item values for a given namespace and statCode.
+	 *
+	 * @param StatCode This is the StatCode that will be stored in the slot.
+	 * @param UserIds This is the UserId array that will be stored in the slot.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsStatItemValueResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void BulkFetchStatItemsValue(const FString& StatCode
+		, const TArray<FString>& UserIds
+		, const THandler<TArray<FAccelByteModelsStatItemValueResponse>>& OnSuccess
 		, const FErrorHandler& OnError);
 
 	/**
@@ -211,6 +236,8 @@ private:
 	ServerStatistic() = delete;
 	ServerStatistic(ServerStatistic const&) = delete;
 	ServerStatistic(ServerStatistic&&) = delete;
+
+	static FString ConvertUserStatisticSortByToString(const EAccelByteStatisticSortBy& SortBy);
 };
 
 } // Namespace Api

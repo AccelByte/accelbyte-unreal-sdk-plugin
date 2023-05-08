@@ -42,7 +42,7 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
-
+	
 	TArray<FString> TempItemIds;
 	for (const auto& ItemId : ItemIds)
 	{
@@ -60,21 +60,48 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 			TempFeatures.Add(FGenericPlatformHttp::UrlEncode(Feature));
 		}
 	}
+	
+	TMap<FString, FString> QueryParams;
+	QueryParams.Add( TEXT("activeOnly"), bActiveOnly ? TEXT("true") : TEXT("false") );
+	
+	if (!EntitlementName.IsEmpty())
+	{
+		QueryParams.Add( TEXT("entitlementName"), FGenericPlatformHttp::UrlEncode(EntitlementName));
+	}
 
-	const TMap<FString, FString> QueryParams = {
-		{ TEXT("activeOnly"), bActiveOnly ? TEXT("true") : TEXT("false") },
-		{ TEXT("entitlementName"), FGenericPlatformHttp::UrlEncode(EntitlementName) },
-		{ TEXT("itemId"), TempItemIds.Num() > 0 ? FString::Join(TempItemIds, TEXT("&itemId=")) : TEXT("") },
-		{ TEXT("features"), TempFeatures.Num() > 0 ? FString::Join(TempFeatures, TEXT("&features=")) : TEXT("") },
-		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
-		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
-		{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ?
-				FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass)) : TEXT("") },
-		{ TEXT("appType"), AppType != EAccelByteAppType::NONE ?
-				FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(AppType)) : TEXT("")  },
-	};
+	if (TempItemIds.Num() > 0)
+	{
+		QueryParams.Add(TEXT("itemId"), FString::Join(TempItemIds, TEXT("&itemId=")));
+	}
 
-	HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
+	if (TempFeatures.Num() > 0)
+	{
+		QueryParams.Add(TEXT("features"), FString::Join(TempFeatures, TEXT("&features=")));
+	}
+
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
+	{
+		QueryParams.Add(TEXT("entitlementClazz"),FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass)));
+	}
+
+	if (AppType != EAccelByteAppType::NONE)
+	{
+		QueryParams.Add(TEXT("appType"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(AppType)));
+	}
+
+	Url.Append(FAccelByteUtilities::CreateQueryParams(QueryParams));
+	
+	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
 
 void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid

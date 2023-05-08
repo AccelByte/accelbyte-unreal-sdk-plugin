@@ -62,3 +62,83 @@ void UABLeaderboard::GetUserRanking(
 		)
 	);
 }
+
+void UABLeaderboard::GetLeaderboards(
+	int32 Offset,
+	int32 Limit,
+	FDModelsPaginatedLeaderboardData const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->Leaderboard.GetLeaderboards(Offset, Limit,
+		THandler<FAccelByteModelsPaginatedLeaderboardData>::CreateLambda([&OnSuccess](FAccelByteModelsPaginatedLeaderboardData const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([&OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}));
+}
+
+void UABLeaderboard::GetRankingsV3(
+	FString const& LeaderboardCode, 
+	int32 Offset,
+	int32 Limit,
+	FDModelsLeaderboardRankingResultV3 const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->Leaderboard.GetRankingsV3(
+		LeaderboardCode,
+		Offset,
+		Limit,
+		THandler<FAccelByteModelsLeaderboardRankingResultV3>::CreateLambda([&OnSuccess](FAccelByteModelsLeaderboardRankingResultV3 const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([&OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}));
+}
+
+void UABLeaderboard::GetRankingByCycle(
+	FString const& LeaderboardCode,
+	FString const& CycleId,
+	int32 Offset,
+	int32 Limit,
+	FDModelsLeaderboardRankingResultV3 const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->Leaderboard.GetRankingByCycle(
+		LeaderboardCode,
+		CycleId,
+		Offset,
+		Limit,
+		THandler<FAccelByteModelsLeaderboardRankingResultV3>::CreateLambda([&OnSuccess](FAccelByteModelsLeaderboardRankingResultV3 const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([&OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}));
+}
+
+void UABLeaderboard::GetUserRankingV3(
+	FString const& UserId,
+	FString const& LeaderboardCode, 
+	FDModelsUserRankingDataV3 const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->Leaderboard.GetUserRankingV3(UserId, LeaderboardCode,
+		THandler<FAccelByteModelsUserRankingDataV3>::CreateLambda([&OnSuccess](FAccelByteModelsUserRankingDataV3 const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([&OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code,Message);
+		}));
+}
+
+

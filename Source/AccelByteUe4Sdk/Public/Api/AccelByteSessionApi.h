@@ -301,6 +301,33 @@ public:
 		, FErrorHandler const& OnError
 		, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
 
+	/**
+	 * @brief Get stored attributes for the current player.
+	 *
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GetPlayerAttributes(THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Update stored attributes for the current player.
+	 *
+	 * @param AttributesRequest Request model for updating attributes for this player.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void StorePlayerAttributes(FAccelByteModelsV2StorePlayerAttributesRequest const& AttributesRequest
+		, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete stored attributes for the current player.
+	 *
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
 private:
 	Session() = delete;
 	Session(Session const&) = delete;

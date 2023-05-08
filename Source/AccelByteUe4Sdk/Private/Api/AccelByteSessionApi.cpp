@@ -463,5 +463,40 @@ void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
+void Session::GetPlayerAttributes(THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/attributes")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Session::StorePlayerAttributes(const FAccelByteModelsV2StorePlayerAttributesRequest& AttributesRequest
+	, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/attributes")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, AttributesRequest, OnSuccess, OnError);
+}
+
+void Session::DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/attributes")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 }
 }

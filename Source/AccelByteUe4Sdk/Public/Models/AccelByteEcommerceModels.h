@@ -520,6 +520,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	bool Purchasable{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	bool SectionExclusive{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	EAccelByteItemType ItemType{EAccelByteItemType::NONE};
@@ -1558,6 +1561,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderCreate
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderCreate")
 	FString ReturnUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderCreate")
+	FString SectionId{};
 };
 
 #pragma endregion OrderModelsField
