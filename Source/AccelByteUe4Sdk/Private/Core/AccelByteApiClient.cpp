@@ -45,7 +45,7 @@ FApiClient::~FApiClient()
 				[Credentials = CredentialsRef, HttpScheduler = HttpRef]()
 				{
 					Credentials->Shutdown();
-			HttpScheduler->Shutdown();
+					HttpScheduler->Shutdown();
 				}
 				, TStatId()
 					, nullptr

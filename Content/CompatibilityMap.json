@@ -4,8 +4,8 @@
     "maxVersion": "5.34.0"
   },
   "agreement": {
-    "minVersion": "1.29.0",
-    "maxVersion": "1.29.0"
+    "minVersion": "1.29.1",
+    "maxVersion": "1.29.1"
   },
   "basic": {
     "minVersion": "2.9.2",

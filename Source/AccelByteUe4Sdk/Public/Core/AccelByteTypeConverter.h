@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/ReflectedTypeAccessors.h"
 
 class ACCELBYTEUE4SDK_API FAccelByteArrayByteFStringConverter
 {

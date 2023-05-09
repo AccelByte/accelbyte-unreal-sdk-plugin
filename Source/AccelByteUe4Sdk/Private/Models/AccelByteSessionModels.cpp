@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Models/AccelByteSessionModels.h"
+#include "Json.h"
 #include "Core/AccelByteReport.h"
 
 FAccelByteModelsV2GameSessionQuery::FAccelByteModelsV2GameSessionQuery()

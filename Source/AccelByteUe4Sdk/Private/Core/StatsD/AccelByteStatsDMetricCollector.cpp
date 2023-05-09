@@ -4,6 +4,7 @@
 
 #include "Core/StatsD/AccelByteStatsDMetricCollector.h"
 #include "Engine/GameEngine.h"
+#include "Misc/ConfigCacheIni.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteStatsDMetricCollector, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteStatsDMetricCollector);

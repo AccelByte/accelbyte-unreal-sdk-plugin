@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Containers/Queue.h"
+
 namespace AccelByte
 {
 	class ACCELBYTEUE4SDK_API FAccelByteAdvancedQuery
