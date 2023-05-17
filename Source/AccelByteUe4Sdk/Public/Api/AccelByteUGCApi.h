@@ -88,6 +88,7 @@ public:
 	 * @param UGCRequest Detail information for the content request that will be modified.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * @param bUpdateContent This will be used to update the content too or only content information . Default value is false.
 	 *
 	 * @deprecated This method will be removed in the future, so please use
 	 * 	void ModifyContent(FString const& ChannelId
@@ -100,7 +101,8 @@ public:
 		, FString const& ContentId
 		, FAccelByteModelsUGCRequest const& UGCRequest
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, bool bUpdateContent = false);
 
 	/**
 	 * @brief Modify existing content to update some information with TArray<uint8> Preview parameter.
@@ -116,6 +118,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
 	 * @param ContentType The specific type of the content's modified. Default value is "application/octet-stream".
+	 * @param bUpdateContent This will be used to update the content too or only content information . Default value is false.
 	 *
 	 * @deprecated This method will be removed in the future, so please use
 	 * 	void ModifyContent(FString const& ChannelId
@@ -134,7 +137,8 @@ public:
 		, FString const& FileExtension
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString ContentType = TEXT("application/octet-stream"));
+		, FString ContentType = TEXT("application/octet-stream")
+		, bool bUpdateContent = false);
 	
 	/**
 	 * @brief Delete a content based on the its channel id and content id.

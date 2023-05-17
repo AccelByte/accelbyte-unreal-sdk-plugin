@@ -129,7 +129,8 @@ void UGC::ModifyContent(FString const& ChannelId
 	, FString const& ContentId
 	, FAccelByteModelsUGCRequest const& ModifyRequest
 	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, bool bUpdateContent)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), TEXT("The API might be removed without notice, please use ModifyContent(.., FAccelByteModelsUGCUpdateRequest const& ModifyRequest, ..) instead!!"));
@@ -143,7 +144,7 @@ void UGC::ModifyContent(FString const& ChannelId
 	Req.FileExtension = ModifyRequest.FileExtension;
 	Req.ContentType = ModifyRequest.ContentType;
 	Req.PreviewMetadata = ModifyRequest.PreviewMetadata;
-	Req.UpdateContentFile = true;
+	Req.UpdateContentFile = bUpdateContent;
 	Req.CustomAttributes = ModifyRequest.CustomAttributes;
 
 	ModifyContent(ChannelId, ContentId, Req, OnSuccess, OnError);
@@ -159,7 +160,8 @@ void UGC::ModifyContent(FString const& ChannelId
 	, FString const& FileExtension
 	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, FString ContentType)
+	, FString ContentType
+	, bool bUpdateContent)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), TEXT("The API might be removed without notice, please use ModifyContent(.., FAccelByteModelsUGCUpdateRequest const& ModifyRequest, ..) instead!!"));
@@ -173,7 +175,7 @@ void UGC::ModifyContent(FString const& ChannelId
 	Req.FileExtension = FileExtension;
 	Req.ContentType = ContentType;
 
-	ModifyContent(ChannelId, ContentId, Req, OnSuccess, OnError);
+	ModifyContent(ChannelId, ContentId, Req, OnSuccess, OnError, bUpdateContent);
 }
 
 void UGC::DeleteContent(FString const& ChannelId
