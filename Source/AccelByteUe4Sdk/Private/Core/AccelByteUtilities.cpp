@@ -305,6 +305,8 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 		return "epicgames"; 
 	case EAccelBytePlatformType::AwsCognito:
 		return "awscognito";
+	case EAccelBytePlatformType::Discord:
+		return "discord";
 	case EAccelBytePlatformType::Nintendo:
 		return "nintendo";	
 	case EAccelBytePlatformType::SnapChat:

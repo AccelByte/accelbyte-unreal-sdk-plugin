@@ -419,5 +419,56 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
+void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV3& ItemCriteria
+	, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/items/byCriteria")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
+
+	TArray<FString> SortByStringArray = {};
+	if (ItemCriteria.SortBy.Num() > 0 )
+	{		 
+		for (auto SortByEnum : ItemCriteria.SortBy)
+		{
+			if (SortByEnum != EAccelByteItemListSortBy::NONE)
+			{
+				SortByStringArray.Add(FAccelByteUtilities::ConvertItemSortByToString(SortByEnum));
+			}
+		} 
+	}
+
+	FString AvailableDateRounded{}; 
+	FString AvailableDateDecimal{};
+	ItemCriteria.AvailableDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
+	FString AvailableDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
+
+	TMap<FString, FString> QueryParams = {
+		{ TEXT("storeId"), ItemCriteria.StoreId },
+		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
+		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true"):TEXT("false") },
+		{ TEXT("itemType"), ItemCriteria.ItemType != EAccelByteItemType::NONE ?
+			FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType) : TEXT("") },
+		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ?
+			FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType) : TEXT("")  },
+		{ TEXT("baseAppId"), ItemCriteria.BaseAppId },
+		{ TEXT("tags"), FString::Join(ItemCriteria.Tags, TEXT(",")) },
+		{ TEXT("features"), FString::Join(ItemCriteria.Features, TEXT(","))  },
+		{ TEXT("region"), ItemCriteria.Region },
+		{ TEXT("availableDate"), AvailableDate },
+		{ TEXT("targetNamespace"), ItemCriteria.TargetNamespace },
+		{ TEXT("itemName"), ItemCriteria.ItemName },
+		{ TEXT("sectionExclusive"), ItemCriteria.bSectionExclusive ? TEXT("true") : TEXT("false") },
+		{ TEXT("offset"), ItemCriteria.Offset > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Offset) : TEXT("") },
+		{ TEXT("limit"), ItemCriteria.Limit > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Limit) : TEXT("") },
+		{ TEXT("sortBy"), FString::Join(SortByStringArray, TEXT(","))  },
+		};
+ 
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 } // Namespace GameServerApi
 } // Namespace AccelByte

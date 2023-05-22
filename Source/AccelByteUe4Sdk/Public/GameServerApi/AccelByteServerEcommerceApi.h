@@ -250,6 +250,17 @@ public:
 		, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Query items by criteria within a store, endpoint version 2.
+	 *
+	 * @param ItemCriteria Struct of item criteria, FAccelByteModelsItemCriteriaV3
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
+	 * @param OnError This will be called when the operation fails.
+	 */
+	void QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV3& ItemCriteria
+		, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	ServerEcommerce() = delete;
 	ServerEcommerce(ServerEcommerce const&) = delete;

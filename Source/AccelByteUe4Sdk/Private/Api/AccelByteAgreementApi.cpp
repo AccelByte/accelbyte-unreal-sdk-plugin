@@ -87,7 +87,7 @@ void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
 		, *AgreementPolicyTypeString
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
 
 void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
@@ -110,7 +110,7 @@ void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
 		, *TagsString
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
 
 void Agreement::BulkAcceptPolicyVersions(TArray<FAccelByteModelsAcceptAgreementRequest> const& AgreementRequests
@@ -164,7 +164,7 @@ void Agreement::GetLegalDocument(FString const& Url
 		{TEXT("Accept"), TEXT("*/*")}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
 
 FString Agreement::ConvertAgreementPolicyType(EAccelByteAgreementPolicyType const& AgreementPolicyType)
