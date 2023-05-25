@@ -1156,19 +1156,10 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds
 		return;
 	}
 
-	TMap<FString, FString> QueryParams = {
-		{TEXT("countOnly"), CountOnly ? TEXT("true") : TEXT("false")}};
-
-	FString UserIdsString;
-	for (int i = 0; i < UserIds.Num(); i++)
-	{
-		UserIdsString.Append(FString::Printf(TEXT("%s"), *FGenericPlatformHttp::UrlEncode(UserIds[i])));
-		if (i < UserIds.Num() - 1)
-		{
-			UserIdsString.Append(TEXT(","));
-		}
-	}
-	QueryParams.Add(TEXT("userIds"), UserIdsString);
+	TMultiMap<FString, FString> QueryParams = {
+		{ TEXT("countOnly"), CountOnly ? TEXT("true") : TEXT("false") },
+		{ TEXT("userIds"), FString::Join(UserIds, TEXT(",")) }
+	};
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/presence/namespaces/%s/users/presence")
 		, *SettingsRef.BaseUrl
@@ -1263,8 +1254,9 @@ void Lobby::SendNotificationToUser(const FString& SendToUserId
 		, *CredentialsRef.GetNamespace()
 		, *SendToUserId);
 
-	const TMap<FString, FString> QueryParams = {
-		{TEXT("async"), bAsync ? TEXT("true") : TEXT("false")}};
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("async"), bAsync ? TEXT("true") : TEXT("false")}
+	};
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Message, OnSuccess, OnError);
 }

@@ -100,7 +100,7 @@ void Reporting::GetReasons(const FString& ReasonGroup
 		, *SettingsRef.ReportingServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("group"), ReasonGroup },
 		{ TEXT("offset"), FString::Printf(TEXT("%d"), Offset) },
 		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
@@ -121,9 +121,9 @@ void Reporting::GetReasonGroups(int32 const& Offset
 		, *SettingsRef.ReportingServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
-		{ TEXT("offset"),FString::Printf(TEXT("%d"), Offset) },
-		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
+	const TMultiMap<FString, FString> QueryParams = {
+		{ TEXT("offset"),FString::FromInt(Offset) },
+		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);

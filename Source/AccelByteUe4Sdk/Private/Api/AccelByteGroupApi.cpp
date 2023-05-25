@@ -75,7 +75,7 @@ void Group::GetGroupList(const FAccelByteModelsGetGroupListRequest& RequestConte
 	const TSharedPtr<FJsonObject> JsonObj = FJsonObjectConverter::UStructToJsonObject(RequestContent);
 	FAccelByteUtilities::RemoveEmptyStrings(JsonObj);
 	
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
 	{
 		{ "groupName", RequestContent.GroupName },
 		{ "groupRegion", RequestContent.GroupRegion },
@@ -272,7 +272,7 @@ void Group::GetMemberRoles(const FAccelByteModelsLimitOffsetRequest& RequestCont
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/roles")
 		, *SettingsRef.GroupServerUrl);
 
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
 	{
 		{ "limit", FString::FromInt(RequestContent.Limit) },
 		{ "offset", FString::FromInt(RequestContent.Offset) },
@@ -320,7 +320,7 @@ void Group::GetGroupJoinRequests(const FString& GroupId
 		, *SettingsRef.GroupServerUrl
 		, *GroupId);
 
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
     {
     	{ "limit", FString::FromInt(RequestContent.Limit) },
     	{ "offset", FString::FromInt(RequestContent.Offset) },
@@ -338,7 +338,7 @@ void Group::GetGroupInvitationRequests(const FAccelByteModelsLimitOffsetRequest&
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/users/me/invite/request")
 		, *SettingsRef.GroupServerUrl);
 
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
 	{
     	{ "limit", FString::FromInt(RequestContent.Limit) },
 		{ "offset", FString::FromInt(RequestContent.Offset) },
@@ -411,7 +411,7 @@ void Group::GetGroupMembersListByGroupId(const FString& GroupId
 		, *GroupId);
 
 	FString Order = (RequestContent.SortBy == EAccelByteGroupListSortBy::DESCENDING) ? TEXT("desc") : TEXT("asc");
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
 	{
 		{ "limit", FString::FromInt(RequestContent.Limit) },
 		{ "offset", FString::FromInt(RequestContent.Offset) },
@@ -741,7 +741,7 @@ void Group::GetMyJoinedGroupInfo(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/me/groups"),
 		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
 	{
 			{ "limit", FString::FromInt(RequestContent.Limit) },
 			{ "offset", FString::FromInt(RequestContent.Offset) }
@@ -760,7 +760,7 @@ void Group::GetMyJoinGroupRequest(
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/me/join/request"),
 		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
 
-	const TMap<FString,FString> QueryParams
+	const TMultiMap<FString,FString> QueryParams
 	{
 		{"limit", FString::FromInt(RequestContent.Limit)},
 		{"offset", FString::FromInt(RequestContent.Offset)}
@@ -781,7 +781,7 @@ void Group::GetGroupInviteRequestList(
 		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
 		*GroupId);
 
-	const TMap<FString,FString> QueryParams
+	const TMultiMap<FString,FString> QueryParams
 	{
 		{"limit", FString::FromInt(RequestContent.Limit)},
 		{"offset", FString::FromInt(RequestContent.Offset)}
@@ -802,7 +802,7 @@ void Group::GetGroupJoinRequestList(
 		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
 		*GroupId);
 
-	const TMap<FString,FString> QueryParams
+	const TMultiMap<FString,FString> QueryParams
 	{
 		{"limit", FString::FromInt(RequestContent.Limit)},
 		{"offset", FString::FromInt(RequestContent.Offset)}
@@ -837,7 +837,7 @@ void Group::GetAllMemberRoles(
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/roles"),
 		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
 
-	const TMap<FString,FString> QueryParams
+	const TMultiMap<FString,FString> QueryParams
 	{
 		{"limit", FString::FromInt(RequestContent.Limit)},
 		{"offset", FString::FromInt(RequestContent.Offset)}

@@ -19,12 +19,9 @@ namespace AccelByte
 {
 	namespace Api
 	{
-
 #pragma region PRIVATE UTILITY
-
 		namespace ChatToken
 		{
-
 			namespace Method
 			{
 				const FString Connect = TEXT("eventConnected");
@@ -69,8 +66,6 @@ namespace AccelByte
 
 				const FString UserBanNotif = TEXT("eventBanChat");
 				const FString UserUnbanNotif = TEXT("eventUnbanChat");
-
-
 			}
 
 			namespace Json
@@ -120,7 +115,6 @@ namespace AccelByte
 					const FString SystemMessageKeep = TEXT("keep");
 					const FString UnreadOnly = TEXT("unreadOnly");
 					const FString Category = TEXT("category");
-					
 				}
 
 				namespace Value
@@ -183,7 +177,6 @@ namespace AccelByte
 
 		namespace IncomingMessage
 		{
-
 			/**
 			 * @brief Deterministic handler type enum getter from an incoming message json object
 			 * @param HandlerStringEnumMap - static map as dictionary
@@ -239,7 +232,7 @@ namespace AccelByte
 					JsonObject->SetStringField(DateTimeField, Iso8601Time);
 					bUpdatedObject = true;
 
-					{//Log
+					{ // Log
 						const int ReferenceTime = FDateTime::Now().ToUnixTimestamp();
 						const FString ReferenceIso8601Time = FDateTime().FromUnixTimestamp(ReferenceTime).ToIso8601();
 						UE_LOG(LogAccelByteChat, VeryVerbose, TEXT("reference now\t\t\t. Json: %d -> %s\n\t\t\tupdated [%s] field\t\t. Json: %d -> %s"), ReferenceTime, *ReferenceIso8601Time, *DateTimeField, UnixTime, *Iso8601Time);

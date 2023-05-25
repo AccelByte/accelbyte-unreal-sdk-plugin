@@ -826,11 +826,11 @@ void User::Upgrade(const FString& Username
 		, *Username
 		, *Password);
 
-	TMap<FString, FString> Params ({
+	TMultiMap<FString, FString> QueryParams ({
 		{"needVerificationCode", bNeedVerificationCode ? TEXT("true") : TEXT("false")}
 	});
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, Params, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 
 void User::Upgradev2(const FString& EmailAddress
@@ -1065,11 +1065,11 @@ void User::SearchUsers(const FString& Query
 		SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
 	}
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("query"), Query },
 		{ TEXT("by"), SearchId },
-		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
-		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
+		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -1212,12 +1212,12 @@ void User::GetInputValidations(const FString& LanguageCode
 	const FString Url = FString::Printf(TEXT("%s/v3/public/inputValidations")
 		, *SettingsRef.IamServerUrl);
 
-	const TMap<FString, FString> Params ({
+	const TMultiMap<FString, FString> QueryParams ({
 		{"languageCode", *LanguageCode},
 		{"defaultOnEmpty", bDefaultOnEmpty ? TEXT("true") : TEXT("false")}
 	});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 	
 void User::Enable2FaBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
@@ -1492,10 +1492,10 @@ void User::GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/users/me/headless/link/conflict")
 	   , *SettingsRef.IamServerUrl );
    
-	const TMap<FString, FString> Params ({
+	const TMultiMap<FString, FString> QueryParams ({
 		{"oneTimeLinkCode", *OneTimeLinkCode}
 	}); 
-	HttpClient.ApiRequest(TEXT("GET"), Url, Params, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 	
 } // Namespace Api

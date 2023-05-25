@@ -62,7 +62,7 @@ void UserProfile::BatchGetPublicUserProfileInfos(const FString& UserIds
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("userIds"), UserIds}
 	};
 
@@ -79,7 +79,7 @@ void UserProfile::BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("userIds"), FString::Join(UserIds, TEXT(","))}
 	};
 
@@ -173,7 +173,7 @@ void UserProfile::GetUserProfilePublicInfoByPublicId(const FString& PublicId
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("publicId"), *PublicId}
 	};
 
@@ -242,7 +242,7 @@ void UserProfile::GenerateUploadURL(const FString& Folder
 		, *CredentialsRef.GetNamespace()
 		, *Folder);
 
-	TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()}
 	};
 
@@ -262,7 +262,7 @@ void UserProfile::GenerateUploadURLForUserContent(const FString& UserId
 		, *CredentialsRef.GetNamespace()
 		, *UserId);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()},
 		{ TEXT("category"), FAccelByteUtilities::GetUEnumValueAsString(Category).ToLower()}
 	};

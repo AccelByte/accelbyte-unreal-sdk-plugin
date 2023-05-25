@@ -261,13 +261,12 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 			{
 				if (TryAttempt > 0)
 				{
-					ReplaceUserRecordCheckLatest(
-						TryAttempt - 1,
-						Key,
-						Data.Value,
-						PayloadModifier,
-						OnSuccess,
-						OnError);
+					ReplaceUserRecordCheckLatest(TryAttempt - 1
+						, Key
+						, Data.Value
+						, PayloadModifier
+						, OnSuccess
+						, OnError);
 				}
 				else
 				{

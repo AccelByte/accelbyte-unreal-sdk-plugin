@@ -76,23 +76,12 @@ void ServerStatistic::GetUserStatItems(const FString& UserId
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams {
+		{ TEXT("statCodes"), FString::Join(StatCodes, TEXT(",")) },
+		{ TEXT("tags"), FString::Join(Tags, TEXT(",")) },
+	};
 
-	FString QueryValue;
-	for (int i = 0; i < StatCodes.Num(); i++)
-	{
-		QueryValue.Append((i == 0) ? TEXT("") : TEXT(",")).Append(StatCodes[i]);
-	}
-	QueryParams.Add(TEXT("statCodes"), QueryValue);
-
-	QueryValue = TEXT("");
-	for (int i = 0; i < Tags.Num(); i++)
-	{
-		QueryValue.Append((i == 0) ? TEXT("") : TEXT(",")).Append(Tags[i]);
-	}
-	QueryParams.Add(TEXT("tags"), QueryValue);
-
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data
@@ -161,14 +150,12 @@ void ServerStatistic::BulkFetchUserStatItemValues(const FString& StatCode
 		, *ServerSettingsRef.StatisticServerUrl
 		, *ServerCredentialsRef.GetClientNamespace());
 
-	FString QueryParam = FAccelByteUtilities::CreateQueryParams({
-		{ "userIds", FString::Join(UserIds, TEXT("&userIds=")) },
+	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("statCode"), StatCode },
 		{ TEXT("additionalKey"), AdditionalKey },
-	});
-	Url.Append(QueryParam);
+	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void ServerStatistic::BulkUpdateMultipleUserStatItemsValue(const TArray<FAccelByteModelsUpdateUserStatItem>& BulkUpdateMultipleUserStatItems
@@ -203,7 +190,7 @@ void ServerStatistic::BulkResetUserStatItemsValues(const FString& UserId
 	FString Content = TEXT("");
 	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsUserStatItem>(BulkUserStatItems, Content);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("additionalKey"), AdditionalKey },
 	};
 
@@ -241,7 +228,7 @@ void ServerStatistic::BulkUpdateUserStatItemValue(const FString& UserId
 	FString Content = TEXT("");
 	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsUpdateUserStatItemWithStatCode>(BulkUpdateUserStatItems, Content);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("additionalKey"), AdditionalKey },
 	};
 
@@ -263,7 +250,7 @@ void ServerStatistic::UpdateUserStatItemValue(const FString& UserId
 		, *UserId
 		, *StatCode);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("additionalKey"), AdditionalKey },
 	};
 
@@ -284,7 +271,7 @@ void ServerStatistic::DeleteUserStatItems(const FString& UserId
 		, *UserId
 		, *StatCode);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("additionalKey"), AdditionalKey },
 	};
 

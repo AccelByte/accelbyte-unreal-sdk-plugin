@@ -51,8 +51,9 @@ void Reward::GetRewardByRewardCode(FString const& RewardCode
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
-		{TEXT("rewardCode"), *RewardCode}};
+	const TMultiMap<FString, FString> QueryParams = {
+		{ TEXT("rewardCode"), RewardCode }
+	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -84,7 +85,7 @@ void Reward::QueryRewards(FString const& EventTopic
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if (!EventTopic.IsEmpty())
 	{
 		QueryParams.Add(TEXT("eventTopic"), *EventTopic);
@@ -99,7 +100,7 @@ void Reward::QueryRewards(FString const& EventTopic
 	}
 	if (SortBy != EAccelByteRewardListSortBy::NONE)
 	{
-		QueryParams.Add(TEXT("sortBy"), *ConvertRewardSortByToString(SortBy));
+		QueryParams.Add(TEXT("sortBy"), ConvertRewardSortByToString(SortBy));
 	}
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);

@@ -54,44 +54,32 @@ void Entitlement::QueryUserEntitlements(FString const& EntitlementName
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements")
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements")
 			, *SettingsRef.PlatformServerUrl
 			, *CredentialsRef.GetNamespace()
 			, *CredentialsRef.GetUserId());
-
-	TArray<FString> TempItemIds;
-	for (const auto& ItemId : ItemIds)
-	{
-		if (!ItemId.IsEmpty())
-		{
-			TempItemIds.Add(FGenericPlatformHttp::UrlEncode(ItemId));
-		}
-	}
-
-	TArray<FString> TempFeatures;
-	for (const auto& Feature : Features)
-	{
-		if (!Feature.IsEmpty())
-		{
-			TempFeatures.Add(FGenericPlatformHttp::UrlEncode(Feature));
-		}
-	}
 	
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams{};
 
 	if (!EntitlementName.IsEmpty())
 	{
 		QueryParams.Add( TEXT("entitlementName"), FGenericPlatformHttp::UrlEncode(EntitlementName));
 	}
 
-	if (TempItemIds.Num() > 0)
+	for (const auto& ItemId : ItemIds)
 	{
-		QueryParams.Add(TEXT("itemId"), FString::Join(TempItemIds, TEXT("&itemId=")));
+		if (!ItemId.IsEmpty())
+		{
+			QueryParams.AddUnique(TEXT("itemId"), ItemId);
+		}
 	}
 
-	if (TempFeatures.Num() > 0)
+	for (const auto& Feature : Features)
 	{
-		QueryParams.Add(TEXT("features"), FString::Join(TempFeatures, TEXT("&features=")));
+		if (!Feature.IsEmpty())
+		{
+			QueryParams.AddUnique(TEXT("features"), Feature);
+		}
 	}
 
 	if (Offset > 0)
@@ -106,17 +94,15 @@ void Entitlement::QueryUserEntitlements(FString const& EntitlementName
 
 	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
 	{
-		QueryParams.Add(TEXT("entitlementClazz"),FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass)));
+		QueryParams.Add(TEXT("entitlementClazz"),FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass));
 	}
 
 	if (AppType != EAccelByteAppType::NONE)
 	{
-		QueryParams.Add(TEXT("appType"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(AppType)));
+		QueryParams.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(AppType));
 	}
-
-	Url.Append(FAccelByteUtilities::CreateQueryParams(QueryParams));
 	
-	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void Entitlement::GetUserEntitlementById(FString const& Entitlementid
@@ -144,7 +130,7 @@ void Entitlement::GetUserEntitlementOwnershipByAppId(FString const& AppId
 		, *SettingsRef.PublisherNamespace
 		, *AppId);
 
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
 	{
 		{"appId", AppId}
 	};
@@ -163,7 +149,7 @@ void Entitlement::GetUserEntitlementOwnershipBySku(FString const& Sku
 		, *SettingsRef.PublisherNamespace
 		, *Sku);
 
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
 	{
 		{"sku", Sku}
 	};
@@ -181,7 +167,7 @@ void Entitlement::GetUserEntitlementOwnershipByItemId(FString const& ItemId
 		, *CredentialsRef.GetNamespace()
 		, *ItemId);
 
-	const TMap<FString, FString> QueryParams
+	const TMultiMap<FString, FString> QueryParams
 	{
 		{"itemId", ItemId}
 	};
@@ -209,24 +195,33 @@ void Entitlement::GetUserEntitlementOwnershipAny(TArray<FString> const ItemIds
 			, *SettingsRef.PlatformServerUrl
 			, *SettingsRef.PublisherNamespace);
 
-		int paramCount = 0;
-		for (int i = 0; i < ItemIds.Num(); i++)
+		TMultiMap<FString, FString> QueryParams{};
+		
+		for (const auto& ItemId : ItemIds)
 		{
-			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("itemIds=")).Append(ItemIds[i]);
-			paramCount++;
+			if (!ItemId.IsEmpty())
+			{
+				QueryParams.AddUnique(TEXT("itemIds"), ItemId);
+			}
 		}
-		for (int i = 0; i < AppIds.Num(); i++)
+
+		for (const auto& AppId : AppIds)
 		{
-			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("appIds=")).Append(AppIds[i]);
-			paramCount++;
-		}
-		for (int i = 0; i < Skus.Num(); i++)
-		{
-			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("skus=")).Append(Skus[i]);
-			paramCount++;
+			if (!AppId.IsEmpty())
+			{
+				QueryParams.AddUnique(TEXT("appIds"), AppId);
+			}
 		}
 		
-		HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+		for (const auto& Sku : Skus)
+		{
+			if (!Sku.IsEmpty())
+			{
+				QueryParams.AddUnique(TEXT("skus"), Sku);
+			}
+		}
+		
+		HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 	}
 }
 
@@ -310,24 +305,33 @@ void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& It
 			, *SettingsRef.PlatformServerUrl
 			, *SettingsRef.PublisherNamespace);
 
-		int paramCount = 0;
-		for (int i = 0; i < ItemIds.Num(); i++)
+		TMultiMap<FString, FString> QueryParams{};
+		
+		for (const auto& ItemId : ItemIds)
 		{
-			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("itemIds=")).Append(ItemIds[i]);
-			paramCount++;
+			if (!ItemId.IsEmpty())
+			{
+				QueryParams.AddUnique(TEXT("itemIds"), ItemId);
+			}
 		}
-		for (int i = 0; i < AppIds.Num(); i++)
+
+		for (const auto& AppId : AppIds)
 		{
-			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("appIds=")).Append(AppIds[i]);
-			paramCount++;
-		}
-		for (int i = 0; i < Skus.Num(); i++)
-		{
-			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("skus=")).Append(Skus[i]);
-			paramCount++;
+			if (!AppId.IsEmpty())
+			{
+				QueryParams.AddUnique(TEXT("appIds"), AppId);
+			}
 		}
 		
-		HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+		for (const auto& Sku : Skus)
+		{
+			if (!Sku.IsEmpty())
+			{
+				QueryParams.AddUnique(TEXT("skus"), Sku);
+			}
+		}
+		
+		HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 	}
 }
 
@@ -741,26 +745,21 @@ void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Id
 		, *CredentialsRef.GetUserId());
 
 	// Params 
-	FString IdsQueryParamString = TEXT("");
+	TMultiMap<FString, FString> QueryParams{};
 
 	for (FString const& Id : Ids)
 	{
 		if (!Id.IsEmpty())
 		{
-			IdsQueryParamString.Append(IdsQueryParamString.IsEmpty() ? TEXT("?") : TEXT("&"));
-			IdsQueryParamString.Append(FString::Printf(TEXT("ids=%s"), *Id));
+			QueryParams.AddUnique(TEXT("ids"), Id);
 		}
-	} 
-
-	// Here we use append string to Url; we couldn't use TMap for ids, since the key should be unique 
-
-	Url.Append(IdsQueryParamString); 
+	}
 
 	// Content 
 	FString Content = TEXT("");
 	
 	// Api Request 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 
 void Entitlement::SyncWithDLCEntitlementInPSNStore(const FAccelByteModelsPlayStationDLCSync& PSNModel

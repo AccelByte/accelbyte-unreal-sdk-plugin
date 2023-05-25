@@ -232,7 +232,7 @@ void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQ
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
 	{
 		QueryParams.Add(TEXT("status"),
@@ -453,7 +453,7 @@ void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
 	{
 		QueryParams.Add(TEXT("status"),

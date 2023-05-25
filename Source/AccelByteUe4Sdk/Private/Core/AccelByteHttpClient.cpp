@@ -7,6 +7,94 @@
 
 namespace AccelByte
 {
+	FHttpFormData::FHttpFormData()
+	{
+	}
+
+	FHttpFormData::FHttpFormData(FHttpFormData const& Other)
+		: Data{ Other.Data }
+	{
+	}
+
+	FHttpFormData::FHttpFormData(TMap<FString, FString> const& InFormData)
+	{
+		ConvertMapToMultiMap(InFormData, Data);
+	}
+
+	FHttpFormData::FHttpFormData(TMultiMap<FString, FString> const& InFormData)
+		: Data{ InFormData }
+	{
+	}
+
+	FHttpFormData::~FHttpFormData()
+	{
+		Data.Reset();
+	}
+
+	bool FHttpFormData::IsEmpty() const
+	{
+		return Data.Num() == 0;
+	}
+
+	FString FHttpFormData::ToString() const
+	{
+		return Serialize(Data);
+	}
+
+	FString FHttpFormData::ToUrlEncodedString() const
+	{
+		return Serialize(Data, true);
+	}
+
+	bool FHttpFormData::ConvertMapToMultiMap(TMap<FString, FString> const& In, TMultiMap<FString, FString>& Out)
+	{
+		bool bIsSuccess = false;
+		
+		for (const auto& Kvp : In)
+		{
+			if (Kvp.Key.IsEmpty() || Kvp.Value.IsEmpty())
+			{
+				continue;
+			}
+			
+			Out.Add(Kvp.Key, Kvp.Value);
+			bIsSuccess = true;
+		}
+
+		return bIsSuccess;
+	}
+
+	FString FHttpFormData::CheckThenUrlEncode(FString const& InValue)
+	{
+		TArray<uint8> KeyBytes;
+		int32 const Length = InValue.Len();
+		KeyBytes.AddUninitialized(Length);
+		StringToBytes(InValue, KeyBytes.GetData(), Length);
+		return FGenericPlatformHttp::IsURLEncoded(KeyBytes) ? InValue : FGenericPlatformHttp::UrlEncode(InValue);
+	}
+
+	FString FHttpFormData::Serialize(TMultiMap<FString, FString> const& InFormData, bool bShouldUrlEncode)
+	{
+		FString Result;
+		int ParamCount = 0;
+
+		for (auto const& Kvp : InFormData)
+		{
+			if (Kvp.Key.IsEmpty() || Kvp.Value.IsEmpty())
+			{
+				continue;
+			}
+
+			FString EncodedKey = bShouldUrlEncode ? CheckThenUrlEncode(Kvp.Key) : Kvp.Key;
+			FString EncodedValue = bShouldUrlEncode ? CheckThenUrlEncode(Kvp.Value) : Kvp.Value;
+			
+			Result.Append(FString::Printf(TEXT("%s%s=%s"), ParamCount++ == 0 ? TEXT("") : TEXT("&")
+										  , *EncodedKey, *EncodedValue));
+		}
+
+		return Result;
+	}
+	
 	FHttpClient::FHttpClient(BaseCredentials const& InCredentialsRef
 		, BaseSettings const& InSettingsRef
 		, FHttpRetryScheduler& InHttpRef)
@@ -16,9 +104,13 @@ namespace AccelByte
 	{
 	}
 
+	FHttpClient::~FHttpClient()
+	{
+	}
+
 	FString FHttpClient::FormatApiUrl(const FString& Url) const
 	{
-		const FStringFormatNamedArguments UrlArgs = {
+		FStringFormatNamedArguments const UrlArgs = {
 			{TEXT("namespace"), FStringFormatArg(CredentialsRef.GetNamespace())},
 			{TEXT("userId"), FStringFormatArg(CredentialsRef.GetUserId())},
 		};
@@ -28,7 +120,7 @@ namespace AccelByte
 
 	bool FHttpClient::AddApiAuthorizationIfAvailable(TMap<FString, FString>& Headers) const
 	{
-		const FString AccessToken = CredentialsRef.GetAccessToken();
+		FString const AccessToken = CredentialsRef.GetAccessToken();
 
 		if (!AccessToken.IsEmpty())
 		{
@@ -38,47 +130,14 @@ namespace AccelByte
 		return false;
 	}
 
-	FString FHttpClient::EncodeParamsData(const TMap<FString, FString>& ParamsData) const
-	{
-		FString Result;
-		int i = 0;
-
-		for (const auto& Kvp : ParamsData)
-		{
-			if (Kvp.Key.IsEmpty() || Kvp.Value.IsEmpty())
-			{
-				continue;
-			}
-
-			TArray<uint8> KeyBytes;
-			KeyBytes.AddUninitialized(Kvp.Key.Len());
-			StringToBytes(Kvp.Key, KeyBytes.GetData(), Kvp.Key.Len());
-			FString EncodedKey = FGenericPlatformHttp::IsURLEncoded(KeyBytes) ? Kvp.Key : FGenericPlatformHttp::UrlEncode(Kvp.Key);
-
-			TArray<uint8> ValueBytes;
-			ValueBytes.AddUninitialized(Kvp.Value.Len());
-			StringToBytes(Kvp.Value, ValueBytes.GetData(), Kvp.Value.Len());
-			FString EncodedValue = FGenericPlatformHttp::IsURLEncoded(ValueBytes) ? Kvp.Value : FGenericPlatformHttp::UrlEncode(Kvp.Value);
-			
-			Result.Append(FString::Printf(TEXT("%s%s=%s"), i++ == 0 ? TEXT("") : TEXT("&")
-			                              , *EncodedKey, *EncodedValue));
-		}
-
-		return Result;
-	}
-
-	FHttpClient::~FHttpClient()
-	{
-	}
-
-	bool FHttpClient::IsValidUrl(const FString& Url)
+	bool FHttpClient::IsValidUrl(FString const& Url)
 	{
 		FRegexPattern UrlRegex(TEXT(REGEX_URL));
 		FRegexMatcher Matcher(UrlRegex, Url);
 		return Matcher.FindNext();
 	}
 
-	void FHttpClient::ExecuteError(const FErrorHandler& OnError, const FString& ErrorText)
+	void FHttpClient::ExecuteError(FErrorHandler const& OnError, FString const& ErrorText)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), ErrorText);
 	}

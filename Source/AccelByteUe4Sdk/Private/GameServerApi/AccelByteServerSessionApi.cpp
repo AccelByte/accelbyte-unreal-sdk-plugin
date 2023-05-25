@@ -167,7 +167,7 @@ void ServerSession::QueryPartySessions(
 	const TSharedPtr<FJsonObject> QueryRequestJsonObject = FJsonObjectConverter::UStructToJsonObject(RequestContent);
 	FAccelByteUtilities::RemoveEmptyStrings(QueryRequestJsonObject);
 
-	TMap<FString, FString> QueryParams{};
+	TMultiMap<FString, FString> QueryParams{};
 	for (const TPair<FString, TSharedPtr<FJsonValue>>& KV : QueryRequestJsonObject->Values)
 	{
 		// Check if the value of this pair is a valid shared instance, if not bail

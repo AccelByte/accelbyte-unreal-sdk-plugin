@@ -114,7 +114,7 @@ void Achievement::QueryAchievements(const FString& Language
 		, *SettingsRef.AchievementServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("language"), Language.IsEmpty() ? TEXT("en-US") : Language},
 		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -161,7 +161,7 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 		, *CredentialsRef.GetNamespace()
 		, *CredentialsRef.GetUserId());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
@@ -188,7 +188,7 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 			, *CredentialsRef.GetNamespace()
 			, *UserId);
 
-		const TMap<FString, FString> QueryParams = {
+		const TMultiMap<FString, FString> QueryParams = {
 			{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
 			{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 			{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
@@ -236,7 +236,7 @@ void Achievement::QueryGlobalAchievements(FString const& AchievementCode
 		, *SettingsRef.AchievementServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteGlobalAchievementListSortBy::NONE ? TEXT("") : ConvertGlobalAchievementSortByToString(SortBy)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
@@ -268,7 +268,7 @@ void Achievement::QueryGlobalAchievementContributors(FString const& AchievementC
 		, *CredentialsRef.GetNamespace()
 		, *AchievementCode);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteGlobalAchievementContributorsSortBy::NONE ? TEXT("") : ConvertGlobalAchievementContributosSortByToString(SortBy)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")}
@@ -291,7 +291,7 @@ void Achievement::QueryGlobalAchievementUserContributed(FString const& Achieveme
 		, *CredentialsRef.GetNamespace()
 		, *CredentialsRef.GetUserId());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteGlobalAchievementContributorsSortBy::NONE ? TEXT("") : ConvertGlobalAchievementContributosSortByToString(SortBy)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
@@ -334,13 +334,13 @@ void Achievement::GetTags(FString const& Name
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace());
 	const FString Verb = TEXT("GET");
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 	
-	HttpClient.ApiRequest(Verb,Url,QueryParams,OnSuccess,OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 } // Namespace Api

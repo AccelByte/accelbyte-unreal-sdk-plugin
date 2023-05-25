@@ -60,7 +60,7 @@ void Leaderboard::GetRankings(FString const& LeaderboardCode
 		, *LeaderboardCode
 		, *TimeFrameString);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 
 	if (Offset > 0)
 	{
