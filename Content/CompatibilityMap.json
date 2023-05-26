@@ -44,12 +44,12 @@
     "maxVersion": "1.18.1"
   },
   "lobby": {
-    "minVersion": "3.19.0",
-    "maxVersion": "3.19.0"
+    "minVersion": "3.20.0",
+    "maxVersion": "3.20.0"
   },
   "dsmcontroller": {
-    "minVersion": "6.3.0",
-    "maxVersion": "6.3.0"
+    "minVersion": "6.3.2",
+    "maxVersion": "6.3.2"
   },
   "game-telemetry": {
     "minVersion": "1.17.2",

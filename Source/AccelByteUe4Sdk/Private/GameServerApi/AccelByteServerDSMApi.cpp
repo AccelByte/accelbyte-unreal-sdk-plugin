@@ -282,6 +282,49 @@ void ServerDSM::GetServerInfo(const THandler<FAccelByteModelsServerInfo>& OnSucc
 	}
 }
 
+void ServerDSM::GetSessionTimeout(const THandler<FAccelByteModelsServerTimeoutResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ServerType == EServerType::NONE)
+	{
+		OnError.ExecuteIfBound((int32)ErrorCodes::StatusBadRequest, TEXT("Server not Registered."));
+		return;
+	}
+	
+	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/config/sessiontimeout")
+		, *ServerSettingsRef.DSMControllerServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerName);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	
+}
+
+void ServerDSM::ServerHeartbeat(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ServerType == EServerType::NONE)
+	{
+		OnError.ExecuteIfBound((int32)ErrorCodes::StatusBadRequest, TEXT("Server not Registered."));
+		return;
+	}
+	
+	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/heartbeat")
+		, *ServerSettingsRef.DSMControllerServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
+
+	FString Content = TEXT("");
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+	JsonObject->SetStringField("podName", ServerName);
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	
+}
+
 void ServerDSM::GetSessionId(const THandler<FAccelByteModelsServerSessionResponse>& OnSuccess
 	, const FErrorHandler& OnError)
 {
@@ -335,6 +378,13 @@ bool ServerDSM::ShutdownTick(float DeltaTime)
 			}
 		}
 	}
+	return true;
+}
+
+bool ServerDSM::PeriodicHeartbeat(float DeltaTime)
+{
+	FReport::Log(FString(__FUNCTION__));
+	ServerHeartbeat(OnHeartbeatSuccess, OnHeartbeatError);
 	return true;
 }
 
@@ -393,6 +443,28 @@ void ServerDSM::ParseCommandParam()
 			Region = ArraySplit[1];
 		}
 	}
+}
+
+void ServerDSM::SetOnHeartbeatSuccessDelegate(const FVoidHandler& OnSuccess)
+{
+	OnHeartbeatSuccess = OnSuccess;
+}
+
+void ServerDSM::SetOnHeartbeatErrorDelegate(const FErrorHandler& OnError)
+{
+	OnHeartbeatError = OnError;
+}
+
+void ServerDSM::StartHeartbeat(uint32 IntervalSeconds)
+{
+	HeartbeatTickSeconds = IntervalSeconds;
+	HeartbeatDelegate = FTickerDelegate::CreateRaw(this, &ServerDSM::PeriodicHeartbeat);
+	HeartbeatDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(HeartbeatDelegate, HeartbeatTickSeconds);
+}
+
+void ServerDSM::StopHeartbeat()
+{
+	FTickerAlias::GetCoreTicker().RemoveTicker(HeartbeatDelegateHandle);
 }
 
 int32 ServerDSM::GetPlayerNum()

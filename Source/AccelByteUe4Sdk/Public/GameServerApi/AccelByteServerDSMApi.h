@@ -153,6 +153,24 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
+	 * @brief GetServerTimeout
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetSessionTimeout(const THandler<FAccelByteModelsServerTimeoutResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief ServerHeartbeat
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ServerHeartbeat(const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
 	 * @brief Configure automatic shutdown, server will send shutdown request to DSM when there is no player on the DS for some periodical time after the DS is claimed. Must be called before calling RegisterServerToDSM or RegisterLocalServerToDSM
 	 *
 	 * @param TickSeconds Tick Second to check the auto shutdown, not bigger than CountdownStart
@@ -175,6 +193,32 @@ public:
 	 */
 	void SetOnAutoShutdownErrorDelegate(const FErrorHandler& OnError);
 
+	/**
+	 * @brief Set handler delegate for OnHeartbeatSuccess event
+	 *
+	 * @param OnHeartbeatSuccess This delegate will be called if the DS heartbeat is sent
+	 */
+	void SetOnHeartbeatSuccessDelegate(const FVoidHandler& OnHeartbeatSuccess);
+
+	/**
+	 * @brief Set handler delegate for OnHeartbeatError event
+	 *
+	 * @param OnHeartbeatError This delegate will be called if the DS heartbeat is not sent
+	 */
+	void SetOnHeartbeatErrorDelegate(const FErrorHandler& OnHeartbeatError);
+
+	/**
+	 * @brief Start sending heartbeat at interval.
+	 *
+	 * @param IntervalSeconds
+	 */
+	void StartHeartbeat(uint32 IntervalSeconds);
+
+	/**
+	 * @brief Stop Heartbeat.
+	 */
+	void StopHeartbeat();
+
 	void SetServerName(const FString Name) { ServerName = Name; };
 	void SetServerType(EServerType Type) { ServerType = Type; };
 	int32 GetPlayerNum();
@@ -194,6 +238,7 @@ private:
 	ServerDSM& operator=(ServerDSM &&) = delete; // Move assignment operator
 
 	bool ShutdownTick(float DeltaTime);
+	bool PeriodicHeartbeat(float DeltaTime);
 
 	FString ServerName = TEXT("");
 	FString Provider = TEXT("");
@@ -202,13 +247,18 @@ private:
 	EServerType ServerType = EServerType::NONE;
 	FHttpRequestCompleteDelegate OnRegisterResponse;
 	FVoidHandler OnAutoShutdown;
+	FVoidHandler OnHeartbeatSuccess;
 	bool bIsDSClaimed = false;
 	uint32 ShutdownTickSeconds = 0;
+	uint32 HeartbeatTickSeconds = 0;
 	int ShutdownCountdown = 0;
 	int CountdownTimeStart = -1;
 	FErrorHandler OnAutoShutdownError;
+	FErrorHandler OnHeartbeatError;
 	FTickerDelegate AutoShutdownDelegate;
+	FTickerDelegate HeartbeatDelegate;
 	FDelegateHandleAlias AutoShutdownDelegateHandle;
+	FDelegateHandleAlias HeartbeatDelegateHandle;
 	THandler<FAccelByteModelsPubIp> GetPubIpDelegate;
 	FAccelByteModelsServerInfo RegisteredServerInfo;
 };

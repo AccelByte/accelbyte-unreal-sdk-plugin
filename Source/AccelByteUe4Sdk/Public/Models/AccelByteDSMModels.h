@@ -206,6 +206,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsServerSessionResponse
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsServerTimeoutResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSM | Models | ServerTimeoutResponse")
+	int32 Session_timeout{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsServerCreateSessionRequest
 {
 	GENERATED_BODY()
