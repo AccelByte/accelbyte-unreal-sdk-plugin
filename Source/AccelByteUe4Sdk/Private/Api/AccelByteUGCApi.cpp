@@ -342,18 +342,20 @@ void UGC::UpdateChannel(FString const& ChannelId
 void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 Limit
-	, int32 Offset)
+	, int32 Offset
+	, FString const& ChannelName)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetChannels(CredentialsRef.GetUserId(), OnSuccess, OnError, Limit, Offset);
+	GetChannels(CredentialsRef.GetUserId(), OnSuccess, OnError, Limit, Offset, ChannelName);
 }
 
 void UGC::GetChannels(FString const& UserId
 	, THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 Limit
-	, int32 Offset)
+	, int32 Offset
+	, FString const& ChannelName)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -362,15 +364,11 @@ void UGC::GetChannels(FString const& UserId
 		, *CredentialsRef.GetNamespace()
 		, *UserId);
 
-	TMap<FString, FString> QueryParams;
-	if (Offset > 0)
-	{
-		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
-	}
-	if (Limit > 0)
-	{
-		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
-	}
+	TMap<FString, FString> QueryParams = {
+		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("name"), ChannelName.IsEmpty() ? TEXT("") : ChannelName }
+	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }

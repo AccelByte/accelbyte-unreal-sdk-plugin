@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.2.1%0D23.2.0) (2023-06-05)
+
+
+### Features
+
+* **UGC:** add a new optional channel name parameter to query a specific channel ([28fe02c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/28fe02c724bc92444d62b9697bd327cb766a8b90))
+
+
+### Refactors
+
+* **HttpClient:** use Request instead of ApiRequest method for specified API function without authorization header check ([a655f0b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a655f0bfe27bcd4eef69588644d6e8e2a0550c21))
+
 ## [23.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.2.0%0D23.1.4) (2023-06-05)
 
 

@@ -254,11 +254,13 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit The limit of the channel results. Default value is 1000.
 	 * @param Offset The offset of the channel results. Default value is 0.
+	 * @param ChannelName The name of the channel you want to query.
 	 */
 	void GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
-		, int32 Offset = 0);
+		, int32 Offset = 0
+		, FString const& ChannelName = "");
 
 	/**
 	 * @brief Get all of the player's channels.
@@ -268,12 +270,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit The limit of the channel results. Default value is 1000.
 	 * @param Offset The offset of the channel results. Default value is 0.
+	 * @param ChannelName The name of the channel you want to query.
 	 */
 	void GetChannels(FString const& UserId
 		, THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
-		, int32 Offset = 0);
+		, int32 Offset = 0
+		, FString const& ChannelName = "");
 
 	/**
 	 * @brief Delete a player's channel based on the its channel id.
