@@ -1217,7 +1217,11 @@ void User::GetInputValidations(const FString& LanguageCode
 		{"defaultOnEmpty", bDefaultOnEmpty ? TEXT("true") : TEXT("false")}
 	});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	const TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 	
 void User::Enable2FaBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess

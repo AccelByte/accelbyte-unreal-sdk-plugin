@@ -168,7 +168,8 @@ public:
 		FDModelsUGCChannelsPagingResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Limit = 1000,
-		int32 Offset = 0
+		int32 Offset = 0,
+		FString const& ChannelName = ""
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")

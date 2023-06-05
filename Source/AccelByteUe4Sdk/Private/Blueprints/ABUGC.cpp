@@ -353,7 +353,8 @@ void UABUGC::GetChannels(
 	FDModelsUGCChannelsPagingResponse const& OnSuccess,
 	FDErrorHandler const& OnError,
 	int32 Limit,
-	int32 Offset
+	int32 Offset,
+	FString const& ChannelName
 )
 {
 	ApiClientPtr->UGC.GetChannels(
@@ -368,7 +369,7 @@ void UABUGC::GetChannels(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}
-		)
+		), Limit, Offset, ChannelName
 	);
 }
 

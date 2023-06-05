@@ -47,7 +47,11 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID
 		, *CredentialsRef.GetNamespace()
 		, *UserID);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	const TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	HttpClient.Request(TEXT("GET"), Url, Headers, OnSuccess, OnError);
 }
 
 void UserProfile::BatchGetPublicUserProfileInfos(const FString& UserIds
@@ -66,7 +70,11 @@ void UserProfile::BatchGetPublicUserProfileInfos(const FString& UserIds
 		{TEXT("userIds"), UserIds}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	const TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 
 void UserProfile::BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
@@ -83,7 +91,11 @@ void UserProfile::BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
 		{TEXT("userIds"), FString::Join(UserIds, TEXT(","))}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	const TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 
 void UserProfile::GetCustomAttributes(const THandler<FJsonObject>& OnSuccess
@@ -176,8 +188,12 @@ void UserProfile::GetUserProfilePublicInfoByPublicId(const FString& PublicId
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("publicId"), *PublicId}
 	};
+	
+	const TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")}
+	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	HttpClient.Request(TEXT("GET"), Url,QueryParams, Headers, OnSuccess, OnError);
 }
 
 void UserProfile::CreateUserProfile(const FString& UserId
