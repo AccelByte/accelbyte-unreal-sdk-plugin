@@ -201,6 +201,10 @@ void ServerSession::QueryPartySessions(
 		{
 			QueryParams.Add(TEXT("leaderID"), ValueStr);
 		}
+		else if(KV.Key.Equals(TEXT("joinType")))
+		{
+			QueryParams.Add(TEXT("joinability"), ValueStr);
+		}
 		else
 		{
 			// Add to the mapping of query parameters
@@ -279,6 +283,77 @@ void ServerSession::GetPlayerAttributes(FString const& UserId, THandler<FAccelBy
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void ServerSession::QueryGameSessions(FAccelByteModelsV2ServerQueryGameSessionsRequest RequestContent,
+	THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError,
+	int64 Offset, int64 Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions"),
+								  *ServerSettingsRef.SessionServerUrl, *ServerCredentialsRef.GetClientNamespace());
+
+	const TSharedPtr<FJsonObject> QueryRequestJsonObject = FJsonObjectConverter::UStructToJsonObject(RequestContent);
+	FAccelByteUtilities::RemoveEmptyStrings(QueryRequestJsonObject);
+
+	TMap<FString, FString> QueryParams{};
+
+	for (const TPair<FString, TSharedPtr<FJsonValue>>& KV : QueryRequestJsonObject->Values)
+	{
+		// Check if the value of this pair is a valid shared instance, if not bail
+		if (!KV.Value.IsValid())
+		{
+			continue;
+		}
+
+		// Attempt to get the value pointed to as a string, and make sure that it is not empty if we are able to grab it
+		FString ValueStr{};
+		if (!KV.Value->TryGetString(ValueStr) || ValueStr.IsEmpty())
+		{
+			continue;
+		}
+
+		// Avoid adding empty enum and default FDateTime to query params
+		if (ValueStr.Equals(TEXT("empty"), ESearchCase::IgnoreCase) || ValueStr.Equals(FDateTime{0}.ToString(), ESearchCase::IgnoreCase))
+		{
+			continue;
+		}
+
+		// Convert FDateTime string representation from UnrealEngine default format to RFC 3339
+		if (KV.Key.Equals(TEXT("fromTime")) || KV.Key.Equals(TEXT("toTime")))
+		{
+			FDateTime OutDateTime;
+			if (FDateTime::Parse(ValueStr, OutDateTime))
+			{
+				ValueStr = OutDateTime.ToString(TEXT("%Y-%m-%dT%H:%M:%SZ"));
+			}
+			else
+			{
+				continue;
+			}
+		}
+
+		// Convert bool value to upper case to match BE convention (e.g. TRUE or FALSE) for these query params
+		if (KV.Key.Equals(TEXT("isSoftDeleted")) || KV.Key.Equals(TEXT("isPersistent")))
+		{
+			ValueStr = ValueStr.ToUpper();
+		}
+
+		QueryParams.Add(KV.Key, ValueStr);
+	}
+
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 }

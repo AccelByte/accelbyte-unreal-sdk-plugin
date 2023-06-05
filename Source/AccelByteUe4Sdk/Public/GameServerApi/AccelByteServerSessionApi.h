@@ -152,6 +152,20 @@ public:
 		, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Query for game sessions for dedicated server
+	 *
+	 * @param RequestContent The query game sessions request body.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Offset Pagination offset. Default 0.
+	 * @param Limit Pagination limit. Default 20.
+	 */
+	void QueryGameSessions(FAccelByteModelsV2ServerQueryGameSessionsRequest RequestContent
+		, THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int64 Offset = 0, int64 Limit = 20);
+
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;

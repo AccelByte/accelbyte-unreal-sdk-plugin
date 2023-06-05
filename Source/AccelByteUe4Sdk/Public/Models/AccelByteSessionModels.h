@@ -635,3 +635,54 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2StorePlayerAttributesRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesRequest")
 	TArray<FAccelByteModelsV2PlayerAttributesPlatform> Platforms{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2ServerQueryGameSessionsRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	EAccelByteV2GameSessionDsStatus Status{EAccelByteV2GameSessionDsStatus::EMPTY};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	EAccelByteV2GameSessionDsStatus StatusV2 {EAccelByteV2GameSessionDsStatus::EMPTY};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FString SessionID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FString MatchPool{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FString GameMode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	EAccelByteV2SessionJoinability Joinability{EAccelByteV2SessionJoinability::EMPTY};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FString MemberID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FString ConfigurationName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FDateTime FromTime{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FDateTime ToTime{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FString DsPodName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	bool IsSoftDeleted{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	bool IsPersistent{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FString OrderBy{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
+	FString Order{};
+};

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [23.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.2.0%0D23.1.4) (2023-06-05)
+
+
+### Features
+
+* **DS:** add DSM heartbeat API ([0701ed3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0701ed30cbf2e8b2ecca93672fd75f39a42fe629))
+* **session:** add query game sessions API for dedicated server ([262c8a9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/262c8a933964e7ca2e3d1eee55626046b2aaf3bb))
+
 ### [23.1.4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.1.4%0D23.1.3) (2023-05-26)
 
 
