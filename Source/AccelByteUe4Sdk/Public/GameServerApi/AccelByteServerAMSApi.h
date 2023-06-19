@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteServerApiBase.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteWatchdog, Warning, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteAMS, Warning, All);
 
 namespace AccelByte
 {
@@ -20,55 +20,55 @@ namespace GameServerApi
 {
 
 /**
- * @brief Watchdog API for communication from dedicated server to backend.
+ * @brief API for communication from dedicated server to AMS.
  */
-class ACCELBYTEUE4SDK_API ServerWatchdog : public FServerApiBase
+class ACCELBYTEUE4SDK_API ServerAMS : public FServerApiBase
 {
 public:
 	DECLARE_DELEGATE(FConnectSuccess);
-	DECLARE_DELEGATE(FOnWatchdogDrainReceived);
+	DECLARE_DELEGATE(FOnAMSDrainReceived);
 	DECLARE_DELEGATE_OneParam(FConnectError, const FString& /* Message */);
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 
-	ServerWatchdog(ServerCredentials const& InCredentialsRef
+	ServerAMS(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
 		, FHttpRetryScheduler& InHttpRef);
 
-	~ServerWatchdog();
+	~ServerAMS();
 
 	/**
-	 * @brief Connect to the Watchdog websocket.
+	 * @brief Connect to the AMS websocket.
 	 */
 	void Connect();
 
 	/**
-	 * @brief Disconnect from Watchdog if already connected.
+	 * @brief Disconnect from AMS if already connected.
 	 */
 	void Disconnect(bool bForceCleanup = false);
 
 	/**
-	 * @brief Check whether the websocket is currently connected to the Watchdog.
+	 * @brief Check whether the websocket is currently connected to the AMS.
 	 *
 	 * @return true if it's connected, false otherwise.
 	 */
 	bool IsConnected() const;
 
 	/**
-	 * @brief set a delegate to be triggered when successfully connect to Watchdog.
+	 * @brief set a delegate to be triggered when successfully connect to AMS.
 	 *
 	 * @param OnConnectSuccess delegate to set.
 	 */
 	void SetOnConnectSuccess(const FConnectSuccess& OnConnectSuccess);
 
 	/**
-	 * @brief set a delegate to be triggered when error connecting to Watchdog.
+	 * @brief set a delegate to be triggered when error connecting to AMS.
 	 *
 	 * @param OnConnectError delegate to set.
 	 */
 	void SetOnConnectError(const FConnectError& OnConnectError);
 
 	/**
-	 * @brief set a delegate to be triggered when Watchdog connection is closed.
+	 * @brief set a delegate to be triggered when AMS connection is closed.
 	 *
 	 * @param OnConnectionClosed delegate to set.
 	 */
@@ -80,16 +80,16 @@ public:
 	void UnbindDelegates();
 
 	/**
-	 * @brief send ready message to Watchdog.
+	 * @brief send ready message to AMS.
 	 */
 	void SendReadyMessage();
 
 	/**
 	 * @brief set delegate to be called when drain message is received.
 	 *
-	 * @param OnWatchdogDrain delegate to set.
+	 * @param OnAMSDrain delegate to set.
 	 */
-	void SetOnWatchdogDrainReceivedDelegate(FOnWatchdogDrainReceived OnWatchdogDrain);
+	void SetOnAMSDrainReceivedDelegate(FOnAMSDrainReceived OnAMSDrain);
 
 
 private:
@@ -113,12 +113,12 @@ private:
 	FConnectSuccess OnConnectSuccessDelegate;
 	FConnectError OnConnectErrorDelegate;
 	FConnectionClosed OnConnectionClosedDelegate;
-	FOnWatchdogDrainReceived OnWatchdogDrainReceivedDelegate;
-	FTickerDelegate WatchdogHeartbeatTickDelegate;
+	FOnAMSDrainReceived OnAMSDrainReceivedDelegate;
+	FTickerDelegate AMSHeartbeatTickDelegate;
 	
-	FDelegateHandleAlias WatchdogHeartbeatTickDelegateHandle;
+	FDelegateHandleAlias AMSHeartbeatTickDelegateHandle;
 	
-	FTimespan WatchdogHeartbeatInterval = FTimespan(0, 0, 15);
+	FTimespan AMSHeartbeatInterval = FTimespan(0, 0, 15);
 	
 	bool bHeartbeatJobStarted = false;
 

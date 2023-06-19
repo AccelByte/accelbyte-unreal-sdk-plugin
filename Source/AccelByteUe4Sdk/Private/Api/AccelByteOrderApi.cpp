@@ -86,9 +86,10 @@ void Order::GetUserOrders(int32 Page
 		, *CredentialsRef.GetNamespace()
 		, *CredentialsRef.GetUserId());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("page"), FString::FromInt(Page)},
-		{TEXT("size"), FString::FromInt(Size)}};
+		{TEXT("size"), FString::FromInt(Size)}
+	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }

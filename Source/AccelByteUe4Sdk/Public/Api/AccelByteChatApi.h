@@ -66,7 +66,7 @@ public:
 	DECLARE_DELEGATE(FChatConnectSuccess);
 	DECLARE_DELEGATE_OneParam(FChatDisconnectNotif, const FAccelByteModelsChatDisconnectNotif&)
 	DECLARE_DELEGATE_ThreeParams(FChatConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
-	
+
 	/**
 	* @brief delegate for handling response when refreshing chat token.
 	*/
@@ -115,7 +115,7 @@ public:
 	DECLARE_DELEGATE_OneParam(FChatUnblockUserResponse, const FAccelByteModelsChatUnblockUserResponse&)
 
 	/**
-	 * @brief delegate for handling action chat topic response (create, update, delete, join, quit) 
+	 * @brief delegate for handling action chat topic response (create, update, delete, join, quit)
 	 */
 	DECLARE_DELEGATE_OneParam(FChatActionTopicResponse, const FAccelByteModelsChatActionTopicResponse&)
 
@@ -125,7 +125,7 @@ public:
 	DECLARE_DELEGATE_OneParam(FAddRemoveUserFromTopicResponse, const FAccelByteModelsChatActionUserTopicResponse&)
 
 	/**
-	 * @brief delegate for handling delete system message(s) response. 
+	 * @brief delegate for handling delete system message(s) response.
 	 */
 	DECLARE_DELEGATE_OneParam(FDeleteSystemMessagesResponse, const FAccelByteModelsDeleteSystemMessagesResponse&)
 
@@ -133,10 +133,10 @@ public:
 	 * @brief delegate for handling update system message(s) response.
 	 */
 	DECLARE_DELEGATE_OneParam(FUpdateSystemMessagesResponse, const FAccelByteModelsUpdateSystemMessagesResponse&)
-	
+
 	/**
-     * @brief delegate for handling query system message response.
-     */
+	 * @brief delegate for handling query system message response.
+	 */
 	DECLARE_DELEGATE_OneParam(FQuerySystemMessageResponse, const FAccelByteModelsQuerySystemMessagesResponse&)
 
 	/** Delegate for handling get system message stats response. */
@@ -172,6 +172,16 @@ public:
 	* @brief delegate for handling ban / unban notification
 	*/
 	DECLARE_DELEGATE_OneParam(FUserBanUnbanNotif, const FAccelByteModelsChatUserBanUnbanNotif&);
+
+	/*
+	* @brief delegate for handling chat muted notification
+	*/
+	DECLARE_DELEGATE_OneParam(FUserMutedNotif, const FAccelByteModelsChatMutedNotif&);
+
+	/*
+	* @brief delegate for handling chat unmuted notification
+	*/
+	DECLARE_DELEGATE_OneParam(FUserUnmutedNotif, const FAccelByteModelsChatUnmutedNotif&);
 
 
 #pragma endregion
@@ -938,6 +948,80 @@ private:
 
 #pragma endregion
 
+#pragma region GROUP CHAT AS MODERATOR
+
+public:
+	/**
+	 * @brief Delete a message from group chat (used by group moderator).
+	 *
+	 * @param GroupId Id of group from group service.
+	 * @param ChatId Id of message to delete.
+	 * @param OnSuccess Called when the operation succeeded.
+	 * @param OnError Called when the operation failed.
+	 */
+	void DeleteGroupChat(const FString& GroupId, const FString& ChatId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Mute user from group chat (used by group moderator).
+	 *
+	 * @param GroupId Id of group from group service.
+	 * @param UserId Id of the user to be muted.
+	 * @param DurationInSeconds Duration of mute in seconds.
+	 * @param OnSuccess Called when the operation succeeded.
+	 * @param OnError Called when the operation failed.
+	 */
+	void MuteGroupUserChat(const FString& GroupId, const FString& UserId, int32 DurationInSeconds, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Unmute user from group chat (used by group moderator).
+	 *
+	 * @param GroupId Id of group from group service.
+	 * @param UserId Id of the user to be un-muted.
+	 * @param OnSuccess Called when the operation succeeded.
+	 * @param OnError Called when the operation failed.
+	 */
+	void UnmuteGroupUserChat(const FString& GroupId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get chat snapshot (used by group moderator).
+	 *
+	 * @param GroupId Id of group from group service.
+	 * @param ChatId Id of message.
+	 * @param OnSuccess Called when the operation succeeded.
+	 * @param OnError Called when the operation failed.
+	 */
+	void GetGroupChatSnapshot(const FString& GroupId, const FString& ChatId, const THandler<FAccelByteModelsChatSnapshotResponse>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Ban users from group chat (used by group moderator).
+	 *
+	 * @param GroupId Id of group from group service.
+	 * @param UserIds Array of user ids to ban.
+	 * @param OnSuccess Called when the operation succeeded.
+	 * @param OnError Called when the operation failed.
+	 */
+	void BanGroupUserChat(const FString& GroupId, const TArray<FString>& UserIds, const THandler<FAccelByteModelsBanGroupChatResponse>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Unban users from group chat (used by group moderator).
+	 *
+	 * @param GroupId Id of group from group service.
+	 * @param UserIds Array of user ids to unban.
+	 * @param OnSuccess Called when the operation succeeded.
+	 * @param OnError Called when the operation failed.
+	 */
+	void UnbanGroupUserChat(const FString& GroupId, const TArray<FString>& UserIds, const THandler<FAccelByteModelsUnbanGroupChatResponse>& OnSuccess, const FErrorHandler& OnError);
+
+private:
+	/**
+	 * @brief Generate group topic id based on group id
+	 * @param GroupId Id of the Group
+	 * @return Group topic id
+	 */
+	static FString GenerateGroupTopicId(const FString& GroupId);
+
+#pragma endregion
+
 #pragma region NOTIFICATION SETTER
 public:
 
@@ -1011,6 +1095,22 @@ public:
 	void SetUserUnbanNotifDelegate(const FUserBanUnbanNotif& Delegate)
 	{
 		UserUnbanNotif = Delegate;
+	}
+
+	/**
+	 * @brief Delegate setter for when user received muted event
+	 */
+	void SetUserMutedNotifDelegate(const FUserMutedNotif& Delegate)
+	{
+		UserMutedNotif = Delegate;
+	}
+
+	/**
+	 * @brief Delegate setter for when user received unmuted event
+	 */
+	void SetUserUnmutedNotifDelegate(const FUserUnmutedNotif& Delegate)
+	{
+		UserUnmutedNotif = Delegate;
 	}
 
 #pragma endregion
@@ -1096,6 +1196,8 @@ private:
 	FDeleteUpdateTopicNotif DeleteTopicNotif;
 	FDeleteUpdateTopicNotif UpdateTopicNotif;
 	FSystemMessageNotif SystemMessageNotif;
+	FUserMutedNotif UserMutedNotif;
+	FUserUnmutedNotif UserUnmutedNotif;
 	
 	FUserBanUnbanNotif UserBanNotif;
 	FUserBanUnbanNotif UserUnbanNotif;

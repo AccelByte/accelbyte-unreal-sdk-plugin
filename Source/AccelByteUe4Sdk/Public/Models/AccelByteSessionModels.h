@@ -686,3 +686,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2ServerQueryGameSessionsRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ServerQueryGameSessionsRequest")
 	FString Order{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionLeaderPromotionRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionLeaderPromotionRequest")
+	FString LeaderID{};
+};

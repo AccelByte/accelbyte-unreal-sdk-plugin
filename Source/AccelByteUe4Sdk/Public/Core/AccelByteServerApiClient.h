@@ -28,7 +28,7 @@
 #include "Core/AccelByteServerApiBase.h"
 #include "GameServerApi/AccelByteServerDSHubApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingV2Api.h"
-#include "GameServerApi/AccelByteServerWatchdogApi.h"
+#include "GameServerApi/AccelByteServerAMSApi.h"
 #include "GameServerApi/AccelByteServerMetricExporterApi.h"
 
 namespace AccelByte
@@ -62,7 +62,7 @@ public:
 	GameServerApi::ServerSession ServerSession{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerDSHub ServerDSHub{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerWatchdog ServerWatchdog{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerAMS ServerAMS{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerMetricExporter ServerMetric{ FRegistry::ServerSettings };
 
 	template<typename T, typename... U>

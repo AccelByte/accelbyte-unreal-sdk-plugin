@@ -10,7 +10,7 @@
 #include "CoreUObject.h"
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Api/AccelByteHeartBeatApi.h"
-#include "GameServerApi/AccelByteServerWatchdogApi.h"
+#include "GameServerApi/AccelByteServerAMSApi.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSignalHandler.h"
 #include "Core/Version.h"
@@ -92,11 +92,11 @@ void FAccelByteUe4SdkModule::StartupModule()
 #if UE_SERVER
 	if (!FParse::Param(FCommandLine::Get(), TEXT("dsid")))
 	{
-		UE_LOG(LogAccelByte, Warning, TEXT("dsid not provided, not connecting to watchdog"));
+		UE_LOG(LogAccelByte, Warning, TEXT("dsid not provided, not connecting to AMS"));
 	}
 	else
 	{
-		AccelByte::FRegistry::ServerWatchdog.Connect();
+		AccelByte::FRegistry::ServerAMS.Connect();
 	}
 
 	FAccelByteSignalHandler::Initialize();

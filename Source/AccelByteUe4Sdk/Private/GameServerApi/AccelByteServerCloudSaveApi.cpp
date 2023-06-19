@@ -35,7 +35,7 @@ void ServerCloudSave::RetrieveGameRecordsKey(const THandler<FAccelByteModelsPagi
 		, *ServerSettingsRef.CloudSaveServerUrl
 		, *ServerCredentialsRef.GetClientNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if(!Query.IsEmpty())
 	{
 		QueryParams.Add(TEXT("query=%s"), *Query);

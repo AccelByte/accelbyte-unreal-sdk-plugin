@@ -22,6 +22,9 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedLeaderboardData, FAccelByteMo
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsLeaderboardRankingResultV3, FAccelByteModelsLeaderboardRankingResultV3, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRankingDataV3, FAccelByteModelsUserRankingDataV3, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsBulkUserRankingDataV3, FAccelByteModelsBulkUserRankingDataV3, Response);
+
 #pragma endregion
 
 UCLASS(BlueprintType, Blueprintable)
@@ -76,6 +79,12 @@ public:
 	void GetUserRankingV3(FString const& UserId,
 		FString const& LeaderboardCode,
 		FDModelsUserRankingDataV3 const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category= "AccelByte | Leaderboard | Api")
+	void GetBulkUserRankingV3(TArray<FString> const& UserIds,
+		FString const& LeaderboardCode,
+		FDModelsBulkUserRankingDataV3 const& OnSuccess,
 		FDErrorHandler const& OnError);
 
 private:

@@ -42,41 +42,29 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
-	
-	TArray<FString> TempItemIds;
-	for (const auto& ItemId : ItemIds)
-	{
-		if (!ItemId.IsEmpty())
-		{
-			TempItemIds.Add(FGenericPlatformHttp::UrlEncode(ItemId));
-		}
-	}
-
-	TArray<FString> TempFeatures;
-	for (const auto& Feature : Features)
-	{
-		if (!Feature.IsEmpty())
-		{
-			TempFeatures.Add(FGenericPlatformHttp::UrlEncode(Feature));
-		}
-	}
-	
-	TMap<FString, FString> QueryParams;
+		
+	TMultiMap<FString, FString> QueryParams{};
 	QueryParams.Add( TEXT("activeOnly"), bActiveOnly ? TEXT("true") : TEXT("false") );
 	
 	if (!EntitlementName.IsEmpty())
 	{
-		QueryParams.Add( TEXT("entitlementName"), FGenericPlatformHttp::UrlEncode(EntitlementName));
+		QueryParams.Add( TEXT("entitlementName"), EntitlementName);
 	}
-
-	if (TempItemIds.Num() > 0)
+	
+	for (const auto& ItemId : ItemIds)
 	{
-		QueryParams.Add(TEXT("itemId"), FString::Join(TempItemIds, TEXT("&itemId=")));
+		if (!ItemId.IsEmpty())
+		{
+			QueryParams.AddUnique(TEXT("itemId"), ItemId);
+		}
 	}
-
-	if (TempFeatures.Num() > 0)
+	
+	for (const auto& Feature : Features)
 	{
-		QueryParams.Add(TEXT("features"), FString::Join(TempFeatures, TEXT("&features=")));
+		if (!Feature.IsEmpty())
+		{
+			QueryParams.AddUnique(TEXT("features"), Feature);
+		}
 	}
 
 	if (Offset > 0)
@@ -91,17 +79,15 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 
 	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
 	{
-		QueryParams.Add(TEXT("entitlementClazz"),FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass)));
+		QueryParams.Add(TEXT("entitlementClazz"),FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass));
 	}
 
 	if (AppType != EAccelByteAppType::NONE)
 	{
-		QueryParams.Add(TEXT("appType"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetUEnumValueAsString(AppType)));
+		QueryParams.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(AppType));
 	}
-
-	Url.Append(FAccelByteUtilities::CreateQueryParams(QueryParams));
 	
-	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid
@@ -212,8 +198,9 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
 
-	const TMap<FString, FString> QueryParams= {
-		{TEXT("entitlementIds"), FString::Join(EntitlementIds, TEXT(","))}};
+	const TMultiMap<FString, FString> QueryParams= {
+		{TEXT("entitlementIds"), FString::Join(EntitlementIds, TEXT(","))}
+	};
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -339,22 +326,17 @@ void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace());
 
-	TArray<FString> TempSkus;
+	TMultiMap<FString, FString> QueryParams{};
+	
 	for (const auto& Sku : Skus)
 	{
 		if (!Sku.IsEmpty())
 		{
-			TempSkus.Add(Sku);
+			QueryParams.AddUnique(TEXT("sku"), Sku);
 		}
 	}
-	
-	const TMap<FString, FString> QueryParams = {
-		{TEXT("sku"), FString::Join(TempSkus, TEXT("&sku="))}
-	};
 
-	Url.Append(FAccelByteUtilities::CreateQueryParams(QueryParams));
-
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void ServerEcommerce::ListStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
@@ -396,7 +378,7 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 	ItemCriteria.AvailableDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
 	FString AvailableDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
 
-	TMap<FString, FString> QueryParams = {
+	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), ItemCriteria.StoreId },
 		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
 		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true"):TEXT("false") },
@@ -412,9 +394,9 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 			FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType) : TEXT("") },
 		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ?
 			FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType) : TEXT("")  },
-		{ TEXT("offset"), ItemCriteria.Offset > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Offset) : TEXT("") },
-		{ TEXT("limit"), ItemCriteria.Limit > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Limit) : TEXT("") },
-		};
+		{ TEXT("offset"), ItemCriteria.Offset > 0 ? FString::FromInt(ItemCriteria.Offset) : TEXT("") },
+		{ TEXT("limit"), ItemCriteria.Limit > 0 ? FString::FromInt(ItemCriteria.Limit) : TEXT("") },
+	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -446,7 +428,7 @@ void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV
 	ItemCriteria.AvailableDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
 	FString AvailableDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
 
-	TMap<FString, FString> QueryParams = {
+	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), ItemCriteria.StoreId },
 		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
 		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true"):TEXT("false") },
@@ -462,10 +444,10 @@ void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV
 		{ TEXT("targetNamespace"), ItemCriteria.TargetNamespace },
 		{ TEXT("itemName"), ItemCriteria.ItemName },
 		{ TEXT("sectionExclusive"), ItemCriteria.bSectionExclusive ? TEXT("true") : TEXT("false") },
-		{ TEXT("offset"), ItemCriteria.Offset > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Offset) : TEXT("") },
-		{ TEXT("limit"), ItemCriteria.Limit > 0 ? FString::Printf(TEXT("%d"), ItemCriteria.Limit) : TEXT("") },
+		{ TEXT("offset"), ItemCriteria.Offset > 0 ? FString::FromInt(ItemCriteria.Offset) : TEXT("") },
+		{ TEXT("limit"), ItemCriteria.Limit > 0 ? FString::FromInt(ItemCriteria.Limit) : TEXT("") },
 		{ TEXT("sortBy"), FString::Join(SortByStringArray, TEXT(","))  },
-		};
+	};
  
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }

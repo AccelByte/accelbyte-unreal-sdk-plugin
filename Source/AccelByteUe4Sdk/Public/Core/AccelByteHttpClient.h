@@ -19,13 +19,35 @@
 
 namespace AccelByte
 {
+	class ACCELBYTEUE4SDK_API FHttpFormData final
+	{
+	public:
+		FHttpFormData();
+		FHttpFormData(FHttpFormData const& Other);
+		FHttpFormData(TMap<FString, FString> const& InFormData);
+		FHttpFormData(TMultiMap<FString, FString> const& InFormData);
+		~FHttpFormData();
+
+		bool IsEmpty() const;
+		FString ToString() const;
+		FString ToUrlEncodedString() const;
+	private:
+		static bool ConvertMapToMultiMap(TMap<FString, FString> const& In, TMultiMap<FString, FString> & Out);
+		static FString CheckThenUrlEncode(FString const& InValue);
+		static FString Serialize(TMultiMap<FString, FString> const& InFormData, bool bShouldUrlEncode = false);
+		
+		TMultiMap<FString, FString> Data;
+	};
+	
 	/**
 	 * @brief HTTP client for building API
 	 */
 	class ACCELBYTEUE4SDK_API FHttpClient final
 	{
 	public:
-		FHttpClient(BaseCredentials const& InCredentialsRef, BaseSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+		FHttpClient(BaseCredentials const& InCredentialsRef
+			, BaseSettings const& InSettingsRef
+			, FHttpRetryScheduler & InHttpRef);
 		~FHttpClient();
 
 		/**
@@ -39,10 +61,10 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			return Request(Verb, Url, {}, FString(), {}, OnSuccess, OnError);
 		}
@@ -52,20 +74,20 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param OnSuccess Callback when HTTP call is successful.
 		 * @param OnError Callback when HTTP call is error.
 		 *
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const U& OnSuccess
-			, const V& OnError)
-		{
-			return Request(Verb, Url, Params, FString(), {}, OnSuccess, OnError);
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, U const& OnSuccess
+			, V const& OnError)
+		{			
+			return Request(Verb, Url, QueryParams, FString(), {}, OnSuccess, OnError);
 		}
 		
 		/**
@@ -73,7 +95,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Headers HTTP request headers key-value (overrides implicit headers).
 		 * @param OnSuccess Callback when HTTP call is successful.
 		 * @param OnError Callback when HTTP call is error.
@@ -81,14 +103,14 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError)
 		{
-			return Request(Verb, Url, Params, FString(), Headers, OnSuccess, OnError);
+			return Request(Verb, Url, QueryParams, FString(), Headers, OnSuccess, OnError);
 		}
 		
 		/**
@@ -103,11 +125,11 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url 
-			, const FString& Content
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url 
+			, FString const& Content
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			return Request(Verb, Url, {}, Content, {}, OnSuccess, OnError);
 		}
@@ -124,11 +146,11 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TArray<uint8>& Content
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, TArray<uint8> const& Content
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			return Request(Verb, Url, {}, Content, {}, OnSuccess, OnError);
 		}
@@ -146,12 +168,12 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url 
-			, const FString& Content
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url 
+			, FString const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			return Request(Verb, Url, {}, Content, Headers, OnSuccess, OnError);
 		}
@@ -169,12 +191,12 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TArray<uint8>& Content
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, TArray<uint8> const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			return Request(Verb, Url, {}, Content, Headers, OnSuccess, OnError);
 		}
@@ -184,7 +206,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Content HTTP request content string
 		 * @param Headers HTTP request headers key-value (overrides implicit headers).
 		 * @param OnSuccess Callback when HTTP call is successful.
@@ -193,13 +215,13 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const FString& Content
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, FString const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
@@ -208,7 +230,7 @@ namespace AccelByte
 				Request->SetContentAsString(Content);
 			}
 
-			return ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
+			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -216,7 +238,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Content HTTP request content binary (implies Content-Type application/octet-stream header).
 		 * @param Headers HTTP request headers key-value (overrides implicit headers).
 		 * @param OnSuccess Callback when HTTP call is successful.
@@ -225,13 +247,13 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const TArray<uint8>& Content
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TArray<uint8> const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
@@ -241,7 +263,7 @@ namespace AccelByte
 				Request->SetContent(Content);
 			}
 
-			return ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
+			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -249,7 +271,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Content HTTP request content form key-value (implies Content-Type application/x-www-form-urlencoded header).
 		 * @param Headers HTTP request headers key-value (overrides implicit headers).
 		 * @param OnSuccess Callback when HTTP call is successful.
@@ -258,13 +280,13 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const TMap<FString, FString>& Content
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TMap<FString, FString> const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
@@ -272,25 +294,25 @@ namespace AccelByte
 			{
 				if (Content.Num() > 0)
 				{
-					const FString EncodedData = EncodeParamsData(Content);
+					const FHttpFormData EncodedData{ Content };
 
 					Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
-					Request->SetContentAsString(EncodedData);
+					Request->SetContentAsString(EncodedData.ToUrlEncodedString());
 				}
 			}
 
-			return ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
+			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
 
 		template<typename  U, typename V, typename W>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const TArray<uint8>& Content
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnProgress
-			, const W& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TArray<uint8> const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnProgress
+			, W const& OnError)
 		{
 			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
@@ -305,18 +327,18 @@ namespace AccelByte
 
 			Request->OnRequestProgress() = OnProgress;
 
-			return ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
+			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
 
 		template<typename  U, typename V, typename W>
-		FAccelByteTaskPtr Request(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const FString& Content
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnProgress
-			, const W& OnError)
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, FString const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnProgress
+			, W const& OnError)
 		{
 			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
@@ -327,7 +349,7 @@ namespace AccelByte
 
 			Request->OnRequestProgress() = OnProgress;
 
-			return ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
+			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -341,12 +363,12 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, U const& OnSuccess
+			, V const& OnError)
 		{
-			return ApiRequest(Verb, Url, {}, TMap<FString, FString>(), OnSuccess, OnError);
+			return ApiRequest(Verb, Url, {}, OnSuccess, OnError);
 		}
 
 		/**
@@ -354,20 +376,20 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param OnSuccess Callback when HTTP call is successful.
 		 * @param OnError Callback when HTTP call is error.
 		 *
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, U const& OnSuccess
+			, V const& OnError)
 		{
-			return ApiRequest(Verb, Url, Params, TMap<FString, FString>(), OnSuccess, OnError);
+			return ApiRequest(Verb, Url, QueryParams, TMap<FString, FString>(), OnSuccess, OnError);
 		}
 
 		/**
@@ -375,7 +397,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Data HTTP request content form key-value (implies Content-Type application/x-www-form-urlencoded header).
 		 * @param OnSuccess Callback when HTTP call is successful.
 		 * @param OnError Callback when HTTP call is error.
@@ -383,18 +405,18 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const TMap<FString, FString>& Data
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TMap<FString, FString> const& Data
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			TMap<FString, FString> Headers = {
 				{TEXT("Accept"), TEXT("application/json")}
 			};
 
-			return ApiRequest(Verb, Url, Params, Data, Headers, OnSuccess, OnError);
+			return ApiRequest(Verb, Url, QueryParams, Data, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -402,7 +424,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Json HTTP request content JSON string (implies Content-Type application/json header).
 		 * @param OnSuccess Callback when HTTP call is successful.
 		 * @param OnError Callback when HTTP call is error.
@@ -410,19 +432,19 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const FString& Json
-			, const U& OnSuccess
-			, const V& OnError)
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, FString const& Json
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			TMap<FString, FString> Headers = {
 				{TEXT("Content-Type"), TEXT("application/json")},
 				{TEXT("Accept"), TEXT("application/json")}
 			};
 
-			return ApiRequest(Verb, Url, Params, Json, Headers, OnSuccess, OnError);
+			return ApiRequest(Verb, Url, QueryParams, Json, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -430,7 +452,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param UStruct HTTP request content from a given UStruct (implies Content-Type application/json header).
 		 * @param OnSuccess Callback when HTTP call is successful.
 		 * @param OnError Callback when HTTP call is error.
@@ -440,18 +462,18 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename T, typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const T& UStruct
-			, const U& OnSuccess
-			, const V& OnError
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, T const& UStruct
+			, U const& OnSuccess
+			, V const& OnError
 			, bool bOmitBlankValues = false)
 		{
 			TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(UStruct);
 			FString JsonString = ParseUStructToJsonString(JsonObject, bOmitBlankValues);
 			
-			return ApiRequest(Verb, Url, Params, JsonString, OnSuccess, OnError);
+			return ApiRequest(Verb, Url, QueryParams, JsonString, OnSuccess, OnError);
 		}
 
 		/**
@@ -459,7 +481,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param UStruct HTTP request content from a given UStruct (implies Content-Type application/json header).
 		 * @param Headers HTTP request headers key-value (overrides implicit headers).
 		 * @param OnSuccess Callback when HTTP call is successful.
@@ -470,19 +492,19 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename T, typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const T& UStruct
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, T const& UStruct
 			, TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError
+			, U const& OnSuccess
+			, V const& OnError
 			, bool bOmitBlankValues = false)
 		{
 			TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(UStruct);
 			FString JsonString = ParseUStructToJsonString(JsonObject, bOmitBlankValues);
 
-			return ApiRequest(Verb, Url, Params, JsonString, Headers, OnSuccess, OnError);
+			return ApiRequest(Verb, Url, QueryParams, JsonString, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -490,7 +512,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Content HTTP request content byte array (implies Content-Type application/octet-stream header).
 		 * @param Headers HTTP request headers key-value (overrides implicit headers).
 		 * @param OnSuccess Callback when HTTP call is successful.
@@ -499,13 +521,13 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const TArray<uint8>& Content
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TArray<uint8> const& Content
 			, TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			FString ApiUrl = FormatApiUrl(Url);
 
@@ -515,7 +537,7 @@ namespace AccelByte
 				return nullptr;
 			}
 
-			return Request(Verb, ApiUrl, Params, Content, Headers, OnSuccess, OnError);
+			return Request(Verb, ApiUrl, QueryParams, Content, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -523,7 +545,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Data HTTP request content form key-value (implies Content-Type application/x-www-form-urlencoded header).
 		 * @param OnSuccess Callback when HTTP call is successful.
 		 * @param OnError Callback when HTTP call is error.
@@ -531,13 +553,13 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const TMap<FString, FString>& Data
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TMap<FString, FString> const& Data
 			, TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			FString ApiUrl = FormatApiUrl(Url);
 
@@ -547,7 +569,7 @@ namespace AccelByte
 				return nullptr;
 			}
 
-			return Request(Verb, ApiUrl, Params, Data, Headers, OnSuccess, OnError);
+			return Request(Verb, ApiUrl, QueryParams, Data, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -555,7 +577,7 @@ namespace AccelByte
 		 *
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
-		 * @param Params HTTP request query string key-value.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param Json HTTP request content JSON string (implies Content-Type application/json header).
 		 * @param Headers HTTP request headers key-value (overrides implicit headers).
 		 * @param OnSuccess Callback when HTTP call is successful.
@@ -564,13 +586,13 @@ namespace AccelByte
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		FAccelByteTaskPtr ApiRequest(const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const FString& Json
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, FString const& Json
 			, TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+			, U const& OnSuccess
+			, V const& OnError)
 		{
 			FString ApiUrl = FormatApiUrl(Url);
 
@@ -580,7 +602,7 @@ namespace AccelByte
 				return nullptr;
 			}
 
-			return Request(Verb, ApiUrl, Params, Json, Headers, OnSuccess, OnError);
+			return Request(Verb, ApiUrl, QueryParams, Json, Headers, OnSuccess, OnError);
 		}
 
 	private:
@@ -588,24 +610,21 @@ namespace AccelByte
 		BaseCredentials const& CredentialsRef;
 		BaseSettings const& SettingsRef;
 
-		FString FormatApiUrl(const FString& Url) const;
+		FString FormatApiUrl(FString const& Url) const;
 
 		bool AddApiAuthorizationIfAvailable(TMap<FString, FString>& Headers) const;
 
-		bool IsValidUrl(const FString& Url);
+		static bool IsValidUrl(FString const& Url);
 
-		void ExecuteError(const FErrorHandler& OnError, const FString& ErrorText);
+		void ExecuteError(const FErrorHandler& OnError, FString const& ErrorText);
 
-		void ExecuteError(const FCustomErrorHandler& OnError, const FString& ErrorText);
+		void ExecuteError(const FCustomErrorHandler& OnError, FString const& ErrorText);
 
 		template<typename T>
-		void ExecuteError(const THandler<T>& OnError, const FString& ErrorText)
+		void ExecuteError(const THandler<T>& OnError, FString const& ErrorText)
 		{
 			OnError.ExecuteIfBound({TEXT("InvalidRequest"), ErrorText});
 		}
-		
-		FString EncodeParamsData(const TMap<FString
-			, FString>& ParamsData) const;
 
 		FString ParseUStructToJsonString(TSharedPtr<FJsonObject> JsonObject, bool bOmitBlankValues = false)
 		{
@@ -638,14 +657,13 @@ namespace AccelByte
 
 		template<typename U, typename V>
 		FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr& Request
-			, const FString& Verb
-			, const FString& Url
-			, const TMap<FString, FString>& Params
-			, const TMap<FString, FString>& Headers
-			, const U& OnSuccess
-			, const V& OnError)
+			, FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError)
 		{
-
 			if (!IsValidUrl(Url))
 			{
 				FString ErrorText = FString::Format(TEXT("Invalid URL format {0}"), { Url });
@@ -655,9 +673,9 @@ namespace AccelByte
 
 			FString QueryString;
 
-			if (Params.Num() > 0)
+			if (!QueryParams.IsEmpty())
 			{
-				QueryString.Append("?").Append(EncodeParamsData(Params));
+				QueryString.Append("?").Append(QueryParams.ToUrlEncodedString());
 			}
 
 			Request->SetURL(FString::Printf(TEXT("%s%s"), *Url, *QueryString));

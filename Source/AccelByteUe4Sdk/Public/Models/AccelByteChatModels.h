@@ -852,3 +852,144 @@ struct ACCELBYTEUE4SDK_API FAccelByteGetSystemMessageStatsResponse
 };
 
 #pragma endregion 
+
+#pragma region GROUP CHAT AS MODERATOR
+
+//!@brief Request for mute user in group chat
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsMuteGroupChatRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	int32 Duration {0};
+};
+
+//!@brief Request for unmute user in group chat
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUnmuteGroupChatRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString UserId{};
+};
+
+//!@brief Message from chat snapshot
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSnapshotMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString ChatId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FDateTime CreatedAt {0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString Message{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString SenderId{};
+};
+
+//!@brief Chat snapshot response structure
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatSnapshotResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString ChatId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FDateTime CreatedAt {0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	TArray<FString> JoinedTopics{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	TArray<FAccelByteModelsSnapshotMessage> Messages{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString SenderId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString TicketId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	FString TopicId{};
+};
+
+//!@brief Group chat ban request structure
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBanGroupChatRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	TArray<FString> UserIDs{};
+};
+
+//!@brief Group chat ban response structure
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBanGroupChatResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	TArray<FString> UserIDs{};
+};
+
+//!@brief Group chat unban request structure
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUnbanGroupChatRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	TArray<FString> UserIDs{};
+};
+
+//!@brief Group chat unban response structure
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUnbanGroupChatResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GroupChatModerator")
+	TArray<FString> UserIDs{};
+};
+
+#pragma endregion
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatMutedNotif
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatMutedNotif")
+	FString TopicId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatMutedNotif")
+	FDateTime ExpiredAt {0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatMutedNotif")
+	int32 RemainingTime{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUnmutedNotif
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatUnmutedNotif")
+	FString TopicId{};
+};

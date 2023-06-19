@@ -22,6 +22,8 @@ namespace Api
  */
 class ACCELBYTEUE4SDK_API Leaderboard : FApiBase
 {
+	static constexpr int32 LeaderboardUserIdsURLLimit = 20;
+
 public:
 	Leaderboard(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Leaderboard();
@@ -65,9 +67,9 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetLeaderboards(uint32 Offset
-	                     , uint32 Limit
-	                     ,THandler<FAccelByteModelsPaginatedLeaderboardData> const& OnSuccess
-	                     , FErrorHandler const& OnError);
+		, uint32 Limit
+		, THandler<FAccelByteModelsPaginatedLeaderboardData> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get the list of all time user ranking data in a leaderboard
@@ -79,10 +81,10 @@ public:
 	 * @param OnError This will be called when the operation failed
 	 */
 	void GetRankingsV3(FString const& LeaderboardCode
-	                   , uint32 Offset
-	                   , uint32 Limit
-	                   , THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
-	                   , FErrorHandler const& OnError);
+		, uint32 Offset
+		, uint32 Limit
+		, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get the list of user ranking data in a leaderboard in a specific cycle
@@ -95,11 +97,11 @@ public:
 	 * @param OnError This will be called when the operation failed
 	 */
 	void GetRankingByCycle(FString const& LeaderboardCode
-	                       , FString const& CycleId
-	                       , uint32 Offset
-	                       , uint32 Limit
-	                       , THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
-	                       , FErrorHandler const& OnError);
+		, FString const& CycleId
+		, uint32 Offset
+		, uint32 Limit
+		, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get all time and cycles user ranking data in a leaderboard. 
@@ -110,9 +112,22 @@ public:
 	 * @param OnError This will be called when the operation failed
 	 */
 	void GetUserRankingV3(FString const& UserId
-	                      , FString const& LeaderboardCode
-	                      , THandler<FAccelByteModelsUserRankingDataV3> OnSuccess
-	                      , FErrorHandler const& OnError);
+		, FString const& LeaderboardCode
+		, THandler<FAccelByteModelsUserRankingDataV3> OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Retrieve bulk user ranking data for all time periods and cycles in a leaderboard.
+	 *
+	 * @param UserIds List of UserIds.
+	 * @param LeaderboardCode The leaderboard code
+	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsBulkUserRankingDataV3
+	 * @param OnError This will be called when the operation failed
+	 */
+	void GetBulkUserRankingV3(TArray<FString> const& UserIds
+		, FString const& LeaderboardCode
+		, THandler<FAccelByteModelsBulkUserRankingDataV3> OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	Leaderboard() = delete;

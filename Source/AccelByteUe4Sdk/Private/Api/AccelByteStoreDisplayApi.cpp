@@ -38,12 +38,12 @@ void StoreDisplay::GetAllViews(FString const& StoreId
 		, *CredentialsRef.GetNamespace()
 		, *CredentialsRef.GetUserId());
 
-	const TMap<FString, FString> Params = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), StoreId },
 		{ TEXT("language"), Language },
 	};
 
-	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 void StoreDisplay::ListActiveSectionContents(FString const& StoreId
@@ -61,14 +61,14 @@ void StoreDisplay::ListActiveSectionContents(FString const& StoreId
 		, *CredentialsRef.GetNamespace()
 		, *CredentialsRef.GetUserId());
 
-	const TMap<FString, FString> Params = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), StoreId },
 		{ TEXT("viewId"), ViewId },
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language },
 	};
 
-	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 } // Namespace Api

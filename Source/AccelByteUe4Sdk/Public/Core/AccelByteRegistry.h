@@ -70,7 +70,7 @@ namespace GameServerApi
 	class ServerSession;
 	class ServerDSHub;
 	class ServerMatchmakingV2;
-	class ServerWatchdog;
+	class ServerAMS;
 	class ServerMetricExporter;
 }
 
@@ -132,7 +132,7 @@ public:
 	static GameServerApi::ServerSession ServerSession;
 	static GameServerApi::ServerDSHub ServerDSHub;
 	static GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2;
-	static GameServerApi::ServerWatchdog ServerWatchdog;
+	static GameServerApi::ServerAMS ServerAMS;
 	static GameServerApi::ServerMetricExporter ServerMetricExporter;
 
 	//Static class doesn't have constructors or destructor

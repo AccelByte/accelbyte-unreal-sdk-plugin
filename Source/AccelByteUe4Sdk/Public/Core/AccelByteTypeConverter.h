@@ -181,7 +181,7 @@ public:
 			ValueInt = (int64)Value->AsNumber();
 			if (Enum->GetNameByValue(ValueInt) == NAME_None)
 			{
-				UE_LOG(LogJson, Warning, TEXT("EnumJsonValueToInt64 - Unknown Enum value %d"), ValueInt);
+				UE_LOG(LogJson, Warning, TEXT("EnumJsonValueToInt64 - Unknown Enum value %I64d"), ValueInt);
 				ValueInt = 0;
 			}
 		}

@@ -14,6 +14,7 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API Settings : public BaseSettings
 {
 public:
+	FString ChatServerWsUrl{};
 	FString ChatServerUrl{};
 	FString BasicServerUrl{};
 	FString CloudStorageServerUrl{};

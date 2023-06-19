@@ -72,7 +72,7 @@ bool ConvertDateTimeFieldsFromUnixTimestamp(const TSet<FString>& InFieldNames
 	{
 		if(!NewJsonObject->HasField(FieldName))
 		{
-			UE_LOG(LogAccelByteServerChat, Warning, TEXT("Field %s not found when converting UnixTimestamp to Iso8601"));
+			UE_LOG(LogAccelByteServerChat, Warning, TEXT("Field %s not found when converting UnixTimestamp to Iso8601"), *FieldName);
 			FJsonObjectConverter::JsonObjectToUStruct(NewJsonObject, &OutObject);
 			return false;
 		}

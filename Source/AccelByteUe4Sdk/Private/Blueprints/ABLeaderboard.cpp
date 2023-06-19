@@ -141,4 +141,21 @@ void UABLeaderboard::GetUserRankingV3(
 		}));
 }
 
+void UABLeaderboard::GetBulkUserRankingV3(
+	TArray<FString> const& UserIds, 
+	FString const& LeaderboardCode,
+	FDModelsBulkUserRankingDataV3 const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->Leaderboard.GetBulkUserRankingV3(UserIds, LeaderboardCode,
+		THandler<FAccelByteModelsBulkUserRankingDataV3>::CreateLambda([&OnSuccess](FAccelByteModelsBulkUserRankingDataV3 const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([&OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code,Message);
+		}));
+}
+
 

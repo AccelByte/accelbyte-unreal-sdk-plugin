@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [23.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.3.0%0D23.2.1) (2023-06-19)
+
+
+### Features
+
+* add AccelByte-specific storage file used in some features ([e8b1833](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e8b1833490268d0b75fd506e35dac8e6be2bc159))
+* add missing header in LinkOtherPlatformId ([5edf70b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5edf70ba9ab47237a7ce6f1478300d6da86ac316))
+* cache generated device id ([1fd182d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1fd182df246f268c310fe1dcde1605ea02ba1f55))
+* **chat:** add event for muted and unmuted ([5887a9f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5887a9f7a4b88972b932117575c443248b208197))
+* **chat:** add group chat moderator api ([6602d4f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6602d4f89471b77ada32ffbd1799e48eb625daa4))
+* **credentials:** change refresh token retry flow ([48ac904](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/48ac9044e02cb51696ce66f812697e7104f203e9))
+* **MPv2:** add error code for party and game session not found ([cb8b906](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cb8b906f1014af34873ae6978ec4195ae13921b4))
+* new statistic endpoints ([4b82172](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4b821729f29fc4c89130c847f289c69749947b1b))
+* OIDC Unlink Features ([dd03101](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dd031010061abe155efc52a0a072597d3540bbb2))
+* **session:** add promote game session leader API for client and DS ([311099d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/311099db6005a9ef0b18df8934d26af342ae96c4))
+
+
+### Bug Fixes
+
+* **Chat:** add missing header for Chat API ([2ba536b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2ba536b07d9f52874c9559eb7567bf5930cc7c65))
+* **log:** fix string format ([c9e6104](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c9e61042c3a817e208ebfde2d3b8414c1280bc01))
+
+
+### Refactors
+
+* **AMS:** change ServerWatchdog to ServerAMS ([1880bcc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1880bccb25a7ae6f22912b94fc02ec2b9d3c012f))
+* **httpclient:** change query params to be TMultiMap ([0bec559](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0bec55932cd2f6f11bb68a96335410fe6e236d10))
+
 ### [23.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.2.1%0D23.2.0) (2023-06-05)
 
 

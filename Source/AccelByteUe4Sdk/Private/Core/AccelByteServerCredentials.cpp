@@ -69,9 +69,16 @@ void ServerCredentials::SetClientToken(const FString& InAccessToken, double Expi
 {
 	AccessToken = InAccessToken;
 	ExpireTime = ExpiresIn;
-	ScheduleRefreshToken(ExpireTime);
+	if (ExpireTime > MaxBackoffTime)
+	{
+		ScheduleRefreshToken(ExpireTime - MaxBackoffTime);
+	}
+	else
+	{
+		ScheduleRefreshToken(ExpireTime*BackoffRatio);
+	}
 	Namespace = InNamespace;
-
+	BackoffCount = 0;
 	SessionState = ESessionState::Valid;
 
 	if (!PollRefreshTokenHandle.IsValid()) {
@@ -119,19 +126,36 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 						{
 							SessionState = ESessionState::Valid;
 							SetClientToken(Result.Access_token, Result.Expires_in, Result.Namespace);
+							TokenRefreshedEvent.Broadcast(true);
 						})
 					, FErrorHandler::CreateLambda(
 						[&](int32 Code, const FString& Message) 
 						{ 
-							if (RefreshBackoff <= 0.0)
+							BackoffCount++;
+							if (BackoffCount < MaxBackoffCount)
 							{
-								RefreshBackoff = 10.0;
-							}
+								if (ExpireTime > MaxBackoffTime)
+								{
+									ExpireTime = MaxBackoffTime;
+								}
+								else if (ExpireTime <= MinBackoffTime)
+								{
+									ExpireTime = MinBackoffTime;
+								}
+								else
+								{
+									ExpireTime = ExpireTime * BackoffRatio;
+								}
 
-							RefreshBackoff *= 2.0;
-							RefreshBackoff += FMath::FRandRange(1.0, 60.0);
-							ScheduleRefreshToken(RefreshBackoff);
-							SessionState = ESessionState::Expired;
+								RefreshBackoff = ExpireTime * BackoffRatio;
+								ScheduleRefreshToken(RefreshBackoff);
+								SessionState = ESessionState::Expired;
+							}
+							else
+							{
+								SessionState = ESessionState::Invalid;
+							}
+							TokenRefreshedEvent.Broadcast(false);
 						})
 					, FRegistry::ServerSettings.IamServerUrl);
 
@@ -147,7 +171,7 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 
 void ServerCredentials::ScheduleRefreshToken(double NextRefreshTime)
 {
-	RefreshTime = FPlatformTime::Seconds() + (NextRefreshTime * FMath::FRandRange(0.7, 0.9));;
+	RefreshTime = FPlatformTime::Seconds() + NextRefreshTime;
 }
 
 void ServerCredentials::SetMatchId(const FString& GivenMatchId)

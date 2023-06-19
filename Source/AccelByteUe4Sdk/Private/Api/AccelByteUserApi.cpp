@@ -4,6 +4,7 @@
 
 
 #include "Api/AccelByteUserApi.h"
+#include "AccelByteUe4SdkModule.h"
 #include "Api/AccelByteEntitlementApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Core/AccelByteRegistry.h"
@@ -13,12 +14,8 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteOauth2Api.h"
-#include "Api/AccelByteQos.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/IAccelByteDataStorage.h"
-#include "Core/AccelByteDataStorageBinaryFile.h"
-#include "AccelByteUe4SdkModule.h"
-
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUser, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUser);
@@ -398,7 +395,8 @@ void User::TryRelogin(const FString& PlatformUserID
 				}
 
 				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError);
-			}));
+			})
+		, FAccelByteUtilities::AccelByteStorageFile());
 #else
 	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("Cannot relogin using cached token on other platforms."), FErrorOAuthInfo{});
 #endif
@@ -525,11 +523,14 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 	FJsonObjectConverter::UStructToJsonObjectString(Info, SerializedInfo);
 
 	auto XorInfo = FAccelByteUtilities::XOR(SerializedInfo, FAccelByteUtilities::GetDeviceId());
-	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(Response.Platform_user_id, XorInfo,
-		THandler<bool>::CreateLambda([this, OnSuccess, Response](bool IsSuccess)
-		{
-			// On Save Refresh Token Success
-		}));
+	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(Response.Platform_user_id
+		, XorInfo
+		, THandler<bool>::CreateLambda(
+			[this, OnSuccess, Response](bool IsSuccess)
+			{
+				// On Save Refresh Token Success
+			})
+		, FAccelByteUtilities::AccelByteStorageFile());
 }
 
 void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -826,11 +827,11 @@ void User::Upgrade(const FString& Username
 		, *Username
 		, *Password);
 
-	TMap<FString, FString> Params ({
+	TMultiMap<FString, FString> QueryParams ({
 		{"needVerificationCode", bNeedVerificationCode ? TEXT("true") : TEXT("false")}
 	});
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, Params, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 
 void User::Upgradev2(const FString& EmailAddress
@@ -975,6 +976,28 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
+void User::LinkOtherPlatformId(const FString& PlatformId
+	, const FString& Ticket
+	, const FVoidHandler& OnSuccess
+	, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *PlatformId);
+
+	const FString Content = FString::Printf(TEXT("ticket=%s"), *FGenericPlatformHttp::UrlEncode(*Ticket));
+	
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+	
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
+}
+
 void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
 	, const FString& PlatformUserId
 	, const FVoidHandler& OnSuccess
@@ -1025,7 +1048,37 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
-	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *PlatformId);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, const FVoidHandler& OnSuccess
+	, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *PlatformId);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+	
+void User::UnlinkOtherPlatformId(const FString& PlatformId
+	, const FVoidHandler& OnSuccess
+	, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace()
 		, *PlatformId);
@@ -1065,11 +1118,11 @@ void User::SearchUsers(const FString& Query
 		SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
 	}
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("query"), Query },
 		{ TEXT("by"), SearchId },
-		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
-		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
+		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -1212,7 +1265,7 @@ void User::GetInputValidations(const FString& LanguageCode
 	const FString Url = FString::Printf(TEXT("%s/v3/public/inputValidations")
 		, *SettingsRef.IamServerUrl);
 
-	const TMap<FString, FString> Params ({
+	const TMultiMap<FString, FString> QueryParams ({
 		{"languageCode", *LanguageCode},
 		{"defaultOnEmpty", bDefaultOnEmpty ? TEXT("true") : TEXT("false")}
 	});
@@ -1221,7 +1274,7 @@ void User::GetInputValidations(const FString& LanguageCode
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, Params, Headers, OnSuccess, OnError);
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 	
 void User::Enable2FaBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
@@ -1496,10 +1549,10 @@ void User::GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/users/me/headless/link/conflict")
 	   , *SettingsRef.IamServerUrl );
    
-	const TMap<FString, FString> Params ({
+	const TMultiMap<FString, FString> QueryParams ({
 		{"oneTimeLinkCode", *OneTimeLinkCode}
 	}); 
-	HttpClient.ApiRequest(TEXT("GET"), Url, Params, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 	
 } // Namespace Api

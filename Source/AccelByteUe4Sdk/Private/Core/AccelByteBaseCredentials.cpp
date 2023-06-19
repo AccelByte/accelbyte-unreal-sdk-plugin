@@ -37,6 +37,10 @@ namespace AccelByte
 		ClientSecret = InClientSecret;
 	}
 
+	BaseCredentials::FTokenRefreshedEvent& BaseCredentials::OnTokenRefreshed()
+	{
+		return TokenRefreshedEvent;
+	}
 
 	const FString& BaseCredentials::GetOAuthClientId() const
 	{

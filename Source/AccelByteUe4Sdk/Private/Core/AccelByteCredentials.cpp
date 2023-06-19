@@ -72,6 +72,7 @@ void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 
 void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime)
 {
+	ExpireTime = NewAuthToken.Expires_in;
 	UserSessionExpire = CurrentTime + (NewAuthToken.Expires_in * FMath::FRandRange(0.7, 0.9));
 	
 	double BanExpire = DBL_MAX;
@@ -91,8 +92,23 @@ void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTi
 		}
 	}
 	
-	RefreshTime = UserSessionExpire < BanExpire ? UserSessionExpire : BanExpire;
+	if (UserSessionExpire >= BanExpire)
+	{
+		const double BanSpanTime = BanExpire - CurrentTime;
+		ExpireTime = BanSpanTime;
+	}
+
+	if (ExpireTime > MaxBackoffTime)
+	{
+		RefreshTime = CurrentTime + (ExpireTime - MaxBackoffTime);
+	}
+	else
+	{
+		RefreshTime = CurrentTime + (ExpireTime * BackoffRatio);
+	}
+
 	AuthToken = NewAuthToken;
+	BackoffCount = 0;
 	SessionState = ESessionState::Valid;
 }
 
@@ -203,27 +219,46 @@ void Credentials::PollRefreshToken(double CurrentTime)
 						RefreshTokenAdditionalActions.Broadcast(true);
 						RefreshTokenAdditionalActions.Clear();
 					}
-						
+					
 					TokenRefreshedEvent.Broadcast(true);
 				})
 				, FErrorHandler::CreateLambda([this](int32 ErrorCode, const FString& ErrorMessage)
 				{
-					if (RefreshBackoff <= 0.0)
-					{
-						RefreshBackoff = 10.0;
-					}
+					BackoffCount++;
 
-				RefreshBackoff *= 2.0;
-				RefreshBackoff += FMath::FRandRange(1.0, 60.0);
-				ScheduleRefreshToken(FPlatformTime::Seconds() + RefreshBackoff);
+					if (BackoffCount < MaxBackoffCount)
+					{
+						if (ExpireTime > MaxBackoffTime)
+						{
+							ExpireTime = MaxBackoffTime;
+						}
+						else if (ExpireTime <= MinBackoffTime)
+						{
+							ExpireTime = MinBackoffTime;
+						}
+						else
+						{
+							ExpireTime = ExpireTime * BackoffRatio;
+						}
+
+						RefreshBackoff = ExpireTime * BackoffRatio;
+						ScheduleRefreshToken(FPlatformTime::Seconds() + RefreshBackoff);
+					}
 
 					if (RefreshTokenAdditionalActions.IsBound())
 					{
 						RefreshTokenAdditionalActions.Broadcast(false);
 						RefreshTokenAdditionalActions.Clear();
 					}
-						
-					SessionState = ESessionState::Expired;
+					
+					if (BackoffCount < MaxBackoffCount)
+					{
+						SessionState = ESessionState::Expired;
+					}
+					else
+					{
+						SessionState = ESessionState::Invalid;
+					}
 					TokenRefreshedEvent.Broadcast(false);
 				})
 			);
@@ -270,11 +305,6 @@ void Credentials::SetAccountUserData(const FAccountUserData& InAccountUserData)
 Credentials::FOnLoginSuccessDelegate& Credentials::OnLoginSuccess()
 {
 	return LoginSuccessDelegate;
-}
-
-Credentials::FTokenRefreshedEvent& Credentials::OnTokenRefreshed()
-{
-	return TokenRefreshedEvent;
 }
 
 void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)

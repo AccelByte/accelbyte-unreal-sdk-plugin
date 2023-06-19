@@ -168,7 +168,7 @@ void ServerSession::QueryPartySessions(
 	const TSharedPtr<FJsonObject> QueryRequestJsonObject = FJsonObjectConverter::UStructToJsonObject(RequestContent);
 	FAccelByteUtilities::RemoveEmptyStrings(QueryRequestJsonObject);
 
-	TMap<FString, FString> QueryParams{};
+	TMultiMap<FString, FString> QueryParams{};
 	for (const TPair<FString, TSharedPtr<FJsonValue>>& KV : QueryRequestJsonObject->Values)
 	{
 		// Check if the value of this pair is a valid shared instance, if not bail
@@ -263,14 +263,11 @@ void ServerSession::BulkGetPlayerAttributes(TArray<FString> const& UserIds, THan
 		, *ServerSettingsRef.SessionServerUrl
 		, *ServerCredentialsRef.GetClientNamespace());
 
-	TMap<FString, FString> Params{};
-	if (UserIds.Num() > 0)
-	{
-		const FString UserIdsStr = FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(UserIds);
-		Params.Add(TEXT("users"), UserIdsStr);
-	}
+	TMultiMap<FString, FString> QueryParams{
+		{ TEXT("users"), FString::Join(UserIds, TEXT(",")) }
+	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, Params, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void ServerSession::GetPlayerAttributes(FString const& UserId, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess, FErrorHandler const& OnError)
@@ -354,6 +351,22 @@ void ServerSession::QueryGameSessions(FAccelByteModelsV2ServerQueryGameSessionsR
 	}
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void ServerSession::PromoteGameSessionLeader(FString const& GameSessionID, FString const& NewLeaderID,
+	THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FAccelByteModelsV2GameSessionLeaderPromotionRequest RequestBody;
+	RequestBody.LeaderID = NewLeaderID;
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/leader")
+		, *ServerSettingsRef.SessionServerUrl
+		, *ServerCredentialsRef.GetNamespace()
+		, *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
 }

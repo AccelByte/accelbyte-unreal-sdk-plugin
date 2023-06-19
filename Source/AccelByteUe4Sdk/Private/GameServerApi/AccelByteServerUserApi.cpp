@@ -49,13 +49,13 @@ void ServerUser::SearchUserOtherPlatformDisplayName(const FString& DisplayName
 		, *ServerSettingsRef.IamServerUrl
 		, *ServerCredentialsRef.GetClientNamespace());
 
-	const TMap<FString, FString> QueryParams = {
-		{TEXT("by"), TEXT("thirdPartyPlatform")},
-		{TEXT("limit"), FString::FromInt(Limit)},
-		{TEXT("offset"), FString::FromInt(Limit)},
-		{TEXT("platformBy"), TEXT("platformDisplayName")},
-		{TEXT("platformId"), *PlatformId},
-		{TEXT("query"), *DisplayName}
+	const TMultiMap<FString, FString> QueryParams = {
+		{ TEXT("by"), TEXT("thirdPartyPlatform") },
+		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("platformBy"), TEXT("platformDisplayName") },
+		{ TEXT("platformId"), *PlatformId },
+		{ TEXT("query"), *DisplayName }
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -107,7 +107,7 @@ void ServerUser::GetUserBans(const FString& UserId
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("activeOnly"), TEXT("true")},
 		{TEXT("after"), *After.ToIso8601()},
 		{TEXT("before"), *Before.ToIso8601()}

@@ -52,7 +52,7 @@ void Item::GetItemById(FString const& ItemId
 		, *CredentialsRef.GetNamespace()
 		, *ItemId);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language },
 		{ TEXT("storeId"), StoreId },
@@ -87,7 +87,7 @@ void Item::GetItemByAppId(FString const& AppId
 		, *SettingsRef.PlatformServerUrl
 		, *SettingsRef.PublisherNamespace);
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language },
 		{ TEXT("appId"), AppId }
@@ -128,7 +128,8 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 			}
 		} 
 	}
-	const TMap<FString, FString> Params = {
+	
+	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
 		{ TEXT("region"), ItemCriteria.Region },
 		{ TEXT("language"), ItemCriteria.Language },
@@ -136,16 +137,16 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 				FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.ItemType) : TEXT("") },
 		{ TEXT("appType"), ItemCriteria.AppType != EAccelByteAppType::NONE ?
 				FAccelByteUtilities::GetUEnumValueAsString(ItemCriteria.AppType) : TEXT("")  },
-		{ TEXT("tags"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(ItemCriteria.Tags) },
-		{ TEXT("features"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(ItemCriteria.Features)  },
-		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
-		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") },
-		{ TEXT("sortBy"), FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(SortByStringArray)  },
+		{ TEXT("tags"), FString::Join(ItemCriteria.Tags, TEXT(",")) },
+		{ TEXT("features"), FString::Join(ItemCriteria.Features, TEXT(",")) },
+		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("sortBy"), FString::Join(SortByStringArray, TEXT(",")) },
 		{ TEXT("storeId"), StoreId },
-		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true"):TEXT("false")},
+		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true") : TEXT("false") },
 	};
 	
-	HttpClient.ApiRequest(Verb, Url, Params, OnSuccess, OnError);
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 void Item::SearchItem(FString const& Language
@@ -175,12 +176,12 @@ void Item::SearchItem(FString const& Language
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 	
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language },
 		{ TEXT("keyword"), Keyword },
-		{ TEXT("offset"), Offset > 0 ? FString::Printf(TEXT("%d"), Offset) : TEXT("") },
-		{ TEXT("limit"), Limit > 0 ? FString::Printf(TEXT("%d"), Limit) : TEXT("") }
+		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") }
 	};
 
 	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
@@ -211,7 +212,7 @@ void Item::GetItemBySku(FString const& Sku
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("sku"), Sku },
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language }
@@ -246,7 +247,7 @@ void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language },

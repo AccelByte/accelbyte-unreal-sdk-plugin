@@ -166,6 +166,19 @@ public:
 		, FErrorHandler const& OnError
 		, int64 Offset = 0, int64 Limit = 20);
 
+	/**
+	 * @brief Promote a new game session leader by user ID
+	 *
+	 * @param GameSessionID The ID of the game session to update.
+	 * @param NewLeaderID The user ID of the new leader to promote.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void PromoteGameSessionLeader(FString const& GameSessionID
+		, FString const& NewLeaderID
+		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;

@@ -270,7 +270,8 @@ void UGC::GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSucce
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
+	
 	if (Offset > 0)
 	{
 		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
@@ -294,7 +295,7 @@ void UGC::GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuc
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
 	{
 		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
@@ -364,7 +365,7 @@ void UGC::GetChannels(FString const& UserId
 		, *CredentialsRef.GetNamespace()
 		, *UserId);
 
-	TMap<FString, FString> QueryParams = {
+	TMultiMap<FString, FString> QueryParams{
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("name"), ChannelName.IsEmpty() ? TEXT("") : ChannelName }
@@ -408,22 +409,25 @@ void UGC::SearchContents(const FString& Name
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
+	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
 		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
-		{ TEXT("name"), FGenericPlatformHttp::UrlEncode(Name) },
-		{ TEXT("creator"), FGenericPlatformHttp::UrlEncode(Creator) },
-		{ TEXT("type"), FGenericPlatformHttp::UrlEncode(Type) },
-		{ TEXT("subtype"), FGenericPlatformHttp::UrlEncode(Subtype) },
-		{ TEXT("tags"), 	FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(Tags, TEXT("&Tags=")) },
+		{ TEXT("name"), Name },
+		{ TEXT("creator"), Creator },
+		{ TEXT("type"), Type },
+		{ TEXT("subtype"), Subtype },
 		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false")},
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
 		{ TEXT("userId"), UserId }
-	});
-	Url.Append(QueryParams);
+	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	for (const auto& Tag : Tags)
+	{
+		QueryParams.AddUnique(TEXT("tags"), Tag);
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void UGC::UpdateLikeStatusToContent(const FString& ContentId, bool bLikeStatus
@@ -455,7 +459,7 @@ void UGC::GetListFollowers(const FString& UserId
 		, *CredentialsRef.GetNamespace()
 		, *UserId);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
 	{
 		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
@@ -508,22 +512,25 @@ void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 		, *CredentialsRef.GetNamespace()
 		, *ChannelId);
 
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
+	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
 		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
-		{ TEXT("name"), FGenericPlatformHttp::UrlEncode(Name) },
-		{ TEXT("creator"), FGenericPlatformHttp::UrlEncode(Creator) },
-		{ TEXT("type"), FGenericPlatformHttp::UrlEncode(Type) },
-		{ TEXT("subtype"), FGenericPlatformHttp::UrlEncode(Subtype) },
-		{ TEXT("tags"), 	FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(Tags, TEXT("&Tags=")) },
+		{ TEXT("name"), Name },
+		{ TEXT("creator"), Creator },
+		{ TEXT("type"), Type },
+		{ TEXT("subtype"), Subtype },
 		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false")},
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
 		{ TEXT("userId"), UserId }
-	});
-	Url.Append(QueryParams);
+	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	for (const auto& Tag : Tags)
+	{
+		QueryParams.AddUnique(TEXT("tags"), Tag);
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void UGC::GetContentBulk(const TArray<FString>& ContentIds
@@ -555,7 +562,7 @@ void UGC::GetUserContent(const FString& UserId
 		, *CredentialsRef.GetNamespace()
 		, *UserId);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
 	{
 		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
@@ -597,7 +604,7 @@ void UGC::GetFollowedContent(THandler<FAccelByteModelsUGCContentPageResponse> co
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
 	{
 		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
@@ -621,7 +628,7 @@ void UGC::GetFollowedUsers(THandler<FAccelByteModelsUGCFollowedUsersResponse> co
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
 	{
 		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
@@ -652,20 +659,23 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	FString QueryParams = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("tags"), 	FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(Tags, TEXT("&Tags=")) },
-		{ TEXT("name"), FGenericPlatformHttp::UrlEncode(Name) },
-		{ TEXT("type"), FGenericPlatformHttp::UrlEncode(Type) },
-		{ TEXT("subtype"), FGenericPlatformHttp::UrlEncode(Subtype) },
+	TMultiMap<FString, FString> QueryParams {
+		{ TEXT("name"), Name },
+		{ TEXT("type"), Type },
+		{ TEXT("subtype"), Subtype },
 		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false")},
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("")  },
 		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
 		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
-		});
-	Url.Append(QueryParams);
+	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	for (const auto& Tag : Tags)
+	{
+		QueryParams.AddUnique(TEXT("tags"), Tag);
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void UGC::GetCreator(const FString& UserId
@@ -695,7 +705,7 @@ void UGC::GetGroups(const FString& UserId
 		, *CredentialsRef.GetNamespace()
 		, *UserId);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
 	{
 		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));

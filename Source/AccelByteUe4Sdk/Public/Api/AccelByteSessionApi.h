@@ -151,6 +151,19 @@ public:
 		, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
 
 	/**
+	 * @brief Promote a new game session leader by user ID (only applicable for current game session leader)
+	 *
+	 * @param GameSessionID The ID of the game session to update.
+	 * @param NewLeaderID The user ID of the new leader to promote.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void PromoteGameSessionLeader(FString const& GameSessionID
+		, FString const& NewLeaderID
+		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Create a new party with the calling user as the sole member.
 	 *
 	 * @param CreateRequest The party creation request with attributes, join type, and members.

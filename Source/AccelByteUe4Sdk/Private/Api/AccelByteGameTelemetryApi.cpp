@@ -3,14 +3,13 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteGameTelemetryApi.h"
+#include "AccelByteUe4SdkModule.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
-#include "Core/AccelByteSettings.h"
-#include <AccelByteUe4SdkModule.h>
-#include <Core/AccelByteUtilities.h>
 
 namespace AccelByte
 {
@@ -196,25 +195,27 @@ void GameTelemetry::LoadCachedEvents()
 	{
 		return;
 	}
-	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(TelemetryKey, THandler<TPair<FString, FString>>::CreateLambda(
-		[this](TPair<FString, FString> Pair)
-		{
-			if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
+	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(TelemetryKey
+		, THandler<TPair<FString, FString>>::CreateLambda(
+			[this](TPair<FString, FString> Pair)
 			{
-				return;
-			}
-			TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventList;
-			if (EventsJsonToArray(Pair.Value, EventList))
-			{
-				SendProtectedEvents(EventList
-					, FVoidHandler::CreateLambda(
-						[this]()
-						{
-							RemoveEventsFromCache();
-						})
-					, FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage) {}));
-			}
-		}));
+				if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
+				{
+					return;
+				}
+				TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventList;
+				if (EventsJsonToArray(Pair.Value, EventList))
+				{
+					SendProtectedEvents(EventList
+						, FVoidHandler::CreateLambda(
+							[this]()
+							{
+								RemoveEventsFromCache();
+							})
+						, FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage) {}));
+				}
+			})
+		, FAccelByteUtilities::AccelByteStorageFile());
 }
 
 void GameTelemetry::AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody> Telemetry)
@@ -229,7 +230,8 @@ void GameTelemetry::AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody>
 	JobArrayQueueAsJsonString(TelemetryValues);
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(TelemetryKey
 		, TelemetryValues
-		, THandler<bool>::CreateLambda([](bool IsSuccess){}));
+		, THandler<bool>::CreateLambda([](bool IsSuccess){})
+		, FAccelByteUtilities::AccelByteStorageFile());
 }
 
 void GameTelemetry::RemoveEventsFromCache()
@@ -240,7 +242,8 @@ void GameTelemetry::RemoveEventsFromCache()
 		return;
 	}
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->DeleteItem(TelemetryKey
-		, FVoidHandler::CreateLambda([](){}));
+		, FVoidHandler::CreateLambda([](){})
+		, FAccelByteUtilities::AccelByteStorageFile());
 }
 
 bool GameTelemetry::JobArrayQueueAsJsonString(FString& OutJsonString)

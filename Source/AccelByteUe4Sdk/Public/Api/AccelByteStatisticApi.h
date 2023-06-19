@@ -233,6 +233,62 @@ public:
 		const int32 Limit = 20,
 		const int32 Offset = 0);
 
+	/**
+	 * @brief Get user's own statistic item
+	 * 
+	 * @param StatCodes Array of statistic codes to be retrieved
+	 * @param Tags Array of tags which the statistic items to be retrieved have
+	 * @param OnSuccess Thil will be called when the operation succeeded. The result is FAccelByteModelsUserStatItemPagingSlicedResult
+	 * @param OnError This will be called when the operation failed
+	 * @param SortBy 
+	 * @param Limit Page size, default value is 20
+	 * @param Offset Page number, default value is 0
+	 */
+	void GetMyStatItems(
+		const TArray<FString>& StatCodes,
+		const TArray<FString>& Tags,
+		const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess,
+		const FErrorHandler& OnError,
+		const EAccelByteStatisticSortBy& SortBy = EAccelByteStatisticSortBy::NONE, 
+		const int32 Limit = 20,
+		const int32 Offset = 0);
+
+	/**
+	 * @brief Get user's own statistic value
+	 * 
+	 * @param StatCodes Array of statistic codes for statistic value to be retrieved
+	 * @param Tags Array of tags that statistic item to be retrieved has
+	 * @param AdditionalKey Additional key 
+	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsFetchUser>
+	 * @param OnError This will be called when the operation failed
+	 */
+	void GetMyStatItemValues(
+		const TArray<FString>& StatCodes,
+		const TArray<FString>& Tags,
+		const FString& AdditionalKey,
+		const THandler<TArray<FAccelByteModelsFetchUser>>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get user's own statistic cycle item
+	 * 
+	 * @param CycleId The cycle id to which the stat item belong
+	 * @param StatCodes Array of statistic codes for statistic cycle item to be retrieved 
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserStatCycleItemPagingSlicedResult
+	 * @param OnError This will be called when the operation failed
+	 * @param SortBy 
+	 * @param Limit Page size, default value is 20
+	 * @param Offset Page number, default value is 0
+	 */
+	void GetMyStatCycleItems(
+		const FString& CycleId,
+		const TArray<FString>& StatCodes,
+		const THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult>& OnSuccess,
+		const FErrorHandler& OnError,
+		const EAccelByteStatisticSortBy& SortBy = EAccelByteStatisticSortBy::NONE,
+		const int32 Limit = 20,
+		const int32 Offset = 0);
+
 #if !UE_BUILD_SHIPPING
 	/**
 	 * @brief Bulk reset multiple user's statitems value.

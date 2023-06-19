@@ -26,7 +26,6 @@ class ACCELBYTEUE4SDK_API Credentials : public BaseCredentials
 {
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoginSuccessDelegate, const FOauth2Token& /*Response*/);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshTokenAdditionalActions, bool);
-	DECLARE_EVENT_OneParam(Credentials, FTokenRefreshedEvent, bool);
 
 public:
 	using BaseCredentials::SetClientCredentials;
@@ -47,8 +46,6 @@ public:
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
 	void SetErrorOAuth(const FErrorOAuthInfo& ErrorOAuthInfo);
 	void SetAccountUserData(const FAccountUserData& InAccountUserData);
-	
-	FTokenRefreshedEvent& OnTokenRefreshed();
 
 	const FOauth2Token& GetAuthToken() const;
 	const FString& GetRefreshToken() const;
@@ -71,7 +68,6 @@ private:
 	FOauth2Token AuthToken;
 	
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
-	FTokenRefreshedEvent TokenRefreshedEvent;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;
 	FAccountUserData AccountUserData;
 

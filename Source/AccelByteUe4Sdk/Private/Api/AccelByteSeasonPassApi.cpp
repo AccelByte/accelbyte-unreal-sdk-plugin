@@ -33,7 +33,7 @@ void SeasonPass::GetCurrentSeason(FString const& Language
 		, *SettingsRef.SeasonPassServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const TMap<FString, FString> QueryParams = {
+	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("language"), *Language}
 	};
 

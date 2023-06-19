@@ -309,11 +309,11 @@ void ServerSessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
 		, *ServerSettingsRef.SessionBrowserServerUrl
 		, *ServerCredentialsRef.GetClientNamespace());
 
-	TMap<FString, FString> QueryParams = {
-		{TEXT("session_type"), *SessionTypeString},
-		{TEXT("game_mode"), *GameMode},
-		{TEXT("joinable"), TEXT("true")},
-		{TEXT("match_exist"), *MatchExist},
+	TMultiMap<FString, FString> QueryParams = {
+		{ TEXT("session_type"), *SessionTypeString },
+		{ TEXT("game_mode"), *GameMode },
+		{ TEXT("joinable"), TEXT("true") },
+		{ TEXT("match_exist"), *MatchExist },
 	};
 
 	if (Limit > 0)
@@ -409,7 +409,7 @@ void ServerSessionBrowser::GetRecentPlayer(FString const& UserId
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if (Limit > 0)
 	{
 		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));

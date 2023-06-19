@@ -232,7 +232,7 @@ void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQ
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
 	{
 		QueryParams.Add(TEXT("status"),
@@ -240,6 +240,22 @@ void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQ
 	}
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Session::PromoteGameSessionLeader(FString const& GameSessionID, FString const& NewLeaderID,
+	THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FAccelByteModelsV2GameSessionLeaderPromotionRequest RequestBody;
+	RequestBody.LeaderID = NewLeaderID;
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/leader")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
 void Session::CreateParty(FAccelByteModelsV2PartyCreateRequest const& CreateRequest
@@ -453,7 +469,7 @@ void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
 	{
 		QueryParams.Add(TEXT("status"),

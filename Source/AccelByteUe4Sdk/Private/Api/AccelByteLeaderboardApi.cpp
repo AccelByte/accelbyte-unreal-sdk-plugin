@@ -60,7 +60,7 @@ void Leaderboard::GetRankings(FString const& LeaderboardCode
 		, *LeaderboardCode
 		, *TimeFrameString);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 
 	if (Offset > 0)
 	{
@@ -106,7 +106,7 @@ void Leaderboard::GetLeaderboards(uint32 Offset
 		, *SettingsRef.LeaderboardServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 
 	if (Offset > 0)
 	{
@@ -129,7 +129,7 @@ void Leaderboard::GetRankingsV3(FString const& LeaderboardCode, uint32 Offset, u
 		, *CredentialsRef.GetNamespace()
 		, *LeaderboardCode);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 
 	if (Offset > 0)
 	{
@@ -158,7 +158,7 @@ void Leaderboard::GetRankingByCycle(FString const& LeaderboardCode
 		, *LeaderboardCode
 		, *CycleId);
 
-	TMap<FString, FString> QueryParams;
+	TMultiMap<FString, FString> QueryParams;
 
 	if (Offset > 0)
 	{
@@ -188,6 +188,41 @@ void Leaderboard::GetUserRankingV3(FString const& UserId
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void Leaderboard::GetBulkUserRankingV3(TArray<FString> const& UserIds
+	, FString const& LeaderboardCode
+	, THandler<FAccelByteModelsBulkUserRankingDataV3> OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (LeaderboardCode.IsEmpty())
+	{
+		OnSuccess.ExecuteIfBound(FAccelByteModelsBulkUserRankingDataV3{});
+		return;
+	}
+
+	if (UserIds.Num() <= 0)
+	{
+		OnSuccess.ExecuteIfBound(FAccelByteModelsBulkUserRankingDataV3{});
+		return;
+	}
+
+	if (UserIds.Num() > LeaderboardUserIdsURLLimit)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("UserIds cannot exceed %d!"), LeaderboardUserIdsURLLimit));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/users/bulk")
+		, *SettingsRef.LeaderboardServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *LeaderboardCode);
+
+	FAccelByteModelsBulkUserRankingDataRequestV3 ContentRequest;
+	ContentRequest.UserIds = UserIds;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ContentRequest, OnSuccess, OnError);
+}
 
 	
 } // Namespace Api

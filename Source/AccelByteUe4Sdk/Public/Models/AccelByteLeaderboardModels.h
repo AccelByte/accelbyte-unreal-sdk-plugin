@@ -189,3 +189,30 @@ struct FAccelByteModelsUserRankingDataV3
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingDataV3")
 	TArray<FAccelByteModelsCycleRank> Cycles{};
 };
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsBulkUserRankingDataValueV3 : public FAccelByteModelsUserRankingDataV3
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BulkUserRankingDataValueV3")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsBulkUserRankingDataV3
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BulkUserRankingDataV3")
+	TArray<FAccelByteModelsBulkUserRankingDataValueV3> Data{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsBulkUserRankingDataRequestV3
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BulkUserRankingDataRequestV3")
+	TArray<FString> UserIds{};
+};

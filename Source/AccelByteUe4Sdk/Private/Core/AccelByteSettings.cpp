@@ -59,7 +59,9 @@ void Settings::LoadSettings(const FString& SectionPath)
 	const FString WssBaseUrl = BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
 	LobbyServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("LobbyServerUrl"), WssBaseUrl, TEXT("lobby/"));
 
-	ChatServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ChatServerUrl"), WssBaseUrl, TEXT("chat/"));
+	ChatServerWsUrl = GetClientConfigUrlValue(SectionPath, TEXT("ChatServerUrl"), WssBaseUrl, TEXT("chat/"));
+
+	ChatServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ChatServerUrl"), BaseUrl, TEXT("chat"));
 	
 	BasicServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("BasicServerUrl"), BaseUrl, TEXT("basic"));
 
@@ -246,7 +248,7 @@ FString UAccelByteBlueprintsSettings::GetLobbyServerUrl()
 
 FString UAccelByteBlueprintsSettings::GetChatServerUrl()
 {
-	return FRegistry::Settings.ChatServerUrl;
+	return FRegistry::Settings.ChatServerWsUrl;
 }
 
 FString UAccelByteBlueprintsSettings::GetCloudStorageServerUrl()
@@ -406,7 +408,7 @@ void UAccelByteBlueprintsSettings::SetLobbyServerUrl(const FString& LobbyServerU
 
 void UAccelByteBlueprintsSettings::SetChatServerUrl(const FString& ChatServerUrl)
 {
-	FRegistry::Settings.ChatServerUrl = ChatServerUrl;
+	FRegistry::Settings.ChatServerWsUrl = ChatServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetCloudStorageServerUrl(const FString& CloudStorageServerUrl)

@@ -261,13 +261,12 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 			{
 				if (TryAttempt > 0)
 				{
-					ReplaceUserRecordCheckLatest(
-						TryAttempt - 1,
-						Key,
-						Data.Value,
-						PayloadModifier,
-						OnSuccess,
-						OnError);
+					ReplaceUserRecordCheckLatest(TryAttempt - 1
+						, Key
+						, Data.Value
+						, PayloadModifier
+						, OnSuccess
+						, OnError);
 				}
 				else
 				{
@@ -632,9 +631,9 @@ void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 		, *CredentialsRef.GetNamespace()
 		, *UserId);
 
-	const TMap<FString, FString> QueryParams = {
-	{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
-	{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")}
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")}
 	};
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(

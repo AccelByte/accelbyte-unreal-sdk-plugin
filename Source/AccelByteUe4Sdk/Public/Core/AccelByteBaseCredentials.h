@@ -17,6 +17,7 @@ namespace AccelByte
  */
 class ACCELBYTEUE4SDK_API BaseCredentials
 {
+	DECLARE_EVENT_OneParam(Credentials, FTokenRefreshedEvent, bool);
 public:
 	enum class ESessionState
 	{
@@ -39,6 +40,8 @@ public:
 	virtual void PollRefreshToken(double CurrentTime) = 0;
 	virtual void ScheduleRefreshToken(double NextRefreshTime) = 0;
 
+	FTokenRefreshedEvent& OnTokenRefreshed();
+
 	virtual void Startup() =0;
 	virtual void Shutdown() = 0;
 
@@ -48,6 +51,22 @@ public:
 	virtual const FString& GetNamespace() const = 0;
 	ESessionState GetSessionState() const;
 	virtual const FString& GetUserId() const = 0;
+
+#if !UE_BUILD_SHIPPING
+	const int32 GetExpireTime()
+	{
+		return ExpireTime;
+	}
+	void SetExpireTime(double InExpireTime)
+	{
+		ExpireTime = InExpireTime;
+	}
+
+	void SetClientId(const FString& InClientId)
+	{
+		ClientId = InClientId;
+	}
+#endif
 
 protected:
 	FString ClientId;
@@ -60,8 +79,14 @@ protected:
 	double RefreshTime;
 	double ExpireTime;
 	double RefreshBackoff;
+	int32 BackoffCount;
+	const double MaxBackoffTime = 3600;
+	const double MinBackoffTime = 60;
+	const int32 MaxBackoffCount = 10;
+	const double BackoffRatio = 0.5;
 
 	FDelegateHandleAlias PollRefreshTokenHandle;
+	FTokenRefreshedEvent TokenRefreshedEvent;
 };
 
 typedef TSharedRef<BaseCredentials, ESPMode::ThreadSafe> FBaseCredentialsRef;

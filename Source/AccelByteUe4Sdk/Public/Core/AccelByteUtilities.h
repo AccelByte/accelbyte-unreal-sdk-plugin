@@ -124,6 +124,9 @@ public:
 	static constexpr uint8 FieldRemovalFlagNull    = 1 << 5;
 	static constexpr uint8 FieldRemovalFlagNested  = 1 << 6;
 	static constexpr uint8 FieldRemovalFlagAll     = 0xFF;
+	
+	static bool IsRunningDevMode();
+	static FString AccelByteStorageFile();
 
 	template<typename CharType = TCHAR, template<typename> class PrintPolicy = TPrettyJsonPrintPolicy, typename InStructType>
 	static bool TArrayUStructToJsonString(const TArray<InStructType>& InArray, FString& OutJsonString, int64 CheckFlags = 0, int64 SkipFlags = 0, int32 Indent = 0)
@@ -511,7 +514,7 @@ protected:
 	static FString GetDevModeDeviceId(FString Default);
 
 	static FString AccelByteStoredSectionIdentifiers() { return FApp::GetProjectName() / FString(TEXT("Identifiers")); }
-	static FString AccelByteStoredKeyDeviceId() { return FString(TEXT("deviceId")); }
+	static FString AccelByteStoredKeyDeviceId() { return FString(TEXT("DeviceId")); }
 #pragma endregion
 
 	static FString AccelByteStored() { return FString(TEXT("AccelByteStored")); } 

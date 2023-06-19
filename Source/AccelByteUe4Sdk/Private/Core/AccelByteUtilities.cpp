@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteUtilities.h"
+#include "AccelByteUe4SdkModule.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -248,6 +249,34 @@ bool FJwt::IsValid() const
 		&& JwtString.Len() - PayloadEnd - 1 == RS256_SIGNATURE_LENGTH;
 }
 
+bool FAccelByteUtilities::IsRunningDevMode()
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#endif
+
+	return true;
+}
+
+FString FAccelByteUtilities::AccelByteStorageFile()
+{
+	FString StorageFilename = TEXT("AccelByteData");
+
+	if (IsRunningDevMode())
+	{
+		FString TempFilename;  
+		if (GConfig->GetString(TEXT("AccelByte.Dev")
+			, TEXT("BinaryFilename")
+			, TempFilename
+			, GEngineIni))
+		{
+			StorageFilename = TempFilename;
+		}
+	}
+
+	return StorageFilename;
+}
+
 void FAccelByteUtilities::RemoveEmptyStrings(TSharedPtr<FJsonObject> JsonPtr)
 {
 	TArray<FString> KeysToRemove;
@@ -406,35 +435,50 @@ FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)
 	FString PlatformDeviceId = FPlatformMisc::GetDeviceId();
 	if (PlatformDeviceId.IsEmpty())
 	{
-		//Decision to encode at the end of this function
-		FString PlainMacAddress = FAccelByteUtilities::GetMacAddress(false);
+		bool bIsCached = false;
+		IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(AccelByteStoredKeyDeviceId()
+			, THandler<TPair<FString, FString>>::CreateLambda(
+				[&Output, &bIsCached](TPair<FString, FString> SavedDeviceId)
+				{
+					if (SavedDeviceId.Key.IsEmpty() || SavedDeviceId.Value.IsEmpty())
+					{
+						return;
+					}
+					Output = SavedDeviceId.Value;
+					bIsCached = true;
 
-		if (PlainMacAddress.IsEmpty())
+				})
+			, AccelByteStorageFile());
+		if (!bIsCached)
 		{
-			Output = RandomizeDeviceId();
-		}
-		else
-		{
-			Output = PlainMacAddress;
+			FString PlainMacAddress = FAccelByteUtilities::GetMacAddress(false);
+			if (PlainMacAddress.IsEmpty())
+			{
+				Output = FGuid::NewGuid().ToString();
+			}
+			else
+			{
+				Output = PlainMacAddress;
+			}
+			IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(AccelByteStoredKeyDeviceId()
+				, Output
+				, THandler<bool>::CreateLambda([](bool bIsSuccess){})
+				, AccelByteStorageFile());
 		}
 	}
 	else //IF Platform-specific DeviceID available
 	{
 		Output = PlatformDeviceId;
 	}
+	
+	bool bIsClientDevMode = IsRunningDevMode() && !IsRunningDedicatedServer();
 
-	bool bIsShippingBuild = false;
-#if UE_BUILD_SHIPPING
-	bIsShippingBuild = true;
-#endif
-	bool bIsDevMode = !bIsShippingBuild && !IsRunningDedicatedServer();
-
-	if (bIsDevMode)
+	if (bIsClientDevMode)
 	{
 		Output = GetDevModeDeviceId(Output);
 	}
 
-	if (bIsDeviceIdRequireEncode || !bIsDevMode)
+	if (bIsDeviceIdRequireEncode || !bIsClientDevMode)
 	{
 		Output = EncodeHMACBase64(Output, FRegistry::Settings.PublisherNamespace);
 	}
@@ -469,7 +513,7 @@ FString FAccelByteUtilities::GetDevModeDeviceId(FString DefaultDeviceId)
 
 	GConfig->GetArray(
 		TEXT("AccelByte.Dev"),
-		TEXT("DeviceId"),
+		*AccelByteStoredKeyDeviceId(),
 		DeviceIdsFromIni,
 		GEngineIni);
 

@@ -3,16 +3,13 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteChatApi.h"
-#include "JsonUtilities.h"
 
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
-
+#include "Engine.h"
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
-
-#include "Engine.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteChat, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteChat);
@@ -21,12 +18,9 @@ namespace AccelByte
 {
 	namespace Api
 	{
-
 #pragma region PRIVATE UTILITY
-
 		namespace ChatToken
 		{
-
 			namespace Method
 			{
 				const FString Connect = TEXT("eventConnected");
@@ -71,8 +65,8 @@ namespace AccelByte
 
 				const FString UserBanNotif = TEXT("eventBanChat");
 				const FString UserUnbanNotif = TEXT("eventUnbanChat");
-
-
+				const FString UserMutedNotif = TEXT("eventUserMuted");
+				const FString UserUnmutedNotif = TEXT("eventUserUnmuted");
 			}
 
 			namespace Json
@@ -122,7 +116,6 @@ namespace AccelByte
 					const FString SystemMessageKeep = TEXT("keep");
 					const FString UnreadOnly = TEXT("unreadOnly");
 					const FString Category = TEXT("category");
-					
 				}
 
 				namespace Value
@@ -178,6 +171,8 @@ namespace AccelByte
 			DeleteTopicNotif,
 			UpdateTopicNotif,
 			SystemMessageNotif,
+			UserMutedNotif,
+			UserUnmutedNotif,
 			
 			UserBanNotif,
 			UserUnbanNotif,
@@ -185,7 +180,6 @@ namespace AccelByte
 
 		namespace IncomingMessage
 		{
-
 			/**
 			 * @brief Deterministic handler type enum getter from an incoming message json object
 			 * @param HandlerStringEnumMap - static map as dictionary
@@ -241,7 +235,7 @@ namespace AccelByte
 					JsonObject->SetStringField(DateTimeField, Iso8601Time);
 					bUpdatedObject = true;
 
-					{//Log
+					{ // Log
 						const int ReferenceTime = FDateTime::Now().ToUnixTimestamp();
 						const FString ReferenceIso8601Time = FDateTime().FromUnixTimestamp(ReferenceTime).ToIso8601();
 						UE_LOG(LogAccelByteChat, VeryVerbose, TEXT("reference now\t\t\t. Json: %d -> %s\n\t\t\tupdated [%s] field\t\t. Json: %d -> %s"), ReferenceTime, *ReferenceIso8601Time, *DateTimeField, UnixTime, *Iso8601Time);
@@ -271,7 +265,16 @@ namespace AccelByte
 				if (Message->HasField(ChatToken::Json::Field::Params)) // Notif
 				{
 					SubObjectField = ChatToken::Json::Field::Params;
-					RootDateTimeField = ChatToken::Json::Field::CreatedAt;
+
+					const FString Method = Message->GetStringField(ChatToken::Json::Field::Method);
+					if (Method.Equals(ChatToken::Method::UserMutedNotif))
+					{
+						RootDateTimeField = ChatToken::Json::Field::ExpiredAt;
+					}
+					else
+					{
+						RootDateTimeField = ChatToken::Json::Field::CreatedAt;
+					}
 				}
 				else if(Message->HasField(ChatToken::Json::Field::Result))// Response
 				{
@@ -285,7 +288,8 @@ namespace AccelByte
 					bHasDateTimeJsonField = ConvertJsonFieldTimeUnixToIso8601(SubObject, RootDateTimeField);
 					if (bHasDateTimeJsonField)
 					{
-						if(SubObject->HasField(ChatToken::Json::Field::ExpiredAt))
+						if(RootDateTimeField != ChatToken::Json::Field::ExpiredAt
+							&& SubObject->HasField(ChatToken::Json::Field::ExpiredAt))
 						{
 							ConvertJsonFieldTimeUnixToIso8601(SubObject, ChatToken::Json::Field::ExpiredAt);
 						}
@@ -380,6 +384,8 @@ namespace AccelByte
 			FORM_STRING_ENUM_PAIR(UserBanNotif),
 			FORM_STRING_ENUM_PAIR(UserUnbanNotif),
 
+			FORM_STRING_ENUM_PAIR(UserMutedNotif),
+			FORM_STRING_ENUM_PAIR(UserUnmutedNotif)
 		};
 
 #undef FORM_STRING_ENUM_PAIR
@@ -424,7 +430,7 @@ namespace AccelByte
 			Headers.Add("X-Ab-RpcEnvelopeStart", WsEnvelopeStart);
 			Headers.Add("X-Ab-RpcEnvelopeEnd", WsEnvelopeEnd);
 			FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-			WebSocket = AccelByteWebSocket::Create(*SettingsRef.ChatServerUrl, TEXT("wss"), CredentialsRef, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
+			WebSocket = AccelByteWebSocket::Create(*SettingsRef.ChatServerWsUrl, TEXT("wss"), CredentialsRef, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
 
 			WebSocket->OnConnected().AddRaw(this, &Chat::OnConnected);
 			WebSocket->OnMessageReceived().AddRaw(this, &Chat::OnMessage);
@@ -447,7 +453,7 @@ namespace AccelByte
 			}
 
 			WebSocket->Connect();
-			UE_LOG(LogAccelByteChat, Display, TEXT("Connecting to %s"), *SettingsRef.ChatServerUrl);
+			UE_LOG(LogAccelByteChat, Display, TEXT("Connecting to %s"), *SettingsRef.ChatServerWsUrl);
 
 		}
 
@@ -803,6 +809,8 @@ namespace AccelByte
 				CASE_NOTIF_EXPLICIT_MODEL(RemoveFromTopicNotif, FAccelByteModelsChatUpdateUserTopicNotif)
 				CASE_NOTIF_EXPLICIT_MODEL(DeleteTopicNotif, FAccelByteModelsChatUpdateTopicNotif)
 				CASE_NOTIF_EXPLICIT_MODEL(SystemMessageNotif, FAccelByteModelsChatSystemMessageNotif)
+				CASE_NOTIF_EXPLICIT_MODEL(UserMutedNotif, FAccelByteModelsChatMutedNotif)
+				CASE_NOTIF_EXPLICIT_MODEL(UserUnmutedNotif, FAccelByteModelsChatUnmutedNotif)
 				CASE_NOTIF(UpdateTopicNotif)
 				// Shadow Ban
 				case (HandleType::UserBanNotif): // intended fallthrough
@@ -1253,6 +1261,89 @@ namespace AccelByte
 		}
 
 #pragma endregion // REQUEST
+
+#pragma region GROUP CHAT AS MODERATOR
+
+		void Chat::DeleteGroupChat(const FString& GroupId, const FString& ChatId, const FVoidHandler& OnSuccess,
+			const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/chats/%s"),
+				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId), *ChatId);
+
+			HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+		}
+
+		void Chat::MuteGroupUserChat(const FString& GroupId, const FString& UserId, int32 DurationInSeconds, const FVoidHandler& OnSuccess,
+			const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/mute"),
+				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId));
+
+			const FAccelByteModelsMuteGroupChatRequest Request {UserId, DurationInSeconds};
+
+			HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+		}
+
+		void Chat::UnmuteGroupUserChat(const FString& GroupId, const FString& UserId, const FVoidHandler& OnSuccess,
+			const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/unmute"),
+				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId));
+
+			const FAccelByteModelsUnmuteGroupChatRequest Request {UserId};
+
+			HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+		}
+
+		void Chat::GetGroupChatSnapshot(const FString& GroupId, const FString& ChatId,
+			const THandler<FAccelByteModelsChatSnapshotResponse>& OnSuccess, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/topic/%s/snapshot/%s"),
+				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId), *ChatId);
+
+			HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+		}
+
+		void Chat::BanGroupUserChat(const FString& GroupId, const TArray<FString>& UserIds,
+			const THandler<FAccelByteModelsBanGroupChatResponse>& OnSuccess, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/ban-members"),
+				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId));
+
+			const FAccelByteModelsBanGroupChatRequest Request {UserIds};
+
+			HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+		}
+
+		void Chat::UnbanGroupUserChat(const FString& GroupId, const TArray<FString>& UserIds,
+			const THandler<FAccelByteModelsUnbanGroupChatResponse>& OnSuccess, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/unban-members"),
+				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId));
+
+			const FAccelByteModelsUnbanGroupChatRequest Request {UserIds};
+
+			HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+		}
+
+		FString Chat::GenerateGroupTopicId(const FString& GroupId)
+		{
+			return FString::Printf(TEXT("g.%s"), *GroupId);
+		}
+
+#pragma endregion
 
 	} // Namespace Api
 

@@ -55,7 +55,7 @@
 #include "GameServerApi/AccelByteServerSessionApi.h"
 #include "GameServerApi/AccelByteServerDSHubApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingV2Api.h"
-#include "GameServerApi/AccelByteServerWatchdogApi.h"
+#include "GameServerApi/AccelByteServerAMSApi.h"
 #include "GameServerApi/AccelByteServerMetricExporterApi.h"
 
 using namespace AccelByte;
@@ -115,5 +115,5 @@ GameServerApi::ServerUser FRegistry::ServerUser(FRegistry::ServerCredentials, FR
 GameServerApi::ServerSession FRegistry::ServerSession(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerDSHub FRegistry::ServerDSHub(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerMatchmakingV2 FRegistry::ServerMatchmakingV2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerWatchdog FRegistry::ServerWatchdog(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
+GameServerApi::ServerAMS FRegistry::ServerAMS(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerMetricExporter FRegistry::ServerMetricExporter(FRegistry::ServerSettings);

@@ -35,7 +35,7 @@ void Currency::GetCurrencyList(const FString& Namespace
 		, *SettingsRef.PlatformServerUrl
 		, *Namespace);
 
-	TMap<FString, FString> QueryParams = {};
+	TMultiMap<FString, FString> QueryParams = {};
 	if (CurrencyType != EAccelByteCurrencyType::NONE)
 	{
 		QueryParams.Add(TEXT("currencyType"), *FAccelByteUtilities::GetUEnumValueAsString(CurrencyType));

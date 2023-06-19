@@ -296,7 +296,7 @@ int32 FRSAEncryptionOpenSSL::EncryptPublic(const TArrayView<const uint8> InSourc
 #else
 	if (InSource.Num() > GetMaxDataSize())
 	{
-		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: The data to be encrypted exceeds the maximum for this modulus of (%d) bytes."), InSource.Num(), GetMaxDataSize());
+		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: The data to be encrypted exceeds the maximum for this modulus of (%d/%d) bytes."), InSource.Num(), GetMaxDataSize());
 		return -1;
 	}
 
@@ -361,7 +361,7 @@ int32 FRSAEncryptionOpenSSL::EncryptPrivate(const TArrayView<const uint8> InSour
 #else
 	if (InSource.Num() > GetMaxDataSize())
 	{
-		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: The data to be encrypted exceeds the maximum for this modulus of (%d) bytes."), InSource.Num(), GetMaxDataSize());
+		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: The data to be encrypted exceeds the maximum for this modulus of (%d/%d) bytes."), InSource.Num(), GetMaxDataSize());
 		return -1;
 	}
 

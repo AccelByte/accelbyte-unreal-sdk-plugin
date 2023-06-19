@@ -302,6 +302,8 @@ namespace AccelByte
 		// V2 sessions
 		SessionUpdateVersionMismatch = 20071,
 		SessionPlayerAttributesNotFound = 20050,
+		SessionPartyNotFound = 20041,
+		SessionGameNotFound = 20042,
 
 		//
 		// V2 Matchmaking

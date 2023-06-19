@@ -93,14 +93,14 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	FParse::Value(FCommandLine::Get(), TEXT("dsid"), DSId);
 
-	if (!FParse::Value(FCommandLine::Get(), TEXT("watchdog_url"), WatchdogServerUrl))
+	if (!FParse::Value(FCommandLine::Get(), TEXT("watchdog_url"), AMSServerWatchdogUrl))
 	{
-		GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), WatchdogServerUrl, GEngineIni);
+		GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni);
 	}
 
-	if (!FParse::Value(FCommandLine::Get(), TEXT("heartbeat"), WatchdogHeartbeatInterval))
+	if (!FParse::Value(FCommandLine::Get(), TEXT("heartbeat"), AMSHeartbeatInterval))
 	{
-		GConfig->GetInt(*DefaultServerSection, TEXT("WatchdogHeartbeatInterval"), WatchdogHeartbeatInterval, GEngineIni);
+		GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni);
 	}
 
 	LoadFallback(SectionPath, TEXT("StatsDUrl"), StatsDServerUrl);
@@ -258,9 +258,9 @@ FString UAccelByteBlueprintsServerSettings::GetMatchmakingV2ServerUrl()
 	return FRegistry::ServerSettings.MatchmakingV2ServerUrl;
 }
 
-FString UAccelByteBlueprintsServerSettings::GetWatchdogServerUrl()
+FString UAccelByteBlueprintsServerSettings::GetAMSServerWatchdogUrl()
 {
-	return FRegistry::ServerSettings.WatchdogServerUrl;
+	return FRegistry::ServerSettings.AMSServerWatchdogUrl;
 }
 
 float UAccelByteBlueprintsServerSettings::GetQosPingTimeout()
@@ -368,9 +368,9 @@ void UAccelByteBlueprintsServerSettings::SetMatchmakingV2ServerUrl(const FString
 	FRegistry::ServerSettings.MatchmakingV2ServerUrl = MatchmakingV2ServerUrl;
 }
 
-void UAccelByteBlueprintsServerSettings::SetWatchdogServerUrl(const FString& WatchdogServerUrl)
+void UAccelByteBlueprintsServerSettings::SetAMSServerWatchdogUrl(const FString& AMSServerWatchdogUrl)
 {
-	FRegistry::ServerSettings.WatchdogServerUrl = WatchdogServerUrl;
+	FRegistry::ServerSettings.AMSServerWatchdogUrl = AMSServerWatchdogUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetQosPingTimeout(const float& QosPingTimeout)

@@ -550,11 +550,23 @@ public:
 		, const FString& Ticket
 		, const FVoidHandler& OnSuccess
 		, const FCustomErrorHandler& OnError);
-	
+
 	/**
-	 * @brief This function forced links user's current account to their other account in other platform. Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
-	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
+	 * @brief This function links user's current account to their other account in other platform, especially to support OIDC
+	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL
 	 * The browser will redirect the URL to a site with a code in form of parameter URL.
+	 *
+	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC)
+	 * @param Ticket The Ticket.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LinkOtherPlatformId(const FString& PlatformId, const FString& Ticket, const FVoidHandler& OnSuccess,
+	                       const FCustomErrorHandler& OnError);
+
+	/**
+	 * @brief This function forced links user's current account to their other account in other platform.
+	 * Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
 	 *
 	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 	 * @param PlatformUserId The UserId from the other platfrom you want to link.
@@ -567,9 +579,8 @@ public:
 		, const FOAuthErrorHandler& OnError);
 	
 	/**
-	 * @brief This function forced links user's current account to their other account in other platform. Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
-	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
-	 * The browser will redirect the URL to a site with a code in form of parameter URL.
+	 * @brief This function forced links user's current account to their other account in other platform.
+	 * Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
 	 *
 	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 	 * @param PlatformUserId The UserId from the other platfrom you want to link.
@@ -582,9 +593,7 @@ public:
 		, const FCustomErrorHandler& OnError);
 
 	/**
-	 * @brief This function links user's current account to their other account in other platform
-	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch).
-	 * The browser will redirect the URL to a site with a code in form of parameter URL.
+	 * @brief This function unlinks user's current account from their other account in other platform
 	 *
 	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 	 * @param OnSuccess This will be called when the operation succeeded.
@@ -593,6 +602,25 @@ public:
 	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, const FVoidHandler& OnSuccess
 		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief This function unlinks user's current account from their other account in other platform
+	 *
+	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidHandler& OnSuccess,
+	                         const FCustomErrorHandler& OnError);
+
+	/**
+	 * @brief This function unlinks user's current account from their other account in other platform, especially to support OIDC
+	 *
+	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC)
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UnlinkOtherPlatformId(const FString& PlatformId, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError);
 
 	/**
 	 * @brief This function will search user by their Username or Display Name. The query will be used to find the user with the most approximate username or display name.
