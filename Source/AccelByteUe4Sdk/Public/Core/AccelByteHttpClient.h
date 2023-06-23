@@ -453,6 +453,42 @@ namespace AccelByte
 		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
 		 * @param Url HTTP request URL.
 		 * @param QueryParams HTTP request query string key-value.
+		 * @param Json HTTP request content JSON Object.
+		 * @param OnSuccess Callback when HTTP call is successful.
+		 * @param OnError Callback when HTTP call is error.
+		 *
+		 * @return FAccelByteTaskPtr.
+		 */
+		template<typename U, typename V>
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TSharedRef<FJsonObject> const& Json
+			, U const& OnSuccess
+			, V const& OnError)
+		{
+			TMap<FString, FString> Headers = {
+				{TEXT("Content-Type"), TEXT("application/json")},
+				{TEXT("Accept"), TEXT("application/json")}
+			};
+
+			FString ContentString{};
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ContentString);
+			if (!FJsonSerializer::Serialize(Json, Writer))
+			{
+				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::StatusBadRequest), TEXT("Failed to convert JSON to JSON object string!"));
+				return nullptr;
+			}
+
+			return ApiRequest(Verb, Url, QueryParams, ContentString, Headers, OnSuccess, OnError);
+		}
+
+		/**
+		 * @brief API request with credentials access token (if available)
+		 *
+		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
+		 * @param Url HTTP request URL.
+		 * @param QueryParams HTTP request query string key-value.
 		 * @param UStruct HTTP request content from a given UStruct (implies Content-Type application/json header).
 		 * @param OnSuccess Callback when HTTP call is successful.
 		 * @param OnError Callback when HTTP call is error.

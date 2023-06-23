@@ -208,6 +208,50 @@ void Session::JoinGameSession(FString const& GameSessionID
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void Session::JoinGameSessionByCode(FString const& Code
+	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/join/code")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
+	Content->SetStringField(TEXT("code"), Code);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void Session::GenerateNewGameSessionCode(FString const& GameSessionID
+	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+}
+	
+void Session::RevokeGameSessionCode(FString const& GameSessionID
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 void Session::LeaveGameSession(FString const& GameSessionID
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -404,15 +448,7 @@ void Session::JoinPartyByCode(FString const& PartyCode
 	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
 	Content->SetStringField(TEXT("code"), PartyCode);
 
-	FString ContentString{};
-	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ContentString);
-	if (!FJsonSerializer::Serialize(Content, Writer))
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::StatusBadRequest), TEXT("Failed to convert party code request to JSON object string!"));
-		return;
-	}
-
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ContentString, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
 void Session::GenerateNewPartyCode(FString const& PartyID

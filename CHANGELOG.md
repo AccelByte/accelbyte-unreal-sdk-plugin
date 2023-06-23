@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.3.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.3.1%0D23.3.0) (2023-06-23)
+
+
+### Features
+
+* Add game session code management endpoints ([d520d76](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d520d767696140cf7650ea3998a7fe2663339d36))
+
+
+### Refactors
+
+* Implement ApiRequest with TSharedRef<FJsonObject> json parameter ([4e69a6f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4e69a6fb9b608287e635428077f1d90983a848cc))
+
 ## [23.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.3.0%0D23.2.1) (2023-06-19)
 
 

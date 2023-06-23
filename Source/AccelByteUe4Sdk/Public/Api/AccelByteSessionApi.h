@@ -129,6 +129,39 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Join a game session by Code.
+	 *
+	 * @param Code The session's code.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void JoinGameSessionByCode(FString const& Code
+		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Generate a new game session code
+	 *
+	 * @param GameSessionID ID of the game session that a new code should be generated for.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GenerateNewGameSessionCode(FString const& GameSessionID
+		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Revoke a game session code
+	 *
+	 * @param GameSessionID ID of the game session that a code should be revoked for.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void RevokeGameSessionCode(FString const& GameSessionID
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Leave a game session by ID.
 	 *
 	 * @param GameSessionID The ID of the session.
@@ -271,7 +304,7 @@ public:
 	/**
 	 * @brief Generate a new party code for the party
 	 *
-	 * @param PartyId ID of the party that a new code should be generated for.
+	 * @param PartyID ID of the party that a new code should be generated for.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 */
@@ -282,7 +315,7 @@ public:
 	/**
 	 * @brief Revoke a party code associated with a party
 	 *
-	 * @param PartyId ID of the party that a code should be revoked for.
+	 * @param PartyID ID of the party that a code should be revoked for.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 */
