@@ -1,58 +1,58 @@
 {
   "iam": {
-    "minVersion": "6.0.2",
-    "maxVersion": "6.0.2"
+    "minVersion": "6.0.3",
+    "maxVersion": "6.0.3"
   },
   "agreement": {
-    "minVersion": "1.29.3",
-    "maxVersion": "1.29.3"
+    "minVersion": "1.30.0",
+    "maxVersion": "1.30.0"
   },
   "basic": {
     "minVersion": "2.10.0",
     "maxVersion": "2.10.0"
   },
   "platform": {
-    "minVersion": "4.30.3",
-    "maxVersion": "4.30.3"
+    "minVersion": "4.31.0",
+    "maxVersion": "4.31.0"
   },
   "social": {
     "minVersion": "2.9.0",
     "maxVersion": "2.9.0"
   },
   "leaderboard": {
-    "minVersion": "2.24.0",
-    "maxVersion": "2.24.0"
+    "minVersion": "2.25.0",
+    "maxVersion": "2.25.0"
   },
   "achievement": {
-    "minVersion": "2.20.1",
-    "maxVersion": "2.20.1"
+    "minVersion": "2.21.0",
+    "maxVersion": "2.21.0"
   },
   "cloudsave": {
-    "minVersion": "3.8.2",
-    "maxVersion": "3.8.2"
+    "minVersion": "3.8.3",
+    "maxVersion": "3.8.3"
   },
   "ugc": {
     "minVersion": "2.11.2",
     "maxVersion": "2.11.2"
   },
   "group": {
-    "minVersion": "2.17.0",
-    "maxVersion": "2.17.0"
+    "minVersion": "2.18.0",
+    "maxVersion": "2.18.0"
   },
   "qosm": {
-    "minVersion": "1.18.1",
-    "maxVersion": "1.18.1"
+    "minVersion": "1.18.2",
+    "maxVersion": "1.18.2"
   },
   "lobby": {
     "minVersion": "3.22.0",
     "maxVersion": "3.22.0"
   },
   "dsmcontroller": {
-    "minVersion": "6.3.3",
-    "maxVersion": "6.3.3"
+    "minVersion": "6.3.4",
+    "maxVersion": "6.3.4"
   },
   "game-telemetry": {
-    "minVersion": "1.17.3",
-    "maxVersion": "1.17.3"
+    "minVersion": "1.18.0",
+    "maxVersion": "1.18.0"
   }
 }

@@ -358,12 +358,15 @@ void ServerDSM::GetSessionId(const THandler<FAccelByteModelsServerSessionRespons
 
 bool ServerDSM::ShutdownTick(float DeltaTime)
 {
-	FReport::Log(FString(__FUNCTION__));
+	// For debugging purposes
+	FReport::Log(FString::Printf(TEXT("%s: CountdownTimeStart:%d, bIsDSClaimed:%d, ServerType:%d, ShutdownCountdown:%d")
+		, *FString(__FUNCTION__), CountdownTimeStart, bIsDSClaimed, ServerType, ShutdownCountdown));
 
 	if (CountdownTimeStart != -1 && bIsDSClaimed && (ServerType == EServerType::CLOUDSERVER))
 	{
 		if (ShutdownCountdown <= 0)
 		{
+			FReport::Log(TEXT("ShutdownTick: Would have been shutdown"));
 			SendShutdownToDSM(true, "", OnAutoShutdown, OnAutoShutdownError);
 		}
 		else
@@ -422,7 +425,7 @@ void ServerDSM::ParseCommandParam()
 	TArray<FString> Switches;
 	FCommandLine::Parse(CommandParams, Tokens, Switches);
 	FReport::Log(FString::Printf(TEXT("Params: %s"), CommandParams));
-	for (auto Param : Switches)
+	for (auto& Param : Switches)
 	{
 		if (Param.Contains("provider"))
 		{

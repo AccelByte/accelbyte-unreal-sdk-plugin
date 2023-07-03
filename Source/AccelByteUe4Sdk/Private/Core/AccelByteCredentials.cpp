@@ -52,6 +52,15 @@ void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 	case ESettingsEnvironment::Production:
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsProd");
 		break;
+	case ESettingsEnvironment::Sandbox:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsSandbox");
+		break;
+	case ESettingsEnvironment::Integration:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsIntegration");
+		break;
+	case ESettingsEnvironment::QA:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsQA");
+		break;
 	case ESettingsEnvironment::Default:
 	default:
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
@@ -116,6 +125,16 @@ void Credentials::SetUserEmailAddress(const FString& EmailAddress)
 {
 	AccelByte::FReport::LogDeprecated( FString(__FUNCTION__),
 		TEXT("Deprecated, this method could not be used to set email address, use GetData instead."));
+}
+
+void Credentials::SetUserName(const FString& Name)
+{
+	UserName = Name;
+}
+
+void Credentials::SetUserDisplayName(const FString& UserDisplayName)
+{
+	AuthToken.Display_name = UserDisplayName;
 }
 
 const FString& Credentials::GetAccessToken() const
@@ -188,6 +207,11 @@ const FString& Credentials::GetUserDisplayName() const
 const FString& Credentials::GetUserEmailAddress() const
 { 
 	return AccountUserData.EmailAddress;
+}
+
+const FString& Credentials::GetUserName() const
+{
+	return UserName;
 }
 
 const FString& Credentials::GetLinkingToken() const
@@ -372,4 +396,9 @@ FString UAccelByteBlueprintsCredentials::GetUserNamespace()
 FString UAccelByteBlueprintsCredentials::GetUserEmailAddress()
 {
 	return FRegistry::Credentials.GetUserEmailAddress();
+}
+
+FString UAccelByteBlueprintsCredentials::GetUserName()
+{
+	return FRegistry::Credentials.GetUserName();
 }

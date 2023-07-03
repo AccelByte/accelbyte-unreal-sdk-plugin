@@ -14,15 +14,11 @@ DEFINE_LOG_CATEGORY(LogAccelByteHttpCache);
 
 namespace AccelByte
 {
-
 	namespace Core
 	{
-
 		int FAccelByteHttpCache::MaxAgeCacheThreshold = 100;
-
 		namespace HTTPHeader
 		{
-
 			namespace Cache
 			{
 				// The time, in seconds, that the object has been in a proxy cache
@@ -65,7 +61,6 @@ namespace AccelByte
 					// the response can be stored in caches and can be reused while fresh. Once it becomes stale, it must be validated with the origin server before reuse
 					const FString MustRevalidate = TEXT("must-revalidate");
 				}
-
 			}
 
 			namespace Verb
@@ -74,9 +69,10 @@ namespace AccelByte
 			}
 
 		}
+		
 		FAccelByteHttpCache::FAccelByteHttpCache()
+			: CachedItemsInternal {nullptr}
 		{
-			CachedItems = MakeShareable<FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>());
 		}
 
 		FAccelByteHttpCache::~FAccelByteHttpCache()
@@ -89,18 +85,29 @@ namespace AccelByte
 			switch (FRegistry::Settings.HttpCacheType)
 			{
 			case EHttpCacheType::MEMORY:
-				CachedItems = MakeShareable<FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>());
+				CachedItemsInternal = MakeShareable<FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>());
 				return;
 			case EHttpCacheType::STORAGE:
 			default:
-				CachedItems = MakeShareable<FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>());
+				CachedItemsInternal = MakeShareable<FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>());
 				return;
 			}
 		}
 
+		TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> FAccelByteHttpCache::GetCachedItems()
+		{
+			if (!CachedItemsInternal.IsValid())
+			{
+				InitializeFromConfig();
+			}
+
+			return CachedItemsInternal;
+		}
+
 		FAccelByteHttpCacheItem* FAccelByteHttpCache::GetSerializedHttpCache(const FHttpRequestPtr& Request)
 		{
-			const FName Key = ConstructKey(Request);
+			auto const& CachedItems = GetCachedItems();
+			FName const Key = ConstructKey(Request);
 			if (CachedItems->Contains(Key))
 			{
 				auto CachedItem = CachedItems->Find(Key);
@@ -174,6 +181,7 @@ namespace AccelByte
 			FScopeTryLock TryLock(&CacheCritSection);
 
 			bool bRetrieved = false;
+			auto const& CachedItems = GetCachedItems();
 
 			const FName Key = ConstructKey(Out);
 			if (CachedItems->Contains(Key))
@@ -235,6 +243,8 @@ namespace AccelByte
 				FAccelByteHttpCacheItem NewCacheItem;
 				const double TimeNow = FPlatformTime::Seconds();
 				NewCacheItem.ExpireTime = TimeNow + ResponseAgeThreshold - TimeInProxyCache;
+				
+				auto const& CachedItems = GetCachedItems();
 
 				// IF the response from the online storage service return 304
 				// THEN we can reuse the old cache and extend the usage because the response should be same
@@ -280,11 +290,15 @@ namespace AccelByte
 
 		void FAccelByteHttpCache::ClearCache()
 		{
-			CachedItems->Empty();
+			if (CachedItemsInternal.IsValid())
+			{
+				CachedItemsInternal->Empty();
+			}
 		}
 
 		FAccelByteHttpCache::EHttpCacheFreshness FAccelByteHttpCache::CheckCachedItemFreshness(const FName& Key)
 		{
+			auto const& CachedItems = GetCachedItems();
 			const TSharedPtr<FAccelByteHttpCacheItem> CachedItemPtr = (CachedItems.Get())->operator[](Key);
 			if (!CachedItems->Contains(Key))
 			{

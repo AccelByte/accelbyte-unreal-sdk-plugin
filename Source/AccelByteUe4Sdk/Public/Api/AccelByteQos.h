@@ -10,6 +10,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteDefines.h"
 #include "Models/AccelByteQosModels.h"
+#include "Templates/SharedPointer.h"
 
 namespace AccelByte
 {
@@ -71,6 +72,7 @@ private:
 	// Constructor
 	Credentials& CredentialsRef;
 	const Settings& SettingsRef;
+	TSharedPtr<bool> bValidityFlagPtr = nullptr;
 
 	static FAccelByteModelsQosServerList QosServers;
 	static TArray<TPair<FString, float>> Latencies;

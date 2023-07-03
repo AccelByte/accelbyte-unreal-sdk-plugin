@@ -141,7 +141,10 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonArray, Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	TMap<FString, FString> Headers;
+	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
+	
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
 } 

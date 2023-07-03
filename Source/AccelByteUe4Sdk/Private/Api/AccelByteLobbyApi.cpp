@@ -2616,7 +2616,10 @@ void Lobby::FetchLobbyErrorMessages()
 {
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/messages"), *SettingsRef.BaseUrl);
 
-	HttpClient.Request(TEXT("GET"), Url, {}, TEXT(""), {}
+	TMap<FString, FString> Headers;
+	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
+
+	HttpClient.Request(TEXT("GET"), Url, {}, TEXT(""), Headers
 		, THandler<TArray<FLobbyMessages>>::CreateLambda(
 			[&](const TArray<FLobbyMessages>& Result)
 			{

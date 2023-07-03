@@ -40,6 +40,7 @@ public:
 	FString SeasonPassServerUrl{};
 	FString MatchmakingV2ServerUrl{};
 	FString SessionServerUrl{};
+	FString GDPRServerUrl{};
 	
 	float QosPingTimeout{.6f};
 	EHttpCacheType HttpCacheType = EHttpCacheType::STORAGE;

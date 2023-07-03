@@ -9,6 +9,8 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByte, Log, All);
 
+const constexpr TCHAR* GHeaderABLogSquelch = TEXT("X-AB-LogSquelch");
+
 namespace AccelByte 
 {
 

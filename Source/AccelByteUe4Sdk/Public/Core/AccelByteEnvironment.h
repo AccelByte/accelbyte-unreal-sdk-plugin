@@ -16,6 +16,12 @@ enum class ESettingsEnvironment : uint8
 	Certification	UMETA(DisplayName = "Certification"),
 	/** Prod environment settings */
 	Production		UMETA(DisplayName = "Production"),
+	/** Sandbox environment settings */
+	Sandbox		UMETA(DisplayName = "Sandbox"),
+	/** Integration environment settings */
+	Integration		UMETA(DisplayName = "Integration"),
+	/** QA environment settings */
+	QA		UMETA(DisplayName = "QA"),
 	/** Default environment settings */
 	Default			UMETA(DisplayName = "Default")
 };

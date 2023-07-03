@@ -632,6 +632,15 @@ namespace AccelByte
 		{
 			FString ApiUrl = FormatApiUrl(Url);
 
+			if (!Headers.Contains(TEXT("Content-Type")))
+			{
+				Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
+			}
+			if (!Headers.Contains(TEXT("Accept")))
+			{
+				Headers.Add(TEXT("Accept"), TEXT("application/json"));
+			}
+
 			if(!AddApiAuthorizationIfAvailable(Headers))
 			{
 				ExecuteError(OnError, TEXT("Authorization Bearer is empty"));

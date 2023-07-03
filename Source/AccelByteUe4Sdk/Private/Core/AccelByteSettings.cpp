@@ -97,6 +97,8 @@ void Settings::LoadSettings(const FString& SectionPath)
 	
 	MatchmakingV2ServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("MatchmakingV2ServerUrl"), BaseUrl, TEXT("match2"));
 
+	GDPRServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("GDPRServerUrl"), BaseUrl, TEXT("gdpr"));
+
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 
 	if (!GConfig->GetString(*DefaultSection, TEXT("CustomerName"), CustomerName, GEngineIni))
@@ -154,6 +156,17 @@ void Settings::LoadSettings(const FString& SectionPath)
 	FString HttpCacheTypeString;
 	LoadFallback(SectionPath, TEXT("HttpCacheType"), HttpCacheTypeString);
 	this->HttpCacheType = FAccelByteUtilities::GetUEnumValueFromString<EHttpCacheType>(HttpCacheTypeString);
+
+	FString PresenceBroadcastEventHeartbeatIntervalString;
+	LoadFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatInterval"), PresenceBroadcastEventHeartbeatIntervalString);
+	if (PresenceBroadcastEventHeartbeatIntervalString.IsNumeric())
+	{
+		PresenceBroadcastEventHeartbeatInterval = FCString::Atoi(*PresenceBroadcastEventHeartbeatIntervalString);
+	}
+
+	FString PresenceBroadcastEventHeartbeatEnabledString;
+	LoadFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatEnabled"), PresenceBroadcastEventHeartbeatEnabledString);
+	bEnablePresenceBroadcastEventHeartbeat = PresenceBroadcastEventHeartbeatEnabledString.IsEmpty() ? false : PresenceBroadcastEventHeartbeatEnabledString.ToBool();
 }
 
 void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FString& Value)
@@ -200,6 +213,18 @@ void Settings::Reset(ESettingsEnvironment const Environment)
 	case ESettingsEnvironment::Production:
 		SettingsEnvironment = "prod";
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsProd");
+		break;
+	case ESettingsEnvironment::Sandbox:
+		SettingsEnvironment = "sandbox";
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsSandbox");
+		break;
+	case ESettingsEnvironment::Integration:
+		SettingsEnvironment = "integration";
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsIntegration");
+		break;
+	case ESettingsEnvironment::QA:
+		SettingsEnvironment = "qa";
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsQA");
 		break;
 	case ESettingsEnvironment::Default:
 	default:
@@ -329,6 +354,11 @@ FString UAccelByteBlueprintsSettings::GetSessionServerUrl()
 FString UAccelByteBlueprintsSettings::GetMatchmakingV2ServerUrl()
 {
 	return FRegistry::Settings.MatchmakingV2ServerUrl;
+}
+
+FString UAccelByteBlueprintsSettings::GetGDPRServerUrl()
+{
+	return FRegistry::Settings.GDPRServerUrl;
 }
 
 FString UAccelByteBlueprintsSettings::GetAppId()
@@ -494,6 +524,11 @@ void UAccelByteBlueprintsSettings::SetSessionServerUrl(const FString& SessionSer
 void UAccelByteBlueprintsSettings::SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl)
 {
 	FRegistry::Settings.MatchmakingV2ServerUrl = MatchmakingV2ServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetGDPRServerUrl(const FString& GDPRServerUrl)
+{
+	FRegistry::Settings.GDPRServerUrl = GDPRServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)

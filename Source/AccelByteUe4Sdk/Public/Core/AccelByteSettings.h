@@ -31,6 +31,8 @@ public:
 	FString HeartBeatData{};
 	float QosLatencyPollIntervalSecs{.0f};
 	float QosServerLatencyPollIntervalSecs{.0f};
+	int64 PresenceBroadcastEventHeartbeatInterval{600};
+	bool bEnablePresenceBroadcastEventHeartbeat;
 	bool bEnableHttpCache{false};
 	EHttpCacheType HttpCacheType {EHttpCacheType::STORAGE};
 	
@@ -277,6 +279,9 @@ public:
 	static FString GetMatchmakingV2ServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetGDPRServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetAppId();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -374,6 +379,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetSeasonPassServerUrl(const FString& SeasonPassServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetGDPRServerUrl(const FString& GDPRServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetAppId(const FString& AppId);

@@ -21,12 +21,25 @@ Qos::Qos(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef)
 	: CredentialsRef{InCredentialsRef}
 	, SettingsRef{InSettingsRef}
+	, bValidityFlagPtr(MakeShared<bool>(true))
 {
-	CredentialsRef.OnLoginSuccess().AddRaw(this, &Qos::OnLoginSuccess);
+		// Credentials is possibly destroyed before we are so we can't remove
+		// from the delegate in our destructor.  This weak pointer allows us to
+		// know whether `this` is valid.
+		TWeakPtr<bool> ValidityFlag = bValidityFlagPtr;
+		CredentialsRef.OnLoginSuccess().AddLambda([ValidityFlag, this](const FOauth2Token& Response)
+			{
+				if (!ValidityFlag.IsValid())
+					return;
+				OnLoginSuccess(Response);
+			});
+
 }
 
 Qos::~Qos()
 {
+	// Indicate to the OnLoginSuccess lambda that we have been destroyed and `this` is no longer valid.
+	bValidityFlagPtr.Reset();
 }
 
 void Qos::OnLoginSuccess(const FOauth2Token& Response)
@@ -60,7 +73,7 @@ void Qos::CallGetQosServers(const bool bPingRegionsOnSuccess
 	, const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess
 	, const FErrorHandler& OnError)
 {
-	FRegistry::QosManager.GetQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
+	FRegistry::QosManager.GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
 		[this, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError](const FAccelByteModelsQosServerList Result)
 		{
 			Qos::QosServers = Result; // Cache for the session

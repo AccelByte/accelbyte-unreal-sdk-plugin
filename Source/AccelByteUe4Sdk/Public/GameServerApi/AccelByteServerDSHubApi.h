@@ -27,6 +27,7 @@ DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FS
 	
 DECLARE_DELEGATE_OneParam(FOnServerClaimedNotification, const FAccelByteModelsServerClaimedNotification& /*Notification*/);
 DECLARE_DELEGATE_OneParam(FOnV2BackfillProposalNotification, const FAccelByteModelsV2MatchmakingBackfillProposalNotif& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2SessionMemberChangedNotification, const FAccelByteModelsV2GameSession& /*Notification*/);
 
 /**
  * @brief DS Hub API for communication from dedicated server to backend.
@@ -96,6 +97,7 @@ public:
 	 * @param InDelegate delegate to set
 	 */
 	void SetOnV2BackfillProposalNotificationDelegate(const FOnV2BackfillProposalNotification& InDelegate);
+	void SetOnV2SessionMemberChangedNotificationDelegate(const FOnV2SessionMemberChangedNotification& InDelegate);
 
 	/**
 	 *	Unbind notification delegates
@@ -147,6 +149,11 @@ private:
 	 * Delegate fired when the server associated with this DS hub connection receives a backfill proposal from matchmaking V2.
 	 */
 	FOnV2BackfillProposalNotification OnV2BackfillProposalNotification{};
+
+	/**
+	 * Delegate fired when the server associated with this DS hub connection receives game session member changed from session.
+	 */
+	FOnV2SessionMemberChangedNotification OnV2SessionMemberChangedNotification{};
 
 	/**
 	 * Create an instance of our websocket to connect to the DSHub server.

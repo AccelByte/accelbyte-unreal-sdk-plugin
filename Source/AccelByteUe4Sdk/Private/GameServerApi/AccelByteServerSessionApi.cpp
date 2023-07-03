@@ -369,5 +369,33 @@ void ServerSession::PromoteGameSessionLeader(FString const& GameSessionID, FStri
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
+void ServerSession::GenerateNewGameSessionCode(FString const& GameSessionID
+	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
+		, *ServerSettingsRef.SessionServerUrl
+		, *ServerCredentialsRef.GetNamespace()
+		, *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void ServerSession::RevokeGameSessionCode(FString const& GameSessionID
+, FVoidHandler const& OnSuccess
+, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
+		, *ServerSettingsRef.SessionServerUrl
+		, *ServerCredentialsRef.GetNamespace()
+		, *GameSessionID);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 }
 }

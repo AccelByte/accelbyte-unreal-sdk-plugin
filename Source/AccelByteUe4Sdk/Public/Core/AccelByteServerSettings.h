@@ -224,6 +224,9 @@ public:
 	static FString GetAMSServerWatchdogUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetGDPRServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static float GetQosPingTimeout();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -288,6 +291,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetAMSServerWatchdogUrl(const FString& AMSServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	void SetGDPRServerUrl(const FString& GDPRServerUrl);
 
 	/**
 	 * @brief

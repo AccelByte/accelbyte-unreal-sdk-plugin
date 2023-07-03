@@ -48,6 +48,15 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 	case ESettingsEnvironment::Production:
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsProd");
 		break;
+	case ESettingsEnvironment::Sandbox:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsSandbox");
+		break;
+	case ESettingsEnvironment::Integration:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsIntegration");
+		break;
+	case ESettingsEnvironment::QA:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsQA");
+		break;
 	case ESettingsEnvironment::Default:
 	default:
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");

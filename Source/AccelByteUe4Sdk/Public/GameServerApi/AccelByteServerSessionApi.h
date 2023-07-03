@@ -179,6 +179,28 @@ public:
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Generate a new game session code
+	 *
+	 * @param GameSessionID ID of the game session that a new code should be generated for.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GenerateNewGameSessionCode(FString const& GameSessionID
+		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Revoke a game session code
+	 *
+	 * @param GameSessionID ID of the game session that a code should be revoked for.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void RevokeGameSessionCode(FString const& GameSessionID
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;

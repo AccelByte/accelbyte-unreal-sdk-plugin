@@ -18,12 +18,14 @@
 #include "Api/AccelByteFulfillmentApi.h"
 #include "Api/AccelByteGameProfileApi.h"
 #include "Api/AccelByteGameTelemetryApi.h"
+#include "Api/AccelByteGDPRApi.h"
 #include "Api/AccelByteGroupApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Api/AccelByteLeaderboardApi.h"
 #include "Api/AccelByteLobbyApi.h"
 #include "Api/AccelByteMiscellaneousApi.h"
 #include "Api/AccelByteOrderApi.h"
+#include "Api/AccelBytePresenceBroadcastEventApi.h"
 #include "Api/AccelByteQos.h"
 #include "Api/AccelByteQosManagerApi.h"
 #include "Api/AccelByteReportingApi.h"
@@ -88,6 +90,8 @@ public:
 	Api::Session Session{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::MatchmakingV2 MatchmakingV2{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::StoreDisplay StoreDisplay{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::GDPR GDPR{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::PresenceBroadcastEvent PresenceBroadcastEvent{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)

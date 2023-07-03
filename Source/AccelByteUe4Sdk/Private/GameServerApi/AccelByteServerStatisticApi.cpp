@@ -77,8 +77,11 @@ void ServerStatistic::CreateUserStatItems(const FString& UserId
 		}
 	}
 	Contents += "]";
+	
+	TMap<FString, FString> Headers;
+	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, Headers, OnSuccess, OnError);
 }
 
 void ServerStatistic::GetAllUserStatItems(const FString& UserId
@@ -122,8 +125,11 @@ void ServerStatistic::GetUserStatItems(const FString& UserId
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("sortBy"), SortBy == EAccelByteStatisticSortBy::NONE ? TEXT("") : FGenericPlatformHttp::UrlEncode(ConvertUserStatisticSortByToString(SortBy))},
 	};
+	
+	TMap<FString, FString> Headers;
+	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
-	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
+	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), Headers, OnSuccess, OnError);
 }
 
 void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data
@@ -148,8 +154,11 @@ void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsB
 		}
 	}
 	Contents += "]";
+	
+	TMap<FString, FString> Headers;
+	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, Headers, OnSuccess, OnError);
 }
 
 void ServerStatistic::IncrementUserStatItems(const FString& UserId
@@ -176,8 +185,11 @@ void ServerStatistic::IncrementUserStatItems(const FString& UserId
 		}
 	}
 	Contents += "]";
+	
+	TMap<FString, FString> Headers;
+	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, Headers, OnSuccess, OnError);
 }
 
 void ServerStatistic::BulkFetchUserStatItemValues(const FString& StatCode

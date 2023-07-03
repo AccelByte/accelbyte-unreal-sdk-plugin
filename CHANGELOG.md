@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [23.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.4.0%0D23.3.1) (2023-07-03)
+
+
+### Features
+
+* add GDPR Api to SDK ([4174ee9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4174ee95c98914948850395f88a0d8f7776878b5))
+* Add missing fields in the DSM models ([987edb4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/987edb4116ca3f5904d7c45bb4c3cef108762299))
+* add missing header in LinkOtherPlatformId ([7a12eb0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7a12eb0aeb001046d907d4cd0c1688979f5b02bd))
+* add session code management for DS ([69d44e0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/69d44e0530c68dac97d2d624a76b125cb34cecba))
+* Add Username in the Credentials class ([b5e955c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b5e955c9bde59b379db523ca73c3e33a2ba8d7ce))
+* Add validity flag in the QoS API class to ensure the object is still valid when OnLoginSuccess triggered ([da08aa2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/da08aa2689cec87ef46b2bca11b027d1c47cea63))
+* **DSHub:** add session member changed notif delegate ([98ebd81](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/98ebd81f2301c78a776543b51f28143d3538046a))
+* extend Environment settings by adding sandbox, integration and qa ([6a55ce3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6a55ce35e3a06edd5860a25262cde513cf0c5488))
+* implement presence boardcast event ([feec513](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/feec5130c5158056fc414343e6bac3bc0e6691b6))
+* Logs squelching to hide some information in the HTTP request and response by adding the new HTTP header ([072cb54](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/072cb54be63391c01773f526c556c1ca9c81f29e))
+
+
+### Bug Fixes
+
+* change cache qos get latencies to get active latencies ([7dbe7e4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7dbe7e401e4cf223cec6d29a4210859768ae5f1e))
+* **httpclient:** Fix undefined Content-Type and Accept headers in the HTTP request ([2c8591b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2c8591bb66eb47567c43cd5d59f374bb1bddcb23))
+* inconsistent string name on GDPRApi Header ([4b3823b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4b3823b65c8cac762285a0e01d5d203a181d0905))
+
+
+### Refactors
+
+* **httpcache:** Change CachedItems initialization process as lazy initialization ([4e636b6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4e636b60fea28a1fd33397dda29327e801ae124c))
+
+
+### Performance
+
+* Use reference to iterate switches in the ServerDSM API class ([461610e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/461610edc75dd9aa874188a5a130475348ad7902))
+
 ### [23.3.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.3.1%0D23.3.0) (2023-06-23)
 
 

@@ -75,6 +75,8 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	ChatServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("ChatServerUrl"), BaseUrl, TEXT("chat"));
 
+	GDPRServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("GDPRServerUrl"), BaseUrl, TEXT("gdpr"));
+
 	const FString DSHubBaseUrl = BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
 	DSHubServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("DSHubServerUrl"), DSHubBaseUrl, TEXT("dshub/"));
 
@@ -148,6 +150,15 @@ void ServerSettings::Reset(ESettingsEnvironment const Environment)
 		break;
 	case ESettingsEnvironment::Production:
 		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsProd");
+		break;
+	case ESettingsEnvironment::Sandbox:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsSandbox");
+		break;
+	case ESettingsEnvironment::Integration:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsIntegration");
+		break;
+	case ESettingsEnvironment::QA:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsQA");
 		break;
 	case ESettingsEnvironment::Default:
 	default:
@@ -263,6 +274,11 @@ FString UAccelByteBlueprintsServerSettings::GetAMSServerWatchdogUrl()
 	return FRegistry::ServerSettings.AMSServerWatchdogUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetGDPRServerUrl()
+{
+	return FRegistry::ServerSettings.GDPRServerUrl;
+}
+
 float UAccelByteBlueprintsServerSettings::GetQosPingTimeout()
 {
 	return FRegistry::ServerSettings.QosPingTimeout;
@@ -371,6 +387,11 @@ void UAccelByteBlueprintsServerSettings::SetMatchmakingV2ServerUrl(const FString
 void UAccelByteBlueprintsServerSettings::SetAMSServerWatchdogUrl(const FString& AMSServerWatchdogUrl)
 {
 	FRegistry::ServerSettings.AMSServerWatchdogUrl = AMSServerWatchdogUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetGDPRServerUrl(const FString& GDPRServerUrl)
+{
+	FRegistry::ServerSettings.GDPRServerUrl = GDPRServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetQosPingTimeout(const float& QosPingTimeout)

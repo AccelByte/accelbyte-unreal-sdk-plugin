@@ -32,6 +32,7 @@
 #include "Api/AccelByteSeasonPassApi.h"
 #include "Api/AccelByteReportingApi.h"
 #include "Api/AccelByteCurrencyApi.h"
+#include "Api/AccelByteGDPRApi.h"
 #include "Api/AccelByteMiscellaneousApi.h"
 #include "Api/AccelByteRewardApi.h"
 #include "Api/AccelByteSessionApi.h"
@@ -98,6 +99,7 @@ Api::MatchmakingV2 FRegistry::MatchmakingV2(FRegistry::Credentials, FRegistry::S
 Api::TurnManager FRegistry::TurnManager(FRegistry::Credentials, FRegistry::Settings, HttpRetryScheduler);
 Api::HeartBeat FRegistry::HeartBeat(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::StoreDisplay FRegistry::StoreDisplay(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+Api::GDPR FRegistry::GDPR(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);

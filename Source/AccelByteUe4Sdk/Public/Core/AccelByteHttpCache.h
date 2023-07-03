@@ -50,9 +50,7 @@ namespace AccelByte
 		protected:
 
 			static int MaxAgeCacheThreshold;
-
-			TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> CachedItems;
-
+			
 			static FName ConstructKey(const FHttpRequestPtr& Request);
 
 			enum class EHttpCacheFreshness : uint8
@@ -63,6 +61,10 @@ namespace AccelByte
 			};
 
 			FCriticalSection CacheCritSection;
+			
+			TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> CachedItemsInternal;
+			
+			TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> GetCachedItems();
 
 		public:
 
@@ -75,7 +77,6 @@ namespace AccelByte
 			static bool IsResponseCacheable(const FHttpRequestPtr& CompletedRequest);
 
 		private:
-
 			/**
 			 * @brief Check whether the cached response is not stale nor invalid
 			 *

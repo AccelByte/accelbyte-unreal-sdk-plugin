@@ -22,6 +22,8 @@ namespace GameServerApi
 // DS HUB TOPICS START
 const FString DSMCServerClaimedTopic = TEXT("serverClaimed");
 const FString MMV2BackfillProposalTopic = TEXT("BACKFILL_PROPOSAL");
+const FString SessionMembersChangedTopic = TEXT("SESSION_MEMBER_CHANGED");
+// DS HUB TOPICS END
 
 ServerDSHub::ServerDSHub(
 	ServerCredentials const& InCredentialsRef,
@@ -99,6 +101,11 @@ void ServerDSHub::SetOnV2BackfillProposalNotificationDelegate(const FOnV2Backfil
 	OnV2BackfillProposalNotification = InDelegate;
 }
 
+void ServerDSHub::SetOnV2SessionMemberChangedNotificationDelegate(const FOnV2SessionMemberChangedNotification& InDelegate)
+{
+	OnV2SessionMemberChangedNotification = InDelegate;
+}
+
 void ServerDSHub::UnbindDelegates()
 {
 	OnConnectSuccessDelegate.Unbind();
@@ -107,6 +114,7 @@ void ServerDSHub::UnbindDelegates()
 	
 	OnServerClaimedNotification.Unbind();
 	OnV2BackfillProposalNotification.Unbind();
+	OnV2SessionMemberChangedNotification.Unbind();
 }
 
 void ServerDSHub::CreateWebSocket()
@@ -205,11 +213,22 @@ void ServerDSHub::OnMessage(const FString& Message)
 		FAccelByteModelsV2MatchmakingBackfillProposalNotif NotificationPayload;
 		if (!FJsonObjectConverter::JsonObjectToUStruct(PayloadObject.ToSharedRef(), &NotificationPayload))
 		{
-			UE_LOG(LogAccelByteDSHub, Warning, TEXT("Failed to convert payload for session claim topic to an FAccelByteModelsV2MatchmakingBackfillProposalNotif instance!"));
+			UE_LOG(LogAccelByteDSHub, Warning, TEXT("Failed to convert payload for backfill proposal topic to an FAccelByteModelsV2MatchmakingBackfillProposalNotif instance!"));
 			return;
 		}
 
 		OnV2BackfillProposalNotification.ExecuteIfBound(NotificationPayload);
+	}
+	else if(Topic.Equals(SessionMembersChangedTopic))
+	{
+		FAccelByteModelsV2GameSession NotificationPayload;
+		if (!FJsonObjectConverter::JsonObjectToUStruct(PayloadObject.ToSharedRef(), &NotificationPayload))
+		{
+			UE_LOG(LogAccelByteDSHub, Warning, TEXT("Failed to convert payload for session member changed topic to an FAccelByteModelsV2GameSession instance!"));
+			return;
+		}
+
+		OnV2SessionMemberChangedNotification.ExecuteIfBound(NotificationPayload);
 	}
 }
 

@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "JsonObjectWrapper.h"
+#include "AccelByteGeneralModels.h"
 
 #include "AccelByteDSMModels.generated.h"
 
@@ -194,6 +195,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsServerInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
 	FString Deployment{};	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
+	FString Session_id{};
 };
 
 USTRUCT(BlueprintType)
@@ -338,4 +342,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsServerCreateSessionResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionResponse")
 	FAccelByteModelsDSMSession Session {};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsListServerResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSM | Models | ListServersResponse")
+	TArray<FAccelByteModelsServerInfo> Servers{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSM | Models | ListServersResponse")
+	FAccelByteModelsPaging Paging{};
 };

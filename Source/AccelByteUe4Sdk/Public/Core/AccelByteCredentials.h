@@ -41,6 +41,8 @@ public:
 	virtual void SetClientCredentials(const ESettingsEnvironment Environment) override;
 	void SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime);
 	void SetUserEmailAddress(const FString& EmailAddress);
+	void SetUserName(const FString& UserName);
+	void SetUserDisplayName(const FString& UserDisplayName);
 	virtual void PollRefreshToken(double CurrentTime) override;
 	virtual void ScheduleRefreshToken(double NextRefreshTime) override;
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
@@ -55,6 +57,7 @@ public:
 	const FString& GetUserDisplayName() const;
 	virtual const FString& GetNamespace() const override;
 	const FString& GetUserEmailAddress() const;
+	const FString& GetUserName() const;
 	const FString& GetLinkingToken() const;
 	const FAccountUserData& GetAccountUserData() const;
 	
@@ -67,6 +70,7 @@ public:
 private:
 	FOauth2Token AuthToken;
 	
+	FString UserName;
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;
 	FAccountUserData AccountUserData;
@@ -101,5 +105,7 @@ public:
 	static FString GetUserNamespace();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	static FString GetUserEmailAddress();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetUserName();
 };
 
