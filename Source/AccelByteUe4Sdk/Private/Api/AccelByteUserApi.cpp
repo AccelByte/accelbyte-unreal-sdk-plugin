@@ -1048,7 +1048,7 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
-	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace()
 		, *PlatformId);
@@ -1064,7 +1064,7 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
-	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace()
 		, *PlatformId);
@@ -1075,6 +1075,36 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 void User::UnlinkOtherPlatformId(const FString& PlatformId
 	, const FVoidHandler& OnSuccess
 	, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *PlatformId);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void User::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType
+	, const FVoidHandler& OnSuccess
+	, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *PlatformId);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+	
+void User::UnlinkAllOtherPlatformId(const FString& PlatformId
+		, const FVoidHandler& OnSuccess
+		, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	

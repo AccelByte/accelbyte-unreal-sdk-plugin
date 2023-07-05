@@ -598,6 +598,8 @@ public:
 	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @deprecated This method will be removed in the future. Please use same function with the FCustomErrorHandler parameter instead.
 	 */
 	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, const FVoidHandler& OnSuccess
@@ -610,8 +612,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidHandler& OnSuccess,
-	                         const FCustomErrorHandler& OnError);
+	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
+		, const FVoidHandler& OnSuccess
+		, const FCustomErrorHandler& OnError);
 
 	/**
 	 * @brief This function unlinks user's current account from their other account in other platform, especially to support OIDC
@@ -620,7 +623,41 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UnlinkOtherPlatformId(const FString& PlatformId, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError);
+	void UnlinkOtherPlatformId(const FString& PlatformId
+		, const FVoidHandler& OnSuccess
+		, const FCustomErrorHandler& OnError);
+
+	/**
+	 * @brief This function unlinks all the user's current account from their other accounts in other platforms.
+	 *
+	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @note Use this API to unlink all the user's current account from their other accounts in other platforms within the game namespace.
+	 * It resolves issues with the old API by ensuring successful unlinking across multiple namespaces.
+	 * After calling this API, if a user logs in to any namespace with the same 3rd platform account,
+	 * they will be logged in as a different account. 
+	 */
+	void UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType
+		, const FVoidHandler& OnSuccess
+		, const FCustomErrorHandler& OnError);
+
+	/**
+	 * @brief This function unlinks all the user's current account from their other accounts in other platforms, especially to support OIDC.
+	 *
+	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC).
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @note Use this API to unlink all the user's current account from their other accounts in other platforms within the game namespace.
+	 * It resolves issues with the old API by ensuring successful unlinking across multiple namespaces.
+	 * After calling this API, if a user logs in to any namespace with the same 3rd platform account,
+	 * they will be logged in as a different account. 
+	 */
+	void UnlinkAllOtherPlatformId(const FString& PlatformId
+		, const FVoidHandler& OnSuccess
+		, const FCustomErrorHandler& OnError);
 
 	/**
 	 * @brief This function will search user by their Username or Display Name. The query will be used to find the user with the most approximate username or display name.

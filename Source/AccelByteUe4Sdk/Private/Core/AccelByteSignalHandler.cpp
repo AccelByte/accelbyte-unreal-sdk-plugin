@@ -4,7 +4,7 @@
 
 #include "Core/AccelByteSignalHandler.h"
 
-#if PLATFORM_LINUX
+#if PLATFORM_LINUX && !WITH_EDITOR
 extern volatile sig_atomic_t GEnteredSignalHandler;
 #endif
 
@@ -12,7 +12,7 @@ FOnSigtermReceived FAccelByteSignalHandler::OnSigtermReceivedDelegate;
 
 void FAccelByteSignalHandler::Initialize()
 {
-#if PLATFORM_LINUX
+#if PLATFORM_LINUX && !WITH_EDITOR
 	struct sigaction Action;
 	FMemory::Memzero(&Action, sizeof(struct sigaction));
 	Action.sa_sigaction = FAccelByteSignalHandler::OnSignalReceived;

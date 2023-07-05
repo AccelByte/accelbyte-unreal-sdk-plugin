@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.4.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.4.1%0D23.4.0) (2023-07-05)
+
+
+### Bug Fixes
+
+* error when building Linux Editor ([bbe6f73](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bbe6f734b21b735020f7e4eef55069a3e45dc23a))
+* Separate UnlinkOtherPlatform API functions for improved functionality and bug fixes ([e1ac377](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e1ac377ca97d0102fa2ae4df0cdd0378c8d6fb7b))
+
 ## [23.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.4.0%0D23.3.1) (2023-07-03)
 
 
