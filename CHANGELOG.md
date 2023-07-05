@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.3.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.3.2%0D23.3.1) (2023-07-05)
+
+
+### Bug Fixes
+
+* error when building Linux editor
+
 ### [23.3.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.3.1%0D23.3.0) (2023-06-23)
 
 

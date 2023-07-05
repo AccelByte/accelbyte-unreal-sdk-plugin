@@ -4,7 +4,7 @@
 
 #pragma once
 #include "CoreMinimal.h"
-#if PLATFORM_LINUX
+#if PLATFORM_LINUX && !WITH_EDITOR
 #include <signal.h>
 #endif
 
@@ -15,7 +15,7 @@ class ACCELBYTEUE4SDK_API FAccelByteSignalHandler
 public:
 	static void Initialize();
 	static void SetOnSigtermReceived(const FOnSigtermReceived& OnSigtermReceived);
-#if PLATFORM_LINUX
+#if PLATFORM_LINUX && !WITH_EDITOR
 	static void OnSignalReceived(int32 Signal, siginfo_t* Info, void* Context);
 #endif
 
