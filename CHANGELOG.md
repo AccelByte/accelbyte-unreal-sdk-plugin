@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [21.3.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.3.3%0D21.3.2) (2023-03-17)
+
+
+### Bug Fixes
+
+* **chatV2:** update websocket chat session id after connected ([ace1e25](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ace1e254c313294fa54c5a6e52082a7c52d1dd37))
+
 ### [21.3.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/21.3.2%0D21.3.1) (2023-03-17)
 
 
