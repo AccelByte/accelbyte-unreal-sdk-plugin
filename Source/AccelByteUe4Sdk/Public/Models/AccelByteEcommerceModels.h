@@ -264,6 +264,23 @@ enum class EAccelByteSubscriptionSummarySubscribedBy : uint8
 	PLATFORM 
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteEntitlementItemIdentityType : uint8
+{
+	NONE = 0,
+	ITEM_ID,
+	ITEM_SKU 
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteEntitlementIAPOrderStatus : uint8
+{
+	NONE = 0,
+	VERIFIED,
+	FULFILLED,
+	FAILED
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -2517,4 +2534,25 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSellItemEntitlementInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SellItemEntitlementInfo ")
 	FAccelByteModelsEntitlementInfo EntitlementInfo{}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSyncOculusConsumableEntitlementInfo
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SyncOculusConsumableEntitlementInfo ")
+	FString TransactionId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SyncOculusConsumableEntitlementInfo ")
+	FString OculusItemSku{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SyncOculusConsumableEntitlementInfo ")
+	EAccelByteEntitlementItemIdentityType ItemIdentityType{EAccelByteEntitlementItemIdentityType::NONE};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SyncOculusConsumableEntitlementInfo ")
+	FString ItemIdentity{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SyncOculusConsumableEntitlementInfo ")
+	EAccelByteEntitlementIAPOrderStatus IAPOrderStatus{EAccelByteEntitlementIAPOrderStatus::NONE};
 };

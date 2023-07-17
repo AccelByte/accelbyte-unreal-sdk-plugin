@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.4.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.4.2%0D23.4.1) (2023-07-14)
+
+
+### Bug Fixes
+
+* added sync IAP & DLC for oculus platform ([3ac6daa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3ac6daafe85c0b0aff4421619b2657d61d7857fb))
+
 ### [23.4.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.4.1%0D23.4.0) (2023-07-05)
 
 

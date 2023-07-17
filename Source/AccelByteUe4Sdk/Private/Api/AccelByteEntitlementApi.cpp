@@ -843,5 +843,29 @@ void Entitlement::SellUserEntitlement(FString const& EntitlementId
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
+void Entitlement::SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteModelsSyncOculusConsumableEntitlementInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));  
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/oculus/sync")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
+}
+
+void Entitlement::SyncOculusDLC(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));  
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/oculus/sync")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
+}
+	
 } // Namespace Api
 }
