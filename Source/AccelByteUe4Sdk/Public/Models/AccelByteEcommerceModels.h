@@ -1939,16 +1939,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementSummary
 	FString CreatedAt{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
-	FDateTime UpdatedAt{};
+	FDateTime UpdatedAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
 	FString GrantedCode{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
-	FDateTime StartDate{};
+	FDateTime StartDate{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | EntitlementSummary")
-	FDateTime EndDate{};
+	FDateTime EndDate{0};
 };
 
 USTRUCT(BlueprintType)
@@ -1996,10 +1996,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSubscriptionSummary
 	EAccelByteSubscriptionSummaryStatus Status{EAccelByteSubscriptionSummaryStatus::NONE};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
-	FDateTime CurrentPeriodStart{};
+	FDateTime CurrentPeriodStart {0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
-	FDateTime CurrentPeriodEnd{};
+	FDateTime CurrentPeriodEnd {0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | SubscriptionSummary")
 	EAccelByteSubscriptionSummarySubscribedBy SubscribedBy{EAccelByteSubscriptionSummarySubscribedBy::NONE};
@@ -2228,11 +2228,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformStore
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Store")
 	FString DefaultLanguage{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Store")
-	FDateTime PublishedTime{};
+	FDateTime PublishedTime{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Store")
-	FDateTime CreatedAt{};
+	FDateTime CreatedAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Store")
-	FDateTime UpdatedAt{};
+	FDateTime UpdatedAt{0};
 };
 
 USTRUCT(BlueprintType)
@@ -2261,7 +2261,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemCriteriaV2
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | ItemRequest")
 	FString Region{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | ItemRequest")
-	FDateTime AvailableDate{};
+	FDateTime AvailableDate{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | ItemRequest")
 	FString TargetNamespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | ItemRequest")
@@ -2448,16 +2448,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSectionInfo
 	bool Active{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
-	FDateTime StartDate{};
+	FDateTime StartDate{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
-	FDateTime EndDate{};
+	FDateTime EndDate{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
 	TArray<FAccelByteModelsItemInfo> CurrentRotationItems{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
-	FDateTime CurrentRotationExpireAt{};
+	FDateTime CurrentRotationExpireAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
 	FDateTime CreatedAt{0};

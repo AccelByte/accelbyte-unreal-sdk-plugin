@@ -20,6 +20,7 @@
 
 DECLARE_DYNAMIC_DELEGATE(FDHandler);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FDErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDCustomErrorHandler, int32, ErrorCode, const FString&, ErrorMessage, const FJsonObjectWrapper&, ErrorObject);
 
 namespace AccelByte
 {
@@ -300,6 +301,7 @@ namespace AccelByte
 		StatisticsEmptyInputException = 20002,
 
 		// V2 sessions
+		SessionJoinSessionFull = 20032,
 		SessionUpdateVersionMismatch = 20071,
 		SessionPlayerAttributesNotFound = 20050,
 		SessionPartyNotFound = 20041,

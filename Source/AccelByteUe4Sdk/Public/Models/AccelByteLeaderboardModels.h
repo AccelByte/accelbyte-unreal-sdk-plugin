@@ -103,9 +103,9 @@ struct FAccelByteModelsLeaderboardData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
 	bool AllTime{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
-	FDateTime CreatedAt{};
+	FDateTime CreatedAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
-	FDateTime DeletedAt{};
+	FDateTime DeletedAt{0};
 };
 
 USTRUCT(BlueprintType)

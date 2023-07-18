@@ -539,6 +539,94 @@ void UABUser::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 			}));
 }
 
+void UABUser::UnlinkOtherPlatformWithCustomErrorHandler(EAccelBytePlatformType PlatformType
+	, FDHandler OnSuccess
+	, FDCustomErrorHandler OnError) 
+{
+	ApiClientPtr->User.UnlinkOtherPlatform(PlatformType
+		, FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorObject)
+		{
+			FString JsonString;
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonString);
+			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorObject);
+			FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+			FJsonObjectWrapper ErrorObjectWrapper;
+			FAccelByteJsonConverter::JsonObjectStringToUStruct(JsonString, &ErrorObjectWrapper);
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorObjectWrapper);
+		}));
+}
+
+void UABUser::UnlinkOtherPlatformId(const FString& PlatformId
+	, FDHandler OnSuccess
+	, FDCustomErrorHandler OnError) 
+{
+	ApiClientPtr->User.UnlinkOtherPlatformId(PlatformId
+		, FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorObject)
+		{
+			FString JsonString;
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonString);
+			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorObject);
+			FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+			FJsonObjectWrapper ErrorObjectWrapper;
+			FAccelByteJsonConverter::JsonObjectStringToUStruct(JsonString, &ErrorObjectWrapper);
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorObjectWrapper);
+		}));
+}
+
+void UABUser::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType
+	, FDHandler OnSuccess
+	, FDCustomErrorHandler OnError) 
+{
+	ApiClientPtr->User.UnlinkAllOtherPlatform(PlatformType
+		, FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorObject)
+		{
+			FString JsonString;
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonString);
+			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorObject);
+			FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+			FJsonObjectWrapper ErrorObjectWrapper;
+			FAccelByteJsonConverter::JsonObjectStringToUStruct(JsonString, &ErrorObjectWrapper);
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorObjectWrapper);
+		}));
+}
+
+void UABUser::UnlinkAllOtherPlatformId(const FString& PlatformId
+	, FDHandler OnSuccess
+	, FDCustomErrorHandler OnError) 
+{
+	ApiClientPtr->User.UnlinkAllOtherPlatformId(PlatformId
+		, FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorObject)
+		{
+			FString JsonString;
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonString);
+			TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(ErrorObject);
+			FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+			FJsonObjectWrapper ErrorObjectWrapper;
+			FAccelByteJsonConverter::JsonObjectStringToUStruct(JsonString, &ErrorObjectWrapper);
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorObjectWrapper);
+		}));
+}
+
 #pragma endregion
 
 #pragma region Query

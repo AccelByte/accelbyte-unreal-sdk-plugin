@@ -586,7 +586,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUsersPresenceNotice
 	FString Platform{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
-	FDateTime LastSeenAt{};
+	FDateTime LastSeenAt{0};
 };
 
 // List all friends presence

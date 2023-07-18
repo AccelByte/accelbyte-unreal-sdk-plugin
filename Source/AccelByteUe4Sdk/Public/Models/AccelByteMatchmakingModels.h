@@ -170,7 +170,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchFoundNotif
 	FString Namespace{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchFoundNotif")
-	FDateTime CreatedAt{};
+	FDateTime CreatedAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchFoundNotif")
 	FString MatchPool{};

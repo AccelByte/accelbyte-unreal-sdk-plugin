@@ -773,3 +773,55 @@ FString FAccelByteUtilities::ConvertItemSortByToString(EAccelByteItemListSortBy 
 	}
 	return TEXT("");
 }
+
+bool FAccelByteUtilities::IsNumericString(const FString& String)
+{
+	if (String.IsEmpty())
+	{
+		return false;
+	}
+
+	const TCHAR* Str = String.GetCharArray().GetData();
+	if (*Str == '-' || *Str == '+')
+	{
+		Str++;
+	}
+
+	bool bHasDecimalSeparator = false;
+	TCHAR DecimalSeparator = '.';
+	if (IsLanguageUseCommaDecimalSeparator())
+	{
+		DecimalSeparator = ',';
+	}
+
+	while (*Str != '\0')
+	{
+		if (*Str == DecimalSeparator)
+		{
+			if (bHasDecimalSeparator)
+			{
+				return false;
+			}
+			bHasDecimalSeparator = true;
+		}
+		else if (!FChar::IsDigit(*Str))
+		{
+			return false;
+		}
+
+		++Str;
+	}
+
+	return true;
+}
+
+bool FAccelByteUtilities::IsLanguageUseCommaDecimalSeparator()
+{
+	double CheckValue = 0.1f;
+	FString StringValue = FString::Printf(TEXT("%g"), CheckValue);
+	if (StringValue.Contains(TEXT(",")))
+	{
+		return true;
+	}
+	return false;
+}

@@ -129,7 +129,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, FDHandler OnSuccess, FDErrorHandler OnError);
 
-//Queries
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void UnlinkOtherPlatformWithCustomErrorHandler(EAccelBytePlatformType PlatformType, FDHandler OnSuccess, FDCustomErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void UnlinkOtherPlatformId(const FString& PlatformId, FDHandler OnSuccess, FDCustomErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType, FDHandler OnSuccess, FDCustomErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void UnlinkAllOtherPlatformId(const FString& PlatformId, FDHandler OnSuccess, FDCustomErrorHandler OnError);
+
+	//Queries
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void SearchUsers(FString const& Query, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError);

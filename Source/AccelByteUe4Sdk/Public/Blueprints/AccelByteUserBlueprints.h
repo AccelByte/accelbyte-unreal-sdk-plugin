@@ -70,5 +70,17 @@ public:
 	static void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	static void UnlinkOtherPlatformWithCustomErrorHandler(EAccelBytePlatformType PlatformType, const FDHandler& OnSuccess,const FDCustomErrorHandler& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	static void UnlinkOtherPlatformId(const FString& PlatformId, const FDHandler& OnSuccess, const FDCustomErrorHandler& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	static void UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType, const FDHandler& OnSuccess, const FDCustomErrorHandler& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	static void UnlinkAllOtherPlatformId(const FString& PlatformId, const FDHandler& OnSuccess, const FDCustomErrorHandler& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void GetUserEligibleToPlay(const FDUserEligiblePlayHandler& OnSuccess, const FDErrorHandler& OnError);
 };

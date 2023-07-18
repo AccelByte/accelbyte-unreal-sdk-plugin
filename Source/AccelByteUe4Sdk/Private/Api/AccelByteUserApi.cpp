@@ -707,7 +707,8 @@ void User::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest
 void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 	, const TArray<FString>& OtherPlatformUserId
 	, const THandler<FBulkPlatformUserIdResponse>& OnSuccess
-	, const FErrorHandler & OnError)
+	, const FErrorHandler & OnError
+	, const bool bRawPuid)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -717,9 +718,15 @@ void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 		, *CredentialsRef.GetNamespace()
 		, *PlatformString);
 
+	TMultiMap<FString, FString> QueryParams;
+	if (bRawPuid)
+	{
+		QueryParams.Add(TEXT("rawPUID"), TEXT("true"));
+	}
+
 	const FBulkPlatformUserIdRequest UserIdRequests{ OtherPlatformUserId };
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserIdRequests, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, UserIdRequests, OnSuccess, OnError);
 }
 
 void User::SendVerificationCode(const FVoidHandler& OnSuccess

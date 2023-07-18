@@ -598,7 +598,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserSeasonData
 	TArray<FString> Tags{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SeasonPass | Models | Data")
-	FDateTime CreatedAt{};
+	FDateTime CreatedAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SeasonPass | Models | Data")
 	EAccelByteSeasonPassSource Source{};

@@ -88,7 +88,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 	SessionBrowserServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SessionBrowserServerUrl"), BaseUrl, TEXT("sessionbrowser"));
 
 	UGCServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("UGCServerUrl"), BaseUrl, TEXT("ugc"));
-	
+
 	SeasonPassServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SeasonPassServerUrl"), BaseUrl, TEXT("seasonpass"));
 
 	ReportingServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ReportingServerUrl"), BaseUrl, TEXT("reporting"));

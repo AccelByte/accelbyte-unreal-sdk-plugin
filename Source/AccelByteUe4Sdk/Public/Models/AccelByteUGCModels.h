@@ -609,7 +609,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCGroups
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Groups")
 	TArray<FString> Contents {};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Groups")
-	FDateTime CreatedAt{};
+	FDateTime CreatedAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Groups")
 	FString Id{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Groups")

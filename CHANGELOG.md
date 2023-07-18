@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [23.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.5.0%0D23.4.2) (2023-07-17)
+
+
+### Features
+
+* add custom print policy to fix locale issue ([48fd989](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/48fd989e20ff8965efa939aafb77773a2837958e))
+* add raw platform user id support ([34d6bf2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/34d6bf22685f52a352b3464843d83efda65ca8cb))
+* add UnlinkOtherPlatform and UnlinkAllPlatform into blueprint ([0b52c0a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0b52c0a023bbfc9400f59f4af471e5722ccb3bd6))
+* **Error:** add sessionJoinFull error code ([95f3d8a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/95f3d8aecd52b19bd408fa4fb0ff5634532b5387))
+* redirect readme to docs portal ([5273f6f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5273f6fab3be71838481129cef45d9bd0c1273c1))
+
+
+### Bug Fixes
+
+* initialize USTRUCT member to default value ([3ecf41e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3ecf41ede16242ef39da4e18b43b86c3bc8c8161))
+
 ### [23.4.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.4.2%0D23.4.1) (2023-07-14)
 
 

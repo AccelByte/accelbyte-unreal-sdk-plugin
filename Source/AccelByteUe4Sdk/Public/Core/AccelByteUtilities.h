@@ -434,6 +434,8 @@ public:
 	static bool GetValueFromCommandLineSwitch(const FString& Key, int& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, bool& Value);
 	static FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
+	static bool IsNumericString(const FString& String);
+	static bool IsLanguageUseCommaDecimalSeparator();
 
 //To allow override for testing using mock class
 protected:

@@ -41,7 +41,7 @@ public:
 	 * - Call this last, just before the actual login call.
 	 */
 	void FinalPreLoginEvents() ;
-	
+
 
 #pragma region Login Methods
 	/**
@@ -69,7 +69,7 @@ public:
 		, const FString& Password
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
-	
+
 	/**
 	 * @brief Log in with email/username account using v3 endpoint.
 	 *
@@ -77,7 +77,7 @@ public:
 	 * @param Password Password.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param bRememberMe This will use for refresh token expiration extension, default value is false. 
+	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	 */
 	void LoginWithUsernameV3(const FString& Username
 		, const FString& Password
@@ -92,14 +92,14 @@ public:
 	 * @param Password Password.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param bRememberMe This will use for refresh token expiration extension, default value is false. 
+	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	 */
 	void LoginWithUsernameV3(const FString& Username
 		, const FString& Password
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError
 		, const bool bRememberMe = false);
-	
+
 	/**
 	 * @brief Log in with device ID (anonymous log in).
 	 *
@@ -137,22 +137,22 @@ public:
 	 * @param PlatformToken Authentication code that provided by another platform.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true 
+	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true
 	 */
 	void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
 		, const FString& PlatformToken
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError
 		, bool bCreateHeadless = true);
-		
+
 	/**
 	 * @brief Log in with another platform Id account e.g. Steam, Google, Twitch, etc especially to support OIDC (with 2FA enable)
 	 *
-	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC)  
+	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC)
 	 * @param PlatformToken Authentication code that provided by another platform.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true 
+	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true
 	 */
 	void LoginWithOtherPlatformId(const FString& PlatformId
 		, const FString& PlatformToken
@@ -165,7 +165,7 @@ public:
 	 *
 	 * @param MfaToken return from BE when user login with new device and 2FA enabled.
 	 * @param AuthFactorType 2FA factor used. Could be "authenticator" or "backupCode". User should make sure what type used
-	 * @param Code auth code from 3rd party authenticator or backupCode. 
+	 * @param Code auth code from 3rd party authenticator or backupCode.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bRememberDevice This will use for refresh token expiration extension, default value is false.
@@ -225,7 +225,7 @@ public:
 	void LoginWithRefreshToken(const FString& RefreshToken
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
-	
+
 	/**
 	 * @brief Relogin using the previously logged-in platform account. WINDOWS ONLY
 	 *
@@ -247,7 +247,7 @@ public:
 	void TryRelogin(const FString& PlatformUserID
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
-	
+
 	/**
 	 * @brief Create Headless Account And Login
 	 *
@@ -267,7 +267,7 @@ public:
 	void CreateHeadlessAccountAndLogin(const FString& LinkingToken
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
-	
+
 	/**
 	 * @brief Authentication With Platform Link And Login
 	 *
@@ -286,7 +286,7 @@ public:
 	 *
 	 * @param Username Username/user's email that will be validated.
 	 * @param Password This is password's account exist
-	 * @param LinkingToken Specified Linking token 
+	 * @param LinkingToken Specified Linking token
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
@@ -297,12 +297,12 @@ public:
 		, const FOAuthErrorHandler& OnError);
 
 #pragma endregion /Login Methods
-	
+
 	/**
 	 * @brief General handler for LoginWith* success; mostly a multicast callback handler.
 	 * - Credentials: Inits Qos Latencies Scheduler.
 	 * - Qos: Sets CredentialsRef Auth Token.
-	 * 
+	 *
 	 * @param OnSuccess delegate function for successful Login.
 	 * @param Response the Login response data.
 	 */
@@ -373,7 +373,7 @@ public:
 	void Registerv3(const FRegisterRequestv3& RegisterRequest
 		, const THandler<FRegisterResponse>& OnSuccess
 		, const FErrorHandler& OnError);
-	
+
 	/**
 	 * @brief This function will get data of currently logged in user.
 	 *
@@ -500,7 +500,7 @@ public:
 		, const FString& VerificationCode
 		, const THandler<FAccountUserData>& OnSuccess
 		, const FErrorHandler& OnError);
-	
+
 	/**
 	* @brief This function should be called after you call SendUpgradeVerificationCode and obtain verification code.
 	*
@@ -535,7 +535,7 @@ public:
 		, const FString& Ticket
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
-	
+
 	/**
 	 * @brief This function links user's current account to their other account in other platform.
 	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
@@ -577,7 +577,7 @@ public:
 		, const FString& PlatformUserId
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
-	
+
 	/**
 	 * @brief This function forced links user's current account to their other account in other platform.
 	 * Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
@@ -598,7 +598,7 @@ public:
 	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * 
+	 *
 	 * @deprecated This method will be removed in the future. Please use same function with the FCustomErrorHandler parameter instead.
 	 */
 	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
@@ -633,11 +633,11 @@ public:
 	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * 
+	 *
 	 * @note Use this API to unlink all the user's current account from their other accounts in other platforms within the game namespace.
 	 * It resolves issues with the old API by ensuring successful unlinking across multiple namespaces.
 	 * After calling this API, if a user logs in to any namespace with the same 3rd platform account,
-	 * they will be logged in as a different account. 
+	 * they will be logged in as a different account.
 	 */
 	void UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType
 		, const FVoidHandler& OnSuccess
@@ -649,11 +649,11 @@ public:
 	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC).
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * 
+	 *
 	 * @note Use this API to unlink all the user's current account from their other accounts in other platforms within the game namespace.
 	 * It resolves issues with the old API by ensuring successful unlinking across multiple namespaces.
 	 * After calling this API, if a user logs in to any namespace with the same 3rd platform account,
-	 * they will be logged in as a different account. 
+	 * they will be logged in as a different account.
 	 */
 	void UnlinkAllOtherPlatformId(const FString& PlatformId
 		, const FVoidHandler& OnSuccess
@@ -684,7 +684,7 @@ public:
 		, int32 Limit
 		, const THandler<FPagedPublicUsersInfo>& OnSuccess
 		, const FErrorHandler& OnError);
-	
+
 	/**
 	 * @brief This function will search user by their Username or Display Name. The query will be used to find the user with the most approximate username or display name.
 	 *
@@ -754,16 +754,18 @@ public:
 	 * @brief This function will get user(s) by other platform user id(s) it linked to.
 	 * Note : For Nintendo Login you have to add Environment ID Suffix behind platform id with PlatformID:EnvironmentID as format
 	 * e.g csg123jskansdk:dd1
-	 * 
-	 * @param PlatformType Other platform type .
+	 *
+	 * @param PlatformType Other platform type.
 	 * @param OtherPlatformUserId Targeted user's ID(s).
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FBulkPlatformUserIdResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * @param bRawPuid Show unencrypted platform user id in result (disabled by default).
 	 */
 	void BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 		, const TArray<FString>& OtherPlatformUserId
 		, const THandler<FBulkPlatformUserIdResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, const bool bRawPuid = false);
 
 	/**
 	 * @brief This function will get country information from user's IP.
@@ -796,11 +798,11 @@ public:
 
 	/**
 	 * @brief This function will get user input validation
-	 * 
-	 * @param  LanguageCode Targeted Language Code, using ISO-639 
+	 *
+	 * @param  LanguageCode Targeted Language Code, using ISO-639
 	 * @param  OnSuccess This will be called when the operation succeeded. The result is FInputUserValidation.
 	 * @param  OnError This will be called when the operation failed.
-	 * @param  bDefaultOnEmpty Targeted DefaultOnEmpty. 
+	 * @param  bDefaultOnEmpty Targeted DefaultOnEmpty.
 	 */
 	void GetInputValidations(const FString& LanguageCode
 		, THandler<FInputValidation> const& OnSuccess
@@ -964,7 +966,7 @@ public:
 	void LinkHeadlessAccountToCurrentFullAccount(const FLinkHeadlessAccountRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
-	 * @brief This function to get conflict result when link headless account to current account by one time code 
+	 * @brief This function to get conflict result when link headless account to current account by one time code
 	 *
 	 * @param OneTimeLinkCode One time link code value.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is THandler<FConflictLinkHeadlessAccountResult>&
@@ -983,7 +985,7 @@ private:
 
 	/**
 	 * @brief Validate Login response data and call the corresponding delegate function.
-	 * 
+	 *
 	 * @param Response the Login response data.
 	 * @param OnSuccess delegate function for successful Login.
 	 * @param OnError delegate function for error Login.
