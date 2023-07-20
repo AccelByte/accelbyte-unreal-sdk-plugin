@@ -90,7 +90,9 @@ void FAccelByteUe4SdkModule::StartupModule()
 	AccelByte::FRegistry::ServerCredentials.Startup();
 
 #if UE_SERVER
-	if (!FParse::Param(FCommandLine::Get(), TEXT("dsid")))
+	FString ServerID;
+	FParse::Value(FCommandLine::Get(), TEXT("dsid="), ServerID);
+	if (ServerID.IsEmpty())
 	{
 		UE_LOG(LogAccelByte, Warning, TEXT("dsid not provided, not connecting to AMS"));
 	}

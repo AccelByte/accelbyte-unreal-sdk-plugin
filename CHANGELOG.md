@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.5.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.5.1%0D23.5.0) (2023-07-20)
+
+
+### Bug Fixes
+
+* **AMS:** launch param cannot be read properly ([786170e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/786170e5e05e64512c92d8b39f130a3b7aff5393))
+* **chatV2:** update websocket chat session id after connected ([c83f2c2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c83f2c2eb4e822bd54a3db5bff8c2f4f781c6933))
+* removed oculus iap sync API function due to incompatibility with AB service. ([10e5529](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/10e5529100166be7e62c24b7b69227a9fe477e07))
+
 ## [23.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.5.0%0D23.4.2) (2023-07-17)
 
 

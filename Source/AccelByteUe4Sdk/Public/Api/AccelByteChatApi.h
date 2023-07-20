@@ -50,6 +50,8 @@ public:
 
 	~Chat();
 private:
+	const FString ChatSessionHeaderName = TEXT("X-Ab-ChatSessionID");
+
 	Credentials& ChatCredentialsRef;
 	bool bBanNotifReceived = false;
 

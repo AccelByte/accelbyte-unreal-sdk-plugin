@@ -93,14 +93,13 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 		QosPingTimeout = .6;
 	}
 
-	FParse::Value(FCommandLine::Get(), TEXT("dsid"), DSId);
-
-	if (!FParse::Value(FCommandLine::Get(), TEXT("watchdog_url"), AMSServerWatchdogUrl))
+	FParse::Value(FCommandLine::Get(), TEXT("dsid="), DSId);
+	if (!FParse::Value(FCommandLine::Get(), TEXT("watchdog_url="), AMSServerWatchdogUrl))
 	{
 		GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni);
 	}
 
-	if (!FParse::Value(FCommandLine::Get(), TEXT("heartbeat"), AMSHeartbeatInterval))
+	if (!FParse::Value(FCommandLine::Get(), TEXT("heartbeat="), AMSHeartbeatInterval))
 	{
 		GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni);
 	}

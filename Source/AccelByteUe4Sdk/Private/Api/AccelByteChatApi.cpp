@@ -426,9 +426,9 @@ namespace AccelByte
 			}
 			
 			TMap<FString, FString> Headers;
-			Headers.Add("X-Ab-ChatSessionID", ChatSessionId.SessionID);
-			Headers.Add("X-Ab-RpcEnvelopeStart", WsEnvelopeStart);
-			Headers.Add("X-Ab-RpcEnvelopeEnd", WsEnvelopeEnd);
+			Headers.Add(ChatSessionHeaderName, ChatSessionId.SessionID);
+			Headers.Add(TEXT("X-Ab-RpcEnvelopeStart"), WsEnvelopeStart);
+			Headers.Add(TEXT("X-Ab-RpcEnvelopeEnd"), WsEnvelopeEnd);
 			FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 			WebSocket = AccelByteWebSocket::Create(*SettingsRef.ChatServerWsUrl, TEXT("wss"), CredentialsRef, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
 
@@ -770,7 +770,10 @@ namespace AccelByte
 				{
 					TSharedPtr<FJsonObject> Result = MessageAsJsonObj->GetObjectField(ChatToken::Json::Field::Params);
 					const bool bSuccess = FJsonObjectConverter::JsonObjectToUStruct(Result.ToSharedRef(), &ChatSessionId, 0, 0);
-
+					if (bSuccess)
+					{
+						WebSocket->UpdateUpgradeHeaders(ChatSessionHeaderName, ChatSessionId.SessionID);
+					}
 					break;
 				}
 				case(HandleType::Disconnect):

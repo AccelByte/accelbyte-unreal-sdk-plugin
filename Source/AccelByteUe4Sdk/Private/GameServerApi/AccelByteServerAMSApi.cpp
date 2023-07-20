@@ -152,6 +152,11 @@ void ServerAMS::SetOnConnectionClosed(const FConnectionClosed& OnConnectionClose
 
 void ServerAMS::OnMessage(const FString& Message)
 {
+	if (Message.IsEmpty())
+	{
+		return;
+	}
+
 	UE_LOG(LogAccelByteAMS, Log, TEXT("New message received from AMS:\n%s"), *Message);
 
 	TSharedPtr<FJsonObject> MessageObject;
@@ -193,6 +198,8 @@ void ServerAMS::SendReadyMessage()
 	}
 
 	FString ReadyMessage = FString::Format(TEXT("{\"ready\":{\"dsid\":\"{0}\"}}"), { ServerSettingsRef.DSId });
+
+	UE_LOG(LogAccelByteAMS, Log, TEXT("Send ready message to AMS\n%s"), *ReadyMessage);
 	WebSocket->Send(ReadyMessage);
 
 	if (bHeartbeatJobStarted == false)
