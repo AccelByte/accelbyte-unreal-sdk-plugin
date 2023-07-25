@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.5.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.5.2%0D23.5.1) (2023-07-25)
+
+
+### Features
+
+* **launcher:** read command line arguments for Justice Auth Code ([2bd030f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2bd030f4584d317014f63ae6a6149a52de7efebc))
+
 ### [23.5.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.5.1%0D23.5.0) (2023-07-20)
 
 

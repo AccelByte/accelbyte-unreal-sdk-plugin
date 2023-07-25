@@ -289,7 +289,7 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString AuthorizationCode = Environment::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), 1000);
+	FString AuthorizationCode = FAccelByteUtilities::GetAuthorizationCode();
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
