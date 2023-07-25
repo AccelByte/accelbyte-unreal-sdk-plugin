@@ -641,6 +641,19 @@ void FAccelByteUtilities::SetAuthTrustId(const FString& AuthTrustId)
 	FPlatformMisc::SetStoredValue(AccelByteStored(), AccelByteStoredSectionIAM(), AccelByteStoredKeyAuthTrustId(), AuthTrustId);
 }
 
+const FString AuthorizationCodeArgument = TEXT("--AB_AUTH_CODE=");
+
+FString FAccelByteUtilities::GetAuthorizationCode()
+{
+	FString AuthorizationCode{};
+	FParse::Value(FCommandLine::Get(), *AuthorizationCodeArgument, AuthorizationCode);
+	if (AuthorizationCode.IsEmpty())
+	{
+		AuthorizationCode = Environment::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), 1000);
+	}
+	return AuthorizationCode;
+}
+
 void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));

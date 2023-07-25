@@ -412,6 +412,12 @@ public:
 
 	static void SetAuthTrustId(const FString& AuthTrustId);
 
+	/// <summary>
+	/// Get Authorization Code.
+	/// </summary>
+	/// <returns>Return authorization code either from command line argument or environment variable</returns>
+	static FString GetAuthorizationCode();
+
 	/// Parse command line to obtain an argument that:
 	/// * intialized by dash (-)
 	/// * contain a value that following equal sign (=)
