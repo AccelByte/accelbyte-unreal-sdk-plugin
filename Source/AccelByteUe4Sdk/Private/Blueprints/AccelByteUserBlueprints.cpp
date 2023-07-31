@@ -172,7 +172,6 @@ void UBPUser::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FStri
 	
 void UBPUser::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	
 	FRegistry::User.UnlinkOtherPlatform(
 		PlatformType,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
@@ -182,7 +181,6 @@ void UBPUser::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FDH
 
 void UBPUser::UnlinkOtherPlatformWithCustomErrorHandler(EAccelBytePlatformType PlatformType, const FDHandler& OnSuccess, const FDCustomErrorHandler& OnError)
 {
-	
 	FRegistry::User.UnlinkOtherPlatform(
 		PlatformType,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
@@ -201,7 +199,6 @@ void UBPUser::UnlinkOtherPlatformWithCustomErrorHandler(EAccelBytePlatformType P
 
 void UBPUser::UnlinkOtherPlatformId(const FString& PlatformId, const FDHandler& OnSuccess, const FDCustomErrorHandler& OnError)
 {
-	
 	FRegistry::User.UnlinkOtherPlatformId(
 		PlatformId,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
@@ -220,7 +217,6 @@ void UBPUser::UnlinkOtherPlatformId(const FString& PlatformId, const FDHandler& 
 
 void UBPUser::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType, const FDHandler& OnSuccess, const FDCustomErrorHandler& OnError)
 {
-	
 	FRegistry::User.UnlinkAllOtherPlatform(
 		PlatformType,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
@@ -239,7 +235,6 @@ void UBPUser::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType, const 
 
 void UBPUser::UnlinkAllOtherPlatformId(const FString& PlatformId, const FDHandler& OnSuccess, const FDCustomErrorHandler& OnError)
 {
-	
 	FRegistry::User.UnlinkAllOtherPlatformId(
 		PlatformId,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),

@@ -70,6 +70,22 @@ public:
 	void GetMatchmakingMetrics(const FString& MatchPool
 		, const THandler<FAccelByteModelsV2MatchmakingMetrics>& OnSuccess
 		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get my match tickets
+	 * already matched tickets will be listed for a while after it's matched.
+	 * 
+	 * @param OnSuccess Will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param MatchPool Name of the match pool we want to query, leave empty will query all match pool.
+	 * @param Limit Pagination item limit, default is 20.
+	 * @param Offset Pagination item offset, default is 0.
+	 */
+	void GetMyMatchTickets(const THandler<FAccelByteModelsV2MatchmakingTicketStatuses>& OnSuccess
+		, const FErrorHandler& OnError
+		, const FString& MatchPool = TEXT("")
+		, const int32& Limit = 20
+		, const int32& Offset = 0);
 	
 private:
 	MatchmakingV2() = delete;

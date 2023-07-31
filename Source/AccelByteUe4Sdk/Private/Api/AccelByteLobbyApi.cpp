@@ -70,8 +70,10 @@ namespace Api
 		const FString RequestFriendsByPublicId = TEXT("requestFriendsByPublicIDRequest");
 		const FString Unfriend = TEXT("unfriendRequest");
 		const FString ListOutgoingFriends = TEXT("listOutgoingFriendsRequest");
+		const FString ListOutgoingFriendsWithTime = TEXT("listOutgoingFriendsWithTimeRequest");
 		const FString CancelFriends = TEXT("cancelFriendsRequest");
 		const FString ListIncomingFriends = TEXT("listIncomingFriendsRequest");
+		const FString ListIncomingFriendsWithTime = TEXT("listIncomingFriendsWithTimeRequest");
 		const FString AcceptFriends = TEXT("acceptFriendsRequest");
 		const FString RejectFriends = TEXT("rejectFriendsRequest");
 		const FString LoadFriendList = TEXT("listOfFriendsRequest");
@@ -162,8 +164,10 @@ namespace Api
 		const FString RequestFriendsByPublicId = TEXT("requestFriendsByPublicIDResponse");
 		const FString Unfriend = TEXT("unfriendResponse");
 		const FString ListOutgoingFriends = TEXT("listOutgoingFriendsResponse");
+		const FString ListOutgoingFriendsWithTime = TEXT("listOutgoingFriendsWithTimeResponse");
 		const FString CancelFriends = TEXT("cancelFriendsResponse");
 		const FString ListIncomingFriends = TEXT("listIncomingFriendsResponse");
+		const FString ListIncomingFriendsWithTime = TEXT("listIncomingFriendsWithTimeResponse");
 		const FString AcceptFriends = TEXT("acceptFriendsResponse");
 		const FString RejectFriends = TEXT("rejectFriendsResponse");
 		const FString LoadFriendList = TEXT("listOfFriendsResponse");
@@ -264,8 +268,10 @@ namespace Api
 		RequestFriendsByPublicId,
 		Unfriend,
 		ListOutgoingFriends,
+		ListOutgoingFriendsWithTime,
 		CancelFriends,
 		ListIncomingFriends,
+		ListIncomingFriendsWithTime,
 		AcceptFriends,
 		RejectFriends,
 		LoadFriendList,
@@ -380,8 +386,10 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Response,RequestFriendsByPublicId),
 		FORM_STRING_ENUM_PAIR(Response,Unfriend),
 		FORM_STRING_ENUM_PAIR(Response,ListOutgoingFriends),
+		FORM_STRING_ENUM_PAIR(Response,ListOutgoingFriendsWithTime),
 		FORM_STRING_ENUM_PAIR(Response,CancelFriends),
 		FORM_STRING_ENUM_PAIR(Response,ListIncomingFriends),
+		FORM_STRING_ENUM_PAIR(Response,ListIncomingFriendsWithTime),
 		FORM_STRING_ENUM_PAIR(Response,AcceptFriends),
 		FORM_STRING_ENUM_PAIR(Response,RejectFriends),
 		FORM_STRING_ENUM_PAIR(Response,LoadFriendList),
@@ -1063,6 +1071,15 @@ void Lobby::ListOutgoingFriends()
 		, {});
 }
 
+void Lobby::ListOutgoingFriendsWithTime()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	SEND_RAW_REQUEST_CACHED_RESPONSE(ListOutgoingFriendsWithTime
+		, Friends
+		, {});
+}
+
 void Lobby::CancelFriendRequest(FString UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1077,6 +1094,15 @@ void Lobby::ListIncomingFriends()
 	FReport::Log(FString(__FUNCTION__));
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(ListIncomingFriends
+		, Friends
+		, {});
+}
+
+void Lobby::ListIncomingFriendsWithTime()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	SEND_RAW_REQUEST_CACHED_RESPONSE(ListIncomingFriendsWithTime
 		, Friends
 		, {});
 }
@@ -1428,8 +1454,10 @@ void Lobby::UnbindFriendResponseEvents()
 	RequestFriendsByPublicIdResponse.Unbind();
 	UnfriendResponse.Unbind();
 	ListOutgoingFriendsResponse.Unbind();
+	ListOutgoingFriendsWithTimeResponse.Unbind();
 	CancelFriendsResponse.Unbind();
 	ListIncomingFriendsResponse.Unbind();
+	ListIncomingFriendsWithTimeResponse.Unbind();
 	AcceptFriendsResponse.Unbind();
 	RejectFriendsResponse.Unbind();
 	LoadFriendListResponse.Unbind();
@@ -1440,8 +1468,10 @@ void Lobby::UnbindFriendResponseEvents()
 	OnRequestFriendsError.Unbind();
 	OnUnfriendError.Unbind();
 	OnListOutgoingFriendsError.Unbind();
+	OnListOutgoingFriendsWithTimeError.Unbind();
 	OnCancelFriendsError.Unbind();
 	OnListIncomingFriendsError.Unbind();
+	OnListIncomingFriendsWithTimeError.Unbind();
 	OnAcceptFriendsError.Unbind();
 	OnRejectFriendsError.Unbind();
 	OnLoadFriendListError.Unbind();
@@ -1958,8 +1988,10 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType
 		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(RequestFriendsByPublicId		, FAccelByteModelsRequestFriendsResponse, FRequestFriendsResponse);
 		CASE_RESPONSE_MESSAGE_ID(Unfriend			, FAccelByteModelsUnfriendResponse);
 		CASE_RESPONSE_MESSAGE_ID(ListOutgoingFriends, FAccelByteModelsListOutgoingFriendsResponse);
+		CASE_RESPONSE_MESSAGE_ID(ListOutgoingFriendsWithTime, FAccelByteModelsListOutgoingFriendsWithTimeResponse);
 		CASE_RESPONSE_MESSAGE_ID(CancelFriends		, FAccelByteModelsCancelFriendsResponse);
 		CASE_RESPONSE_MESSAGE_ID(ListIncomingFriends, FAccelByteModelsListIncomingFriendsResponse);
+		CASE_RESPONSE_MESSAGE_ID(ListIncomingFriendsWithTime, FAccelByteModelsListIncomingFriendsWithTimeResponse);
 		CASE_RESPONSE_MESSAGE_ID(AcceptFriends		, FAccelByteModelsAcceptFriendsResponse);
 		CASE_RESPONSE_MESSAGE_ID(RejectFriends		, FAccelByteModelsRejectFriendsResponse);
 		CASE_RESPONSE_MESSAGE_ID(LoadFriendList		, FAccelByteModelsLoadFriendListResponse);

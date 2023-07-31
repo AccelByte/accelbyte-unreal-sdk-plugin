@@ -141,7 +141,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void UnlinkAllOtherPlatformId(const FString& PlatformId, FDHandler OnSuccess, FDCustomErrorHandler OnError);
 
-	//Queries
+// Queries
+// Blueprint Functions below are indeed related to queries since they involve querying for specific user data
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void SearchUsers(FString const& Query, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError);

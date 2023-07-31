@@ -28,6 +28,24 @@ void ServerMatchmakingV2::AcceptBackfillProposal(const FString& BackfillTicketId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+			FString(__FUNCTION__),
+			TEXT("Use ServerMatchmakingV2::AcceptBackfillProposal with FAccelByteModelsV2GameSession info on success callback"));
+
+	AcceptBackfillProposal(BackfillTicketId, ProposalId, bStopBackfilling,
+		THandler<FAccelByteModelsV2GameSession>::CreateLambda([OnSuccess](const FAccelByteModelsV2GameSession& GameSessionInfo)
+		{
+			OnSuccess.ExecuteIfBound();
+		}), OnError);
+}
+
+void ServerMatchmakingV2::AcceptBackfillProposal(const FString& BackfillTicketId
+	, const FString& ProposalId
+	, bool bStopBackfilling
+	, const THandler<FAccelByteModelsV2GameSession>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
 
 	if (BackfillTicketId.IsEmpty())
 	{

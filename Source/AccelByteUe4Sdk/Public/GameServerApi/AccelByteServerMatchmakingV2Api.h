@@ -26,7 +26,7 @@ public:
 	~ServerMatchmakingV2();
 
 	/**
-	 * @brief Accept a proposal from the matchmaking V2 service to backfill a session.
+	 * @brief [DEPRECATED] Accept a proposal from the matchmaking V2 service to backfill a session.
 	 * 
 	 * @param BackfillTicketId ID of the backfill ticket that the proposal is for
 	 * @param ProposalId ID of the proposal that you are accepting
@@ -38,6 +38,21 @@ public:
 		, const FString& ProposalId
 		, bool bStopBackfilling
 		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Accept a proposal from the matchmaking V2 service to backfill a session.
+	 *
+	 * @param BackfillTicketId ID of the backfill ticket that the proposal is for
+	 * @param ProposalId ID of the proposal that you are accepting
+	 * @param bStopBackfilling Whether or not to signal to the matchmaking service that you no longer want backfill
+	 * @param OnSuccess Delegate fired when the accept request has gone through
+	 * @param OnError Delegate fired when the accept request fails
+	 */
+	void AcceptBackfillProposal(const FString& BackfillTicketId
+		, const FString& ProposalId
+		, bool bStopBackfilling
+		, const THandler<FAccelByteModelsV2GameSession>& OnSuccess
 		, const FErrorHandler& OnError);
 	
 	/**

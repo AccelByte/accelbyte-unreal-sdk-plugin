@@ -17,7 +17,7 @@ namespace Api
 {
 
 /**
- * @brief Cloud Storage API for storing binary data on the cloud.
+ * @brief DEPRECATED.Cloud Storage API for storing binary data on the cloud.
  * Each player has configurable slot(s) that controlled by admin.
  * The configuration affects the amount of slot that owned by user and the allowed size for each slot (byte).
  */
@@ -28,7 +28,7 @@ public:
 	~CloudStorage();
 
 	/**
-	 * @brief This function gets list of slot(s) those owned by the player.
+	 * @brief DEPRECATED.This function gets list of slot(s) those owned by the player. Cloud Storage is DEPRECATED.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsSlot>&.
 	 * @param OnError This will be called when the operation failed.
@@ -37,7 +37,7 @@ public:
 		, const FErrorHandler& OnError);
 	
 	/**
-	 * @brief This function creates a slot for an uploaded binary data.
+	 * @brief DEPRECATED.This function creates a slot for an uploaded binary data. Cloud Storage is DEPRECATED.
 	 *
 	 * @param BinaryData This is the data that will be stored in the slot.
 	 * @param FileName This is the filename of the item that saved in the slot.
@@ -58,7 +58,7 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief This function updates a stored slot.
+	 * @brief DEPRECATED.This function updates a stored slot. Cloud Storage is DEPRECATED.
 	 *
 	 * @param SlotId This is specific slot that will be updated.
 	 * @param BinaryData This is the data that will be stored in the slot.
@@ -81,7 +81,7 @@ public:
 		, const FErrorHandler& OnError);
 	
 	/**
-	 * @brief This function updates stored slot's metadata. This function is DEPRECATED.
+	 * @brief DEPRECATED.This function updates stored slot's metadata. Cloud Storage is DEPRECATED.
 	 *
 	 * @param SlotId This is specific slot that will be updated.
 	 * @param FileName This is the filename of the item that saved in the slot.
@@ -102,7 +102,7 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief This function updates stored slot's metadata.
+	 * @brief DEPRECATED.This function updates stored slot's metadata. Cloud Storage is DEPRECATED.
 	 *
 	 * @param SlotId This is specific slot that will be updated.
 	 * @param Tags This is an array of tag that will be stored in the slot.
@@ -121,7 +121,7 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief This function gets the data that stored in the slot.
+	 * @brief DEPRECATED.This function gets the data that stored in the slot. Cloud Storage is DEPRECATED.
 	 *
 	 * @param SlotId Specify the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<uint8>&.
@@ -132,7 +132,7 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief This function delete the specified slot.
+	 * @brief DEPRECATED.This function delete the specified slot. Cloud Storage is DEPRECATED.
 	 *
 	 * @param SlotId Specify the slot.
 	 * @param OnSuccess This will be called when the operation succeeded.
@@ -152,7 +152,7 @@ private:
 		, FString FileName);
 	
 	/**
-	 * @brief Generate custom attribute form data.
+	 * @brief DEPRECATED.Generate custom attribute form data. Cloud Storage is DEPRECATED.
 	 * 
 	 * @param CustomAttribute This is the content.
 	 * @param BoundaryGuid This is the boundary.

@@ -328,6 +328,11 @@ public:
 	 * @brief delegate for handling list outgoing friends response
 	 */
 	DECLARE_DELEGATE_OneParam(FListOutgoingFriendsResponse, const FAccelByteModelsListOutgoingFriendsResponse&);
+
+	/**
+	 * @brief delegate for handling list outgoing friends response with added requiredAt timestamp
+	 */
+	DECLARE_DELEGATE_OneParam(FListOutgoingFriendsWithTimeResponse, const FAccelByteModelsListOutgoingFriendsWithTimeResponse&);
 	
 	/**
 	 * @brief delegate for handling cancel friend response
@@ -338,6 +343,11 @@ public:
 	 * @brief delegate for handling list incoming friends response
 	 */
 	DECLARE_DELEGATE_OneParam(FListIncomingFriendsResponse, const FAccelByteModelsListIncomingFriendsResponse&);
+
+	/**
+	 * @brief delegate for handling list incoming friends response with added requiredAt timestamp
+	 */
+	DECLARE_DELEGATE_OneParam(FListIncomingFriendsWithTimeResponse, const FAccelByteModelsListIncomingFriendsWithTimeResponse&);
 	
 	/**
 	 * @brief delegate for handling accept friend response
@@ -894,6 +904,11 @@ public:
 	void ListOutgoingFriends();
 
 	/**
+	 * @brief Send list of outgoing friends request with requestedAt timestamp.
+	 */
+	void ListOutgoingFriendsWithTime();
+
+	/**
 	 * @brief Send cancel friend request.
 	 *
 	 * @param UserId Targeted user ID.
@@ -904,6 +919,11 @@ public:
 	 * @brief Send list of incoming friends request.
 	 */
 	void ListIncomingFriends();
+
+	/**
+	 * @brief Send list of incoming friends request with requestedAt timestamp.
+	 */
+	void ListIncomingFriendsWithTime();
 
 	/**
 	 * @brief Send accept friend request.
@@ -1933,6 +1953,19 @@ public:
 	}
 
 	/**
+	 * @brief Set list outgoing request of friend response with time.
+	 *
+	 * @param OnListOutgoingFriendsWithTimeResponse Delegate that will be set.
+	 * @param OnError Delegate that will be called when operation failed.
+	 */
+	void SetListOutgoingFriendsWithTimeResponseDelegate(FListOutgoingFriendsWithTimeResponse OnListOutgoingFriendsWithTimeResponse
+		, FErrorHandler OnError = {})
+	{
+		ListOutgoingFriendsWithTimeResponse = OnListOutgoingFriendsWithTimeResponse;
+		OnListOutgoingFriendsWithTimeError = OnError;
+	}
+
+	/**
 	 * @brief Set cancel request of friend response.
 	 *
 	 * @param OnCancelFriendsResponse Delegate that will be set.
@@ -1956,6 +1989,19 @@ public:
 	{
 		ListIncomingFriendsResponse = OnListIncomingFriendsResponse;
 		OnListIncomingFriendsError = OnError;
+	}
+
+	/**
+	 * @brief Set incoming request of friend response with time.
+	 *
+	 * @param OnListIncomingFriendsWithTimeResponse Delegate that will be set.
+	 * @param OnError Delegate that will be called when operation failed.
+	 */
+	void SetListIncomingFriendsWithTimeResponseDelegate(FListIncomingFriendsWithTimeResponse OnListIncomingFriendsWithTimeResponse
+		, FErrorHandler OnError = {})
+	{
+		ListIncomingFriendsWithTimeResponse = OnListIncomingFriendsWithTimeResponse;
+		OnListIncomingFriendsWithTimeError = OnError;
 	}
 
 	/**
@@ -2415,8 +2461,10 @@ private:
 	TMap<FString, FRequestFriendsResponse> MessageIdRequestFriendsByPublicIdResponseMap;
 	TMap<FString, FUnfriendResponse> MessageIdUnfriendResponseMap;
 	TMap<FString, FListOutgoingFriendsResponse> MessageIdListOutgoingFriendsResponseMap;
+	TMap<FString, FListOutgoingFriendsWithTimeResponse> MessageIdListOutgoingFriendsWithTimeResponseMap;
 	TMap<FString, FCancelFriendsResponse> MessageIdCancelFriendsResponseMap;
 	TMap<FString, FListIncomingFriendsResponse> MessageIdListIncomingFriendsResponseMap;
+	TMap<FString, FListIncomingFriendsWithTimeResponse> MessageIdListIncomingFriendsWithTimeResponseMap;
 	TMap<FString, FAcceptFriendsResponse> MessageIdAcceptFriendsResponseMap;
 	TMap<FString, FRejectFriendsResponse> MessageIdRejectFriendsResponseMap;
 	TMap<FString, FLoadFriendListResponse> MessageIdLoadFriendListResponseMap;
@@ -2522,8 +2570,10 @@ private:
 	FRequestFriendsResponse RequestFriendsByPublicIdResponse;
 	FUnfriendResponse UnfriendResponse;
 	FListOutgoingFriendsResponse ListOutgoingFriendsResponse;
+	FListOutgoingFriendsWithTimeResponse ListOutgoingFriendsWithTimeResponse;
 	FCancelFriendsResponse CancelFriendsResponse;
 	FListIncomingFriendsResponse ListIncomingFriendsResponse;
+	FListIncomingFriendsWithTimeResponse ListIncomingFriendsWithTimeResponse;
 	FAcceptFriendsResponse AcceptFriendsResponse;
 	FRejectFriendsResponse RejectFriendsResponse;
 	FLoadFriendListResponse LoadFriendListResponse;
@@ -2602,8 +2652,10 @@ private:
 	FErrorHandler OnRequestFriendsByPublicIdError;
 	FErrorHandler OnUnfriendError;
 	FErrorHandler OnListOutgoingFriendsError;
+	FErrorHandler OnListOutgoingFriendsWithTimeError;
 	FErrorHandler OnCancelFriendsError;
 	FErrorHandler OnListIncomingFriendsError;
+	FErrorHandler OnListIncomingFriendsWithTimeError;
 	FErrorHandler OnAcceptFriendsError;
 	FErrorHandler OnRejectFriendsError;
 	FErrorHandler OnLoadFriendListError;

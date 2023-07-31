@@ -96,7 +96,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
 	void ValidateUserItemPurchaseCondition(TArray<FString> const& Items, FDAccelByteModelsPlatformValidateUserItemPurchaseResponse OnSuccess, FDErrorHandler OnError);
- 
+	 
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;
 };

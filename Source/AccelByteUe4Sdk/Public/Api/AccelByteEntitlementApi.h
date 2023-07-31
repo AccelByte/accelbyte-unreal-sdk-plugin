@@ -430,6 +430,24 @@ public:
 		, FString const& RequestId
 		, THandler<FAccelByteModelsSellItemEntitlementInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Synchronize Oculus Consumable Entitlement/IAP.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */	
+	void SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteModelsSyncOculusConsumableEntitlementInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Synchronize Oculus Downloadable Content/DLC.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */	
+	void SyncOculusDLC(FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 private:
 	Entitlement() = delete;

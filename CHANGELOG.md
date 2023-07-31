@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [23.6.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.6.0%0D23.5.2) (2023-07-31)
+
+
+### Features
+
+* Add GetMyMatchTickets API ([488cf7f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/488cf7fa3d6bc929ac496566c427eabfa7d44273))
+* add raw platform user id support ([ea50a94](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ea50a945b8638cf333f29e04b38b1fbef034fb8d))
+* add UnlinkOtherPlatform and UnlinkAllPlatform into blueprint ([a69e344](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a69e344e3250572116f6c81603c7789f9d7286f7))
+* bring back oculus iap sync ([2e55f8a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2e55f8a2dd38e0535ebef9a78d950d6f42c07ced))
+* Expose Oculus IAP Sync Endpoint ([d097105](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d09710527a2657d22368e9cf3a119f15c1593eca))
+* **Lobby:** Add incoming and outgoing friend request with timestamp ([f857aac](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f857aac300224e7183d1b8b9d089e44176761dd1))
+* **MPv2:** add accept backfill proposal API with game session info and deprecate the old one ([839de09](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/839de09716a0a3cc1ef9eb3813f592aa5991dc2e))
+* revert oculus sync iap changes, will be a hotfix at justice 3.52 ([08f7b48](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/08f7b48cccfbe085336e194872d61672ce34edd0))
+
+
+### Bug Fixes
+
+* initialize USTRUCT member to default value ([7eb6745](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7eb67458fd8fc77465b1395e8ce95e0155f78de9))
+* **Inventory:** Revert all inventory endpoints since BE isn't ready ([d0e92d0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d0e92d0b45fa7748dad2f8ce7e72d8c49987646b))
+* trigger on connection close delegate when failed reconnecting to websocket ([8d642cb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8d642cbafd4cf3ca739b8a20d22e06b4dad20081))
+* **user:** add missing fields in FAccountUserData ([d845c29](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d845c297dfb49d1d7d205ea48e6a0f6889ad58ca))
+
 ### [23.5.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.5.2%0D23.5.1) (2023-07-25)
 
 

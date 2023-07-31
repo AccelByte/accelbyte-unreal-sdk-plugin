@@ -352,15 +352,15 @@ void UABEntitlement::SyncTwitchDropEntitlement(
 		TwitchDropModel,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
-	{
-		OnSuccess.ExecuteIfBound();
-	}),
+			{
+				OnSuccess.ExecuteIfBound();
+			}),
 		FErrorHandler::CreateLambda(
 			[OnError](int Code, FString const& Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
-}
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+		}
 
 void UABEntitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items,
 	FDAccelByteModelsPlatformValidateUserItemPurchaseResponse OnSuccess, FDErrorHandler OnError)
@@ -368,13 +368,13 @@ void UABEntitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& It
 	ApiClientPtr->Entitlement.ValidateUserItemPurchaseCondition(
 		Items,
 		THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>>::CreateLambda(
-	[OnSuccess](const TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>& Result)
-	{
-		OnSuccess.ExecuteIfBound(Result);
-	}), 
+			[OnSuccess](const TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>& Result)
+			{
+				OnSuccess.ExecuteIfBound(Result);
+			}), 
 		FErrorHandler::CreateLambda(
 			[OnError](int Code, FString const& Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
 }

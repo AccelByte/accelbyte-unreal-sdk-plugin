@@ -27,6 +27,9 @@ void CloudStorage::GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnS
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Cloud Storage is deprecated - please use Binary Cloudsave for the replacement"));
+
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots")
 		, *SettingsRef.CloudStorageServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -45,6 +48,9 @@ void CloudStorage::CreateSlot(TArray<uint8> BinaryData
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Cloud Storage is deprecated - please use Binary Cloudsave for the replacement"));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots")
@@ -89,6 +95,9 @@ void CloudStorage::GetSlot(FString SlotID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Cloud Storage is deprecated - please use Binary Cloudsave for the replacement"));
+
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s")
 		, *SettingsRef.CloudStorageServerUrl
@@ -116,6 +125,9 @@ void CloudStorage::UpdateSlot(FString SlotID
 	, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Cloud Storage is deprecated - please use Binary Cloudsave for the replacement"));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());	
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s")
@@ -182,6 +194,9 @@ void CloudStorage::UpdateSlotMetadata(const FString& SlotId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Cloud Storage is deprecated - please use Binary Cloudsave for the replacement"));
+
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata")
 		, *SettingsRef.CloudStorageServerUrl
@@ -210,6 +225,9 @@ void CloudStorage::DeleteSlot(FString SlotID
 	, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Cloud Storage is deprecated - please use Binary Cloudsave for the replacement"));
 
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s")
 		, *SettingsRef.CloudStorageServerUrl

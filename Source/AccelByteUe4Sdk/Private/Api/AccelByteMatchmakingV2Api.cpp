@@ -103,5 +103,24 @@ void MatchmakingV2::GetMatchmakingMetrics(const FString& MatchPool,
 
 	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
+
+void MatchmakingV2::GetMyMatchTickets(const THandler<FAccelByteModelsV2MatchmakingTicketStatuses>& OnSuccess,
+	const FErrorHandler& OnError, const FString& MatchPool, const int32& Limit, const int32& Offset)
+{
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/me")
+		, *SettingsRef.MatchmakingV2ServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMultiMap<FString, FString> QueryParams;
+	if(!MatchPool.IsEmpty())
+	{
+		QueryParams.Emplace(TEXT("matchPool"), MatchPool);
+	}
+	QueryParams.Emplace(TEXT("offset"), FString::FromInt(Offset));
+	QueryParams.Emplace(TEXT("limit"), FString::FromInt(Limit));
+	
+	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+}
 }
 }

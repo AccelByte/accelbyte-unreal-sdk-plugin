@@ -1,39 +1,39 @@
 {
   "iam": {
-    "minVersion": "6.1.0",
-    "maxVersion": "6.1.0"
+    "minVersion": "6.2.0",
+    "maxVersion": "6.2.0"
   },
   "agreement": {
-    "minVersion": "1.30.1",
-    "maxVersion": "1.30.1"
+    "minVersion": "1.31.0",
+    "maxVersion": "1.31.0"
   },
   "basic": {
     "minVersion": "2.10.1",
     "maxVersion": "2.10.1"
   },
   "platform": {
-    "minVersion": "4.31.1",
-    "maxVersion": "4.31.1"
+    "minVersion": "4.32.0",
+    "maxVersion": "4.32.0"
   },
   "social": {
-    "minVersion": "2.9.0",
-    "maxVersion": "2.9.0"
+    "minVersion": "2.9.1",
+    "maxVersion": "2.9.1"
   },
   "leaderboard": {
-    "minVersion": "2.25.0",
-    "maxVersion": "2.25.0"
+    "minVersion": "2.26.0",
+    "maxVersion": "2.26.0"
   },
   "achievement": {
     "minVersion": "2.21.0",
     "maxVersion": "2.21.0"
   },
   "cloudsave": {
-    "minVersion": "3.9.0",
-    "maxVersion": "3.9.0"
+    "minVersion": "3.10.0",
+    "maxVersion": "3.10.0"
   },
   "ugc": {
-    "minVersion": "2.11.2",
-    "maxVersion": "2.11.2"
+    "minVersion": "2.11.3",
+    "maxVersion": "2.11.3"
   },
   "group": {
     "minVersion": "2.18.1",

@@ -893,6 +893,26 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsListOutgoingFriendsResponse : public 
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsFriendRequestData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | FriendRequestData")
+	FString FriendId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | FriendRequestData")
+	FDateTime RequestedAt{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsListOutgoingFriendsWithTimeResponse : public FAccelByteModelsLobbyBaseResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | ListOutgoingFriendsResponse")
+	TArray<FAccelByteModelsFriendRequestData> Data{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsCancelFriendsResponse : public FAccelByteModelsLobbyBaseResponse
 {
 	GENERATED_BODY()
@@ -905,6 +925,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsListIncomingFriendsResponse : public 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | ListIncomingFriendsResponse")
 	TArray<FString> friendsId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsListIncomingFriendsWithTimeResponse : public FAccelByteModelsLobbyBaseResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | ListOutgoingFriendsResponse")
+	TArray<FAccelByteModelsFriendRequestData> Data{};
 };
 
 USTRUCT(BlueprintType)

@@ -9,6 +9,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteWebSocketErrorTypes.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteWebsocket, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteWebsocket);
@@ -392,6 +393,11 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 		{
 			TimeSinceLastReconnect = FPlatformTime::Seconds();
 			BackoffDelay = InitialBackoffDelay;
+
+			const int32 StatusCode = static_cast<int32>(EWebsocketErrorTypes::DisconnectFromExternalReconnect);
+			const FString Reason(TEXT("Reconnection total timeout limit reached"));
+			const bool WasClean = false;
+			OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 
 			WsState = EWebSocketState::Closed;
 		}

@@ -257,6 +257,18 @@ struct ACCELBYTEUE4SDK_API FPermission
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FNamespaceRole
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | NamespaceRole")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | NamespaceRole")
+	FString RoleId{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccountUserData
 {
 	GENERATED_BODY()
@@ -320,6 +332,34 @@ struct ACCELBYTEUE4SDK_API FAccountUserData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
 	FString AvatarUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FString DeletionDate{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	bool DeletionStatus{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FDateTime LastDateOfBirthChangedTime{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	TArray<FNamespaceRole> NamespaceRoles{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FString NewEmailAddress{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FString OldEmailAddress{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FString PhoneNumber{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FString PlatformAvatarUrl{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FString PlatformDisplayName{};
+	
 };
 
 USTRUCT(BlueprintType)
@@ -691,18 +731,6 @@ struct ACCELBYTEUE4SDK_API FListBulkUserInfo
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FNamespaceRole
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | NamespaceRole")
-	FString Namespace{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | NamespaceRole")
-	FString RoleId{};
-};
-
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUserOtherPlatformInfo
 {
 	GENERATED_BODY()
@@ -781,6 +809,15 @@ struct ACCELBYTEUE4SDK_API FUserOtherPlatformInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
 	FString Username{}; //optional
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+	FString AvatarUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+	FString DeletionDate{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+	FString PlatformAvatarUrl{};
 };
 
 USTRUCT(BlueprintType)
