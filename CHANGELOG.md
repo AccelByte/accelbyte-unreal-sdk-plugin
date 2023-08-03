@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.6.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.6.1%0D23.6.0) (2023-08-03)
+
+
+### Features
+
+* **MPv2:** add teams setting model and auto join flag ([2f086d3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2f086d36581ab5c5a45d00a8c25883bb966f7b54))
+
 ## [23.6.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.6.0%0D23.5.2) (2023-07-31)
 
 

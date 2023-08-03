@@ -4,20 +4,20 @@
     "maxVersion": "6.2.0"
   },
   "agreement": {
-    "minVersion": "1.31.0",
-    "maxVersion": "1.31.0"
+    "minVersion": "1.31.1",
+    "maxVersion": "1.31.1"
   },
   "basic": {
     "minVersion": "2.10.1",
     "maxVersion": "2.10.1"
   },
   "platform": {
-    "minVersion": "4.32.0",
-    "maxVersion": "4.32.0"
+    "minVersion": "4.32.1",
+    "maxVersion": "4.32.1"
   },
   "social": {
-    "minVersion": "2.9.1",
-    "maxVersion": "2.9.1"
+    "minVersion": "2.9.2",
+    "maxVersion": "2.9.2"
   },
   "leaderboard": {
     "minVersion": "2.26.0",
@@ -48,8 +48,8 @@
     "maxVersion": "3.23.0"
   },
   "dsmcontroller": {
-    "minVersion": "6.3.4",
-    "maxVersion": "6.3.4"
+    "minVersion": "6.3.6",
+    "maxVersion": "6.3.6"
   },
   "game-telemetry": {
     "minVersion": "1.18.0",

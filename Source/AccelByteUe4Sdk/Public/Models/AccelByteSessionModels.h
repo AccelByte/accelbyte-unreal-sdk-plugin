@@ -124,6 +124,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionConfiguration
 		bool TextChat{false};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
 		bool Persistent{false};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
+		bool AutoJoin{false};
 };
 
 USTRUCT(BlueprintType)
@@ -294,6 +296,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest : public F
 
 	// Optional, Also create group chat attached to this game session
 	TOptional<bool> TextChat{};
+
+	// Optional, Enable auto join, the invited user will be joined directly from the backend
+	TOptional<bool> AutoJoin{};
 };
 
 USTRUCT(BlueprintType)
@@ -695,4 +700,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionLeaderPromotionRequest
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionLeaderPromotionRequest")
 	FString LeaderID{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionTeamsSetting
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionTeamsSetting")
+	TArray<FAccelByteModelsV2GameSessionTeam> Teams;
 };
