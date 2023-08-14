@@ -761,28 +761,28 @@ FString FAccelByteUtilities::ConvertItemSortByToString(EAccelByteItemListSortBy 
 { 
 	switch (SortBy)
 	{
-	case EAccelByteItemListSortBy::NAME:
-		return FGenericPlatformHttp::UrlEncode(TEXT("name"));
+	case EAccelByteItemListSortBy::NAME: 
+		return TEXT("name");
 	case EAccelByteItemListSortBy::NAME_DESC:
-		return FGenericPlatformHttp::UrlEncode(TEXT("name:desc"));
+		return TEXT("name:desc");
 	case EAccelByteItemListSortBy::CREATEDAT:
-		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt"));
+		return TEXT("createdAt");
 	case EAccelByteItemListSortBy::CREATEDAT_ASC:
-		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt:asc"));
+		return TEXT("createdAt:asc");
 	case EAccelByteItemListSortBy::CREATEDAT_DESC:
-		return FGenericPlatformHttp::UrlEncode(TEXT("createdAt:desc"));
+		return TEXT("createdAt:desc");
 	case EAccelByteItemListSortBy::UPDATEDAT:
-		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt"));
+		return TEXT("updatedAt");
 	case EAccelByteItemListSortBy::UPDATEDAT_ASC:
-		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt:asc"));
+		return TEXT("updatedAt:asc");
 	case EAccelByteItemListSortBy::UPDATEDAT_DESC:
-		return FGenericPlatformHttp::UrlEncode(TEXT("updatedAt:desc"));
+		return TEXT("updatedAt:desc");
 	case EAccelByteItemListSortBy::DISPLAYORDER:
-		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder"));
+		return TEXT("displayOrder");
 	case EAccelByteItemListSortBy::DISPLAYORDER_ASC:
-		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder:asc"));
+		return TEXT("displayOrder:asc");
 	case EAccelByteItemListSortBy::DISPLAYORDER_DESC:
-		return FGenericPlatformHttp::UrlEncode(TEXT("displayOrder:desc"));
+		return TEXT("displayOrder:desc");
 	}
 	return TEXT("");
 }

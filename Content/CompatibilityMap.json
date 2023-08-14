@@ -1,39 +1,39 @@
 {
   "iam": {
-    "minVersion": "6.2.0",
-    "maxVersion": "6.2.0"
+    "minVersion": "7.0.0",
+    "maxVersion": "7.0.0"
   },
   "agreement": {
-    "minVersion": "1.31.1",
-    "maxVersion": "1.31.1"
+    "minVersion": "1.31.2",
+    "maxVersion": "1.31.2"
   },
   "basic": {
     "minVersion": "2.10.1",
     "maxVersion": "2.10.1"
   },
   "platform": {
-    "minVersion": "4.32.1",
-    "maxVersion": "4.32.1"
+    "minVersion": "4.33.0",
+    "maxVersion": "4.33.0"
   },
   "social": {
-    "minVersion": "2.9.2",
-    "maxVersion": "2.9.2"
+    "minVersion": "2.9.3",
+    "maxVersion": "2.9.3"
   },
   "leaderboard": {
-    "minVersion": "2.26.0",
-    "maxVersion": "2.26.0"
+    "minVersion": "2.26.1",
+    "maxVersion": "2.26.1"
   },
   "achievement": {
     "minVersion": "2.21.0",
     "maxVersion": "2.21.0"
   },
   "cloudsave": {
-    "minVersion": "3.10.0",
-    "maxVersion": "3.10.0"
+    "minVersion": "3.11.0",
+    "maxVersion": "3.11.0"
   },
   "ugc": {
-    "minVersion": "2.11.3",
-    "maxVersion": "2.11.3"
+    "minVersion": "2.12.0",
+    "maxVersion": "2.12.0"
   },
   "group": {
     "minVersion": "2.18.1",
@@ -52,7 +52,7 @@
     "maxVersion": "6.3.6"
   },
   "game-telemetry": {
-    "minVersion": "1.18.0",
-    "maxVersion": "1.18.0"
+    "minVersion": "1.19.0",
+    "maxVersion": "1.19.0"
   }
 }

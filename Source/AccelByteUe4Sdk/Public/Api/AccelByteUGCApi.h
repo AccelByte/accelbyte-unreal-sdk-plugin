@@ -478,7 +478,13 @@ public:
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria, name,download,like,date. default=date.
 	 * @param OrderBy Sorting order: asc, desc. default=desc	
-	 */	
+	 *
+	 * @deprecated This method will be removed in the future, so please use
+	 * 	void GetLikedContent(const TArray<FString>& Tags
+		, ...
+		, EAccelByteLikedContentSortBy SortBy = EAccelByteLikedContentSortBy::DATE
+		, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC);
+	 */
 	void GetLikedContent(const TArray<FString>& Tags
 		, const FString& Name
 		, const FString& Type
@@ -489,6 +495,33 @@ public:
 		, int32 Limit = 1000
 		, int32 Offset = 0
 		, EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE
+		, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC);
+
+	/**
+	 * @brief Get liked contents.   
+	 *
+	 * @param Tags Content Tags. 
+	 * @param Name Content Name. 
+	 * @param Type Content Type.
+	 * @param Subtype Content Subtype.
+	 * @param IsOfficial Filter only official contents
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 * @param SortBy Sorting criteria, name,download,like,date. default=date.
+	 * @param OrderBy Sorting order: asc, desc. default=desc	
+	 */	
+	void GetLikedContent(const TArray<FString>& Tags
+		, const FString& Name
+		, const FString& Type
+		, const FString& Subtype
+		, bool IsOfficial
+		, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 1000
+		, int32 Offset = 0
+		, EAccelByteLikedContentSortBy SortBy = EAccelByteLikedContentSortBy::DATE
 		, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC);
 
 	/**
@@ -522,6 +555,7 @@ private:
 	UGC(UGC const&) = delete;
 	UGC(UGC&&) = delete;
 
+	static FString ConvertLikedContentSortByToString(const EAccelByteLikedContentSortBy& SortBy);
 	static FString ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy);
 	static FString ConvertUGCOrderByToString(const EAccelByteUgcOrderBy& OrderBy);
 };

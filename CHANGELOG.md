@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [23.7.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.7.0%0D23.6.1) (2023-08-14)
+
+
+### Features
+
+* bring back oculus iap sync ([92b2eef](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/92b2eefdf35ea9b96c631ef7f155b7e29a7adeb0))
+* **config:** omit server ClientId and ClientSecret from configuration file on shipping build ([5c2959c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5c2959cf78b34f1b9be4e4d1880ffe0a90e66a20))
+* **launcher:** read command line arguments for Justice Auth Code ([b586a69](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b586a69fcad9959ec8aeea540ff8249f530d255f))
+* **telemetry:** add clientTimestamp ([511a4eb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/511a4eb5eab3bd7801d3ec880d4efb7b5b2ac6e2))
+* **UGC:** add a new sort by value and devide liked content endpoint ([ac14217](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ac14217f4b5acc188cde2e20794f8a741356aaa4))
+
+
+### Bug Fixes
+
+* **core:** add scopelock on availableToken to handle multi thread requests ([0e4202c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0e4202c3714f7879a833eb9aafd64bfdcf2a99c9))
+* lobby not triggering ConnectionClosed after user disconnected because of login ban. ([536c5ac](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/536c5ac5365b312b4eca3dc98e3bb6598d511d4c))
+* Prebuild script failed when path contain spaces ([ee7241c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ee7241c0fc9f22630852d6519afaadc0f24be548))
+* removed encoding process in ConvertItemSortByToString utilites fucntion ([9358317](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9358317d6558ff5522542b075bc5417e5d0eba85))
+
 ### [23.6.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.6.1%0D23.6.0) (2023-08-03)
 
 

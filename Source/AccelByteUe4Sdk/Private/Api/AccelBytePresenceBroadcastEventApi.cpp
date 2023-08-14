@@ -16,7 +16,7 @@ PresenceBroadcastEvent::PresenceBroadcastEvent(Credentials& InCredentialsRef
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, CredentialsRef{ InCredentialsRef }
 {
-	CredentialsRef.OnLoginSuccess().AddRaw(this, &PresenceBroadcastEvent::OnLoginSuccess);
+	PresenceBroadcastLoginSuccess = CredentialsRef.OnLoginSuccess().AddRaw(this, &PresenceBroadcastEvent::OnLoginSuccess);
 }
 
 PresenceBroadcastEvent::~PresenceBroadcastEvent()
@@ -126,6 +126,10 @@ void PresenceBroadcastEvent::Shutdown()
 			FTickerAlias::GetCoreTicker().RemoveTicker(PresenceBroadcastEventHeartbeatTickDelegateHandle);
 			PresenceBroadcastEventHeartbeatTickDelegateHandle.Reset();
 		}
+		if (PresenceBroadcastLoginSuccess.IsValid())
+		{
+			CredentialsRef.OnLoginSuccess().Remove(PresenceBroadcastLoginSuccess);
+		}
 	}
 }
 
@@ -187,7 +191,7 @@ void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadc
 	JsonObjectPtr->SetStringField("EventNamespace", SettingsRef.PublisherNamespace);
 	JsonObjectPtr->SetStringField("EventName", EventName);
 	JsonObjectPtr->SetObjectField("Payload", FJsonObjectConverter::UStructToJsonObject(Events));
-	JsonObjectPtr->SetNumberField("EventTimestamp", FDateTime::UtcNow().ToUnixTimestamp());
+	JsonObjectPtr->SetNumberField("ClientTimestamp", FDateTime::UtcNow().ToUnixTimestamp());
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll);
 
 	FString Content{};

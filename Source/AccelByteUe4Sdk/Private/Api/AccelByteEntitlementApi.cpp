@@ -853,7 +853,7 @@ void Entitlement::SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteMod
 		, *CredentialsRef.GetUserId());
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
 }
-
+	
 void Entitlement::SyncOculusDLC(FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {

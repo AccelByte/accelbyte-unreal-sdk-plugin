@@ -15,6 +15,16 @@ enum class EAccelByteUgcSortBy : uint8
 	NAME = 0,
 	DOWNLOAD,
 	LIKE,
+	DATE,
+	UPDATED_TIME
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteLikedContentSortBy : uint8
+{
+	NAME = 0,
+	DOWNLOAD,
+	LIKE,
 	DATE
 };
 

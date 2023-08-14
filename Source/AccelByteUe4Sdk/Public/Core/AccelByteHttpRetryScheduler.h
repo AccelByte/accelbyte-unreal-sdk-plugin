@@ -39,6 +39,7 @@ public:
 	static int MaximumDelay;
 	static int TotalTimeout;
 	static int PauseTimeout;
+	static constexpr uint32 DefaultRateLimit = 6;
 
 	FHttpRetryScheduler();
 	virtual ~FHttpRetryScheduler();
@@ -67,6 +68,7 @@ public:
 protected:
 	static TMap<EHttpResponseCodes::Type, FHttpResponseCodeHandler> ResponseCodeDelegates;
 	TMap<FString /*Endpoint*/, FRequestBucket> RequestsBucket;
+	mutable FCriticalSection RequestBucketLock;
 
 	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue{};
 	FDelegateHandleAlias PollRetryHandle{};

@@ -54,6 +54,7 @@ private:
 
 	Credentials& ChatCredentialsRef;
 	bool bBanNotifReceived = false;
+	EBanType BanType = EBanType::EMPTY;
 
 	Chat() = delete;
 	Chat(const Chat&) = delete; // Copy constructor

@@ -23,7 +23,7 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, CredentialsRef{InCredentialsRef}
 	, ShuttingDown(false)
 {
-	CredentialsRef.OnLoginSuccess().AddRaw(this, &GameTelemetry::OnLoginSuccess);
+	GameTelemetryLoginSuccess = CredentialsRef.OnLoginSuccess().AddRaw(this, &GameTelemetry::OnLoginSuccess);
 }
 
 GameTelemetry::~GameTelemetry()
@@ -47,6 +47,12 @@ void GameTelemetry::SetBatchFrequency(FTimespan Interval)
 		UE_LOG(LogAccelByte, Warning, TEXT("Telemetry schedule interval is too small! Set to %f seconds."), MINIMUM_INTERVAL_TELEMETRY.GetTotalSeconds());
 		TelemetryInterval = MINIMUM_INTERVAL_TELEMETRY;
 	}
+	if (bTelemetryJobStarted)
+	{
+		FTickerAlias::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
+		GameTelemetryTickDelegateHandle.Reset();
+		GameTelemetryTickDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, static_cast<float>(TelemetryInterval.GetTotalSeconds()));
+	}
 }
 
 void GameTelemetry::SetImmediateEventList(TArray<FString> const& EventNames)
@@ -65,9 +71,9 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 
 	FReport::Log(FString(__FUNCTION__));
 
-	if(TelemetryBody.EventTimestamp.GetTicks() == 0)
+	if(TelemetryBody.ClientTimestamp.GetTicks() == 0)
 	{
-		TelemetryBody.EventTimestamp = FDateTime::UtcNow();
+		TelemetryBody.ClientTimestamp = FDateTime::UtcNow();
 	}
 
 	if (ImmediateEvents.Contains(TelemetryBody.EventName))
@@ -107,6 +113,11 @@ void GameTelemetry::Shutdown()
 		{
 			FTickerAlias::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
 			GameTelemetryTickDelegateHandle.Reset();
+		}
+
+		if (GameTelemetryLoginSuccess.IsValid())
+		{
+			CredentialsRef.OnLoginSuccess().Remove(GameTelemetryLoginSuccess);
 		}
 		// flush events
 		Flush();
@@ -178,7 +189,7 @@ void GameTelemetry::SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTeleme
 		JsonObject->SetStringField("EventNamespace", Event->EventNamespace);
 		JsonObject->SetStringField("EventName", Event->EventName);
 		JsonObject->SetObjectField("Payload", Event->Payload);
-		JsonObject->SetStringField("EventTimestamp", Event->EventTimestamp.ToIso8601());
+		JsonObject->SetStringField("ClientTimestamp", Event->ClientTimestamp.ToIso8601());
 
 		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));
 	}
@@ -260,7 +271,7 @@ bool GameTelemetry::JobArrayQueueAsJsonString(FString& OutJsonString)
 		JsonObj->SetStringField("EventName", EventPtr->EventName);
 		JsonObj->SetStringField("EventNamespace", EventPtr->EventNamespace);
 		JsonObj->SetObjectField("Payload", EventPtr->Payload);
-		JsonObj->SetNumberField("EventTimestamp", EventPtr->EventTimestamp.ToUnixTimestamp());
+		JsonObj->SetNumberField("ClientTimestamp", EventPtr->ClientTimestamp.ToUnixTimestamp());
 		TSharedRef<FJsonValueObject> JsonValue = MakeShared<FJsonValueObject>(JsonObj);
 		EventsObjArray.Add(JsonValue);
 	}
@@ -294,13 +305,13 @@ bool GameTelemetry::EventsJsonToArray(FString& InJsonString
 		auto& JsonObj = ArrayItem->AsObject();
 		FString EventName, EventNamespace;
 		TSharedPtr<FJsonObject> const* Payload = nullptr;
-		int32 EventTimeStamp = 0;
+		int32 ClientTimestamp = 0;
 		FAccelByteModelsTelemetryBody TelemetryBody;
 		TelemetryBody.EventName = JsonObj->GetStringField("EventName");
 		TelemetryBody.EventNamespace = JsonObj->GetStringField("EventNamespace");
 		TelemetryBody.Payload = JsonObj->GetObjectField("Payload");
-		EventTimeStamp = JsonObj->GetIntegerField("EventTimestamp");
-		TelemetryBody.EventTimestamp = FDateTime::FromUnixTimestamp(EventTimeStamp);
+		ClientTimestamp = JsonObj->GetIntegerField("ClientTimestamp");
+		TelemetryBody.ClientTimestamp = FDateTime::FromUnixTimestamp(ClientTimestamp);
 		OutArray.Add(MakeShared<FAccelByteModelsTelemetryBody>(TelemetryBody));
 	}
 	return true;

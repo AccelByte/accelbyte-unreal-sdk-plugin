@@ -1648,8 +1648,10 @@ void Lobby::OnClosed(int32 StatusCode
 	, const FString& Reason
 	, bool WasClean)
 {
+	// disconnect only if status code > 4000 and we don't receive a login ban,
+	// other ban will try to reconnect the websocket
 	bool bIsReconnecting {true};
-	if (StatusCode > 4000 && !BanNotifReceived)
+	if (StatusCode > 4000 && !(BanNotifReceived && BanType != EBanType::LOGIN))
 	{
 		bIsReconnecting = false;
 		Disconnect();
@@ -1659,6 +1661,7 @@ void Lobby::OnClosed(int32 StatusCode
 	TokenRefreshDelegateHandle.Reset();
 
 	BanNotifReceived = false;
+	BanType = EBanType::EMPTY;
 	
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %s Reconnecting: %s"),
 		StatusCode, *Reason, WasClean? TEXT("true") : TEXT("false"), bIsReconnecting? TEXT("true") : TEXT("false"));
@@ -2360,6 +2363,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 			//CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
 			if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result))
 			{
+				BanType = Result.Ban;
 				if (Result.UserId == CredentialsRef.GetUserId())
 				{
 					HttpRef.BearerAuthRejected();

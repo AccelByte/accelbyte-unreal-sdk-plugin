@@ -18,6 +18,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTelemetryBody
 	/** @brief Event payload that will be sent as telemetry data */
 	TSharedPtr<FJsonObject> Payload{};
 
-	/** @brief Timestamp when the event is registered */
+	/** @brief [Deprecated]Timestamp when the event is registered*/
 	FDateTime EventTimestamp {0};
+
+	/** @brief Timestamp when the event is registered */
+	FDateTime ClientTimestamp{0};
 };

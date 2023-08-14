@@ -24,6 +24,23 @@ UGC::UGC(Credentials const& InCredentialsRef
 
 UGC::~UGC(){}
 
+FString UGC::ConvertLikedContentSortByToString(const EAccelByteLikedContentSortBy& SortBy)
+{
+	switch (SortBy)
+	{
+	case EAccelByteLikedContentSortBy::NAME:
+		return TEXT("name");
+	case EAccelByteLikedContentSortBy::DATE:
+		return TEXT("date");
+	case EAccelByteLikedContentSortBy::DOWNLOAD:
+		return TEXT("download");
+	case EAccelByteLikedContentSortBy::LIKE:
+		return TEXT("like");
+	default:
+		return TEXT("");
+	}
+}
+
 FString UGC::ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy)
 {
 	switch (SortBy)
@@ -36,6 +53,8 @@ FString UGC::ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy)
 		return TEXT("download");
 	case EAccelByteUgcSortBy::LIKE:
 		return TEXT("like");
+	case EAccelByteUgcSortBy::UPDATED_TIME:
+		return TEXT("updatedTime");
 	default:
 		return TEXT("");
 	}
@@ -668,6 +687,43 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("")  },
 		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
 		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
+	};
+
+	for (const auto& Tag : Tags)
+	{
+		QueryParams.AddUnique(TEXT("tags"), Tag);
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void UGC::GetLikedContent(const TArray<FString>& Tags
+	, const FString& Name
+	, const FString& Type
+	, const FString& Subtype
+	, bool IsOfficial
+	, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteLikedContentSortBy SortBy
+	, EAccelByteUgcOrderBy OrderBy)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/liked")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMultiMap<FString, FString> QueryParams {
+		{ TEXT("name"), Name },
+		{ TEXT("type"), Type },
+		{ TEXT("subtype"), Subtype },
+		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false") },
+		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("sortby"), ConvertLikedContentSortByToString(SortBy) },
+		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy) },
 	};
 
 	for (const auto& Tag : Tags)

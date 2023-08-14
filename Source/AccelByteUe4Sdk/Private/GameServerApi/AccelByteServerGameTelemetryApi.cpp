@@ -54,9 +54,9 @@ void ServerGameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	if(TelemetryBody.EventTimestamp.GetTicks() == 0)
+	if(TelemetryBody.ClientTimestamp.GetTicks() == 0)
 	{
-		TelemetryBody.EventTimestamp = FDateTime::UtcNow();
+		TelemetryBody.ClientTimestamp = FDateTime::UtcNow();
 	}
 	
 	if (ImmediateEvents.Contains(TelemetryBody.EventName))
@@ -134,7 +134,7 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 		JsonObject->SetStringField("EventNamespace", Event.EventNamespace);
 		JsonObject->SetStringField("EventName", Event.EventName);
 		JsonObject->SetObjectField("Payload", Event.Payload);
-		JsonObject->SetStringField("EventTimestamp", Event.EventTimestamp.ToIso8601());
+		JsonObject->SetStringField("ClientTimestamp", Event.ClientTimestamp.ToIso8601());
 
 		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));
 	}

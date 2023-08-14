@@ -133,6 +133,8 @@ private:
 	FVoidHandler OnSendPresenceHeartbeatSuccess;
 	FErrorHandler OnSendPresenceHeartbeatError;
 
+	FDelegateHandle PresenceBroadcastLoginSuccess;
+
 	FAccelBytePresenceBroadcastEventPayload PresencePayload;
 	TSharedPtr<FJsonObject> AdditionalPayload;
 

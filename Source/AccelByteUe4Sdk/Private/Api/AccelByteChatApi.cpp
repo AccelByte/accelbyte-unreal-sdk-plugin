@@ -511,7 +511,9 @@ namespace AccelByte
 			, const FString& Reason
 			, bool WasClean)
 		{
-			if (StatusCode >= 4000 && !bBanNotifReceived)
+			// disconnect only if status code > 4000 and we don't receive a login ban,
+			// other ban will try to reconnect the websocket
+			if (StatusCode > 4000 && !(bBanNotifReceived && BanType != EBanType::LOGIN))
 			{
 				Disconnect();
 			}
@@ -521,6 +523,8 @@ namespace AccelByte
 			}
 
 			bBanNotifReceived = false;
+			BanType = EBanType::EMPTY;
+			
 			UE_LOG(LogAccelByteChat, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 			ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 		}

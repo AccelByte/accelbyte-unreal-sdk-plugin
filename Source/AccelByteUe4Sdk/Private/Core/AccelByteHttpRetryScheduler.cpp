@@ -19,7 +19,7 @@ int FHttpRetryScheduler::InitialDelay = 1;
 int FHttpRetryScheduler::MaximumDelay = 30;
 int FHttpRetryScheduler::TotalTimeout = 60;
 int FHttpRetryScheduler::PauseTimeout = 60;
-int FHttpRetryScheduler::RateLimit = 6;
+int FHttpRetryScheduler::RateLimit = FHttpRetryScheduler::DefaultRateLimit;
 
 FString FHttpRetryScheduler::HeaderNamespace = TEXT("");
 FString FHttpRetryScheduler::HeaderSDKVersion = TEXT("");
@@ -34,6 +34,10 @@ FHttpRetryScheduler::FHttpRetryScheduler()
 	: TaskQueue()
 {
 	GConfig->GetInt(TEXT("HTTP"), TEXT("RateLimit"), RateLimit, GEngineIni);
+	if (RateLimit <= 0)
+	{
+		RateLimit = DefaultRateLimit;
+	}
 }
 
 FHttpRetryScheduler::~FHttpRetryScheduler()
@@ -93,9 +97,10 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 		}
 		else
 		{
-			int32 AvailableToken = RateLimit;
+			uint32 AvailableToken = RateLimit;
 			double ResetTokenTime = RequestTime + 1.0f; //Reset every second
 			bool bCancelRequest = false;
+			RequestBucketLock.Lock();
 			if (FRequestBucket* LastRequest = RequestsBucket.Find(Request->GetURL()))
 			{
 				if (RequestTime < LastRequest->ResetTokenTime)
@@ -106,14 +111,25 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 						Task->Cancel();
 						bCancelRequest = true;
 					}
-					ResetTokenTime = LastRequest->ResetTokenTime;
-					AvailableToken = LastRequest->AvailableToken;
+					else
+					{
+						--LastRequest->AvailableToken;
+					}
+				}
+				else
+				{
+					LastRequest->AvailableToken = --AvailableToken;
+					LastRequest->ResetTokenTime = ResetTokenTime;
 				}
 			}
+			else
+			{
+				RequestsBucket.Emplace(Request->GetURL(), FRequestBucket{ --AvailableToken, ResetTokenTime});
+			}
+			RequestBucketLock.Unlock();
 			if (!bCancelRequest)
 			{
 				Task->Start();
-				RequestsBucket.Emplace(Request->GetURL(), FRequestBucket{ --AvailableToken, ResetTokenTime });
 			}
 		}
 

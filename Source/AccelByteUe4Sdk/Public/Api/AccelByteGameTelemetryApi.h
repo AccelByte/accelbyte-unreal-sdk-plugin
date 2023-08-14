@@ -108,6 +108,7 @@ private:
 	FTimespan const MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;
 	FDelegateHandleAlias GameTelemetryTickDelegateHandle;
+	FDelegateHandle GameTelemetryLoginSuccess;
 
 	bool ShuttingDown;
 };

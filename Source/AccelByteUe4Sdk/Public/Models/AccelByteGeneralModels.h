@@ -118,7 +118,6 @@ struct FAccelByteHttpCacheItem
 
 struct FRequestBucket
 {
-	int32 AvailableToken {0};
-
+	uint32 AvailableToken {0};
 	double ResetTokenTime{ 0.0f };
 };
