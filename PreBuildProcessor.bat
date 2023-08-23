@@ -37,7 +37,7 @@ EXIT /b 0
 EXIT /b 1
 
 :append_section_blacklist
-    SET "ConfigFileTmp=%ConfigFile%.tmp"
+    SET ConfigFileTmp="%ConfigFile:"=%.tmp"
     SET CurrentSection=
     SET FirstLine=True
     SET IsPackagingSettingSection=False
@@ -71,7 +71,7 @@ EXIT /b 1
             )
         )
         IF NOT [!Line!] == [] ECHO !Line!
-    ))>"%ConfigFileTmp%"
+    ))>%ConfigFileTmp%
     
     IF !IsPackagingSettingSection!==True (
         (FOR %%a IN (!ServerSettingsSectionList!) DO (
@@ -84,7 +84,7 @@ EXIT /b 1
     EXIT /B 0
 
 :remove_section_blacklist
-    SET "ConfigFileTmp=%ConfigFile%.tmp"
+    SET ConfigFileTmp="%ConfigFile:"=%.tmp"
     SET CurrentSection=
     
     SET FirstLine=True
@@ -107,7 +107,7 @@ EXIT /b 1
             )
         )
         IF NOT [!Line!] == [] ECHO !Line!
-    ))>"%ConfigFileTmp%"
+    ))>%ConfigFileTmp%
 
     COPY /y %ConfigFileTmp% %ConfigFile% >NUL
     DEL %ConfigFileTmp%

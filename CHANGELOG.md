@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [23.7.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.7.1%0D23.7.0) (2023-08-23)
+
+
+### Bug Fixes
+
+* Prebuild script failed when project path contain spaces ([0454259](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/04542596a3adf305e9ecaff97a4401e94f186fd3))
+
 ## [23.7.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.7.0%0D23.6.1) (2023-08-14)
 
 

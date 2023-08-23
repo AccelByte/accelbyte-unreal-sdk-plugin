@@ -40,16 +40,16 @@
     "maxVersion": "2.18.1"
   },
   "qosm": {
-    "minVersion": "1.18.2",
-    "maxVersion": "1.18.2"
+    "minVersion": "1.18.3",
+    "maxVersion": "1.18.3"
   },
   "lobby": {
     "minVersion": "3.23.0",
     "maxVersion": "3.23.0"
   },
   "dsmcontroller": {
-    "minVersion": "6.3.6",
-    "maxVersion": "6.3.6"
+    "minVersion": "6.3.7",
+    "maxVersion": "6.3.7"
   },
   "game-telemetry": {
     "minVersion": "1.19.0",
