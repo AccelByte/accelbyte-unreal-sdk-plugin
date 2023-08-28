@@ -382,6 +382,11 @@ namespace AccelByte
 		PartyStorageOutdatedUpdateData = 119017,
 		PartyNotFound = 11901,
 		//
+		//Lobby Error Code List
+		//
+		FriendRequesterMaxFriendsLimitReached = 11590,
+		FriendRequesteeMaxFriendsLimitReached = 11591,
+		//
 		//UGC Error Code List
 		//
 		UGCCreateContentBadRequestException = 770100,

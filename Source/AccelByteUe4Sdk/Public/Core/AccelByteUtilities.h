@@ -10,6 +10,10 @@
 #include "Math/NumericLimits.h"
 #include "AccelByteUtilities.generated.h"
 
+// AccelByte IDs have a max length of 32, as they are UUIDs that are striped of their hyphens
+#define ACCELBYTE_ID_LENGTH 32
+#define ACCELBYTE_ID_LENGTH_WITH_HYPENS 36
+
 using AccelByte::THandler;
 using AccelByte::FErrorHandler;
 
@@ -37,27 +41,31 @@ enum class EAccelByteDevModeDeviceIdMethod : uint8
 };
 
 /**
- * @brief RSA public key with parameters encoded in Base64Url. Only supports 2048 bits modulus and 24 bits exponent
+ * @brief RSA public key with parameters encoded in Base64Url. Only supports 2048 bits modulus and 24 bits exponent.
  */
 class ACCELBYTEUE4SDK_API FRsaPublicKey
 {
 public:
 	
 	/**
-	 * @brief Construct FRsaPublicKey with modulus and exponent
-	 * @param ModulusB64Url RSA modulus (n) in Base64URL format
-	 * @param ExponentB64Url RSA exponent (e) in Base64URL format
+	 * @brief Construct FRsaPublicKey with modulus and exponent.
+	 * 
+	 * @param ModulusB64Url RSA modulus (n) in Base64URL format.
+	 * @param ExponentB64Url RSA exponent (e) in Base64URL format.
 	 */
 	FRsaPublicKey(FString ModulusB64Url, FString ExponentB64Url); 
 
 	/**
-	 * @brief Check if this RSA public key is valid.    
+	 * @brief Check if this RSA public key is valid.
+	 *
+	 * @return Valid RSA Public key or not.
 	 */
 	bool IsValid() const;
 
 	
 	/**
-	 * @brief Convert RSA public key to armored PEM format
+	 * @brief Convert RSA public key to armored PEM format.
+	 * 
 	 * @return PEM format armored with "-----BEGIN PUBLIC KEY-----" and "-----END PUBLIC KEY-----"
 	 */
 	FString ToPem() const;
@@ -75,33 +83,40 @@ class ACCELBYTEUE4SDK_API FJwt
 {
 public:
 	/**
-	 * @brief Construct FJwt from JWT string
-	 * @param JwtString JWT encoded as dot separated Base64Url string
+	 * @brief Construct FJwt from JWT string.
+	 * 
+	 * @param JwtString JWT encoded as dot separated Base64Url string.
 	 */
 	explicit FJwt(FString JwtString);
 
 	/**
-	 * @brief Verify this JWT using RSA public key
-	 * @param Key RSA public key
-	 * @return EJwtResult::Ok if signature match
+	 * @brief Verify this JWT using RSA public key.
+	 * 
+	 * @param Key RSA public key.
+	 * 
+	 * @return EJwtResult::Ok if signature match.
 	 */
 	EJwtResult VerifyWith(FRsaPublicKey Key) const;
 
 	/**
-	 * @brief Get header content from JWT. Content could be any valid JSON having at least "alg" field
-	 * @return JWT header
+	 * @brief Get header content from JWT. Content could be any valid JSON having at least "alg" field.
+	 * 
+	 * @return JWT header.
 	 */
 	TSharedPtr<FJsonObject> const& Header() const;
 
 	/**
-	 * @brief Get payload content from JWT. Content could be any valid JSON
-	 * @return JWT payload
+	 * @brief Get payload content from JWT. Content could be any valid JSON.
+	 * 
+	 * @return JWT payload.
 	 */
 	TSharedPtr<FJsonObject> const& Payload() const;
 
 	/**
-	 * @brief Check if this JWT format is correct and both and payload are valid JSON encoded as Base64URL
-	 * @return true if  this JWT is valid, false otherwise
+	 * @brief Check if this JWT format is correct and both and payload are valid JSON encoded as Base64URL.
+	 * 
+	 * @return true if  this JWT is valid, and
+	 * @return false if otherwise.
 	 */
 	bool IsValid() const;
 
@@ -115,7 +130,7 @@ private:
 
 class ACCELBYTEUE4SDK_API FAccelByteUtilities
 {
-public:
+public:	
 	static constexpr uint8 FieldRemovalFlagObjects = 1 << 0;
 	static constexpr uint8 FieldRemovalFlagArrays  = 1 << 1;
 	static constexpr uint8 FieldRemovalFlagStrings = 1 << 2;
@@ -129,7 +144,11 @@ public:
 	static FString AccelByteStorageFile();
 
 	template<typename CharType = TCHAR, template<typename> class PrintPolicy = TPrettyJsonPrintPolicy, typename InStructType>
-	static bool TArrayUStructToJsonString(const TArray<InStructType>& InArray, FString& OutJsonString, int64 CheckFlags = 0, int64 SkipFlags = 0, int32 Indent = 0)
+	static bool TArrayUStructToJsonString(TArray<InStructType> const& InArray
+		, FString& OutJsonString
+		, int64 CheckFlags = 0
+		, int64 SkipFlags = 0
+		, int32 Indent = 0)
 	{
 		const UStruct* StructDefinition = InStructType::StaticStruct();
 		TArray< TSharedPtr<FJsonValue> > JsonArray;
@@ -162,6 +181,13 @@ public:
 
 	static void RemoveEmptyStrings(TSharedPtr<FJsonObject> Json);
 
+	/**
+	 * @brief Convert an UEnum value into a String enum value.
+	 *
+	 * @param Value UEnum value.
+	 * 
+	 * @return String value of specified UEnum. 
+	 */
 	template<typename TEnum>
 	static FString GetUEnumValueAsString(TEnum Value)
 	{
@@ -175,6 +201,13 @@ public:
 		return ParsedStrings.Last();
 	}
 
+	/**
+	 * @brief Convert a String enum value into a UEnum value.
+	 *
+	 * @param ValueString String enum value.
+	 *
+	 * @return UEnum value of specified String enum.
+	 */
 	template<typename TEnum>
 	static TEnum GetUEnumValueFromString(FString const& ValueString)
 	{
@@ -194,179 +227,54 @@ public:
 		return static_cast<TEnum>(ValueInt);
 	}
 
+	/**
+	 * @brief Retrieve Platform name from the specified PlatformType.
+	 *
+	 * @param Platform Platform type enumeration.
+	 */
 	static FString GetPlatformString(EAccelBytePlatformType Platform);
 
 	static FString GetAuthenticatorString(EAccelByteLoginAuthFactorType Authenticator);
 	
-	static FString CreateQueryParams(TMap<FString, FString> Map, FString SuffixChar = TEXT("?"))
-	{
-		FString Query = TEXT("");
-		for (auto kvp : Map)
-		{
-			FString Param = kvp.Key;
-			FString Value = kvp.Value;
-			if (!Param.IsEmpty() && !Value.IsEmpty())
-			{			
-				Query.Append(Query.IsEmpty() ? SuffixChar : TEXT("&"));
-				Query.Append(FString::Printf(TEXT("%s=%s"), *Param, *Value));
-			}	
-		}
-		return Query;
-	}
+	static FString CreateQueryParams(TMap<FString, FString> Map
+		, FString SuffixChar = TEXT("?"));
  
-	static FString CreateQueryParamValueUrlEncodedFromArray(const TArray<FString>& Array, const FString& Delimiter = TEXT(","))
-	{
-		FString QueryParamValue = TEXT("");
-		if (Array.Num() > 0)
-		{ 
-			for (int i = 0; i < Array.Num(); i++)
-			{
-				const FString& UrlEncodedStringValue = FGenericPlatformHttp::UrlEncode(Array[i]);
-				FString ItemAppended = FString::Printf(TEXT("%s%s"), *Delimiter, *UrlEncodedStringValue);
-				QueryParamValue.Append( i == 0 ? Array[i] : ItemAppended);
-			}
-		}
-		return QueryParamValue;	
-	}
+	static FString CreateQueryParamValueUrlEncodedFromArray(TArray<FString> const& Array
+		, FString const& Delimiter = TEXT(","));
+	
+	/**
+	 * @brief Remove fields which have empty values according to the given flags. Defaults to removing empty objects/arrays, blank
+	 * strings, and looping recursively on object and array field values.
+	 * Possible Removal flags are as follow:
+	 *	 - FieldRemovalFlagObjects: for empty JSON object value
+	 *	 - FieldRemovalFlagArrays: for empty JSON array value
+	 *	 - FieldRemovalFlagStrings: for empty string value
+	 *	 - FieldRemovalFlagDates: for empty date value
+	 *	 - FieldRemovalFlagNumbers: for empty number value
+	 *	 - FieldRemovalFlagNull: for null value
+	 *	 - FieldRemovalFlagNested: for empty nested value
+	 *
+	 * @param JsonObjectPtr JSON object which will be modified.
+	 * @param Flags Removal flags for the empty value using bit flag.
+	 * @param ExcludedFieldNames Specified field names that will be excluded in the omission process.
+	 */
+	static void RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject> const& JsonObjectPtr
+		, uint8 const Flags = FieldRemovalFlagObjects | FieldRemovalFlagStrings | FieldRemovalFlagArrays | FieldRemovalFlagNested
+		, TArray<FString> const& ExcludedFieldNames = {});
 
 	/**
-	 * Remove fields which have empty values according to the given flags. Defaults to removing empty objects/arrays, blank
-	 * strings, and recursing on object and array field values.
+	 * @brief Convert array of UStructs into JSON array string.
+	 *
+	 * @param Objects List of UStruct objects.
+	 * @param OutString Output string.
 	 */
-	static void RemoveEmptyFieldsFromJson(
-		const TSharedPtr<FJsonObject>& JsonObjectPtr,
-		const uint8 Flags = FieldRemovalFlagObjects | FieldRemovalFlagStrings | FieldRemovalFlagArrays | FieldRemovalFlagNested,
-		const TArray<FString>& ExcludedFieldNames = {})
-	{
-// Macro to make field removal flag bit logic more readable
-#define HAS_FIELD_REMOVAL_FLAG(FlagName) ((Flags & FieldRemovalFlag##FlagName) != 0)
-
-		TArray<FString> FieldsToRemove;
-		TMap<FString, TSharedPtr<FJsonValue>> FieldsToReplace;
-
-		// Remove empty field so it doesn't get updated in BE
-		for(auto& KeyValuePair : JsonObjectPtr->Values)
-		{
-			if(!KeyValuePair.Value.IsValid() || ExcludedFieldNames.Contains(KeyValuePair.Key))
-			{
-				continue;
-			}
-
-			bool bRemoveField = false;
-			switch (KeyValuePair.Value->Type)
-			{
-			case EJson::Array:
-			{
-				TArray<TSharedPtr<FJsonValue>> OriginalArray = KeyValuePair.Value->AsArray();
-				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Arrays) && OriginalArray.Num() == 0;
-
-				if(bRemoveField || !HAS_FIELD_REMOVAL_FLAG(Nested))
-				{
-					break;
-				}
-
-				// If the array is not empty, we want to look for nested objects which might have empty values inside them
-				TArray<TSharedPtr<FJsonValue>> NewArray;
-				for(const auto& NestedValue : OriginalArray)
-				{
-					// Skipping over any array item that is not an object
-					if(NestedValue->Type != EJson::Object)
-					{
-						NewArray.Add(NestedValue);
-						continue;
-					}
-
-					TSharedPtr<FJsonObject> NestedObject = NestedValue->AsObject();
-					RemoveEmptyFieldsFromJson(NestedObject, Flags, ExcludedFieldNames);
-
-					if(HAS_FIELD_REMOVAL_FLAG(Objects) && NestedObject->Values.Num() == 0)
-					{
-						continue;
-					}
-					NewArray.Add(MakeShared<FJsonValueObject>(NestedObject));
-				}
-
-				if(HAS_FIELD_REMOVAL_FLAG(Arrays) && NewArray.Num() == 0)
-				{
-					bRemoveField = true;
-					break;
-				}
-				FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueArray>(NewArray));
-
-				break;
-			}
-			case EJson::Object:
-			{
-				TSharedPtr<FJsonObject> Object = KeyValuePair.Value->AsObject();
-				TArray<FString> Keys;
-				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Objects) && Object->Values.Num() == 0;
-
-				if(bRemoveField || !HAS_FIELD_REMOVAL_FLAG(Nested))
-				{
-					break;
-				}
-
-				RemoveEmptyFieldsFromJson(Object, Flags, ExcludedFieldNames);
-				if(HAS_FIELD_REMOVAL_FLAG(Objects) && Object->Values.Num() == 0)
-				{
-					bRemoveField = true;
-					break;
-				}
-				FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueObject>(Object));
-
-				break;
-			}
-			case EJson::String:
-			{
-				const FString Value = KeyValuePair.Value->AsString();
-
-				// Removing string fields if the dates flag is set and the string is equal to an uninitialized datetime (aka 0 ticks)
-				bRemoveField =
-					(HAS_FIELD_REMOVAL_FLAG(Strings) && Value.IsEmpty()) ||
-					(HAS_FIELD_REMOVAL_FLAG(Dates) && Value.Equals(FDateTime(0).ToString()));
-
-				break;
-			}
-			case EJson::Number:
-			{
-				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Numbers) && static_cast<int32>(FMath::Floor(KeyValuePair.Value->AsNumber())) == TNumericLimits<int32>::Min();
-				break;
-			}
-			case EJson::Null:
-			{
-				bRemoveField = HAS_FIELD_REMOVAL_FLAG(Null);
-				break;
-			}
-
-			// Redundant technically, but for readability explicitly says that we don't care about the other members of EJson
-			default: break;
-			}
-
-			if(bRemoveField)
-			{
-				FieldsToRemove.Add(KeyValuePair.Key);
-			}
-		}
-
-		for(const FString& Key : FieldsToRemove)
-		{
-			JsonObjectPtr->RemoveField(Key);
-		}
-
-		for(const auto& KeyValuePair : FieldsToReplace)
-		{
-			JsonObjectPtr->SetField(KeyValuePair.Key, KeyValuePair.Value);
-		}
-
-#undef HAS_FIELD_REMOVAL_FLAG
-	}
-	
 	template<typename ObjectType> 
-	static bool UStructArrayToJsonObjectString(TArray<ObjectType> Objects, FString& OutString)
+	static bool UStructArrayToJsonObjectString(TArray<ObjectType> const& Objects
+		, FString& OutString)
 	{
 		OutString.Append(TEXT("["));	
 		FString JsonArrayString = TEXT("");
-		for (auto Item : Objects)
+		for (auto& Item : Objects)
 		{
 			FString Delimiter =	JsonArrayString.IsEmpty() ? TEXT("") : TEXT(",");
 			JsonArrayString.Append(Delimiter);
@@ -382,144 +290,182 @@ public:
 		return true;
 	}
 
-	/// <summary>
-	/// Try to Get the DeviceID from current platform
-	/// Fallback if not found, using MacAddress
-	/// Fallback if not found, using a randomized deviceID
-	/// NOTE: 
-	/// DeviceID for shipping build & dedicated server are always encoded
-	/// Other than those, it can use the development mode deviceID that is configurable
-	/// </summary>
-	/// <param name="bIsDeviceIdRequireEncode"></param>
-	/// <returns>Return either plain DeviceID or encoded</returns>
+	/**
+	 * @brief Try to get the DeviceID from current Platform, if not found from the current Platform then 
+	 * the first fallback option will get the DeviceID from a cached file and if not found in the cached file then 
+	 * the second fallback option will try to get the MAC Address value and if MAC Address not found then
+	 * the last fallback option is generating random UUID and then cached in a file.
+	 *
+	 * NOTE:
+	 * DeviceID for shipping build and Dedicated Server are always encoded, and other thant those it can use development
+	 * mode DeviceID that is configurable from the .ini file.
+	 *
+	 * @param bIsDeviceIdRequireEncode Flag to encode DeviceID. (default: true)
+	 * 
+	 * @return String of DeviceID.
+	 */
 	static FString GetDeviceId(bool bIsDeviceIdRequireEncode = true);
 
-	/// <summary>
-	/// Encode HMAC the message using built in function from UnrealEngine and then Base64 the result
-	/// </summary>
-	/// <param name="Message">Targeted text</param>
-	/// <param name="Key">HMAC Buffer Key</param>
-	/// <returns>Encode result</returns>
-	static FString EncodeHMACBase64(const FString& Message, const FString& Key);
+	/**
+	 * @brief Encode HMAC the message using built in function from UnrealEngine and then Base64 the result.
+	 * 
+	 * @param Message Specified text.
+	 * @param Key HMAC Buffer Key.
+	 * 
+	 * @return Encoded string result.
+	 */
+	static FString EncodeHMACBase64(FString const& Message
+		, FString const& Key);
 
-	/// <summary>
-	/// Obtain an HMAC Buffer encoded MacAddress, using PublisherNamespace as key.
-	/// </summary>
-	/// <param name="bEncoded">Is the returned value is encoded</param>
-	/// <returns>Return either plain MacAddress or encoded</returns>
+	/**
+	 * @brief Obtain an HMAC Buffer encoded MAC Address, using PublisherNamespace as key.
+	 *
+	 * @param bEncoded Flag to encode the return value. (default: true)
+	 * @return Either plain MAC Address or encoded one.
+	 */
 	static FString GetMacAddress(bool bEncoded = true);
 
+	/**
+	 * @brief Get current Platform name.
+	 *
+	 * @return Current Platform name.
+	 */
 	static FString GetPlatformName();
 
-	static FString XOR(const FString& Input, const FString& Key);
+	/**
+	 * @brief Execute XOR operation between two string values.
+	 *
+	 * @param Input Specified input string.
+	 * @param Key Specified key string.
+	 * 
+	 * @return String result from XOR operation.
+	 */
+	static FString XOR(FString const& Input
+		, FString const& Key);
 
+	/**
+	 * @brief Retrieve AuthTrustId that was cached in a filed.
+	 *
+	 * @return AuthTrustId string.
+	 */
 	static FString GetAuthTrustId();
 
-	static void SetAuthTrustId(const FString& AuthTrustId);
+	/**
+	 * @brief Store AuthTrustId value to a file.
+	 *
+	 * @param AuthTrustId AuthTrustId.
+	 */
+	static void SetAuthTrustId(FString const& AuthTrustId);
 
-	/// <summary>
-	/// Get Authorization Code.
-	/// </summary>
-	/// <returns>Return authorization code either from command line argument or environment variable</returns>
+	/**
+	 * @brief Retrieve Authorization Code provided by AccelByte Launcher. 
+	 *
+	 * @return Authorization code either from command line argument or environment variable.
+	 */
 	static FString GetAuthorizationCode();
 
-	/// Parse command line to obtain an argument that:
-	/// * intialized by dash (-)
-	/// * contain a value that following equal sign (=)
-	/// Assuming the switch is case insesitive
-	/// Example: -serverip=127.0.0.1
-	///    key or switch is the serverip
-	///    value is 127.0.0.1
-	///
-	/// @param Key The key of switch argument.
-	/// @param Value The operation result will be returned through this parameter.
-	///
-	/// @return True if value from the second parameter is returned and
-	/// @return False if no value/args can be found
+	/**
+	 * @brief Parse command line to obtain an argument that:
+	 *  * intialized by dash (-)
+	 *  * contain a value that following equal sign (=)
+	 *  Assuming the switch is case insesitive
+	 *  Example: -serverip=127.0.0.1
+	 *     key or switch is the serverip
+	 *     value is 127.0.0.1
+	 *     
+	 *  @param Key The key of switch argument.
+	 *  @param Value The operation result will be returned through this parameter.
+	 * 
+	 *  @return True if value from the second parameter is returned and
+	 *  @return False if no value/args can be found
+	 */
 	static bool GetValueFromCommandLineSwitch(const FString& Key, FString& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, int& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, bool& Value);
 	static FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
 	static bool IsNumericString(const FString& String);
 	static bool IsLanguageUseCommaDecimalSeparator();
+	static bool IsAccelByteIDValid(FString const& AccelByteId);
 
 //To allow override for testing using mock class
 protected:
 #pragma region DEVICE_ID
-	/// <summary>
-	/// Create a randomized 30 digit alpha-numberic DeviceID
-	/// </summary>
-	/// <returns></returns>
+	/**
+	 * @brief Create a randomized 30 digit alpha-numeric DeviceID.
+	 *
+	 * @return Random string of DeviceID. 
+	 */
 	static FString RandomizeDeviceId();
 
-	/// <summary>
-	/// Try to obtain DeviceID from a cached value
-	/// If not found using the Default parameter and also store it into the cache
-	/// </summary>
-	/// <param name="Default"></param>
-	/// <returns></returns>
-	static FString GetOrSetIfDeviceIdNotFound(FString Default = "");
+	/**
+	 * @brief Try to obtain DeviceID from a cached value if not found using the Default parameter and also store it into the cache
+	 *
+	 * @param Default 
+	 */
+	static FString GetOrSetIfDeviceIdNotFound(FString const& Default = "");
 
-	/// <summary>
-	/// Get the development mode DeviceID override method from "DefaultEngine.ini"
-	/// 	Section:	[AccelByte.Dev]
-	/// 	Key:		DeviceIdOverrideMethod=(STRING)
-	/// </summary>
-	/// <returns>Parsing result</returns>
+	/**
+	 * @brief Get the development mode DeviceID override method from "DefaultEngine.ini"
+	 *  	Section:	[AccelByte.Dev]
+	 *  	Key:		DeviceIdOverrideMethod=(STRING)
+	 *
+	 * @return DeviceID override method.
+	 */
 	static EAccelByteDevModeDeviceIdMethod GetCurrentDeviceIdOverrideMethod();
 
-	/// <summary>
-	/// Obtain DeviceID for development mode
-	/// GAME CLIENT NON SHIPPING BUILD ONLY!
-	/// Can be controlled using either command-line args or configuration file.
-	/// 
-	/// IF you want to FORCEFULLY override the device ID:
-	///		Please use Command-line args.
-	///		Example:
-	/// 	"PackagedGameClient.exe -deviceid YOUR_DEVICE_ID ......"
-	/// 
-	/// ELSE use the "DefaultEngine.ini" file to control the device ID.
-	/// First of all, select the override method using this field in configuration:
-	/// ===>Section:	[AccelByte.Dev]
-	/// 	Key:		DeviceIdOverrideMethod=(STRING)
-	///		Value:
-	/// 	Supported string as enumerator = {COMMANDLINE, PICK_RANDOM, RANDOMIZE, PERSISTENT}
-	/// 	Example
-	/// 			[AccelByte.Dev]
-	/// 			DeviceIdOverrideMethod=RANDOMIZE
-	///		IF this field is wrong or left empty:
-	///			The override behavior will be done by the following method order [COMMANDLINE, PICK_RANDOM, RANDOMIZE, PERSISTENT]
-	/// 
-	/// Then specify the key/value for the list of PICK_RANDOM override method
-	/// ===>Section:	[AccelByte.Dev]
-	/// 	Key:
-	/// 		[_] DeviceId=(STRING[])
-	/// 			Example
-	/// 				[AccelByte.Dev]
-	/// 				+DeviceId=aaasdfsadfasd
-	/// 				+DeviceId=sdahssdghsgfd
-	/// 				+DeviceId=safvcgdsfgsgf
-	/// 				+DeviceId=gsdgdsfgfafsf
-	/// 
-	/// COMPILED EXAMPLE from DefaultEngine.ini
-	/// [AccelByte.Dev]
-	/// DeviceIdOverrideMethod=[COMMANDLINE, or PICK_RANDOM, or RANDOMIZE, or PERSISTENT]
-	/// +DeviceId=aaasdfsadfasd
-	/// +DeviceId=sdahssdghsgfd
-	/// +DeviceId=safvcgdsfgsgf
-	/// +DeviceId=gsdgdsfgfafsf
-	/// 
-	/// To deny all override and pretend to be shipping build:
-	/// ===>Section:	[AccelByte.Dev]
-	/// 	Key:		DiscardOverride=(BOOL)
-	/// 		Example
-	/// 			[AccelByte.Dev]
-	/// 			DiscardOverride=true
-	/// 
-	/// </summary>
-	/// <param name="Default">The default value if there is no override found</param>
-	/// <returns></returns>
-	static FString GetDevModeDeviceId(FString Default);
+	/**
+	 * @brief Obtain DeviceID for development mode
+	 * GAME CLIENT NON SHIPPING BUILD ONLY!
+	 * Can be controlled using either command-line args or configuration file.
+	 * 
+	 * IF you want to FORCEFULLY override the device ID:
+	 * 	Please use Command-line args.
+	 * 	Example:
+	 * 	"PackagedGameClient.exe -deviceid YOUR_DEVICE_ID ......"
+	 * 
+	 * ELSE use the "DefaultEngine.ini" file to control the device ID.
+	 * First of all, select the override method using this field in configuration:
+	 * ===>Section:	[AccelByte.Dev]
+	 * 	Key:		DeviceIdOverrideMethod=(STRING)
+	 * 	Value:
+	 * 	Supported string as enumerator = {COMMANDLINE, PICK_RANDOM, RANDOMIZE, PERSISTENT}
+	 * 	Example
+	 * 			[AccelByte.Dev]
+	 * 			DeviceIdOverrideMethod=RANDOMIZE
+	 * 	IF this field is wrong or left empty:
+	 * 		The override behavior will be done by the following method order [COMMANDLINE, PICK_RANDOM, RANDOMIZE, PERSISTENT]
+	 * 
+	 * Then specify the key/value for the list of PICK_RANDOM override method
+	 * ===>Section:	[AccelByte.Dev]
+	 * 	Key:
+	 * 		[_] DeviceId=(STRING[])
+	 * 			Example
+	 * 				[AccelByte.Dev]
+	 * 				+DeviceId=aaasdfsadfasd
+	 * 				+DeviceId=sdahssdghsgfd
+	 * 				+DeviceId=safvcgdsfgsgf
+	 * 				+DeviceId=gsdgdsfgfafsf
+	 * 
+	 * COMPILED EXAMPLE from DefaultEngine.ini
+	 * [AccelByte.Dev]
+	 * DeviceIdOverrideMethod=[COMMANDLINE, or PICK_RANDOM, or RANDOMIZE, or PERSISTENT]
+	 * +DeviceId=aaasdfsadfasd
+	 * +DeviceId=sdahssdghsgfd
+	 * +DeviceId=safvcgdsfgsgf
+	 * +DeviceId=gsdgdsfgfafsf
+	 *
+	 * To deny all override and pretend to be shipping build:
+	 * ===>Section:	[AccelByte.Dev]<summary>
+	 * 	Key:		DiscardOverride=(BOOL)
+	 * 		Example
+	 * 			[AccelByte.Dev]
+	 * 			DiscardOverride=true
+	 *
+	 *  @param Default The default value if there is no override found
+	 *
+	 *  @return String of DeviceID.
+	 */
+	static FString GetDevModeDeviceId(FString const& Default);
 
 	static FString AccelByteStoredSectionIdentifiers() { return FApp::GetProjectName() / FString(TEXT("Identifiers")); }
 	static FString AccelByteStoredKeyDeviceId() { return FString(TEXT("DeviceId")); }
@@ -535,17 +481,61 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPubIp
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Web | Models | Ip")
-		FString Ip;
+		FString Ip {};
 };
 
+/**
+ * @brief AccelByteNetUtilities 
+ */
 class ACCELBYTEUE4SDK_API FAccelByteNetUtilities
 {
 public:
-	/*
-	* @brief Get Public IP using api.ipify.org
-	*/
-	static void GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError);
-	static void DownloadFrom(const FString& Url, const FHttpRequestProgressDelegate& OnProgress, const THandler<TArray<uint8>>& OnDownloaded, const FErrorHandler& OnError);
-	static void UploadTo(const FString& Url, const TArray<uint8>& DataUpload, const FHttpRequestProgressDelegate& OnProgress,
-		const AccelByte::FVoidHandler& OnSuccess, const FErrorHandler& OnError, FString ContentType = TEXT("application/octet-stream"));
+	/**
+	 * @brief Get Public IP using api.ipify.org
+	 *
+	 * @param OnSuccess Callback function for successful delegate.
+	 * @param OnError Callback function for error delegate.
+	 */
+	static void GetPublicIP(THandler<FAccelByteModelsPubIp> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Download  acontent from specified URL with several callback functions including OnProgress, OnDownloaded, and OnError.
+	 *
+	 * @param Url Specified URL to download the content.
+	 * @param OnProgress Callback function for on progress delegate.
+	 * @param OnDownloaded Callback function for successful download delegate.
+	 * @param OnError Callback function for error delegate.
+	 */
+	static void DownloadFrom(FString const& Url
+		, FHttpRequestProgressDelegate const& OnProgress
+		, const THandler<TArray<uint8>>& OnDownloaded
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Upload a content using specified URL with several callback functions including OnProgress, OnSuccess, and OnError.
+	 *
+	 * @param Url Specified URL to upload the content.
+	 * @param DataUpload Content to upload.
+	 * @param OnProgress Callback function for on progress delegate.
+	 * @param OnSuccess Callback function for successful upload delegate.
+	 * @param OnError Callback function for error delegate.
+	 * @param ContentType Specified content-type header which determine the type of uploaded content (default: application/octet-stream)
+	 */
+	static void UploadTo(FString const& Url
+		, TArray<uint8> const& DataUpload
+		, FHttpRequestProgressDelegate const& OnProgress
+		, AccelByte::FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& ContentType = TEXT("application/octet-stream"));
+
+	/**
+	 * @brief Check whether specified URL is a valid URL format or not.
+	 *
+	 * @param Url Specified URL.
+	 * 
+	 * @return true if the URL is valid, and
+	 * @return false if it is invalid.
+	 */
+	static bool IsValidUrl(FString const& Url);
 };

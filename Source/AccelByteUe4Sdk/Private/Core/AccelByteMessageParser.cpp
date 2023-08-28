@@ -71,16 +71,46 @@ bool MessageParser::MoveToEndObject(const TCHAR*& Cursor)
 	return Braces == 0;
 }
 
-FString MessageParser::EscapeString(const FString& InString)
+bool EscapeStr(const TCHAR*& Cursor, FString& OutJsonString)
+{
+	bool bIsEscape = false;
+	OutJsonString.Append("\"");
+	while (*Cursor)
+	{
+		if (*Cursor == '\\' || *Cursor == '"')
+		{
+			OutJsonString.Append("\\");
+		}
+		OutJsonString.AppendChar(*Cursor);
+		++Cursor;
+	}
+	OutJsonString.Append("\"");
+	return true;
+}
+
+FString MessageParser::EscapeString(const FString& InString, bool bIsEnclosedWithQuote)
 {
 	const TCHAR* Cursor = GetData(InString);
-	if (!Cursor || !InString.Contains("\""))
+
+	// We will check if the string DOES NOT CONTAIN quote && backslash
+	// If so, we don't need to escape it.
+	if (!Cursor || 
+		(!InString.Contains("\"") && !InString.Contains("\\")))
 	{
+		// Checking the value is an OBJECT or ARRAY
+		// We only need to enclose it with quote.
+		if (bIsEnclosedWithQuote ||
+			InString.StartsWith("{") ||
+			InString.StartsWith("[")
+			)
+		{
+			return FString::Printf(TEXT("\"%s\""), *InString);
+		}
 		return InString;
 	}
 
 	FString Escaped;
-	ParseString(Cursor, Escaped);
+	EscapeStr(Cursor, Escaped);
 	return Escaped;
 }
 

@@ -448,6 +448,28 @@ public:
 	 */	
 	void SyncOculusDLC(FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Synchronize with DLC entitlements in PSN Store with multiple service labels.
+	 *
+	 * @param PlaystationModel Contains ServiceLabel needed for PlayStation DLC Multiple Service sync.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */	
+	void SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDLCSync const& PlaystationModel
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+	
+	/**
+	 * @brief Synchronize with IAP entitlements in PSN Store with multiple service labels.
+	 *
+	 * @param PlaystationModel Contains ServiceLabel needed for PlayStation IAP Multiple Service sync.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */	
+	void SyncEntitlementPSNMultipleService(const FAccelByteModelsMultipleServicePSNIAPSync& PlaystationModel
+		, THandler<TArray<FAccelByteModelsMultipleServicePlayStationInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 private:
 	Entitlement() = delete;

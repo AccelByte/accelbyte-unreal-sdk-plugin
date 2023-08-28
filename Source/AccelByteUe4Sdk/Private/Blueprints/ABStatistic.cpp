@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABStatistic.h"
 
+using namespace AccelByte;
+
 void UABStatistic::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

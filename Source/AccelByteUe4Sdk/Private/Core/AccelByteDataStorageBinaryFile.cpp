@@ -6,6 +6,10 @@
 #include "JsonUtilities.h"
 #include "Misc/FileHelper.h"
 #include "Containers/UnrealString.h"
+#if PLATFORM_SWITCH
+#include "SwitchFileSystem.h"
+#include "SwitchPathManager.h"
+#endif
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteDataStorageBinaryFile, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteDataStorageBinaryFile);
@@ -17,6 +21,12 @@ DataStorageBinaryFile::DataStorageBinaryFile(FString DirectoryPath)
 	FDirectoryPath DirPath;
 	DirPath.Path = DirectoryPath;
 	this->RelativeFileDirectory = DirPath;
+#if PLATFORM_SWITCH
+	if(!FSwitchFileSystem::IsCacheStorageMounted())
+	{
+		FSwitchFileSystem::MountCacheStorage();
+	}
+#endif
 }
 
 void DataStorageBinaryFile::Reset(const THandler<bool>& Result, const FString & FileName)
@@ -132,7 +142,14 @@ void DataStorageBinaryFile::GetItem(const FString & Key, const THandler<TPair<FS
 FDirectoryPath DataStorageBinaryFile::GetAbsoluteFileDirectory()
 {
 	FDirectoryPath DirPath;
-#if !(PLATFORM_WINDOWS) || UE_BUILD_SHIPPING
+#if PLATFORM_SWITCH
+	DirPath.Path = this->RelativeFileDirectory.Path;
+	if(!FSwitchPathManager::DoesPathIncludeMountPoint(*DirPath.Path))
+	{
+		FString MountPoint = TEXT("cache:");
+		DirPath.Path = MountPoint / DirPath.Path;
+	}
+#elif !(PLATFORM_WINDOWS) || UE_BUILD_SHIPPING
 	//This is the only directory that allow us to write. This hardcode is mandatory & unavoidable
 	DirPath.Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectLogDir());
 #else

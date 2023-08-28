@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABAgreement.h"
 
+using namespace AccelByte;
+
 void UABAgreement::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

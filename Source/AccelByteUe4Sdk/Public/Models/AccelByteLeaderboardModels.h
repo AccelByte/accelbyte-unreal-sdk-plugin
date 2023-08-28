@@ -29,6 +29,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserPoint
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPoint")
 	FString userId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPoint")
+	bool hidden{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPoint")
+	FJsonObjectWrapper additionalData{};
 };
 
 USTRUCT(BlueprintType)
@@ -53,6 +59,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRanking
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRanking")
 	int rank{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRanking")
+	bool hidden{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRanking")
+	FJsonObjectWrapper additionalData{};
 };
 
 USTRUCT(BlueprintType)

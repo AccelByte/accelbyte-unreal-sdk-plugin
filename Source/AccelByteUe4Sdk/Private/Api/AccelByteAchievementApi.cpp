@@ -183,6 +183,12 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 	{
 		FReport::Log(FString(__FUNCTION__));
 
+		if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+		{
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+			return;
+		}
+
 		const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
 			, *SettingsRef.AchievementServerUrl
 			, *CredentialsRef.GetNamespace()

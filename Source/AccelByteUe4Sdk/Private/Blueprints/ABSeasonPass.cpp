@@ -5,6 +5,8 @@
 
 #include "Blueprints/ABSeasonPass.h"
 
+using namespace AccelByte;
+
 void UABSeasonPass::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

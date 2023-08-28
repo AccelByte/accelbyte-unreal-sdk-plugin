@@ -280,6 +280,53 @@ enum class EAccelByteEntitlementIAPOrderStatus : uint8
 	FAILED
 };
 
+UENUM(BlueprintType)
+enum class EAccelBytePlatformRewardType : uint8
+{
+	NONE = 0,
+	ITEM,
+	CURRENCY  
+};
+
+UENUM(BlueprintType)
+enum class EAccelBytePlatformRewardSource : uint8
+{
+	NONE = 0,
+	PURCHASE,
+	IAP,
+	PROMOTION,
+	ACHIEVEMENT,
+	REFERRAL_BONUS,
+	REDEEM_CODE,
+	REWARD,
+	GIFT,
+	DLC,
+	OTHER,
+	SELL_BACK,
+	CONSUME_ENTITLEMENT,
+	ORDER_REVOCATION,
+	DLC_REVOCATION,
+	PAYMENT,
+	EXPIRATION
+};
+
+UENUM(BlueprintType)
+enum class EAccelBytePlatformRewardOrigin : uint8
+{
+	NONE = 0,
+	Playstation,
+	Xbox,
+	Steam,
+	Epic,
+	IOS,
+	GooglePlay,
+	Twitch,
+	Nintendo,
+	Oculus,
+	System,
+	Other
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -1327,6 +1374,47 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayStationIAPSync
 	FString CurrencyCode{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationIAPSync")
 	int32 ServiceLabel{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsMultipleServicePSNDLCSync
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceDLCSync")
+	TArray<int32> ServiceLabel{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsMultipleServicePSNIAPSync
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	FString ProductId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	int32 Price{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	FString CurrencyCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	TArray<int32> ServiceLabel{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsMultipleServicePlayStationInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	FString TransactionId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	FString PsnItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	FString ItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	FString Sku{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlayStationMultipleServiceIAPSync")
+	EAccelByteEntitlementIAPOrderStatus IAPOrderStatus{EAccelByteEntitlementIAPOrderStatus::NONE};
 };
 
 USTRUCT(BlueprintType)
@@ -2553,4 +2641,67 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSyncOculusConsumableEntitlementInfo
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SyncOculusConsumableEntitlementInfo ")
 	EAccelByteEntitlementIAPOrderStatus IAPOrderStatus{EAccelByteEntitlementIAPOrderStatus::NONE};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformRewardItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardItem")
+	FString ItemType{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardItem")
+	FString ItemId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardItem")
+	FString ItemSku{}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformRewardCurrency
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardCurrency")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardCurrency")
+	FString CurrencyCode{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformReward
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformReward")
+	EAccelBytePlatformRewardType Type{EAccelBytePlatformRewardType::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformReward")
+	FAccelByteModelsPlatformRewardItem Item{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformReward")
+	FAccelByteModelsPlatformRewardCurrency Currency{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformReward")
+	int32 Quantity{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsFulfillRewards
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | FulfillRewards")
+	TArray<FAccelByteModelsPlatformReward> Rewards{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | FulfillRewards")
+	EAccelBytePlatformRewardSource Source{EAccelBytePlatformRewardSource::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | FulfillRewards")
+	EAccelBytePlatformRewardOrigin Origin{EAccelBytePlatformRewardOrigin::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | FulfillRewards")
+	FJsonObjectWrapper Metadata{};
 };

@@ -666,7 +666,6 @@ FString Lobby::SendPartyGenerateCodeRequest()
 		, Party
 		, {})
 }
-
 FString Lobby::SendPartyGetCodeRequest()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -746,10 +745,15 @@ FString Lobby::SendSetPresenceStatus(const EAvailability Availability
 	, const FString& Activity)
 {
 	FReport::Log(FString(__FUNCTION__));
-	const FString EscapedActivity = MessageParser::EscapeString(Activity);
+	if (Activity.Contains("\n"))
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Unhandled character detected"));
+		return "";
+	}
+	FString CopyActivity = MessageParser::EscapeString(Activity);
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(SetUserPresence
 		, Presence
-		, FString::Printf(TEXT("availability: %s\nactivity: %s\n"), *FAccelByteUtilities::GetUEnumValueAsString(Availability).ToLower(), *EscapedActivity))
+		, FString::Printf(TEXT("availability: %s\nactivity: %s\n"), *FAccelByteUtilities::GetUEnumValueAsString(Availability).ToLower(), *CopyActivity))
 }
 
 FString Lobby::SendGetOnlineUsersRequest()
@@ -1709,6 +1713,12 @@ void Lobby::CreateWebSocket(const FString& Token)
 
 	TMap<FString, FString> Headers;
 	Headers.Add(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
+
+	const FString PlatformId = LobbyCredentialsRef.GetAuthToken().Platform_id;
+	if (!PlatformId.IsEmpty())
+	{
+		Headers.Add(LobbyPlatformIdHeaderName, PlatformId);
+	}
 	if(!Token.IsEmpty())
 	{
 		Headers.Add("Entitlement", Token);
@@ -1810,10 +1820,16 @@ FString Lobby::LobbyMessageToJson(const FString& Message)
 				UE_LOG(LogAccelByte, Warning, TEXT("[LobbyMessageToJson] Invalid object for field '%s', set to empty object"), *Name);
 			}
 		}
-		// everything else
-		else
+		// JSON string
+		else if (Value.StartsWith("\"") && Value.EndsWith("\""))
 		{
 			MessageParser::ParseString(Cursor, JsonString);
+		}
+		// everything else
+		else 
+		{
+			FString Escaped = MessageParser::EscapeString(Value, true);
+			JsonString.Append(Escaped);
 		}
 	}
 

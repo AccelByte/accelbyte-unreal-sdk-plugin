@@ -7,6 +7,8 @@
 #include "Api/AccelByteCategoryApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
+
 void UABCatalog::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

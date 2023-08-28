@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.0.0%0D23.7.1) (2023-08-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* parsing behavior has been improved and handle quotation mark + backslash
+
+### Features
+
+* add lobby error code for max friend limit reached ([b4b25c8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b4b25c890a3456b334853dbaba113dd2316572c1))
+* check user id validity before calling API ([5405de2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5405de22018f65f33ceeb9903bce71a7c7bcee91))
+* Expose Fulfill Rewards ([ff1316e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ff1316e6dfdc9e4061d7c7171b884903198363e6))
+* exposing missing psn sync entitlement multiple service ([a045dbc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a045dbcfd52727049d7c1875efcaba4b9b2bac09))
+* **lobby:** send platform name to lobby when connecting ([e1e5546](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e1e5546166c99af1f4b6618521cd4483d599d69d))
+* **MMv1:** add Region in MMv1 matchmaking notice ([df7a1a3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/df7a1a3b89b038aff9ab59b85b461c6f62c366ba))
+* SetUserPresenceStatus support JSON ([d542a29](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d542a29a77288253784e4eb86fe25ca7674d4e5c))
+* **telemetry:** add clientTimestamp ([8f25c0e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8f25c0e277cc9a993f3a49dbdd793f3b78097e57))
+* **UGC:** add a new sort by value and devide liked content endpoint ([583e0a7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/583e0a73b531f225c8fc3018e2c2862aacb2f449))
+
+
+### Bug Fixes
+
+* change I64d to lli ([352be36](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/352be3699952b96fe065e51a10279afd6bc627b6))
+* **Leaderboard:** Sync the leftover variables for get user rank endpoint ([fef82d0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fef82d0884bdc428c4b3b552c1fe1fb10f32a99d))
+* lobby not triggering ConnectionClosed after user disconnected because of login ban. ([2c78a05](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2c78a0555c09ba76c7e253a942e579c0224b17fe))
+* Prebuild script failed when path contain spaces ([b9988d1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b9988d13ae04026f8d604e7064b6bfd0858ff295))
+* remove 'using namespace' in public header ([0ad5094](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0ad50942d3d24163b248e67e43e3b32057e519a6))
+* **Statistic:** Adjust newest flow to expose which statistic is being updated ([3867dde](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3867dde44f29434a784e9b56cb2dbf294cbdb73e))
+* **switch:** unable to read/write cache file ([1feee5e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1feee5efb62e594c37048c20e8517a3db4ac13c0))
+
+
+### Refactors
+
+* move IsValidUrl to AccelByte Net Utilities ([f91f18e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f91f18e8049e55d8b36eab2013eb6e18d284b067))
+
 ### [23.7.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/23.7.1%0D23.7.0) (2023-08-23)
 
 

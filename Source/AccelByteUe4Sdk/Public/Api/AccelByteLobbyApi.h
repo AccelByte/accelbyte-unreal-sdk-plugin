@@ -72,6 +72,7 @@ public:
 private:
 	Credentials& LobbyCredentialsRef;
 
+	const FString LobbyPlatformIdHeaderName = "X-Ab-Platform";
 	const FString LobbySessionHeaderName = "X-Ab-LobbySessionID";
 
 	bool BanNotifReceived = false;
@@ -641,7 +642,7 @@ public:
 	 * @brief Set presence status on lobby service
 	 *
 	 * @param Availability Presence state that you want to use. State is EAvailability type
-	 * @param Activity User's custom activity
+	 * @param Activity User's custom activity. It will be escaped and unescaped automatically, can handle JSON.
 	 */
 	FString SendSetPresenceStatus(const EAvailability Availability, const FString& Activity);
 

@@ -34,6 +34,13 @@ void ServerAchievement::UnlockAchievement(const FString& UserId
 		OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
 		return;
 	}
+
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	if (AchievementCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("Url is invalid. Achievement Code is empty."));

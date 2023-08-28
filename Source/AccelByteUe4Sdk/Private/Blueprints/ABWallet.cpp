@@ -6,6 +6,8 @@
 #include "Api/AccelByteWalletApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
+
 void UABWallet::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

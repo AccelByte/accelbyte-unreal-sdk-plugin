@@ -150,6 +150,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkStatItemOperationResult
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkStatItemIncResult")
 	bool Success{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkStatItemIncResult")
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
@@ -243,6 +246,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateUserStatItemsResponse
 	FString StatCode{}; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUserResponse")
 	FJsonObjectWrapper Details{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUpdateMultipleUserResponse")
+	FString UserId{}; 
+
 };
 
 USTRUCT(BlueprintType)

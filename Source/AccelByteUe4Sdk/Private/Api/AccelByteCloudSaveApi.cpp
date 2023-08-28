@@ -88,6 +88,12 @@ void CloudSave::GetPublicUserRecord(FString const& Key
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Get Public User Record failed, UserId format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s/public")
 		, *SettingsRef.CloudSaveServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -626,6 +632,12 @@ void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 		return;
 	}
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Record Keys Failed, UserId format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/public")
 		, *SettingsRef.CloudSaveServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -677,6 +689,12 @@ void CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 	if (UserId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Records Failed, UserId cannot be empty!"));
+		return;
+	}
+
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Records Failed, UserId format is invalid"));
 		return;
 	}
 

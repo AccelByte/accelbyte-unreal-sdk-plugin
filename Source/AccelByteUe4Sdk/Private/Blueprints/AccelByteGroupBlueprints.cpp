@@ -7,6 +7,7 @@
 #include "Api/AccelByteGroupApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
 using Api::Group;
 using AccelByte::FErrorHandler;
 using AccelByte::THandler;

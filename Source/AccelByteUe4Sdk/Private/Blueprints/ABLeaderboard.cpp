@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABLeaderboard.h"
 
+using namespace AccelByte;
+
 void UABLeaderboard::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

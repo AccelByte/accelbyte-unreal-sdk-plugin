@@ -8,13 +8,13 @@
 
 namespace AccelByte
 {
-class MessageParser
+class ACCELBYTEUE4SDK_API MessageParser
 {
 public:
 	static bool MoveToEndQuote(const TCHAR*& Cursor);
 	static bool MoveToEndObject(const TCHAR*& Cursor);
 	// escape quote on string
-	static FString EscapeString(const FString& InString);
+	static FString EscapeString(const FString& InString, bool bIsEnclosedWithQuote = false);
 	// parse and append string into OutJsonString, unescaped quote will be escaped
 	static bool ParseString(const TCHAR*& Cursor, FString& OutJsonString);
 	// parse and append object into OutJsonString

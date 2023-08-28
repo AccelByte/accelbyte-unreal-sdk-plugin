@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABSessionBrowser.h"
 
+using namespace AccelByte;
+
 void UABSessionBrowser::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

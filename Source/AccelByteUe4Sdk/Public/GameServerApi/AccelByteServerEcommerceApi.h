@@ -261,6 +261,19 @@ public:
 		, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Fulfill Rewards to User 
+	 *
+	 * @param UserId User Id 
+	 * @param FulfillRewardsRequest Struct of Fulfill Rewards, FAccelByteModelsFulfillRewards
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation fails.
+	 */
+	void FulfillRewards(const FString& UserId, const FAccelByteModelsFulfillRewards& FulfillRewardsRequest
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+
 private:
 	ServerEcommerce() = delete;
 	ServerEcommerce(ServerEcommerce const&) = delete;

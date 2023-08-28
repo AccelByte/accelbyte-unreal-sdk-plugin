@@ -6,6 +6,8 @@
 #include "Api/AccelByteOrderApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
+
 void UABOrder::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

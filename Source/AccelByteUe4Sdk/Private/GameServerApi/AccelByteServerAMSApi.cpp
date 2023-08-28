@@ -87,8 +87,6 @@ void ServerAMS::Disconnect(bool bForceCleanup /*= false*/)
 
 bool ServerAMS::IsConnected() const
 {
-	FReport::Log(FString(__FUNCTION__));
-
 	return WebSocket.IsValid() && WebSocket->IsConnected();
 }
 
@@ -194,6 +192,7 @@ void ServerAMS::SendReadyMessage()
 {
 	if (!IsConnected())
 	{
+		UE_LOG(LogAccelByteAMS, Warning, TEXT("DS is not connected to AMS yet!"));
 		return;
 	}
 
@@ -207,6 +206,7 @@ void ServerAMS::SendReadyMessage()
 		bHeartbeatJobStarted = true;
 		AMSHeartbeatTickDelegate = FTickerDelegate::CreateRaw(this, &ServerAMS::PeriodicHeartbeat);
 		AMSHeartbeatTickDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AMSHeartbeatTickDelegate, static_cast<float>(AMSHeartbeatInterval.GetTotalSeconds()));
+		UE_LOG(LogAccelByteAMS, Log, TEXT("Added AMS heartbeat event periodically: %i seconds"), AMSHeartbeatInterval.GetTotalSeconds());
 	}
 }
 
@@ -218,6 +218,8 @@ void ServerAMS::SendHeartbeat()
 	}
 
 	FString HeartbeatMessage = TEXT("{\"heartbeat\":{}}");
+
+	UE_LOG(LogAccelByteAMS, VeryVerbose, TEXT("Send heartbeat message to AMS\n%s"), *HeartbeatMessage);
 	WebSocket->Send(HeartbeatMessage);
 }
 

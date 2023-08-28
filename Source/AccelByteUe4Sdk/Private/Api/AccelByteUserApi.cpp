@@ -1187,6 +1187,12 @@ void User::GetUserByUserId(const FString& UserID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserID))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -1489,6 +1495,12 @@ void User::GetPublisherUser(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/publisher")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -1523,6 +1535,12 @@ void User::GetUserInformation(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+
+	}
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/information")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace()

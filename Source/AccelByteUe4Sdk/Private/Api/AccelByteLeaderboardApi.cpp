@@ -86,6 +86,12 @@ void Leaderboard::GetUserRanking(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s")
 		, *SettingsRef.LeaderboardServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -178,6 +184,12 @@ void Leaderboard::GetUserRankingV3(FString const& UserId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/users/%s")
 		, *SettingsRef.LeaderboardServerUrl

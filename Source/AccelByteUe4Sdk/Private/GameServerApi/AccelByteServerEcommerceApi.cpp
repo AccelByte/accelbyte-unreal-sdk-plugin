@@ -452,5 +452,19 @@ void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
+void ServerEcommerce::FulfillRewards(const FString& UserId, const FAccelByteModelsFulfillRewards& FulfillRewardsRequest
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment/rewards")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FulfillRewardsRequest, OnSuccess, OnError);
+}
+
 } // Namespace GameServerApi
 } // Namespace AccelByte

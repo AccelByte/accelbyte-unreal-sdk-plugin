@@ -1287,6 +1287,12 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 
+			if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+			{
+				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+				return;
+			}
+
 			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/mute"),
 				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId));
 
@@ -1299,6 +1305,12 @@ namespace AccelByte
 			const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
+
+			if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+			{
+				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+				return;
+			}
 
 			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/unmute"),
 				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId));
@@ -1324,10 +1336,22 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 
+			TArray<FString> FilteredIds = UserIds;
+			FilteredIds.RemoveAll([](const FString& Element)
+			{
+				return !FAccelByteUtilities::IsAccelByteIDValid(Element);
+			});
+
+			if (FilteredIds.Num() <= 0)
+			{
+				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+				return;
+			}
+
 			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/ban-members"),
 				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId));
 
-			const FAccelByteModelsBanGroupChatRequest Request {UserIds};
+			const FAccelByteModelsBanGroupChatRequest Request {FilteredIds};
 
 			HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 		}

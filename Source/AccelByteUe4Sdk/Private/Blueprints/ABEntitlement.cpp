@@ -6,6 +6,8 @@
 #include "Api/AccelByteEntitlementApi.h"
 #include "Core/AccelByteRegistry.h"
 
+using namespace AccelByte;
+
 void UABEntitlement::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABReward.h"
 
+using namespace AccelByte;
+
 void UABReward::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

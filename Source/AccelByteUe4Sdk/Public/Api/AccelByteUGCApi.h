@@ -478,7 +478,7 @@ public:
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria, name,download,like,date. default=date.
 	 * @param OrderBy Sorting order: asc, desc. default=desc	
-	 *
+	 * 
 	 * @deprecated This method will be removed in the future, so please use
 	 * 	void GetLikedContent(const TArray<FString>& Tags
 		, ...

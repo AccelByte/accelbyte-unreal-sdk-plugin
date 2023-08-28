@@ -864,6 +864,46 @@ void Entitlement::SyncOculusDLC(FVoidHandler const& OnSuccess
 		, *CredentialsRef.GetUserId());
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
 }
+
+void Entitlement::SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDLCSync const& PlaystationModel
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	FString Content = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/psn/sync/multiServiceLabels")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(PlaystationModel);
+	FAccelByteUtilities::RemoveEmptyStrings(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void Entitlement::SyncEntitlementPSNMultipleService(const FAccelByteModelsMultipleServicePSNIAPSync& PlaystationModel
+	, THandler<TArray<FAccelByteModelsMultipleServicePlayStationInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__)); 
+
+	FString Content = TEXT("");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/psn/sync/multiServiceLabels")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(PlaystationModel);
+	FAccelByteUtilities::RemoveEmptyStrings(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
+	
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
 	
 } // Namespace Api
 }

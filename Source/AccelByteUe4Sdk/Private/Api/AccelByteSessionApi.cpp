@@ -486,6 +486,12 @@ void Session::KickUserFromParty(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserID))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/%s/kick")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef.GetNamespace()

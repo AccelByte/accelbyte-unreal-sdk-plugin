@@ -68,7 +68,7 @@ bool ConvertDateTimeFieldsFromUnixTimestamp(const TSet<FString>& InFieldNames
 	, T& OutObject)
 {
 	TSharedRef<FJsonObject> NewJsonObject = MakeShared<FJsonObject>(InJsonObject);
-	for (FString FieldName : InFieldNames)
+	for (const FString& FieldName : InFieldNames)
 	{
 		if(!NewJsonObject->HasField(FieldName))
 		{

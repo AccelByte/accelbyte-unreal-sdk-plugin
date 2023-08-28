@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABPresence.h"
 
+using namespace AccelByte;
+
 void UABPresence::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
@@ -42,7 +44,7 @@ void UABPresence::BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request
 		Request.bCountOnly);
 }
 
-void UABPresence::SetPresenceStatus(FAccelBytePresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError) 
+void UABPresence::SetPresenceStatus(FAccelBytePresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError)
 {
 	ApiClientPtr->Lobby.SetUserPresenceResponseDelegate(
 	Api::Lobby::FSetUserPresenceResponse::CreateLambda(
@@ -58,7 +60,6 @@ void UABPresence::SetPresenceStatus(FAccelBytePresenceStatus const& Request, FDO
 
 	ApiClientPtr->Lobby.SendSetPresenceStatus(Request.Availability, Request.Activity);
 }
-
 
 void UABPresence::SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif) 
 {

@@ -43,7 +43,6 @@
 #include "Core/AccelByteApiBase.h"
 #include "Api/AccelByteStoreDisplayApi.h"
 
-using namespace AccelByte;
 namespace AccelByte
 {
 

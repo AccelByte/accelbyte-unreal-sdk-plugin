@@ -42,6 +42,12 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserID))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/public")
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -203,6 +209,12 @@ void UserProfile::CreateUserProfile(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -224,6 +236,12 @@ void UserProfile::UpdateUserProfile(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -237,6 +255,12 @@ void UserProfile::GetUserProfile(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
@@ -272,6 +296,12 @@ void UserProfile::GenerateUploadURLForUserContent(const FString& UserId
 	, EAccelByteUploadCategory Category)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/files")
 		, *SettingsRef.BasicServerUrl

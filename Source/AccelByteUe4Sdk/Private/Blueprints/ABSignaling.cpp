@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABSignaling.h"
 
+using namespace AccelByte;
+
 void UABSignaling::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

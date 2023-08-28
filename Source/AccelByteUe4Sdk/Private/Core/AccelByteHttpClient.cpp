@@ -132,9 +132,7 @@ namespace AccelByte
 
 	bool FHttpClient::IsValidUrl(FString const& Url)
 	{
-		FRegexPattern UrlRegex(TEXT(REGEX_URL));
-		FRegexMatcher Matcher(UrlRegex, Url);
-		return Matcher.FindNext();
+		return FAccelByteNetUtilities::IsValidUrl(Url);
 	}
 
 	void FHttpClient::ExecuteError(FErrorHandler const& OnError, FString const& ErrorText)

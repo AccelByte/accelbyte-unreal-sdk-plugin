@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABUGC.h"
 
+using namespace AccelByte;
+
 void UABUGC::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

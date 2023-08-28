@@ -743,6 +743,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	FAccelByteModelsMatchingAllies MatchingAllies{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Region {};
 	
 	// rejected status message
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")

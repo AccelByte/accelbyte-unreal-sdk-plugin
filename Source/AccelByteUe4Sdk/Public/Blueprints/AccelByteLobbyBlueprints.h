@@ -181,6 +181,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnUserPresenceResponse);
 	
+    /**
+     * @brief Set presence status on lobby service
+     *
+     * @param State Presence state that you want to use. State is EAvailability type
+     * @param Activity User's custom activity. It will be escaped and unescaped automatically, can handle JSON.
+     */
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SetPresenceStatus(EAvailability State, FString Activity);
 

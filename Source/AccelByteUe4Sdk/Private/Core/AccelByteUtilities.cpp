@@ -33,29 +33,23 @@ using namespace openssl;
 class FScopedEVPMDContext
 {
 public:
-	/**
-	 * Creates our OpenSSL Message Digest Context on construction
-	 */
+	/** @brief Creates our OpenSSL Message Digest Context on construction */
 	FScopedEVPMDContext() :
 		Context(EVP_MD_CTX_create())
 	{
 	}
 
-	/** Disable copying/assigning */
+	/** @brief Disable copying/assigning */
 	FScopedEVPMDContext(FScopedEVPMDContext&) = delete;
 	FScopedEVPMDContext& operator=(FScopedEVPMDContext&) = delete;
 
-	/**
-	 * Free our OpenSSL Message Digest Context
-	 */
+	/** @brief Free our OpenSSL Message Digest Context */
 	~FScopedEVPMDContext()
 	{
 		EVP_MD_CTX_destroy(Context);
 	}
 
-	/**
-	 * Get our OpenSSL Message Digest Context
-	 */
+	/** @brief Get our OpenSSL Message Digest Context */
 	EVP_MD_CTX* Get() const { return Context; }
 
 private:
@@ -76,9 +70,10 @@ void UnescapeB64Url(FString& B64UrlString)
 }
 
 
-FRsaPublicKey::FRsaPublicKey(FString ModulusB64Url, FString ExponentB64Url) :
-	ModulusB64Url{MoveTemp(ModulusB64Url)},
-	ExponentB64Url{MoveTemp(ExponentB64Url)}
+FRsaPublicKey::FRsaPublicKey(FString ModulusB64Url
+	, FString ExponentB64Url) 
+	: ModulusB64Url{MoveTemp(ModulusB64Url)}
+	, ExponentB64Url{MoveTemp(ExponentB64Url)}
 {}
 
 bool FRsaPublicKey::IsValid() const
@@ -106,7 +101,6 @@ int32 GetHeaderEnd(FString const& JwtString)
 	return HeaderEnd;
 }
 
-
 int32 GetPayloadEnd(FString const& JwtString)
 {
 	int32 PayloadEnd;
@@ -115,7 +109,9 @@ int32 GetPayloadEnd(FString const& JwtString)
 	return PayloadEnd;
 }
 
-TSharedPtr<FJsonObject> ExtractJson(FString const& JsonB64Url, int32 Start, int32 Count)
+TSharedPtr<FJsonObject> ExtractJson(FString const& JsonB64Url
+	, int32 Start
+	, int32 Count)
 {
 	if (JsonB64Url.IsEmpty())
 	{
@@ -137,12 +133,11 @@ TSharedPtr<FJsonObject> ExtractJson(FString const& JsonB64Url, int32 Start, int3
 }
 
 FJwt::FJwt(FString JwtString)
-	:
-	JwtString{MoveTemp(JwtString)},
-	HeaderEnd{GetHeaderEnd(this->JwtString)},
-	PayloadEnd{GetPayloadEnd(this->JwtString)},
-	HeaderJsonPtr{ExtractJson(this->JwtString, 0, HeaderEnd)},
-	PayloadJsonPtr{ExtractJson(this->JwtString, HeaderEnd + 1, PayloadEnd - HeaderEnd - 1)}
+	: JwtString{MoveTemp(JwtString)}
+	, HeaderEnd{GetHeaderEnd(this->JwtString)}
+	, PayloadEnd{GetPayloadEnd(this->JwtString)}
+	, HeaderJsonPtr{ExtractJson(this->JwtString, 0, HeaderEnd)}
+	, PayloadJsonPtr{ExtractJson(this->JwtString, HeaderEnd + 1, PayloadEnd - HeaderEnd - 1)}
 {
 }
 
@@ -240,8 +235,7 @@ TSharedPtr<FJsonObject> const& FJwt::Payload() const
 
 bool FJwt::IsValid() const
 {
-	return
-		HeaderEnd != INDEX_NONE
+	return HeaderEnd != INDEX_NONE
 		&& PayloadEnd != INDEX_NONE
 		&& HeaderEnd != PayloadEnd
 		&& HeaderJsonPtr != nullptr
@@ -360,6 +354,166 @@ FString FAccelByteUtilities::GetAuthenticatorString(EAccelByteLoginAuthFactorTyp
 	}
 }
 
+FString FAccelByteUtilities::CreateQueryParams(TMap<FString, FString> Map
+	, FString SuffixChar)
+{
+	FString Query = TEXT("");
+	for (auto kvp : Map)
+	{
+		FString Param = kvp.Key;
+		FString Value = kvp.Value;
+		if (!Param.IsEmpty() && !Value.IsEmpty())
+		{			
+			Query.Append(Query.IsEmpty() ? SuffixChar : TEXT("&"));
+			Query.Append(FString::Printf(TEXT("%s=%s"), *Param, *Value));
+		}	
+	}
+	return Query;
+}
+
+FString FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(TArray<FString> const& Array
+	, FString const& Delimiter)
+{
+	FString QueryParamValue = TEXT("");
+	if (Array.Num() > 0)
+	{ 
+		for (int i = 0; i < Array.Num(); i++)
+		{
+			const FString& UrlEncodedStringValue = FGenericPlatformHttp::UrlEncode(Array[i]);
+			FString ItemAppended = FString::Printf(TEXT("%s%s"), *Delimiter, *UrlEncodedStringValue);
+			QueryParamValue.Append( i == 0 ? Array[i] : ItemAppended);
+		}
+	}
+	return QueryParamValue;	
+}
+
+void FAccelByteUtilities::RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject> const& JsonObjectPtr
+	, uint8 const Flags
+	, TArray<FString> const& ExcludedFieldNames)
+{
+// Macro to make field removal flag bit logic more readable
+#define HAS_FIELD_REMOVAL_FLAG(FlagName) ((Flags & FieldRemovalFlag##FlagName) != 0)
+
+	TArray<FString> FieldsToRemove;
+	TMap<FString, TSharedPtr<FJsonValue>> FieldsToReplace;
+
+	// Remove empty field so it doesn't get updated in BE
+	for(auto& KeyValuePair : JsonObjectPtr->Values)
+	{
+		if(!KeyValuePair.Value.IsValid() || ExcludedFieldNames.Contains(KeyValuePair.Key))
+		{
+			continue;
+		}
+
+		bool bRemoveField = false;
+		switch (KeyValuePair.Value->Type)
+		{
+		case EJson::Array:
+		{
+			TArray<TSharedPtr<FJsonValue>> OriginalArray = KeyValuePair.Value->AsArray();
+			bRemoveField = HAS_FIELD_REMOVAL_FLAG(Arrays) && OriginalArray.Num() == 0;
+
+			if(bRemoveField || !HAS_FIELD_REMOVAL_FLAG(Nested))
+			{
+				break;
+			}
+
+			// If the array is not empty, we want to look for nested objects which might have empty values inside them
+			TArray<TSharedPtr<FJsonValue>> NewArray;
+			for(const auto& NestedValue : OriginalArray)
+			{
+				// Skipping over any array item that is not an object
+				if(NestedValue->Type != EJson::Object)
+				{
+					NewArray.Add(NestedValue);
+					continue;
+				}
+
+				TSharedPtr<FJsonObject> NestedObject = NestedValue->AsObject();
+				RemoveEmptyFieldsFromJson(NestedObject, Flags, ExcludedFieldNames);
+
+				if(HAS_FIELD_REMOVAL_FLAG(Objects) && NestedObject->Values.Num() == 0)
+				{
+					continue;
+				}
+				NewArray.Add(MakeShared<FJsonValueObject>(NestedObject));
+			}
+
+			if(HAS_FIELD_REMOVAL_FLAG(Arrays) && NewArray.Num() == 0)
+			{
+				bRemoveField = true;
+				break;
+			}
+			FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueArray>(NewArray));
+
+			break;
+		}
+		case EJson::Object:
+		{
+			TSharedPtr<FJsonObject> Object = KeyValuePair.Value->AsObject();
+			TArray<FString> Keys;
+			bRemoveField = HAS_FIELD_REMOVAL_FLAG(Objects) && Object->Values.Num() == 0;
+
+			if(bRemoveField || !HAS_FIELD_REMOVAL_FLAG(Nested))
+			{
+				break;
+			}
+
+			RemoveEmptyFieldsFromJson(Object, Flags, ExcludedFieldNames);
+			if(HAS_FIELD_REMOVAL_FLAG(Objects) && Object->Values.Num() == 0)
+			{
+				bRemoveField = true;
+				break;
+			}
+			FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueObject>(Object));
+
+			break;
+		}
+		case EJson::String:
+		{
+			const FString Value = KeyValuePair.Value->AsString();
+
+			// Removing string fields if the dates flag is set and the string is equal to an uninitialized datetime (aka 0 ticks)
+			bRemoveField =
+				(HAS_FIELD_REMOVAL_FLAG(Strings) && Value.IsEmpty()) ||
+				(HAS_FIELD_REMOVAL_FLAG(Dates) && Value.Equals(FDateTime(0).ToString()));
+
+			break;
+		}
+		case EJson::Number:
+		{
+			bRemoveField = HAS_FIELD_REMOVAL_FLAG(Numbers) && static_cast<int32>(FMath::Floor(KeyValuePair.Value->AsNumber())) == TNumericLimits<int32>::Min();
+			break;
+		}
+		case EJson::Null:
+		{
+			bRemoveField = HAS_FIELD_REMOVAL_FLAG(Null);
+			break;
+		}
+
+		// Redundant technically, but for readability explicitly says that we don't care about the other members of EJson
+		default: break;
+		}
+
+		if(bRemoveField)
+		{
+			FieldsToRemove.Add(KeyValuePair.Key);
+		}
+	}
+
+	for(const FString& Key : FieldsToRemove)
+	{
+		JsonObjectPtr->RemoveField(Key);
+	}
+
+	for(const auto& KeyValuePair : FieldsToReplace)
+	{
+		JsonObjectPtr->SetField(KeyValuePair.Key, KeyValuePair.Value);
+	}
+
+#undef HAS_FIELD_REMOVAL_FLAG
+}
+
 FString FAccelByteUtilities::RandomizeDeviceId()
 {
 	FString NewDeviceId;
@@ -376,7 +530,8 @@ FString FAccelByteUtilities::RandomizeDeviceId()
 	return NewDeviceId;
 }
 
-FString FAccelByteUtilities::EncodeHMACBase64(const FString& Message, const FString& Key)
+FString FAccelByteUtilities::EncodeHMACBase64(FString const& Message
+	, FString const& Key)
 {
 	const int BYTE_BUFFER_COUNT = 20; // Based on the inline documentation FSHA1::HMACBuffer
 	uint8 EncodeOutput[BYTE_BUFFER_COUNT];
@@ -390,7 +545,7 @@ FString FAccelByteUtilities::EncodeHMACBase64(const FString& Message, const FStr
 	return FBase64::Encode(TArrayEncodedOutput);
 }
 
-FString FAccelByteUtilities::GetOrSetIfDeviceIdNotFound(const FString Default)
+FString FAccelByteUtilities::GetOrSetIfDeviceIdNotFound(FString const& Default)
 {
 	static FString StaticDeviceId;
 
@@ -425,7 +580,7 @@ EAccelByteDevModeDeviceIdMethod FAccelByteUtilities::GetCurrentDeviceIdOverrideM
 		return EAccelByteDevModeDeviceIdMethod::UNSPECIFIED;
 	}
 	
-	return FAccelByteUtilities::GetUEnumValueFromString<EAccelByteDevModeDeviceIdMethod>(DeviceIdOverrideMethod);
+	return GetUEnumValueFromString<EAccelByteDevModeDeviceIdMethod>(DeviceIdOverrideMethod);
 }
 
 FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)
@@ -451,7 +606,7 @@ FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)
 			, AccelByteStorageFile());
 		if (!bIsCached)
 		{
-			FString PlainMacAddress = FAccelByteUtilities::GetMacAddress(false);
+			FString PlainMacAddress = GetMacAddress(false);
 			if (PlainMacAddress.IsEmpty())
 			{
 				Output = FGuid::NewGuid().ToString();
@@ -485,7 +640,7 @@ FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)
 	return Output;
 }
 
-FString FAccelByteUtilities::GetDevModeDeviceId(FString DefaultDeviceId)
+FString FAccelByteUtilities::GetDevModeDeviceId(FString const& DefaultDeviceId)
 {
 #pragma region RETRIEVE_OVERRIDE_CONDITION
 	bool bUsePersistentDeviceId = false;
@@ -609,7 +764,8 @@ FString FAccelByteUtilities::GetPlatformName()
 	return PlatformName;
 }
 
-FString FAccelByteUtilities::XOR(const FString& Input, const FString& Key)
+FString FAccelByteUtilities::XOR(FString const& Input
+	, FString const& Key)
 {
 	TArray<uint8> AccumulateResult;
 
@@ -637,7 +793,8 @@ FString FAccelByteUtilities::GetAuthTrustId()
 	return AuthTrustId;
 }
 
-bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, FString& Value)
+bool FAccelByteUtilities::GetValueFromCommandLineSwitch(FString const& Key
+	, FString& Value)
 {
 	const auto CommandParams = FCommandLine::Get();
 	TArray<FString> Tokens;
@@ -659,7 +816,8 @@ bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, FStr
 	return false;
 }
 
-bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, int& Value)
+bool FAccelByteUtilities::GetValueFromCommandLineSwitch(FString const& Key
+	, int & Value)
 {
 	FString TempResult = "";
 	bool bIsSuccess = GetValueFromCommandLineSwitch(Key, TempResult);
@@ -672,7 +830,8 @@ bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, int&
 	return true;
 }
 
-bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, bool& Value)
+bool FAccelByteUtilities::GetValueFromCommandLineSwitch(FString const& Key
+	, bool & Value)
 {
 	FString TempResult = "";
 	bool bIsSuccess = GetValueFromCommandLineSwitch(Key, TempResult);
@@ -685,7 +844,7 @@ bool FAccelByteUtilities::GetValueFromCommandLineSwitch(const FString& Key, bool
 	return true;
 }
 
-void FAccelByteUtilities::SetAuthTrustId(const FString& AuthTrustId)
+void FAccelByteUtilities::SetAuthTrustId(FString const& AuthTrustId)
 { 
 	FPlatformMisc::SetStoredValue(AccelByteStored(), AccelByteStoredSectionIAM(), AccelByteStoredKeyAuthTrustId(), AuthTrustId);
 }
@@ -703,7 +862,8 @@ FString FAccelByteUtilities::GetAuthorizationCode()
 	return AuthorizationCode;
 }
 
-void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
+void FAccelByteNetUtilities::GetPublicIP(THandler<FAccelByteModelsPubIp> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
@@ -723,7 +883,10 @@ void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void FAccelByteNetUtilities::DownloadFrom(const FString& Url, const FHttpRequestProgressDelegate& OnProgress, const THandler<TArray<uint8>>& OnDownloaded, const FErrorHandler& OnError)
+void FAccelByteNetUtilities::DownloadFrom(FString const& Url
+	, FHttpRequestProgressDelegate const& OnProgress
+	, THandler<TArray<uint8>> const& OnDownloaded
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -739,8 +902,12 @@ void FAccelByteNetUtilities::DownloadFrom(const FString& Url, const FHttpRequest
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnDownloaded, OnError), FPlatformTime::Seconds());
 }
 
-void FAccelByteNetUtilities::UploadTo(const FString& Url, const TArray<uint8>& DataUpload, const FHttpRequestProgressDelegate& OnProgress,
-	const AccelByte::FVoidHandler& OnSuccess, const FErrorHandler& OnError, FString ContentType)
+void FAccelByteNetUtilities::UploadTo(FString const& Url
+	, TArray<uint8> const& DataUpload
+	, FHttpRequestProgressDelegate const& OnProgress
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& ContentType)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -755,6 +922,19 @@ void FAccelByteNetUtilities::UploadTo(const FString& Url, const TArray<uint8>& D
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	
+}
+
+#define REGEX_BASE_URL_WITH_DOMAIN "https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,128}\\.[a-zA-Z0-9()]{1,6}"
+#define REGEX_BASE_URL_WITHOUT_DOMAIN "(?:(https?:\\/\\/)?((?:[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost))"
+#define REGEX_OPTIONAL_PORT "(:(?:[1-9]{1}[0-9]{1,4}|[0-9]{1}))?"
+#define REGEX_PATH_AND_PARAM "(\\/?|((\\/)[^\\/\\\\]{1,512}(?:\\7[^\\/\\\\]{1,512})*(\\/?)))"
+#define REGEX_URL "^(" REGEX_BASE_URL_WITH_DOMAIN "|" REGEX_BASE_URL_WITHOUT_DOMAIN ")" REGEX_OPTIONAL_PORT REGEX_PATH_AND_PARAM "$"
+
+bool FAccelByteNetUtilities::IsValidUrl(FString const& Url)
+{
+	FRegexPattern UrlRegex(TEXT(REGEX_URL));
+	FRegexMatcher Matcher(UrlRegex, Url);
+	return Matcher.FindNext();
 }
 
 FString FAccelByteUtilities::ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy)
@@ -787,7 +967,7 @@ FString FAccelByteUtilities::ConvertItemSortByToString(EAccelByteItemListSortBy 
 	return TEXT("");
 }
 
-bool FAccelByteUtilities::IsNumericString(const FString& String)
+bool FAccelByteUtilities::IsNumericString(FString const& String)
 {
 	if (String.IsEmpty())
 	{
@@ -836,5 +1016,25 @@ bool FAccelByteUtilities::IsLanguageUseCommaDecimalSeparator()
 	{
 		return true;
 	}
+	return false;
+}
+
+bool FAccelByteUtilities::IsAccelByteIDValid(FString const& AccelByteId)
+{
+	// delete the "-client" prefix, session service will add this prefix if a session is created by non user client ID
+	FString ProcessedAccelByteId = AccelByteId;
+	ProcessedAccelByteId.RemoveFromStart(TEXT("client-"));
+
+	FGuid OutId;
+	if (ProcessedAccelByteId.Len() == ACCELBYTE_ID_LENGTH)
+	{
+		return FGuid::ParseExact(ProcessedAccelByteId, EGuidFormats::Digits, OutId);
+	}
+
+	if (ProcessedAccelByteId.Len() == ACCELBYTE_ID_LENGTH_WITH_HYPENS)
+	{
+		return FGuid::ParseExact(ProcessedAccelByteId, EGuidFormats::DigitsWithHyphens, OutId);
+	}
+
 	return false;
 }

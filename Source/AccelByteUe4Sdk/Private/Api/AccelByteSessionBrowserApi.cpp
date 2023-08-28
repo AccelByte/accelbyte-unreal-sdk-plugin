@@ -363,7 +363,19 @@ void SessionBrowser::GetGameSessionsByUserIds(const TArray<FString>& UserIds
 		return;
 	}
 
-	FString UserIdsQueryString = FString::Join(UserIds, TEXT(","));
+	TArray<FString> FilteredIds = UserIds;
+	FilteredIds.RemoveAll([](const FString& Element)
+	{
+		return !FAccelByteUtilities::IsAccelByteIDValid(Element);
+	});
+
+	if (FilteredIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
+	FString UserIdsQueryString = FString::Join(FilteredIds, TEXT(","));
 	UserIdsQueryString = FGenericPlatformHttp::UrlEncode(UserIdsQueryString);
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/bulk?user_ids=%s")
@@ -433,6 +445,12 @@ void SessionBrowser::GetRecentPlayer(FString const& UserId
 	if (UserId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("User id is empty"));
+		return;
+	}
+
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 

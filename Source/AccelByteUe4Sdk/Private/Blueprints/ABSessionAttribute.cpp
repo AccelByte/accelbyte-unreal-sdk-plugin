@@ -4,6 +4,8 @@
 
 #include "Blueprints/ABSessionAttribute.h"
 
+using namespace AccelByte;
+
 void UABSessionAttribute::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;

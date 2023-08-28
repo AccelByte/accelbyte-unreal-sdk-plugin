@@ -124,6 +124,12 @@ void Statistic::GetUserStatItems(const FString& UserId
 		return;
 	}
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems")
 		, *SettingsRef.StatisticServerUrl
 		, *CredentialsRef.GetNamespace()

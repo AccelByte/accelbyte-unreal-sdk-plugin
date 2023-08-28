@@ -1,5 +1,7 @@
 ﻿#include "Blueprints/AccelByteBPLobby.h"
 
+using namespace AccelByte;
+
 void UABLobby::Connect() 
 {
 	ApiClientPtr->Lobby.Connect();

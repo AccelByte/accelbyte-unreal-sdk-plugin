@@ -204,6 +204,12 @@ void Group::GetUserGroupInfoByUserId(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/users/%s")
 		, *SettingsRef.GroupServerUrl
 		, *UserId);
@@ -216,6 +222,12 @@ void Group::InviteUserToGroup(const FString UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/users/%s/invite")
 		, *SettingsRef.GroupServerUrl
@@ -230,6 +242,12 @@ void Group::AcceptGroupJoinRequest(const FString UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/users/%s/join/accept")
 		, *SettingsRef.GroupServerUrl
 		, *UserId);
@@ -242,6 +260,12 @@ void Group::RejectGroupJoinRequest(const FString UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/users/%s/join/reject")
 		, *SettingsRef.GroupServerUrl
@@ -256,6 +280,12 @@ void Group::KickGroupMember(const FString UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
+		return;
+
+	}
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/users/%s/kick")
 		, *SettingsRef.GroupServerUrl
 		, *UserId);
