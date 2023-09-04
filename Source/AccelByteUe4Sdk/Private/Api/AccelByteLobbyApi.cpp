@@ -1715,9 +1715,11 @@ void Lobby::CreateWebSocket(const FString& Token)
 	Headers.Add(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 
 	const FString PlatformId = LobbyCredentialsRef.GetAuthToken().Platform_id;
+	const FString PlatformUserId = LobbyCredentialsRef.GetAuthToken().Platform_user_id;
 	if (!PlatformId.IsEmpty())
 	{
 		Headers.Add(LobbyPlatformIdHeaderName, PlatformId);
+		Headers.Add(LobbyPlatformUserIdHeaderName, PlatformUserId);
 	}
 	if(!Token.IsEmpty())
 	{

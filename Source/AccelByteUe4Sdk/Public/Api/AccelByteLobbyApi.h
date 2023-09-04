@@ -73,6 +73,7 @@ private:
 	Credentials& LobbyCredentialsRef;
 
 	const FString LobbyPlatformIdHeaderName = "X-Ab-Platform";
+	const FString LobbyPlatformUserIdHeaderName = "X-Ab-Platform-User-Id";
 	const FString LobbySessionHeaderName = "X-Ab-LobbySessionID";
 
 	bool BanNotifReceived = false;

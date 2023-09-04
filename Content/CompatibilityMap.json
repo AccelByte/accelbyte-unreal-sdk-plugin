@@ -12,8 +12,8 @@
     "maxVersion": "2.11.0"
   },
   "platform": {
-    "minVersion": "4.34.0",
-    "maxVersion": "4.34.0"
+    "minVersion": "4.34.1",
+    "maxVersion": "4.34.1"
   },
   "social": {
     "minVersion": "2.9.4",
@@ -28,8 +28,8 @@
     "maxVersion": "2.21.0"
   },
   "cloudsave": {
-    "minVersion": "3.12.0",
-    "maxVersion": "3.12.0"
+    "minVersion": "3.12.1",
+    "maxVersion": "3.12.1"
   },
   "ugc": {
     "minVersion": "2.12.0",
@@ -40,16 +40,16 @@
     "maxVersion": "2.18.1"
   },
   "qosm": {
-    "minVersion": "1.18.3",
-    "maxVersion": "1.18.3"
+    "minVersion": "1.18.4",
+    "maxVersion": "1.18.4"
   },
   "lobby": {
     "minVersion": "3.23.0",
     "maxVersion": "3.23.0"
   },
   "dsmcontroller": {
-    "minVersion": "6.3.7",
-    "maxVersion": "6.3.7"
+    "minVersion": "6.4.0",
+    "maxVersion": "6.4.0"
   },
   "game-telemetry": {
     "minVersion": "1.19.0",

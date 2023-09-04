@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [24.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.0.1%0D24.0.0) (2023-09-04)
+
+
+### Bug Fixes
+
+* unable to connect to lobby when logged in via 3rd party platform ([985ddfc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/985ddfc9627e5bd6f4c5b570650c80c88144dc7f))
+
 ## [24.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.0.0%0D23.7.1) (2023-08-28)
 
 
