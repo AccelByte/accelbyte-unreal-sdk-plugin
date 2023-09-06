@@ -48,8 +48,8 @@
     "maxVersion": "3.23.0"
   },
   "dsmcontroller": {
-    "minVersion": "6.4.0",
-    "maxVersion": "6.4.0"
+    "minVersion": "6.4.1",
+    "maxVersion": "6.4.1"
   },
   "game-telemetry": {
     "minVersion": "1.19.0",

@@ -27,6 +27,8 @@ public:
 
 	virtual void Reset(ESettingsEnvironment const Environment) override;
 
+	bool LoadAMSSettings();
+
 	ServerSettings& operator=(ServerSettings const& Other) = default;
 
 protected:

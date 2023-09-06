@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [24.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.0.2%0D24.0.1) (2023-09-06)
+
+
+### Bug Fixes
+
+* **AMS:** DS not connecting to amssim when launched using editor command line ([6fdf909](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6fdf9092cfed1f940eab87c4362c4dab9c2ec6e9))
+* **AMS:** settings are not loaded on module startup ([309b213](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/309b2138dec27ae4a3fdded27c75eaa2d7abee0e))
+
 ### [24.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.0.1%0D24.0.0) (2023-09-04)
 
 

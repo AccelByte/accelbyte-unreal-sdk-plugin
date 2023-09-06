@@ -4,6 +4,7 @@
 
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteUtilities.h"
 
 using namespace AccelByte;
 
@@ -93,16 +94,7 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 		QosPingTimeout = .6;
 	}
 
-	FParse::Value(FCommandLine::Get(), TEXT("dsid="), DSId);
-	if (!FParse::Value(FCommandLine::Get(), TEXT("watchdog_url="), AMSServerWatchdogUrl))
-	{
-		GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni);
-	}
-
-	if (!FParse::Value(FCommandLine::Get(), TEXT("heartbeat="), AMSHeartbeatInterval))
-	{
-		GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni);
-	}
+	LoadAMSSettings();
 
 	LoadFallback(SectionPath, TEXT("StatsDUrl"), StatsDServerUrl);
 	FString StatsDPortString;
@@ -166,6 +158,21 @@ void ServerSettings::Reset(ESettingsEnvironment const Environment)
 	}
 
 	LoadSettings(SectionPath);
+}
+
+bool AccelByte::ServerSettings::LoadAMSSettings()
+{
+	if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("watchdog_url"), AMSServerWatchdogUrl))
+	{
+		GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni);
+	}
+
+	if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("heartbeat"), AMSHeartbeatInterval))
+	{
+		GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni);
+	}
+
+	return FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("dsid"), DSId);
 }
 
 FString UAccelByteBlueprintsServerSettings::GetClientId()
