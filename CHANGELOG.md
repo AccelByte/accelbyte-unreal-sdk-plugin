@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [24.0.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.0.3%0D24.0.2) (2023-09-08)
+
+
+### Bug Fixes
+
+* deprecation warning for IWYU support in Unreal Engine 5.2 ([407f29b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/407f29b42e424769d8198f0b270b49097746b23b))
+
 ### [24.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.0.2%0D24.0.1) (2023-09-06)
 
 

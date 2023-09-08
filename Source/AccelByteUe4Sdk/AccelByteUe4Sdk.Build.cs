@@ -18,8 +18,12 @@ public class AccelByteUe4Sdk : ModuleRules
 		bLegacyPublicIncludePaths = false;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		
+
+#if UE_5_2_OR_LATER
+		IWYUSupport = IWYUSupport.Full;
+#else
 		bEnforceIWYU = true;
+#endif
 
 		PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
 		PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
