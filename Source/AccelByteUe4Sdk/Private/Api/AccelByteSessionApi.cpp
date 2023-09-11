@@ -556,5 +556,59 @@ void Session::DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandle
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void Session::UpdateLeaderStorage(FString const& SessionID
+	, FJsonObjectWrapper const& Data
+	, THandler<FJsonObjectWrapper> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	if(SessionID.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("SessionID is empty!"));
+		return;
+	}
+	
+	if(!Data.JsonObject.IsValid())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Data has invalid json object!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/sessions/%s/storage/leader")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *SessionID);
+
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Data.JsonObject.ToSharedRef(), OnSuccess, OnError);
+}
+
+void Session::UpdateMemberStorage(FString const& SessionID
+	, FJsonObjectWrapper const& Data
+	, THandler<FJsonObjectWrapper> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if(SessionID.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("SessionID is empty!"));
+		return;
+	}
+	
+	if(!Data.JsonObject.IsValid())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Data has invalid json object!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/sessions/%s/storage/users/%s")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *SessionID
+		, *CredentialsRef.GetUserId());
+
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Data.JsonObject.ToSharedRef(), OnSuccess, OnError);
+}
 }
 }

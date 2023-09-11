@@ -34,6 +34,7 @@ namespace AccelByte
 	using FErrorHandler = TDelegate<void(int32 /* ErrorCode */, const FString& /* ErrorMessage */)>;
 	using FCustomErrorHandler = TDelegate<void(int32 /* ErrorCode */, const FString& /* ErrorMessage */, const FJsonObject& /* ErrorObject */)>;
 	using FOAuthErrorHandler = TDelegate<void(int32 /* ErrorCode */, const FString& /* ErrorMessage */, const FErrorOAuthInfo& /* ErrorObject */)>;
+	using FCreateMatchmakingTicketErrorHandler = TDelegate<void(int32 /* ErrorCode */, const FString& /* ErrorMessage */, const FErrorCreateMatchmakingTicketV2& /* CreateTicketErrorInfo */)>;
 #else
 	template <typename T> using THandler = TBaseDelegate<void, const T&>;
 	template <typename T1, typename T2> using THandlerPayloadModifier = TBaseDelegate<T1, T2>;
@@ -41,6 +42,7 @@ namespace AccelByte
 	using FErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */>;
 	using FCustomErrorHandler = TBaseDelegate<void, int32 /* ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* ErrorObject */>;
 	using FOAuthErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FErrorOAuthInfo& /* ErrorObject */>;
+	using FCreateMatchmakingTicketErrorHandler = TBaseDelegate<void(int32 /* ErrorCode */, const FString& /* ErrorMessage */, const FErrorCreateMatchmakingTicketV2& /* CreateTicketErrorInfo */)>;
 #endif
 
 	UENUM(BlueprintType)
@@ -306,6 +308,9 @@ namespace AccelByte
 		SessionPlayerAttributesNotFound = 20050,
 		SessionPartyNotFound = 20041,
 		SessionGameNotFound = 20042,
+		SessionStorageNonLeaderUpdateLeaderData = 30054,
+		SessionStorageMemberNotInSession = 30052,
+		SessionStorageUserNotActiveInSession = 30055,
 
 		//
 		// V2 Matchmaking
@@ -418,6 +423,8 @@ namespace AccelByte
 	ACCELBYTEUE4SDK_API void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject);
 	
 	ACCELBYTEUE4SDK_API void HandleHttpOAuthError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorOAuthInfo& OutErrorInfo);
+
+	ACCELBYTEUE4SDK_API void HandleHttpCreateMatchmakingTicketError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorCreateMatchmakingTicketV2& OutErrorCreateMatchmakingV2);
 
 	inline bool HandleHttpResultOk(FHttpResponsePtr Response, TArray<uint8> Payload, const FVoidHandler& OnSuccess)
 	{
@@ -676,5 +683,45 @@ namespace AccelByte
 		});
 	}
 
+	template<typename T>
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FCreateMatchmakingTicketErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
+	{
+		return FHttpRequestCompleteDelegate::CreateLambda(
+			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
+			{
+				FErrorCreateMatchmakingTicketV2 ErrorCreateMatchmakingV2Info;
+				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+				{
+					if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
+					{
+						OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("Invalid JSON response"), ErrorCreateMatchmakingV2Info);
+					}
+					return;
+				}
+
+				if (!bFinished)
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), TEXT("Request not sent."), ErrorCreateMatchmakingV2Info);
+					return;
+				}
+
+				// If response is nullptr then search the actual response in the cache
+				if (!Response.IsValid() && Scheduler != nullptr)
+				{
+					FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+					if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+					{
+						auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
+						HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
+						return;
+					}
+				}
+
+				int32 ErrorCode;
+				FString ErrorMessage;
+				HandleHttpCreateMatchmakingTicketError(Request, Response, ErrorCode, ErrorMessage, ErrorCreateMatchmakingV2Info);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorCreateMatchmakingV2Info);
+			});
+	}
 	
 } // Namespace AccelByte

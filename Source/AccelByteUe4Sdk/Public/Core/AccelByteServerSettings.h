@@ -128,6 +128,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	int AMSHeartbeatInterval{15};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	bool bSendPredefinedEvent{ false };
 };
 
 UCLASS(Config = Engine)
@@ -232,6 +235,9 @@ public:
 	static float GetQosPingTimeout();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static bool IsSendPredefinedEvent();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -303,6 +309,9 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetQosPingTimeout(const float& QosPingTimeout);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetSendPredefinedEvent(bool bEnabled);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void ResetSettings(const ESettingsEnvironment Environment);

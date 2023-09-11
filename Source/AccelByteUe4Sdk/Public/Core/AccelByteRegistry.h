@@ -50,6 +50,7 @@ namespace Api
 	class HeartBeat;
 	class StoreDisplay;
 	class GDPR;
+	class PredefinedEvent;
 }
 
 namespace GameServerApi
@@ -73,6 +74,7 @@ namespace GameServerApi
 	class ServerMatchmakingV2;
 	class ServerAMS;
 	class ServerMetricExporter;
+	class ServerPredefinedEvent;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -117,6 +119,7 @@ public:
 	static Api::HeartBeat HeartBeat;
 	static Api::StoreDisplay StoreDisplay;
 	static Api::GDPR GDPR;
+	static Api::PredefinedEvent PredefinedEvent;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;
@@ -136,6 +139,7 @@ public:
 	static GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2;
 	static GameServerApi::ServerAMS ServerAMS;
 	static GameServerApi::ServerMetricExporter ServerMetricExporter;
+	static GameServerApi::ServerPredefinedEvent ServerPredefinedEvent;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

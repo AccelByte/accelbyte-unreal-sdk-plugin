@@ -26,7 +26,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API GameTelemetry : public FApiBase
 {
 public:
-	GameTelemetry(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	GameTelemetry(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, bool bInCacheEvent = true);
 	~GameTelemetry();
 
 	/**
@@ -111,6 +111,7 @@ private:
 	FDelegateHandle GameTelemetryLoginSuccess;
 
 	bool ShuttingDown;
+	bool bCacheEvent;
 };
 
 } // Namespace Api

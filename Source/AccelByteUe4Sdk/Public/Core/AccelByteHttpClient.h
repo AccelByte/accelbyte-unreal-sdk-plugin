@@ -659,6 +659,8 @@ namespace AccelByte
 
 		void ExecuteError(const FCustomErrorHandler& OnError, FString const& ErrorText);
 
+		void ExecuteError(const FCreateMatchmakingTicketErrorHandler& OnError, const FString& ErrorText);
+
 		template<typename T>
 		void ExecuteError(const THandler<T>& OnError, FString const& ErrorText)
 		{

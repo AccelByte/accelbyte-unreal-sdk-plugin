@@ -117,6 +117,10 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 	{
 		StatsDMetricInterval = 60;
 	}
+
+	FString SendPredefinedEventString;
+	LoadFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString);
+	this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
 #endif
 }
 
@@ -290,6 +294,11 @@ float UAccelByteBlueprintsServerSettings::GetQosPingTimeout()
 	return FRegistry::ServerSettings.QosPingTimeout;
 }
 
+bool UAccelByteBlueprintsServerSettings::IsSendPredefinedEvent()
+{
+	return FRegistry::ServerSettings.bSendPredefinedEvent;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -414,6 +423,11 @@ void UAccelByteBlueprintsServerSettings::SetQosPingTimeout(const float& QosPingT
 	{
 		FRegistry::ServerSettings.QosPingTimeout = QosPingTimeout;
 	}
+}
+
+void UAccelByteBlueprintsServerSettings::SetSendPredefinedEvent(bool bEnabled)
+{
+	FRegistry::ServerSettings.bSendPredefinedEvent = bEnabled;
 }
 
 void UAccelByteBlueprintsServerSettings::ResetSettings(ESettingsEnvironment const Environment)

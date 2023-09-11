@@ -539,6 +539,11 @@ public:
 	DECLARE_DELEGATE_OneParam(FV2GameSessionRejectedNotif, FAccelByteModelsV2GameSessionUserRejectedEvent);
 
 	/**
+	 * @brief Delegate for session storage changed event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2SessionStorageChangedNotif, FAccelByteModelsV2SessionStorageChangedEvent)
+
+	/**
 	 * @brief Delegate for game session when DS status is changed.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif)
@@ -1096,6 +1101,11 @@ public:
 	void UnbindV2GameSessionEvents();
 
 	/**
+	 * @brief Unbind all shared notif for session and v2 party set previously.
+	 */
+	void UnbindV2SessionGeneralEvents();
+
+	/**
 	 * @brief Unbind all V2 matchmaking delegates set previously.
 	 */
 	void UnbindV2MatchmakingEvents();
@@ -1365,6 +1375,15 @@ public:
 	void SetV2GameSessionRejectedNotifDelegate(const FV2GameSessionRejectedNotif& OnGameSessionRejectedNotif)
 	{
 		V2GameSessionRejectedNotif = OnGameSessionRejectedNotif;
+	}
+
+	/**
+	 * @brief Set a trigger function when session storage content changes (v2)
+	 * @param OnSessionStorageChangedNotif return models called FAccelByteModelsV2SessionStorageChangedEvent
+	 */
+	void SetV2SessionStorageChangedNotifDelegate(const FV2SessionStorageChangedNotif& OnSessionStorageChangedNotif)
+	{
+		V2SessionStorageChangedNotif = OnSessionStorageChangedNotif;
 	}
 
 	/**
@@ -2547,6 +2566,8 @@ private:
 	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;
 	FV2GameSessionKickedNotif V2GameSessionKickedNotif;
 	FV2GameSessionRejectedNotif V2GameSessionRejectedNotif;
+
+	FV2SessionStorageChangedNotif V2SessionStorageChangedNotif;
 
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 

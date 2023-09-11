@@ -374,6 +374,34 @@ public:
 	 */
 	void DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Update leader's session storage data, can only be updated by current session leader.
+	 * this will overwrite leader storage data, if updating also provide latest leader storage.
+	 * to clear current leader storage data update with empty jsonObject.
+	 *
+	 * @param Data Data to update leader storage.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void UpdateLeaderStorage(FString const& SessionID
+		, FJsonObjectWrapper const& Data
+		, THandler<FJsonObjectWrapper> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Update current user's session member storage data.
+	 * this will overwrite this user's storage data, if updating also provide latest user's storage.
+	 * to clear current user's storage data update with empty jsonObject.
+	 *
+	 * @param Data Data to update member storage.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void UpdateMemberStorage(FString const& SessionID
+		, FJsonObjectWrapper const& Data
+		, THandler<FJsonObjectWrapper> const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	Session() = delete;
 	Session(Session const&) = delete;

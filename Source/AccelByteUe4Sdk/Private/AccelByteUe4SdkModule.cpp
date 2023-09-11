@@ -16,6 +16,7 @@
 #include "Core/Version.h"
 #include "Interfaces/IPluginManager.h"
 #include "Core/AccelByteDataStorageBinaryFile.h"
+#include "Api/AccelBytePredefinedEventApi.h"
 
 #if WITH_EDITOR
 #include "ISettingsModule.h"
@@ -84,6 +85,7 @@ void FAccelByteUe4SdkModule::StartupModule()
 	AccelByte::FRegistry::HttpRetryScheduler.Startup();
 	AccelByte::FRegistry::Credentials.Startup();
 	AccelByte::FRegistry::GameTelemetry.Startup();
+	AccelByte::FRegistry::PredefinedEvent.Startup();
 #if !UE_SERVER
 	AccelByte::FRegistry::HeartBeat.Startup();
 #endif
@@ -113,6 +115,7 @@ void FAccelByteUe4SdkModule::ShutdownModule()
 	AccelByte::FRegistry::HeartBeat.Shutdown();
 #endif
 	AccelByte::FRegistry::GameTelemetry.Shutdown();
+	AccelByte::FRegistry::PredefinedEvent.Shutdown();
 	AccelByte::FRegistry::Credentials.Shutdown();
 	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
 	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();

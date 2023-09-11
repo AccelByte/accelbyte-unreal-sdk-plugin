@@ -453,7 +453,7 @@ namespace AccelByte
 			}
 
 			WebSocket->Connect();
-			UE_LOG(LogAccelByteChat, Display, TEXT("Connecting to %s"), *SettingsRef.ChatServerWsUrl);
+			UE_LOG(LogAccelByteChat, Log, TEXT("Connecting to %s"), *SettingsRef.ChatServerWsUrl);
 
 		}
 
@@ -466,7 +466,7 @@ namespace AccelByte
 				WebSocket->Disconnect();
 			}
 
-			if (GEngine) UE_LOG(LogAccelByteChat, Display, TEXT("Disconnected"));
+			if (GEngine) UE_LOG(LogAccelByteChat, Log, TEXT("Disconnected"));
 		}
 
 		bool Chat::IsConnected() const
@@ -486,7 +486,7 @@ namespace AccelByte
 
 		void Chat::OnConnected()
 		{
-			UE_LOG(LogAccelByteChat, Display, TEXT("Connected"));
+			UE_LOG(LogAccelByteChat, Log, TEXT("Connected"));
 			TokenRefreshDelegateHandle = ChatCredentialsRef.OnTokenRefreshed().AddLambda([this](bool bSuccess)
 			{
 				if (bSuccess)
@@ -503,7 +503,7 @@ namespace AccelByte
 
 		void Chat::OnConnectionError(const FString& Error)
 		{
-			UE_LOG(LogAccelByteChat, Display, TEXT("Error connecting: %s"), *Error);
+			UE_LOG(LogAccelByteChat, Warning, TEXT("Error connecting: %s"), *Error);
 			ConnectError.ExecuteIfBound(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed), ErrorMessages::Default.at(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed)) + TEXT(" Reason: ") + Error);
 		}
 
@@ -525,7 +525,7 @@ namespace AccelByte
 			bBanNotifReceived = false;
 			BanType = EBanType::EMPTY;
 			
-			UE_LOG(LogAccelByteChat, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
+			UE_LOG(LogAccelByteChat, Log, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 			ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 		}
 
@@ -742,7 +742,7 @@ namespace AccelByte
 		
 		void Chat::OnMessage(const FString& Message)
 		{
-			UE_LOG(LogAccelByteChat, Display, TEXT("Raw Message\n%s"), *Message);
+			UE_LOG(LogAccelByteChat, Log, TEXT("Raw Message\n%s"), *Message);
 
 			if (Message.IsEmpty())
 			{
@@ -760,7 +760,7 @@ namespace AccelByte
 			TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ProcessedMessage);
 			if (!FJsonSerializer::Deserialize(JsonReader, MessageAsJsonObj))
 			{
-				UE_LOG(LogAccelByteChat, Display, TEXT("Failed to Deserialize. Json: %s"), *ProcessedMessage);
+				UE_LOG(LogAccelByteChat, Warning, TEXT("Failed to Deserialize Chat Message. Json: %s"), *ProcessedMessage);
 				return;
 			}
 

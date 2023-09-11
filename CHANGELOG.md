@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.1.0%0D24.0.3) (2023-09-11)
+
+
+### Features
+
+* add predefinedEvent api ([6613202](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6613202bb854e030fd8a4bf836bb6d1e75430c47))
+* **BinaryCloudSave:** added public binary cloud save APIs ([1a02de6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1a02de6581d161c36f9d9c12be529354838edeb1))
+* check user id validity before calling API ([99aec64](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/99aec64fdb94cf79a555c0a5d2279a7f8c9afad3))
+* **MMv1:** add Region in MMv1 matchmaking notice ([7ca8036](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7ca8036d8c5b3a4234659ae53aa40d40721750f4))
+* **MPv2:** add new create matchmaking ticket with more info on error and deprecate the old one ([6ee106a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6ee106af4aaf878a2e687fde6565ade2d5bb98ba))
+* **predefinedEvent:** add bool to enable/disable caching, add event timestamp as parameter ([18341fe](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/18341fef3ba298b91e866d5ed6abcc502f796bde))
+* **predefinedEvent:** add payload with TelemetryBody, add send method with telemetryBody ([7a1aa89](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7a1aa89473830a6b0cfb23e4240b5501adc4c21c))
+* **predefinedEvent:** change to clientTimestamp ([a24d826](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a24d826c834637902c4ab396c7fbc6d2e249c487))
+* **Session:** add update session storage methods ([8b07b68](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8b07b6889f4e281c4db2e143a44e3e5d84b06e46))
+
+
+### Bug Fixes
+
+* **AMS:** default AMS config is empty ([ff2d2da](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ff2d2daae409ab2819c7edb29e77bd73bd381518))
+* deprecation warning for IWYU support in Unreal Engine 5.2 ([9b336ff](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9b336fffa3eebbf4da6025da13f448a1f8540394))
+* missing Category in UProperty causing an explicit category specifier issue ([36d0001](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/36d00017a061a1a55fbcf6ecff4c50b800c03d25))
+* **predefinedEvent:** change UserAgreement_Rejected to UserAgreement_NotAccepted, change UserProfile payload from TArray<FString> to FJsonObjectWrapper ([6e6a3c5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6e6a3c530d1c71f7ed646cce7449daaaaa8a698e))
+* **Statistic:** Adjust newest flow to expose which statistic is being updated ([a24a10f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a24a10f79be1ca5bee5940da5f1494bf385c1658))
+
 ### [24.0.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.0.3%0D24.0.2) (2023-09-08)
 
 

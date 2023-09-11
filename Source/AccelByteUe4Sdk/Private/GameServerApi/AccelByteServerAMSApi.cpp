@@ -64,7 +64,7 @@ void ServerAMS::Connect()
 
 	WebSocket->Connect();
 
-	UE_LOG(LogAccelByteAMS, Log, TEXT("Connecting to %s"), *ServerSettingsRef.AMSServerWatchdogUrl);
+	UE_LOG(LogAccelByteAMS, Log, TEXT("Connecting to %s"), *AMSWatchdogUrl);
 }
 
 void ServerAMS::Disconnect(bool bForceCleanup /*= false*/)
@@ -107,7 +107,12 @@ void ServerAMS::CreateWebSocket()
 	TMap<FString, FString> Headers;
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 
-	WebSocket = AccelByteWebSocket::Create(*ServerSettingsRef.AMSServerWatchdogUrl,
+	if (!ServerSettingsRef.AMSServerWatchdogUrl.IsEmpty())
+	{
+		AMSWatchdogUrl = ServerSettingsRef.AMSServerWatchdogUrl;
+	}
+
+	WebSocket = AccelByteWebSocket::Create(*AMSWatchdogUrl,
 		TEXT("ws"),
 		ServerCredentialsRef,
 		Headers,
@@ -117,7 +122,11 @@ void ServerAMS::CreateWebSocket()
 	WebSocket->OnMessageReceived().AddRaw(this, &ServerAMS::OnMessage);
 	WebSocket->OnConnectionError().AddRaw(this, &ServerAMS::OnConnectionError);
 	WebSocket->OnConnectionClosed().AddRaw(this, &ServerAMS::OnClosed);
-	AMSHeartbeatInterval = FTimespan::FromSeconds(ServerSettingsRef.AMSHeartbeatInterval);
+
+	if (ServerSettingsRef.AMSHeartbeatInterval > 0)
+	{
+		AMSHeartbeatInterval = FTimespan::FromSeconds(ServerSettingsRef.AMSHeartbeatInterval);
+	}
 }
 
 void ServerAMS::OnConnected()

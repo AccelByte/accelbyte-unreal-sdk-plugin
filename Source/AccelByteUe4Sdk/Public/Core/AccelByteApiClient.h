@@ -9,6 +9,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteAgreementApi.h"
+#include "Api/AccelByteBinaryCloudSaveApi.h"
 #include "Api/AccelByteCategoryApi.h"
 #include "Api/AccelByteChatApi.h"
 #include "Api/AccelByteCloudSaveApi.h"
@@ -42,6 +43,7 @@
 #include "Api/AccelByteMatchmakingV2Api.h"
 #include "Core/AccelByteApiBase.h"
 #include "Api/AccelByteStoreDisplayApi.h"
+#include "Api/AccelBytePredefinedEventApi.h"
 
 namespace AccelByte
 {
@@ -75,6 +77,7 @@ public:
 	Api::Qos Qos{*CredentialsRef, FRegistry::Settings};
 	Api::Leaderboard Leaderboard{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::CloudSave CloudSave{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::BinaryCloudSave BinaryCloudSave{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::GameTelemetry GameTelemetry{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Agreement Agreement{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Achievement Achievement{*CredentialsRef, FRegistry::Settings, *HttpRef};
@@ -91,7 +94,8 @@ public:
 	Api::StoreDisplay StoreDisplay{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::GDPR GDPR{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::PresenceBroadcastEvent PresenceBroadcastEvent{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	
+	Api::PredefinedEvent PredefinedEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)
 	{

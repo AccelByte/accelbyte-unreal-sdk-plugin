@@ -30,6 +30,7 @@
 #include "GameServerApi/AccelByteServerMatchmakingV2Api.h"
 #include "GameServerApi/AccelByteServerAMSApi.h"
 #include "GameServerApi/AccelByteServerMetricExporterApi.h"
+#include "GameServerApi/AccelByteServerPredefinedEventApi.h"
 
 namespace AccelByte
 {
@@ -64,6 +65,7 @@ public:
 	GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerAMS ServerAMS{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerMetricExporter ServerMetric{ FRegistry::ServerSettings };
+	GameServerApi::ServerPredefinedEvent ServerPredefinedEvent{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 
 	template<typename T, typename... U>
 	T GetServerApi(U&&... Args)

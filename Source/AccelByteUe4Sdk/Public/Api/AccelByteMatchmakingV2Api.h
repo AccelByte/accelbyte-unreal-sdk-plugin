@@ -25,7 +25,7 @@ public:
 	~MatchmakingV2();
 
 	/**
-	 * @brief Create a matchmaking ticket, this will start matchmaking process.
+	 * @brief [DEPRECATED] Create a matchmaking ticket, this will start matchmaking process.
 	 *
 	 * @param MatchPool Name of the match pool we want to matchmake into.
 	 * @param OnSuccess This will be called if the operation succeeded.
@@ -35,6 +35,19 @@ public:
 	void CreateMatchTicket(const FString& MatchPool
 		, const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess
 		, const FErrorHandler& OnError
+		, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals = {});
+
+	/**
+	 * @brief Create a matchmaking ticket, this will start matchmaking process.
+	 *
+	 * @param MatchPool Name of the match pool we want to matchmake into.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Optionals optional variables we can set for matchmaking process.
+	 */
+	void CreateMatchTicket(const FString& MatchPool
+		, const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess
+		, const FCreateMatchmakingTicketErrorHandler& OnError
 		, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals = {});
 
 	/**

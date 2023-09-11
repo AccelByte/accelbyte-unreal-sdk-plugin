@@ -129,6 +129,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionConfiguration
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelbyteModelsV2SessionStorage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession | Storage")
+	FJsonObjectWrapper Leader{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | BaseSession | Storage")
+	TMap<FString, FJsonObjectWrapper> Member{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2BaseSession
 {
 	GENERATED_BODY()
@@ -157,6 +168,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2BaseSession
 		int64 Version{TNumericLimits<int32>::Min()};
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | BaseSession")
 		EAccelByteV2SessionType SessionType{};
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | BaseSession")
+		FAccelbyteModelsV2SessionStorage Storage{};
 	
 	FAccelByteModelsV2BaseSession(EAccelByteV2SessionType Type) : SessionType(Type) {}
 	FAccelByteModelsV2BaseSession() : SessionType(EAccelByteV2SessionType::Unknown) {}
@@ -708,4 +721,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionTeamsSetting
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionTeamsSetting")
 	TArray<FAccelByteModelsV2GameSessionTeam> Teams;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionStorageChangedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionStorageChangedEvent")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionStorageChangedEvent")
+	FString SessionID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionStorageChangedEvent")
+	FString ActorUserID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionStorageChangedEvent")
+	bool IsLeader{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionStorageChangedEvent")
+	FJsonObjectWrapper StorageChanges{};
 };

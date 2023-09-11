@@ -71,4 +71,27 @@ struct ACCELBYTEUE4SDK_API FErrorOAuthInfo
 	FUserBan UserBan{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OAuthError")
 	FJsonObjectWrapper MessageVariables{};
-}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2CreateTicketErrorDetails
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | CreateMatchmakingV2Error")
+	FString TicketID{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FErrorCreateMatchmakingTicketV2
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | CreateMatchmakingV2Error")
+	int32 ErrorCode{-1};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | CreateMatchmakingV2Error")
+	FString ErrorMessage{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | CreateMatchmakingV2Error")
+	FString ExistingTicketID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | CreateMatchmakingV2Error")
+	FAccelByteModelsV2CreateTicketErrorDetails MessageVariables{};
+};

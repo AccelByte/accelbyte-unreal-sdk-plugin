@@ -568,6 +568,63 @@ namespace AccelByte
 		}
 	}
 
+	void HandleHttpCreateMatchmakingTicketError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorCreateMatchmakingTicketV2& OutErrorCreateMatchmakingV2)
+	{
+		int32 Code = 0;
+		OutMessage = "";
+		if (Response.IsValid())
+		{
+			if (!Response->GetContentAsString().IsEmpty())
+			{
+				if(FAccelByteJsonConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &OutErrorCreateMatchmakingV2))
+				{
+					if(OutErrorCreateMatchmakingV2.ErrorCode != -1)
+					{
+						Code = OutErrorCreateMatchmakingV2.ErrorCode;
+					}
+					else
+					{
+						Code = Response->GetResponseCode();
+						OutErrorCreateMatchmakingV2.ErrorCode = Code;
+					}
+				}
+				else
+				{
+					Code = static_cast<int32>(ErrorCodes::InvalidResponse);
+				}
+			}
+			else
+			{
+				Code = Response->GetResponseCode();
+				OutErrorCreateMatchmakingV2.ErrorCode = Code;
+			}
+		}
+		else
+		{
+			Code = static_cast<int32>(ErrorCodes::NetworkError);
+		}
+
+		OutCode = Code;
+
+		if (!OutErrorCreateMatchmakingV2.ErrorMessage.IsEmpty())
+		{
+			OutMessage = OutErrorCreateMatchmakingV2.ErrorMessage;
+		}
+		else
+		{
+			const auto It = ErrorMessages::Default.find(Code);
+			if (It != ErrorMessages::Default.cend())
+			{
+				OutMessage += ErrorMessages::Default.at(Code);
+				OutErrorCreateMatchmakingV2.ErrorMessage = OutMessage;
+			}
+		}
+
+		if (!OutErrorCreateMatchmakingV2.MessageVariables.TicketID.IsEmpty())
+		{
+			OutErrorCreateMatchmakingV2.ExistingTicketID = OutErrorCreateMatchmakingV2.MessageVariables.TicketID;
+		}
+	}
 
 } // Namespace AccelByte
 

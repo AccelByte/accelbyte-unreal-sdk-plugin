@@ -167,6 +167,10 @@ void Settings::LoadSettings(const FString& SectionPath)
 	FString PresenceBroadcastEventHeartbeatEnabledString;
 	LoadFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatEnabled"), PresenceBroadcastEventHeartbeatEnabledString);
 	bEnablePresenceBroadcastEventHeartbeat = PresenceBroadcastEventHeartbeatEnabledString.IsEmpty() ? false : PresenceBroadcastEventHeartbeatEnabledString.ToBool();
+	
+	FString SendPredefinedEventString;
+	LoadFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString);
+	this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
 }
 
 void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FString& Value)
@@ -401,6 +405,11 @@ EHttpCacheType UAccelByteBlueprintsSettings::GetHttpCacheType()
 	return FRegistry::Settings.HttpCacheType;
 }
 
+bool UAccelByteBlueprintsSettings::IsSendPredefinedEvent()
+{
+	return FRegistry::Settings.bSendPredefinedEvent;
+}
+
 void UAccelByteBlueprintsSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::Settings.ClientId = ClientId;
@@ -570,6 +579,11 @@ void UAccelByteBlueprintsSettings::SetQosPingTimeout(const float& QosPingTimeout
 void UAccelByteBlueprintsSettings::SetHttpCacheType(EHttpCacheType Type)
 {
 	FRegistry::Settings.HttpCacheType = Type;
+}
+
+void UAccelByteBlueprintsSettings::SetSendPredefinedEvent(bool bEnable)
+{
+	FRegistry::Settings.bSendPredefinedEvent = bEnable;
 }
 
 void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment Environment)

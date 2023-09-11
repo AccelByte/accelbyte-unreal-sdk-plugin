@@ -119,6 +119,8 @@ private:
 	FDelegateHandleAlias AMSHeartbeatTickDelegateHandle;
 	
 	FTimespan AMSHeartbeatInterval = FTimespan(0, 0, 15);
+
+	FString AMSWatchdogUrl = TEXT("ws://localhost:5555/watchdog");
 	
 	bool bHeartbeatJobStarted = false;
 

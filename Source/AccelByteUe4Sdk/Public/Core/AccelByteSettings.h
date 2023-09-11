@@ -172,6 +172,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	EHttpCacheType HttpCacheType { EHttpCacheType::STORAGE};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	bool bSendPredefinedEvent{ false };
 };
 
 UCLASS(Config = Engine)
@@ -306,6 +309,9 @@ public:
 	static EHttpCacheType GetHttpCacheType();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static bool IsSendPredefinedEvent();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -414,5 +420,7 @@ public:
 	static void ResetSettings(const ESettingsEnvironment Environment);
 
 	static void SetIsHttpCacheEnabled(bool bEnable);
+
+	static void SetSendPredefinedEvent(bool bEnable);
 };
 

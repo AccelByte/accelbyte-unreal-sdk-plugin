@@ -24,9 +24,26 @@ void MatchmakingV2::CreateMatchTicket(const FString& MatchPool
 	, const FErrorHandler& OnError
 	, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals)
 {
+	const auto OnCreateTicketError = FCreateMatchmakingTicketErrorHandler::CreateLambda(
+		[&OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorCreateMatchmakingTicketV2& ErrorDetails)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	});
+
+	CreateMatchTicket(MatchPool, OnSuccess, OnCreateTicketError, Optionals);
+}
+
+void MatchmakingV2::CreateMatchTicket(const FString& MatchPool,
+	const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess,
+	const FCreateMatchmakingTicketErrorHandler& OnError,
+	const FAccelByteModelsV2MatchTicketOptionalParams& Optionals)
+{
 	if (MatchPool.IsEmpty())
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("MatchPool cannot be empty!"));
+		FErrorCreateMatchmakingTicketV2 CreateTicketError;
+		CreateTicketError.ErrorCode = static_cast<int32>(ErrorCodes::InvalidRequest);
+		CreateTicketError.ErrorMessage = TEXT("MatchPool cannot be empty!");
+		OnError.ExecuteIfBound(CreateTicketError.ErrorCode, CreateTicketError.ErrorMessage, CreateTicketError);
 		return;
 	}
 

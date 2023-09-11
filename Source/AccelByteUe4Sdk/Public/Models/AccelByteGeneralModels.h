@@ -89,30 +89,35 @@ struct ACCELBYTEUE4SDK_API FAccelByteLRUHttpStruct
 		ExpireTime = FString::SanitizeFloat( ExpireTime_);
 	}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | LRUCache")
 	TArray<FString> RequestHeaders{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//Header array in format "Name: Value"
+	
+	/** @brief Header array in format "Name: Value". */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | LRUCache")
 	TArray<FString> ResponseHeaders{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | LRUCache")
 	int ResponseCode = 0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | LRUCache")
 	FString RequestURL {};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | LRUCache")
 	TArray<uint8> ResponsePayload{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | LRUCache")
 	FString ExpireTime{};
 };
 
 struct FAccelByteHttpCacheItem
 {
-	// Platform time until cached response is stale (in seconds)
+	/** @brief Platform time until cached response is stale (in seconds). */
 	double ExpireTime{ 0.0f };
 
-	// Completed request with valid response
-	FHttpRequestPtr Request = nullptr;
+	/** @brief Completed request with valid response. */
+	FHttpRequestPtr Request{nullptr};
 
-	// The raw request and response serialized
+	/** @brief The raw request and response serialized. */
 	FAccelByteLRUHttpStruct SerializableRequestAndResponse{};
 };
 

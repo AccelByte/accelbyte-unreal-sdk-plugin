@@ -144,4 +144,9 @@ namespace AccelByte
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), ErrorText, FJsonObject{});
 	}
+
+	void FHttpClient::ExecuteError(const FCreateMatchmakingTicketErrorHandler& OnError, const FString& ErrorText)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), ErrorText, FErrorCreateMatchmakingTicketV2());
+	}
 }

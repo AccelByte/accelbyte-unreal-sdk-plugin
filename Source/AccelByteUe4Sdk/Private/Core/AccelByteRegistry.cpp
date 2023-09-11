@@ -39,6 +39,7 @@
 #include "Api/AccelByteMatchmakingV2Api.h"
 #include "Api/AccelByteHeartBeatApi.h"
 #include "Api/AccelByteStoreDisplayApi.h"
+#include "Api/AccelBytePredefinedEventApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -58,6 +59,7 @@
 #include "GameServerApi/AccelByteServerMatchmakingV2Api.h"
 #include "GameServerApi/AccelByteServerAMSApi.h"
 #include "GameServerApi/AccelByteServerMetricExporterApi.h"
+#include "GameServerApi/AccelByteServerPredefinedEventApi.h"
 
 using namespace AccelByte;
 
@@ -100,6 +102,7 @@ Api::TurnManager FRegistry::TurnManager(FRegistry::Credentials, FRegistry::Setti
 Api::HeartBeat FRegistry::HeartBeat(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::StoreDisplay FRegistry::StoreDisplay(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::GDPR FRegistry::GDPR(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+Api::PredefinedEvent FRegistry::PredefinedEvent(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
@@ -119,3 +122,4 @@ GameServerApi::ServerDSHub FRegistry::ServerDSHub(FRegistry::ServerCredentials, 
 GameServerApi::ServerMatchmakingV2 FRegistry::ServerMatchmakingV2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerAMS FRegistry::ServerAMS(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerMetricExporter FRegistry::ServerMetricExporter(FRegistry::ServerSettings);
+GameServerApi::ServerPredefinedEvent FRegistry::ServerPredefinedEvent(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);

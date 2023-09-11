@@ -44,6 +44,7 @@ public:
 	
 	float QosPingTimeout{.6f};
 	EHttpCacheType HttpCacheType = EHttpCacheType::STORAGE;
+	bool bSendPredefinedEvent{ false };
 
 	virtual void Reset(ESettingsEnvironment const Environment) = 0;
 

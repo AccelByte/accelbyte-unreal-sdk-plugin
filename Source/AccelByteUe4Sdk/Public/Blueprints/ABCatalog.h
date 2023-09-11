@@ -17,7 +17,7 @@ USTRUCT(BlueprintType)
 struct FArrayModelsCategoryInfoResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "AccelByte | CategoryInfo")
 	TArray<FAccelByteModelsCategoryInfo> Content;
 };
 

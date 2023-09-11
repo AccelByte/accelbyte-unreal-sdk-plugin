@@ -462,7 +462,7 @@ void Lobby::Connect(const FString& Token)
 	}
 
 	WebSocket->Connect();
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Connecting to %s"), *SettingsRef.LobbyServerUrl);
+	UE_LOG(LogAccelByteLobby, Log, TEXT("Connecting to %s"), *SettingsRef.LobbyServerUrl);
 
 	// if shipping build, skip fetching lobby error messages.
 	// avoid fetching large json file to store lobby error messages.
@@ -486,7 +486,7 @@ void Lobby::Disconnect(bool ForceCleanup)
 		WebSocket->Disconnect(ForceCleanup);
 	}
 
-	if (GEngine) UE_LOG(LogAccelByteLobby, Display, TEXT("Disconnected"));
+	if (GEngine) UE_LOG(LogAccelByteLobby, Log, TEXT("Disconnected"));
 }
 
 
@@ -783,7 +783,7 @@ void Lobby::GetAllAsyncNotification()
 		FString Content = FString::Printf(TEXT("type: offlineNotificationRequest\nid:%s")
 			, *FGuid::NewGuid().ToString(EGuidFormats::Digits));
 		WebSocket->Send(Content);
-		UE_LOG(LogAccelByteLobby, Display, TEXT("Get async notification (id=%s)"), *Content)
+		UE_LOG(LogAccelByteLobby, Verbose, TEXT("Get async notification (id=%s)"), *Content)
 	}
 }
 
@@ -1431,6 +1431,7 @@ void Lobby::UnbindEvent()
 	UnbindV2PartyEvents();
 	UnbindV2GameSessionEvents();
 	UnbindV2MatchmakingEvents();
+	UnbindV2SessionGeneralEvents();
 	
 	UserBannedNotification.Unbind();
 	UserUnbannedNotification.Unbind();
@@ -1619,6 +1620,11 @@ void Lobby::UnbindV2GameSessionEvents()
 	V2GameSessionRejectedNotif.Unbind();
 }
 
+void Lobby::UnbindV2SessionGeneralEvents()
+{
+	V2SessionStorageChangedNotif.Unbind();
+}
+
 void Lobby::UnbindV2MatchmakingEvents()
 {
 	V2MatchmakingMatchFoundNotif.Unbind();
@@ -1628,7 +1634,7 @@ void Lobby::UnbindV2MatchmakingEvents()
 
 void Lobby::OnConnected()
 {
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
+	UE_LOG(LogAccelByteLobby, Log, TEXT("Connected"));
 
 	TokenRefreshDelegateHandle = LobbyCredentialsRef.OnTokenRefreshed().AddLambda(
 		[this](bool bSuccess)
@@ -1644,7 +1650,7 @@ void Lobby::OnConnected()
 
 void Lobby::OnConnectionError(const FString& Error)
 {
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Error connecting: %s"), *Error);
+	UE_LOG(LogAccelByteLobby, Warning, TEXT("Error connecting: %s"), *Error);
 	ConnectError.ExecuteIfBound(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed), ErrorMessages::Default.at(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed)) + TEXT(" Reason: ") + Error);
 }
 
@@ -1667,7 +1673,7 @@ void Lobby::OnClosed(int32 StatusCode
 	BanNotifReceived = false;
 	BanType = EBanType::EMPTY;
 	
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %s Reconnecting: %s"),
+	UE_LOG(LogAccelByteLobby, Log, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %s Reconnecting: %s"),
 		StatusCode, *Reason, WasClean? TEXT("true") : TEXT("false"), bIsReconnecting? TEXT("true") : TEXT("false"));
 	
 	if(!bIsReconnecting)
@@ -1693,7 +1699,7 @@ FString Lobby::SendRawRequest(const FString& MessageType
 			Content.Append(FString::Printf(TEXT("\n%s"), *CustomPayload));
 		}
 		WebSocket->Send(Content);
-		UE_LOG(LogAccelByteLobby, Display, TEXT("Sending request: %s"), *Content);
+		UE_LOG(LogAccelByteLobby, Verbose, TEXT("Sending request: %s"), *Content);
 		return MessageID;
 	}
 	return TEXT("");
@@ -1879,7 +1885,7 @@ void HandleResponse(const FString& MessageType
 			ErrorCodeName = TEXT("Error name not defined");
 		}
 		
-		UE_LOG(LogAccelByteLobby, Display, TEXT("%s returned non zero error code, code is %d with codename %s"), *MessageType, lobbyResponseCode, *ErrorCodeName);
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("%s returned non zero error code, code is %d with codename %s"), *MessageType, lobbyResponseCode, *ErrorCodeName);
 		if (ErrorCallback.IsBound())
 		{
 			ErrorCallback.ExecuteIfBound(lobbyResponseCode, *ErrorCodeName);
@@ -2182,6 +2188,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	case EV2SessionNotifTopic::OnGameSessionUpdated:
 	{
 		DispatchV2JsonNotif<FAccelByteModelsV2GameSession>(Notif.Payload, V2GameSessionUpdatedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnSessionStorageChanged:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2SessionStorageChangedEvent>(Notif.Payload, V2SessionStorageChangedNotif);
 		break;
 	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
@@ -2505,14 +2516,14 @@ bool Lobby::ExtractLobbyMessageMetaData(const FString& InLobbyMessage
 		}
 	}
 
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Metadata found type %s, id %s, code %s"), *OutLobbyMessageMetaData->Type, *OutLobbyMessageMetaData->Id, *OutLobbyMessageMetaData->Code);
+	UE_LOG(LogAccelByteLobby, Log, TEXT("Metadata found type %s, id %s, code %s"), *OutLobbyMessageMetaData->Type, *OutLobbyMessageMetaData->Id, *OutLobbyMessageMetaData->Code);
 
 	return true;
 }
 	
 void Lobby::OnMessage(const FString& Message)
 {
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Raw Lobby Response\n%s"), *Message);
+	UE_LOG(LogAccelByteLobby, Verbose, TEXT("Raw Lobby Response\n%s"), *Message);
 
 	if (Message.IsEmpty())
 	{
@@ -2522,13 +2533,13 @@ void Lobby::OnMessage(const FString& Message)
 	// Conversion : Custom -> Json
 	const FString ParsedJsonString = LobbyMessageToJson(Message);
 	
-	UE_LOG(LogAccelByteLobby, Display, TEXT("JSON Version: %s"), *ParsedJsonString);
+	UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("JSON Version: %s"), *ParsedJsonString);
 
 	TSharedPtr<FJsonObject> ParsedJsonObj;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParsedJsonString);
 	if (!FJsonSerializer::Deserialize(JsonReader, ParsedJsonObj))
 	{
-		UE_LOG(LogAccelByteLobby, Display, TEXT("Failed to Deserialize. Json: %s"), *ParsedJsonString);
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Failed to Deserialize. Json: %s"), *ParsedJsonString);
 
 		TSharedRef<FLobbyMessageMetaData> MetaData = MakeShared<FLobbyMessageMetaData>();
 		ExtractLobbyMessageMetaData(Message, MetaData);
@@ -2550,7 +2561,7 @@ void Lobby::OnMessage(const FString& Message)
 	}
 
 	const FString ReceivedMessageType = ParsedJsonObj->GetStringField(JsonTypeIdentifier);
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Type: %s"), *ReceivedMessageType);
+	UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("Type: %s"), *ReceivedMessageType);
 
 	if (ReceivedMessageType.Equals(LobbyResponse::SessionNotif))
 	{

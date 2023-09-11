@@ -15,6 +15,7 @@ FApiClient::FApiClient()
 	HttpRef->Startup();
 	CredentialsRef->Startup();
 	GameTelemetry.Startup();
+	PredefinedEvent.Startup();
 	PresenceBroadcastEvent.Startup();
 }
 
@@ -26,12 +27,14 @@ FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetr
 		[](AccelByte::FHttpRetryScheduler*) {}))
 {
 	GameTelemetry.Startup();
+	PredefinedEvent.Startup();
 	PresenceBroadcastEvent.Startup();
 }
 
 FApiClient::~FApiClient()
 {
 	GameTelemetry.Shutdown();
+	PredefinedEvent.Shutdown();
 	PresenceBroadcastEvent.Shutdown();
 	
 	if (!bUseSharedCredentials)

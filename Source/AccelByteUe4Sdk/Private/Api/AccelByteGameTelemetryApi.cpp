@@ -18,10 +18,12 @@ namespace Api
 	
 GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, bool bInCacheEvent)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, CredentialsRef{InCredentialsRef}
 	, ShuttingDown(false)
+	, bCacheEvent(bInCacheEvent)
 {
 	GameTelemetryLoginSuccess = CredentialsRef.OnLoginSuccess().AddRaw(this, &GameTelemetry::OnLoginSuccess);
 }
@@ -33,7 +35,10 @@ GameTelemetry::~GameTelemetry()
 
 void GameTelemetry::OnLoginSuccess(FOauth2Token const& Response)
 {
-	LoadCachedEvents();
+	if (bCacheEvent)
+	{
+		LoadCachedEvents();
+	}
 }
 
 void GameTelemetry::SetBatchFrequency(FTimespan Interval)
@@ -84,7 +89,10 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 	{
 		TSharedPtr<FAccelByteModelsTelemetryBody> TelemetryPtr = MakeShared<FAccelByteModelsTelemetryBody>(TelemetryBody);
 		JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>{ TelemetryPtr, OnSuccess, OnError });
-		AppendEventToCache(TelemetryPtr);
+		if (bCacheEvent)
+		{
+			AppendEventToCache(TelemetryPtr);
+		}
 		if (bTelemetryJobStarted == false)
 		{
 			bTelemetryJobStarted = true;
