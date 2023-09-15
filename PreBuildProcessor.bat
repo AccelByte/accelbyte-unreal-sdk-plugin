@@ -5,13 +5,18 @@ IF [%1]==[] GOTO usage
 IF [%2]==[] GOTO usage
 IF [%3]==[] GOTO usage
 IF [%4]==[] GOTO usage
+IF [%5]==[] GOTO end
 
 SET EngineDir=%1
 SET ProjectDir=%2
 SET TargetConfiguration=%3
 SET TargetType=%4
+SET Enabled=%5
+
+IF NOT %Enabled%==True GOTO end
 
 SET ConfigFile="%ProjectDir:"=%\Config\DefaultGame.ini"
+SET OriginalConfigFile="%ConfigFile:"=%.orig"
 SET BuildVersionFile="%EngineDir:"=%\Build\Build.version"
 SET IniSection=+IniSectionBlacklist
 
@@ -25,15 +30,16 @@ SET PackagingSettingSection=[/Script/UnrealEd.ProjectPackagingSettings]
 CALL :get_engine_version Version
 IF %Version%==5 SET IniSection=+IniSectionDenylist
 
-IF NOT %TargetConfiguration%==Shipping GOTO remove_section_blacklist
-IF %TargetType%==Editor GOTO remove_section_blacklist
-IF %TargetType%==Server GOTO remove_section_blacklist
+IF NOT %TargetConfiguration%==Shipping GOTO end
+IF %TargetType%==Editor GOTO end
+IF %TargetType%==Server GOTO end
 
+COPY /y %ConfigFile% %OriginalConfigFile% >NUL
 CALL :append_section_blacklist
 EXIT /b 0
 
 :usage
-    ECHO Usage: PreBuildProcessor.bat {engine_dir} {project_dir} {target_configuration} {target_type}
+    ECHO Usage: PreBuildProcessor.bat {engine_dir} {project_dir} {target_configuration} {target_type} {enabled=False}
 EXIT /b 1
 
 :append_section_blacklist
@@ -41,7 +47,7 @@ EXIT /b 1
     SET CurrentSection=
     SET FirstLine=True
     SET IsPackagingSettingSection=False
-    
+
     (FOR /f "usebackq eol=` delims=" %%i IN (%ConfigFile%) DO (
         SET Line=%%i
         IF "x!Line:~0,1!"=="x[" (
@@ -78,36 +84,6 @@ EXIT /b 1
             ECHO !IniSection!=%%a
         ))>>"%ConfigFileTmp%"
     )
-
-    COPY /y %ConfigFileTmp% %ConfigFile% >NUL
-    DEL %ConfigFileTmp%
-    EXIT /B 0
-
-:remove_section_blacklist
-    SET ConfigFileTmp="%ConfigFile:"=%.tmp"
-    SET CurrentSection=
-    
-    SET FirstLine=True
-    (FOR /f "usebackq eol=` delims=" %%i IN (%ConfigFile%) DO (
-        SET Line=%%i
-        IF "x!Line:~0,1!"=="x[" (
-            IF !FirstLine!==True (
-                SET FirstLine=False
-            ) ELSE (
-                ECHO:
-            )
-            SET CurrentSection=!Line!
-        ) ELSE (
-            IF !CurrentSection!==!PackagingSettingSection! (
-                FOR %%a IN (!ServerSettingsSectionList!) DO (
-                    IF !Line!==!IniSection!=%%a (
-                        SET Line=
-                    )
-                )
-            )
-        )
-        IF NOT [!Line!] == [] ECHO !Line!
-    ))>%ConfigFileTmp%
 
     COPY /y %ConfigFileTmp% %ConfigFile% >NUL
     DEL %ConfigFileTmp%

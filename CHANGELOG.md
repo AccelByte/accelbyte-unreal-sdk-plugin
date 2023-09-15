@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [24.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.1.1%0D24.1.0) (2023-09-15)
+
+
+### Bug Fixes
+
+* DefaultGame.ini is altered after build ([3ccdea0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3ccdea0b761da738940f8809ab6cc541194e10a9))
+
 ## [24.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.1.0%0D24.0.3) (2023-09-11)
 
 

@@ -1,7 +1,7 @@
 {
     "FileVersion": 3,
-    "Version": 44,
-    "VersionName": "24.1.0",
+    "Version": 45,
+    "VersionName": "24.1.1",
     "FriendlyName": "AccelByte Unreal Engine SDK",
     "Description": "Official AccelByte SDK for Unreal Engine 4",
     "Category": "Online Platform",
@@ -28,7 +28,12 @@
     ],
     "PreBuildSteps": {
         "Win64": [
-            "call \"$(PluginDir)\\PreBuildProcessor.bat\" \"$(EngineDir)\" \"$(ProjectDir)\" $(TargetConfiguration) $(TargetType)"
+            "call \"$(PluginDir)\\PreBuildProcessor.bat\" \"$(EngineDir)\" \"$(ProjectDir)\" $(TargetConfiguration) $(TargetType) False"
+        ]
+    },
+    "PostBuildSteps": {
+        "Win64": [
+            "call \"$(PluginDir)\\PostBuildProcessor.bat\" \"$(ProjectDir)\" "
         ]
     }
 }
