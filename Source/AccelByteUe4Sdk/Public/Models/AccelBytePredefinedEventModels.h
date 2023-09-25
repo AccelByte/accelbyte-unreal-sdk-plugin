@@ -264,6 +264,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemCreatedPayload : public F
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | StatItemInfo")
+        FString UserId{};
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | StatItemInfo")
         TArray<FString> StatCodes{};
 
     virtual const FString GetEventName() override
@@ -302,7 +305,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordDeletedPayload : public F
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | PlayerRecordInfo")
         FString Key{};
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | PlayerRecordInfo")
-        bool IsPublic{};
+        FString UserId{};
 
     virtual const FString GetEventName() override
     {
@@ -320,7 +323,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordUpdatedPayload : public F
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | PlayerRecordUpdateInfo")
         bool IsPublic{};
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | PlayerRecordUpdateInfo")
+        FString UserId{};
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | PlayerRecordUpdateInfo")
+        FString SetBy{};
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | PlayerRecordUpdateInfo")
         FString Strategy{};
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | PlayerRecordUpdateInfo")
+        FJsonObjectWrapper Value{};
 
     virtual const FString GetEventName() override
     {
@@ -350,7 +359,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecordUpdatedPayload : public FAc
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | GameRecordUpdateInfo")
         FString Key{};
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | GameRecordUpdateInfo")
+        FString SetBy{};
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | GameRecordUpdateInfo")
         FString Strategy{};
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Telemetry | PredefinedEvent | GameRecordUpdateInfo")
+        FJsonObjectWrapper Value{};
 
     virtual const FString GetEventName() override
     {

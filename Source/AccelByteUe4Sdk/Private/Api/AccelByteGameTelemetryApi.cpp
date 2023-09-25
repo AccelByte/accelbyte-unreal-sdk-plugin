@@ -65,6 +65,11 @@ void GameTelemetry::SetImmediateEventList(TArray<FString> const& EventNames)
 	ImmediateEvents = TSet<FString>(EventNames);
 }
 
+void GameTelemetry::SetCriticalEventList(TArray<FString> const& EventNames)
+{
+	CriticalEvents = TSet<FString>(EventNames);
+}
+
 void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -89,7 +94,7 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 	{
 		TSharedPtr<FAccelByteModelsTelemetryBody> TelemetryPtr = MakeShared<FAccelByteModelsTelemetryBody>(TelemetryBody);
 		JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>{ TelemetryPtr, OnSuccess, OnError });
-		if (bCacheEvent)
+		if (bCacheEvent || CriticalEvents.Contains(TelemetryBody.EventName))
 		{
 			AppendEventToCache(TelemetryPtr);
 		}
@@ -218,6 +223,9 @@ void GameTelemetry::LoadCachedEvents()
 	{
 		return;
 	}
+
+	bCacheUpdated = true;
+
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(TelemetryKey
 		, THandler<TPair<FString, FString>>::CreateLambda(
 			[this](TPair<FString, FString> Pair)
@@ -255,6 +263,8 @@ void GameTelemetry::AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody>
 		, TelemetryValues
 		, THandler<bool>::CreateLambda([](bool IsSuccess){})
 		, FAccelByteUtilities::AccelByteStorageFile());
+
+	bCacheUpdated = true;
 }
 
 void GameTelemetry::RemoveEventsFromCache()
@@ -264,9 +274,17 @@ void GameTelemetry::RemoveEventsFromCache()
 	{
 		return;
 	}
+
+	if (!bCacheUpdated)
+	{
+		return;
+	}
+
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->DeleteItem(TelemetryKey
 		, FVoidHandler::CreateLambda([](){})
 		, FAccelByteUtilities::AccelByteStorageFile());
+
+	bCacheUpdated = false;
 }
 
 bool GameTelemetry::JobArrayQueueAsJsonString(FString& OutJsonString)

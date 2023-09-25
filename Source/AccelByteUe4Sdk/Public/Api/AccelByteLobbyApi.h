@@ -2212,6 +2212,19 @@ public:
 		, FErrorHandler OnError);
 
 	/**
+	 * @brief Sync platform specific friend list to AccelByte friend list.
+	 * This will automatically add platform specific friend list to AccelByte friend list if the friends already linked
+	 * their account to AccelByte service.
+	 *
+	 * @param Request the request of S2S friend sync.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SyncThirdPartyFriends(const FAccelByteModelsSyncThirdPartyFriendsRequest& Request
+		, const THandler<TArray<FAccelByteModelsSyncThirdPartyFriendsResponse>>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
 	 * @brief  Get party data by party ID.
 	 *
 	 * @param PartyId Targeted party Id.

@@ -1161,9 +1161,56 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserIds, OnSuccess, OnError);
 }
 
-void Lobby::GetPartyData(const FString& PartyId
-	, const THandler<FAccelByteModelsPartyData>& OnSuccess
+void Lobby::SyncThirdPartyFriends(const FAccelByteModelsSyncThirdPartyFriendsRequest& Request
+	, const THandler<TArray<FAccelByteModelsSyncThirdPartyFriendsResponse>>& OnSuccess
 	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if(Request.FriendSyncDetails.Num() < 1)
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request parameter must have at least 1 element!"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request parameter must have at least 1 element!"));
+		return;
+	}
+
+	const bool bContainEmptyPlatformId = Request.FriendSyncDetails.ContainsByPredicate([](const FAccelByteModelsSyncThirdPartyFriendInfo& Item)
+	{
+		return Item.PlatformId.IsEmpty();
+	});
+	
+	if(bContainEmptyPlatformId)
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request details cannot contains empty platform ID!"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request details cannot contains empty platform ID!"));
+		return;
+	}
+
+	const bool bContainNotLoggedInAndEmptyPlatformToken = Request.FriendSyncDetails.ContainsByPredicate([](const FAccelByteModelsSyncThirdPartyFriendInfo& Item)
+	{
+		return Item.PlatformToken.IsEmpty() && !Item.IsLogin;
+	});
+
+	if(bContainNotLoggedInAndEmptyPlatformToken)
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request details cannot contains empty platform Token when IsLogin is false!"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request details cannot contains empty platform Token when IsLogin is false!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/friends/sync/namespaces/%s/me")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FString JSONString;
+	FAccelByteUtilities::TArrayUStructToJsonString(Request.FriendSyncDetails, JSONString);
+
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JSONString, OnSuccess, OnError);
+}
+
+void Lobby::GetPartyData(const FString& PartyId
+                         , const THandler<FAccelByteModelsPartyData>& OnSuccess
+                         , const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 

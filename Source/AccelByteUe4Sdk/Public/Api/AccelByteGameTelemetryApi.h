@@ -39,6 +39,13 @@ public:
 	void SetBatchFrequency(FTimespan Interval);
 
 	/**
+	 * @brief Set list of event that need to be backed up on disc before sending in order to be able to recover in case of failure.
+	 *
+	 * @param EventNames FString Array of payload EventName.
+	 */
+	void SetCriticalEventList(TArray<FString> const& EventNames);
+
+	/**
 	 * @brief Set list of event that need to be sent immediately without the needs to jobQueue it.
 	 *
 	 * @param EventNames FString Array of payload EventName.
@@ -72,6 +79,11 @@ public:
 	 */
 	void Shutdown();
 
+	/**
+	 * @brief Check the cache has been updated or not
+	*/
+	bool IsCacheUpdated() { return bCacheUpdated; }
+
 private:
 	void SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events
 		, FVoidHandler const& OnSuccess
@@ -89,11 +101,13 @@ private:
 	
 	bool JobArrayQueueAsJsonString(FString& OutJsonString);
 	
+protected:
 	bool EventsJsonToArray(FString& InJsonString
 		, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray);
 	
 	FString GetTelemetryKey();
 
+private:
 	GameTelemetry() = delete;
 	GameTelemetry(GameTelemetry const&) = delete;
 	GameTelemetry(GameTelemetry&&) = delete;
@@ -102,6 +116,8 @@ private:
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;
+	TSet<FString> CriticalEvents;
+	bool bCacheUpdated = false;
 	TQueue<TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>> JobQueue;
 	TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventPtrArray;
 	bool bTelemetryJobStarted = false;

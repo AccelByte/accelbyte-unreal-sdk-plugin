@@ -615,6 +615,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetOnlineUsersResponse
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
     TArray<FString> lastSeenAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	TArray<FString> Platform{};
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -1062,6 +1065,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatusNotif
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
 	FString LastSeenAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
+	FString Platform{};
 };
 
 USTRUCT(BlueprintType)
@@ -1349,6 +1355,49 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserBannedNotification
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	bool Enable{};
+};
+
+// ------------------------------------------------------------------------------------------------
+// Third Party Friend Sync
+// ------------------------------------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct FAccelByteModelsSyncThirdPartyFriendInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	bool IsLogin{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString PlatformId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString PlatformToken{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString PsnEnv{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsSyncThirdPartyFriendsRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	TArray<FAccelByteModelsSyncThirdPartyFriendInfo> FriendSyncDetails;
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsSyncThirdPartyFriendsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Detail{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString PlatformId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Status{};
 };
 
 // ------------------------------------------------------------------------------------------------

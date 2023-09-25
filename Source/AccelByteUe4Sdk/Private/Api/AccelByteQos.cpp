@@ -7,6 +7,7 @@
 #include "Networking.h"
 #include "Api/AccelByteQosManagerApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/Ping/AccelBytePing.h"
 
 namespace AccelByte
 {
@@ -104,17 +105,15 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 		for (int count = 0; count < QosServerList.Servers.Num(); count++)
 		{
 			auto Server = QosServerList.Servers[count];
-			FString IpPort = FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Port);
 			FString Region = Server.Region;
 
 			// Ping -> Get the latencies on pong.
-			FUDPPing::UDPEcho(IpPort, FRegistry::Settings.QosPingTimeout, FIcmpEchoResultDelegate::CreateLambda(
-				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError](FIcmpEchoResult& PingResult)
+			FAccelBytePing::SendIcmpPing(Server.Ip, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
+				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError](const FPingResult& PingResult)
 				{
-					// Add <Region, PingSeconds>
-					if (PingResult.Status == EIcmpResponseStatus::Success)
+					if (PingResult.Status == FPingResultStatus::Success)
 					{
-						float PingDelay = PingResult.Time * 1000;
+						float PingDelay = PingResult.AverageRoundTrip * 1000;
 						SuccessLatencies->Add(TPair<FString, float>(Region, PingDelay));
 					}
 					else

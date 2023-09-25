@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.2.0%0D24.1.1) (2023-09-25)
+
+
+### Features
+
+* **QoS:** send multiple ping and calculate average round trip ([c04fe54](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c04fe548d31539c50e6900eed5140840b08a5237))
+* **telemetry:** bringback caching improvement ([a614f50](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a614f50273456ee0d7e01cb1abae165acc04bc99))
+* **Telemetry:** make some function protected to allow access by child class ([e48a2b1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e48a2b1077a6742322f0d34b1fc91904393730be))
+
+
+### Bug Fixes
+
+* **lobby:** add missing platform field in FAccelByteModelsUserStatusNotif and FAccelByteModelsGetOnlineUsersResponse ([1ac6792](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1ac6792675dfc15e1af14e4168843e69d14bb7e8))
+* **predefinedEvent:** adjust predefinedEvent models on storage scope ([e49b4a1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e49b4a14f8b54029b9fc67273248636b5cf6d735))
+
 ### [24.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.1.1%0D24.1.0) (2023-09-15)
 
 
