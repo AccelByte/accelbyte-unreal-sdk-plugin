@@ -420,32 +420,9 @@ void ServerDSM::SetOnAutoShutdownErrorDelegate(const FErrorHandler& OnError)
 // Should not be called from constructor, FCommandLine::Get() is not ready.
 void ServerDSM::ParseCommandParam()
 {
-	const auto CommandParams = FCommandLine::Get();
-	TArray<FString> Tokens;
-	TArray<FString> Switches;
-	FCommandLine::Parse(CommandParams, Tokens, Switches);
-	FReport::Log(FString::Printf(TEXT("Params: %s"), CommandParams));
-	for (auto& Param : Switches)
-	{
-		if (Param.Contains("provider"))
-		{
-			TArray<FString> ArraySplit;
-			Param.ParseIntoArray(ArraySplit, TEXT("="), true);
-			Provider = ArraySplit[1];
-		}
-		else if (Param.Contains("game_version"))
-		{
-			TArray<FString> ArraySplit;
-			Param.ParseIntoArray(ArraySplit, TEXT("="), true);
-			GameVersion = ArraySplit[1];
-		}
-		else if (Param.Contains("region"))
-		{
-			TArray<FString> ArraySplit;
-			Param.ParseIntoArray(ArraySplit, TEXT("="), true);
-			Region = ArraySplit[1];
-		}
-	}
+	FAccelByteUtilities::GetValueFromCommandLineSwitch("provider", Provider);
+	FAccelByteUtilities::GetValueFromCommandLineSwitch("game_version", GameVersion);
+	FAccelByteUtilities::GetValueFromCommandLineSwitch("region", Region);
 }
 
 void ServerDSM::SetOnHeartbeatSuccessDelegate(const FVoidHandler& OnSuccess)

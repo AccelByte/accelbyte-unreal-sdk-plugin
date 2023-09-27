@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [24.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.2.1%0D24.2.0) (2023-09-27)
+
+
+### Bug Fixes
+
+* command line parser will have wrong value when input key contains other param key ([951facd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/951facde106f02553893d3384c50fabf451bfc67))
+
 ## [24.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.2.0%0D24.1.1) (2023-09-25)
 
 

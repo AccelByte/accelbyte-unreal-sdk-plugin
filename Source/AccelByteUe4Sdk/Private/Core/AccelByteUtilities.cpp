@@ -802,11 +802,11 @@ bool FAccelByteUtilities::GetValueFromCommandLineSwitch(FString const& Key
 	FCommandLine::Parse(CommandParams, Tokens, Switches);
 	for (auto Param : Switches)
 	{
-		if (Param.Contains(Key))
+		if (Param.StartsWith(Key))
 		{
 			TArray<FString> ArraySplit;
-			Param.ParseIntoArray(ArraySplit, TEXT("="), 1);
-			if (ArraySplit.Num() == 2 && ArraySplit[1].IsEmpty() == false)
+			Param.ParseIntoArray(ArraySplit, TEXT("="), true);
+			if (ArraySplit.Num() == 2 && ArraySplit[0] == Key)
 			{
 				Value = ArraySplit[1];
 				return true;
