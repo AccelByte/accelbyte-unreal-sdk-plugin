@@ -54,19 +54,23 @@ void TurnManager::GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer
 					{
 		                auto Server = Result.Servers[i];
 						int Count = Result.Servers.Num();
-		                FUDPPing::UDPEcho(FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Qos_port), 10.00, FIcmpEchoResultDelegate::CreateLambda([this, Server, Count, OnSuccess](FIcmpEchoResult &PingResult)
-		                {
-		                    Counter++;
-		                    if(FastestPing > PingResult.Time)
-		                    {
-                    			FastestPing = PingResult.Time;
-                    			ClosestServer = Server;
-		                    }
-		                    if(Counter == Count)
-		                    {
-                    			OnSuccess.ExecuteIfBound(ClosestServer);
-		                    }
-		                }));
+		                FUDPPing::UDPEcho(FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Qos_port)
+							, 10.0f
+							, FIcmpEchoResultDelegate::CreateLambda(
+								[this, Server, Count, OnSuccess](FIcmpEchoResult PingResult)
+								{
+									Counter++;
+									if(FastestPing > PingResult.Time)
+									{
+                    					FastestPing = PingResult.Time;
+                    					ClosestServer = Server;
+									}
+									if(Counter == Count)
+									{
+                    					OnSuccess.ExecuteIfBound(ClosestServer);
+									}
+								})
+							);
 		            }
 				}
 			})

@@ -31,6 +31,17 @@ FHttpRequestPtr Oauth2::ConstructTokenRequest(const FString& Url
 	return Request;
 }
 
+FString Oauth2::ConstructAdditionalData()
+{
+	TSharedPtr<FJsonObject> AdditionalDataJsonObj = MakeShared<FJsonObject>();
+	AdditionalDataJsonObj->SetStringField(TEXT("flightId"), FAccelByteUtilities::GetFlightId());
+
+	FString AdditionalDataString{};
+	const auto Writer = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&AdditionalDataString);
+	FJsonSerializer::Serialize(AdditionalDataJsonObj.ToSharedRef(), Writer);
+	return AdditionalDataString;
+}
+
 void Oauth2::GetTokenWithAuthorizationCode(const FString& ClientId
 	, const FString& ClientSecret
 	, const FString& AuthorizationCode
@@ -139,7 +150,12 @@ void Oauth2::GetTokenWithClientCredentials(const FString& ClientId
 		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret);
-	Request->SetContentAsString(FString::Printf(TEXT("grant_type=client_credentials")));
+
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("grant_type"), TEXT("client_credentials")},
+		{TEXT("additionalData"), ConstructAdditionalData()},
+	}, TEXT(""));
+	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
@@ -222,7 +238,8 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{TEXT("platform_token"), FGenericPlatformHttp::UrlEncode(PlatformToken)},
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
-		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress(true)) }
+		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress(true)) },
+		{TEXT("additionalData"), ConstructAdditionalData()},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -265,6 +282,7 @@ void Oauth2::GetTokenWithRefreshToken(const FString& ClientId
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{TEXT("grant_type"), TEXT("refresh_token")},
 		{TEXT("refresh_token"), RefreshToken},
+		{TEXT("additionalData"), ConstructAdditionalData()},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
@@ -371,6 +389,7 @@ void Oauth2::GetTokenWithAuthorizationCodeV3(const FString& ClientId
 		{TEXT("grant_type"), TEXT("authorization_code") },
 		{TEXT("code"), AuthorizationCode },
 		{TEXT("redirect_uri"), RedirectUri },
+		{TEXT("additionalData"), ConstructAdditionalData() },
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	
@@ -423,7 +442,8 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId
 		{TEXT("grant_type"), TEXT("password")},
 		{TEXT("username"), FGenericPlatformHttp::UrlEncode(Username)},
 		{TEXT("password"), FGenericPlatformHttp::UrlEncode(Password)},
-		{TEXT("extend_exp"), bRememberMe ? TEXT("true") : TEXT("false") },
+		{TEXT("extend_exp"), bRememberMe ? TEXT("true") : TEXT("false")},
+		{TEXT("additionalData"), ConstructAdditionalData()},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	

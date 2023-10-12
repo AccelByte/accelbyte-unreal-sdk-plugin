@@ -527,6 +527,8 @@ private:
 	static FHttpRequestPtr ConstructTokenRequest(const FString& Url
 		, const FString& ClientId
 		, const FString& ClientSecret);
+
+	static FString ConstructAdditionalData();
 };
 
 } // Namespace Api

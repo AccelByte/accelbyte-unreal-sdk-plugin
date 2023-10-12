@@ -738,3 +738,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionStorageChangedEvent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionStorageChangedEvent")
 	FJsonObjectWrapper StorageChanges{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionEndedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionEndedEvent")
+	FString SessionID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionEndedEvent")
+	bool TextChat{};
+};

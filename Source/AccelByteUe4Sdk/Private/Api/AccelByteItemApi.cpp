@@ -293,7 +293,7 @@ void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> cons
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
-	} 
+	}	
 
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/stores")
@@ -301,6 +301,40 @@ void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> cons
 		, *CredentialsRef.GetNamespace());
 
 	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Item::GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Region, THandler<TArray<FAccelByteModelsEstimatedPrices>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (CredentialsRef.GetNamespace().IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	} 
+
+	if (ItemIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemIds can not be empty"));
+		return;
+	}
+
+	// There will only one published stored in a live game environment. 
+	// Here the StoreId is intended to be set as empty string, then the Platform Service will fill by default value/published store Id. 
+	const FString& StoreId = TEXT("");
+	const TMultiMap<FString, FString> QueryParams = {
+		{ TEXT("storeId"), StoreId },
+		{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
+		{ TEXT("region"), Region },
+	};
+	
+	const FString Verb = TEXT("GET");
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/estimatedPrice")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
 }
 	
 } // Namespace Api

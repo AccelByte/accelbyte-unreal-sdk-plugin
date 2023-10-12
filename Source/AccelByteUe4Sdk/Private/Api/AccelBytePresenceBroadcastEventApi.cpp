@@ -135,11 +135,7 @@ void PresenceBroadcastEvent::Shutdown()
 
 FString PresenceBroadcastEvent::GetFlightId()
 {
-	if (FlightId.IsEmpty())
-	{
-		FlightId = FGuid::NewGuid().ToString();
-	}
-	return FlightId;
+	return FAccelByteUtilities::GetFlightId();
 }
 
 bool PresenceBroadcastEvent::PeriodicHeartbeat(float DeltaTime)

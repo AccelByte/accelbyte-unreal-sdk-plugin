@@ -862,6 +862,17 @@ FString FAccelByteUtilities::GetAuthorizationCode()
 	return AuthorizationCode;
 }
 
+FString FAccelByteUtilities::GetFlightId()
+{
+	static FString FlightId{};
+
+	if (FlightId.IsEmpty())
+	{
+		FlightId = FGuid::NewGuid().ToString();
+	}
+	return FlightId;
+}
+
 void FAccelByteNetUtilities::GetPublicIP(THandler<FAccelByteModelsPubIp> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -965,6 +976,16 @@ FString FAccelByteUtilities::ConvertItemSortByToString(EAccelByteItemListSortBy 
 		return TEXT("displayOrder:desc");
 	}
 	return TEXT("");
+}
+
+bool FAccelByteUtilities::ReplaceDecimalSeparator(FString& NumberStr, const TCHAR* From, const TCHAR* To)
+{
+	if (FAccelByteUtilities::IsNumericString(NumberStr))
+	{
+		NumberStr = NumberStr.Replace(From, To);
+		return true;
+	}
+	return false;
 }
 
 bool FAccelByteUtilities::IsNumericString(FString const& String)

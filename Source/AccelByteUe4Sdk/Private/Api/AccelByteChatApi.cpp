@@ -7,7 +7,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
-#include "Engine.h"
+#include "Engine/Engine.h"
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
 
@@ -429,7 +429,7 @@ namespace AccelByte
 			Headers.Add(ChatSessionHeaderName, ChatSessionId.SessionID);
 			Headers.Add(TEXT("X-Ab-RpcEnvelopeStart"), WsEnvelopeStart);
 			Headers.Add(TEXT("X-Ab-RpcEnvelopeEnd"), WsEnvelopeEnd);
-			FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
+
 			WebSocket = AccelByteWebSocket::Create(*SettingsRef.ChatServerWsUrl, TEXT("wss"), CredentialsRef, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
 
 			WebSocket->OnConnected().AddRaw(this, &Chat::OnConnected);

@@ -62,15 +62,29 @@ public:
 
 	/**
 	 * @brief Get all of user's orders that have been created with paging.
+	 * @obsolete This method will be removed in the future, so please use QueryUserOrders(const FAccelByteModelsUserOrdersRequest& UserOrderRequest, 
+	 *	  const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 	 * 
 	 * @param Page Page number.
 	 * @param Size Items per page.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetUserOrders(int32 Page
 		, int32 Size
 		, THandler<FAccelByteModelsPagedOrderInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Query all of user's orders that have been created with paging.
+	 *
+	 * @param UserOrderRequest The request to query user orders, contains some parameters.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
+	 * @param OnError This will be called when the operation failed.
+     */
+	void QueryUserOrders(const FAccelByteModelsUserOrdersRequest& UserOrderRequest
+		, const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess
+		, const FErrorHandler& OnError);
 
 	/**
 	 * @brief  Get the history of the created orders.

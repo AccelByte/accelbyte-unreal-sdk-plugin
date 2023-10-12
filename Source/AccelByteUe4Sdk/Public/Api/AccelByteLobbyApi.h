@@ -539,6 +539,11 @@ public:
 	DECLARE_DELEGATE_OneParam(FV2GameSessionRejectedNotif, FAccelByteModelsV2GameSessionUserRejectedEvent);
 
 	/**
+	 * @brief Delegate for game session ended event. Will be triggered when DS unregistered.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionEndedNotif, FAccelByteModelsV2GameSessionEndedEvent);
+
+	/**
 	 * @brief Delegate for session storage changed event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2SessionStorageChangedNotif, FAccelByteModelsV2SessionStorageChangedEvent)
@@ -1375,6 +1380,15 @@ public:
 	void SetV2GameSessionRejectedNotifDelegate(const FV2GameSessionRejectedNotif& OnGameSessionRejectedNotif)
 	{
 		V2GameSessionRejectedNotif = OnGameSessionRejectedNotif;
+	}
+
+	/**
+	 * @brief Set a trigger function when game session ended by the DS (v2)
+	 * @param OnGameSessionEndededNotif return models called FAccelByteModelsV2GameSessionEndedEvent
+	 */
+	void SetV2GameSessionEndedNotifDelegate(const FV2GameSessionEndedNotif& OnGameSessionEndededNotif)
+	{
+		V2GameSessionEndedNotif = OnGameSessionEndededNotif;
 	}
 
 	/**
@@ -2579,6 +2593,7 @@ private:
 	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;
 	FV2GameSessionKickedNotif V2GameSessionKickedNotif;
 	FV2GameSessionRejectedNotif V2GameSessionRejectedNotif;
+	FV2GameSessionEndedNotif V2GameSessionEndedNotif;
 
 	FV2SessionStorageChangedNotif V2SessionStorageChangedNotif;
 

@@ -94,6 +94,29 @@ void Order::GetUserOrders(int32 Page
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
+void Order::QueryUserOrders(const FAccelByteModelsUserOrdersRequest& UserOrderRequest
+    , const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess
+	, const FErrorHandler& OnError) 
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	FString Status = UserOrderRequest.Status != EAccelByteOrderStatus::NONE ? 
+		FAccelByteUtilities::GetUEnumValueAsString(UserOrderRequest.Status) : TEXT("");
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("itemId"), UserOrderRequest.ItemId},
+		{TEXT("status"), Status },
+		{TEXT("offset"), FString::FromInt(UserOrderRequest.Offset)},
+		{TEXT("limit"), FString::FromInt(UserOrderRequest.Limit)}
+	};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 void Order::GetUserOrderHistory(const FString& OrderNo
 	, const THandler<TArray<FAccelByteModelsOrderHistoryInfo>>& OnSuccess
 	, const FErrorHandler& OnError)

@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.3.0%0D24.2.1) (2023-10-12)
+
+
+### Features
+
+* add flight id to additional login data ([bae39d8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bae39d8d4b278b59141785794caf13478280b9f0))
+* exposed latest query user orders ([af10369](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/af103697965b2d7e0f392ad13e68d650f6126d8d))
+* Flexible bundle pricing ([702a448](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/702a44812f924df7c8197afe6265c45fbdb9451f))
+* platform wrapper interface ([3df2503](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3df2503221eed0856b22b7ce9ff035cd8bc84895))
+* **predefinedEvent:** add CampaignCodeRedeemedPayload model, add payment payload ([307ab85](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/307ab8509f2f8b00249b6067fe5c220cdf7518fa))
+* **predefinedEvent:** add some event on social scope ([e675d67](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e675d670236a56a43b9ef79bd9d5c2f2a5fa0e0e))
+* **predefinedEvent:** update and add some models on Play scope ([428da23](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/428da23b1434c954970e80cac38589998aea334f))
+
+
+### Bug Fixes
+
+* capitalization for itemId in FAccelByteModelsPriceDetail ([f811c51](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f811c5157871dde78e75ea15706fdc7576e768ae))
+* compile error on UE5.1 ([1d5d329](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1d5d32988664a556f412ac899ad7e7e9a6a0f5d3))
+* compile error on UE5.1 ([59ca43e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/59ca43ed823383ef12ca4b8633b09b3c435c4482))
+* compile warnings when using monolithic header ([7567275](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7567275c08c3cebd61cff1b0cce2a3d620955f72))
+* custom json policy not working on UE5 ([6767794](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6767794e9209e39a0b9c567e8a94d7aad0d35077))
+* custom json policy not working on UE5 ([98ddda8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/98ddda88dbcc6ec1a144fa8107a71cbcb129d5e8))
+* incorrect signature for the parameters used in the lambda function that causes compile errors ([6909d79](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6909d791cfe07f24ffd480067b80a008c762c58f))
+* **lobby:** add missing platform field in FAccelByteModelsUserStatusNotif and FAccelByteModelsGetOnlineUsersResponse ([aa8707c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/aa8707c3bbe762458f4cdbd8c38b1106fe027121))
+* **lobby:** ignore empty friendsId for BulkFriendRequest and don't send the request ([2193fc7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2193fc7e1b7a56b0d38e45e43861c1a9e2429cee))
+* missing Base64 header in the Lobby Api ([0cf2527](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0cf2527e0b7aaf496af6cb9ce86f933759e45c6a))
+* **mpv2:** add missing notification handler for OnSessionEnded ([afab9c9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/afab9c94ace245324c9b67a5323a01dfed23ec9a))
+* **predefinedEvent:** remove UPROPERTY's params so that it won't shown on blueprint ([a4ff71a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a4ff71a4f8446f2b4d75b72efb13480d876f46fb))
+* **UE:** allow compilation on UE5.2 ([7ef6b04](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7ef6b04012e0c2574342d92af465b8b5642ccc91))
+* **UE:** allow compilation on UE5.2 ([0ee9b11](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0ee9b11e399a61facacdc7c3388aa8a858c18fe9))
+* **UGC:** sync the variables for UGC response ([d6b85de](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d6b85de0c50ccc14c880ad6032f9afdd128cefd3))
+
 ### [24.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.2.1%0D24.2.0) (2023-09-27)
 
 

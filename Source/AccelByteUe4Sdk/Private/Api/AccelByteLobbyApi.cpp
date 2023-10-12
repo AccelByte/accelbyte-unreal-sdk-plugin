@@ -19,7 +19,8 @@
 #include "Core/AccelByteMessageParser.h"
 #include "Core/AccelByteUtilities.h"
 #include "JsonUtilities.h"
-#include "Engine.h"
+#include "Engine/Engine.h"
+#include "Misc/Base64.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -1153,6 +1154,12 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (UserIds.FriendIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("FriendsId can't be empty for BulkFriendRequest"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk")
 		, *SettingsRef.BaseUrl
 		, *CredentialsRef.GetNamespace()
@@ -2240,6 +2247,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	case EV2SessionNotifTopic::OnSessionStorageChanged:
 	{
 		DispatchV2JsonNotif<FAccelByteModelsV2SessionStorageChangedEvent>(Notif.Payload, V2SessionStorageChangedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnSessionEnded:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionEndedEvent>(Notif.Payload, V2GameSessionEndedNotif);
 		break;
 	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);

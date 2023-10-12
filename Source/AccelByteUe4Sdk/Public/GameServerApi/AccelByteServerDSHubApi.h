@@ -28,6 +28,7 @@ DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FS
 DECLARE_DELEGATE_OneParam(FOnServerClaimedNotification, const FAccelByteModelsServerClaimedNotification& /*Notification*/);
 DECLARE_DELEGATE_OneParam(FOnV2BackfillProposalNotification, const FAccelByteModelsV2MatchmakingBackfillProposalNotif& /*Notification*/);
 DECLARE_DELEGATE_OneParam(FOnV2SessionMemberChangedNotification, const FAccelByteModelsV2GameSession& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2SessionEndedNotification, const FAccelByteModelsSessionEndedNotification& /*Notification*/)
 
 /**
  * @brief DS Hub API for communication from dedicated server to backend.
@@ -97,7 +98,20 @@ public:
 	 * @param InDelegate delegate to set
 	 */
 	void SetOnV2BackfillProposalNotificationDelegate(const FOnV2BackfillProposalNotification& InDelegate);
+
+	/**
+	 * @brief Bind a delegate to listen to game session members changed notifications from DS hub
+	 *
+	 * @param InDelegate delegate to set
+	 */
 	void SetOnV2SessionMemberChangedNotificationDelegate(const FOnV2SessionMemberChangedNotification& InDelegate);
+
+	/**
+	 * @brief Bind a delegate to listen to game session ended notifications from DS hub
+	 *
+	 * @param InDelegate delegate to set
+	 */
+	void SetOnV2SessionEndedNotificationDelegate(const FOnV2SessionEndedNotification& InDelegate);
 
 	/**
 	 *	Unbind notification delegates
@@ -154,6 +168,11 @@ private:
 	 * Delegate fired when the server associated with this DS hub connection receives game session member changed from session.
 	 */
 	FOnV2SessionMemberChangedNotification OnV2SessionMemberChangedNotification{};
+
+	/**
+	 * Delegate fired when the game session associated with this DS ended (game session deleted or all of the users left).
+	 */
+	FOnV2SessionEndedNotification OnV2SessionEndedNotification{};
 
 	/**
 	 * Create an instance of our websocket to connect to the DSHub server.

@@ -365,6 +365,13 @@ public:
 	static FString GetAuthorizationCode();
 
 	/**
+	 * @brief Get game client flight id.
+	 *
+	 * @return Flight id of game client.
+	 */
+	static FString GetFlightId();
+
+	/**
 	 * @brief Parse command line to obtain an argument that:
 	 *  * intialized by dash (-)
 	 *  * contain a value that following equal sign (=)
@@ -383,6 +390,7 @@ public:
 	static bool GetValueFromCommandLineSwitch(const FString& Key, int& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, bool& Value);
 	static FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
+	static bool ReplaceDecimalSeparator(FString& NumberStr, const TCHAR* From, const TCHAR* To);
 	static bool IsNumericString(const FString& String);
 	static bool IsLanguageUseCommaDecimalSeparator();
 	static bool IsAccelByteIDValid(FString const& AccelByteId);

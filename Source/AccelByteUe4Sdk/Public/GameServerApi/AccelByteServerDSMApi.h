@@ -221,6 +221,7 @@ public:
 
 	void SetServerName(const FString Name) { ServerName = Name; };
 	void SetServerType(EServerType Type) { ServerType = Type; };
+	FString GetServerName() { return ServerName; };
 	int32 GetPlayerNum();
 
 	FString DSMServerUrl = TEXT("");

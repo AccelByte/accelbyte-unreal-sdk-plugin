@@ -24,3 +24,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsServerClaimedNotification
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSHub | Models | ServerClaimedNotif")
 	FString Session_id{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionEndedNotification
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSHub | Models | SessionEndedNotif")
+	bool Is_active{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSHub | Models | SessionEndedNotif")
+	FString Session_id{};
+};

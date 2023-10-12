@@ -318,6 +318,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCContentResponse
 	FString UserId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ContentResponse")
+	FDateTime UpdatedTime{0};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ContentResponse")
 	FJsonObjectWrapper CustomAttributes{};
 };
 

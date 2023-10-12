@@ -17,6 +17,7 @@
 #include "Interfaces/IPluginManager.h"
 #include "Core/AccelByteDataStorageBinaryFile.h"
 #include "Api/AccelBytePredefinedEventApi.h"
+#include "Core/Platform/AccelBytePlatformHandler.h"
 
 #if WITH_EDITOR
 #include "ISettingsModule.h"
@@ -36,6 +37,7 @@ public:
 	virtual ESettingsEnvironment const& GetSettingsEnvironment() const override;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() override;
 	virtual AccelByte::IAccelByteDataStorage * GetLocalDataStorage() override;
+	virtual AccelByte::FAccelBytePlatformHandler GetPlatformHandler() override;
 
 private:
 	AccelByte::Settings ClientSettings{};
@@ -43,7 +45,8 @@ private:
 	ESettingsEnvironment SettingsEnvironment{ESettingsEnvironment::Default};
 	FEnvironmentChangedDelegate EnvironmentChangedDelegate{};
 	TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage = nullptr;
-	
+	AccelByte::FAccelBytePlatformHandler PlatformHandler;
+
 	// For registering settings in UE4 editor
 	void RegisterSettings();
 	void UnregisterSettings();
@@ -363,6 +366,11 @@ AccelByte::IAccelByteDataStorage * FAccelByteUe4SdkModule::GetLocalDataStorage()
 	{
 		return nullptr;
 	}
+}
+
+AccelByte::FAccelBytePlatformHandler FAccelByteUe4SdkModule::GetPlatformHandler()
+{
+	return this->PlatformHandler;
 }
 
 void FAccelByteUe4SdkModule::SetDefaultHttpCustomHeader(FString const& Namespace)

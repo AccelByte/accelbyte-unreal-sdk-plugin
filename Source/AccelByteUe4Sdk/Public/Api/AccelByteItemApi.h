@@ -143,7 +143,7 @@ public:
 		, const FString& StoreId = TEXT(""));
 
 	/**
-	 * @brief Get list all stores in a namespace..
+	 * @brief Get list all stores in a namespace.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is array of FAccelByteModelsPlatformStore.
 	 * @param OnError This will be called when the operation failed.
@@ -151,6 +151,17 @@ public:
 	void GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Get estimated prices of item.
+	 *
+	 * @param ItemIds The item's IDs to check, commas separated item ids.
+	 * @param Region Region Code, ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
+	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsEstimatedPrices>.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Region, THandler<TArray<FAccelByteModelsEstimatedPrices>> const& OnSuccess
+		, FErrorHandler const& OnError);
+	
 private:
 	Item() = delete;
 	Item(Item const&) = delete;

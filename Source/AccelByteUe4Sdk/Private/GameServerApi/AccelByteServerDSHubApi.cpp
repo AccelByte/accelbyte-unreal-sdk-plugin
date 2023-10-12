@@ -23,6 +23,7 @@ namespace GameServerApi
 const FString DSMCServerClaimedTopic = TEXT("serverClaimed");
 const FString MMV2BackfillProposalTopic = TEXT("BACKFILL_PROPOSAL");
 const FString SessionMembersChangedTopic = TEXT("SESSION_MEMBER_CHANGED");
+const FString SessionEndedTopic = TEXT("SESSION_ENDED_NOTIF");
 // DS HUB TOPICS END
 
 ServerDSHub::ServerDSHub(
@@ -106,6 +107,11 @@ void ServerDSHub::SetOnV2SessionMemberChangedNotificationDelegate(const FOnV2Ses
 	OnV2SessionMemberChangedNotification = InDelegate;
 }
 
+void ServerDSHub::SetOnV2SessionEndedNotificationDelegate(const FOnV2SessionEndedNotification& InDelegate)
+{
+	OnV2SessionEndedNotification = InDelegate;
+}
+
 void ServerDSHub::UnbindDelegates()
 {
 	OnConnectSuccessDelegate.Unbind();
@@ -115,6 +121,7 @@ void ServerDSHub::UnbindDelegates()
 	OnServerClaimedNotification.Unbind();
 	OnV2BackfillProposalNotification.Unbind();
 	OnV2SessionMemberChangedNotification.Unbind();
+	OnV2SessionEndedNotification.Unbind();
 }
 
 void ServerDSHub::CreateWebSocket()
@@ -229,6 +236,16 @@ void ServerDSHub::OnMessage(const FString& Message)
 		}
 
 		OnV2SessionMemberChangedNotification.ExecuteIfBound(NotificationPayload);
+	}
+	else if (Topic.Equals(SessionEndedTopic))
+	{
+		FAccelByteModelsSessionEndedNotification NotificationPayload;
+		if (!FJsonObjectConverter::JsonObjectToUStruct(PayloadObject.ToSharedRef(), &NotificationPayload))
+		{
+			UE_LOG(LogAccelByteDSHub, Warning, TEXT("Failed to convert payload for session member changed topic to an FAccelByteModelsSessionEndedNotification instance!"));
+			return;
+		}
+		OnV2SessionEndedNotification.ExecuteIfBound(NotificationPayload);
 	}
 }
 
