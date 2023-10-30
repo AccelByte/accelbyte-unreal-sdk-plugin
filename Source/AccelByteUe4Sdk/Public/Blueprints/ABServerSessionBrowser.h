@@ -8,7 +8,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "Models/AccelByteSessionBrowserModels.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
+#include "Core/AccelByteError.h"
 #include "JsonObjectWrapper.h"
 #include "ABServerSessionBrowser.generated.h"
 

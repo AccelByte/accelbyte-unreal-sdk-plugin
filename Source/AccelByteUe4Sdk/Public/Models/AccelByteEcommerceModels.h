@@ -703,7 +703,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	bool Fresh{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	bool bSellable{};
+	bool bSellable{}; // obsolete, please use Sellable instead  
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	bool Sellable{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FAccelByteModelsItemSaleConfig SaleConfig{};
@@ -2550,7 +2553,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfoV2
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FAccelByteModelsItemLootBoxConfig LootBoxConfig{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	bool bSellable{};
+	bool bSellable{}; // obsolete, please use Sellable instead  
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	bool Sellable{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FAccelByteModelsItemSaleConfig SaleConfig{}; 
 };

@@ -8,6 +8,7 @@
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteIdValidator.h"
 
 namespace AccelByte
 {
@@ -20,6 +21,17 @@ public:
 		, FHttpRetryScheduler& InHttpRef);
 	
 protected:
+	template<typename T>
+	bool ValidateAccelByteId(FString const& Id, EAccelByteIdHypensRule HypenRule, FString const& ErrorMessage, T const& OnError)
+	{
+		if (!FAccelByteIdValidator::IsAccelByteIdValid(Id, HypenRule))
+		{
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), ErrorMessage);
+			return false;
+		}
+		return true;
+	}
+
 	Credentials const& CredentialsRef;
 	Settings const& SettingsRef;
 	FHttpRetryScheduler& HttpRef;

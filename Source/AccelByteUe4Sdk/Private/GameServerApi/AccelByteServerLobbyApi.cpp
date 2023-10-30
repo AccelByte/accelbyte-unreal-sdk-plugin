@@ -29,9 +29,10 @@ void ServerLobby::GetPartyDataByUserId(const FString & UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
 		return;
 	}
 
@@ -146,9 +147,10 @@ void ServerLobby::GetSessionAttributeAll(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
 		return;
 	}
 
@@ -167,9 +169,10 @@ void ServerLobby::GetSessionAttribute(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
 		return;
 	}
 
@@ -195,9 +198,10 @@ void ServerLobby::SetSessionAttribute(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
 		return;
 	}
 
@@ -224,6 +228,13 @@ void ServerLobby::SetSessionAttribute(const FString& UserId
 	, const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError)
 {
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	TMap<FString, FString> Attributes = { { Key, Value } };
 	SetSessionAttribute(UserId, Attributes, OnSuccess, OnError);
 }
@@ -233,6 +244,13 @@ void ServerLobby::GetListOfBlockedUsers(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked")
 		, *ServerSettingsRef.BaseUrl
@@ -247,6 +265,13 @@ void ServerLobby::GetListOfBlockers(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by")
 		, *ServerSettingsRef.BaseUrl

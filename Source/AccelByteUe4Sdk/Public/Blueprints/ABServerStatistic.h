@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
+#include "Core/AccelByteError.h"
 #include "Models/AccelByteStatisticModels.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABServerStatistic.generated.h"

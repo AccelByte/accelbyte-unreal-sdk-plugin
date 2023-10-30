@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
-#include "AccelByteUe4Sdk/Public/Models/AccelByteUserModels.h"
+#include "Core/AccelByteError.h"
+#include "Models/AccelByteUserModels.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABUser.generated.h"
 

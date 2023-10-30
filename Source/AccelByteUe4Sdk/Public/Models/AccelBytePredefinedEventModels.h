@@ -101,17 +101,38 @@ enum class EAccelBytePredefinedEventName : uint8
 	User_Unbanned,
 	Group_Created,
 	Group_Updated,
+	Group_CustomAttributesUpdated,
+	Group_CustomRuleUpdated,
+	Group_PredefinedRuleUpdated,
+	Group_PredefinedRuleDeleted,
+	Group_GetInformation,
+	Group_Find,
+	Group_FindByIds,
 	Group_Joined,
 	Group_Deleted,
 	Group_Left,
-	GroupInvite_Accepted,
-	GroupInvite_Rejected,
-	GroupInvite_Cancelled,
-	GroupJoinRequest_Accepted,
-	GroupJoinRequest_Rejected,
-	GroupMember_Kicked,
-	GroupMember_RoleUpdated,
+	Group_UserInvited,
+	Group_InvitationAccepted,
+	Group_InvitationRejected,
+	Group_InvitationCanceled,
+	Group_GetInvitationList,
+	Group_JoinRequestAccepted,
+	Group_JoinRequestRejected,
+	Group_JoinRequestCanceled,
+	Group_GetJoinRequest,
+	Group_MemberKicked,
+	Group_MemberRoleUpdated,
+	Group_MemberRoleDeleted,
+	Group_GetGroupMember,
 	Achievement_Unlocked,
+	Achievement_GetAll,
+	Achievement_GetSpecific,
+	Achievement_GetUserAchievements,
+	GlobalAchievement_Get,
+	GlobalAchievement_GetContributors,
+	GlobalAchievement_GetContributed,
+	GlobalAchievement_Claimed,
+	Achievement_GetTags,
 	Leaderboard_Ascended,
 	Leaderboard_Descended,
 	BattlePassMenu_Opened,
@@ -127,9 +148,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPredefinedEvent
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName()
+	UPROPERTY()
+		FString PreDefinedEventName{};
+
+	virtual const FString GetPreDefinedEventName()
 	{
-		return TEXT("PredefinedEvent");
+		return TEXT("PreDefinedEvent");
 	};
 
 	FAccelByteModelsPredefinedEvent() = default;
@@ -140,9 +164,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCachedEventPayload : public FAccelByt
 {
 	FAccelByteModelsTelemetryBody Payload{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
-		return Payload.EventName;
+		return PreDefinedEventName;
 	};
 };
 
@@ -168,7 +192,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSDKInitializedPayload : public FAccel
 	UPROPERTY()
 		TArray<FAccelByteModelsPluginInfo> Plugins{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::SDK_Initialized);
 	};
@@ -186,7 +210,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLoginFailedPayload : public FAccelByt
 	UPROPERTY()
 		FString PlatformId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Login_Failed);
 	}
@@ -204,7 +228,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLoginSuccededPayload : public FAccelB
 	UPROPERTY()
 		FString DeviceId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Login_Succeeded);
 	}
@@ -231,7 +255,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserAgreementAcceptedPayload : public
 	UPROPERTY()
 		TArray<FAccelByteModelsAgreementDocument> AgreementDocuments{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserAgreement_Accepted);
 	}
@@ -242,7 +266,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserAgreementNotAcceptedPayload : pub
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserAgreement_NotAccepted);
 	}
@@ -259,7 +283,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileCreatedPayload : public FA
 	UPROPERTY()
 		FJsonObjectWrapper UpdatedFields{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserProfile_Created);
 	}
@@ -270,7 +294,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileUpdatedPayload : public FA
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserProfile_Updated);
 	}
@@ -287,7 +311,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemCreatedPayload : public F
 	UPROPERTY()
 		TArray<FString> StatCodes{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserStatItem_Created);
 	}
@@ -298,7 +322,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemUpdatedPayload : public F
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserStatItem_Updated);
 	}
@@ -309,7 +333,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemDeletedPayload : public F
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserStatItem_Deleted);
 	}
@@ -325,7 +349,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordDeletedPayload : public F
 	UPROPERTY()
 		FString UserId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerRecord_Deleted);
 	}
@@ -349,7 +373,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordUpdatedPayload : public F
 	UPROPERTY()
 		FJsonObjectWrapper Value{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerRecord_Updated);
 	}
@@ -363,7 +387,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecordDeletedPayload : public FAc
 	UPROPERTY()
 		FString Key{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameRecord_Deleted);
 	}
@@ -383,7 +407,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecordUpdatedPayload : public FAc
 	UPROPERTY()
 		FJsonObjectWrapper Value{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameRecord_Updated);
 	}
@@ -403,7 +427,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsStoreOpenedPayload : public FAccelByt
 	UPROPERTY()
 		FString Category{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Store_Opened);
 	}
@@ -414,7 +438,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsStoreClosedPayload : public FAccelByt
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Store_Closed);
 	}
@@ -434,7 +458,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInspectOpenedPayload : public FAc
 	UPROPERTY()
 		FString Language{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ItemInspect_Opened);
 	}
@@ -445,7 +469,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInspectClosedPayload : public FAc
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ItemInspect_Closed);
 	}
@@ -461,7 +485,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyUpdatedPayload : public FAcce
 	UPROPERTY()
 		FString CurrencyCode{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Currency_Updated);
 	}
@@ -492,7 +516,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementGrantedPayload : public FA
 	UPROPERTY()
 		TArray<FAccelByteModelsEntitlementGrantData> Entitlements{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Entitlement_Granted);
 	}
@@ -599,7 +623,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemFulfilledPayload : public FAccelB
 	UPROPERTY()
 		TArray<FAccelByteModelsSubscriptionSummaryEventPayload> SubscriptionSummaries{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Item_Fulfilled);
 	}
@@ -613,7 +637,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCampaignCodeRedeemedPayload : public 
 	UPROPERTY()
 		FString Code{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::CampaignCode_Redeemed);
 	}
@@ -637,7 +661,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaymentSuccededPayload : public FAcce
 	UPROPERTY()
 		FString Status{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Payment_Succeeded);
 	}
@@ -648,7 +672,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaymentFailedPayload : public FAccelB
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Payment_Failed);
 	}
@@ -665,7 +689,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyConnectedPayload : public FAccel
 	UPROPERTY()
 		FString UserId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Lobby_Connected);
 	}
@@ -679,7 +703,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyDisconnectedPayload : public FAc
 	UPROPERTY()
 		int32 StatusCode{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Lobby_Disconnected);
 	}
@@ -703,7 +727,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV1MatchmakingStartedPayload : publi
 	UPROPERTY()
 		TMap<FString, FString> PartyAttributes{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV1_Matchmaking_Started);
 	}
@@ -719,7 +743,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV1MatchmakingReadyConsentPayload : 
 	UPROPERTY()
 		FString MatchId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV1_Matchmaking_ReadyConsent);
 	}
@@ -730,7 +754,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV1MatchmakingRejectMatchPayload : p
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV1_Matchmaking_RejectMatch);
 	}
@@ -748,7 +772,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV1MatchmakingCanceledPayload : publ
 	UPROPERTY()
 		bool IsTempParty{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV1_Matchmaking_Canceled);
 	}
@@ -764,7 +788,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV1PartyJoinedPayload : public FAcce
 	UPROPERTY()
 		FString PartyId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV1_Party_Joined);
 	}
@@ -775,7 +799,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV1PartyLeavePayload : public FAccel
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+		virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV1_Party_Leave);
 	}
@@ -786,7 +810,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV1PartyInvitePayload : public FAcce
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+		virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV1_Party_Invite);
 	}
@@ -797,7 +821,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV1PartyKickPayload : public FAccelB
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+		virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV1_Party_Kick);
 	}
@@ -813,7 +837,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2GameSessionCreatedPayload : publi
 	UPROPERTY()
 		FString GameSessionId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_GameSession_Created);
 	}
@@ -824,7 +848,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2GameSessionInvitedPayload : publi
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_GameSession_Invited);
 	}
@@ -835,7 +859,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2GameSessionJoinedPayload : public
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_GameSession_Joined);
 	}
@@ -846,7 +870,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2GameSessionLeftPayload : public F
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_GameSession_Left);
 	}
@@ -862,7 +886,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2GameSessionLeaderPromotedPayload 
 	UPROPERTY()
 		FString GameSessionId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_GameSession_LeaderPromoted);
 	}
@@ -878,7 +902,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2PartySessionCreatedPayload : publ
 	UPROPERTY()
 		FString PartySessionId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_PartySession_Created);
 	}
@@ -889,7 +913,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2PartySessionInvitedPayload : publ
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_PartySession_Invited);
 	}
@@ -900,7 +924,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2PartySessionJoinedPayload : publi
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_PartySession_Joined);
 	}
@@ -911,7 +935,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2PartySessionLeftPayload : public 
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_PartySession_Left);
 	}
@@ -922,7 +946,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2PartySessionKickedPayload : publi
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_PartySession_Kicked);
 	}
@@ -938,7 +962,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2PartySessionLeaderPromotedPayload
 	UPROPERTY()
 		FString PartySessionId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_PartySession_LeaderPromoted);
 	}
@@ -962,7 +986,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2MatchmakingRequestedPayload : pub
 	UPROPERTY()
 		int32 QueueTime{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_Matchmaking_Requested);
 	}
@@ -982,7 +1006,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2MatchmakingStartedPayload : publi
 	UPROPERTY()
 		FString MatchPool{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_Matchmaking_Started);
 	}
@@ -998,7 +1022,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMPV2MatchmakingCanceledPayload : publ
 	UPROPERTY()
 		FString MatchTicketId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::MPV2_Matchmaking_Canceled);
 	}
@@ -1012,7 +1036,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSHubConnectedPayload : public FAccel
 	UPROPERTY()
 		FString PodName{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_DSHub_Connected);
 	}
@@ -1026,7 +1050,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSHubDisconnectedPayload : public FAc
 	UPROPERTY()
 		int32 StatusCode{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_DSHub_Disconnected);
 	}
@@ -1040,7 +1064,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSRegisteredPayload : public FAccelBy
 	UPROPERTY()
 		FString PodName{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_Registered);
 	}
@@ -1054,7 +1078,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSClaimedPayload : public FAccelByteM
 	UPROPERTY()
 		FString GameSessionId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_Claimed);
 	}
@@ -1072,7 +1096,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSMemberChangedNotifReceivedPayload :
 	UPROPERTY()
 		TArray<FAccelByteModelsV2GameSessionTeam> Teams {};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_MemberChangedNotif_Received);
 	}
@@ -1086,7 +1110,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSGameClientJoinedPayload : public FA
 	UPROPERTY()
 		FString UserId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_GameClient_Joined);
 	}
@@ -1097,7 +1121,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSGameClientLeftPayload : public FAcc
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_GameClient_Left);
 	}
@@ -1121,7 +1145,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSBackfillProposalReceivedPayload : p
 	UPROPERTY()
 		TArray<FAccelByteModelsV2MatchmakingTicket> AddedTickets;
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_BackfillProposal_Received);
 	}
@@ -1132,7 +1156,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSBackfillProposalAcceptedPayload : p
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_BackfillProposal_Accepted);
 	}
@@ -1143,7 +1167,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSBackfillProposalRejectedPayload : p
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_BackfillProposal_Rejected);
 	}
@@ -1154,7 +1178,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSUnregisteredPayload : public FAccel
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_Unregistered);
 	}
@@ -1169,11 +1193,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFriendRequestSentPayload : public FAc
 	GENERATED_BODY()
 
 	UPROPERTY()
-		FString SenderId{};
+	FString SenderId{};
 	UPROPERTY()
-		FString ReceiverId{};
-
-	virtual const FString GetEventName() override
+	FString ReceiverId{};
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::FriendRequest_Sent);
 	}
@@ -1184,7 +1207,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFriendRequestCancelledPayload : publi
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::FriendRequest_Cancelled);
 	}
@@ -1195,7 +1218,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFriendRequestRejectedPayload : public
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::FriendRequest_Rejected);
 	}
@@ -1206,7 +1229,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFriendRequestAcceptedPayload : public
 {
 	GENERATED_BODY()
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::FriendRequest_Accepted);
 	}
@@ -1218,11 +1241,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFriendUnfriendedPayload : public FAcc
 	GENERATED_BODY()
 
 	UPROPERTY()
-		FString SenderId{};
+	FString SenderId{};
 	UPROPERTY()
-		FString FriendId{};
-
-	virtual const FString GetEventName() override
+	FString FriendId{};
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Friend_Unfriended);
 	}
@@ -1234,11 +1256,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserBlockedPayload : public FAccelByt
 	GENERATED_BODY()
 
 	UPROPERTY()
-		FString SenderId{};
+	FString SenderId{};
 	UPROPERTY()
-		FString ReceiverId{};
-
-	virtual const FString GetEventName() override
+	FString ReceiverId{};
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::User_Blocked);
 	}
@@ -1250,11 +1271,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserUnblockedPayload : public FAccelB
 	GENERATED_BODY()
 
 	UPROPERTY()
-		FString SenderId{};
+	FString SenderId{};
 	UPROPERTY()
-		FString ReceiverId{};
+	FString ReceiverId{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::User_Unblocked);
 	}
@@ -1266,11 +1287,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserPresenceStatusUpdatedPayload : pu
 	GENERATED_BODY()
 
 	UPROPERTY()
-		FString UserId{};
+	FString UserId{};
 	UPROPERTY()
-		FString Status{};
+	FString Status{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserPresence_StatusUpdated);
 	}
@@ -1290,7 +1311,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserBannedPayload : public FAccelByte
 	UPROPERTY()
 		EBanReason Reason{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::User_Banned);
 	}
@@ -1306,9 +1327,569 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserUnbannedPayload : public FAccelBy
 	UPROPERTY()
 		EBanType BanType{};
 
-	virtual const FString GetEventName() override
+	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::User_Unbanned);
 	}
 };
 #pragma endregion Social
+
+#pragma region Engagement
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupCreatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString ConfigurationCode{};
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		int32 GroupMaxMember{0};
+	UPROPERTY()
+		FString GroupName{};
+	UPROPERTY()
+		FString GroupRegion{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_Created);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupUpdatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString ConfigurationCode{};
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		int32 GroupMaxMember{0};
+	UPROPERTY()
+		FString GroupName{};
+	UPROPERTY()
+		FString GroupRegion{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_Updated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupCustomAttributesUpdatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+	UPROPERTY()
+		FJsonObjectWrapper CustomAttributes{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_CustomAttributesUpdated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupCustomRuleUpdatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+	UPROPERTY()
+		FJsonObjectWrapper GroupRules{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_CustomRuleUpdated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupPredefinedRuleUpdatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_PredefinedRuleUpdated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupPredefinedRuleDeletedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_PredefinedRuleDeleted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupInformationPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_GetInformation);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupFindPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString GroupName{};
+	UPROPERTY()
+		FString GroupRegion{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_Find);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupFindByIdsPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		TArray<FString> GroupIds{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_FindByIds);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupJoinedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString Status{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_Joined);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupDeletedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_Deleted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupLeftPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_Left);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupInviteUserPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+	UPROPERTY()
+		FString InvitedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_UserInvited);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupInviteAcceptedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_InvitationAccepted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupInviteRejectedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_InvitationRejected);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupInviteCanceledPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+	UPROPERTY()
+		FString CanceledUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_InvitationCanceled);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupGetInvitationListPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_GetInvitationList);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupJoinRequestAcceptedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+	UPROPERTY()
+		FString AcceptedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_JoinRequestAccepted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupJoinRequestRejectedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+	UPROPERTY()
+		FString RejectedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_JoinRequestRejected);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupJoinRequestCanceledPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_JoinRequestCanceled);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupJoinRequestListPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_GetJoinRequest);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupMemberKickedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString AdminUserId{};
+	UPROPERTY()
+		FString KickedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_MemberKicked);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupMemberRoleUpdatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString MemberRoleId{};
+	UPROPERTY()
+		FString UpdatedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_MemberRoleUpdated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupMemberRoleDeletedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString MemberRoleId{};
+	UPROPERTY()
+		FString UpdatedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_MemberRoleDeleted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupMemberByGroupIdPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Group_GetGroupMember);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementUnlockedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString AchievementCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Achievement_Unlocked);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementsGetAllPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Achievement_GetAll);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementGetSpecificPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString AchievementCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Achievement_GetSpecific);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementGetUsersPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Achievement_GetUserAchievements );
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalAchievementGetPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString AchievementCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GlobalAchievement_Get);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalAchievementGetContributorsPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString AchievementCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GlobalAchievement_GetContributors);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalAchievementGetContributedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString AchievementCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GlobalAchievement_GetContributed);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalAchievementClaimPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString AchievementCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GlobalAchievement_Claimed);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementGetTagsPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString Name{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Achievement_GetTags);
+	}
+};
+#pragma endregion Engagement

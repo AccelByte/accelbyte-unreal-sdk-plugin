@@ -112,6 +112,13 @@ void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s/users/%s")
 		, *ServerSettingsRef.MatchmakingServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()

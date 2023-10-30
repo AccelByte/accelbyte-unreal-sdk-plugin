@@ -39,6 +39,13 @@ void ServerSeasonPass::GrantExpToUser(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/exp")
 		, *ServerSettingsRef.SeasonPassServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -70,6 +77,13 @@ void ServerSeasonPass::GrantTierToUser(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/tiers")
 		, *ServerSettingsRef.SeasonPassServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -97,6 +111,13 @@ void ServerSeasonPass::GetCurrentUserSeasonProgression(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 	
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression")
 		, *ServerSettingsRef.SeasonPassServerUrl
@@ -113,6 +134,13 @@ void ServerSeasonPass::GetUserSeasonData(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/%s/data")
 		, *ServerSettingsRef.SeasonPassServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -127,6 +155,13 @@ void ServerSeasonPass::GetCurrentUserSeasonHistory(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/exp/history")
 		, *ServerSettingsRef.SeasonPassServerUrl
@@ -179,6 +214,13 @@ void ServerSeasonPass::QueryUserSeasonExp(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/exp/history/tags")
 		, *ServerSettingsRef.SeasonPassServerUrl

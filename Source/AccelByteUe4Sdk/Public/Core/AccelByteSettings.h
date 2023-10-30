@@ -34,6 +34,7 @@ public:
 	int64 PresenceBroadcastEventHeartbeatInterval{600};
 	bool bEnablePresenceBroadcastEventHeartbeat;
 	bool bEnableHttpCache{false};
+	bool bServerUseAMS{false};//Affect QoS Manager BaseURL
 	EHttpCacheType HttpCacheType {EHttpCacheType::STORAGE};
 	
 	/** @brief Ensure a minimum # secs for Qos Latency polling */
@@ -175,6 +176,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	bool bSendPredefinedEvent{ false };
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	bool bServerUseAMS{ false };
 };
 
 UCLASS(Config = Engine)
@@ -310,6 +314,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static bool IsSendPredefinedEvent();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static bool IsServerUseAMS();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetClientId(const FString& ClientId);
@@ -415,6 +422,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetHttpCacheType(EHttpCacheType Type);
+
+	/**
+	 * @brief Set to select the server management, whether using AMS or not.
+	 * @param bEnable Use AMS
+	 */
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetServerUseAMS(bool bEnable);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void ResetSettings(const ESettingsEnvironment Environment);

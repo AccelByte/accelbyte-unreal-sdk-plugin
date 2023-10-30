@@ -27,8 +27,18 @@ void QosManager::GetQosServers(const THandler<FAccelByteModelsQosServerList>& On
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/public/qos")
+	FString Url = FString::Printf(TEXT("%s/public/qos")
 		, *SettingsRef.QosManagerServerUrl);
+	
+	// Need to workaround this temporarily to prevent error
+	// AMS-Qosm doesn't have the equivalent endpoint
+	// This endpoint will return server with any status (ACTIVE, INACTIVE, UNREACHABLE)
+	if (SettingsRef.bServerUseAMS)
+	{
+		Url = FString::Printf(TEXT("%s/public/namespaces/%s/qos")
+			, *SettingsRef.QosManagerServerUrl
+			, *SettingsRef.Namespace);
+	}
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/json")},

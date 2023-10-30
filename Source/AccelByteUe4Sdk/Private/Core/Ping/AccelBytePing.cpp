@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/Ping/AccelBytePing.h"
+#include "Core/Ping/AccelBytePingAsync.h"
 
 constexpr int DefaultPingNum = 3;
 
@@ -66,4 +67,26 @@ void FAccelBytePing::SendIcmpPing(FPingConfig const& Config, FPingCompleteDelega
 void FAccelBytePing::SendIcmpPing(FString const& Address, int32 Port, float Timeout, FPingCompleteDelegate const& OnPingCompleteDelegate)
 {
 	SendIcmpPingImpl(Address, Port, Timeout, DefaultPingNum, OnPingCompleteDelegate);
+}
+
+void FAccelBytePing::SendUdpPing(FPingConfig const& Config, FPingCompleteDelegate const& OnPingCompleteDelegate)
+{
+	ISocketSubsystem* const SocketSub = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+
+	FAccelByteUdpPingAsync* const Ping = new FAccelByteUdpPingAsync(SocketSub, OnPingCompleteDelegate);
+	check(Ping);
+	if (Ping)
+	{
+		Ping->Start(Config);
+	}
+}
+
+void FAccelBytePing::SendUdpPing(FString const& Address, int32 Port, float Timeout, FPingCompleteDelegate const& OnPingCompleteDelegate)
+{
+	FPingConfig Config;
+	Config.Address = Address;
+	Config.Port = Port;
+	Config.Timeout = Timeout;
+	Config.PingNum = DefaultPingNum;
+	SendUdpPing(Config, OnPingCompleteDelegate);
 }

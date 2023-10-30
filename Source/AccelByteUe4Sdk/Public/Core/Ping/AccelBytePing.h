@@ -28,6 +28,7 @@ struct FPingResult
 	int Received;
 	int Lost;
 
+	FPingResult() = default;
 };
 
 typedef TFunction<void(FPingResult)> FPingCompleteCallback;
@@ -38,4 +39,7 @@ class ACCELBYTEUE4SDK_API FAccelBytePing
 public:
 	static void SendIcmpPing(FPingConfig const& Config, FPingCompleteDelegate const& OnPingCompleteDelegate);
 	static void SendIcmpPing(FString const& Address, int32 Port, float Timeout, FPingCompleteDelegate const& OnPingCompleteDelegate);
+	
+	static void SendUdpPing(FPingConfig const& Config, FPingCompleteDelegate const& OnPingCompleteDelegate);
+	static void SendUdpPing(FString const& Address, int32 Port, float Timeout, FPingCompleteDelegate const& OnPingCompleteDelegate);
 };

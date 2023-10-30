@@ -7,6 +7,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteIdValidator.h"
 #include "Models/AccelByteUserModels.h"
 #include "Misc/CommandLine.h"
 #include "Misc/CString.h"
@@ -1040,22 +1041,7 @@ bool FAccelByteUtilities::IsLanguageUseCommaDecimalSeparator()
 	return false;
 }
 
-bool FAccelByteUtilities::IsAccelByteIDValid(FString const& AccelByteId)
+bool FAccelByteUtilities::IsAccelByteIDValid(FString const& AccelByteId, EAccelByteIdHypensRule HypenRule)
 {
-	// delete the "-client" prefix, session service will add this prefix if a session is created by non user client ID
-	FString ProcessedAccelByteId = AccelByteId;
-	ProcessedAccelByteId.RemoveFromStart(TEXT("client-"));
-
-	FGuid OutId;
-	if (ProcessedAccelByteId.Len() == ACCELBYTE_ID_LENGTH)
-	{
-		return FGuid::ParseExact(ProcessedAccelByteId, EGuidFormats::Digits, OutId);
-	}
-
-	if (ProcessedAccelByteId.Len() == ACCELBYTE_ID_LENGTH_WITH_HYPENS)
-	{
-		return FGuid::ParseExact(ProcessedAccelByteId, EGuidFormats::DigitsWithHyphens, OutId);
-	}
-
-	return false;
+	return FAccelByteIdValidator::IsAccelByteIdValid(AccelByteId);
 }

@@ -84,11 +84,22 @@ void ServerSession::UpdateGameSession(FString const& GameSessionID
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *GameSessionID);
 
-	const bool bIncludeTeams = UpdateRequest.Teams.Num() > 0 &&
-		(UpdateRequest.Teams.Num() > 1 || UpdateRequest.Teams[0].UserIDs.Num() > 0);
+	FAccelByteModelsV2GameSessionUpdateRequest RequestToSend = UpdateRequest;
+
+	// we intentionally wants to clear teams content.
+	// backend will only process this field if at least Teams array consist of 1 empty element.
+	// so make sure we have 1 teams with no content.
+	if(UpdateRequest.bIncludeEmptyTeams && UpdateRequest.Teams.Num() == 0)
+	{
+		RequestToSend.Teams.AddDefaulted();
+	}
+	
+	const bool bIsTeamsNotEmpty = (RequestToSend.Teams.Num() > 0 && (RequestToSend.Teams.Num() > 1 || RequestToSend.Teams[0].UserIDs.Num() > 0));
+
+	const bool bIncludeTeams = RequestToSend.bIncludeEmptyTeams || bIsTeamsNotEmpty;
 
 	FString Content{};
-	Api::Session::SerializeAndRemoveEmptyValues(UpdateRequest, Content, bIncludeTeams);
+	Api::Session::SerializeAndRemoveEmptyValues(RequestToSend, Content, bIncludeTeams);
 
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -274,6 +285,13 @@ void ServerSession::GetPlayerAttributes(FString const& UserId, THandler<FAccelBy
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/attributes")
 		, *ServerSettingsRef.SessionServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -395,6 +413,23 @@ void ServerSession::RevokeGameSessionCode(FString const& GameSessionID
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void ServerSession::SendDSSessionReady(FString const& GameSessionID, bool bDSSessionReady
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions/%s/ds")
+		, *ServerSettingsRef.SessionServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *GameSessionID);
+
+	FAccelByteModelsV2DSSessionReadyRequest Request;
+	Request.Ready = bDSSessionReady;
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
 }
 
 }

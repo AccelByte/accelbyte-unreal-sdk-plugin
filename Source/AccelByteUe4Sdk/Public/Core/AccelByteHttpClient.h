@@ -567,6 +567,8 @@ namespace AccelByte
 				return nullptr;
 			}
 
+			AddFlightIdHeader(Headers);
+
 			return Request(Verb, ApiUrl, QueryParams, Content, Headers, OnSuccess, OnError);
 		}
 
@@ -598,6 +600,8 @@ namespace AccelByte
 				ExecuteError(OnError, TEXT("Authorization Bearer is empty"));
 				return nullptr;
 			}
+			
+			AddFlightIdHeader(Headers);
 
 			return Request(Verb, ApiUrl, QueryParams, Data, Headers, OnSuccess, OnError);
 		}
@@ -641,6 +645,8 @@ namespace AccelByte
 				return nullptr;
 			}
 
+			AddFlightIdHeader(Headers);
+
 			return Request(Verb, ApiUrl, QueryParams, Json, Headers, OnSuccess, OnError);
 		}
 
@@ -652,6 +658,8 @@ namespace AccelByte
 		FString FormatApiUrl(FString const& Url) const;
 
 		bool AddApiAuthorizationIfAvailable(TMap<FString, FString>& Headers) const;
+
+		void AddFlightIdHeader(TMap<FString, FString>& Headers) const;
 
 		static bool IsValidUrl(FString const& Url);
 

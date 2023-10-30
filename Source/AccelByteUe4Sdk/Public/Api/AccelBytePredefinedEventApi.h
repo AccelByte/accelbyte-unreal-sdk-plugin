@@ -54,12 +54,13 @@ public:
 		}
 		else
 		{
+			Payload->PreDefinedEventName = Payload->GetPreDefinedEventName();
 			const TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(Payload.Get());
 			if (JsonObject.IsValid())
 			{
 				FAccelByteModelsTelemetryBody Body;
-				Body.EventNamespace = EventNamespace;
-				Body.EventName = Payload->GetEventName();
+				Body.EventNamespace = GetEventNamespace();
+				Body.EventName = EventName;
 				Body.Payload = JsonObject;
 				Body.ClientTimestamp = ClientTimestamp;
 
@@ -76,11 +77,14 @@ public:
 	void SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedEventPayload>& Payload, FVoidHandler const& OnSuccess, FErrorHandler const& OnError, FDateTime const& ClientTimestamp = FDateTime::UtcNow());
 
 protected:
-	const FString EventNamespace = TEXT("io.accelbyte.intelligence.predefinedevents");
+	const FString GetEventNamespace();
+	const FString EventName = TEXT("PreDefinedEvent");
 
 private:
 	using GameTelemetry::SetImmediateEventList;
 	using GameTelemetry::Send;
+	using FApiBase::CredentialsRef;
+	FString EventNamespace;
 
 	PredefinedEvent() = delete;
 	PredefinedEvent(PredefinedEvent const&) = delete;

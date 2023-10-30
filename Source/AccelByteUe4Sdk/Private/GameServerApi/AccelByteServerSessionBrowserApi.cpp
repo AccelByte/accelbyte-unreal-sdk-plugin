@@ -398,9 +398,10 @@ void ServerSessionBrowser::GetRecentPlayer(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("User id is empty"));
 		return;
 	}
 

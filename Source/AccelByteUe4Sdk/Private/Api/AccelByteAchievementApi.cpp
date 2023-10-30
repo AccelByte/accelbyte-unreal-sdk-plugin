@@ -183,9 +183,10 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+		if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
 		{
-			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 			return;
 		}
 

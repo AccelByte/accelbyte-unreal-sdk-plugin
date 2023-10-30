@@ -1187,9 +1187,10 @@ void User::GetUserByUserId(const FString& UserID
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserID))
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -1495,9 +1496,10 @@ void User::GetPublisherUser(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -1535,12 +1537,13 @@ void User::GetUserInformation(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
-
 	}
+
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/information")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace()

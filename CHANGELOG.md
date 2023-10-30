@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.4.0%0D24.3.0) (2023-10-30)
+
+
+### Features
+
+* add Flight ID across API and Web Socket calls ([228ff16](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/228ff16053955866a48d9be239aaf520556140ea))
+* add upd ping pong async task ([1438283](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/14382834d76fee2c0ec91d8b1fd1b5b920dd22a0))
+* **lobby:** add FriendId in friend interaction response ([ee83b7f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ee83b7f061a2bbf8f32fb19dabb037f2f78af043))
+* **MPv2:** add API to send DS session ready to session service ([3c1b9f5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3c1b9f58762f4fcb5965b323ad800a5d8003889d))
+* **predefinedEvent:** add some models on Engagement Achievement scope ([48ddf23](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/48ddf23f4e62ae5a39841d1a9cf793b59c67ca38))
+* **predefinedEvent:** add some models on Engagement Group scope ([62b8114](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/62b8114b23b26511771f0561070cc2c8d9212416))
+* **predefinedEvent:** disabling predefinedEventApi ([faef12a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/faef12af98af555735ab01ca37bdbb82809ea605))
+* **predefinedEvent:** update and add some models on Play scope ([a9f9afc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a9f9afc6c73868c40415c13794071da7df0645cc))
+* **qosm:** allow the game client to specify the qosm URL change to AMS-qosm using DefaultEngine.ini ([98518cd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/98518cd16d602c62928d961a5d518c0f6f31e6e4))
+* **QoS:** use udp ping pong to get latencies ([4f88f48](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4f88f486879d7ecfc7cce4fcc6d5b2fc4f55507a))
+
+
+### Bug Fixes
+
+* change presence broadcast event namespace from publisher namespace to session namespace ([2c77a9e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2c77a9e30338d999359ba3a9a1edf22c21157c9f))
+* compile error on PlayStation build ([9da8846](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9da884688c0c4d9af343cc0db1d590858835acdd))
+* enable update session with empty teams ([3e019cd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3e019cdcdb5fe93dea87ba1d74a36e86b0cfd7cc))
+* fix clang error in linux build ([7bfade5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7bfade52ea7bec3873cb6832758cdf6c48e8d59b))
+* fix preprocessor checks for TEMPORARY_ENABLE_COMPAT_CHECK macro ([ab89159](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ab891596cb7b2504444aefa035aa3f681b131029))
+* given new/proper name for Sellable in FAccelByteModelsItemInfo model ([7c939fe](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7c939fee49800bb27142e51cac864a6fb4be521a))
+* Incorrect include paths ([e3f48be](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e3f48bea73f4fe4febf7e26c18885b77ddb96d5e))
+* **predefinedEvent:** change event namespace to game namespace ([8c164ae](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8c164aea89f9770d137e3933b17d7878b79a8257))
+
+
+### Refactors
+
+* **compatibilityMap:** temporarily disable compatibility map checking ([8d59de3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8d59de32da6d49f6ebf3b44d34e0bbb248a9d68f))
+* validate user id before calling API ([c3c5afd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c3c5afdb2f683f35c849f8c22407dafb155904c8))
+
 ## [24.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.3.0%0D24.2.1) (2023-10-12)
 
 

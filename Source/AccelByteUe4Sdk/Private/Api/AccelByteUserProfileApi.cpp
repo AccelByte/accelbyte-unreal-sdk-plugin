@@ -42,9 +42,10 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserID))
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -209,9 +210,10 @@ void UserProfile::CreateUserProfile(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -236,9 +238,10 @@ void UserProfile::UpdateUserProfile(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -256,9 +259,10 @@ void UserProfile::GetUserProfile(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -297,9 +301,10 @@ void UserProfile::GenerateUploadURLForUserContent(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 

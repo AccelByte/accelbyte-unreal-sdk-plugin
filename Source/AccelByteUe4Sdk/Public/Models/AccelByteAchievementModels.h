@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteGeneralModels.h"
-#include "JsonUtilities/Public/JsonObjectWrapper.h"
+#include "JsonObjectWrapper.h"
 #include "AccelByteAchievementModels.generated.h"
 
 /** @brief Enumeration for Achievement sorting */

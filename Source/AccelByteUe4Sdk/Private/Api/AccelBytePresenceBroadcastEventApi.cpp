@@ -180,21 +180,26 @@ void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadc
 
 	FReport::Log(FString(__FUNCTION__));
 
+	const FString EventNamespace = CredentialsRef.GetNamespace();
+
+	if (EventNamespace.IsEmpty())
+	{
+		StopHeartbeat();
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/protected/events")
 		, *SettingsRef.GameTelemetryServerUrl);
 
 	TSharedPtr<FJsonObject> JsonObjectPtr = MakeShared<FJsonObject>();
-	JsonObjectPtr->SetStringField("EventNamespace", SettingsRef.PublisherNamespace);
+	JsonObjectPtr->SetStringField("EventNamespace", EventNamespace);
 	JsonObjectPtr->SetStringField("EventName", EventName);
 	JsonObjectPtr->SetObjectField("Payload", FJsonObjectConverter::UStructToJsonObject(Events));
 	JsonObjectPtr->SetNumberField("ClientTimestamp", FDateTime::UtcNow().ToUnixTimestamp());
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll);
 
-	FString Content{};
-	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
-	FJsonSerializer::Serialize(JsonObjectPtr.ToSharedRef(), Writer);
-
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, JsonObjectPtr.ToSharedRef(), OnSuccess, OnError);
 }
 
 }

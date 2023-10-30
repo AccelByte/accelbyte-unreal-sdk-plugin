@@ -57,6 +57,13 @@ void ServerStatistic::CreateUserStatItems(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -93,6 +100,13 @@ void ServerStatistic::GetAllUserStatItems(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	GetUserStatItems(UserId, {}, {}, OnSuccess, OnError);
 }
 
@@ -107,9 +121,10 @@ void ServerStatistic::GetUserStatItems(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnSuccess.ExecuteIfBound(FAccelByteModelsUserStatItemPagingSlicedResult{});
 		return;
 	}
 
@@ -167,6 +182,13 @@ void ServerStatistic::IncrementUserStatItems(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems/value/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
@@ -274,6 +296,13 @@ void ServerStatistic::BulkResetUserStatItemsValues(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/users/%s/statitems/value/reset/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -312,6 +341,13 @@ void ServerStatistic::BulkUpdateUserStatItemValue(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/users/%s/statitems/value/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -336,6 +372,13 @@ void ServerStatistic::UpdateUserStatItemValue(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/users/%s/stats/%s/statitems/value")
 		, *ServerSettingsRef.StatisticServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -356,6 +399,13 @@ void ServerStatistic::DeleteUserStatItems(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/users/%s/stats/%s/statitems")
 		, *ServerSettingsRef.StatisticServerUrl

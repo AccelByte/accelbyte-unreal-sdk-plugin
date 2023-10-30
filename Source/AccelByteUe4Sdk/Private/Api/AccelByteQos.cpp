@@ -108,12 +108,12 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 			FString Region = Server.Region;
 
 			// Ping -> Get the latencies on pong.
-			FAccelBytePing::SendIcmpPing(Server.Ip, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
+			FAccelBytePing::SendUdpPing(Server.Ip, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
 				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError](const FPingResult& PingResult)
 				{
 					if (PingResult.Status == FPingResultStatus::Success)
 					{
-						float PingDelay = PingResult.AverageRoundTrip * 1000;
+						float PingDelay = PingResult.AverageRoundTrip * 1000; // convert to milliseconds
 						SuccessLatencies->Add(TPair<FString, float>(Region, PingDelay));
 					}
 					else

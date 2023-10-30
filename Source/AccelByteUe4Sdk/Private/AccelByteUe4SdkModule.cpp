@@ -81,9 +81,11 @@ void FAccelByteUe4SdkModule::StartupModule()
 
 	LocalDataStorage = MakeShared<AccelByte::DataStorageBinaryFile>();
 
-#if UE_BUILD_DEVELOPMENT
+#ifdef TEMPORARY_ENABLE_COMPAT_CHECK
+#if UE_BUILD_DEVELOPMENT && TEMPORARY_ENABLE_COMPAT_CHECK
 	CheckServicesCompatibility();
-#endif
+#endif // UE_BUILD_DEVELOPMENT && TEMPORARY_ENABLE_COMPAT_CHECK
+#endif // defined(TEMPORARY_ENABLE_COMPAT_CHECK)
 
 	AccelByte::FRegistry::HttpRetryScheduler.Startup();
 	AccelByte::FRegistry::Credentials.Startup();

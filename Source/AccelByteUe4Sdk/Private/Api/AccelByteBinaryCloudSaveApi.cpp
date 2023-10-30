@@ -95,9 +95,10 @@ void BinaryCloudSave::GetPublicUserBinaryRecord(FString const& Key
 		return;
 	}
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserId cannot be empty!"));
 		return;
 	}
 
@@ -156,9 +157,10 @@ void BinaryCloudSave::BulkGetPublicUserBinaryRecords(const TArray<FString>& Keys
 		return;
 	}
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserId cannot be empty!"));
 		return;
 	}
 
@@ -236,9 +238,10 @@ void BinaryCloudSave::BulkQueryPublicUserBinaryRecords(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserId cannot be empty!"));
 		return;
 	}
 

@@ -42,6 +42,7 @@ enum class EAccelByteV2GameSessionDsStatus : uint8
 	EMPTY = 0,
 	NEED_TO_REQUEST,
 	REQUESTED,
+	PREPARING,
 	AVAILABLE,
 	FAILED_TO_REQUEST,
 	ENDED,
@@ -320,6 +321,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUpdateRequest : public F
 	GENERATED_BODY();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateRequest")
 		int64 Version{TNumericLimits<int32>::Min()};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateRequest")
+		bool bIncludeEmptyTeams {false};
 };
 
 USTRUCT(BlueprintType)
@@ -748,4 +752,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionEndedEvent
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionEndedEvent")
 	bool TextChat{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSSessionReadyRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionEndedEvent")
+	bool Ready{false};
 };

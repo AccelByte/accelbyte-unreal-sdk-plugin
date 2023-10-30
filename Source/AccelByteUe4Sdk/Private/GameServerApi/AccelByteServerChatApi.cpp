@@ -173,6 +173,13 @@ void ServerChat::AddUserToChannelChat(const FString& TopicId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic/%s/user/%s")
 		, *ServerSettingsRef.ChatServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -201,6 +208,13 @@ void ServerChat::RemoveUserFromChannelChat(const FString& TopicId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic/%s/user/%s")
 		, *ServerSettingsRef.ChatServerUrl

@@ -9,6 +9,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteReport.h"
+#include "Core/Ping/AccelBytePing.h"
 
 namespace AccelByte
 {
@@ -52,26 +53,26 @@ void TurnManager::GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer
 					Counter = 0;
 					for (int i=0;i< Result.Servers.Num();i++)
 					{
-		                auto Server = Result.Servers[i];
+						auto Server = Result.Servers[i];
 						int Count = Result.Servers.Num();
-		                FUDPPing::UDPEcho(FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Qos_port)
+						FAccelBytePing::SendUdpPing(*Server.Ip, Server.Qos_port
 							, 10.0f
-							, FIcmpEchoResultDelegate::CreateLambda(
-								[this, Server, Count, OnSuccess](FIcmpEchoResult PingResult)
+							, FPingCompleteDelegate::CreateLambda(
+								[this, Server, Count, OnSuccess](FPingResult PingResult)
 								{
 									Counter++;
-									if(FastestPing > PingResult.Time)
+									if (FastestPing > PingResult.AverageRoundTrip)
 									{
-                    					FastestPing = PingResult.Time;
-                    					ClosestServer = Server;
+										FastestPing = PingResult.AverageRoundTrip;
+										ClosestServer = Server;
 									}
-									if(Counter == Count)
+									if (Counter == Count)
 									{
-                    					OnSuccess.ExecuteIfBound(ClosestServer);
+										OnSuccess.ExecuteIfBound(ClosestServer);
 									}
 								})
-							);
-		            }
+						);
+					}
 				}
 			})
 		, FErrorHandler::CreateLambda(

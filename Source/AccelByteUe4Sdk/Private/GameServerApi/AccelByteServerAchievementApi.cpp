@@ -29,15 +29,10 @@ void ServerAchievement::UnlockAchievement(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
-		return;
-	}
-
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 

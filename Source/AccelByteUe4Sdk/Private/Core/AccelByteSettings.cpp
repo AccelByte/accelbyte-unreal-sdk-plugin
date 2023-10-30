@@ -73,7 +73,11 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 	StatisticServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("StatisticServerUrl"), BaseUrl, TEXT("social"));
 
-	QosManagerServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("QosManagerServerUrl"), BaseUrl, TEXT("qosm"));
+	FString ServerUseAMSString{};
+	LoadFallback(SectionPath, TEXT("bServerUseAMS"), ServerUseAMSString);
+	this->bServerUseAMS = ServerUseAMSString.IsEmpty() ? false : ServerUseAMSString.ToBool();
+	FString QoSMDefaultPrefix = this->bServerUseAMS ? TEXT("ams-qosm") : TEXT("qosm");
+	QosManagerServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("QosManagerServerUrl"), BaseUrl, QoSMDefaultPrefix);
 
 	LeaderboardServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("LeaderboardServerUrl"), BaseUrl, TEXT("leaderboard"));
 
@@ -170,7 +174,9 @@ void Settings::LoadSettings(const FString& SectionPath)
 	
 	FString SendPredefinedEventString;
 	LoadFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString);
-	this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
+	//Disabling PredefinedEventApi for the time being
+	//this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
+	this->bSendPredefinedEvent = false;
 }
 
 void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FString& Value)
@@ -410,6 +416,11 @@ bool UAccelByteBlueprintsSettings::IsSendPredefinedEvent()
 	return FRegistry::Settings.bSendPredefinedEvent;
 }
 
+bool UAccelByteBlueprintsSettings::IsServerUseAMS()
+{
+	return FRegistry::Settings.bServerUseAMS;
+}
+
 void UAccelByteBlueprintsSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::Settings.ClientId = ClientId;
@@ -579,6 +590,11 @@ void UAccelByteBlueprintsSettings::SetQosPingTimeout(const float& QosPingTimeout
 void UAccelByteBlueprintsSettings::SetHttpCacheType(EHttpCacheType Type)
 {
 	FRegistry::Settings.HttpCacheType = Type;
+}
+
+void UAccelByteBlueprintsSettings::SetServerUseAMS(bool bEnable)
+{
+	FRegistry::Settings.bServerUseAMS = bEnable;
 }
 
 void UAccelByteBlueprintsSettings::SetSendPredefinedEvent(bool bEnable)

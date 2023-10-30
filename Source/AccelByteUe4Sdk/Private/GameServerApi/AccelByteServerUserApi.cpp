@@ -86,6 +86,13 @@ void ServerUser::BanSingleUser(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
 		, *ServerSettingsRef.IamServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -101,6 +108,13 @@ void ServerUser::GetUserBans(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
 		, *ServerSettingsRef.IamServerUrl
@@ -119,6 +133,13 @@ void ServerUser::GetUserBans(const FString& UserId
 void ServerUser::GetUserBanInfo(const FString& UserId, const THandler<FGetUserBansResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans?activeOnly=true")
 		, *ServerSettingsRef.IamServerUrl

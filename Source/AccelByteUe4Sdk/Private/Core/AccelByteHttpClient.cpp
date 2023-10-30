@@ -130,6 +130,11 @@ namespace AccelByte
 		return false;
 	}
 
+	void FHttpClient::AddFlightIdHeader(TMap<FString, FString>& Headers) const
+	{
+		Headers.Add(TEXT("x-flight-id"), FAccelByteUtilities::GetFlightId());
+	}
+
 	bool FHttpClient::IsValidUrl(FString const& Url)
 	{
 		return FAccelByteNetUtilities::IsValidUrl(Url);

@@ -21,6 +21,15 @@ ServerPredefinedEvent::~ServerPredefinedEvent()
 	ServerGameTelemetry::~ServerGameTelemetry();
 }
 
+const FString ServerPredefinedEvent::GetEventNamespace()
+{
+	if (EventNamespace.IsEmpty())
+	{
+		EventNamespace = ServerCredentialsRef.GetNamespace();
+	}
+	return EventNamespace;
+}
+
 void ServerPredefinedEvent::SendPredefinedEventData(TSharedRef<FAccelByteModelsCachedEventPayload> const& Payload, FVoidHandler const& OnSuccess, FErrorHandler const& OnError, FDateTime const& ClientTimestamp)
 {
 	if (!ServerSettingsRef.bSendPredefinedEvent)
@@ -33,7 +42,7 @@ void ServerPredefinedEvent::SendPredefinedEventData(TSharedRef<FAccelByteModelsC
 
 	if (EnumPtr != nullptr)
 	{
-		ValueInt = EnumPtr->GetValueByNameString(Payload->GetEventName());
+		ValueInt = EnumPtr->GetValueByNameString(Payload->GetPreDefinedEventName());
 
 		if (ValueInt == INDEX_NONE)
 		{
@@ -47,7 +56,8 @@ void ServerPredefinedEvent::SendPredefinedEventData(TSharedRef<FAccelByteModelsC
 		return;
 	}
 
-	Payload->Payload.EventNamespace = EventNamespace;
+	Payload->Payload.EventNamespace = GetEventNamespace();
+	Payload->Payload.EventName = EventName;
 	if (Payload->Payload.ClientTimestamp.GetTicks() == 0)
 	{
 		Payload->Payload.ClientTimestamp = ClientTimestamp;

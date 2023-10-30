@@ -7,6 +7,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
+#include "Core/Ping/AccelBytePing.h"
 
 namespace AccelByte
 {
@@ -56,12 +57,12 @@ void ServerQosManager::GetServerLatencies(const THandler<TArray<TPair<FString, f
 				{
 					auto Server = Result.Servers[i];
 					int32 Count = Result.Servers.Num();
-					FUDPPing::UDPEcho(FString::Printf(TEXT("%s:%d"), *Server.Ip, Server.Port)
+					FAccelBytePing::SendUdpPing(*Server.Ip, Server.Port
 						, FRegistry::ServerSettings.QosPingTimeout
-						, FIcmpEchoResultDelegate::CreateLambda(
-							[this, Server, OnSuccess, Count](FIcmpEchoResult Result)
+						, FPingCompleteDelegate::CreateLambda(
+							[this, Server, OnSuccess, Count](FPingResult Result)
 							{
-								Latencies.Add(TPair<FString, float>(Server.Region, Result.Time * 1000));
+								Latencies.Add(TPair<FString, float>(Server.Region, Result.AverageRoundTrip * 1000)); // convert to milliseconds
 								if (Count == Latencies.Num())
 								{
 									OnSuccess.ExecuteIfBound(Latencies);

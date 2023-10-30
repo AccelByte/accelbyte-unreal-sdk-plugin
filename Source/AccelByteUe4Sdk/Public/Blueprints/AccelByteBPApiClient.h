@@ -27,7 +27,7 @@
 #include "ABSessionAttribute.h"
 #include "ABSignaling.h"
 #include "ABGroup.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "Core/AccelByteEnvironment.h"
 #include "AccelByteBPApiClient.generated.h"

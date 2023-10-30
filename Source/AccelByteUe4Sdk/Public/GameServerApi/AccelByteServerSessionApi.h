@@ -201,6 +201,20 @@ public:
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Inform session service that current DS session is ready receiving client travel.
+	 * This needed if session template used for this game session enable the dsManualSetReady flag.
+	 *
+	 * @param GameSessionID ID of the game session that claimed the DS.
+	 * @param bDSSessionReady flag indicating the DS session ready or not.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void SendDSSessionReady(FString const& GameSessionID
+		, bool bDSSessionReady
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;

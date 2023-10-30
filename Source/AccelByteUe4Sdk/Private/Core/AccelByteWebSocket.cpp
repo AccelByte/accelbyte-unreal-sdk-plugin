@@ -9,6 +9,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteWebSocketErrorTypes.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteWebsocket, Log, All);
@@ -83,6 +84,8 @@ void AccelByteWebSocket::SetupWebSocket()
 		WebSocket->Close();
 		WebSocket.Reset();
 	}
+
+	UpgradeHeaders.Add(TEXT("x-flight-id"), FAccelByteUtilities::GetFlightId());
 
 	TMap<FString, FString> Headers = UpgradeHeaders;
 

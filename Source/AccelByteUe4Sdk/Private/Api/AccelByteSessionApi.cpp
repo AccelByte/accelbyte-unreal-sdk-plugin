@@ -486,9 +486,10 @@ void Session::KickUserFromParty(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserID))
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 

@@ -379,9 +379,10 @@ void UGC::GetChannels(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -479,6 +480,13 @@ void UGC::GetListFollowers(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/followers")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -503,6 +511,13 @@ void UGC::UpdateFollowStatusToUser(const FString& UserId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/follow")
 		, *SettingsRef.UGCServerUrl
@@ -582,6 +597,13 @@ void UGC::GetUserContent(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -608,6 +630,13 @@ void UGC::UploadContentScreenshot(const FString& ContentId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents/%s/screenshots")
 		, *SettingsRef.UGCServerUrl
@@ -746,6 +775,13 @@ void UGC::GetCreator(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -761,6 +797,13 @@ void UGC::GetGroups(const FString& UserId
 	, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/groups")
 		, *SettingsRef.UGCServerUrl

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteIdValidator.h"
 #include "JsonObjectConverter.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Math/NumericLimits.h"
@@ -393,7 +394,7 @@ public:
 	static bool ReplaceDecimalSeparator(FString& NumberStr, const TCHAR* From, const TCHAR* To);
 	static bool IsNumericString(const FString& String);
 	static bool IsLanguageUseCommaDecimalSeparator();
-	static bool IsAccelByteIDValid(FString const& AccelByteId);
+	static bool IsAccelByteIDValid(FString const& AccelByteId, EAccelByteIdHypensRule HypenRule = EAccelByteIdHypensRule::NO_RULE);
 
 //To allow override for testing using mock class
 protected:

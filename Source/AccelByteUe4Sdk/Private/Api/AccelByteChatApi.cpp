@@ -902,6 +902,13 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 
+			if (!ValidateAccelByteId(TargetUserId, EAccelByteIdHypensRule::NO_HYPENS
+				, FAccelByteIdValidator::GetUserIdInvalidMessage(TargetUserId)
+				, OnError))
+			{
+				return;
+			}
+
 			const FString Self = CredentialsRef.GetUserId();
 			FJsonDomBuilder::FObject Params;
 			Params.Set(ChatToken::Json::Field::Type, ChatToken::Json::Value::ChatGroupTypePrivate);
@@ -1203,6 +1210,14 @@ namespace AccelByte
 			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
+
+			if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+				, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+				, OnError))
+			{
+				return;
+			}
+
 			FJsonDomBuilder::FObject Params;
 			Params.Set(ChatToken::Json::Field::UserId, UserId);
 			SEND_CONTENT_CACHE_ID(BlockUser);
@@ -1213,6 +1228,14 @@ namespace AccelByte
 			, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
+
+			if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+				, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+				, OnError))
+			{
+				return;
+			}
+
 			FJsonDomBuilder::FObject Params;
 			Params.Set(ChatToken::Json::Field::UserId, UserId);
 			SEND_CONTENT_CACHE_ID(UnblockUser);
@@ -1287,9 +1310,10 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 
-			if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+			if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+				, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+				, OnError))
 			{
-				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 				return;
 			}
 
@@ -1306,9 +1330,10 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 
-			if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+			if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+				, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+				, OnError))
 			{
-				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 				return;
 			}
 
@@ -1336,22 +1361,10 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 
-			TArray<FString> FilteredIds = UserIds;
-			FilteredIds.RemoveAll([](const FString& Element)
-			{
-				return !FAccelByteUtilities::IsAccelByteIDValid(Element);
-			});
-
-			if (FilteredIds.Num() <= 0)
-			{
-				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
-				return;
-			}
-
 			const FString Url = FString::Printf(TEXT("%s/public/namespaces/{namespace}/topic/%s/ban-members"),
 				*SettingsRef.ChatServerUrl, *GenerateGroupTopicId(GroupId));
 
-			const FAccelByteModelsBanGroupChatRequest Request {FilteredIds};
+			const FAccelByteModelsBanGroupChatRequest Request {UserIds};
 
 			HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 		}

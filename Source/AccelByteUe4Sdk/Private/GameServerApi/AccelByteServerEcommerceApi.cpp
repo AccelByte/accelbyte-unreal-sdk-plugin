@@ -37,6 +37,13 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
 		, *ServerSettingsRef.PlatformServerUrl
@@ -111,6 +118,13 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s")
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -126,6 +140,13 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
 		, *ServerSettingsRef.PlatformServerUrl
@@ -177,6 +198,13 @@ void ServerEcommerce::CreditUserWalletV2(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit")
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -192,6 +220,13 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds")
 		, *ServerSettingsRef.PlatformServerUrl
@@ -212,6 +247,13 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke")
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -230,6 +272,13 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId
 	, FString const& RequestId)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement")
 		, *ServerSettingsRef.PlatformServerUrl
@@ -258,6 +307,13 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable")
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
@@ -273,6 +329,13 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable")
 		, *ServerSettingsRef.PlatformServerUrl
@@ -307,6 +370,13 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment")
 		, *ServerSettingsRef.PlatformServerUrl
@@ -457,6 +527,13 @@ void ServerEcommerce::FulfillRewards(const FString& UserId, const FAccelByteMode
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment/rewards")
 		, *ServerSettingsRef.PlatformServerUrl

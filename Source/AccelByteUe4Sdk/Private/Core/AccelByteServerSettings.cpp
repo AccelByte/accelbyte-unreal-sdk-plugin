@@ -120,7 +120,9 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	FString SendPredefinedEventString;
 	LoadFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString);
-	this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
+	//Disabling PredefinedEventApi for the time being
+	//this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
+	this->bSendPredefinedEvent = false;
 #endif
 }
 

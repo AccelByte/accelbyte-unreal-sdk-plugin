@@ -25,6 +25,15 @@ PredefinedEvent::~PredefinedEvent()
 	Shutdown();
 }
 
+const FString PredefinedEvent::GetEventNamespace()
+{
+	if (EventNamespace.IsEmpty())
+	{
+		EventNamespace = CredentialsRef.GetNamespace();
+	}
+	return EventNamespace;
+}
+
 void PredefinedEvent::SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedEventPayload>& Payload, FVoidHandler const& OnSuccess, FErrorHandler const& OnError, FDateTime const& ClientTimestamp)
 {
 	if (!SettingsRef.bSendPredefinedEvent)
@@ -38,7 +47,7 @@ void PredefinedEvent::SendPredefinedEventData(const TSharedRef<FAccelByteModelsC
 
 	if (EnumPtr != nullptr)
 	{
-		ValueInt = EnumPtr->GetValueByNameString(Payload->GetEventName());
+		ValueInt = EnumPtr->GetValueByNameString(Payload->GetPreDefinedEventName());
 
 		if (ValueInt == INDEX_NONE)
 		{
@@ -52,7 +61,8 @@ void PredefinedEvent::SendPredefinedEventData(const TSharedRef<FAccelByteModelsC
 		return;
 	}
 
-	Payload->Payload.EventNamespace = EventNamespace;
+	Payload->Payload.EventNamespace = GetEventNamespace();
+	Payload->Payload.EventName = EventName;
 	if (Payload->Payload.ClientTimestamp.GetTicks() == 0)
 	{
 		Payload->Payload.ClientTimestamp = ClientTimestamp;

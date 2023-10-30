@@ -1672,6 +1672,7 @@ void Lobby::UnbindV2GameSessionEvents()
 	V2DSStatusChangedNotif.Unbind();
 	V2GameSessionKickedNotif.Unbind();
 	V2GameSessionRejectedNotif.Unbind();
+	V2GameSessionEndedNotif.Unbind();
 }
 
 void Lobby::UnbindV2SessionGeneralEvents()
@@ -2083,8 +2084,11 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType
 			if (bParseSuccess)
 			{
 				FAccelByteModelsGetFriendshipStatusResponse Result;
+				Result.Type = StringResult.Type;
+				Result.Id = StringResult.Id;
 				Result.Code = StringResult.Code;
 				Result.friendshipStatus = (ERelationshipStatusCode)FCString::Atoi(*StringResult.friendshipStatus);
+				Result.FriendId = StringResult.FriendId;
 				GetFriendshipStatusResponse.ExecuteIfBound(Result);
 			}
 			break;

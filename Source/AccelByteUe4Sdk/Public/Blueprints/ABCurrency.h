@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
+#include "Core/AccelByteError.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABCurrency.generated.h"

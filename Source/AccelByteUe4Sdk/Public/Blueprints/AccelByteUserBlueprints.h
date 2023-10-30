@@ -6,8 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
-#include "AccelByteUe4Sdk/Public/Models/AccelByteUserModels.h"
+#include "Core/AccelByteError.h"
+#include "Models/AccelByteUserModels.h"
 #include "AccelByteUserBlueprints.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserDataHandler, const FAccountUserData&, Result);

@@ -204,9 +204,10 @@ void Group::GetUserGroupInfoByUserId(const FString& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -223,9 +224,10 @@ void Group::InviteUserToGroup(const FString UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -242,9 +244,10 @@ void Group::AcceptGroupJoinRequest(const FString UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -261,9 +264,10 @@ void Group::RejectGroupJoinRequest(const FString UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
@@ -280,12 +284,13 @@ void Group::KickGroupMember(const FString UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
-
 	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/users/%s/kick")
 		, *SettingsRef.GroupServerUrl
 		, *UserId);
@@ -544,6 +549,13 @@ void Group::InviteUserToV2Group(
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/invite"),
 		*SettingsRef.GroupServerUrl,
 		*CredentialsRef.GetNamespace(),
@@ -560,6 +572,13 @@ void Group::AcceptV2GroupJoinRequest(
 	const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/join/accept"),
 		*SettingsRef.GroupServerUrl,
@@ -578,6 +597,13 @@ void Group::RejectV2GroupJoinRequest(
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/join/reject"),
 		*SettingsRef.GroupServerUrl,
 		*CredentialsRef.GetNamespace(),
@@ -594,6 +620,13 @@ void Group::KickV2GroupMember(
 	const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/kick"),
 		*SettingsRef.GroupServerUrl,
@@ -756,6 +789,13 @@ void Group::GetUserGroupStatusInfo(
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/status"),
 		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace(),*UserId,*GroupId);
 
@@ -848,6 +888,13 @@ void Group::CancelGroupMemberInvitation(
 	const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/invite/cancel"),
 		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),

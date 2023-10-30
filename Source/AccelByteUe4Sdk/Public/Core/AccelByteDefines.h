@@ -11,8 +11,10 @@
 #if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
 
 using FTickerAlias = FTSTicker;
+using FTickerObjectBaseAlias = FTSTickerObjectBase;
 using FDelegateHandleAlias = FTSTicker::FDelegateHandle;
 #else
 using FTickerAlias = FTicker;
+using FTickerObjectBaseAlias = FTickerObjectBase;
 using FDelegateHandleAlias = FDelegateHandle;
 #endif

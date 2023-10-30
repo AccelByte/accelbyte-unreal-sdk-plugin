@@ -883,12 +883,18 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsRequestFriendsResponse : public FAccelByteModelsLobbyBaseResponse
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsResponse")
+	FString FriendId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUnfriendResponse : public FAccelByteModelsLobbyBaseResponse
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | UnfriendResponse")
+	FString FriendId{};
 };
 
 USTRUCT(BlueprintType)
@@ -924,6 +930,9 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsCancelFriendsResponse : public FAccelByteModelsLobbyBaseResponse
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | CancelFriendsResponse")
+	FString FriendId{};
 };
 
 USTRUCT(BlueprintType)
@@ -948,12 +957,18 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsAcceptFriendsResponse : public FAccelByteModelsLobbyBaseResponse
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | AcceptFriendsResponse")
+	FString FriendId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsRejectFriendsResponse : public FAccelByteModelsLobbyBaseResponse
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | RejectFriendsResponse")
+	FString FriendId{};
 };
 
 USTRUCT(BlueprintType)
@@ -982,6 +997,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetFriendshipStatusResponse : public 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | GetFriendshipStatusResponse")
 	ERelationshipStatusCode friendshipStatus{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends | GetFriendshipStatusResponse")
+	FString FriendId{};
 };
 
 USTRUCT(BlueprintType)
@@ -991,6 +1009,9 @@ struct FAccelByteModelsGetFriendshipStatusStringResponse : public FAccelByteMode
 
 	UPROPERTY(EditAnywhere, NotBlueprintType, Category = "AccelByte | Lobby | Models | Friends | GetFriendshipStatusStringResponse")
 	FString friendshipStatus{};
+
+	UPROPERTY(EditAnywhere, NotBlueprintType, Category = "AccelByte | Lobby | Models | Friends | GetFriendshipStatusStringResponse")
+	FString FriendId{};
 };
 
 USTRUCT(BlueprintType)

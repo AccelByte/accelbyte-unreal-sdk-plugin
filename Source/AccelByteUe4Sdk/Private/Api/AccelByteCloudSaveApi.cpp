@@ -32,6 +32,12 @@ void CloudSave::SaveUserRecord(const FString& Key
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
 	const FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(ESetByMetadataRecord::CLIENT, bSetPublic, RecordRequest);
 	SaveUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
 }
@@ -88,9 +94,10 @@ void CloudSave::GetPublicUserRecord(FString const& Key
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Get Public User Record failed, UserId format is invalid"));
 		return;
 	}
 
@@ -209,6 +216,12 @@ void CloudSave::ReplaceUserRecord(const FString& Key
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
 
 	const FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(ESetByMetadataRecord::CLIENT, bSetPublic, RecordRequest);
 	ReplaceUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
@@ -626,15 +639,10 @@ void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Record Keys Failed, UserId cannot be empty!"));
-		return;
-	}
-
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Record Keys Failed, UserId format is invalid"));
 		return;
 	}
 
@@ -686,15 +694,10 @@ void CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Records Failed, UserId cannot be empty!"));
-		return;
-	}
-
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Bulk Get Other Player Public Records Failed, UserId format is invalid"));
 		return;
 	}
 

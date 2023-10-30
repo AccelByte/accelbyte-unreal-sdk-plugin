@@ -363,19 +363,7 @@ void SessionBrowser::GetGameSessionsByUserIds(const TArray<FString>& UserIds
 		return;
 	}
 
-	TArray<FString> FilteredIds = UserIds;
-	FilteredIds.RemoveAll([](const FString& Element)
-	{
-		return !FAccelByteUtilities::IsAccelByteIDValid(Element);
-	});
-
-	if (FilteredIds.Num() <= 0)
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
-		return;
-	}
-
-	FString UserIdsQueryString = FString::Join(FilteredIds, TEXT(","));
+	FString UserIdsQueryString = FString::Join(UserIds, TEXT(","));
 	UserIdsQueryString = FGenericPlatformHttp::UrlEncode(UserIdsQueryString);
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/bulk?user_ids=%s")
@@ -393,6 +381,13 @@ void SessionBrowser::RegisterPlayer(FString const& SessionId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(PlayerToAdd, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(PlayerToAdd)
+		, OnError))
+	{
+		return;
+	}
 
 	if (SessionId.IsEmpty())
 	{
@@ -419,6 +414,13 @@ void SessionBrowser::UnregisterPlayer(FString const& SessionId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PlayerToRemove, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(PlayerToRemove)
+		, OnError))
+	{
+		return;
+	}
+
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
@@ -442,15 +444,10 @@ void SessionBrowser::GetRecentPlayer(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("User id is empty"));
-		return;
-	}
-
-	if (!FAccelByteUtilities::IsAccelByteIDValid(*UserId))
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, User Id format is invalid"));
 		return;
 	}
 
