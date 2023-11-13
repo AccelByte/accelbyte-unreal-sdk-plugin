@@ -99,6 +99,23 @@ enum class EAccelBytePredefinedEventName : uint8
 	UserPresence_StatusUpdated,
 	User_Banned,
 	User_Unbanned,
+	ChatV2_Connected,
+	ChatV2_Disconnected,
+	ChatV2_PersonalTopic_Created,
+	ChatV2_GroupTopic_Created,
+	ChatV2_Topic_Joined,
+	ChatV2_Topic_Quit,
+	ChatV2_Topic_UserAdded,
+	ChatV2_Topic_UserRemoved,
+	ChatV2_Topic_Updated,
+	ChatV2_Topic_Deleted,
+	ChatV2_UserBlocked,
+	ChatV2_UserUnblocked,
+	ChatV2_GroupChat_ModeratorMutedUser,
+	ChatV2_GroupChat_ModeratorUnmutedUser,
+	ChatV2_GroupChat_ModeratorBannedUser,
+	ChatV2_GroupChat_ModeratorUnbannedUser,
+	ChatV2_GroupChat_ModeratorDeletedGroupChat,
 	Group_Created,
 	Group_Updated,
 	Group_CustomAttributesUpdated,
@@ -133,10 +150,19 @@ enum class EAccelBytePredefinedEventName : uint8
 	GlobalAchievement_GetContributed,
 	GlobalAchievement_Claimed,
 	Achievement_GetTags,
-	Leaderboard_Ascended,
-	Leaderboard_Descended,
-	BattlePassMenu_Opened,
-	BattlePassMenu_Closed,
+	Leaderboard_GetRankings,
+	Leaderboard_GetUserRanking,
+	Leaderboard_GetLeaderboards,
+	Leaderboard_GetRankingByCycleId,
+	Leaderboard_GetUsersRankings,
+	SeasonPass_RewardClaimed,
+	SeasonPass_BulkRewardClaimed,
+	SeasonPass_GetCurrentSeason,
+	SeasonPass_GetUserSpecificSeasonData,
+	SeasonPass_GetUserCurrentSeasonData,
+	Reward_GetRewardByCode,
+	Reward_GetRewardById,
+	Reward_GetAllReward,
 	UGCChannel_Created,
 	UGCChannel_Updated,
 	UGCContent_Added,
@@ -1332,6 +1358,279 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserUnbannedPayload : public FAccelBy
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::User_Unbanned);
 	}
 };
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2ConnectedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_Connected);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2DisconnectedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		int32 StatusCode{0};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_Disconnected);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2PersonalTopicCreatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString TargetUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_PersonalTopic_Created);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2GroupTopicCreatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Name{};
+	UPROPERTY()
+		TSet<FString> Members{};
+	UPROPERTY()
+		TSet<FString> Admins{};
+	UPROPERTY()
+		bool IsJoinable{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_GroupTopic_Created);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2TopicJoinedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString TopicId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_Topic_Joined);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2TopicQuitPayload : public FAccelByteModelsChatV2TopicJoinedPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_Topic_Quit);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2TopicUserAddedPayload : public FAccelByteModelsChatV2TopicJoinedPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_Topic_UserAdded);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2TopicUserRemovedPayload : public FAccelByteModelsChatV2TopicJoinedPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_Topic_UserRemoved);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2TopicUpdatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Name{};
+	UPROPERTY()
+		bool IsChannel{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_Topic_Updated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2TopicDeletedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString TopicId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_Topic_Deleted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2UserBlockedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString BlockedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_UserBlocked);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2UserUnblockedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString UnblockedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_UserUnblocked);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2GroupChatModeratorMutedUserPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString ModeratorId{};
+	UPROPERTY()
+		FString MutedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_GroupChat_ModeratorMutedUser);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2GroupChatModeratorUnmutedUserPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString ModeratorId{};
+	UPROPERTY()
+		FString UnmutedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_GroupChat_ModeratorUnmutedUser);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2GroupChatModeratorBannedUserPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString ModeratorId{};
+	UPROPERTY()
+		FString BannedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_GroupChat_ModeratorBannedUser);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2GroupChatModeratorUnbannedUserPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString ModeratorId{};
+	UPROPERTY()
+		FString UnbannedUserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_GroupChat_ModeratorUnbannedUser);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2GroupChatModeratorDeleteGroupChatPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString GroupId{};
+	UPROPERTY()
+		FString ModeratorId{};
+	UPROPERTY()
+		FString ChatId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_GroupChat_ModeratorDeletedGroupChat);
+	}
+};
 #pragma endregion Social
 
 #pragma region Engagement
@@ -1890,6 +2189,216 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementGetTagsPayload : public FA
 	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Achievement_GetTags);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLeaderboardGetRankingsPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString LeaderboardCode{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Leaderboard_GetRankings);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLeaderboardGetUserRankingPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString LeaderboardCode{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Leaderboard_GetUserRanking);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLeaderboardGetLeaderboardsPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Leaderboard_GetLeaderboards);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLeaderboardGetRankingByCycleIdPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString LeaderboardCode{};
+	UPROPERTY()
+		FString CycleId{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Leaderboard_GetRankingByCycleId);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLeaderboardGetUsersRankingsPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString LeaderboardCode{};
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		TArray<FString> TargetUserIds{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Leaderboard_GetUsersRankings);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassClaimRewardPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString PassCode{};
+	UPROPERTY()
+		int32 TierIndex{};
+	UPROPERTY()
+		FString RewardCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::SeasonPass_RewardClaimed);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassBulkRewardClaimedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::SeasonPass_BulkRewardClaimed);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassGetCurrentSeasonPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Language{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::SeasonPass_GetCurrentSeason);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassGetUserSpecificSeasonDataPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString SeasonId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::SeasonPass_GetUserSpecificSeasonData);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassGetUserCurrentSeasonDataPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::SeasonPass_GetUserCurrentSeasonData);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRewardGetRewardByCodePayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString RewardCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Reward_GetRewardByCode);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRewardGetRewardByIdPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString RewardId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Reward_GetRewardById);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRewardGetAllRewardPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString EventTopic{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Reward_GetAllReward);
 	}
 };
 #pragma endregion Engagement

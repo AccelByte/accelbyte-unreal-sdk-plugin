@@ -147,27 +147,35 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId
 	{
 		return;
 	}
+	if (UserId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserId cannot be empty!"));
+		return;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
 
-	FString Contents = "[";
-	for (int i =0; i < EntitlementGrant.Num(); i++)
+	TArray<TSharedPtr<FJsonValue>> JsonArray;
+	for (const FAccelByteModelsEntitlementGrant& Entitlement : EntitlementGrant)
 	{
-		FString Content;
-		FJsonObjectConverter::UStructToJsonObjectString(EntitlementGrant[i], Content);
-		Contents += Content;
-		if (i < EntitlementGrant.Num() - 1)
+		if (Entitlement.Source == EAccelByteEntitlementSource::NONE)
 		{
-			Contents += ",";
+			// Handle the specific case when Source is NONE
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest),
+				TEXT("Invalid request. The 'Source' field must be set to a valid item source (e.g., EAccelByteEntitlementSource::PURCHASE, EAccelByteEntitlementSource::REWARD, etc.). Please set a valid 'Source' value to fulfill the request."));
+			return;
 		}
-		else
-		{
-			Contents += "]";
-		}
+		TSharedPtr<FJsonObject> JsonObj = FJsonObjectConverter::UStructToJsonObject(Entitlement);
+		FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObj, FAccelByteUtilities::FieldRemovalFlagAll);
+		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObj));
 	}
+
+	FString Contents;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Contents);
+	FJsonSerializer::Serialize(JsonArray, Writer);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }
@@ -378,12 +386,62 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId
 		return;
 	}
 
+	if (FulfillmentRequest.Source == EAccelByteItemSource::NONE)
+	{
+		const FString Message = TEXT("Invalid request. The 'Source' field must be set to a valid item source "
+							   "(e.g., EAccelByteItemSource::PURCHASED, EAccelByteItemSource::REWARDED, etc.). "
+							   "Please set a valid 'Source' value to fulfill the request.");
+		// Handle the specific case when Source is NONE
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest),Message);
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment")
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef.GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FulfillmentRequest, OnSuccess, OnError);
+	FString Content;
+	const TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(FulfillmentRequest);
+	if (FulfillmentRequest.Origin == EAccelBytePlatformRewardOrigin::NONE)
+	{
+		JsonObject->RemoveField(TEXT("Origin"));
+	}
+
+	if (FulfillmentRequest.Order.Currency.CurrencyType == EAccelByteItemCurrencyType::NONE)
+	{
+		JsonObject->RemoveField(TEXT("Order"));
+	}
+	
+	if (FulfillmentRequest.StartDate != 0 || FulfillmentRequest.EndDate != 0)
+	{
+		FString StartDate;
+		FString EndDate;
+		if (FulfillmentRequest.StartDate != 0)
+		{
+			FString AvailableDateRounded{};
+			FString AvailableDateDecimal{};
+			FulfillmentRequest.StartDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
+			StartDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
+			// Add StartDate and EndDate to JsonObject
+			JsonObject->SetStringField(TEXT("StartDate"), StartDate);
+		}
+
+		if (FulfillmentRequest.EndDate != 0)
+		{
+			FString AvailableDateRounded{};
+			FString AvailableDateDecimal{};
+			FulfillmentRequest.EndDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
+			EndDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
+			// Add StartDate and EndDate to JsonObject
+			JsonObject->SetStringField(TEXT("EndDate"), EndDate);
+		}
+	}
+	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObject, FAccelByteUtilities::FieldRemovalFlagAll | FAccelByteUtilities::FieldRemovalFlagNumbersZeroValues);
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
 void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus
@@ -443,11 +501,6 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 		} 
 	}
 
-	FString AvailableDateRounded{}; 
-	FString AvailableDateDecimal{};
-	ItemCriteria.AvailableDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
-	FString AvailableDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
-
 	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), ItemCriteria.StoreId },
 		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
@@ -457,7 +510,6 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 		{ TEXT("features"), FString::Join(ItemCriteria.Features, TEXT(","))  },
 		{ TEXT("activeOnly"), ItemCriteria.ActiveOnly ? TEXT("true"):TEXT("false") },
 		{ TEXT("region"), ItemCriteria.Region },
-		{ TEXT("availableDate"), AvailableDate },
 		{ TEXT("targetNamespace"), ItemCriteria.TargetNamespace },
 		{ TEXT("sortBy"), FString::Join(SortByStringArray, TEXT(","))  },
 		{ TEXT("itemType"), ItemCriteria.ItemType != EAccelByteItemType::NONE ?
@@ -467,6 +519,16 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 		{ TEXT("offset"), ItemCriteria.Offset > 0 ? FString::FromInt(ItemCriteria.Offset) : TEXT("") },
 		{ TEXT("limit"), ItemCriteria.Limit > 0 ? FString::FromInt(ItemCriteria.Limit) : TEXT("") },
 	};
+
+	if (ItemCriteria.AvailableDate != 0)
+	{
+		FString AvailableDateRounded{};
+		FString AvailableDateDecimal{};
+		ItemCriteria.AvailableDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
+		FString AvailableDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
+
+		QueryParams.Add(TTuple<FString, FString>{TEXT("availableDate"), AvailableDate });
+	}
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -493,11 +555,6 @@ void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV
 		} 
 	}
 
-	FString AvailableDateRounded{}; 
-	FString AvailableDateDecimal{};
-	ItemCriteria.AvailableDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
-	FString AvailableDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
-
 	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), ItemCriteria.StoreId },
 		{ TEXT("categoryPath"), ItemCriteria.CategoryPath },
@@ -510,7 +567,6 @@ void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV
 		{ TEXT("tags"), FString::Join(ItemCriteria.Tags, TEXT(",")) },
 		{ TEXT("features"), FString::Join(ItemCriteria.Features, TEXT(","))  },
 		{ TEXT("region"), ItemCriteria.Region },
-		{ TEXT("availableDate"), AvailableDate },
 		{ TEXT("targetNamespace"), ItemCriteria.TargetNamespace },
 		{ TEXT("itemName"), ItemCriteria.ItemName },
 		{ TEXT("sectionExclusive"), ItemCriteria.bSectionExclusive ? TEXT("true") : TEXT("false") },
@@ -519,6 +575,16 @@ void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV
 		{ TEXT("sortBy"), FString::Join(SortByStringArray, TEXT(","))  },
 	};
  
+	if (ItemCriteria.AvailableDate != 0)
+	{
+		FString AvailableDateRounded{};
+		FString AvailableDateDecimal{};
+		ItemCriteria.AvailableDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
+		FString AvailableDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
+
+		QueryParams.Add(TTuple<FString, FString>{ TEXT("availableDate"), AvailableDate });
+	}
+
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 

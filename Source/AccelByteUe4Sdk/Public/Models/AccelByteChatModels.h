@@ -73,6 +73,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatSendChatResponse
 	//! Id of sent chat
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SendChatResponse")
 	FString ChatId {};
+
+	//! The chat message that was sent, will return filtered message
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SendChatResponse")
+	FString Message {};
 };
 
 //!@brief Chat notification  

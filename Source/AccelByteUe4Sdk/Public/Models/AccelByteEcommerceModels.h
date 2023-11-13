@@ -112,6 +112,15 @@ enum class EAccelByteItemSource : uint8
 	ACHIEVEMENT,
 	REFERRAL_BONUS,
 	REDEEM_CODE,
+	REWARD,
+	GIFT,
+	DLC,
+	SELL_BACK,
+	CONSUME_ENTITLEMENT,
+	ORDER_REVOCATION,
+	PAYMENT,
+	EXPIRATION,
+	IAP_CHARGEBACK_REVERSED,
 	OTHER
 };
 
@@ -1764,6 +1773,21 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderCreate
 	FString SectionId{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderSummary
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderSummary")
+	FAccelByteModelsOrderCurrencySummary Currency{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Order | Models | OrderSummary")
+	FJsonObjectWrapper Ext{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderSummary")
+	bool Free{};
+};
+
 #pragma endregion OrderModelsField
 
 #pragma region CategoryModelsField
@@ -2032,6 +2056,33 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFulfillmentRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentRequest")
 	FString Language{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentRequest")
+	FString StoreId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentRequest")
+	FString ItemSku{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentRequest")
+	FAccelByteModelsOrderSummary Order{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentRequest")
+	FDateTime StartDate{0};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentRequest")
+	FDateTime EndDate{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Fulfillment | Models | FulfillmentRequest")
+	int32 Duration{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Fulfillment | Models | FulfillmentRequest")
+	EAccelBytePlatformRewardOrigin Origin{EAccelBytePlatformRewardOrigin::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Fulfillment | Models | FulfillmentRequest")
+	FJsonObjectWrapper Metadata{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Fulfillment | Models | FulfillmentRequest")
+	FJsonObjectWrapper OverrideBundleItemQty{};
 };
 
 USTRUCT(BlueprintType)

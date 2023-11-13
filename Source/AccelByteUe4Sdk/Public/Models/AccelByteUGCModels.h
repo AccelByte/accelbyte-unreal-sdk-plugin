@@ -35,6 +35,32 @@ enum class EAccelByteUgcOrderBy : uint8
 	DESC
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteUGCContentSortByV2 : uint8
+{
+	NAME = 0,
+	NAME_ASC,
+	NAME_DESC,
+	DOWNLOAD,
+	DOWNLOAD_ASC,
+	DOWNLOAD_DESC,
+	LIKE,
+	LIKE_ASC,
+	LIKE_DESC,
+	CREATED_TIME,
+	CREATED_TIME_ASC,
+	CREATED_TIME_DESC
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteUGCContentUtilitiesSortByV2 : uint8
+{
+	NONE,
+	CREATED_TIME,
+	CREATED_TIME_ASC,
+	CREATED_TIME_DESC
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPayloadUrl
 {
@@ -64,6 +90,30 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCScreenshot
 	FString Source{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Payload")
 	FString Url{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUploadScreenshotV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadScreenshotV2")
+	FString ContentType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadScreenshotV2")
+	FString Description{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadScreenshotV2")
+	FString FileExtension{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateScreenshotV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateScreenshotV2")
+	FString Description{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateScreenshotV2")
+	FString ScreenshotId{};
 };
 
 USTRUCT(BlueprintType)
@@ -142,7 +192,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPreviewMetadata
 	FString PreviewFileExtension{};
 };
 
-
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCRequest
 {
@@ -175,7 +224,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Request")
 	FAccelByteModelsUGCPreviewMetadata PreviewMetadata{};
 };
-
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateRequest : public FAccelByteModelsUGCRequest
@@ -409,7 +457,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelScreenshots
 	FString Url{};	
 };
 
-
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCSearchContentsResponse
 {
@@ -485,7 +532,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateLikeStatusToContentResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateLikeStatusToContentResponse")
 	FString ContentId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateLikeStatusToContentResponse")
-	bool  LikeStatus{};	
+	bool LikeStatus{};	
 };
 
 USTRUCT(BlueprintType)
@@ -585,6 +632,67 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCScreenshotsRequest
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUploadScreenshotsRequestV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ScreenshotsRequestV2")
+	TArray<FAccelByteModelsUGCUploadScreenshotV2> Screenshots {};
+
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateScreenshotsV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ScreenshotsRequestV2")
+	TArray<FAccelByteModelsUGCUpdateScreenshotV2> Screenshots {};
+
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCFilterRequestV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | FilterRequest")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | FilterRequest")
+	FString Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | FilterRequest")
+	FString SubType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | FilterRequest")
+	TArray<FString> Tags{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUploadContentURLRequestV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadContentRequestV2")
+	FString ContentType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadContentRequestV2")
+	FString FileExtension{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUploadContentURLResponseV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadContentRequestV2")
+	FString ContentType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadContentRequestV2")
+	FString FileExtension{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadContentRequestV2")
+	FString Url{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UploadContentRequestV2")
+	FString FileLocation{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateContentScreenshotResponse
 {
 	GENERATED_BODY()
@@ -592,7 +700,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateContentScreenshotResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentScreenshotResponse")
 	TArray<FAccelByteModelScreenshots> Screenshots {};
 };
-
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCGetFollowedContentResponse
@@ -644,3 +751,306 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCGetGroupsResponse
 	FAccelByteModelsPaging Paging{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCContentResponseV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString ChannelId{};	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString CreatedTime{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FAccelByteModelsUserIdState CreatorFollowState{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	int DownloadCount{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString FileExtension{};	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	TArray<FString> Groups{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString Id{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	bool IsHidden{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	bool IsOfficial{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	int LikeCount{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FAccelByteModelsUserIdState LikeState{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	TArray<FAccelByteModelSpayLoadURL> PayloadURL{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	TArray<FAccelByteModelScreenshots> Screenshots{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString ShareCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString SubType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FDateTime UpdatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsResponseV2")
+	FJsonObjectWrapper CustomAttributes{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCSearchContentsPagingResponseV2 {
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsPagingResponseV2")
+	TArray<FAccelByteModelsUGCContentResponseV2> Data{};	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | SearchContentsPagingResponseV2")
+	FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCreateUGCRequestV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCRequestV2")
+	FString ContentType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCRequestV2")
+	FString FileExtension{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCRequestV2")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCRequestV2")
+	FString Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCRequestV2")
+	FString SubType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCRequestV2")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCRequestV2")
+	FJsonObjectWrapper CustomAttributes{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCCreateUGCResponseV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString ChannelId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString ContentType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FDateTime CreatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString FileExtension{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString FileLocation{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString Id{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	bool IsHidden{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	bool IsOfficial{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString ParentNamespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	TArray<FAccelByteModelsUGCPayloadUrl> PayloadUrl{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString ShareCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString SubType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FDateTime UpdatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	FJsonObjectWrapper CustomAttributes{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsModifyUGCRequestV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCRequestV2")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCRequestV2")
+	FString Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCRequestV2")
+	FString SubType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCRequestV2")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCRequestV2")
+	FJsonObjectWrapper CustomAttributes{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCModifyUGCResponseV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString ChannelId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString ContentType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FDateTime CreatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString FileExtension{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString Id{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	bool IsHidden{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	bool IsOfficial{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString ParentNamespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	TArray<FAccelByteModelsUGCPayloadUrl> PayloadUrl{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString ShareCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString SubType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FDateTime UpdatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyUGCResponseV2")
+	FJsonObjectWrapper CustomAttributes{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCAddDownloadContentCountResponseV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | AddDownloadContentCountResponseV2")
+	FString ContentId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCContentDownloaderV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UGCContentDownloaderV2")
+	FString ContentId {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UGCContentDownloaderV2")
+	FDateTime CreatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UGCContentDownloaderV2")
+	FString DownloadedBy{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UGCContentDownloaderV2")
+	FString Namespace{};
+};
+	
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | PaginatedContentDownloaderResponseV2")
+	TArray<FAccelByteModelsUGCContentDownloaderV2> Data {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | PaginatedContentDownloaderResponseV2")
+	FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCContentLikerV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UGCContentLikerV2")
+	FString ContentId {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UGCContentLikerV2")
+	FDateTime CreatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UGCContentLikerV2")
+	FString LikedBy{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UGCContentLikerV2")
+	FString Namespace{};
+};
+	
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCGetPaginatedContentLikerResponseV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | PaginatedContentLikerResponseV2")
+	TArray<FAccelByteModelsUGCContentLikerV2> Data {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | PaginatedContentLikerResponseV2")
+	FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateContentFileLocationRequestV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString FileExtension{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString FileLocation{};
+};
+	
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateContentFileLocationResponseV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString ChannelId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString ContentType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FDateTime CreatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FJsonObjectWrapper CustomAttributes{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString FileExtension{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString FileLocation{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString Id{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	bool IsHidden{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	bool IsOfficial{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString ParentNamespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	TArray<FAccelByteModelsUGCPayloadUrl> PayloadUrl{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString ShareCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString SubType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FDateTime UpdatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	FString UserId{};
+};

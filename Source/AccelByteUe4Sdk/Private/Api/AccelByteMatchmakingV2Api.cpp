@@ -25,7 +25,7 @@ void MatchmakingV2::CreateMatchTicket(const FString& MatchPool
 	, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals)
 {
 	const auto OnCreateTicketError = FCreateMatchmakingTicketErrorHandler::CreateLambda(
-		[&OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorCreateMatchmakingTicketV2& ErrorDetails)
+		[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorCreateMatchmakingTicketV2& ErrorDetails)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	});

@@ -76,3 +76,18 @@ FString FAccelByteIdValidator::GetUserIdInvalidMessage(FString const& UserId)
 {
 	return FString::Printf(TEXT("Invalid request, User Id format is invalid\nValue: %s"), *UserId);
 }
+
+FString AccelByte::FAccelByteIdValidator::GetChannelIdInvalidMessage(FString const& ChannelId)
+{
+	return FString::Printf(TEXT("Invalid request, Channel Id format is invalid\nValue: %s"), *ChannelId);
+}
+
+FString AccelByte::FAccelByteIdValidator::GetContentIdInvalidMessage(FString const& ContentId)
+{
+	return FString::Printf(TEXT("Invalid request, Content Id format is invalid\nValue: %s"), *ContentId);
+}
+
+FString AccelByte::FAccelByteIdValidator::GetScreenshotIdInvalidMessage(FString const& ScreenshotId)
+{
+	return FString::Printf(TEXT("Invalid request, Screenshot Id format is invalid\nValue: %s"), *ScreenshotId);
+}

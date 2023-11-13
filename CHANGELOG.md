@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.5.0%0D24.4.1) (2023-11-13)
+
+
+### Features
+
+*  Expose CheckUserAvailability ([56d8042](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/56d8042915676498024cd20c307353f2aa75338f))
+* add message field in send chat response model ([b72ecdd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b72ecdde3f985e300b1cbb43caff34e81fe5c3dc))
+* adjust logic RemoveEmptyFieldsFromJson to allows removal of a fields with a value of 0 ([e062559](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e0625593b11bc204ee97d72d2d2ff673f95985e0))
+* **CloudSave:** add cloud save admin game record API ([ec7d671](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ec7d67149b6f85ac004055fff007a30088812f6f))
+* making param guard for ServerEcommerce::FulfillUserItem ([ec73975](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ec73975fa1e41c52c6179f3346d5f8a22b21ad69))
+* Parity model for FulfillUserItem ([ba412db](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ba412dbdcc08a340f73cc4282a842e179834f9ab))
+* **predefinedEvent:** add events for chatv2 scope ([e0974e1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e0974e1343cfef1f81b5f5d208483f228168c0fb))
+* **predefinedEvent:** add some models on Engagement Leaderboard, Seasonpass, and Reward scope ([78c974d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/78c974d8279d5168d2e351352b88960fa29cf2a0))
+* **predefinedEvent:** disabling predefinedEventApi ([3daa8bb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3daa8bb73cd39c9f18aee94656cd126bfc818cb8))
+* **qosm:** allow the game client to specify the qosm URL change to AMS-qosm using DefaultEngine.ini ([79a366f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/79a366fd3831414d93c078b017ef4b761da11e35))
+* **UGC:** new V2 UGC endpoints ([367c96c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/367c96cffc569806bf0e1079049863d36855abb4))
+
+
+### Bug Fixes
+
+* compile error on PlayStation build ([b9271bb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b9271bbffd0eb4f3f09dff6bdc66161785477fd0))
+* **Ecommerce:** add some validations inside the grant user entitlements ([7ade9d8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7ade9d82f6f385b5a3e0089b0491cd9bf2b4e106))
+* fixed cache token ([5c102fc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5c102fc4f8b0c52ecea733685f110ec7e2bc9e3d))
+* fixed cache token ([7e64590](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7e645903b05d0564d4401830bae90d27631a8035))
+* move the function from OSS to the utilities function ([f43c40a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f43c40a11041f3ee38796eb6bd23673b8939c4a7))
+* **predefinedEvent:** change event namespace to game namespace ([2a11b13](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2a11b13425d38b05b6f6f9a39585ce629e45716c))
+* remove delegate capture by reference in lambda capture ([d94b3b8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d94b3b88848837e0ca8f398f03a175e14e9ba88f))
+* **serverEcommerce:** remove availableDate param when the value is default ([1c415d6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1c415d6c2bfb75103a3b309f4a3378d3e710400d))
+
 ### [24.4.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.4.1%0D24.4.0) (2023-11-13)
 
 

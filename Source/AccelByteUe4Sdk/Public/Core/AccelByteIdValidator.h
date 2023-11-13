@@ -23,5 +23,8 @@ public:
 	static FString GetPartyIdInvalidMessage(FString const& PartyId);
 	static FString GetSessionIdInvalidMessage(FString const& SessionId);
 	static FString GetUserIdInvalidMessage(FString const& UserId);
+	static FString GetChannelIdInvalidMessage(FString const& ChannelId);
+	static FString GetContentIdInvalidMessage(FString const& ContentId);
+	static FString GetScreenshotIdInvalidMessage(FString const& ScreenshotId);
 };
 }

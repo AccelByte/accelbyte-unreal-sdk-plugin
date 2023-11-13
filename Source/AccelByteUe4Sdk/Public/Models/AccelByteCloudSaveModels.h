@@ -176,3 +176,72 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysR
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedBulkGetPlayerRecordSizeResponse")
 	FAccelByteModelsPaging Paging{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAdminGameRecord
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminGameRecord")
+	FString Key{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminGameRecord")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminGameRecord")
+	FDateTime Created_At{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminGameRecord")
+	FDateTime Updated_At{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminGameRecord")
+	FJsonObjectWrapper Value{}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAdminUserRecord
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminUserRecord")
+	FString Key{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminUserRecord")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminUserRecord")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminUserRecord")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminUserRecord")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminUserRecord")
+	FJsonObjectWrapper Value{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGetAdminUserRecordKeys
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminUserRecordKeys")
+	FString Key{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminUserRecordKeys")
+	FString User_Id{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedGetAdminUserRecordKeysResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedGetAdminUserRecordSizeResponse")
+	TArray<FAccelByteModelsGetAdminUserRecordKeys> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedGetAdminUserRecordSizeResponse")
+	FAccelByteModelsPaging Paging {};
+};

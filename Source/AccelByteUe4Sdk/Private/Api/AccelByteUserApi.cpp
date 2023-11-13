@@ -85,9 +85,9 @@ void User::LoginWithUsername(const FString& Username
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError, Username](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, Username);
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -126,9 +126,9 @@ void User::LoginWithUsernameV3(const FString& Username
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError, Username](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, Username);
 			})
 		, OnError
 		, bRememberMe
@@ -160,7 +160,7 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess](const FOauth2Token& Result)
 			{
-				OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+				OnLoginSuccess(OnSuccess, Result, Result.Platform_user_id); // Curry to general handler	
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -200,7 +200,7 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
 			})
 		, FOAuthErrorHandler::CreateLambda(
 			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
@@ -231,7 +231,7 @@ void User::LoginWithOtherPlatformId(const FString& PlatformId
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
 			})
 		, FOAuthErrorHandler::CreateLambda(
 			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
@@ -262,7 +262,7 @@ void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})
 		, OnError
 		, bRememberDevice
@@ -300,7 +300,7 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);			
+				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -341,7 +341,7 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -367,7 +367,7 @@ void User::TryRelogin(const FString& PlatformUserID
 	, const FVoidHandler& OnSuccess
 	, const FOAuthErrorHandler& OnError)
 {
-#if PLATFORM_WINDOWS
+#if PLATFORM_WINDOWS || PLATFORM_LINUX || PLATFORM_MAC
 	FReport::Log(FString(__FUNCTION__));
 
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(PlatformUserID
@@ -420,7 +420,7 @@ void User::CreateHeadlessAccountAndLogin(const FString& LinkingToken
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})	
 		, OnError
 		, SettingsRef.IamServerUrl); 
@@ -450,7 +450,7 @@ void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})		
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -460,7 +460,8 @@ void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
 
 void User::ProcessLoginResponse(const FOauth2Token& Response
 	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+	, const FOAuthErrorHandler& OnError
+	, const FString& CachedTokenKey)
 {
 	if (Response.Access_token.IsEmpty() || Response.Expires_in <= 0.0f)
 	{
@@ -469,12 +470,13 @@ void User::ProcessLoginResponse(const FOauth2Token& Response
 	}
 	else
 	{
-		OnLoginSuccess(OnSuccess, Response);
+		OnLoginSuccess(OnSuccess, Response, CachedTokenKey);
 	}
 }
 	
 void User::OnLoginSuccess(const FVoidHandler& OnSuccess
-	, const FOauth2Token& Response)
+	, const FOauth2Token& Response
+	, const FString& CachedTokenKey)
 {
 	// Set auth token before anything: Set before anything to prevent race condition issues.
 	UserCredentialsRef.SetAuthToken(Response, FPlatformTime::Seconds());
@@ -504,33 +506,48 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 			})
 		);
 
-	FHttpRetryScheduler::SetHeaderNamespace(Response.Namespace);
+	FHttpRetryScheduler::SetHeaderNamespace(Response.Namespace); 
 
-#ifndef PLATFORM_WINDOWS // the following code is working on Windows only at the moment
-	return;
-#endif
+	// Save Cached Token to local data storage.
+	FDateTime ExpireDate = FDateTime::UtcNow() + FTimespan::FromSeconds(Response.Refresh_expires_in);
+	SavingCachedTokenToLocalDataStorage(CachedTokenKey, Response.Refresh_token, ExpireDate);
+}
 
-	if (Response.Platform_user_id.IsEmpty() || Response.Refresh_token.IsEmpty())
+void User::SavingCachedTokenToLocalDataStorage(const FString& CachedTokenKey, const FString& RefreshToken, FDateTime ExpireDate)
+{
+#if PLATFORM_WINDOWS || PLATFORM_LINUX || PLATFORM_MAC 
+
+	// Username as Key should be used when the Player was login with Username Password/AccelByte account,
+	// when the login happen the IAM service give empty string value for Platform_user_id.
+	// Platform_user_id should be used when the Player was login with platform/including login with device-id.
+	if (CachedTokenKey.IsEmpty())
 	{
+		FReport::Log(FString::Printf(TEXT("[AccelByte] Key for Cached Token can not be empty. ")));
 		return;
 	}
 
 	// Store the refresh token
 	FRefreshInfo Info;
-	Info.RefreshToken = Response.Refresh_token;
-	Info.Expiration = FDateTime::UtcNow() + FTimespan::FromSeconds(Response.Refresh_expires_in);
+	Info.RefreshToken = RefreshToken;
+	Info.Expiration = ExpireDate;
 	FString SerializedInfo;
 	FJsonObjectConverter::UStructToJsonObjectString(Info, SerializedInfo);
 
 	auto XorInfo = FAccelByteUtilities::XOR(SerializedInfo, FAccelByteUtilities::GetDeviceId());
-	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(Response.Platform_user_id
+	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(CachedTokenKey
 		, XorInfo
 		, THandler<bool>::CreateLambda(
-			[this, OnSuccess, Response](bool IsSuccess)
+			[this](bool IsSuccess)
 			{
-				// On Save Refresh Token Success
+				FReport::Log(FString::Printf(TEXT("[AccelByte] Save Refresh Token %s. "),
+					IsSuccess ? TEXT("Success") : TEXT("Fail")));
 			})
 		, FAccelByteUtilities::AccelByteStorageFile());
+
+#else 
+	FReport::Log(FString::Printf(TEXT("[AccelByte] Save Cached Token to local storage is not support for this platform yet. ")));
+	return;
+#endif 
 }
 
 void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -1585,7 +1602,7 @@ void User::GenerateGameToken(const FString& Code,
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError);
+				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})		
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -1611,6 +1628,36 @@ void User::GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& 
 		{"oneTimeLinkCode", *OneTimeLinkCode}
 	}); 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void User::CheckUserAccountAvailability(const FString& DisplayName,
+	const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));   
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/availability")
+	   , *SettingsRef.IamServerUrl
+	   , *CredentialsRef.GetNamespace());
+
+	const FString Field = TEXT("displayName");
+	const TMultiMap<FString, FString> QueryParams ({
+		{"field", *Field},
+		{"query", *DisplayName}
+	}); 
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess,
+		FErrorHandler::CreateLambda([this, OnError](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			FString Message = ErrorMessage;
+			if (ErrorCode == EHttpResponseCodes::NotFound)
+			{
+				Message = TEXT("Account doesn't exist. If a new account is added with the defined display name, " 
+						"the service will be able to perform the action.");
+				OnError.ExecuteIfBound(EHttpResponseCodes::NotFound, Message);
+			}
+			else
+			{
+				OnError.ExecuteIfBound(ErrorCode, Message);
+			}
+		}));
 }
 	
 } // Namespace Api

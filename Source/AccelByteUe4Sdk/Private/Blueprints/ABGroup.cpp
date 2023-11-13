@@ -534,11 +534,11 @@ void UABGroup::GetGroupsByGroupIds(
 	ApiClientPtr->Group.GetGroupsByGroupIds(
 		GroupIds,
 		THandler<FAccelByteModelsGetGroupListResponse>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGetGroupListResponse& Response)
+			[OnSuccess](const FAccelByteModelsGetGroupListResponse& Response)
 		{
 			OnSuccess.ExecuteIfBound(Response);
 		}),
-		FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 		}));
@@ -554,11 +554,11 @@ void UABGroup::UpdateV2Group(
 		GroupId,
 		RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
-		[&OnSuccess](const FAccelByteModelsGroupInformation& Response)
+		[OnSuccess](const FAccelByteModelsGroupInformation& Response)
 		{
 			OnSuccess.ExecuteIfBound(Response);
 		}),
-		FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 		}));
@@ -571,11 +571,11 @@ void UABGroup::DeleteV2Group(
 {
 	ApiClientPtr->Group.DeleteV2Group(
 		GroupId,
-		FVoidHandler::CreateLambda([&OnSuccess]()
+		FVoidHandler::CreateLambda([OnSuccess]()
 		{
 			OnSuccess.ExecuteIfBound();
 		}),
-		FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 		}));
@@ -589,11 +589,11 @@ void UABGroup::UpdateV2GroupCustomAttributes(
 {
 	ApiClientPtr->Group.UpdateV2GroupCustomAttributes(
 		GroupId,RequestContent,
-		THandler<FAccelByteModelsGroupInformation>::CreateLambda([&OnSuccess](const FAccelByteModelsGroupInformation& Response)
+		THandler<FAccelByteModelsGroupInformation>::CreateLambda([OnSuccess](const FAccelByteModelsGroupInformation& Response)
 		{
 			OnSuccess.ExecuteIfBound(Response);
 		}),
-		FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 		}));
@@ -608,11 +608,11 @@ void UABGroup::GetGroupInviteRequestList(
 	ApiClientPtr->Group.GetGroupInviteRequestList(
 		GroupId,RequestContent,
 		THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
+			[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),
-			FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
@@ -627,11 +627,11 @@ void UABGroup::UpdateV2GroupCustomRule(
 {
 	ApiClientPtr->Group.UpdateV2GroupCustomRule(GroupId,RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGroupInformation& Response)
+			[OnSuccess](const FAccelByteModelsGroupInformation& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),
-			FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
@@ -646,11 +646,11 @@ void UABGroup::DeleteV2GroupPredefinedRule(
 	ApiClientPtr->Group.DeleteV2GroupPredefinedRule(
 		GroupId,AllowedAction,
 		FVoidHandler::CreateLambda(
-			[&OnSuccess]()
+			[OnSuccess]()
 			{
 				OnSuccess.ExecuteIfBound();
 			}),
-			FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
@@ -665,11 +665,11 @@ void UABGroup::GetUserGroupStatusInfo(
 	ApiClientPtr->Group.GetUserGroupStatusInfo(
 		UserId,GroupId,
 		THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGetUserGroupInfoResponse& Response)
+			[OnSuccess](const FAccelByteModelsGetUserGroupInfoResponse& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),
-			FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
@@ -685,11 +685,11 @@ void UABGroup::UpdateV2GroupPredefinedRule(
 	ApiClientPtr->Group.UpdateV2GroupPredefinedRule(
 		GroupId,AllowedAction,RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGroupInformation& Response)
+			[OnSuccess](const FAccelByteModelsGroupInformation& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),
-			FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
@@ -704,11 +704,11 @@ void UABGroup::GetGroupJoinRequestList(
 	ApiClientPtr->Group.GetGroupJoinRequestList(
 		GroupId,RequestContent,
 		THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
+			[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),
-			FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
@@ -723,11 +723,11 @@ void UABGroup::CancelGroupMemberInvitation(
 	ApiClientPtr->Group.CancelGroupMemberInvitation(
 		UserId,GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsMemberRequestGroupResponse& Response)
+			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),
-			FErrorHandler::CreateLambda([&OnError](const int32 ErrorCode, const FString& ErrorMessage)
+			FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
@@ -898,7 +898,7 @@ void UABGroup::GetMyJoinedGroupInfo(
 	ApiClientPtr->Group.GetMyJoinedGroupInfo(
 		RequestContent,
 		THandler<FAccelByteModelsGetGroupMemberListResponse>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGetGroupMemberListResponse& Response)
+			[OnSuccess](const FAccelByteModelsGetGroupMemberListResponse& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),
@@ -916,7 +916,7 @@ void UABGroup::GetMyJoinGroupRequest(
 	ApiClientPtr->Group.GetMyJoinGroupRequest(
 		RequestContent,
 		THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
+			[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),
@@ -978,7 +978,7 @@ void UABGroup::GetAllMemberRoles(
 	ApiClientPtr->Group.GetAllMemberRoles(
 		RequestContent,
 		THandler<FAccelByteModelsGetMemberRolesListResponse>::CreateLambda(
-			[&OnSuccess](const FAccelByteModelsGetMemberRolesListResponse& Response)
+			[OnSuccess](const FAccelByteModelsGetMemberRolesListResponse& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}),

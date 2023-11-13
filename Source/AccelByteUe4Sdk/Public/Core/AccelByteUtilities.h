@@ -129,6 +129,17 @@ private:
 	TSharedPtr<FJsonObject> const PayloadJsonPtr;
 };
 
+/**
+ * Enum used to determine whether the server management from this instance
+ */
+enum class EAccelByteCurrentServerManagementType
+{
+	NOT_A_SERVER,
+	LOCAL_SERVER,
+	ONLINE_ARMADA,
+	ONLINE_AMS
+};
+
 class ACCELBYTEUE4SDK_API FAccelByteUtilities
 {
 public:	
@@ -139,7 +150,9 @@ public:
 	static constexpr uint8 FieldRemovalFlagNumbers = 1 << 4;
 	static constexpr uint8 FieldRemovalFlagNull    = 1 << 5;
 	static constexpr uint8 FieldRemovalFlagNested  = 1 << 6;
-	static constexpr uint8 FieldRemovalFlagAll     = 0xFF;
+	static constexpr uint8 FieldRemovalFlagNumbersZeroValues = 1 << 7;
+	static constexpr uint8 FieldRemovalFlagAll     = 0xFF & ~FieldRemovalFlagNumbersZeroValues;
+
 	
 	static bool IsRunningDevMode();
 	static FString AccelByteStorageFile();
@@ -371,6 +384,11 @@ public:
 	 * @return Flight id of game client.
 	 */
 	static FString GetFlightId();
+
+	/**
+	 * @brief To be called from game server to decide the type of the game server management.
+	 */
+	static EAccelByteCurrentServerManagementType GetCurrentServerManagementType();
 
 	/**
 	 * @brief Parse command line to obtain an argument that:

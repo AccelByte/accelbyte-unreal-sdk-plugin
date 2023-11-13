@@ -523,6 +523,275 @@ void ServerCloudSave::BulkGetPlayerRecordSize(const FAccelByteModelsBulkGetPlaye
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, GetPlayerRecordSizeRequest, OnSuccessHttpClient, OnError);
 }
 
+#pragma region AdminRecord
+
+void ServerCloudSave::CreateAdminGameRecord(FString const& Key, FJsonObject const& RecordRequest
+	, const THandler<FAccelByteModelsAdminGameRecord>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *Key);
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>(RecordRequest);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void ServerCloudSave::QueryAdminGameRecordsByKey(FString const& Key
+	, const THandler<FAccelByteModelsAdminGameRecord>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *Key);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
+}
+
+void ServerCloudSave::QueryAdminGameRecordKeys(int Limit, int Offset
+	, THandler<FAccelByteModelsPaginatedRecordsKey> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	TMultiMap<FString, FString> QueryParams;
+	if (Offset >= 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit >= 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+}
+
+void ServerCloudSave::ReplaceAdminGameRecord(FString const& Key, FJsonObject const& RecordRequest
+	, THandler<FAccelByteModelsAdminGameRecord> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *Key);
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>(RecordRequest);
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void ServerCloudSave::DeleteAdminGameRecord(FString const& Key
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *Key);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void ServerCloudSave::CreateAdminUserRecord(const FString& Key
+	, const FString& UserId
+	, const FJsonObject& RecordRequest
+	, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId
+		, *Key);
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>(RecordRequest);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void ServerCloudSave::QueryAdminUserRecordsByKey(FString const& Key
+	, const FString& UserId
+	, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId
+		, *Key);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
+}
+
+void ServerCloudSave::QueryAdminUserRecordKeys(const FString& UserId, int Limit, int Offset
+	, const THandler<FAccelByteModelsPaginatedGetAdminUserRecordKeysResponse>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (UserId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("User id cannot be empty!"));
+		return;
+	}
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	TMultiMap<FString, FString> QueryParams;
+	if (Offset >= 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit >= 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+}
+
+void ServerCloudSave::ReplaceAdminUserRecord(FString const& Key
+	, const FString& UserId
+	, const FJsonObject& RecordRequest
+	, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId
+		, *Key);
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>(RecordRequest);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void ServerCloudSave::DeleteAdminUserRecord(FString const& Key
+	, const FString& UserId
+	, const FVoidHandler& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId
+		, *Key);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+#pragma endregion
+
 FJsonObject ServerCloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy
 	, bool SetPublic
 	, FJsonObject const& RecordRequest)

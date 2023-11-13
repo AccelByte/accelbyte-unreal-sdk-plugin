@@ -298,16 +298,6 @@ public:
 
 #pragma endregion /Login Methods
 
-	/**
-	 * @brief General handler for LoginWith* success; mostly a multicast callback handler.
-	 * - Credentials: Inits Qos Latencies Scheduler.
-	 * - Qos: Sets CredentialsRef Auth Token.
-	 *
-	 * @param OnSuccess delegate function for successful Login.
-	 * @param Response the Login response data.
-	 */
-	void OnLoginSuccess(const FVoidHandler& OnSuccess
-		, const FOauth2Token& Response);
 
 	/**
 	 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
@@ -974,6 +964,17 @@ public:
 	 */
 	void GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& OneTimeLinkCode, const THandler<FConflictLinkHeadlessAccountResult>& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	 * @brief Check users's account availability, available only using displayName field
+	 * If the result is success or no error, it means the account already exists.
+	 * If a new account is added with the defined display name, the service will be unable to perform the action.
+	 *
+	 * @param DisplayName User's display name value to be checked.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FVoidHandler
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CheckUserAccountAvailability(const FString& DisplayName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	
 private:
 	User() = delete;
 	User(User const&) = delete;
@@ -989,10 +990,37 @@ private:
 	 * @param Response the Login response data.
 	 * @param OnSuccess delegate function for successful Login.
 	 * @param OnError delegate function for error Login.
+	 * @param CachedTokenKey The cached token key.
 	 */
 	void ProcessLoginResponse(const FOauth2Token& Response
 		, const FVoidHandler& OnSuccess
-		, const FOAuthErrorHandler& OnError);
+		, const FOAuthErrorHandler& OnError
+		, const FString& CachedTokenKey);
+
+	/**
+	 * @brief General handler for LoginWith* success; mostly a multicast callback handler.
+	 * - Credentials: Inits Qos Latencies Scheduler.
+	 * - Qos: Sets CredentialsRef Auth Token.
+	 *
+	 * @param OnSuccess delegate function for successful Login.
+	 * @param Response the Login response data.
+	 * @param CachedTokenKey The cached token key.
+	 */
+	void OnLoginSuccess(const FVoidHandler& OnSuccess
+		, const FOauth2Token& Response
+		, const FString& CachedTokenKey);
+
+	/**
+	 * @brief Saving chached token as a file to Local Data Storage.
+	 * This functionality is working on Windows Platform only at the moment
+	 *
+	 * @param CachedTokenKey The cached token key.
+	 * @param RefreshToken The refresh token.
+	 * @param ExpireDate The expire date 
+	 */
+	void SavingCachedTokenToLocalDataStorage(const FString& CachedTokenKey
+		, const FString& RefreshToken
+		, FDateTime ExpireDate);
 };
 
 } // Namespace Api

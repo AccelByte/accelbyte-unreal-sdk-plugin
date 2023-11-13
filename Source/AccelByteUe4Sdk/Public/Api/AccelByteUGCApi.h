@@ -18,6 +18,9 @@ class Settings;
 
 namespace Api
 {
+
+#define MAX_BULK_CONTENT_IDS_COUNT 20
+
 /**
  * @brief Provide APIs to access UGC service.
  */
@@ -26,6 +29,8 @@ class ACCELBYTEUE4SDK_API UGC : public FApiBase
 public:
 	UGC(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~UGC();
+
+#pragma region UGC V1
 
 	/**
 	 * @brief Create a content with FString preview and get the payload url to upload the content.
@@ -549,7 +554,280 @@ public:
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
 		, int32 Offset = 0);
-	
+
+#pragma endregion UGC V1
+
+#pragma region UGC V2 (Content)
+
+	/**
+	 * @brief Search contents specific to a channel.
+	 *
+	 * @param ChannelId Channel Id.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 * @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
+	 */
+	void SearchContentsSpecificToChannelV2(FString const& ChannelId
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteUGCContentUtilitiesSortByV2 SortBy = EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_DESC);
+
+	/**
+	 * @brief Get all contents in current namespace
+	 *
+	 * @param Filter To filter the returned UGC contets.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 * @param SortBy Sorting criteria: name, download, like, created time with asc or desc. default = created time and desc.
+	 */
+	void SearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteUGCContentSortByV2 SortBy = EAccelByteUGCContentSortByV2::CREATED_TIME_DESC);
+
+	/**
+	 * @brief Get contents by content Ids
+	 *
+	 * @param ContentIds Content Ids Array
+	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUGCContentResponseV2>.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetContentBulkByIdsV2(TArray<FString> const& ContentIds
+		, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get a content information by its share code.
+	 *
+	 * @param ShareCode The share code of the content that will be fetched.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetContentByShareCodeV2(FString const& ShareCode
+		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get a content information by its content id
+	 *
+	 * @param ContentId The id of the content that will be fetched.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetContentByContentIdV2(FString const& ContentId
+		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Create a UGC content with create content request.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param CreateRequest Detail information for the content request.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCCreateUGCResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CreateContentV2(FString const& ChannelId
+		, FAccelByteModelsCreateUGCRequestV2 const& CreateRequest
+		, THandler<FAccelByteModelsUGCCreateUGCResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete a content based on the its channel id and content id.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ContentId The id of the content that will be deleted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void DeleteContentV2(FString const& ChannelId
+		, FString const& ContentId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Modify existing content to update content metadata.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ContentId The id of the content.
+	 * @param ModifyRequest Detail information for the content request that will be modified.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCModifyUGCResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ModifyContentV2(FString const& ChannelId
+		, FString const& ContentId
+		, FAccelByteModelsModifyUGCRequestV2 const& ModifyRequest
+		, THandler<FAccelByteModelsUGCModifyUGCResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Generate Upload URL and Conten File Location.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ContentId The id of the content.
+	 * @param UploadRequest Detail information for the upload request.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCUploadContentURLResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GenerateUploadContentURLV2(FString const& ChannelId
+		, FString const& ContentId
+		, FAccelByteModelsUploadContentURLRequestV2 const& UploadRequest
+		, THandler<FAccelByteModelsUGCUploadContentURLResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Update Content File Location in S3.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ContentId The id of the content.
+	 * @param FileExtension FileExtension of the content.
+	 * @param S3Key Detail information about the file location in S3.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCUpdateContentFileLocationResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateContentFileLocationV2(FString const& ChannelId
+		, FString const& ContentId
+		, FString const& FileExtension
+		, FString const& S3Key
+		, THandler<FAccelByteModelsUGCUpdateContentFileLocationResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get user's generated contents
+	 *
+	 * @param UserId User Id
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 */
+	void GetUserContentsV2(FString const& UserId
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteUGCContentUtilitiesSortByV2 SortBy = EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_DESC);
+
+	/**
+	 * @brief Update screenshots for content.
+	 *
+	 * @param ContentId Content Id.
+	 * @param ScreenshotsRequest Screenshots Request
+	 *	Supported file extensions: pjp, jpg, jpeg, jfif, bmp, png.
+	 *	Maximum description length: 1024.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCUpdateScreenshotsV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateContentScreenshotV2(FString const& ContentId
+		, FAccelByteModelsUGCUpdateScreenshotsV2 const& ScreenshotsRequest
+		, THandler<FAccelByteModelsUGCUpdateScreenshotsV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Upload screenshots for content.
+	 *
+	 * @param ContentId Content Id.
+	 * @param ScreenshotsRequest Screenshots Request.
+	 *	Supported file extensions: pjp, jpg, jpeg, jfif, bmp, png.
+	 *	Maximum description length: 1024.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCUpdateContentScreenshotResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UploadContentScreenshotV2(FString const& ContentId
+		, FAccelByteModelsUGCUploadScreenshotsRequestV2 const& ScreenshotsRequest
+		, THandler<FAccelByteModelsUGCUpdateContentScreenshotResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete screenshots for content.
+	 *
+	 * @param ContentId Content Id.
+	 * @param ScreenshotId Screenshot Id
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void DeleteContentScreenshotV2(FString const& ContentId
+		, FString const& ScreenshotId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+#pragma endregion UGC V2 (Content)
+
+#pragma region UGC V2 (Download Count)
+
+	/**
+	 * @brief Add download count for a content.
+	 *
+	 * @param ContentId The id of the content.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCAddDownloadContentCountResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void AddDownloadContentCountV2(FString const& ContentId
+		, THandler<FAccelByteModelsUGCAddDownloadContentCountResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get list of UGC content downloader
+	 *
+	 * @param ContentId The id of the content.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 * @param UserId The id of the user who downloaded the content.
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 * @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
+	 */
+	void GetListContentDownloaderV2(FString const& ContentId
+		, THandler<FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& UserId = TEXT("")
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteUGCContentUtilitiesSortByV2 SortBy = EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_DESC);
+
+#pragma endregion UGC V2 (Download Count)
+
+#pragma region UGC V2 (Like)
+
+	/**
+	 * @brief Get a list of users who like the content.
+	 *
+	 * @param ContentId The id of the content.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCGetPaginatedContentLikerResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 * @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
+	 */
+	void GetListContentLikerV2(FString const& ContentId
+		, THandler<FAccelByteModelsUGCGetPaginatedContentLikerResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteUGCContentUtilitiesSortByV2 SortBy = EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_DESC);
+
+	/**
+	 * @brief Update like/unlike status to a content
+	 *
+	 * @param ContentId The content id that will be updated.
+	 * @param bLikeStatus New like Status value.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateLikeStatusToContentV2(FString const& ContentId
+		, bool bLikeStatus
+		, THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+#pragma endregion UGC V2 (Like)
+
 private:
 	UGC() = delete;
 	UGC(UGC const&) = delete;
@@ -558,6 +836,8 @@ private:
 	static FString ConvertLikedContentSortByToString(const EAccelByteLikedContentSortBy& SortBy);
 	static FString ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy);
 	static FString ConvertUGCOrderByToString(const EAccelByteUgcOrderBy& OrderBy);
+	static FString ConvertGetUGContentsSortByToString(const EAccelByteUGCContentSortByV2& SortBy);
+	static FString ConvertUGCUtilitiesSortByToString(const EAccelByteUGCContentUtilitiesSortByV2& SortBy);
 };
 
 }

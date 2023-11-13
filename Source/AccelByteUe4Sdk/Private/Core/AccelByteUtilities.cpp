@@ -483,7 +483,19 @@ void FAccelByteUtilities::RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject> cons
 		}
 		case EJson::Number:
 		{
-			bRemoveField = HAS_FIELD_REMOVAL_FLAG(Numbers) && static_cast<int32>(FMath::Floor(KeyValuePair.Value->AsNumber())) == TNumericLimits<int32>::Min();
+			bool removeZeroValues = HAS_FIELD_REMOVAL_FLAG(NumbersZeroValues) != 0;
+			int32 integerValue = static_cast<int32>(FMath::Floor(KeyValuePair.Value->AsNumber()));
+
+			if (HAS_FIELD_REMOVAL_FLAG(Numbers) && integerValue == TNumericLimits<int32>::Min())
+			{
+				// Remove fields with a value of TNumericLimits<int32>::Min() if FieldRemovalFlagAll is set
+				bRemoveField = true;
+			}
+			else if (removeZeroValues && integerValue == 0)
+			{
+				// Remove fields with a value of 0 if FieldRemovalFlagNumbersZeroValues is set
+				bRemoveField = true;
+			}
 			break;
 		}
 		case EJson::Null:
@@ -1044,4 +1056,28 @@ bool FAccelByteUtilities::IsLanguageUseCommaDecimalSeparator()
 bool FAccelByteUtilities::IsAccelByteIDValid(FString const& AccelByteId, EAccelByteIdHypensRule HypenRule)
 {
 	return FAccelByteIdValidator::IsAccelByteIdValid(AccelByteId);
+}
+
+EAccelByteCurrentServerManagementType FAccelByteUtilities::GetCurrentServerManagementType()
+{
+	//Sort this decision based on priority
+	if (!IsRunningDedicatedServer())
+	{
+		return EAccelByteCurrentServerManagementType::NOT_A_SERVER;
+	}
+
+	if (!FRegistry::ServerSettings.DSId.IsEmpty())
+	{
+		return EAccelByteCurrentServerManagementType::ONLINE_AMS;
+	}
+
+	FString PodNameValue = FPlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"));
+	if (!PodNameValue.IsEmpty())
+	{
+		return EAccelByteCurrentServerManagementType::ONLINE_ARMADA;
+	}
+	else
+	{
+		return EAccelByteCurrentServerManagementType::LOCAL_SERVER;
+	}
 }

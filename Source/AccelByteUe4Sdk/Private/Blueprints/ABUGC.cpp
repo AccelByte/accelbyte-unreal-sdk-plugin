@@ -375,6 +375,28 @@ void UABUGC::GetChannels(
 	);
 }
 
+void UABUGC::GetChannelsByUserId(const FString& UserId,
+	FDModelsUGCChannelsPagingResponse const& OnSuccess, 
+	FDErrorHandler const& OnError, 
+	int32 Limit, 
+	int32 Offset)
+{
+	ApiClientPtr->UGC.GetChannels(UserId,
+		THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCChannelsPagingResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
 void UABUGC::DeleteChannel(
 	FString const& ChannelId,
 	FDHandler const& OnSuccess,
@@ -524,5 +546,345 @@ void UABUGC::SearchContentsSpecificToChannel(const FString& ChannelId,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 			SortBy, OrderBy, Limit, Offset
+	);
+}
+
+void UABUGC::SearchContentsSpecificToChannelV2(const FString& ChannelId, 
+	FDModelsUGCSearchContentsPagingResponseV2 const& OnSuccess,
+	FDErrorHandler const& OnError, 
+	int32 Limit, 
+	int32 Offset,
+	EAccelByteUGCContentSortByV2 SortBy)
+{
+	ApiClientPtr->UGC.SearchContentsSpecificToChannelV2(ChannelId,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+			Limit, Offset
+	);
+}
+
+void UABUGC::SearchContentsV2(const FAccelByteModelsUGCFilterRequestV2& Filter,
+	FDModelsUGCSearchContentsPagingResponseV2 const& OnSuccess,
+	FDErrorHandler const& OnError, 
+	int32 Limit, 
+	int32 Offset, 
+	EAccelByteUGCContentSortByV2 SortBy)
+{
+	ApiClientPtr->UGC.SearchContentsV2(Filter,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+			Limit, Offset, SortBy
+	);
+}
+
+void UABUGC::GetContentBulkByIdsV2(const TArray<FString>& ContentIds, 
+	FDModelsUGCBulkContentResponseV2 const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.GetContentBulkByIdsV2(ContentIds,
+		THandler<TArray<FAccelByteModelsUGCContentResponseV2>>::CreateLambda(
+			[OnSuccess](TArray<FAccelByteModelsUGCContentResponseV2> const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::GetContentByShareCodeV2(FString const& ShareCode, 
+	FDModelsUGCContentResponseV2 const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.GetContentByShareCodeV2(ShareCode,
+		THandler<FAccelByteModelsUGCContentResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCContentResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::GetContentByContentIdV2(FString const& ContentId, 
+	FDModelsUGCContentResponseV2 const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.GetContentByContentIdV2(ContentId,
+		THandler<FAccelByteModelsUGCContentResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCContentResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::CreateContentV2(FString const& ChannelId, 
+	FAccelByteModelsCreateUGCRequestV2 const& CreateRequest, 
+	FDModelsUGCCreateUGCResponseV2 const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.CreateContentV2(ChannelId, CreateRequest,
+		THandler<FAccelByteModelsUGCCreateUGCResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCCreateUGCResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::DeleteContentV2(FString const& ChannelId, 
+	FString const& ContentId, 
+	FDHandler const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.DeleteContentV2(ChannelId, ContentId,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::ModifyContentV2(FString const& ChannelId, 
+	FString const& ContentId, 
+	FAccelByteModelsModifyUGCRequestV2 const& ModifyRequest, 
+	FDModelsUGCModifyUGCResponseV2 const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.ModifyContentV2(ChannelId, ContentId, ModifyRequest,
+		THandler<FAccelByteModelsUGCModifyUGCResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCModifyUGCResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::GenerateUploadContentURLV2(FString const& ChannelId, 
+	FString const& ContentId, 
+	FAccelByteModelsUploadContentURLRequestV2 const& UploadRequest, 
+	FDModelsUGCUploadContentResponse const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.GenerateUploadContentURLV2(ChannelId, ContentId, UploadRequest,
+		THandler<FAccelByteModelsUGCUploadContentURLResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCUploadContentURLResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::UpdateContentFileLocationV2(FString const& ChannelId, 
+	FString const& ContentId, 
+	FString const& FileExtension,
+	FString const& S3Key, 
+	FDModelsUGCUpdateContentFileLocation const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.UpdateContentFileLocationV2(ChannelId, ContentId, FileExtension, S3Key,
+		THandler<FAccelByteModelsUGCUpdateContentFileLocationResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCUpdateContentFileLocationResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::GetUserContentsV2(const FString& UserId, 
+	FDModelsUGCContentPageResponseV2 const& OnSuccess, 
+	FDErrorHandler const& OnError, 
+	int32 Limit, 
+	int32 Offset)
+{
+	ApiClientPtr->UGC.GetUserContentsV2(UserId,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+			Limit, Offset
+	);
+}
+
+void UABUGC::UpdateContentScreenshotV2(const FString& ContentId, 
+	FAccelByteModelsUGCUpdateScreenshotsV2 ScreenshotsRequest, 
+	FDModelsUGCUpdateScreenshotsV2 const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.UpdateContentScreenshotV2(ContentId, ScreenshotsRequest,
+		THandler<FAccelByteModelsUGCUpdateScreenshotsV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCUpdateScreenshotsV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::UploadContentScreenshotV2(const FString& ContentId, 
+	FAccelByteModelsUGCUploadScreenshotsRequestV2 ScreenshotsRequest, 
+	FDModelsUGCUpdateContentScreenshotResponse const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.UploadContentScreenshotV2(ContentId, ScreenshotsRequest,
+		THandler<FAccelByteModelsUGCUpdateContentScreenshotResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCUpdateContentScreenshotResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::DeleteContentScreenshotV2(const FString& ContentId, 
+	const FString& ScreenshotId, 
+	FDHandler const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.DeleteContentScreenshotV2(ContentId, ScreenshotId,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::AddDownloadContentCountV2(FString const& ContentId, 
+	FDModelsUGCAddDownloadContentCountResponse const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.AddDownloadContentCountV2(ContentId, 
+		THandler<FAccelByteModelsUGCAddDownloadContentCountResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCAddDownloadContentCountResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::GetListContentDownloaderV2(FString const& ContentId, 
+	FDModelsUGCGetPaginatedContentDownloaderResponse const& OnSuccess, 
+	FDErrorHandler const& OnError, 
+	FString const& UserId,
+	int32 Limit, 
+	int32 Offset, 
+	EAccelByteUGCContentUtilitiesSortByV2 SortBy)
+{
+	ApiClientPtr->UGC.GetListContentDownloaderV2(ContentId,
+		THandler<FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+		UserId, Limit, Offset, SortBy
+	);
+}
+
+void UABUGC::GetListContentLikerV2(FString const& ContentId
+	, FDModelsUGCGetPaginatedContentLikerResponse const& OnSuccess
+	, FDErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset)
+{
+	ApiClientPtr->UGC.GetListContentLikerV2(ContentId,
+		THandler<FAccelByteModelsUGCGetPaginatedContentLikerResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCGetPaginatedContentLikerResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+			Limit, Offset
+	);
+}
+
+void UABUGC::UpdateLikeStatusToContentV2(const FString& ContentId
+	, bool bLikeStatus
+	, FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.UpdateLikeStatusToContentV2(ContentId, bLikeStatus,
+		THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCUpdateLikeStatusToContentResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
 	);
 }

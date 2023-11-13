@@ -317,6 +317,137 @@ public:
 		, const THandler<FAccelByteModelsPaginatedBulkGetPlayerRecordSizeResponse>& OnSuccess
 		, const FErrorHandler& OnError);
 
+#pragma region AdminRecord
+
+	/**
+	 * @brief Create new admin game record or append the existing admin game record.
+	 *
+	 * @param Key Key of record
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CreateAdminGameRecord(FString const& Key, FJsonObject const& RecordRequest
+		, const THandler<FAccelByteModelsAdminGameRecord>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get a record by its key in namespace-level.
+	 *
+	 * @param Key Key of record
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void QueryAdminGameRecordsByKey(FString const& Key
+		, THandler<FAccelByteModelsAdminGameRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Retrieve list of records key by namespace
+	 *
+	 * @param Limit The limit of the keys result.
+	 * @param Offset Distance between the beginning of the data list and a given point.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void QueryAdminGameRecordKeys(int Limit, int Offset
+		, THandler<FAccelByteModelsPaginatedRecordsKey> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Create new admin game record or replace the existing admin game record.
+	 *
+	 * @param Key Key of record
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ReplaceAdminGameRecord(FString const& Key, FJsonObject const& RecordRequest
+		, THandler<FAccelByteModelsAdminGameRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete game record in namespace-level
+	 *
+	 * @param Key Key of record
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void DeleteAdminGameRecord(FString const& Key
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Create new admin user record or append the existing admin user record.
+	 *
+	 * @param Key Key of record
+	 * @param UserId UserId of the record owner.
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CreateAdminUserRecord(const FString& Key
+		, const FString& UserId
+		, const FJsonObject& RecordRequest
+		, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Query admin user records by Key
+	 *
+	 * @param Key Key of record
+	 * @param UserId UserId of the record owner.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void QueryAdminUserRecordsByKey(const FString& Key
+		, const FString& UserId
+		, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Query admin user record Keys
+	 *
+	 * @param UserId UserId of the record owner.
+	 * @param Limit
+	 * @param Offset
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void QueryAdminUserRecordKeys(const FString& UserId, int Limit, int Offset
+		, const THandler<FAccelByteModelsPaginatedGetAdminUserRecordKeysResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Replace admin user record
+	 *
+	 * @param Key Key of record
+	 * @param UserId UserId of the record owner.
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ReplaceAdminUserRecord(const FString& Key
+		, const FString& UserId
+		, const FJsonObject& RecordRequest
+		, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Delete admin user record
+	 *
+	 * @param Key Key of record
+	 * @param UserId UserId of the record owner.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void DeleteAdminUserRecord(const FString& Key
+		, const FString& UserId
+		, const FVoidHandler& OnSuccess
+		, const FErrorHandler& OnError);
+
+#pragma endregion
+
 private:
 	ServerCloudSave() = delete;
 	ServerCloudSave(ServerCloudSave const&) = delete;
