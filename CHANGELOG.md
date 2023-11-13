@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [24.4.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.4.1%0D24.4.0) (2023-11-13)
+
+
+### Bug Fixes
+
+* add allowed user id list for official user id ([f100bf4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f100bf4537daa25a5be41186ad2f5fefb37ed7ee))
+
 ## [24.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.4.0%0D24.3.0) (2023-10-30)
 
 

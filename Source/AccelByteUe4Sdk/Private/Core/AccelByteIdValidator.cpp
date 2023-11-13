@@ -10,11 +10,21 @@ using namespace AccelByte;
 #define ACCELBYTE_ID_LENGTH 32
 #define ACCELBYTE_ID_LENGTH_WITH_HYPENS 36
 
+// Contains list of user IDs that don't have the UUIDv4 format
+const TArray<FString> AllowedUserIdList =
+{
+	"official"
+};
+
 bool FAccelByteIdValidator::IsAccelByteIdValid(FString const& AccelByteId, EAccelByteIdHypensRule HypenRule)
 {
 	if (AccelByteId.IsEmpty())
 	{
 		return false;
+	}
+	if (AllowedUserIdList.Contains(AccelByteId))
+	{
+		return true;
 	}
 
 	// delete the "-client" prefix, session service will add this prefix if a session is created by non user client ID
