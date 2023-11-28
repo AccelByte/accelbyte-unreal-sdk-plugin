@@ -1126,6 +1126,15 @@ struct ACCELBYTEUE4SDK_API FGeneratedOneTimeCode
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FCodeForTokenExchangeResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CodeForTokenExchangeResponse")
+	FString Code{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FLinkHeadlessAccountRequest
 {
 	GENERATED_BODY()

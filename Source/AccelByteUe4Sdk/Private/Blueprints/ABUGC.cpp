@@ -448,6 +448,26 @@ void UABUGC::SearchContents(const FString& Name,
 	);
 }
 
+void UABUGC::SearchAllContents(FAccelByteModelsUGCSearchContentsRequest const& Request, 
+	FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	int32 Limit, 
+	int32 Offset)
+{
+	ApiClientPtr->UGC.SearchContents(Request,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+		Limit, Offset
+	);
+}
+
 void UABUGC::UpdateLikeStatusToContent(const FString& ContentId,
 	bool bLikeStatus,
 	FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
@@ -546,6 +566,27 @@ void UABUGC::SearchContentsSpecificToChannel(const FString& ChannelId,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 			SortBy, OrderBy, Limit, Offset
+	);
+}
+
+void UABUGC::SearchContentsByChannelId(FString const& ChannelId,
+	FAccelByteModelsUGCSearchContentsRequest const& Request,
+	FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	int32 Limit,
+	int32 Offset)
+{
+	ApiClientPtr->UGC.SearchContentsSpecificToChannel(ChannelId, Request,
+		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+		Limit, Offset
 	);
 }
 

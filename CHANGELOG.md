@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.6.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.6.0%0D24.5.0) (2023-11-28)
+
+
+### Features
+
+* add deprecated message for UpdateUserV3 ([b8aa29c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b8aa29c82f090ed48c667bd6aa6544188713f8b9))
+* add several predefined events for storage scope ([1f80ba7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1f80ba77e33d7302bc9f0c629a03546636a752f6))
+* expose new search hidden content endpoints ([ad57dcb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ad57dcbc07c649b881164e1a4b77e7bb3be0f6b9))
+* **IAM:** generate game namespace code for publisher usage ([76d9cde](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/76d9cdeb739ba13626bff5a7877b878dea346297))
+* **OAuth:** add CreateHeadless for LoginWithDeviceId ([59ad4f4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/59ad4f449e018ac9392d2d4f4f0271460d752978))
+
+
+### Bug Fixes
+
+* fixed cache token for windows platform ([e526034](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e526034e987665689712862d8fc866c76361a268))
+* **predefinedEvent:** change event namespace to game namespace ([21b8877](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/21b8877acc376a34368d6ba6696f0530c1c90bd2))
+* **Switch:** compile error on switch platform ([5d4705a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5d4705a891a8b4c92cb2b9bcdc26c3ad537a8c07))
+
 ## [24.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.5.0%0D24.4.1) (2023-11-13)
 
 

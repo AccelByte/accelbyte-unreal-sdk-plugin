@@ -61,9 +61,8 @@ bool FAccelByteUdpPingThread::CreateSocket()
 	}
 
 	Socket = SocketSubsystem->CreateSocket(NAME_DGram, TEXT("ABPing"), IpAddress->GetProtocolType());
-	if (!Socket)
+	if (!SocketIsValid())
 	{
-		Socket = nullptr;
 		return false;
 	}
 
@@ -117,7 +116,7 @@ bool FAccelByteUdpPingThread::ResolveIp()
 
 bool FAccelByteUdpPingThread::SocketReceiveData(uint8* Data, int32 BufferSize, int32& BytesRead)
 {
-	if (!Socket)
+	if (!SocketIsValid())
 	{
 		return false;
 	}
@@ -128,7 +127,7 @@ bool FAccelByteUdpPingThread::SocketReceiveData(uint8* Data, int32 BufferSize, i
 
 bool FAccelByteUdpPingThread::SocketSendData(const FString& StringToSend, int32& BytesSent)
 {
-	if (!Socket)
+	if (!SocketIsValid())
 	{
 		return false;
 	}
@@ -138,7 +137,7 @@ bool FAccelByteUdpPingThread::SocketSendData(const FString& StringToSend, int32&
 
 bool FAccelByteUdpPingThread::SocketWaitData()
 {
-	if (!Socket)
+	if (!SocketIsValid())
 	{
 		return false;
 	}
@@ -146,11 +145,16 @@ bool FAccelByteUdpPingThread::SocketWaitData()
 	return Socket->Wait(ESocketWaitConditions::WaitForRead, FTimespan::FromSeconds(Config.Timeout));
 }
 
+bool FAccelByteUdpPingThread::SocketIsValid()
+{
+	return Socket != nullptr;
+}
+
 FPingResultStatus FAccelByteUdpPingThread::SendPing(const FString& PingString)
 {
 	for (int PingIndex = 0; PingIndex < Config.PingNum; ++PingIndex)
 	{
-		if (!Socket)
+		if (!SocketIsValid())
 		{
 			return FPingResultStatus::Invalid;
 		}

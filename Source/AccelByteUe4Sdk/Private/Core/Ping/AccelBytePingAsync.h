@@ -61,12 +61,12 @@ protected:
 	virtual bool SocketReceiveData(uint8* Data, int32 BufferSize, int32& BytesRead);
 	virtual bool SocketSendData(const FString& StringToSend, int32& BytesSent);
 	virtual bool SocketWaitData();
+	virtual bool SocketIsValid();
 
 	FPingResultStatus SendPing(const FString& PingString);
 
 	FPingResultStatusDelegate OnComplete;
 	FGotResponseDelegate OnGotResponse;
-	TFunction<FPingResponse(uint64)> PongResponseValidator;
 	FPingConfig Config;
 
 private:

@@ -296,7 +296,7 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Public user can access without token or if token specified, requires valid user token.   
+	 * @brief Search specific contents based on the given filter.
 	 *
 	 * @param Name Content Name.
 	 * @param Creator Creator Name.
@@ -324,6 +324,21 @@ public:
 		, EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE
 		, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC
 		, int32 Limit = 1000
+		, int32 Offset = 0);
+
+	/**
+	 * @brief Search specific contents based on the given filter.
+	 *
+	 * @param Request Filter request to specify the search result.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 */
+	void SearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
 		, int32 Offset = 0);
 
 	/**
@@ -398,6 +413,23 @@ public:
 		, EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE
 		, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC
 		, int32 Limit = 1000
+		, int32 Offset = 0);
+
+	/**
+	 * @brief Search contents specific to a channel.
+	 *
+	 * @param ChannelId Channel Id.
+	 * @param Request Filter request to specify the search result.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 */
+	void SearchContentsSpecificToChannel(FString const& ChannelId
+		, FAccelByteModelsUGCSearchContentsRequest const& Request
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
 		, int32 Offset = 0);
 
 	/**

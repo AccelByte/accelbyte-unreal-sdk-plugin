@@ -92,6 +92,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString AchievementServerUrl{};
+	
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	FString UGCServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString MatchmakingServerUrl{};
@@ -197,6 +200,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetAchievementServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetUGCServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetMatchmakingServerUrl();
@@ -269,6 +275,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetAchievementServerUrl(const FString& AchievementServerUrl);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetUGCServerUrl(const FString& UGCServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetMatchmakingServerUrl(const FString& MatchmakingServerurl);

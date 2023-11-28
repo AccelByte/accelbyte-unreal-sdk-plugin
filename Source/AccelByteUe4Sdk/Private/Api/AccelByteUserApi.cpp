@@ -138,18 +138,20 @@ void User::LoginWithUsernameV3(const FString& Username
 }
 
 void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, bool bCreateHeadless)
 {
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
 		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		});
-	LoginWithDeviceId(OnSuccess, OnErrorHandler);
+	LoginWithDeviceId(OnSuccess, OnErrorHandler, bCreateHeadless);
 } 
 
 void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+	, const FOAuthErrorHandler& OnError
+	, bool bCreateHeadless)
 { 
 	FReport::Log(FString(__FUNCTION__));
 
@@ -163,7 +165,8 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
 				OnLoginSuccess(OnSuccess, Result, Result.Platform_user_id); // Curry to general handler	
 			})
 		, OnError
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, bCreateHeadless);
 
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -1493,6 +1496,8 @@ void User::UpdateUserV3(FUserUpdateRequest UpdateRequest
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("UpdateUserV3 is deprecated & might be removed without notice - please use UpdateUser instead!!"));
 
 	if (!UpdateRequest.EmailAddress.IsEmpty())
 	{
@@ -1606,6 +1611,18 @@ void User::GenerateGameToken(const FString& Code,
 			})		
 		, OnError
 		, SettingsRef.IamServerUrl);
+}
+
+void User::GenerateCodeForPublisherTokenExchange(const FString& PublisherClientID,
+	const THandler<FCodeForTokenExchangeResponse>& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__)); 
+	Oauth2::GenerateCodeForPublisherTokenExchange(UserCredentialsRef.GetAccessToken()
+		, SettingsRef.PublisherNamespace
+		, PublisherClientID
+		, OnSuccess
+		, OnError);
 }
 
 void User::LinkHeadlessAccountToCurrentFullAccount(const FLinkHeadlessAccountRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)

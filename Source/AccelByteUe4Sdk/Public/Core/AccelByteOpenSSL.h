@@ -8,7 +8,6 @@
 #include "Misc/IEngineCrypto.h"
 #include "Misc/Base64.h"
 
-#if !PLATFORM_SWITCH
 namespace openssl
 {
 THIRD_PARTY_INCLUDES_START
@@ -18,7 +17,6 @@ THIRD_PARTY_INCLUDES_START
 #include <openssl/aes.h>
 THIRD_PARTY_INCLUDES_END
 }
-#endif // PLATFORM_SWITCH
 
 namespace AccelByte
 {

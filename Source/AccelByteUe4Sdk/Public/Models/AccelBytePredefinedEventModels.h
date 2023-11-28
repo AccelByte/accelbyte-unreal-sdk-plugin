@@ -30,12 +30,40 @@ enum class EAccelBytePredefinedEventName : uint8
 	UserStatItem_Created,
 	UserStatItem_Updated,
 	UserStatItem_Deleted,
+	UserStatItem_Reset,
+	UserStatItem_GetItemsByCodes,
+	UserStatItem_GetSameItemsFromUsers,
+	UserStatItem_GetItems,
+	GlobalStatItem_GetItemByCode,
+	StatCycleItem_GetItemList,
+	StatCycleItem_GetConfigByCycleId,
+	StatCycleItem_GetListCycle,
+	StatCycleItem_GetCycleItems,
 	PlayerRecord_Created,
 	PlayerRecord_Updated,
 	PlayerRecord_Deleted,
+	PlayerRecord_GetRecords,
+	PublicPlayerRecord_GetSameRecordsFromUsers,
+	PublicPlayerRecord_GetRecord,
+	PublicPlayerRecord_Updated,
+	PublicPlayerRecord_GetOtherUserKeys,
+	PublicPlayerRecord_GetOtherUserRecords,
 	GameRecord_Created,
+	GameRecord_GetRecord,
 	GameRecord_Updated,
 	GameRecord_Deleted,
+	GameRecord_GetRecords,
+	PlayerBinaryRecord_Created,
+	PlayerBinaryRecord_GetRecord,
+	PlayerBinaryRecord_GetRecords,
+	PlayerBinaryRecord_GetSameRecordsFromUsers,
+	PlayerBinaryRecord_GetRecordsByQuery,
+	PlayerBinaryRecord_GetAll,
+	PlayerBinaryRecord_Updated,
+	PlayerBinaryRecord_Deleted,
+	GameBinaryRecord_GetRecord,
+	GameBinaryRecord_GetRecords,
+	GameBinaryRecord_GetRecordsByQuery,
 	Store_Opened,
 	Store_Closed,
 	ItemInspect_Opened,
@@ -366,6 +394,142 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemDeletedPayload : public F
 };
 
 USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemResetPayload : public FAccelByteModelsUserStatItemCreatedPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserStatItem_Reset);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemGetItemsByCodesPayload : public FAccelByteModelsUserStatItemCreatedPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserStatItem_GetItemsByCodes);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemGetSameItemsFromUsersPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+		
+	UPROPERTY()
+		FString StatCode{};
+	UPROPERTY()
+		TArray<FString> UserIds{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserStatItem_GetSameItemsFromUsers);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemGetItemsPayload : public FAccelByteModelsUserStatItemCreatedPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::UserStatItem_GetItems);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalStatItemGetItemByCodePayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+		
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString StatCode{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GlobalStatItem_GetItemByCode);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsStatCycleItemGetItemListPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+		
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString CycleId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::StatCycleItem_GetItemList);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsStatCycleItemGetConfigByCycleIdPayload : public FAccelByteModelsStatCycleItemGetItemListPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::StatCycleItem_GetConfigByCycleId);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsStatCycleItemGetListCyclePayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+		
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::StatCycleItem_GetListCycle);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsStatCycleItemGetCycleItemsPayload : public FAccelByteModelsStatCycleItemGetItemListPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		TArray<FString> StatCodes{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::StatCycleItem_GetCycleItems);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordCreatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString Key{};
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerRecord_Created);
+	}
+};
+
+USTRUCT()
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordDeletedPayload : public FAccelByteModelsPredefinedEvent
 {
 	GENERATED_BODY()
@@ -378,6 +542,95 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordDeletedPayload : public F
 	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerRecord_Deleted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerRecordGetRecordsPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		TArray<FString> Keys{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerRecord_GetRecords);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPlayerRecordGetSameRecordsFromUsersPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString Key{};
+	UPROPERTY()
+		TArray<FString> UserIds{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PublicPlayerRecord_GetSameRecordsFromUsers);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPlayerRecordGetRecordPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PublicPlayerRecord_GetRecord);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPlayerRecordUpdatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PublicPlayerRecord_Updated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPlayerRecordGetOtherUserKeysPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PublicPlayerRecord_GetOtherUserKeys);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPlayerRecordGetOtherUserRecordsPayload : public FAccelByteModelsPlayerRecordGetRecordsPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PublicPlayerRecord_GetOtherUserRecords);
 	}
 };
 
@@ -412,10 +665,44 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecordDeletedPayload : public FAc
 
 	UPROPERTY()
 		FString Key{};
+	UPROPERTY()
+		FString UserId{};
 
 	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameRecord_Deleted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecordCreatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameRecord_Created);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecordGetRecordByKeyPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameRecord_GetRecord);
 	}
 };
 
@@ -436,6 +723,181 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecordUpdatedPayload : public FAc
 	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameRecord_Updated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecordGetRecordsByKeysPayload : public FAccelByteModelsPlayerRecordGetRecordsPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameRecord_GetRecords);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerBinaryRecordCreatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerBinaryRecord_Created);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerBinaryRecordGetRecordPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerBinaryRecord_GetRecord);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerBinaryRecordGetRecordsPayload : public FAccelByteModelsPlayerRecordGetRecordsPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerBinaryRecord_GetRecords);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerBinaryRecordGetSameRecordsFromUsersPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString Key{};
+	UPROPERTY()
+		TArray<FString> UserIds{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerBinaryRecord_GetSameRecordsFromUsers);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerBinaryRecordGetRecordsByQueryPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Query{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerBinaryRecord_GetRecordsByQuery);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerBinaryRecordGetAllPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerBinaryRecord_GetAll);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerBinaryRecordRecordUpdatedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerBinaryRecord_Updated);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayerBinaryRecordDeletedPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::PlayerBinaryRecord_Deleted);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameBinaryRecordGetRecordPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Key{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameBinaryRecord_GetRecord);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameBinaryRecordGetRecordsByKeysPayload : public FAccelByteModelsPlayerRecordGetRecordsPayload
+{
+	GENERATED_BODY()
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameBinaryRecord_GetRecords);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameBinaryRecordGetRecordsByQueryPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+		FString UserId{};
+	UPROPERTY()
+		FString Query{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::GameBinaryRecord_GetRecordsByQuery);
 	}
 };
 #pragma endregion Storage

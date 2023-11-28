@@ -159,7 +159,8 @@ public:
 		, const FString& ClientSecret
 		, const THandler<FOauth2Token>& OnSuccess
 		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+		, const FString& IamUrl = TEXT("")
+		, bool bCreateHeadless = true);
 
 	/**
 	* @brief Get access token using the user's device information and its unique Id.
@@ -176,7 +177,8 @@ public:
 		, const FString& ClientSecret
 		, const THandler<FOauth2Token>& OnSuccess
 		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+		, const FString& IamUrl = TEXT("")
+		, bool bCreateHeadless = true);
 	
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -518,6 +520,22 @@ public:
 		, const THandler<FOauth2Token>& OnSuccess
 		, const FOAuthErrorHandler& OnError
 		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief This function generate a code that can be exchanged into publisher namespace token (i.e. by web portal)
+	 *
+	 * @param AccessToken Player's access token.
+	 * @param PublisherNamespace The targeted game's publisher Namespace.
+	 * @param PublisherClientID The targeted game's publisher ClientID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void GenerateCodeForPublisherTokenExchange(const FString& AccessToken,
+		const FString& PublisherNamespace,
+		const FString& PublisherClientID,
+		const THandler<FCodeForTokenExchangeResponse>& OnSuccess,
+		const FErrorHandler& OnError,
+		const FString& IamUrl = TEXT(""));
 
 private:
 	Oauth2() = delete; // static class can't have instance

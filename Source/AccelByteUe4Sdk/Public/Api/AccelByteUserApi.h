@@ -107,7 +107,8 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void LoginWithDeviceId(const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, bool bCreateHeadless = true);
 
 	/**
 	 * @brief Log in with device ID (anonymous log in).
@@ -115,7 +116,9 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FOAuthErrorHandler& OnError);
+	void LoginWithDeviceId(const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, bool bCreateHeadless = true);
 
 	/**
 	 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
@@ -883,11 +886,13 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief This function for update user account info within the game.
+	 * @brief DEPRECATED: This function is no longer supported and will be removed in future releases.
+	 * This function for update user account info within the game.
 	 *
 	 * @param UpdateRequest The data you want to update. for DateOfBirth, the format is YYYY-MM-DD.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 	 * @param OnError This will be called when the operation failed.
+	 * Please use UpdateUser instead.
 	 */
 	void UpdateUserV3(FUserUpdateRequest UpdateRequest
 		, const THandler<FAccountUserData>& OnSuccess
@@ -945,6 +950,17 @@ public:
 	void GenerateGameToken(const FString& Code,
 		const FVoidHandler& OnSuccess,
 		const FOAuthErrorHandler & OnError);
+	
+	/**
+	 * @brief This function generate a code that can be exchanged into publisher namespace token (i.e. by web portal)
+	 *
+	 * @param PublisherClientID The targeted game's publisher ClientID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GenerateCodeForPublisherTokenExchange(const FString& PublisherClientID,
+		const THandler<FCodeForTokenExchangeResponse>& OnSuccess,
+		const FErrorHandler & OnError);
 
 	/**
 	 * @brief This function for link headless account to current full account.

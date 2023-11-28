@@ -36,6 +36,7 @@ public:
 	FString CloudSaveServerUrl{};
 	FString GameTelemetryServerUrl{};
 	FString AchievementServerUrl{};
+	FString UGCServerUrl{};
 	FString SessionBrowserServerUrl{};
 	FString SeasonPassServerUrl{};
 	FString MatchmakingV2ServerUrl{};

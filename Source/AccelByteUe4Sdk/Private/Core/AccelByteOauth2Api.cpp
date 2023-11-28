@@ -164,7 +164,8 @@ void Oauth2::GetTokenWithDeviceId(const FString& ClientId
 	, const FString& ClientSecret
 	, const THandler<FOauth2Token>& OnSuccess
 	, const FErrorHandler& OnError
-	, const FString& IamUrl)
+	, const FString& IamUrl
+	, bool bCreateHeadless)
 {
 	GetTokenWithDeviceId(ClientId
 		, ClientSecret
@@ -174,22 +175,28 @@ void Oauth2::GetTokenWithDeviceId(const FString& ClientId
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			})
-		, IamUrl);
+		, IamUrl
+		, bCreateHeadless);
 }
 
 void Oauth2::GetTokenWithDeviceId(const FString& ClientId
 	, const FString& ClientSecret 
 	, const THandler<FOauth2Token>& OnSuccess
 	, const FOAuthErrorHandler& OnError
-	, const FString& IamUrl)
+	, const FString& IamUrl
+	, bool bCreateHeadless)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/v3/oauth/platforms/device/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+	const FString Url = FString::Printf(TEXT("%s/v3/oauth/platforms/device/token?createHeadless=%s")
+		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl, bCreateHeadless ? TEXT("true") : TEXT("false"));
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret);
-	Request->SetContentAsString(FString::Printf(TEXT("device_id=%s"), *FGenericPlatformHttp::UrlEncode(*FAccelByteUtilities::GetDeviceId())));
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("device_id"), *FGenericPlatformHttp::UrlEncode(*FAccelByteUtilities::GetDeviceId())},
+		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
+		}, TEXT(""));
+	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
 }
@@ -229,9 +236,10 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	const FString Url = FString::Printf(TEXT("%s/v3/oauth/platforms/%s/token")
+	const FString Url = FString::Printf(TEXT("%s/v3/oauth/platforms/%s/token?createHeadless=%s")
 		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl
-		, *PlatformId);
+		, *PlatformId
+		, bCreateHeadless ? TEXT("true") : TEXT("false"));
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret);
 	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
@@ -592,5 +600,23 @@ void Oauth2::GenerateGameToken(const FString& ClientId
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
 }
 
+void Oauth2::GenerateCodeForPublisherTokenExchange(const FString& AccessToken
+	,const FString& PublisherNamespace
+	,const FString& PublisherClientID
+	,const THandler<FCodeForTokenExchangeResponse>& OnSuccess
+	,const FErrorHandler& OnError
+	,const FString& IamUrl)
+{
+	FReport::Log(FString(__FUNCTION__));
+	const FString Url = FString::Printf(TEXT("%s/v3/namespace/%s/token/request")
+		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl
+		, *PublisherNamespace);
+
+	FHttpRequestPtr Request = ConstructTokenRequest(Url, TEXT(""), TEXT(""));
+	Request->SetHeader(TEXT("Authorization"), TEXT("Bearer " + AccessToken));
+	Request->SetContentAsString(FString::Printf(TEXT("client_id=%s"), *PublisherClientID));
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
 } // Namespace Api
 } // Namespace AccelByte

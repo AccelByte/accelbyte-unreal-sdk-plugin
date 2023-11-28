@@ -58,6 +58,7 @@ namespace GameServerApi
 	class ServerOauth2;
 	class ServerDSM;
 	class ServerStatistic;
+	class ServerUGC;
 	class ServerEcommerce;
 	class ServerQosManager;
 	class ServerGameTelemetry;
@@ -123,6 +124,7 @@ public:
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;
+	static GameServerApi::ServerUGC ServerUGC;
 	static GameServerApi::ServerEcommerce ServerEcommerce;
 	static GameServerApi::ServerQosManager ServerQosManager;
 	static GameServerApi::ServerGameTelemetry ServerGameTelemetry;

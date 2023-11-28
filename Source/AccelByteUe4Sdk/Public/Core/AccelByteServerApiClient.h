@@ -21,6 +21,7 @@
 #include "GameServerApi/AccelByteServerSeasonPassApi.h"
 #include "GameServerApi/AccelByteServerSessionBrowserApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
+#include "GameServerApi/AccelByteServerUGCApi.h"
 #include "GameServerApi/AccelByteServerUserApi.h"
 #include "GameServerApi/AccelByteServerSessionApi.h"
 #include "Core/AccelByteServerCredentials.h"
@@ -59,6 +60,7 @@ public:
 	GameServerApi::ServerSeasonPass ServerSeasonPass{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerSessionBrowser ServerSessionBrowser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerStatistic ServerStatistic{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerUGC ServerUGC{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerUser ServerUser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerSession ServerSession{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerDSHub ServerDSHub{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };

@@ -228,6 +228,13 @@ public:
 		int32 Offset = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void SearchAllContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+		, FDModelsUGCSearchContentsPagingResponse const& OnSuccess
+		, FDErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void UpdateLikeStatusToContent(const FString& ContentId,
 		bool bLikeStatus,
 		FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
@@ -260,6 +267,14 @@ public:
 		EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE,
 		EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC,
 		int32 Limit = 1000,
+		int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void SearchContentsByChannelId(FString const& ChannelId,
+		FAccelByteModelsUGCSearchContentsRequest const& Request,
+		FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 Limit = 20,
 		int32 Offset = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")

@@ -62,6 +62,8 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	AchievementServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("AchievementServerUrl"), BaseUrl, TEXT("achievement"));
 
+	UGCServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("UGCServerUrl"), BaseUrl, TEXT("ugc"));
+
 	MatchmakingServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("MatchmakingServerUrl"), BaseUrl, TEXT("matchmaking"));
 
 	LobbyServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("LobbyServerUrl"), BaseUrl, TEXT("lobby"));
@@ -236,6 +238,11 @@ FString UAccelByteBlueprintsServerSettings::GetAchievementServerUrl()
 	return FRegistry::ServerSettings.AchievementServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetUGCServerUrl()
+{
+	return FRegistry::ServerSettings.UGCServerUrl;
+}
+
 FString UAccelByteBlueprintsServerSettings::GetMatchmakingServerUrl()
 {
 	return FRegistry::ServerSettings.MatchmakingServerUrl;
@@ -354,6 +361,11 @@ void UAccelByteBlueprintsServerSettings::SetGameTelemetryServerUrl(const FString
 void UAccelByteBlueprintsServerSettings::SetAchievementServerUrl(const FString& AchievementServerUrl)
 {
 	FRegistry::ServerSettings.AchievementServerUrl = AchievementServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetUGCServerUrl(const FString& UGCServerUrl)
+{
+	FRegistry::ServerSettings.UGCServerUrl = UGCServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetMatchmakingServerUrl(const FString& MatchmakingServerUrl)

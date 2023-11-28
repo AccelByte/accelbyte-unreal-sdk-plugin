@@ -489,18 +489,52 @@ void UGC::SearchContents(const FString& Name
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
-		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
+		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy) },
 		{ TEXT("name"), Name },
 		{ TEXT("creator"), Creator },
 		{ TEXT("type"), Type },
 		{ TEXT("subtype"), Subtype },
-		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false")},
+		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false") },
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
+		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("userId"), UserId }
 	};
 
 	for (const auto& Tag : Tags)
+	{
+		QueryParams.AddUnique(TEXT("tags"), Tag);
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void UGC::SearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+	, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMultiMap<FString, FString> QueryParams {
+		{ TEXT("sortby"), ConvertUGCSortByToString(Request.SortBy) },
+		{ TEXT("orderby"), ConvertUGCOrderByToString(Request.OrderBy)  },
+		{ TEXT("name"), Request.Name },
+		{ TEXT("creator"), Request.Creator },
+		{ TEXT("type"), Request.Type },
+		{ TEXT("subtype"), Request.Subtype },
+		{ TEXT("isofficial"), Request.bIsOfficial ? TEXT("true") : TEXT("false")},
+		{ TEXT("ishidden"), Request.bIsHidden ? TEXT("true") : TEXT("false")},
+		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
+		{ TEXT("userId"), Request.UserId }
+	};
+
+	for (const auto& Tag : Request.Tags)
 	{
 		QueryParams.AddUnique(TEXT("tags"), Tag);
 	}
@@ -581,7 +615,7 @@ void UGC::UpdateFollowStatusToUser(const FString& UserId
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 	
-void UGC::SearchContentsSpecificToChannel(const FString& ChannelId 
+void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 	, const FString& Name
 	, const FString& Creator
 	, const FString& Type
@@ -595,7 +629,7 @@ void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 	, EAccelByteUgcOrderBy OrderBy
 	, int32 Limit
 	, int32 Offset
-	)
+)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -606,18 +640,66 @@ void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
-		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
+		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy) },
 		{ TEXT("name"), Name },
 		{ TEXT("creator"), Creator },
 		{ TEXT("type"), Type },
 		{ TEXT("subtype"), Subtype },
-		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false")},
+		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false") },
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
+		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("userId"), UserId }
 	};
 
 	for (const auto& Tag : Tags)
+	{
+		QueryParams.AddUnique(TEXT("tags"), Tag);
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+	
+void UGC::SearchContentsSpecificToChannel(FString const& ChannelId
+	, FAccelByteModelsUGCSearchContentsRequest const& Request
+	, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChannelId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
+		return;
+	}
+	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
+	{
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/channels/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *ChannelId);
+
+	TMultiMap<FString, FString> QueryParams {
+		{ TEXT("sortby"), ConvertUGCSortByToString(Request.SortBy) },
+		{ TEXT("orderby"), ConvertUGCOrderByToString(Request.OrderBy)  },
+		{ TEXT("name"), Request.Name },
+		{ TEXT("creator"), Request.Creator },
+		{ TEXT("type"), Request.Type },
+		{ TEXT("subtype"), Request.Subtype },
+		{ TEXT("isofficial"), Request.bIsOfficial ? TEXT("true") : TEXT("false")},
+		{ TEXT("ishidden"), Request.bIsHidden ? TEXT("true") : TEXT("false")},
+		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
+		{ TEXT("userId"), Request.UserId }
+	};
+
+	for (const auto& Tag : Request.Tags)
 	{
 		QueryParams.AddUnique(TEXT("tags"), Tag);
 	}
@@ -999,7 +1081,7 @@ void UGC::GetContentByContentIdV2(FString const& ContentId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1065,7 +1147,7 @@ void UGC::DeleteContentV2(FString const& ChannelId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1106,7 +1188,7 @@ void UGC::ModifyContentV2(FString const& ChannelId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1152,7 +1234,7 @@ void UGC::GenerateUploadContentURLV2(FString const& ChannelId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1204,7 +1286,7 @@ void UGC::UpdateContentFileLocationV2(FString const& ChannelId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1272,7 +1354,7 @@ void UGC::UpdateContentScreenshotV2(FString const& ContentId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1305,7 +1387,7 @@ void UGC::UploadContentScreenshotV2(FString const& ContentId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1338,7 +1420,7 @@ void UGC::DeleteContentScreenshotV2(FString const& ContentId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1376,7 +1458,7 @@ void UGC::AddDownloadContentCountV2(FString const& ContentId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1406,7 +1488,7 @@ void UGC::GetListContentDownloaderV2(FString const& ContentId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1446,7 +1528,7 @@ void UGC::GetListContentLikerV2(FString const& ContentId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
@@ -1479,7 +1561,7 @@ void UGC::UpdateLikeStatusToContentV2(FString const& ContentId
 		return;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ContentId)
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
 		return;
