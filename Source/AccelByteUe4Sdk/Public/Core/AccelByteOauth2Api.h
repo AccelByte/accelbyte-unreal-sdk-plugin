@@ -537,6 +537,24 @@ public:
 		const FErrorHandler& OnError,
 		const FString& IamUrl = TEXT(""));
 
+	/**
+	 * @brief This function is used for retrieving third party platform token for user that login using third party,
+	 * if user have not link requested platform in game namespace, will try to retrieving third party platform token from publisher namespace.
+	 * Passing platform group name or it's member will return same access token that can be used across the platform members.
+	 * Note: The third party platform and platform group covered for this is:
+	 *    (psn) ps4web, (psn) ps4, (psn) ps5, epicgames, twitch, awscognito.
+	 * @param UserId UserId.
+	 * @param PlatformType Platform type value.
+	 * @param Authorization Authorization.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FThirdPartyPlatformTokenData.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void RetrieveUserThirdPartyPlatformToken(const FString& UserId
+		, const FString& PlatformId
+		, const FString& Authorization
+		, const THandler<FThirdPartyPlatformTokenData>& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
 private:
 	Oauth2() = delete; // static class can't have instance
 	Oauth2(Oauth2 const&) = delete;

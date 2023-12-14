@@ -28,7 +28,7 @@ class ACCELBYTEUE4SDK_API ServerGameTelemetry : public FServerApiBase
 {
 public:
 	ServerGameTelemetry(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
-	~ServerGameTelemetry();
+	virtual ~ServerGameTelemetry();
 
 	/**
 	 * @brief Set the interval of sending telemetry event to the backend.
@@ -86,6 +86,8 @@ private:
 	
 	bool PeriodicTelemetry(float DeltaTime);
 
+	const FString GetEventNamespace();
+
 	ServerGameTelemetry() = delete;
 	ServerGameTelemetry(ServerGameTelemetry const&) = delete;
 	ServerGameTelemetry(ServerGameTelemetry&&) = delete;
@@ -97,6 +99,7 @@ private:
 	const FTimespan MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;
 	FDelegateHandleAlias GameTelemetryTickDelegateHandle;
+	FString EventNamespace;
 };
 
 } // Namespace Api

@@ -88,6 +88,27 @@ bool FMultiRegistry::RemoveServerApiClient(const FString &Key)
 	return bResult;
 }
 
+void FMultiRegistry::Shutdown()
+{
+	TArray<FString> ApiClientKeys{};
+	ApiClientInstances.GenerateKeyArray(ApiClientKeys);
+	ApiClientKeys.Remove(TEXT("default"));
+	for (const auto& Key : ApiClientKeys)
+	{
+		const auto& TempApiClient = GetApiClient(Key);
+		RemoveApiClient(Key);
+	}
+
+	TArray<FString> ServerApiClientKeys{};
+	ServerApiClientInstances.GenerateKeyArray(ServerApiClientKeys);
+	ServerApiClientKeys.Remove(TEXT("default"));
+	for (const auto& Key : ServerApiClientKeys)
+	{
+		const auto& TempApiClient = GetServerApiClient(Key);
+		RemoveServerApiClient(Key);
+	}
+}
+
 TMap<FString, FApiClientPtr> FMultiRegistry::ApiClientInstances;
 TMap<FString, FServerApiClientPtr> FMultiRegistry::ServerApiClientInstances;
 

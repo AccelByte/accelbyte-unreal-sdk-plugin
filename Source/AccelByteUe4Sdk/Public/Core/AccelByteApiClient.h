@@ -44,6 +44,7 @@
 #include "Core/AccelByteApiBase.h"
 #include "Api/AccelByteStoreDisplayApi.h"
 #include "Api/AccelBytePredefinedEventApi.h"
+#include "Api/AccelByteGameStandardEventApi.h"
 
 namespace AccelByte
 {
@@ -95,6 +96,7 @@ public:
 	Api::GDPR GDPR{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::PresenceBroadcastEvent PresenceBroadcastEvent{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::PredefinedEvent PredefinedEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::GameStandardEvent GameStandardEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)

@@ -17,6 +17,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCResponse, FAccelByteModelsUGCRespon
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCContentResponse, FAccelByteModelsUGCContentResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCBulkContentResponse, TArray<FAccelByteModelsUGCContentResponse>, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCPreviewResponse, FAccelByteModelsUGCPreview, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayUint8, TArray<uint8>, Response);
@@ -394,7 +396,44 @@ public:
 		bool bLikeStatus,
 		FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
-		
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void ModifyContentByShareCode(FString const& ChannelId,
+		FString const& ShareCode,
+		FAccelByteModelsUGCUpdateRequest const& ModifyRequest,
+		FDModelsUGCResponse const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void DeleteContentByShareCode(FString const& ChannelId,
+		FString const& ShareCode,
+		FDHandler const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void BulkGetContentByShareCode(const TArray<FString>& ShareCodes, 
+		FDModelsUGCBulkContentResponse const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void BulkGetContentByShareCodeV2(const TArray<FString>& ShareCodes, 
+		FDModelsUGCBulkContentResponseV2 const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void ModifyContentShareCode(FString const& ChannelId,
+		FString const& ContentId,
+		FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest,
+		FDModelsUGCResponse const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void ModifyContentShareCodeV2(FString const& ChannelId,
+		FString const& ContentId,
+		FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest,
+		FDModelsUGCCreateUGCResponseV2 const& OnSuccess,
+		FDErrorHandler const& OnError);
+
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;
 };

@@ -51,3 +51,42 @@ void UABServerUGC::SearchContentsSpecificToChannel(FString const& ChannelId,
 		Limit, Offset
 	);
 }
+
+void UABServerUGC::ModifyContentByShareCode(FString const& UserId,
+	FString const& ChannelId,
+	FString const& ShareCode,
+	FAccelByteModelsUGCUpdateRequest const& ModifyRequest,
+	FDModelsUGCServerResponse const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->ServerUGC.ModifyContentByShareCode(UserId, ChannelId, ShareCode, ModifyRequest,
+		THandler<FAccelByteModelsUGCResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABServerUGC::DeleteContentByShareCode(FString const& UserId,
+	FString const& ChannelId,
+	FString const& ShareCode,
+	FDHandler const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->ServerUGC.DeleteContentByShareCode(UserId, ChannelId, ShareCode,FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}

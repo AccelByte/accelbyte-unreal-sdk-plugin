@@ -1764,7 +1764,7 @@ FString Lobby::GenerateMessageID(const FString& Prefix) const
 {
 	return FString::Printf(TEXT("%s-%d"), *Prefix, FMath::RandRange(1000, 9999));
 }
-
+ 
 void Lobby::CreateWebSocket(const FString& Token)
 {
 	if(WebSocket.IsValid())
@@ -1786,6 +1786,8 @@ void Lobby::CreateWebSocket(const FString& Token)
 	{
 		Headers.Add("Entitlement", Token);
 	}
+	FAccelByteUtilities::AppendModulesVersionToMap(Headers);
+
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 
 	WebSocket = AccelByteWebSocket::Create(*SettingsRef.LobbyServerUrl

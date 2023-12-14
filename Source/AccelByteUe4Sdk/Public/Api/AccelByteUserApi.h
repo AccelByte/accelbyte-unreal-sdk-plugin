@@ -990,7 +990,20 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void CheckUserAccountAvailability(const FString& DisplayName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-	
+
+	/**
+	 * @brief This function is used for retrieving third party platform token for user that login using third party,
+	 * if user have not link requested platform in game namespace, will try to retrieving third party platform token from publisher namespace.
+	 * Passing platform group name or it's member will return same access token that can be used across the platform members.
+     * Note: The third party platform and platform group covered for this is:
+     *    (psn) ps4web, (psn) ps4, (psn) ps5, epicgames, twitch, awscognito.
+	 * @param PlatformType Platform type value.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FThirdPartyPlatformTokenData.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& PlatformType,
+		const THandler<FThirdPartyPlatformTokenData>& OnSuccess, const FOAuthErrorHandler& OnError);
+		
 private:
 	User() = delete;
 	User(User const&) = delete;
@@ -1028,15 +1041,16 @@ private:
 
 	/**
 	 * @brief Saving chached token as a file to Local Data Storage.
-	 * This functionality is working on Windows Platform only at the moment
+	 * This functionality is working on Windows Platform, MAC and Linux only at the moment. 
 	 *
 	 * @param CachedTokenKey The cached token key.
 	 * @param RefreshToken The refresh token.
 	 * @param ExpireDate The expire date 
 	 */
-	void SavingCachedTokenToLocalDataStorage(const FString& CachedTokenKey
+	void SaveCachedTokenToLocalDataStorage(const FString& CachedTokenKey
 		, const FString& RefreshToken
 		, FDateTime ExpireDate);
+	 
 };
 
 } // Namespace Api

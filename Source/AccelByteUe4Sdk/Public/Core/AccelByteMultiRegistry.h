@@ -19,7 +19,8 @@ public:
 	static bool RegisterApiClient(FString const& Key, FApiClientPtr ApiClient);
 	static bool RemoveApiClient(const FString& Key = FString(TEXT("default")));
 	static bool RemoveServerApiClient(const FString& Key = FString(TEXT("default")));
-	
+	static void Shutdown();
+
 private:
 	static TMap<FString, FApiClientPtr> ApiClientInstances;
 	static TMap<FString, FServerApiClientPtr> ServerApiClientInstances;

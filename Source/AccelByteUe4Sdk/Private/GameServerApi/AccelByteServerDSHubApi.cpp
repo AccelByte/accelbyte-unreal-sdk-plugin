@@ -135,6 +135,7 @@ void ServerDSHub::CreateWebSocket()
 	Headers.Add(DSHubServerNameHeader, BoundServerName);
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 
+	FAccelByteUtilities::AppendModulesVersionToMap(Headers);
 	WebSocket = AccelByteWebSocket::Create(*ServerSettingsRef.DSHubServerUrl,
 		TEXT("wss"),
 		ServerCredentialsRef,

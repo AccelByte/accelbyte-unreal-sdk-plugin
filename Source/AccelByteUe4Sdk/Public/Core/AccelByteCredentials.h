@@ -26,6 +26,7 @@ class ACCELBYTEUE4SDK_API Credentials : public BaseCredentials
 {
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoginSuccessDelegate, const FOauth2Token& /*Response*/);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshTokenAdditionalActions, bool);
+	DECLARE_MULTICAST_DELEGATE(FOnLogoutSuccessDelegate);
 
 public:
 	using BaseCredentials::SetClientCredentials;
@@ -35,6 +36,9 @@ public:
 
 	/** @brief The user was just authed: At this point, Credential auth tokens are already set. */
 	FOnLoginSuccessDelegate& OnLoginSuccess();
+
+	/** @brief The user was just Logged out : At this point, Credential auth tokens are already removed. */
+	FOnLogoutSuccessDelegate& OnLogoutSuccess();
 	
 	/** @brief Forgets post-auth info, but pre-auth (such as setting email) will remain. */
 	virtual void ForgetAll() override;
@@ -48,7 +52,9 @@ public:
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
 	void SetErrorOAuth(const FErrorOAuthInfo& ErrorOAuthInfo);
 	void SetAccountUserData(const FAccountUserData& InAccountUserData);
-
+	void SetThridPartyPlatformTokenData(const FString& PlatformId, const FThirdPartyPlatformTokenData& ThirdPartyPlatformTokenData);
+	void ClearThridPartyPlatformTokenData();
+		
 	const FOauth2Token& GetAuthToken() const;
 	const FString& GetRefreshToken() const;
 	virtual const FString& GetAccessToken() const override;
@@ -60,7 +66,8 @@ public:
 	const FString& GetUserName() const;
 	const FString& GetLinkingToken() const;
 	const FAccountUserData& GetAccountUserData() const;
-	
+	const TMap<FString, FThirdPartyPlatformTokenData>& GetThridPartyPlatformTokenData() const;
+
 	bool IsSessionValid() const;
 	bool IsComply() const;
 
@@ -72,8 +79,10 @@ private:
 	
 	FString UserName;
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
-	FOnLoginSuccessDelegate LoginSuccessDelegate;
+	FOnLoginSuccessDelegate LoginSuccessDelegate{};
+	FOnLogoutSuccessDelegate LogoutSuccessDelegate{};
 	FAccountUserData AccountUserData;
+	TMap<FString, FThirdPartyPlatformTokenData> ThirdPartyPlatformTokenData;
 
 	static const FString DefaultSection;
 

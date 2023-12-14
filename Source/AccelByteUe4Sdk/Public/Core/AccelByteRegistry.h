@@ -51,6 +51,7 @@ namespace Api
 	class StoreDisplay;
 	class GDPR;
 	class PredefinedEvent;
+	class GameStandardEvent;
 }
 
 namespace GameServerApi
@@ -76,6 +77,7 @@ namespace GameServerApi
 	class ServerAMS;
 	class ServerMetricExporter;
 	class ServerPredefinedEvent;
+	class ServerGameStandardEvent;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -121,6 +123,7 @@ public:
 	static Api::StoreDisplay StoreDisplay;
 	static Api::GDPR GDPR;
 	static Api::PredefinedEvent PredefinedEvent;
+	static Api::GameStandardEvent GameStandardEvent;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;
@@ -142,6 +145,7 @@ public:
 	static GameServerApi::ServerAMS ServerAMS;
 	static GameServerApi::ServerMetricExporter ServerMetricExporter;
 	static GameServerApi::ServerPredefinedEvent ServerPredefinedEvent;
+	static GameServerApi::ServerGameStandardEvent ServerGameStandardEvent;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

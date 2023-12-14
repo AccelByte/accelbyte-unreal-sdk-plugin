@@ -58,6 +58,38 @@ public:
 		, int32 Limit = 20
 		, int32 Offset = 0);
 
+	/**
+	 * @brief Modify existing content to update some information by share code.
+	 *
+	 * @param UserId The user id who modify the Content.
+	 * @param ChannelId The id of the content's channel.
+	 * @param ShareCode The share code of the content that will be fetched.
+	 * @param ModifyRequest Detail information for the content request that will be modified.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ModifyContentByShareCode(FString const& UserId
+		, FString const& ChannelId
+		, FString const& ShareCode
+		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete a content based on the its channel id and share code.
+	 *
+	 * @param UserId The user id who delete the Content.
+	 * @param ChannelId The id of the content's channel.
+	 * @param ShareCode The share code of the content that will be fetched.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void DeleteContentByShareCode(FString const& UserId
+		, FString const& ChannelId
+		, FString const& ShareCode
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	ServerUGC() = delete;
 	ServerUGC(ServerUGC const&) = delete;

@@ -97,7 +97,6 @@ void AccelByteWebSocket::SetupWebSocket()
 	{
 		Headers.Add("Authorization", "Bearer " + ServerCreds->GetClientAccessToken());
 	}
-
 	WebSocket = WebSocketFactory->CreateWebSocket(Url, Protocol, Headers);
 
 	WebSocket->OnMessage().AddRaw(this, &AccelByteWebSocket::OnMessageReceived);

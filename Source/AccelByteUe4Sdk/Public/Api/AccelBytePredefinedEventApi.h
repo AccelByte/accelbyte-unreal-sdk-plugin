@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Containers/Queue.h"
 #include "Containers/Set.h"
-#include "Api/AccelByteGameTelemetryApi.h"
+#include "Api/AccelByteBaseAnalyticsApi.h"
 #include "Core/AccelByteSettings.h"
 #include "Models/AccelBytePredefinedEventModels.h"
 
@@ -21,25 +21,25 @@ namespace Api
 /**
  * @brief Send predefined telemetry data securely and the user should be logged in first.
  */
-class ACCELBYTEUE4SDK_API PredefinedEvent : public GameTelemetry
+class ACCELBYTEUE4SDK_API PredefinedEvent : public BaseAnalytics
 {
 public:
 	PredefinedEvent(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
-	~PredefinedEvent();
 
 	/**
 	 * @brief Send/enqueue a single authorized telemetry data of a predefined event.
 	 * User should be logged in.
 	 *
-	 * @param EventNamespace Namespace of the event.
-	 * @param EventName Name of the event.
 	 * @param Payload The data to be send, each event expected to have different payload body, see Models/AccelBytePredefinedEventModels.h
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param ClientTimestamp Timestamp when the event is triggered, the default will be FDateTime::UtcNow()
 	 */
 	template<typename T>
-	void SendPredefinedEventData(const TSharedRef<T>& Payload, FVoidHandler const& OnSuccess, FErrorHandler const& OnError, FDateTime const& ClientTimestamp = FDateTime::UtcNow())
+	void SendPredefinedEventData(const TSharedRef<T>& Payload, 
+									FVoidHandler const& OnSuccess, 
+									FErrorHandler const& OnError, 
+									FDateTime const& ClientTimestamp = FDateTime::UtcNow())
 	{
 		if (!SettingsRef.bSendPredefinedEvent)
 		{
@@ -55,37 +55,16 @@ public:
 		else
 		{
 			Payload->PreDefinedEventName = Payload->GetPreDefinedEventName();
-			const TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(Payload.Get());
-			if (JsonObject.IsValid())
-			{
-				FAccelByteModelsTelemetryBody Body;
-				Body.EventNamespace = GetEventNamespace();
-				Body.EventName = EventName;
-				Body.Payload = JsonObject;
-				Body.ClientTimestamp = ClientTimestamp;
-
-				Send(Body, OnSuccess, OnError);
-			}
-			else
-			{
-				OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::InvalidRequest, TEXT("Failed to convert UStruct to Json!"));
-				return;
-			}
+			SendEventData(Payload, OnSuccess, OnError, ClientTimestamp);
 		}
 	}
 
-	void SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedEventPayload>& Payload, FVoidHandler const& OnSuccess, FErrorHandler const& OnError, FDateTime const& ClientTimestamp = FDateTime::UtcNow());
-
-protected:
-	const FString GetEventNamespace();
-	const FString EventName = TEXT("PreDefinedEvent");
+	void SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedPredefinedEventPayload>& Payload, 
+									FVoidHandler const& OnSuccess, 
+									FErrorHandler const& OnError, 
+									FDateTime const& ClientTimestamp = FDateTime::UtcNow());
 
 private:
-	using GameTelemetry::SetImmediateEventList;
-	using GameTelemetry::Send;
-	using FApiBase::CredentialsRef;
-	FString EventNamespace;
-
 	PredefinedEvent() = delete;
 	PredefinedEvent(PredefinedEvent const&) = delete;
 	PredefinedEvent(PredefinedEvent&&) = delete;

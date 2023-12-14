@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/SecureHash.h"
 #include "Misc/Base64.h"
+#include "Interfaces/IPluginManager.h"
 
 using namespace AccelByte;
 
@@ -337,11 +338,13 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 		return "snapchat";
 	case EAccelBytePlatformType::EAOrigin:
 		return "eaorigin";
+	case EAccelBytePlatformType::PS4Web:
+		return "ps4web";
 	default:
 		return "unknown";
 	}
 }
-
+ 
 FString FAccelByteUtilities::GetAuthenticatorString(EAccelByteLoginAuthFactorType Authenticator)
 {
 	switch (Authenticator)
@@ -1056,6 +1059,35 @@ bool FAccelByteUtilities::IsLanguageUseCommaDecimalSeparator()
 bool FAccelByteUtilities::IsAccelByteIDValid(FString const& AccelByteId, EAccelByteIdHypensRule HypenRule)
 {
 	return FAccelByteIdValidator::IsAccelByteIdValid(AccelByteId);
+}
+
+void FAccelByteUtilities::AppendModulesVersionToMap(TMap<FString, FString>& Headers)
+{
+	// Append AccelByteUe4SdkPlugin Version 
+	const FString AccelByteUe4SdkPluginName = TEXT("AccelByteUe4Sdk");
+	TSharedPtr<IPlugin> const AccelByteUe4SdkPlugin = IPluginManager::Get().FindPlugin(AccelByteUe4SdkPluginName);
+	if (AccelByteUe4SdkPlugin.IsValid())
+	{
+		const FPluginDescriptor& Descriptor = AccelByteUe4SdkPlugin->GetDescriptor();
+		const FString AccelByteUe4SdkPluginVersion = Descriptor.VersionName;
+		Headers.Add(TEXT("AccelByte-SDK-Version"), AccelByteUe4SdkPluginVersion);
+	}
+
+	// Append OnlineSubsystemAccelBytePlugin Version
+	const FString OnlineSubsystemAccelBytePluginName = TEXT("OnlineSubsystemAccelByte");
+	TSharedPtr<IPlugin> const OnlineSubsystemAccelBytePlugin = IPluginManager::Get().FindPlugin(OnlineSubsystemAccelBytePluginName);
+	if (OnlineSubsystemAccelBytePlugin.IsValid())
+	{
+		const FPluginDescriptor& Descriptor = OnlineSubsystemAccelBytePlugin->GetDescriptor();
+		const FString OnlineSubsystemAccelBytePluginVersion = Descriptor.VersionName;
+		Headers.Add(TEXT("AccelByte-OSS-Version"), OnlineSubsystemAccelBytePluginVersion);
+	}
+
+	// Append Game Project Version
+	FString ProjectVersion = TEXT("");
+	GConfig->GetString(TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+		TEXT("ProjectVersion"), ProjectVersion, GGameIni);
+	Headers.Add(TEXT("Game-Client-Version"), ProjectVersion);
 }
 
 EAccelByteCurrentServerManagementType FAccelByteUtilities::GetCurrentServerManagementType()

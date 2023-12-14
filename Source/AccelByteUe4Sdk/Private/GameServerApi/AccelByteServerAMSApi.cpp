@@ -112,6 +112,7 @@ void ServerAMS::CreateWebSocket()
 		AMSWatchdogUrl = ServerSettingsRef.AMSServerWatchdogUrl;
 	}
 
+	FAccelByteUtilities::AppendModulesVersionToMap(Headers);
 	WebSocket = AccelByteWebSocket::Create(*AMSWatchdogUrl,
 		TEXT("ws"),
 		ServerCredentialsRef,

@@ -245,3 +245,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedGetAdminUserRecordKeysRespon
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedGetAdminUserRecordSizeResponse")
 	FAccelByteModelsPaging Paging {};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsReplaceUserRecordResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | ReplaceUserRecordResponse")
+	FDateTime Updated_At{0};
+};

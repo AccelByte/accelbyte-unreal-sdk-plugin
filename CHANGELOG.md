@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.7.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.7.0%0D24.6.0) (2023-12-14)
+
+
+### Features
+
+* Add SDK version in the connection headers of all the Websocket API. ([8d334dc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8d334dc522fba269a8554f2b2ead076c2977271c))
+* adjust concurrent record endpoint behavior ([fb17510](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fb17510df9330af5cc8f733921513e2ae2bd0a38))
+* **analytics:** refactor predefinedEvent, adding base analytics api ([c8b490d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c8b490df3b863eade265c218a46ecdff9de8574e))
+* **chatv2:** add more information in FSystemMessageNotifMessage ([d7a34e3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d7a34e3eff9aaf972b9441b0f53662d621475266))
+* expose public bulk get content by sharecode ([5437a8c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5437a8c9baf8d5931392e2292cf81d23246e3bcd))
+* expose public endpoint for updating content share code ([0575ea4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0575ea4520eb6607ed69c6c82f213e4ce5d0768d))
+* Expose UGC ModifyContent and DeleteContent by shareCode ([1b2551a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1b2551a71827989913d384e164b8123181dba4b2))
+* Exposed RetrieveUserThirdPartyPlatformToken ([2d6ccc9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2d6ccc96d8a814aca22b55a11d8e51a183f60601))
+
 ## [24.6.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.6.0%0D24.5.0) (2023-11-28)
 
 

@@ -28,6 +28,7 @@ Credentials::Credentials()
 Credentials::~Credentials()
 {
 	LoginSuccessDelegate.Clear();
+	LogoutSuccessDelegate.Clear();
 }
 
 const FString Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
@@ -224,6 +225,11 @@ const FAccountUserData& Credentials::GetAccountUserData() const
 	return AccountUserData;
 }
 
+const TMap<FString, FThirdPartyPlatformTokenData>& Credentials::GetThridPartyPlatformTokenData() const
+{
+	return ThirdPartyPlatformTokenData;
+}
+
 void Credentials::PollRefreshToken(double CurrentTime)
 {
 	switch (SessionState)
@@ -325,10 +331,25 @@ void Credentials::SetAccountUserData(const FAccountUserData& InAccountUserData)
 {
 	AccountUserData = InAccountUserData;
 }
+
+void Credentials::SetThridPartyPlatformTokenData(const FString& PlatformId, const FThirdPartyPlatformTokenData& InThirdPartyPlatformTokenData)
+{
+	ThirdPartyPlatformTokenData.Emplace(PlatformId, InThirdPartyPlatformTokenData);
+}
 	
+void Credentials::ClearThridPartyPlatformTokenData()
+{
+	ThirdPartyPlatformTokenData.Empty();
+}
+
 Credentials::FOnLoginSuccessDelegate& Credentials::OnLoginSuccess()
 {
 	return LoginSuccessDelegate;
+}
+
+Credentials::FOnLogoutSuccessDelegate& Credentials::OnLogoutSuccess()
+{
+	return LogoutSuccessDelegate;
 }
 
 void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)

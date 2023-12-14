@@ -414,6 +414,8 @@ public:
 	static bool IsLanguageUseCommaDecimalSeparator();
 	static bool IsAccelByteIDValid(FString const& AccelByteId, EAccelByteIdHypensRule HypenRule = EAccelByteIdHypensRule::NO_RULE);
 
+	static void AppendModulesVersionToMap(TMap<FString, FString>& Headers);
+
 //To allow override for testing using mock class
 protected:
 #pragma region DEVICE_ID

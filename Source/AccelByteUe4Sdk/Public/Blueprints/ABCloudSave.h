@@ -25,6 +25,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsListGameRecords, FAccelByteModelsListG
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedBulkGetPublicUserRecordKeysResponse, FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsReplaceUserRecordResponse, FAccelByteModelsReplaceUserRecordResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FJsonObjectWrapper, FDPayloadJsonObject, FJsonObjectWrapper, Response);
 
 #pragma endregion
@@ -81,6 +83,23 @@ public:
 		FJsonObjectWrapper RecordRequest,
 		FDPayloadJsonObject const& PayloadModifier,
 		FDHandler const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
+	void ReplaceUserRecordCheckLatestWithResponse(
+		FString const& Key,
+		FDateTime LastUpdated,
+		FJsonObjectWrapper RecordRequest,
+		FDModelsReplaceUserRecordResponse const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
+	void ReplaceUserRecordCheckLatestRetryWithResponse(
+		int TryAttempt,
+		FString const& Key,
+		FJsonObjectWrapper RecordRequest,
+		FDPayloadJsonObject const& PayloadModifier,
+		FDModelsReplaceUserRecordResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")

@@ -77,8 +77,8 @@ private:
 	const FString LobbySessionHeaderName = "X-Ab-LobbySessionID";
 
 	bool BanNotifReceived = false;
-
 	EBanType BanType = EBanType::EMPTY;
+
 public:
 	
 	// Party 

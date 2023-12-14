@@ -214,7 +214,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPredefinedEvent
 	virtual ~FAccelByteModelsPredefinedEvent() = default;
 };
 
-struct ACCELBYTEUE4SDK_API FAccelByteModelsCachedEventPayload : public FAccelByteModelsPredefinedEvent
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCachedPredefinedEventPayload : public FAccelByteModelsPredefinedEvent
 {
 	FAccelByteModelsTelemetryBody Payload{};
 

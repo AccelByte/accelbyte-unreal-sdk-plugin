@@ -12,7 +12,7 @@ namespace Api
 PredefinedEvent::PredefinedEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: GameTelemetry(InCredentialsRef, InSettingsRef, InHttpRef, false)
+	: BaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, TEXT("PreDefinedEvent"), false)
 {
 	if (!SettingsRef.bSendPredefinedEvent)
 	{
@@ -20,21 +20,10 @@ PredefinedEvent::PredefinedEvent(Credentials& InCredentialsRef
 	}
 }
 
-PredefinedEvent::~PredefinedEvent()
-{
-	Shutdown();
-}
-
-const FString PredefinedEvent::GetEventNamespace()
-{
-	if (EventNamespace.IsEmpty())
-	{
-		EventNamespace = CredentialsRef.GetNamespace();
-	}
-	return EventNamespace;
-}
-
-void PredefinedEvent::SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedEventPayload>& Payload, FVoidHandler const& OnSuccess, FErrorHandler const& OnError, FDateTime const& ClientTimestamp)
+void PredefinedEvent::SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedPredefinedEventPayload>& Payload, 
+												FVoidHandler const& OnSuccess, 
+												FErrorHandler const& OnError, 
+												FDateTime const& ClientTimestamp)
 {
 	if (!SettingsRef.bSendPredefinedEvent)
 	{
@@ -61,14 +50,7 @@ void PredefinedEvent::SendPredefinedEventData(const TSharedRef<FAccelByteModelsC
 		return;
 	}
 
-	Payload->Payload.EventNamespace = GetEventNamespace();
-	Payload->Payload.EventName = EventName;
-	if (Payload->Payload.ClientTimestamp.GetTicks() == 0)
-	{
-		Payload->Payload.ClientTimestamp = ClientTimestamp;
-	}
-
-	Send(Payload->Payload, OnSuccess, OnError);
+	SendEventData(Payload->Payload, OnSuccess, OnError, ClientTimestamp);
 }
 
 } 

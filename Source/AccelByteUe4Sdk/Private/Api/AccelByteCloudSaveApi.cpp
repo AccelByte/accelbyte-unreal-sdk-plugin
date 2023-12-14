@@ -250,6 +250,8 @@ void CloudSave::ReplaceUserRecord(FString const& Key
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
+#pragma region ReplaceUserConcurrentRecord (Without Response)
+
 void CloudSave::ReplaceUserRecord(int TryAttempt
 	, FString const& Key
 	, FAccelByteModelsConcurrentReplaceRequest const& Data
@@ -259,11 +261,21 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public")
 		, *SettingsRef.CloudSaveServerUrl
 		, *CredentialsRef.GetNamespace()
 		, *CredentialsRef.GetUserId()
 		, *Key);
+		
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("responseBody"), TEXT("false")}
+	};
 
 	FString Content = TEXT("");
 	FJsonObject DataJson;
@@ -298,7 +310,7 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 			}
 		});
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnErrorHttpClient);
+	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnErrorHttpClient);
 }
 
 void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key
@@ -373,6 +385,147 @@ void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 				}
 			}));
 }
+
+#pragma endregion ReplaceUserConcurrentRecord (Without Response)	
+
+
+#pragma region ReplaceUserConcurrentRecord (With Response)
+
+void CloudSave::ReplaceUserRecord(int TryAttempt
+	, FString const& Key
+	, FAccelByteModelsConcurrentReplaceRequest const& Data
+	, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
+	, THandler<FAccelByteModelsReplaceUserRecordResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *Key);
+
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("responseBody"), TEXT("true")}
+	};
+
+	FString Content = TEXT("");
+	FJsonObject DataJson;
+	DataJson.SetStringField("updatedAt", Data.UpdatedAt.ToIso8601());
+	DataJson.SetObjectField("value", Data.Value.JsonObject);
+	const TSharedPtr<FJsonObject> JSONObject = MakeShared<FJsonObject>(DataJson);
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
+
+	const auto OnErrorHttpClient = FErrorHandler::CreateLambda(
+		[this, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](const int32 Code, FString const& Message)
+		{
+			if (Code == static_cast<int32>(ErrorCodes::PlayerRecordPreconditionFailedException))
+			{
+				if (TryAttempt > 0)
+				{
+					ReplaceUserRecordCheckLatest(TryAttempt - 1
+						, Key
+						, Data.Value
+						, PayloadModifier
+						, OnSuccess
+						, OnError);
+				}
+				else
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			}
+			else
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		});
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnErrorHttpClient);
+}	
+
+void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key
+	, FDateTime const LastUpdated
+	, FJsonObjectWrapper RecordRequest
+	, THandler<FAccelByteModelsReplaceUserRecordResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	const FAccelByteModelsConcurrentReplaceRequest Request
+	{
+		LastUpdated,
+		RecordRequest
+	};
+
+	ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
+}
+
+void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
+	, FString const& Key
+	, FJsonObjectWrapper RecordRequest
+	, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
+	, THandler<FAccelByteModelsReplaceUserRecordResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	if (TryAttempt <= 0)
+	{
+		OnError.ExecuteIfBound(
+			static_cast<int32>(ErrorCodes::PlayerRecordPreconditionFailedException),
+			"Exhaust all retry attempt to modify game record. Please try again.");
+		return;
+	}
+
+	GetUserRecord(Key
+		, THandler<FAccelByteModelsUserRecord>::CreateLambda(
+			[this, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsUserRecord LatestData)
+			{
+				if (PayloadModifier.IsBound())
+				{
+					LatestData.Value = PayloadModifier.Execute(LatestData.Value);
+				}
+
+				FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
+				UpdateRequest.Value = LatestData.Value;
+				UpdateRequest.UpdatedAt = LatestData.UpdatedAt;
+
+				ReplaceUserRecord(TryAttempt
+					, Key
+					, UpdateRequest
+					, PayloadModifier
+					, OnSuccess
+					, OnError);
+			})
+		, FErrorHandler::CreateLambda(
+			[this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, FString const& Message)
+			{
+				if (Code == static_cast<int32>(ErrorCodes::PlayerRecordNotFoundException))
+				{
+					FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
+					UpdateRequest.Value = RecordRequest;
+					UpdateRequest.UpdatedAt = FDateTime::Now();
+
+					ReplaceUserRecord(TryAttempt
+						, Key
+						, UpdateRequest
+						, PayloadModifier
+						, OnSuccess
+						, OnError);
+				}
+				else
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			}));
+}
+
+#pragma endregion ReplaceUserConcurrentRecord (With Response)		
 
 void CloudSave::DeleteUserRecord(FString const& Key
 	, FVoidHandler const& OnSuccess

@@ -19,7 +19,8 @@ class Settings;
 namespace Api
 {
 
-#define MAX_BULK_CONTENT_IDS_COUNT 20
+#define MAX_BULK_CONTENT_IDS_COUNT 100
+#define MAX_BULK_CONTENT_SHARECODES_COUNT 100
 
 /**
  * @brief Provide APIs to access UGC service.
@@ -587,6 +588,17 @@ public:
 		, int32 Limit = 1000
 		, int32 Offset = 0);
 
+	/**
+	 * @brief Bulk Get contents by ShareCodes
+	 *
+	 * @param ShareCodes Content ShareCodes Array  
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */	
+	void BulkGetContentByShareCode(const TArray<FString>& ShareCodes
+		, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
 #pragma endregion UGC V1
 
 #pragma region UGC V2 (Content)
@@ -788,6 +800,75 @@ public:
 	void DeleteContentScreenshotV2(FString const& ContentId
 		, FString const& ScreenshotId
 		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Modify existing content to update some information by share code.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ShareCode The share code of the content that will be fetched.
+	 * @param ModifyRequest Detail information for the content request that will be modified.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ModifyContentByShareCode(FString const& ChannelId
+		, FString const& ShareCode
+		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Modify the shareCode of a content.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ContentId Content Id.
+	 * @param ModifyContentShareCodeRequest Detail information for the content request that will be modified.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ModifyContentShareCode(FString const& ChannelId
+		, FString const& ContentId
+		, FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest
+		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete a content based on the its channel id and share code.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ShareCode The share code of the content that will be fetched.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void DeleteContentByShareCode(FString const& ChannelId
+		, FString const& ShareCode
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Bulk Get contents by ShareCodes
+	 *
+	 * @param ShareCodes Content ShareCodes Array  
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */	
+	void BulkGetContentByShareCodeV2(const TArray<FString>& ShareCodes
+		, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Modify the shareCode of a content.
+	 *
+	 * @param ChannelId The id of the content's channel.
+	 * @param ContentId Content Id.
+	 * @param ModifyContentShareCodeRequest Detail information for the content request that will be modified.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCCreateUGCResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ModifyContentShareCodeV2(FString const& ChannelId
+		, FString const& ContentId
+		, FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest
+		, THandler<FAccelByteModelsUGCCreateUGCResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 #pragma endregion UGC V2 (Content)

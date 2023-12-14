@@ -3,21 +3,22 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUe4SdkModule.h"
+#include "CoreUObject.h"
+#include "Core/Version.h"
+#include "Interfaces/IPluginManager.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "CoreUObject.h"
-#include "Api/AccelByteGameTelemetryApi.h"
-#include "Api/AccelByteHeartBeatApi.h"
-#include "GameServerApi/AccelByteServerAMSApi.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSignalHandler.h"
-#include "Core/Version.h"
-#include "Interfaces/IPluginManager.h"
 #include "Core/AccelByteDataStorageBinaryFile.h"
-#include "Api/AccelBytePredefinedEventApi.h"
 #include "Core/Platform/AccelBytePlatformHandler.h"
+#include "Api/AccelByteGameTelemetryApi.h"
+#include "Api/AccelByteHeartBeatApi.h"
+#include "Api/AccelBytePredefinedEventApi.h"
+#include "Api/AccelByteGameStandardEventApi.h"
+#include "GameServerApi/AccelByteServerAMSApi.h"
 
 #if WITH_EDITOR
 #include "ISettingsModule.h"
@@ -91,6 +92,7 @@ void FAccelByteUe4SdkModule::StartupModule()
 	AccelByte::FRegistry::Credentials.Startup();
 	AccelByte::FRegistry::GameTelemetry.Startup();
 	AccelByte::FRegistry::PredefinedEvent.Startup();
+	AccelByte::FRegistry::GameStandardEvent.Startup();
 #if !UE_SERVER
 	AccelByte::FRegistry::HeartBeat.Startup();
 #endif
@@ -121,6 +123,7 @@ void FAccelByteUe4SdkModule::ShutdownModule()
 #endif
 	AccelByte::FRegistry::GameTelemetry.Shutdown();
 	AccelByte::FRegistry::PredefinedEvent.Shutdown();
+	AccelByte::FRegistry::GameStandardEvent.Shutdown();
 	AccelByte::FRegistry::Credentials.Shutdown();
 	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
 	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();

@@ -193,6 +193,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPreviewMetadata
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCModifyContentShareCodeRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | ModifyContentShareCodeRequest")
+	FString ShareCode{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCRequest
 {
 	GENERATED_BODY()
@@ -608,6 +617,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCGetContentBulkRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | LinkPlatformAccountRequest")
 	TArray<FString> ContentIds {};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCBulkGetContentByShareCodeRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | BulkGetContentByShareCodeRequest")
+	TArray<FString> ShareCodes {};
 };
 
 USTRUCT(BlueprintType)

@@ -58,6 +58,11 @@ void ServerGameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 	{
 		TelemetryBody.ClientTimestamp = FDateTime::UtcNow();
 	}
+
+	if (TelemetryBody.EventNamespace.IsEmpty())
+	{
+		TelemetryBody.EventNamespace = GetEventNamespace();
+	}
 	
 	if (ImmediateEvents.Contains(TelemetryBody.EventName))
 	{
@@ -114,6 +119,15 @@ bool ServerGameTelemetry::PeriodicTelemetry(float DeltaTime)
 			}));
 
 	return true;
+}
+
+const FString ServerGameTelemetry::GetEventNamespace()
+{
+	if (EventNamespace.IsEmpty())
+	{
+		EventNamespace = ServerCredentialsRef.GetNamespace();
+	}
+	return EventNamespace;
 }
 
 void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events

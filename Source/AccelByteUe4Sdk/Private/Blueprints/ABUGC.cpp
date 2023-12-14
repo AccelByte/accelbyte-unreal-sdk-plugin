@@ -929,3 +929,124 @@ void UABUGC::UpdateLikeStatusToContentV2(const FString& ContentId
 			})
 	);
 }
+
+void UABUGC::ModifyContentByShareCode(FString const& ChannelId
+	, FString const& ShareCode
+	, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+	, FDModelsUGCResponse const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.ModifyContentByShareCode(ChannelId, ShareCode, ModifyRequest,
+	THandler<FAccelByteModelsUGCResponse>::CreateLambda(
+		[OnSuccess](FAccelByteModelsUGCResponse const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}
+	),
+	FErrorHandler::CreateLambda(
+		[OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}
+	)
+);
+}
+
+void UABUGC::DeleteContentByShareCode(FString const& ChannelId,
+	FString const& ShareCode,
+	FDHandler const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.DeleteContentByShareCode(ChannelId, ShareCode,
+	FVoidHandler::CreateLambda(
+		[OnSuccess]()
+		{
+			OnSuccess.ExecuteIfBound();
+		})
+	, FErrorHandler::CreateLambda(
+		[OnError](int Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		})
+	);
+}
+
+void UABUGC::BulkGetContentByShareCode(const TArray<FString>& ShareCodes, 
+	FDModelsUGCBulkContentResponse const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.BulkGetContentByShareCode(ShareCodes,
+		THandler<TArray<FAccelByteModelsUGCContentResponse>>::CreateLambda(
+			[OnSuccess](TArray<FAccelByteModelsUGCContentResponse> const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::BulkGetContentByShareCodeV2(const TArray<FString>& ShareCodes, 
+	FDModelsUGCBulkContentResponseV2 const& OnSuccess, 
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.BulkGetContentByShareCodeV2(ShareCodes,
+		THandler<TArray<FAccelByteModelsUGCContentResponseV2>>::CreateLambda(
+			[OnSuccess](TArray<FAccelByteModelsUGCContentResponseV2> const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+			FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+	);
+}
+
+void UABUGC::ModifyContentShareCode(FString const& ChannelId
+	, FString const& ContentId
+	, FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest
+	, FDModelsUGCResponse const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.ModifyContentShareCode(ChannelId, ContentId, ModifyContentShareCodeRequest,
+	THandler<FAccelByteModelsUGCResponse>::CreateLambda(
+		[OnSuccess](FAccelByteModelsUGCResponse const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}
+	),
+	FErrorHandler::CreateLambda(
+		[OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}
+	)
+);
+}
+
+void UABUGC::ModifyContentShareCodeV2(FString const& ChannelId
+	, FString const& ContentId
+	, FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest
+	, FDModelsUGCCreateUGCResponseV2 const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.ModifyContentShareCodeV2(ChannelId, ContentId, ModifyContentShareCodeRequest,
+	THandler<FAccelByteModelsUGCCreateUGCResponseV2>::CreateLambda(
+		[OnSuccess](FAccelByteModelsUGCCreateUGCResponseV2 const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}
+	),
+	FErrorHandler::CreateLambda(
+		[OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}
+	)
+);
+}
+
+

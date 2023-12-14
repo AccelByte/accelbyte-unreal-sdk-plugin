@@ -1,7 +1,7 @@
 {
     "FileVersion": 3,
-    "Version": 51,
-    "VersionName": "24.6.0",
+    "Version": 52,
+    "VersionName": "24.7.0",
     "FriendlyName": "AccelByte Unreal Engine SDK",
     "Description": "Official AccelByte SDK for Unreal Engine 4",
     "Category": "Online Platform",

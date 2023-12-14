@@ -429,6 +429,7 @@ namespace AccelByte
 			Headers.Add(ChatSessionHeaderName, ChatSessionId.SessionID);
 			Headers.Add(TEXT("X-Ab-RpcEnvelopeStart"), WsEnvelopeStart);
 			Headers.Add(TEXT("X-Ab-RpcEnvelopeEnd"), WsEnvelopeEnd);
+			FAccelByteUtilities::AppendModulesVersionToMap(Headers);
 
 			WebSocket = AccelByteWebSocket::Create(*SettingsRef.ChatServerWsUrl, TEXT("wss"), CredentialsRef, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
 

@@ -731,6 +731,16 @@ struct ACCELBYTEUE4SDK_API FSystemMessageNotifMessage
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif")
+	FString  MessageId {};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif")
+	FDateTime  CreatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif")
+	FDateTime  ExpiredAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FDateTime UpdatedAt {0};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | QuerySystemMessagesResponseItem")
+	FDateTime ReadAt {0};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif | Data")
 	FString Title{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SystemMessageNotif | Data")
@@ -765,7 +775,29 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatSystemMessageNotif
 	 */
 	bool GetSystemMessageData(FSystemMessageNotifMessage& OutFormattedMessage) const
 	{
-		return FJsonObjectConverter::JsonObjectStringToUStruct(Message, &OutFormattedMessage, 0, 0);
+		const bool bMessageDeserialized = FJsonObjectConverter::JsonObjectStringToUStruct(Message, &OutFormattedMessage, 0, 0);
+
+		OutFormattedMessage.MessageId = MessageId;
+		OutFormattedMessage.CreatedAt = CreatedAt;
+		OutFormattedMessage.ExpiredAt = ExpiredAt;
+
+		return bMessageDeserialized;
+	}
+
+	/**
+	 * @brief Check if this notification is a transient system message
+	 *
+	 * @result returns true if this notification is a transient system message
+	 */
+	bool IsTransientSystemMessage() const
+	{
+		// Transient system message indicated by the presence of category field. If it empty it means this is regular system message.
+		if (Category.IsEmpty())
+		{
+			return false;
+		}
+
+		return true;
 	}
 };
 
@@ -798,7 +830,31 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsQuerySystemMessagesResponseItem
 	 */
 	bool GetSystemMessageData(FSystemMessageNotifMessage& OutFormattedMessage) const
 	{
-		return FJsonObjectConverter::JsonObjectStringToUStruct(Message, &OutFormattedMessage, 0, 0);
+		const bool bMessageDeserialized = FJsonObjectConverter::JsonObjectStringToUStruct(Message, &OutFormattedMessage, 0, 0);
+
+		OutFormattedMessage.MessageId = Id;
+		OutFormattedMessage.CreatedAt = CreatedAt;
+		OutFormattedMessage.ExpiredAt = ExpiredAt;
+		OutFormattedMessage.ReadAt = ReadAt;
+		OutFormattedMessage.UpdatedAt = UpdatedAt;
+
+		return bMessageDeserialized;
+	}
+
+	/**
+	 * @brief Check if this notification is a transient system message
+	 *
+	 * @result returns true if this notification is a transient system message
+	 */
+	bool IsTransientSystemMessage() const
+	{
+		// Transient system message indicated by the presence of category field. If it empty it means this is regular system message.
+		if (Category.IsEmpty())
+		{
+			return false;
+		}
+
+		return true;
 	}
 };
 

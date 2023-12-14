@@ -141,5 +141,86 @@ void ServerUGC::SearchContentsSpecificToChannel(FString const& ChannelId
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
+void ServerUGC::ModifyContentByShareCode(FString const& UserId
+	, FString const& ChannelId
+	, FString const& ShareCode
+	, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChannelId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
+		return;
+	}
+
+	if (ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
+		return;
+	}
+	
+	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
+	{
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/channels/%s/contents/s3/sharecodes/%s")
+		, *ServerSettingsRef.UGCServerUrl
+		, *ServerCredentialsRef.GetNamespace()
+		, *UserId
+		, *ChannelId
+		, *ShareCode);
+
+	FAccelByteModelsUGCUpdateRequest Request = ModifyRequest;
+	if (Request.ContentType.IsEmpty())
+	{
+		Request.ContentType = TEXT("application/octet-stream");
+	}
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+}
+
+void ServerUGC::DeleteContentByShareCode(FString const& UserId
+	, FString const& ChannelId
+	, FString const& ShareCode
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChannelId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
+		return;
+	}
+
+	if (ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
+		return;
+	}
+	
+	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
+	{
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/channels/%s/contents/sharecodes/%s")
+		, *ServerSettingsRef.UGCServerUrl
+		, *ServerCredentialsRef.GetNamespace()
+		, *UserId
+		, *ChannelId
+		, *ShareCode);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 } // Namespace GameServerApi
 } // Namespace AccelByte

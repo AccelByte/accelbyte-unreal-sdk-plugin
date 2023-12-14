@@ -16,6 +16,8 @@
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCSearchContentsResponse, FAccelByteModelsUGCSearchContentsPagingResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCServerResponse, FAccelByteModelsUGCResponse, Response);
+
 #pragma endregion
 
 UCLASS(Blueprintable, BlueprintType)
@@ -40,6 +42,21 @@ public:
 		, FDErrorHandler const& OnError
 		, int32 Limit = 20
 		, int32 Offset = 0);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | UGC | Api")
+	void ModifyContentByShareCode(FString const& UserId
+		, FString const& ChannelId
+		, FString const& ShareCode
+		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+		, FDModelsUGCServerResponse const& OnSuccess
+		, FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | UGC | Api")
+	void DeleteContentByShareCode(FString const& UserId
+		, FString const& ChannelId
+		, FString const& ShareCode
+		, FDHandler const& OnSuccess
+		, FDErrorHandler const& OnError);
 
 private:
 	AccelByte::FServerApiClientPtr ApiClientPtr;

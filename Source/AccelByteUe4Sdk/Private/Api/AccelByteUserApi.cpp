@@ -513,10 +513,10 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 
 	// Save Cached Token to local data storage.
 	FDateTime ExpireDate = FDateTime::UtcNow() + FTimespan::FromSeconds(Response.Refresh_expires_in);
-	SavingCachedTokenToLocalDataStorage(CachedTokenKey, Response.Refresh_token, ExpireDate);
+	SaveCachedTokenToLocalDataStorage(CachedTokenKey, Response.Refresh_token, ExpireDate);
 }
 
-void User::SavingCachedTokenToLocalDataStorage(const FString& CachedTokenKey, const FString& RefreshToken, FDateTime ExpireDate)
+void User::SaveCachedTokenToLocalDataStorage(const FString& CachedTokenKey, const FString& RefreshToken, FDateTime ExpireDate)
 {
 #if PLATFORM_WINDOWS || PLATFORM_LINUX || PLATFORM_MAC 
 
@@ -549,7 +549,6 @@ void User::SavingCachedTokenToLocalDataStorage(const FString& CachedTokenKey, co
 
 #else 
 	FReport::Log(FString::Printf(TEXT("[AccelByte] Save Cached Token to local storage is not support for this platform yet. ")));
-	return;
 #endif 
 }
 
@@ -563,8 +562,10 @@ void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 		, FVoidHandler::CreateLambda(
 			[this, OnSuccess, OnError]() 
 			{
+				UserCredentialsRef.OnLogoutSuccess().Broadcast();
 				ForgetAllCredentials();
 				OnSuccess.ExecuteIfBound();
+
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -1675,6 +1676,37 @@ void User::CheckUserAccountAvailability(const FString& DisplayName,
 				OnError.ExecuteIfBound(ErrorCode, Message);
 			}
 		}));
+}
+
+void User::RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& PlatformType,
+	const THandler<FThirdPartyPlatformTokenData>& OnSuccess, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__)); 
+
+	switch (PlatformType)
+	{
+	case EAccelBytePlatformType::PS4Web:
+	case EAccelBytePlatformType::PS4:
+	case EAccelBytePlatformType::PS5:
+	case EAccelBytePlatformType::Twitch:
+	case EAccelBytePlatformType::EpicGames:
+	case EAccelBytePlatformType::AwsCognito:
+		break;
+	default:
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::BadRequestException), TEXT("Platform Type is not supported"), {});
+		return;
+	}
+
+	const FString UserId = CredentialsRef.GetUserId();
+	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	Oauth2::RetrieveUserThirdPartyPlatformToken(UserId, PlatformId, Authorization, 
+		THandler<FThirdPartyPlatformTokenData>::CreateLambda(
+			[this, PlatformId, OnSuccess](const FThirdPartyPlatformTokenData& Result)
+			{
+				UserCredentialsRef.SetThridPartyPlatformTokenData(PlatformId, Result);
+				OnSuccess.ExecuteIfBound(Result); 
+			}), OnError);
 }
 	
 } // Namespace Api

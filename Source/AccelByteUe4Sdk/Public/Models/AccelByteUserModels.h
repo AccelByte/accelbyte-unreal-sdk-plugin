@@ -40,7 +40,8 @@ enum class EAccelBytePlatformType : uint8
 	Discord,
 	Nintendo,
 	SnapChat,
-	EAOrigin
+	EAOrigin,
+	PS4Web
 };
 
 UENUM(BlueprintType)
@@ -61,7 +62,7 @@ enum class EBanType : uint8
 	LEADERBOARD,
 	MATCHMAKING,
 	UGC_CREATE_UPDATE
-}; 
+};
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAcceptedPolicies
@@ -1216,4 +1217,19 @@ struct ACCELBYTEUE4SDK_API FListUserDataResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | ListUserRequest")
 	TArray<FUserDataResponse> Data{};
-}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FThirdPartyPlatformTokenData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ThirdPartyPlatformTokenResponse")
+	FString Platform_token{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ThirdPartyPlatformTokenResponse")
+	int32 Platform_token_expires_at{0};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ThirdPartyPlatformTokenResponse")
+	FString Sand_box_id{};
+};

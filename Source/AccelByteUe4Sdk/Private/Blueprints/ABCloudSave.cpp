@@ -173,6 +173,67 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 	);
 }
 
+void UABCloudSave::ReplaceUserRecordCheckLatestWithResponse(
+	FString const& Key,
+	FDateTime const LastUpdated,
+	FJsonObjectWrapper RecordRequest,
+	FDModelsReplaceUserRecordResponse const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
+		Key,
+		LastUpdated,
+		RecordRequest,
+		THandler<FAccelByteModelsReplaceUserRecordResponse>::CreateLambda(
+		[OnSuccess](FAccelByteModelsReplaceUserRecordResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
+void UABCloudSave::ReplaceUserRecordCheckLatestRetryWithResponse(
+	int TryAttempt,
+	FString const& Key,
+	FJsonObjectWrapper RecordRequest,
+	FDPayloadJsonObject const& PayloadModifier,
+	FDModelsReplaceUserRecordResponse const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
+		TryAttempt,
+		Key,
+		RecordRequest,
+		THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>::CreateLambda(
+			[PayloadModifier](FJsonObjectWrapper const& Response)
+			{
+				return PayloadModifier.Execute(Response);
+			}
+		),
+		THandler<FAccelByteModelsReplaceUserRecordResponse>::CreateLambda(
+		[OnSuccess](FAccelByteModelsReplaceUserRecordResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
 void UABCloudSave::DeleteUserRecord(
 	FString const& Key,
 	FDHandler const& OnSuccess,

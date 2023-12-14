@@ -26,8 +26,8 @@ namespace Api
 class ACCELBYTEUE4SDK_API GameTelemetry : public FApiBase
 {
 public:
-	GameTelemetry(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, bool bInCacheEvent = true);
-	~GameTelemetry();
+	GameTelemetry(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, bool bInCacheEvent = true, bool bInRetryOnFailed = false);
+	virtual ~GameTelemetry();
 
 	/**
 	 * @brief Set the interval of sending telemetry event to the backend.
@@ -96,16 +96,20 @@ private:
 	void AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody> Telemetry);
 	
 	void OnLoginSuccess(FOauth2Token const& Response);
+
+	void OnLogoutSuccess();
 	
-	void RemoveEventsFromCache();
+	void RemoveEventsFromCache(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events);
 	
 	bool JobArrayQueueAsJsonString(FString& OutJsonString);
+
+	const FString GetEventNamespace();
 	
 protected:
 	bool EventsJsonToArray(FString& InJsonString
 		, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray);
 	
-	FString GetTelemetryKey();
+	virtual FString GetTelemetryKey();
 
 private:
 	GameTelemetry() = delete;
@@ -118,16 +122,21 @@ private:
 	TSet<FString> ImmediateEvents;
 	TSet<FString> CriticalEvents;
 	bool bCacheUpdated = false;
-	TQueue<TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>> JobQueue;
+	TQueue<TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>> JobQueue{};
 	TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventPtrArray;
+	mutable FCriticalSection EventPtrArrayLock;
 	bool bTelemetryJobStarted = false;
 	FTimespan const MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;
 	FDelegateHandleAlias GameTelemetryTickDelegateHandle;
 	FDelegateHandle GameTelemetryLoginSuccess;
+	FDelegateHandle GameTelemetryLogoutSuccess;
 
 	bool ShuttingDown;
 	bool bCacheEvent;
+	bool bRetryOnFailed;
+
+	FString EventNamespace;
 };
 
 } // Namespace Api

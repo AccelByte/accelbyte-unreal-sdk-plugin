@@ -957,6 +957,33 @@ void UGC::GetGroups(const FString& UserId
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
+void UGC::BulkGetContentByShareCode(const TArray<FString>& ShareCodes
+		, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess
+		, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ShareCodes.Num() == 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCodes is empty."));
+		return;
+	}
+	if (ShareCodes.Num() > MAX_BULK_CONTENT_SHARECODES_COUNT)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), MAX_BULK_CONTENT_SHARECODES_COUNT));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/bulk")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsUGCBulkGetContentByShareCodeRequest ContentRequest;
+	ContentRequest.ShareCodes = ShareCodes;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ContentRequest, OnSuccess, OnError);
+}
+
 #pragma region UGC V2 (Content)
 
 void UGC::SearchContentsSpecificToChannelV2(FString const& ChannelId
@@ -1441,6 +1468,224 @@ void UGC::DeleteContentScreenshotV2(FString const& ContentId
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
+
+void UGC::ModifyContentByShareCode(FString const& ChannelId
+	, FString const& ShareCode
+	, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChannelId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
+		return;
+	}
+
+	if (ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
+		return;
+	}
+	
+	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
+	{
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/sharecodes/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ChannelId
+		, *ShareCode);
+
+	FAccelByteModelsUGCUpdateRequest Request = ModifyRequest;
+	if (Request.ContentType.IsEmpty())
+	{
+		Request.ContentType = TEXT("application/octet-stream");
+	}
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+}
+
+void UGC::ModifyContentShareCode(FString const& ChannelId
+	, FString const& ContentId
+	, FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest
+	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChannelId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
+		return;
+	}
+
+	if (ContentId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
+		return;
+	}
+
+	if (ModifyContentShareCodeRequest.ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
+		return;
+	}
+
+	if (ModifyContentShareCodeRequest.ShareCode.Len() > 7)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode length exceeds the maximum of 7 characters."));
+		return;
+	}
+	
+	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
+	{
+		return;
+	}
+
+	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+		, OnError))
+	{
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s/sharecode")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ChannelId
+		, *ContentId);
+
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, ModifyContentShareCodeRequest, OnSuccess, OnError);
+}	
+
+void UGC::DeleteContentByShareCode(FString const& ChannelId
+	, FString const& ShareCode
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChannelId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
+		return;
+	}
+
+	if (ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
+		return;
+	}
+	
+	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
+	{
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/sharecodes/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ChannelId
+		, *ShareCode);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void UGC::BulkGetContentByShareCodeV2(TArray<FString> const& ShareCodes
+		, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess
+		, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ShareCodes.Num() == 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCodes is empty."));
+		return;
+	}
+	if (ShareCodes.Num() > MAX_BULK_CONTENT_SHARECODES_COUNT)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), MAX_BULK_CONTENT_SHARECODES_COUNT));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/bulk")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsUGCBulkGetContentByShareCodeRequest ContentRequest;
+	ContentRequest.ShareCodes = ShareCodes;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ContentRequest, OnSuccess, OnError);
+}
+
+void UGC::ModifyContentShareCodeV2(FString const& ChannelId
+	, FString const& ContentId
+	, FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest
+	, THandler<FAccelByteModelsUGCCreateUGCResponseV2> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChannelId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
+		return;
+	}
+
+	if (ContentId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
+		return;
+	}
+
+	if (ModifyContentShareCodeRequest.ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
+		return;
+	}
+
+	if (ModifyContentShareCodeRequest.ShareCode.Len() > 7)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode length exceeds the maximum of 7 characters."));
+		return;
+	}
+	
+	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
+	{
+		return;
+	}
+
+	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+		, OnError))
+	{
+		return;
+	}
+
+	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s/sharecode")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ChannelId
+		, *ContentId);
+
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, ModifyContentShareCodeRequest, OnSuccess, OnError);
+}	
 
 #pragma endregion UGC V2 (Content)
 

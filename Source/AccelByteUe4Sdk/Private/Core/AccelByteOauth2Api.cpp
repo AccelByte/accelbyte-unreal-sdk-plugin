@@ -618,5 +618,30 @@ void Oauth2::GenerateCodeForPublisherTokenExchange(const FString& AccessToken
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void Oauth2::RetrieveUserThirdPartyPlatformToken(const FString& UserId
+	, const FString& PlatformId
+	, const FString& Authorization
+	, const THandler<FThirdPartyPlatformTokenData>& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));  
+
+	const FString Url = FString::Printf(TEXT("%s/v3/oauth/namespaces/%s/users/%s/platforms/%s/platformToken")
+		, *FRegistry::Settings.IamServerUrl
+		, *FRegistry::Credentials.GetNamespace() 
+		, *UserId
+		, *PlatformId);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb(TEXT("GET"));
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 } // Namespace Api
 } // Namespace AccelByte
