@@ -13,6 +13,8 @@
 #include "Models/AccelByteLobbyModels.h"
 #include "Models/AccelByteMatchmakingModels.h"
 #include "Models/AccelByteSessionModels.h"
+#include "Core/AccelByteMessagingSystem.h"
+#include "Core/AccelByteNetworkConditioner.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 
@@ -63,6 +65,8 @@ public:
 	Lobby(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetryScheduler& InHttpRef
+		, FAccelByteMessagingSystem& InMessagingSystemRef
+		, FAccelByteNetworkConditioner& InNetworkConditionerRef
 		, float InPingDelay = 30.f
 		, float InInitialBackoffDelay = 1.f
 		, float InMaxBackoffDelay = 30.f
@@ -71,6 +75,8 @@ public:
 	~Lobby();
 private:
 	Credentials& LobbyCredentialsRef;
+	FAccelByteMessagingSystem& MessagingSystem;
+	FAccelByteNetworkConditioner& NetworkConditioner;
 
 	const FString LobbyPlatformIdHeaderName = "X-Ab-Platform";
 	const FString LobbyPlatformUserIdHeaderName = "X-Ab-Platform-User-Id";
@@ -265,6 +271,11 @@ public:
 	 * @brief delegate for handling incoming notification
 	 */
 	DECLARE_DELEGATE_OneParam(FMessageNotif, const FAccelByteModelsNotificationMessage&); //Passive
+
+	/*
+	* @brief multicast delegate for handling incoming notification
+	*/
+	DECLARE_MULTICAST_DELEGATE_OneParam(FNotifBroadcaster, const FAccelByteModelsNotificationMessage&); //Passive
 
 	/**
 	 * @brief delegate for handling ban notification
@@ -471,7 +482,7 @@ public:
 	/**
 	* @brief delegate for handling lobby connection disconnected.
 	*/
-	DECLARE_DELEGATE_OneParam(FDisconnectNotif, const FAccelByteModelsDisconnectNotif&)
+	typedef TDelegate<void(const FAccelByteModelsDisconnectNotif&)> FDisconnectNotif;
 
 	/**
 	* @brief delegate for handling connection closed.
@@ -549,6 +560,11 @@ public:
 	DECLARE_DELEGATE_OneParam(FV2SessionStorageChangedNotif, FAccelByteModelsV2SessionStorageChangedEvent)
 
 	/**
+	 * @brief Delegate for session joined secret event.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2SessionJoinedSecretNotif, const FAccelByteModelsV2SessionJoinedSecret&)
+
+	/**
 	 * @brief Delegate for game session when DS status is changed.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2DSStatusChangedNotif, FAccelByteModelsV2DSStatusChangedNotif)
@@ -572,6 +588,12 @@ public:
 	 * @brief Delegate for notification when party leader canceled matchmaking
 	 */
 	DECLARE_DELEGATE_OneParam(FV2MatchmakingCanceledNotif, FAccelByteModelsV2MatchmakingCanceledNotif)
+
+	// Metrics
+	/**
+	 * @brief delegate for handling set user region response
+	 */
+	DECLARE_DELEGATE_OneParam(FChangeUserRegionResponse, const FAccelByteModelsChangeUserRegionResponse&)
 	
 public:
 	/**
@@ -1280,7 +1302,31 @@ public:
 	 */
 	void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
 	{
-		MessageNotif = OnNotificationMessage;
+		MessageNotifBroadcaster.AddLambda([this, OnNotificationMessage](FAccelByteModelsNotificationMessage const& Message)
+			{
+				OnNotificationMessage.ExecuteIfBound(Message);
+			});
+	}
+
+	/**
+	 * @brief Set a trigger function when receiving a notification message
+	 * @param OnNotificationMessage return models called FAccelByteModelsNotificationMessage
+	 */
+	FDelegateHandle AddMessageNotifBroadcasterDelegate(const FNotifBroadcaster& OnNotificationBroadcasterMessage)
+	{
+		return MessageNotifBroadcaster.AddLambda([OnNotificationBroadcasterMessage](FAccelByteModelsNotificationMessage const& Message)
+			{
+				OnNotificationBroadcasterMessage.Broadcast(Message);
+			});
+	}
+
+	/**
+	 * @brief Remove a trigger function when receiving a notification message
+	 * @param OnNotificationBroadcasterDelegate Delegate handle to be removed
+	 */
+	void RemoveMessageNotifBroadcasterDelegate(const FDelegateHandle& OnNotificationBroadcasterDelegate)
+	{
+		MessageNotifBroadcaster.Remove(OnNotificationBroadcasterDelegate);
 	}
 
 	/**
@@ -1398,6 +1444,15 @@ public:
 	void SetV2SessionStorageChangedNotifDelegate(const FV2SessionStorageChangedNotif& OnSessionStorageChangedNotif)
 	{
 		V2SessionStorageChangedNotif = OnSessionStorageChangedNotif;
+	}
+
+	/**
+    * @brief Set a trigger function when session (with secret server enabled) joined (v2)
+    * @param OnSessionJoinedSecretNotif return models called FAccelByteModelsV2SessionJoinedSecret
+    */
+	void SetV2SessionJoinedSecretNotifDelegate(const FV2SessionJoinedSecretNotif& OnSessionJoinedSecretNotif)
+	{
+		V2SessionJoinedSecretNotif = OnSessionJoinedSecretNotif;
 	}
 
 	/**
@@ -2214,6 +2269,19 @@ public:
 		OnRefreshTokenError = OnError;
 	}
 
+	// Metrics
+	/**
+	 * @brief Set delegate for set user region response.
+	 *
+	 * @param OnChangeUserRegionResponse Delegate that will be called when operation success.
+	 * @param OnError Delegate that will be called when operation failed.
+	 */
+	void SetChangeUserRegionDelegate(const FChangeUserRegionResponse& OnChangeUserRegionResponse , const FErrorHandler& OnError = {})
+	{
+		ChangeUserRegionResponse = OnChangeUserRegionResponse;
+		OnChangeUserRegionError = OnError;
+	}
+
 	/**
 	 * @brief Bulk add friend(s), don't need any confirmation from the player.
 	 *
@@ -2365,6 +2433,13 @@ public:
 	 * @param TokenGenerator The token generator.
 	 */
 	void SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator);
+
+	/**
+	 * @brief Change current user region for metric.
+	 *
+	 * @param Region The region of current user based on lowest ping to QOS servers.
+	 */
+	void ChangeUserRegion(const FString& Region);
 
 	static FString LobbyMessageToJson(const FString& Message);
 
@@ -2531,6 +2606,9 @@ private:
 	TMap<FString, FGetSessionAttributeResponse> MessageIdGetSessionAttributeResponseMap;
 	TMap<FString, FGetAllSessionAttributeResponse> MessageIdGetAllSessionAttributeResponseMap;
 	TMap<FString, FRefreshTokenResponse> MessageIdRefreshTokenResponseMap;
+
+	// Metrics
+	TMap<FString, FChangeUserRegionResponse> MessageIdChangeUserRegionResponseMap;
 #pragma endregion
 
 #pragma region Response/Notif Delegates
@@ -2575,7 +2653,7 @@ private:
 	FGetAllFriendsStatusResponse GetAllFriendsStatusResponse;
 
 	// Notification
-	FMessageNotif MessageNotif;
+	FNotifBroadcaster MessageNotifBroadcaster;
 	FUserBannedNotification UserBannedNotification;
 	FUserUnbannedNotification UserUnbannedNotification;
 
@@ -2596,6 +2674,7 @@ private:
 	FV2GameSessionEndedNotif V2GameSessionEndedNotif;
 
 	FV2SessionStorageChangedNotif V2SessionStorageChangedNotif;
+	FV2SessionJoinedSecretNotif V2SessionJoinedSecretNotif; 
 
 	FV2DSStatusChangedNotif V2DSStatusChangedNotif;
 
@@ -2662,6 +2741,9 @@ private:
 	
 	// Refresh Token
 	FRefreshTokenResponse RefreshTokenResponse;
+
+	// Metrics
+	FChangeUserRegionResponse ChangeUserRegionResponse;
 #pragma endregion
 	
 	struct PartyStorageWrapper
@@ -2720,6 +2802,17 @@ private:
 	FErrorHandler OnGetAllSessionAttributeError;
 	FErrorHandler OnRefreshTokenError;
 	FErrorHandler OnCreateDSError;
+	FErrorHandler OnChangeUserRegionError;
+
+#pragma region Messaging System
+private:
+	FOnMessagingSystemReceivedMessage OnReceivedQosLatenciesUpdatedDelegate;
+	FDelegateHandle QosLatenciesUpdatedDelegateHandle;
+
+	void InitializeMessaging();
+
+	void OnReceivedQosLatencies(const FString& Payload);
+#pragma endregion
 };
 } // Namespace Api
 } // Namespace AccelByte

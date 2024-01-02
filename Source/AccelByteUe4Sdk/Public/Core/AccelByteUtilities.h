@@ -413,8 +413,10 @@ public:
 	static bool IsNumericString(const FString& String);
 	static bool IsLanguageUseCommaDecimalSeparator();
 	static bool IsAccelByteIDValid(FString const& AccelByteId, EAccelByteIdHypensRule HypenRule = EAccelByteIdHypensRule::NO_RULE);
-
 	static void AppendModulesVersionToMap(TMap<FString, FString>& Headers);
+	static FString GetContentType(EAccelByteFileType const& FileType);
+	static const FString GenerateHashString(const FString& Message);
+	static const FString GenerateTOTP(const FString& SecretKey, int CodeLength = 6, int TimeStep = 30);
 
 //To allow override for testing using mock class
 protected:
@@ -424,7 +426,7 @@ protected:
 	 *
 	 * @return Random string of DeviceID. 
 	 */
-	static FString RandomizeDeviceId();
+	static FString RandomizeDeviceId(int64 Seed = FDateTime::UtcNow().ToUnixTimestamp());
 
 	/**
 	 * @brief Try to obtain DeviceID from a cached value if not found using the Default parameter and also store it into the cache

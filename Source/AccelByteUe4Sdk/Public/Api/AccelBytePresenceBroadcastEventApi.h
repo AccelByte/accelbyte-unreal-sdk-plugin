@@ -101,12 +101,12 @@ public:
 	void Startup();
 
 	/**
-	 * @brief Start heartbeat
+	 * @brief Start heartbeat. This funtion is DEPRECATED, will be removed soon.
 	 */
 	void StartHeartbeat();
 
 	/**
-	 * @brief Stop heartbeat
+	 * @brief Stop heartbeat. This funtion is DEPRECATED, will be removed soon.
 	 */
 	void StopHeartbeat();
 

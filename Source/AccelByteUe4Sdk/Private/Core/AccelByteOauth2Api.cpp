@@ -297,6 +297,27 @@ void Oauth2::GetTokenWithRefreshToken(const FString& ClientId
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Oauth2::RefreshPlatformToken(const FString& ClientID
+	, const FString& ClientSecret
+	, const FString& PlatformID
+	, const FString& PlatformToken
+	, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
+	, const FOAuthErrorHandler& OnError
+	, const FString& IamUrl)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/platforms/%s/token/verify")
+		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl,
+		*PlatformID);
+
+	FString Content = FString::Printf(TEXT("platform_token=%s"), *PlatformToken);
+	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientID, ClientSecret);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Oauth2::RevokeToken(const FString& AccessToken
 	, const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError
@@ -458,6 +479,35 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	
+void Oauth2::GetTokenWithSimultaneousPlatformToken(const FString& ClientId
+	, const FString& ClientSecret
+	, const FString& NativePlatformName
+	, const FString& NativePlatformToken
+	, const FString& SecondaryPlatformName
+	, const FString& SecondaryPlatformToken
+	, const THandler<FOauth2Token>& OnSuccess
+	, const FOAuthErrorHandler& OnError
+	, const FString& IamUrl)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/oauth/simultaneousLogin")
+		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+
+	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret);
+	Request->SetHeader(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	Request->SetHeader(TEXT("Auth-Trust-Id"), FAccelByteUtilities::GetAuthTrustId());
+	FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("nativePlatform"), NativePlatformName},
+		{TEXT("nativePlatformTicket"), FGenericPlatformHttp::UrlEncode(NativePlatformToken)},
+		{TEXT("simultaneousPlatform"), FGenericPlatformHttp::UrlEncode(SecondaryPlatformName)},
+		{TEXT("simultaneousTicket"), FGenericPlatformHttp::UrlEncode(SecondaryPlatformToken)}
+		}, TEXT(""));
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Oauth2::VerifyAndRememberNewDevice(const FString& ClientId
 	, const FString& ClientSecret
 	, const FString& MfaToken

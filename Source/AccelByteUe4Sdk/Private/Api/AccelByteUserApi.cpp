@@ -248,6 +248,39 @@ void User::LoginWithOtherPlatformId(const FString& PlatformId
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
+void User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
+	, const FString& NativePlatformToken
+	, const EAccelBytePlatformType& SecondaryPlatform
+	, const FString& SecondaryPlatformToken
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
+		, FAccelByteUtilities::GetPlatformString(NativePlatform)
+		, NativePlatformToken
+		, FAccelByteUtilities::GetPlatformString(SecondaryPlatform)
+		,SecondaryPlatformToken
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			{
+				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			{
+				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
+			})
+		, SettingsRef.IamServerUrl);
+
+	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
+
 void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
 	, EAccelByteLoginAuthFactorType AuthFactorType
 	, const FString& Code
@@ -332,7 +365,8 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 }
 void User::LoginWithRefreshToken(const FString& RefreshToken
 	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+	, const FOAuthErrorHandler& OnError
+	, const FString& PlatformUserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -342,10 +376,32 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, RefreshToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, PlatformUserId, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				ProcessLoginResponse(Result, OnSuccess, OnError, PlatformUserId);
 			})
+		, OnError
+		, SettingsRef.IamServerUrl);
+}
+
+void User::RefreshPlatformToken(const EAccelBytePlatformType& Platform
+	, const FString& NativePlatformToken
+	, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (NativePlatformToken.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::StatusBadRequest), TEXT("Please provide a valid NativePlatformToken"), FErrorOAuthInfo{});
+		return;
+	}
+
+	Oauth2::RefreshPlatformToken(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
+		, FAccelByteUtilities::GetPlatformString(Platform)
+		, NativePlatformToken
+		, OnSuccess
 		, OnError
 		, SettingsRef.IamServerUrl);
 }
@@ -375,7 +431,7 @@ void User::TryRelogin(const FString& PlatformUserID
 
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(PlatformUserID
 		, THandler<TPair<FString, FString>>::CreateLambda(
-			[this, OnSuccess, OnError](TPair<FString, FString> Pair)
+			[this, PlatformUserID, OnSuccess, OnError](TPair<FString, FString> Pair)
 			{
 				if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
 				{
@@ -397,7 +453,7 @@ void User::TryRelogin(const FString& PlatformUserID
 					return;
 				}
 
-				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError);
+				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError, PlatformUserID);
 			})
 		, FAccelByteUtilities::AccelByteStorageFile());
 #else

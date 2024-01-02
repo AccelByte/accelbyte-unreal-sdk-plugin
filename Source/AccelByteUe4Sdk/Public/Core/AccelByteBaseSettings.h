@@ -29,6 +29,7 @@ public:
 	FString RedirectURI{};
 	FString BaseUrl{};
 	FString IamServerUrl{};
+	FString BasicServerUrl{};
 	FString PlatformServerUrl{};
 	FString LobbyServerUrl{};
 	FString StatisticServerUrl{};

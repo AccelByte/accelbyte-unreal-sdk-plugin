@@ -8,6 +8,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteWebSocket.h"
 #include "Core/AccelByteApiBase.h"
+#include "Core/AccelByteNetworkConditioner.h"
 #include "Models/AccelByteChatModels.h"
 
 namespace AccelByte
@@ -42,6 +43,7 @@ public:
 	Chat(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetryScheduler& InHttpRef
+		, FAccelByteNetworkConditioner& InNetworkConditionerRef
 		, float PingDelay = 30.f
 		, float InitialBackoffDelay = 1.f
 		, float MaxBackoffDelay = 30.f
@@ -53,6 +55,8 @@ private:
 	const FString ChatSessionHeaderName = TEXT("X-Ab-ChatSessionID");
 
 	Credentials& ChatCredentialsRef;
+	FAccelByteNetworkConditioner& NetworkConditioner;
+
 	bool bBanNotifReceived = false;
 	EBanType BanType = EBanType::EMPTY;
 

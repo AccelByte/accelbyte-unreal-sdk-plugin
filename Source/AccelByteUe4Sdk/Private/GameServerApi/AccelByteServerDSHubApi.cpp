@@ -24,6 +24,7 @@ const FString DSMCServerClaimedTopic = TEXT("serverClaimed");
 const FString MMV2BackfillProposalTopic = TEXT("BACKFILL_PROPOSAL");
 const FString SessionMembersChangedTopic = TEXT("SESSION_MEMBER_CHANGED");
 const FString SessionEndedTopic = TEXT("SESSION_ENDED_NOTIF");
+const FString SessionSecretUpdateTopic = TEXT("SESSION_SERVER_SECRET");
 // DS HUB TOPICS END
 
 ServerDSHub::ServerDSHub(
@@ -110,6 +111,11 @@ void ServerDSHub::SetOnV2SessionMemberChangedNotificationDelegate(const FOnV2Ses
 void ServerDSHub::SetOnV2SessionEndedNotificationDelegate(const FOnV2SessionEndedNotification& InDelegate)
 {
 	OnV2SessionEndedNotification = InDelegate;
+}
+
+void ServerDSHub::SetOnV2SessionSecretUpdateNotification(const FOnV2SessionSecretUpdateNotification& InDelegate)
+{
+	OnV2SessionSecreteUpdateNotification = InDelegate;
 }
 
 void ServerDSHub::UnbindDelegates()
@@ -247,6 +253,16 @@ void ServerDSHub::OnMessage(const FString& Message)
 			return;
 		}
 		OnV2SessionEndedNotification.ExecuteIfBound(NotificationPayload);
+	}
+	else if (Topic.Equals(SessionSecretUpdateTopic))
+	{
+		FAccelByteModelsSessionSecretUpdateNotification NotificationPayload;
+		if (!FJsonObjectConverter::JsonObjectToUStruct(PayloadObject.ToSharedRef(), &NotificationPayload))
+		{
+			UE_LOG(LogAccelByteDSHub, Warning, TEXT("Failed to convert payload for session member changed topic to an FAccelByteModelsSessionSecretUpdateNotification instance!"));
+			return;
+		}
+		OnV2SessionSecreteUpdateNotification.ExecuteIfBound(NotificationPayload);
 	}
 }
 

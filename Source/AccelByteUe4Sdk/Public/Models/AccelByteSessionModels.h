@@ -761,3 +761,33 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2DSSessionReadyRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionEndedEvent")
 	bool Ready{false};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionRecentPlayer
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2RecentPlayer")
+	FString Namespace {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2RecentPlayer")
+	FString PlatformName {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2RecentPlayer")
+	FString UserId {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2RecentPlayer")
+	FDateTime LastPlayedTime {0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionRecentPlayers
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionRecentPlayers")
+	TArray<FAccelByteModelsV2SessionRecentPlayer> Data{};
+};
+
+USTRUCT(BlueprintType) 
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionJoinedSecret
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionJoinedSecret")
+	FString Secret{};
+};

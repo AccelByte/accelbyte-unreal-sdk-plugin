@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteApiBase.h"
-
+#include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteGeneralModels.h"
@@ -37,6 +37,8 @@ private:
 	Miscellaneous() = delete;
 	Miscellaneous(Miscellaneous const&) = delete;
 	Miscellaneous(Miscellaneous&&) = delete;
+
+	AccelByte::FAccelByteTimeManager TimeManager;
 };
 
 } // Namespace Api

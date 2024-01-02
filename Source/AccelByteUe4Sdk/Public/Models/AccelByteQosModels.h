@@ -36,3 +36,41 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsQosServerList
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Qos | Models | QosServerList")
 	TArray<FAccelByteModelsQosServer> Servers{};
 };
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsQosRegionLatency
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Qos | Models | QosRegionLatency")
+	FString Region{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Qos | Models | QosRegionLatency")
+	float Latency{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsQosRegionLatencies
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Qos | Models | QosRegionLatency")
+	TArray<FAccelByteModelsQosRegionLatency> Data{};
+
+	FString GetClosestRegion()
+	{
+		float LowestPing = TNumericLimits<float>::Max();
+		FString ClosestRegion{};
+
+		for (const auto& RegionLatency : Data)
+		{
+			if (RegionLatency.Latency < LowestPing)
+			{
+				ClosestRegion = RegionLatency.Region;
+				LowestPing = RegionLatency.Latency;
+			}
+		}
+
+		return ClosestRegion;
+	}
+};

@@ -46,6 +46,20 @@ enum class EAccelByteCycle : uint8
 	ANNUALLY
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteFileType : uint8
+{
+	NONE = 0,
+	JPEG,
+	JPG,
+	PNG,
+	BMP,
+	GIF,
+	MP3,
+	BIN,
+	WEBP
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 {

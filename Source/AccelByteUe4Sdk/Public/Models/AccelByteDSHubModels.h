@@ -36,3 +36,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionEndedNotification
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSHub | Models | SessionEndedNotif")
 	FString Session_id{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionSecretUpdateNotification
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSHub | Models | SessionSecretUpdateNotif")
+	FString Secret{};
+};

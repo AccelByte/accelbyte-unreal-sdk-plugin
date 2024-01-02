@@ -122,6 +122,14 @@ namespace AccelByte
 		UserNameAlreadyUsedException = 10177,
 		UserDisplayNameAlreadyUsedException = 10180,
 
+		// User Simultaneous Login
+		SimultaneousLogin_SecondaryPlatformTicketRequired = 10215,
+		SimultaneousLogin_BothNativeAndSecondaryPlatformAlreadyLinkedToDifferentAccelByteAccount = 10220,
+		SimultaneousLogin_AccountAlreadyLinkedButSecondaryTicketMismatch = 10219,
+		SimultaneousLogin_NativePlatformAccountPreviouslyLinkedToAnotherAccount = 10217,
+		SimultaneousLogin_AccountAlreadyLinkedButNativeTicketMismatch = 10221,
+		SimultaneousLogin_SecondaryPlatformAccountPreviouslyLinkedToAnotherAccount = 10218,
+
 		// Platform error
 		PlatformInternalServerErrorException = 20000,
 		UnauthorizedException,

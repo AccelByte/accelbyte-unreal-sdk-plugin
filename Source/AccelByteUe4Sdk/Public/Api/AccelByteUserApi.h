@@ -164,6 +164,23 @@ public:
 		, bool bCreateHeadless = true);
 
 	/**
+	 * @brief Login with native platform and secondary platform. Currently support Windows only.
+	 *
+	 * @param NativePlatform From the native subsystem
+	 * @param NativePlatformToken The auth ticket from native identity interface
+	 * @param SecondaryPlatform From the secondary platform subsystem
+	 * @param SecondaryPlatformToken The auth ticket from secondary platform interface
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
+		, const FString& NativePlatformToken
+		, const EAccelBytePlatformType& SecondaryPlatform
+		, const FString& SecondaryPlatformToken
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
 	 * @brief Verify log in with new device when user enabled 2FA.
 	 *
 	 * @param MfaToken return from BE when user login with new device and 2FA enabled.
@@ -224,9 +241,26 @@ public:
 	 * @param RefreshToken the refresh token for login.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param PlatformUserId Target platform user id to cache.
 	 */
 	void LoginWithRefreshToken(const FString& RefreshToken
 		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& PlatformUserId = TEXT(""));
+
+	/**
+	 * @brief Refresh the platform token that is stored in the IAM backend.
+	 * Therefore we can prevent expiration on the backend.
+	 * This endpoint also not generate any event or AB Access/Refresh Token.
+	 *
+	 * @param Platform The targeted platform to be refreshed.
+	 * @param NativePlatformToken The platform token that will used to refresh IAM storage.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void RefreshPlatformToken(const EAccelBytePlatformType& Platform
+		, const FString& NativePlatformToken
+		, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
 		, const FOAuthErrorHandler& OnError);
 
 	/**

@@ -43,6 +43,21 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Save a namespace-level user binary.
+	 * If the binary doesn't exist, it will create the binary save, if already exists, it will append to the existing one.
+	 *
+	 * @param Key Key of the binary record.
+	 * @param FileType File type of the binary (supported file types are jpeg, jpg, png, bmp, gif, mp3, webp, and bin).
+	 * @param bIsPublic Whether to save the binary as a public or private record.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SaveUserBinaryRecord(FString const& Key
+		, EAccelByteFileType FileType
+		, bool bIsPublic
+		, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get current user's binary record by its key in namespace-level.
 	 *
 	 * @param Key Key of the binary record.
@@ -149,6 +164,21 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Update current user's binary record to point to an uploaded file.
+	 *
+	 * @param Key Key of the binary record.
+	 * @param ContentType The specific type of the binary record created.
+	 * @param FileLocation Location of the uploaded binary file.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateUserBinaryRecordFile(FString const& Key
+		, EAccelByteFileType ContentType
+		, FString const& FileLocation
+		, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Update current user's binary record's metadata in namespace-level.
 	 *
 	 * @param Key Key of the binary record.
@@ -182,6 +212,19 @@ public:
 	 */
 	void RequestUserBinaryRecordPresignedUrl(FString const& Key
 		, FString const& FileType
+		, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Request a presigned url to upload current user's binary record file.
+	 *
+	 * @param Key Key of the binary record.
+	 * @param FileType File type of the binary (supported file types are jpeg, jpg, png, bmp, gif, mp3, webp, and bin).
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void RequestUserBinaryRecordPresignedUrl(FString const& Key
+		, EAccelByteFileType FileType
 		, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 

@@ -8,11 +8,14 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteServerCredentials.h"
+#include "Core/AccelByteMessagingSystem.h"
+#include "Core/AccelByteNetworkConditioner.h"
 
 namespace AccelByte
 {
 
 class FHttpRetryScheduler;
+class FAccelByteTimeManager;
 
 namespace Api
 {
@@ -83,69 +86,114 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API FRegistry
 {
 public:
-	static Settings Settings;
+#pragma region Core
 	static FHttpRetryScheduler HttpRetryScheduler;
+	static Settings Settings;
 	static Credentials Credentials;
 	static ServerSettings ServerSettings;
 	static ServerCredentials ServerCredentials;
+	static FAccelByteTimeManager TimeManager;
+	static FAccelByteMessagingSystem MessagingSystem;
+	static FAccelByteNetworkConditioner NetworkConditioner;
+#pragma endregion
+
+#pragma region Game Client Access
 	static Api::User User;
 	static Api::UserProfile UserProfile;
-	static Api::Category Category;
-	static Api::Entitlement Entitlement;
-	static Api::Group Group;
-	static Api::Order Order;
-	static Api::Item Item;
-	static Api::Wallet Wallet;
-	static Api::Fulfillment Fulfillment;
-	static Api::CloudStorage CloudStorage;
-	static Api::Lobby Lobby;
-	static Api::Chat Chat;
 	static Api::GameProfile GameProfile;
+	static Api::Agreement Agreement;
+	static Api::GDPR GDPR;
+	static Api::Reporting Reporting;
+	static Api::Miscellaneous Miscellaneous;
+#pragma endregion
+
+#pragma region Game Client Commerce
+	static Api::Currency Currency;
+	static Api::Wallet Wallet;
+	static Api::Category Category;
+	static Api::Item Item;
+	static Api::Order Order;
+	static Api::Entitlement Entitlement;
+	static Api::Fulfillment Fulfillment;
+	static Api::StoreDisplay StoreDisplay;
+#pragma endregion
+
+#pragma region Game Client Storage
+	static Api::CloudStorage CloudStorage;
+	static Api::CloudSave CloudSave;
+	static Api::UGC UGC;
+#pragma endregion
+
+#pragma region Game Client Engagement
 	static Api::Statistic Statistic;
+	static Api::Achievement Achievement;
+	static Api::Leaderboard Leaderboard;
+	static Api::Reward Reward;
+	static Api::SeasonPass SeasonPass;
+	static Api::Group Group;
+#pragma endregion
+
+#pragma region Game Client Multiplayer
 	static Api::QosManager QosManager;
 	static Api::Qos Qos;
-	static Api::Leaderboard Leaderboard;
-	static Api::CloudSave CloudSave;
-	static Api::GameTelemetry GameTelemetry;
-	static Api::Agreement Agreement;
-	static Api::Achievement Achievement;
+	static Api::Lobby Lobby;
+	static Api::Chat Chat;
 	static Api::SessionBrowser SessionBrowser;
 	static Api::TurnManager TurnManager;
-	static Api::UGC UGC;
-	static Api::SeasonPass SeasonPass;
-	static Api::Reporting Reporting;
-	static Api::Currency Currency;
-	static Api::Miscellaneous Miscellaneous;
-	static Api::Reward Reward;
 	static Api::Session Session;
 	static Api::MatchmakingV2 MatchmakingV2;
-	static Api::HeartBeat HeartBeat;
-	static Api::StoreDisplay StoreDisplay;
-	static Api::GDPR GDPR;
+#pragma endregion
+
+#pragma region Game Client Analytics
+	static Api::GameTelemetry GameTelemetry;
 	static Api::PredefinedEvent PredefinedEvent;
 	static Api::GameStandardEvent GameStandardEvent;
+#pragma endregion
+
+	static Api::HeartBeat HeartBeat;
+
+#pragma region Dedicated Server Access
 	static GameServerApi::ServerOauth2 ServerOauth2;
-	static GameServerApi::ServerDSM ServerDSM;
-	static GameServerApi::ServerStatistic ServerStatistic;
-	static GameServerApi::ServerUGC ServerUGC;
+	static GameServerApi::ServerUser ServerUser;
+#pragma endregion
+
+#pragma region Dedicated Server Commerce
 	static GameServerApi::ServerEcommerce ServerEcommerce;
-	static GameServerApi::ServerQosManager ServerQosManager;
-	static GameServerApi::ServerGameTelemetry ServerGameTelemetry;
+#pragma endregion
+
+#pragma region Dedicated Server Storage
+	static GameServerApi::ServerCloudSave ServerCloudSave;
+	static GameServerApi::ServerUGC ServerUGC;
+#pragma endregion
+
+#pragma region Dedicated Server Engagement
+	static GameServerApi::ServerStatistic ServerStatistic;
 	static GameServerApi::ServerAchievement ServerAchievement;
-	static GameServerApi::ServerMatchmaking ServerMatchmaking;
+	static GameServerApi::ServerSeasonPass ServerSeasonPass;
+#pragma endregion
+
+#pragma region Dedicated Server Multiplayer
 	static GameServerApi::ServerLobby ServerLobby;
 	static GameServerApi::ServerChat ServerChat;
-	static GameServerApi::ServerCloudSave ServerCloudSave;
-	static GameServerApi::ServerSeasonPass ServerSeasonPass;
 	static GameServerApi::ServerSessionBrowser ServerSessionBrowser;
-	static GameServerApi::ServerUser ServerUser;
-	static GameServerApi::ServerSession ServerSession;
+	static GameServerApi::ServerMatchmaking ServerMatchmaking;
 	static GameServerApi::ServerDSHub ServerDSHub;
+	static GameServerApi::ServerSession ServerSession;
 	static GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2;
-	static GameServerApi::ServerAMS ServerAMS;
-	static GameServerApi::ServerMetricExporter ServerMetricExporter;
+#pragma endregion
+
+#pragma region DedicatedServerAnalytics
+	static GameServerApi::ServerGameTelemetry ServerGameTelemetry;
 	static GameServerApi::ServerPredefinedEvent ServerPredefinedEvent;
 	static GameServerApi::ServerGameStandardEvent ServerGameStandardEvent;
+#pragma endregion
+
+#pragma region Dedicated Server Management
+	static GameServerApi::ServerDSM ServerDSM;
+	static GameServerApi::ServerAMS ServerAMS;
+	static GameServerApi::ServerMetricExporter ServerMetricExporter;
+	static GameServerApi::ServerQosManager ServerQosManager;
+#pragma endregion
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

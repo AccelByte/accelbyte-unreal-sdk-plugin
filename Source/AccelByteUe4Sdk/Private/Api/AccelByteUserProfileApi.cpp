@@ -58,7 +58,7 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, Headers, OnSuccess, OnError);
+	HttpClient.Request(TEXT("GET"), Url, FString(), Headers, OnSuccess, OnError);
 }
 
 void UserProfile::BatchGetPublicUserProfileInfos(const FString& UserIds

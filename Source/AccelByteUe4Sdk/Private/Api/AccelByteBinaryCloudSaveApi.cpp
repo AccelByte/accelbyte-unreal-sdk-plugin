@@ -61,6 +61,43 @@ void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
+void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
+	, EAccelByteFileType FileType
+	, bool bIsPublic
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	if (FileType == EAccelByteFileType::NONE)
+	{
+		const FString Message = TEXT("Invalid request. The 'FileType' field must be set to "
+							   "(e.g., EAccelByteFileType::JPG, EAccelByteFileType::PNG, etc.). "
+							   "Please set a valid 'FileType' value to fulfill the request.");
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), Message);
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	FJsonObject JsonObj{};
+	JsonObj.SetStringField("key", Key);
+	JsonObj.SetBoolField("is_public", bIsPublic);
+	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
+	auto Content = MakeShared<FJsonObject>(JsonObj);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
 void BinaryCloudSave::GetCurrentUserBinaryRecord(FString const& Key
 	, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -297,6 +334,49 @@ void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
+void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
+	, EAccelByteFileType ContentType
+	, FString const& FileLocation
+	, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	if (FileLocation.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("File Location cannot be empty!"));
+		return;
+	}
+
+	if (ContentType == EAccelByteFileType::NONE)
+	{
+		const FString Message = TEXT("Invalid request. The 'ContentType' field must be set to "
+							   "(e.g., EAccelByteFileType::JPG, EAccelByteFileType::PNG, etc.). "
+							   "Please set a valid 'ContentType' value to fulfill the request.");
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), Message);
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *Key);
+
+	FJsonObject JsonObj{};
+	JsonObj.SetStringField("content_type", FAccelByteUtilities::GetContentType(ContentType));
+	JsonObj.SetStringField("file_location", FileLocation);
+	auto Content = MakeShared<FJsonObject>(JsonObj);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
 void BinaryCloudSave::UpdateUserBinaryRecordMetadata(FString const& Key
 	, bool bIsPublic
 	, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
@@ -370,6 +450,41 @@ void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("file_type", FileType);
+	auto Content = MakeShared<FJsonObject>(JsonObj);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
+void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
+	, EAccelByteFileType FileType
+	, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return;
+	}
+
+	if (FileType == EAccelByteFileType::NONE)
+	{
+		const FString Message = TEXT("Invalid request. The 'FileType' field must be set to "
+							   "(e.g., EAccelByteFileType::JPG, EAccelByteFileType::PNG, etc.). "
+							   "Please set a valid 'FileType' value to fulfill the request.");
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), Message);
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/presigned")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *Key);
+
+	FJsonObject JsonObj{};
+	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);

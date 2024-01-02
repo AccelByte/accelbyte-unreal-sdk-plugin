@@ -35,6 +35,10 @@ public:
 	bool bEnablePresenceBroadcastEventHeartbeat;
 	bool bEnableHttpCache{false};
 	bool bServerUseAMS{false};//Affect QoS Manager BaseURL
+	
+	/* @brief false will disable cache on game telemetry, except for what listed on critical event list */
+	bool bEnableGameTelemetryCache{ true };
+	
 	EHttpCacheType HttpCacheType {EHttpCacheType::STORAGE};
 	
 	/** @brief Ensure a minimum # secs for Qos Latency polling */
@@ -179,6 +183,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	bool bServerUseAMS{ false };
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	bool bEnableGameTelemetryCache{ true };
 };
 
 UCLASS(Config = Engine)
@@ -319,6 +326,9 @@ public:
 	static bool IsServerUseAMS();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static bool IsGameTelemetryCacheEnabled();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -436,5 +446,7 @@ public:
 	static void SetIsHttpCacheEnabled(bool bEnable);
 
 	static void SetSendPredefinedEvent(bool bEnable);
+
+	static void SetEnableGameTelemetryCache(bool bEnable);
 };
 

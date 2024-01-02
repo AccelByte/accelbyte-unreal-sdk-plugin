@@ -395,6 +395,7 @@ namespace AccelByte
 		Chat::Chat(Credentials& InCredentialsRef
 			, Settings const& InSettingsRef
 			, FHttpRetryScheduler& InHttpRef
+			, FAccelByteNetworkConditioner& InNetworkConditionerRef
 			, float PingDelay
 			, float InitialBackoffDelay
 			, float MaxBackoffDelay
@@ -402,6 +403,7 @@ namespace AccelByte
 			, TSharedPtr<IWebSocket> WebSocket)
 			: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 			, ChatCredentialsRef{InCredentialsRef}
+			, NetworkConditioner{InNetworkConditionerRef}
 			, PingDelay{PingDelay}
 			, InitialBackoffDelay{InitialBackoffDelay}
 			, MaxBackoffDelay{MaxBackoffDelay}
@@ -768,6 +770,13 @@ namespace AccelByte
 			IncomingMessage::ConvertJsonTimeFormatToFDateTimeFriendly(MessageAsJsonObj);
 
 			const HandleType HandleType = IncomingMessage::GetHandleType(HandlerStringEnumMap, MessageAsJsonObj);
+			const FString MessageType = MessageAsJsonObj->GetStringField(ChatToken::Json::Field::Method);
+
+			if(NetworkConditioner.CalculateFail(MessageType))
+			{
+				UE_LOG(LogAccelByte, Log, TEXT("[AccelByteNetworkConditioner] Dropped chat message method %s"), *MessageType);
+				return;
+			}
 
 			switch (HandleType)
 			{
