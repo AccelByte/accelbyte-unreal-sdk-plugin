@@ -14,7 +14,7 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API FMultiRegistry
 {
 public:
-	static FApiClientPtr GetApiClient(FString const &Key = FString(TEXT("default")));
+	static FApiClientPtr GetApiClient(FString const &Key = FString(TEXT("default")), bool bCreateIfNotFound = true);
 	static FServerApiClientPtr GetServerApiClient(FString const &Key = FString(TEXT("default")));
 	static bool RegisterApiClient(FString const& Key, FApiClientPtr ApiClient);
 	static bool RemoveApiClient(const FString& Key = FString(TEXT("default")));

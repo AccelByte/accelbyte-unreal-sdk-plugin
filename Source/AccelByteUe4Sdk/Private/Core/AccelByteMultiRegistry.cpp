@@ -7,10 +7,15 @@
 namespace AccelByte
 {
 
-FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key)
+FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key, bool bCreateIfNotFound)
 {
 	if (!ApiClientInstances.Contains(Key))
 	{
+		if (!bCreateIfNotFound)
+		{
+			return nullptr;
+		}
+
 		FApiClientPtr NewClient = nullptr;
 		
 		if (Key.Compare(TEXT("default")) == 0) 

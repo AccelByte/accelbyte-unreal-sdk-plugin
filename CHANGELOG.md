@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [24.7.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.7.1%0D24.7.0) (2024-01-02)
+
+
+### Bug Fixes
+
+* hotfix get api client from oss ([f7fcf08](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f7fcf086a00f135535416b20519fc7c7972090cd))
+* remove unnecessary return for a better code ([474b57e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/474b57e5f5801b689994e9e0c130199ba4e5e8a9))
+
 ## [24.7.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.7.0%0D24.6.0) (2023-12-14)
 
 
