@@ -350,6 +350,28 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 		, SettingsRef.IamServerUrl);
 }
 
+void User::RefreshPlatformToken(const EAccelBytePlatformType& Platform
+	, const FString& NativePlatformToken
+	, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (NativePlatformToken.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::StatusBadRequest), TEXT("Please provide a valid NativePlatformToken"), FErrorOAuthInfo{});
+		return;
+	}
+
+	Oauth2::RefreshPlatformToken(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
+		, FAccelByteUtilities::GetPlatformString(Platform)
+		, NativePlatformToken
+		, OnSuccess
+		, OnError
+		, SettingsRef.IamServerUrl);
+}
+
 bool IsTokenExpired(FRefreshInfo RefreshInfo)
 {
 	return RefreshInfo.Expiration <= FDateTime::UtcNow();

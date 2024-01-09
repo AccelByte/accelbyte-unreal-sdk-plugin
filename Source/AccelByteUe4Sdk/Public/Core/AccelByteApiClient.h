@@ -4,9 +4,10 @@
 
 #pragma once
 
+#include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteRegistry.h"
+#include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "Api/AccelByteBinaryCloudSaveApi.h"
@@ -56,47 +57,67 @@ public:
 	FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http);
 	~FApiClient();
 
+#pragma region Core
 	bool bUseSharedCredentials;
 	FCredentialsRef CredentialsRef{};
 	FHttpRetrySchedulerRef HttpRef{};
-	
-	Api::Group Group{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::User User{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::UserProfile UserProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Category Category{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Entitlement Entitlement{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Order Order{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Item Item{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Wallet Wallet{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Fulfillment Fulfillment{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::CloudStorage CloudStorage{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Lobby Lobby{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Chat Chat{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::GameProfile GameProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Statistic Statistic{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::QosManager QosManager{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Qos Qos{*CredentialsRef, FRegistry::Settings};
-	Api::Leaderboard Leaderboard{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::CloudSave CloudSave{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::BinaryCloudSave BinaryCloudSave{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::GameTelemetry GameTelemetry{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Agreement Agreement{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Achievement Achievement{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::SessionBrowser SessionBrowser{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::UGC UGC{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::SeasonPass SeasonPass{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Reporting Reporting{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Currency Currency{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Miscellaneous Miscellaneous{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Reward Reward{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::TurnManager TurnManager{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Session Session{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::MatchmakingV2 MatchmakingV2{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::StoreDisplay StoreDisplay{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::GDPR GDPR{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::PresenceBroadcastEvent PresenceBroadcastEvent{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	FAccelByteTimeManager TimeManager{ *HttpRef };
+#pragma endregion
+
+#pragma region Access
+	Api::User User{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::UserProfile UserProfile{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::GameProfile GameProfile{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Agreement Agreement{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::GDPR GDPR{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Reporting Reporting{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Miscellaneous Miscellaneous{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+#pragma endregion
+
+#pragma region Commerce
+	Api::Currency Currency{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Wallet Wallet{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Category Category{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Item Item{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Order Order{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Entitlement Entitlement{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Fulfillment Fulfillment{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::StoreDisplay StoreDisplay{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+#pragma endregion
+
+#pragma region Storage
+	Api::CloudStorage CloudStorage{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::CloudSave CloudSave{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::BinaryCloudSave BinaryCloudSave{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::UGC UGC{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+#pragma endregion
+
+#pragma region Engagement
+	Api::Statistic Statistic{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Achievement Achievement{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Leaderboard Leaderboard{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Reward Reward{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::SeasonPass SeasonPass{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Group Group{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+#pragma endregion
+
+#pragma region Multiplayer
+	Api::QosManager QosManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Qos Qos{ *CredentialsRef, FRegistry::Settings };
+	Api::Lobby Lobby{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Chat Chat{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::SessionBrowser SessionBrowser{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::TurnManager TurnManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Session Session{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::MatchmakingV2 MatchmakingV2{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+#pragma endregion
+
+#pragma region Analytics
+	Api::GameTelemetry GameTelemetry{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::PresenceBroadcastEvent PresenceBroadcastEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::PredefinedEvent PredefinedEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::GameStandardEvent GameStandardEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+#pragma endregion
 
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)

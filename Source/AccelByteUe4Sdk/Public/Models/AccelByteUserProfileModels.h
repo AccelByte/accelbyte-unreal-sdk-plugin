@@ -9,19 +9,6 @@
 #include "AccelByteUserProfileModels.generated.h"
 
 UENUM(BlueprintType)
-enum class EAccelByteFileType : uint8
-{
-	JPEG,
-	JPG,
-	PNG,
-	BMP,
-	GIF,
-	MP3,
-	BIN,
-	WEBP
-};
-
-UENUM(BlueprintType)
 enum class EAccelByteUploadCategory : uint8
 {
 	DEFAULT,

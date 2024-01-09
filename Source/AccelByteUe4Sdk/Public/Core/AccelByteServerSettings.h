@@ -76,6 +76,9 @@ public:
 	FString IamServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
+	FString BasicServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString DSMControllerServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
@@ -184,6 +187,9 @@ public:
 	static FString GetIamServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetBasicServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetDSMControllerServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -257,6 +263,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetIamServerUrl(const FString& IamServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetBasicServerUrl(const FString& BasicServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetDSMControllerServerUrl(const FString& DSMControllerServerUrl);

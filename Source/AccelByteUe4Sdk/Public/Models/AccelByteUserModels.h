@@ -21,6 +21,7 @@ enum class EAccelByteLoginAuthFactorType : uint8
 UENUM(BlueprintType)
 enum class EAccelBytePlatformType : uint8
 {
+	None,//Invalid
 	Steam,
 	PS4,
 	PS4CrossGen,

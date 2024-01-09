@@ -263,6 +263,28 @@ public:
 		, const FString& IamUrl = TEXT(""));
 
 	/**
+	 * @brief Refresh the platform token that is stored in the IAM backend.
+	 * Therefore we can prevent expiration on the backend.
+	 * This endpoint also not generate any event or AB Access/Refresh Token.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param PlatformID The targeted platform to be refreshed.
+	 * @param PlatformToken The platform token that will used to refresh IAM storage.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void RefreshPlatformToken(const FString& ClientID
+		, const FString& ClientSecret
+		, const FString& PlatformID
+		, const FString& PlatformToken
+		, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
+
+	/**
      * @brief Revoke specified access token to make it invalid.
      *
      * @param AccessToken Specified Access Token.

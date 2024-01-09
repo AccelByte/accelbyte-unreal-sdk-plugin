@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.8.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.8.0%0D24.7.1) (2024-01-09)
+
+
+### Features
+
+* add game session recent player endpoint ([1f3adea](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1f3adea47845d524c132f7ed571a4931356daf44))
+* expose cloud save game binary records endpoints in server SDK ([1b50200](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1b5020058034e4f82642e0009288fcdfba32f23b))
+* **gameTelemetry:** add feature to enable/disable game telemetry cache from Engine.ini setup ([4cdd848](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4cdd84879e73dbfe35352c884deaedc07e4c99f6))
+* **IAM:** refresh native platform token ([c8d3ac1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c8d3ac1ea43dd4f8d92e81f50192f5fca0f62598))
+* new lobby notification delegate for UE OSS ([d2ae140](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d2ae140975153167b224ac446ac1319137cf6d94))
+* **oauth:** add namespaceRoles on Oauth2Token model ([5c748f3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5c748f3913021966cafd3f2a516b341d0fb582af))
+* **ServerTime:** return back caculated ServerTime and sync ServerTime with the service every one hour. ([f6881af](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f6881af70e7aade36ef938f4f7273653b7778e9a))
+
+
+### Bug Fixes
+
+* GetPublicUserProfileInfo headers attached as queryParam ([c0c7622](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c0c7622dff79b587c28c78fdaa7bad2e92d39871))
+* **presenceBroadcast:** mark StartHeartbeat and StopHeartbeat as deprecated since it not supposed to be used outside of the class ([fbc0ab7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fbc0ab77a931a6142718ac8ab4805c0a70a81bc6))
+
 ### [24.7.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.7.1%0D24.7.0) (2024-01-02)
 
 

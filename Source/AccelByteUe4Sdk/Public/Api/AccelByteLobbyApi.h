@@ -266,6 +266,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FMessageNotif, const FAccelByteModelsNotificationMessage&); //Passive
 
+	/*
+	* @brief multicast delegate for handling incoming notification
+	*/
+	DECLARE_MULTICAST_DELEGATE_OneParam(FNotifBroadcaster, const FAccelByteModelsNotificationMessage&); //Passive
+
 	/**
 	 * @brief delegate for handling ban notification
 	 */
@@ -1280,7 +1285,31 @@ public:
 	 */
 	void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
 	{
-		MessageNotif = OnNotificationMessage;
+		MessageNotifBroadcaster.AddLambda([this, OnNotificationMessage](FAccelByteModelsNotificationMessage const& Message)
+			{
+				OnNotificationMessage.ExecuteIfBound(Message);
+			});
+	}
+
+	/**
+	 * @brief Set a trigger function when receiving a notification message
+	 * @param OnNotificationMessage return models called FAccelByteModelsNotificationMessage
+	 */
+	FDelegateHandle AddMessageNotifBroadcasterDelegate(const FNotifBroadcaster& OnNotificationBroadcasterMessage)
+	{
+		return MessageNotifBroadcaster.AddLambda([OnNotificationBroadcasterMessage](FAccelByteModelsNotificationMessage const& Message)
+			{
+				OnNotificationBroadcasterMessage.Broadcast(Message);
+			});
+	}
+
+	/**
+	 * @brief Remove a trigger function when receiving a notification message
+	 * @param OnNotificationBroadcasterDelegate Delegate handle to be removed
+	 */
+	void RemoveMessageNotifBroadcasterDelegate(const FDelegateHandle& OnNotificationBroadcasterDelegate)
+	{
+		MessageNotifBroadcaster.Remove(OnNotificationBroadcasterDelegate);
 	}
 
 	/**
@@ -2575,7 +2604,7 @@ private:
 	FGetAllFriendsStatusResponse GetAllFriendsStatusResponse;
 
 	// Notification
-	FMessageNotif MessageNotif;
+	FNotifBroadcaster MessageNotifBroadcaster;
 	FUserBannedNotification UserBannedNotification;
 	FUserUnbannedNotification UserUnbannedNotification;
 

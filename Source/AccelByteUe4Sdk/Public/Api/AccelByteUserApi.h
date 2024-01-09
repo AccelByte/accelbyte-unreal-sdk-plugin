@@ -230,6 +230,21 @@ public:
 		, const FOAuthErrorHandler& OnError);
 
 	/**
+	 * @brief Refresh the platform token that is stored in the IAM backend.
+	 * Therefore we can prevent expiration on the backend.
+	 * This endpoint also not generate any event or AB Access/Refresh Token.
+	 *
+	 * @param Platform The targeted platform to be refreshed.
+	 * @param NativePlatformToken The platform token that will used to refresh IAM storage.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void RefreshPlatformToken(const EAccelBytePlatformType& Platform
+		, const FString& NativePlatformToken
+		, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
 	 * @brief Relogin using the previously logged-in platform account. WINDOWS ONLY
 	 *
 	 * @param PlatformUserID The user ID that used previously and used .

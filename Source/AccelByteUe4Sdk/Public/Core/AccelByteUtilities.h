@@ -415,6 +415,7 @@ public:
 	static bool IsAccelByteIDValid(FString const& AccelByteId, EAccelByteIdHypensRule HypenRule = EAccelByteIdHypensRule::NO_RULE);
 
 	static void AppendModulesVersionToMap(TMap<FString, FString>& Headers);
+	static FString GetContentType(EAccelByteFileType const& FileType);
 
 //To allow override for testing using mock class
 protected:

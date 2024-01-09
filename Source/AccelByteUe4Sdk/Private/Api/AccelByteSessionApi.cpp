@@ -611,5 +611,25 @@ void Session::UpdateMemberStorage(FString const& SessionID
 
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Data.JsonObject.ToSharedRef(), OnSuccess, OnError);
 }
+
+void Session::GetRecentPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess,
+	FErrorHandler const& OnError, const int32 Limit /* = 20 */)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if(Limit > 200)
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Requesting recent player limit with %d will only return 200 items"), Limit);
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/recent-player")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> QueryParam;
+	QueryParam.Emplace(TEXT("limit"), FString::FromInt(Limit));
+	
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
+}
 }
 }

@@ -884,7 +884,7 @@ FString FAccelByteUtilities::GetFlightId()
 
 	if (FlightId.IsEmpty())
 	{
-		FlightId = FGuid::NewGuid().ToString();
+		FlightId = FGuid::NewGuid().ToString().ToLower();
 	}
 	return FlightId;
 }
@@ -1111,5 +1111,30 @@ EAccelByteCurrentServerManagementType FAccelByteUtilities::GetCurrentServerManag
 	else
 	{
 		return EAccelByteCurrentServerManagementType::LOCAL_SERVER;
+	}
+}
+
+// Helper function to get content type based on EAccelByteFileType enum
+FString FAccelByteUtilities::GetContentType(EAccelByteFileType const& FileType)
+{
+	switch (FileType)
+	{
+	case EAccelByteFileType::JPEG:
+	case EAccelByteFileType::JPG:
+		return "image/jpeg";
+	case EAccelByteFileType::PNG:
+		return "image/png";
+	case EAccelByteFileType::BMP:
+		return "image/bmp";
+	case EAccelByteFileType::GIF:
+		return "image/gif";
+	case EAccelByteFileType::MP3:
+		return "audio/mpeg";
+	case EAccelByteFileType::BIN:
+		return "application/octet-stream";
+	case EAccelByteFileType::WEBP:
+		return "image/webp";
+	default:
+		return ""; // Handle NONE or other cases accordingly
 	}
 }

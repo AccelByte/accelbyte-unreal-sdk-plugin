@@ -1462,7 +1462,7 @@ void Lobby::UnbindEvent()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	MessageNotif.Unbind();
+	MessageNotifBroadcaster.Clear();
 	PartyDataUpdateNotif.Unbind();
 
 	UnbindFriendNotifEvents();
@@ -2430,7 +2430,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 				break;
 			}
 				
-			MessageNotif.ExecuteIfBound(NotificationMessage);
+			MessageNotifBroadcaster.Broadcast(NotificationMessage);
 			break;
 		}
 		// Matchmaking

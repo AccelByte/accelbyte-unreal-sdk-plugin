@@ -43,6 +43,18 @@ struct ACCELBYTEUE4SDK_API FOauth2TokenBan
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FOauth2TokenNamespaceRole
+{
+	GENERATED_BODY()	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token | NamespaceRole")
+	FString RoleId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token | NamespaceRole")
+	FString Namespace{};
+};
+	
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FOauth2Token
 {
 	// UE4 JSON parser is case-insensitive and we have to match the variable names against the backend's model.
@@ -75,6 +87,9 @@ struct ACCELBYTEUE4SDK_API FOauth2Token
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
 	TArray<FString> Roles{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
+	TArray<FOauth2TokenNamespaceRole> Namespace_roles{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
 	TArray<FOauth2TokenBan> Bans{};
@@ -129,4 +144,25 @@ struct ACCELBYTEUE4SDK_API FRefreshInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FRefreshInfo")
 	FDateTime Expiration {0}; //Stored as UTC Now + TimeSpan Expiration Time
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FPlatformTokenRefreshResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FPlatformTokenRefreshResponse")
+	FString AvatarUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FPlatformTokenRefreshResponse")
+	FString Country{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FPlatformTokenRefreshResponse")
+	FString DisplayName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FPlatformTokenRefreshResponse")
+	FString PlatformTokenExpiresAt{}; //Invalid date time format therefore it can't use FDateTime
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FPlatformTokenRefreshResponse")
+	FString PlatformUserId{};
 };

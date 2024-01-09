@@ -297,6 +297,27 @@ void Oauth2::GetTokenWithRefreshToken(const FString& ClientId
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Oauth2::RefreshPlatformToken(const FString& ClientID
+	, const FString& ClientSecret
+	, const FString& PlatformID
+	, const FString& PlatformToken
+	, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
+	, const FOAuthErrorHandler& OnError
+	, const FString& IamUrl)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/platforms/%s/token/verify")
+		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl,
+		*PlatformID);
+
+	FString Content = FString::Printf(TEXT("platform_token=%s"), *PlatformToken);
+	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientID, ClientSecret);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Oauth2::RevokeToken(const FString& AccessToken
 	, const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError

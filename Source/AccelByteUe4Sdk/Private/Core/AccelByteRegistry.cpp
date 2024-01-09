@@ -5,6 +5,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "Api/AccelByteCategoryApi.h"
@@ -66,66 +67,109 @@
 
 using namespace AccelByte;
 
-Settings FRegistry::Settings;
+#pragma region Core
 FHttpRetryScheduler FRegistry::HttpRetryScheduler;
+Settings FRegistry::Settings;
 Credentials FRegistry::Credentials;
 ServerSettings FRegistry::ServerSettings;
 ServerCredentials FRegistry::ServerCredentials;
-Api::Group FRegistry::Group(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::User FRegistry::User{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};
-Api::UserProfile FRegistry::UserProfile{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};
-Api::Category FRegistry::Category(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Entitlement FRegistry::Entitlement(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Order FRegistry::Order(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Item FRegistry::Item(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Wallet FRegistry::Wallet(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Fulfillment FRegistry::Fulfillment(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::CloudStorage FRegistry::CloudStorage(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Chat FRegistry::Chat(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::QosManager FRegistry::QosManager(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::CloudSave FRegistry::CloudSave(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Qos FRegistry::Qos(FRegistry::Credentials, FRegistry::Settings);
-Api::Leaderboard FRegistry::Leaderboard(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::GameTelemetry FRegistry::GameTelemetry(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Agreement FRegistry::Agreement{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};
-Api::Achievement FRegistry::Achievement(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::SessionBrowser FRegistry::SessionBrowser(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::UGC FRegistry::UGC(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::SeasonPass FRegistry::SeasonPass(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Reporting FRegistry::Reporting(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Currency FRegistry::Currency(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Miscellaneous FRegistry::Miscellaneous(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Reward FRegistry::Reward(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Session FRegistry::Session(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::MatchmakingV2 FRegistry::MatchmakingV2(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::TurnManager FRegistry::TurnManager(FRegistry::Credentials, FRegistry::Settings, HttpRetryScheduler);
-Api::HeartBeat FRegistry::HeartBeat(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::StoreDisplay FRegistry::StoreDisplay(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::GDPR FRegistry::GDPR(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::PredefinedEvent FRegistry::PredefinedEvent(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::GameStandardEvent FRegistry::GameStandardEvent(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerUGC FRegistry::ServerUGC(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerEcommerce FRegistry::ServerEcommerce(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerQosManager FRegistry::ServerQosManager(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerGameTelemetry FRegistry::ServerGameTelemetry(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerAchievement FRegistry::ServerAchievement(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerMatchmaking FRegistry::ServerMatchmaking(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerLobby FRegistry::ServerLobby(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerChat FRegistry::ServerChat(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerCloudSave FRegistry::ServerCloudSave(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerSeasonPass FRegistry::ServerSeasonPass(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerSessionBrowser FRegistry::ServerSessionBrowser(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerUser FRegistry::ServerUser(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerSession FRegistry::ServerSession(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerDSHub FRegistry::ServerDSHub(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerMatchmakingV2 FRegistry::ServerMatchmakingV2(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerAMS FRegistry::ServerAMS(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerMetricExporter FRegistry::ServerMetricExporter(FRegistry::ServerSettings);
-GameServerApi::ServerPredefinedEvent FRegistry::ServerPredefinedEvent(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
-GameServerApi::ServerGameStandardEvent FRegistry::ServerGameStandardEvent(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);
+FAccelByteTimeManager FRegistry::TimeManager{ FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Game Client Access
+Api::User FRegistry::User{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::UserProfile FRegistry::UserProfile{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::GameProfile FRegistry::GameProfile{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Agreement FRegistry::Agreement{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::GDPR FRegistry::GDPR{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Reporting FRegistry::Reporting{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Miscellaneous FRegistry::Miscellaneous{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Game Client Commerce
+Api::Currency FRegistry::Currency{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Wallet FRegistry::Wallet{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Category FRegistry::Category{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Item FRegistry::Item{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Order FRegistry::Order{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Entitlement FRegistry::Entitlement{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Fulfillment FRegistry::Fulfillment{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::StoreDisplay FRegistry::StoreDisplay{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Game Client Storage
+Api::CloudStorage FRegistry::CloudStorage{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::CloudSave FRegistry::CloudSave{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::UGC FRegistry::UGC{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Game Client Engagement
+Api::Statistic FRegistry::Statistic{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Achievement FRegistry::Achievement{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Leaderboard FRegistry::Leaderboard{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Reward FRegistry::Reward{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::SeasonPass FRegistry::SeasonPass{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Group FRegistry::Group{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Game Client Multiplayer
+Api::QosManager FRegistry::QosManager{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Qos FRegistry::Qos{ FRegistry::Credentials, FRegistry::Settings };
+Api::Lobby FRegistry::Lobby{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Chat FRegistry::Chat{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::SessionBrowser FRegistry::SessionBrowser{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::TurnManager FRegistry::TurnManager{ FRegistry::Credentials, FRegistry::Settings, HttpRetryScheduler };
+Api::Session FRegistry::Session{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::MatchmakingV2 FRegistry::MatchmakingV2{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Game Client Analytics
+Api::GameTelemetry FRegistry::GameTelemetry{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::PredefinedEvent FRegistry::PredefinedEvent{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::GameStandardEvent FRegistry::GameStandardEvent{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+Api::HeartBeat FRegistry::HeartBeat{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+
+#pragma region Dedicated Server Access
+GameServerApi::ServerOauth2 FRegistry::ServerOauth2{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerUser FRegistry::ServerUser{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Dedicated Server Commerce
+GameServerApi::ServerEcommerce FRegistry::ServerEcommerce{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Dedicated Server Storage
+GameServerApi::ServerCloudSave FRegistry::ServerCloudSave{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerUGC FRegistry::ServerUGC{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Dedicated Server Engagement
+GameServerApi::ServerStatistic FRegistry::ServerStatistic{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerAchievement FRegistry::ServerAchievement{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerSeasonPass FRegistry::ServerSeasonPass{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Dedicated Server Multiplayer
+GameServerApi::ServerLobby FRegistry::ServerLobby{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerChat FRegistry::ServerChat{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerSessionBrowser FRegistry::ServerSessionBrowser{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerMatchmaking FRegistry::ServerMatchmaking{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerDSHub FRegistry::ServerDSHub{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerSession FRegistry::ServerSession{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerMatchmakingV2 FRegistry::ServerMatchmakingV2{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Dedicated Server Analytics
+GameServerApi::ServerGameTelemetry FRegistry::ServerGameTelemetry{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerPredefinedEvent FRegistry::ServerPredefinedEvent{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerGameStandardEvent FRegistry::ServerGameStandardEvent{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+#pragma endregion
+
+#pragma region Dedicated Server Management
+GameServerApi::ServerDSM FRegistry::ServerDSM{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerAMS FRegistry::ServerAMS{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+GameServerApi::ServerMetricExporter FRegistry::ServerMetricExporter{ FRegistry::ServerSettings };
+GameServerApi::ServerQosManager FRegistry::ServerQosManager{ FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler };
+#pragma endregion

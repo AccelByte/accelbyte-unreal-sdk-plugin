@@ -17,6 +17,7 @@ Miscellaneous::Miscellaneous(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, TimeManager(InHttpRef)
 {}
 
 Miscellaneous::~Miscellaneous()
@@ -26,15 +27,7 @@ void Miscellaneous::GetServerCurrentTime(const THandler<FTime>& OnSuccess, const
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/v1/public/misc/time"), *SettingsRef.BasicServerUrl);
-
-	const FString Accept = TEXT("application/json");
-
-	const TMap<FString, FString> Headers = {
-		{TEXT("Accept"), Accept}
-	};
-
-	HttpClient.Request(TEXT("GET"), Url, TEXT(""), Headers, OnSuccess, OnError);
+	TimeManager.GetServerTime(OnSuccess, OnError);
 }
 
 } // Namespace Api

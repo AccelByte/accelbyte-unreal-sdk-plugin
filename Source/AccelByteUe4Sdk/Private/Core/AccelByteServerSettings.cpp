@@ -50,6 +50,8 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	IamServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("IamServerUrl"), BaseUrl, TEXT("iam"));
 
+	BasicServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("BasicServerUrl"), BaseUrl, TEXT("basic"));
+
 	DSMControllerServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("DSMControllerServerUrl"), BaseUrl, TEXT("dsmcontroller"));
 
 	StatisticServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("StatisticServerUrl"), BaseUrl, TEXT("social"));
@@ -208,6 +210,11 @@ FString UAccelByteBlueprintsServerSettings::GetIamServerUrl()
 	return FRegistry::ServerSettings.IamServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetBasicServerUrl()
+{
+	return FRegistry::ServerSettings.BasicServerUrl;
+}
+
 FString UAccelByteBlueprintsServerSettings::GetDSMControllerServerUrl()
 {
 	return FRegistry::ServerSettings.DSMControllerServerUrl;
@@ -331,6 +338,11 @@ void UAccelByteBlueprintsServerSettings::SetPublisherNamespace(const FString& Pu
 void UAccelByteBlueprintsServerSettings::SetIamServerUrl(const FString& IamServerUrl)
 {
 	FRegistry::ServerSettings.IamServerUrl = IamServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetBasicServerUrl(const FString& BasicServerUrl)
+{
+	FRegistry::ServerSettings.BasicServerUrl = BasicServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetDSMControllerServerUrl(const FString& DSMControllerServerUrl)

@@ -16,6 +16,7 @@ PresenceBroadcastEvent::PresenceBroadcastEvent(Credentials& InCredentialsRef
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, CredentialsRef{ InCredentialsRef }
 {
+	SetHeartbeatInterval(FTimespan::FromSeconds(SettingsRef.PresenceBroadcastEventHeartbeatInterval));
 	PresenceBroadcastLoginSuccess = CredentialsRef.OnLoginSuccess().AddRaw(this, &PresenceBroadcastEvent::OnLoginSuccess);
 }
 
@@ -99,6 +100,8 @@ void PresenceBroadcastEvent::Startup()
 
 void PresenceBroadcastEvent::StartHeartbeat()
 {
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("This funtion is DEPRECATED, will be removed soon"));
 	if (PresenceBroadcastEventHeartbeatTickDelegateHandle.IsValid())
 	{
 		return;
@@ -109,6 +112,8 @@ void PresenceBroadcastEvent::StartHeartbeat()
 
 void PresenceBroadcastEvent::StopHeartbeat()
 {
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("This funtion is DEPRECATED, will be removed soon"));
 	if (PresenceBroadcastEventHeartbeatTickDelegateHandle.IsValid())
 	{
 		FTickerAlias::GetCoreTicker().RemoveTicker(PresenceBroadcastEventHeartbeatTickDelegateHandle);
@@ -166,7 +171,6 @@ void PresenceBroadcastEvent::OnLoginSuccess(FOauth2Token const& Response)
 
 	if (SettingsRef.bEnablePresenceBroadcastEventHeartbeat)
 	{
-		SetHeartbeatInterval(FTimespan::FromSeconds(SettingsRef.PresenceBroadcastEventHeartbeatInterval));
 		StartHeartbeat();
 	}
 }

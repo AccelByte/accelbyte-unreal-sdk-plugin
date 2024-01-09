@@ -29,6 +29,7 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 {
 	GameTelemetryLoginSuccess = CredentialsRef.OnLoginSuccess().AddRaw(this, &GameTelemetry::OnLoginSuccess);
 	GameTelemetryLogoutSuccess = CredentialsRef.OnLogoutSuccess().AddRaw(this, &GameTelemetry::OnLogoutSuccess);
+	bCacheEvent = SettingsRef.bEnableGameTelemetryCache;
 }
 
 GameTelemetry::~GameTelemetry()

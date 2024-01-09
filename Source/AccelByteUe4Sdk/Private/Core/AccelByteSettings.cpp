@@ -171,6 +171,10 @@ void Settings::LoadSettings(const FString& SectionPath)
 	FString PresenceBroadcastEventHeartbeatEnabledString;
 	LoadFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatEnabled"), PresenceBroadcastEventHeartbeatEnabledString);
 	bEnablePresenceBroadcastEventHeartbeat = PresenceBroadcastEventHeartbeatEnabledString.IsEmpty() ? false : PresenceBroadcastEventHeartbeatEnabledString.ToBool();
+
+	FString GameTelemetryCacheEnabledString;
+	LoadFallback(SectionPath, TEXT("GameTelemetryCacheEnabled"), GameTelemetryCacheEnabledString);
+	this->bEnableGameTelemetryCache = GameTelemetryCacheEnabledString.IsEmpty() ? true : GameTelemetryCacheEnabledString.ToBool();// the default is true
 	
 	FString SendPredefinedEventString;
 	LoadFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString);
@@ -421,6 +425,11 @@ bool UAccelByteBlueprintsSettings::IsServerUseAMS()
 	return FRegistry::Settings.bServerUseAMS;
 }
 
+bool UAccelByteBlueprintsSettings::IsGameTelemetryCacheEnabled()
+{
+	return FRegistry::Settings.bEnableGameTelemetryCache;
+}
+
 void UAccelByteBlueprintsSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::Settings.ClientId = ClientId;
@@ -600,6 +609,11 @@ void UAccelByteBlueprintsSettings::SetServerUseAMS(bool bEnable)
 void UAccelByteBlueprintsSettings::SetSendPredefinedEvent(bool bEnable)
 {
 	FRegistry::Settings.bSendPredefinedEvent = bEnable;
+}
+
+void UAccelByteBlueprintsSettings::SetEnableGameTelemetryCache(bool bEnable)
+{
+	FRegistry::Settings.bEnableGameTelemetryCache = bEnable;
 }
 
 void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment Environment)
