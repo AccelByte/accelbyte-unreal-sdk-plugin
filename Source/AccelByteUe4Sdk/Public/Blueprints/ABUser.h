@@ -24,6 +24,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDCountryInfoResponse, FCountryInfo, Response)
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDBooleanResponse, bool, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccountUserPlatformInfosResponse, FAccountUserPlatformInfosResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDAccountLinkConflictErrorJsonResponse, int32, ErrorCode, const FString&, ErrorMessage, FAccountLinkConflictErrorJson, Response);
 
 UCLASS(Blueprintable, BlueprintType)
@@ -151,6 +153,12 @@ public:
 	void SearchUsersByType(FString const& Query, EAccelByteSearchType By, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void SearchUsersByOtherPlatformType(FString const& Query, EAccelBytePlatformType PlatformType, EAccelByteSearchPlatformType PlatformBy, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void SearchUsersByOtherPlatformId(FString const& Query, const FString& PlatformId, EAccelByteSearchPlatformType PlatformBy, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void GetUserByUserId(FString const& UserId, FDSimpleUserDataResponse OnSuccess, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
@@ -172,6 +180,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void GetData(FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void GetDataWithLinkedPlatform(FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest& Request,FDAccountUserPlatformInfosResponse OnSuccess, FDErrorHandler OnError);
 
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;

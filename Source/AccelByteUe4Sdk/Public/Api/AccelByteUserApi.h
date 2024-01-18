@@ -164,6 +164,23 @@ public:
 		, bool bCreateHeadless = true);
 
 	/**
+	 * @brief Login with native platform and secondary platform. Currently support Windows only.
+	 *
+	 * @param NativePlatform From the native subsystem
+	 * @param NativePlatformToken The auth ticket from native identity interface
+	 * @param SecondaryPlatform From the secondary platform subsystem
+	 * @param SecondaryPlatformToken The auth ticket from secondary platform interface
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
+		, const FString& NativePlatformToken
+		, const EAccelBytePlatformType& SecondaryPlatform
+		, const FString& SecondaryPlatformToken
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
 	 * @brief Verify log in with new device when user enabled 2FA.
 	 *
 	 * @param MfaToken return from BE when user login with new device and 2FA enabled.
@@ -224,10 +241,12 @@ public:
 	 * @param RefreshToken the refresh token for login.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param PlatformUserId Target platform user id to cache.
 	 */
 	void LoginWithRefreshToken(const FString& RefreshToken
 		, const FVoidHandler& OnSuccess
-		, const FOAuthErrorHandler& OnError);
+		, const FOAuthErrorHandler& OnError
+		, const FString& PlatformUserId = TEXT(""));
 
 	/**
 	 * @brief Refresh the platform token that is stored in the IAM backend.
@@ -387,9 +406,11 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 	 * @param OnError This will be called when the operation failed.
+	 * @param bIncludeAllPlatforms This will return all 3rd party platform accounts linked to account. Default is False
 	 */
 	void GetData(const THandler<FAccountUserData>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, bool bIncludeAllPlatforms = false);
 
 	/**
 	 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
@@ -697,18 +718,62 @@ public:
 	 * @brief This function will search user by their Username or Display Name. The query will be used to find the user with the most approximate username or display name.
 	 *
 	 * @param Query Targeted user's Username or Display Name.
+	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
+	 * @param PlatformBy Filter the responded PagedPublicUsersInfo by SearchPlatformType.
+	 * @param Offset Targeted offset query filter.
+	 * @param Limit Targeted limit query filter.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SearchUsers(const FString& Query
+		, EAccelBytePlatformType PlatformType
+		, EAccelByteSearchPlatformType PlatformBy
+		, const THandler<FPagedPublicUsersInfo>& OnSuccess
+		, const FErrorHandler& OnError
+		, const int32 Offset = 0
+		, const int32 Limit = 100);
+
+	/**
+	 * @brief Searches for users on third-party platforms using their Username or Display Name.
+	 * This function specifically targets users on platforms and utilizes the platform's DisplayName for the search.
+	 *
+	 * @param Query Targeted user's Username or Display Name.
+	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC).
+	 * @param PlatformBy Filter the responded PagedPublicUsersInfo by SearchPlatformType.
+	 * @param Offset Targeted offset query filter.
+	 * @param Limit Targeted limit query filter.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SearchUsers(const FString& Query
+		, const FString& PlatformId
+		, EAccelByteSearchPlatformType PlatformBy
+		, const THandler<FPagedPublicUsersInfo>& OnSuccess
+		, const FErrorHandler& OnError
+		, const int32 Offset = 0
+		, const int32 Limit = 100);
+
+	/**
+	 * @brief Searches for users on third-party platforms using their Username or Display Name.
+	 * This function specifically targets users on platforms and utilizes the platform's DisplayName for the search.
+	 *
+	 * @param Query Targeted user's Username or Display Name.
 	 * @param By Filter the responded PagedPublicUsersInfo by SearchType. Choose the SearchType.ALL if you want to be responded with all query type.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset Targeted offset query filter.
 	 * @param Limit Targeted limit query filter.
+	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC).
+	 * @param PlatformBy Filter the responded PagedPublicUsersInfo by SearchPlatformType.
 	 */
 	void SearchUsers(const FString& Query
 		, EAccelByteSearchType By
 		, const THandler<FPagedPublicUsersInfo>& OnSuccess
 		, const FErrorHandler& OnError
 		, const int32& Offset = 0
-		, const int32& Limit = 100);
+		, const int32& Limit = 100
+		, const FString& PlatformId = TEXT("")
+		, EAccelByteSearchPlatformType PlatformBy = EAccelByteSearchPlatformType::NONE);
 
 	/**
 	 * @brief This function will search user by userId.
@@ -1016,9 +1081,20 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FThirdPartyPlatformTokenData.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& PlatformType,
-		const THandler<FThirdPartyPlatformTokenData>& OnSuccess, const FOAuthErrorHandler& OnError);
-		
+	void RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& PlatformType
+		, const THandler<FThirdPartyPlatformTokenData>& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief This function will get user basic and public info of 3rd party account
+	 * @param Request Request struct containing chosen platformId and userIds.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserPlatformInfos.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest& Request
+		, const THandler<FAccountUserPlatformInfosResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+
 private:
 	User() = delete;
 	User(User const&) = delete;

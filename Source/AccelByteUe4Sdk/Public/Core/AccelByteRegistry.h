@@ -8,6 +8,8 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteServerCredentials.h"
+#include "Core/AccelByteMessagingSystem.h"
+#include "Core/AccelByteNetworkConditioner.h"
 
 namespace AccelByte
 {
@@ -91,6 +93,8 @@ public:
 	static ServerSettings ServerSettings;
 	static ServerCredentials ServerCredentials;
 	static FAccelByteTimeManager TimeManager;
+	static FAccelByteMessagingSystem MessagingSystem;
+	static FAccelByteNetworkConditioner NetworkConditioner;
 #pragma endregion
 
 #pragma region Game Client Access

@@ -43,6 +43,7 @@ static FString SearchStrings[] =
 	TEXT(""),
 	TEXT("displayName"),
 	TEXT("username"),
+	TEXT("thirdPartyPlatform"),
 };
 
 void User::FinalPreLoginEvents()
@@ -248,6 +249,39 @@ void User::LoginWithOtherPlatformId(const FString& PlatformId
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
+void User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
+	, const FString& NativePlatformToken
+	, const EAccelBytePlatformType& SecondaryPlatform
+	, const FString& SecondaryPlatformToken
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef.GetOAuthClientId()
+		, UserCredentialsRef.GetOAuthClientSecret()
+		, FAccelByteUtilities::GetPlatformString(NativePlatform)
+		, NativePlatformToken
+		, FAccelByteUtilities::GetPlatformString(SecondaryPlatform)
+		,SecondaryPlatformToken
+		, THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			{
+				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			{
+				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
+			})
+		, SettingsRef.IamServerUrl);
+
+	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
+
 void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
 	, EAccelByteLoginAuthFactorType AuthFactorType
 	, const FString& Code
@@ -332,7 +366,8 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 }
 void User::LoginWithRefreshToken(const FString& RefreshToken
 	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+	, const FOAuthErrorHandler& OnError
+	, const FString& PlatformUserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -342,9 +377,9 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, RefreshToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, PlatformUserId, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				ProcessLoginResponse(Result, OnSuccess, OnError, PlatformUserId);
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -397,7 +432,7 @@ void User::TryRelogin(const FString& PlatformUserID
 
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(PlatformUserID
 		, THandler<TPair<FString, FString>>::CreateLambda(
-			[this, OnSuccess, OnError](TPair<FString, FString> Pair)
+			[this, PlatformUserID, OnSuccess, OnError](TPair<FString, FString> Pair)
 			{
 				if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
 				{
@@ -419,7 +454,7 @@ void User::TryRelogin(const FString& PlatformUserID
 					return;
 				}
 
-				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError);
+				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError, PlatformUserID);
 			})
 		, FAccelByteUtilities::AccelByteStorageFile());
 #else
@@ -528,7 +563,7 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 			{
 				FReport::Log(FString::Printf(TEXT("[AccelByte] Error GetData after Login Success, Error Code: %d Message: %s"), ErrorCode, *ErrorMessage));
 				CallbackFunction.Execute();
-			})
+			}),true
 		);
 
 	FHttpRetryScheduler::SetHeaderNamespace(Response.Namespace); 
@@ -697,12 +732,17 @@ void User::Registerv3(const FRegisterRequestv3& RegisterRequest
 }
 
 void User::GetData(const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, bool bIncludeAllPlatforms)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/users/me")
 		, *SettingsRef.IamServerUrl);
+
+	const TMultiMap<FString, FString> QueryParams ({
+		{"includeAllPlatforms", bIncludeAllPlatforms ? TEXT("true") : TEXT("false")}
+	}); 
 
 	const TDelegate<void(FAccountUserData const&)> OnSuccessHttpClient =
 		THandler<FAccountUserData>::CreateLambda(
@@ -712,7 +752,7 @@ void User::GetData(const THandler<FAccountUserData>& OnSuccess
 				OnSuccess.ExecuteIfBound(AccountUserData);
 			});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
 }
 
 void User::UpdateUser(FUserUpdateRequest UpdateRequest
@@ -1184,7 +1224,9 @@ void User::SearchUsers(const FString& Query
 	, const THandler<FPagedPublicUsersInfo>& OnSuccess
 	, const FErrorHandler& OnError
 	, const int32& Offset
-	, const int32& Limit)
+	, const int32& Limit
+	, const FString& PlatformId
+	, EAccelByteSearchPlatformType PlatformBy)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1198,11 +1240,26 @@ void User::SearchUsers(const FString& Query
 		SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
 	}
 
+	FString SearchPlatformBy = TEXT("");
+	switch (PlatformBy)
+	{
+	case EAccelByteSearchPlatformType::NONE:
+		SearchPlatformBy = TEXT("");
+		break;
+	case EAccelByteSearchPlatformType::PLATFORM_DISPLAY_NAME:
+		SearchPlatformBy = TEXT("platformDisplayName");
+		break;
+	default:
+		return;
+	}
+
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("query"), Query },
 		{ TEXT("by"), SearchId },
 		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("platformId"), PlatformId },
+		{ TEXT("platformBy"), SearchPlatformBy },
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -1223,6 +1280,41 @@ void User::SearchUsers(const FString& Query
 {
 	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError, Offset, Limit);
 }
+
+void User::SearchUsers(const FString& Query
+	, EAccelBytePlatformType PlatformType
+	, EAccelByteSearchPlatformType PlatformBy
+	, const THandler<FPagedPublicUsersInfo>& OnSuccess
+	, const FErrorHandler& OnError
+	, const int32 Offset
+	, const int32 Limit)
+{
+	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
+	if (PlatformId.IsEmpty() && PlatformBy == EAccelByteSearchPlatformType::NONE)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest),
+			TEXT("platformId and platformBy can not be empty, platformBy only supports value [platformDisplayName]"));
+		return;
+	}
+	SearchUsers(Query, EAccelByteSearchType::THIRD_PARTY_PLATFORM, OnSuccess, OnError, Offset, Limit, PlatformId, PlatformBy);
+}
+
+void User::SearchUsers(const FString& Query
+	, const FString& PlatformId
+	, EAccelByteSearchPlatformType PlatformBy
+	, const THandler<FPagedPublicUsersInfo>& OnSuccess
+	, const FErrorHandler& OnError
+	, const int32 Offset
+	, const int32 Limit)
+{
+	if (PlatformId.IsEmpty() && PlatformBy == EAccelByteSearchPlatformType::NONE)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest),
+			TEXT("platformId and platformBy can not be empty, platformBy only supports value [platformDisplayName]"));
+		return;
+	}
+	SearchUsers(Query, EAccelByteSearchType::THIRD_PARTY_PLATFORM, OnSuccess, OnError, Offset, Limit, PlatformId, PlatformBy);
+}	
 	
 void User::GetUserByUserId(const FString& UserID
 	, const THandler<FSimpleUserData>& OnSuccess
@@ -1729,6 +1821,18 @@ void User::RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& Pla
 				UserCredentialsRef.SetThridPartyPlatformTokenData(PlatformId, Result);
 				OnSuccess.ExecuteIfBound(Result); 
 			}), OnError);
+}
+
+void User::GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest& Request
+	, const THandler<FAccountUserPlatformInfosResponse>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));   
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/platforms")
+	   , *SettingsRef.IamServerUrl
+	   , *CredentialsRef.GetNamespace());
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 	
 } // Namespace Api

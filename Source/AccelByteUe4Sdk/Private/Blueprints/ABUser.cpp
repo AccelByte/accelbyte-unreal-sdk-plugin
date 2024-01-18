@@ -667,6 +667,48 @@ void UABUser::SearchUsersByType(FString const& Query
 			}));
 }
 
+void UABUser::SearchUsersByOtherPlatformType(FString const& Query
+	, EAccelBytePlatformType PlatformType
+	, EAccelByteSearchPlatformType PlatformBy
+	, FDPagedPublicUsersInfoResponse OnSuccess
+	, FDErrorHandler OnError) 
+{
+	ApiClientPtr->User.SearchUsers(Query
+		, PlatformType
+		, PlatformBy
+		, THandler<FPagedPublicUsersInfo>::CreateLambda(
+		[OnSuccess](FPagedPublicUsersInfo const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		})
+		, FErrorHandler::CreateLambda(
+		[OnError](int Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}), 0, 100);
+}
+
+void UABUser::SearchUsersByOtherPlatformId(FString const& Query
+	, const FString& PlatformId
+	, EAccelByteSearchPlatformType PlatformBy
+	, FDPagedPublicUsersInfoResponse OnSuccess
+	, FDErrorHandler OnError) 
+{
+	ApiClientPtr->User.SearchUsers(Query
+	, PlatformId
+	, PlatformBy
+	, THandler<FPagedPublicUsersInfo>::CreateLambda(
+	[OnSuccess](FPagedPublicUsersInfo const& Response)
+	{
+		OnSuccess.ExecuteIfBound(Response);
+	})
+	, FErrorHandler::CreateLambda(
+	[OnError](int Code, FString const& Message)
+	{
+		OnError.ExecuteIfBound(Code, Message);
+	}), 0, 100);
+}
+
 
 void UABUser::GetUserByUserId(FString const& UserId
 	, FDSimpleUserDataResponse OnSuccess
@@ -779,6 +821,38 @@ void UABUser::GetData(FDAccountUserDataResponse OnSuccess
 {
 	ApiClientPtr->User.GetData(THandler<FAccountUserData>::CreateLambda(
 			[OnSuccess](FAccountUserData const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}), false);
+}
+
+void UABUser::GetDataWithLinkedPlatform(FDAccountUserDataResponse OnSuccess
+	, FDErrorHandler OnError) 
+{
+	ApiClientPtr->User.GetData(THandler<FAccountUserData>::CreateLambda(
+			[OnSuccess](FAccountUserData const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),true);
+}
+
+void UABUser::GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest& Request
+	, FDAccountUserPlatformInfosResponse OnSuccess
+	, FDErrorHandler OnError) 
+{
+	ApiClientPtr->User.GetUserOtherPlatformBasicPublicInfo(Request
+		, THandler<FAccountUserPlatformInfosResponse>::CreateLambda(
+			[OnSuccess](FAccountUserPlatformInfosResponse const& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			})

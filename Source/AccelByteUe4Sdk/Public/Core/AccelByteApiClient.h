@@ -7,6 +7,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteNetworkConditioner.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteAgreementApi.h"
@@ -46,6 +47,7 @@
 #include "Api/AccelByteStoreDisplayApi.h"
 #include "Api/AccelBytePredefinedEventApi.h"
 #include "Api/AccelByteGameStandardEventApi.h"
+#include "Core/AccelByteMessagingSystem.h"
 
 namespace AccelByte
 {
@@ -59,9 +61,11 @@ public:
 
 #pragma region Core
 	bool bUseSharedCredentials;
-	FCredentialsRef CredentialsRef{};
+	FAccelByteMessagingSystem MessagingSystem{};
+	FCredentialsRef CredentialsRef;
 	FHttpRetrySchedulerRef HttpRef{};
 	FAccelByteTimeManager TimeManager{ *HttpRef };
+	FAccelByteNetworkConditioner NetworkConditioner{};
 #pragma endregion
 
 #pragma region Access
@@ -103,9 +107,9 @@ public:
 
 #pragma region Multiplayer
 	Api::QosManager QosManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Qos Qos{ *CredentialsRef, FRegistry::Settings };
-	Api::Lobby Lobby{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Chat Chat{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Qos Qos{ *CredentialsRef, FRegistry::Settings, MessagingSystem };
+	Api::Lobby Lobby{ *CredentialsRef, FRegistry::Settings, *HttpRef, MessagingSystem, NetworkConditioner };
+	Api::Chat Chat{ *CredentialsRef, FRegistry::Settings, *HttpRef, MessagingSystem, NetworkConditioner};
 	Api::SessionBrowser SessionBrowser{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::TurnManager TurnManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Session Session{ *CredentialsRef, FRegistry::Settings, *HttpRef };

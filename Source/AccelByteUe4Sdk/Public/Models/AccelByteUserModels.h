@@ -26,6 +26,7 @@ enum class EAccelBytePlatformType : uint8
 	PS4,
 	PS4CrossGen,
 	PS5,
+	PSPC,
 	Live,
 	Google,
 	Apple,
@@ -48,7 +49,17 @@ enum class EAccelBytePlatformType : uint8
 UENUM(BlueprintType)
 enum class EAccelByteSearchType : uint8
 {
-	ALL, DISPLAYNAME, USERNAME
+	ALL,
+	DISPLAYNAME,
+	USERNAME,
+	THIRD_PARTY_PLATFORM
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteSearchPlatformType : uint8
+{
+	NONE = 0,
+	PLATFORM_DISPLAY_NAME
 };
 
 UENUM(BlueprintType)
@@ -271,6 +282,45 @@ struct ACCELBYTEUE4SDK_API FNamespaceRole
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccountUserPlatformInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfo")
+	FString PlatformAvatarUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfo")
+	FString PlatformDisplayName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfo")
+	FString PlatformGroup{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfo")
+	FString PlatformId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfo")
+	FString PlatformUserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccountUserPlatformData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfos")
+	FString AvatarUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfos")
+	FString DisplayName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfos")
+	TArray<FAccountUserPlatformInfo> PlatformInfos{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfos")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccountUserData
 {
 	GENERATED_BODY()
@@ -361,7 +411,9 @@ struct ACCELBYTEUE4SDK_API FAccountUserData
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
 	FString PlatformDisplayName{};
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	TArray<FAccountUserPlatformInfo> PlatformInfos{};
 };
 
 USTRUCT(BlueprintType)
@@ -511,6 +563,9 @@ struct ACCELBYTEUE4SDK_API FPublicUserInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
 	FString UserName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | GetPublicUserInfoRequest")
+	TArray<FAccountUserPlatformInfo> UserPlatformInfos{};
 };
 
 USTRUCT(BlueprintType)
@@ -1233,4 +1288,25 @@ struct ACCELBYTEUE4SDK_API FThirdPartyPlatformTokenData
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | ThirdPartyPlatformTokenResponse")
 	FString Sand_box_id{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FPlatformAccountInfoRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PlatformAccountInfoRequest")
+	FString PlatformId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PlatformAccountInfoRequest")
+	TArray<FString> UserIds{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccountUserPlatformInfosResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | AccountUserPlatformInfosResponse")
+	TArray<FAccountUserPlatformData> Data{};
 };

@@ -69,11 +69,13 @@ using namespace AccelByte;
 
 #pragma region Core
 FHttpRetryScheduler FRegistry::HttpRetryScheduler;
+FAccelByteMessagingSystem FRegistry::MessagingSystem;
 Settings FRegistry::Settings;
-Credentials FRegistry::Credentials;
+Credentials FRegistry::Credentials {MessagingSystem};
 ServerSettings FRegistry::ServerSettings;
 ServerCredentials FRegistry::ServerCredentials;
 FAccelByteTimeManager FRegistry::TimeManager{ FRegistry::HttpRetryScheduler };
+FAccelByteNetworkConditioner FRegistry::NetworkConditioner;
 #pragma endregion
 
 #pragma region Game Client Access
@@ -114,9 +116,9 @@ Api::Group FRegistry::Group{ FRegistry::Credentials, FRegistry::Settings, FRegis
 
 #pragma region Game Client Multiplayer
 Api::QosManager FRegistry::QosManager{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Qos FRegistry::Qos{ FRegistry::Credentials, FRegistry::Settings };
-Api::Lobby FRegistry::Lobby{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Chat FRegistry::Chat{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Qos FRegistry::Qos{ FRegistry::Credentials, FRegistry::Settings, FRegistry::MessagingSystem };
+Api::Lobby FRegistry::Lobby{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler,FRegistry::MessagingSystem, FRegistry::NetworkConditioner};
+Api::Chat FRegistry::Chat{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler, FRegistry::MessagingSystem, FRegistry::NetworkConditioner};
 Api::SessionBrowser FRegistry::SessionBrowser{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::TurnManager FRegistry::TurnManager{ FRegistry::Credentials, FRegistry::Settings, HttpRetryScheduler };
 Api::Session FRegistry::Session{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };

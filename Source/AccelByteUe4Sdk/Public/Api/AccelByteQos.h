@@ -9,6 +9,7 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteDefines.h"
+#include "Core/AccelByteMessagingSystem.h"
 #include "Models/AccelByteQosModels.h"
 #include "Templates/SharedPointer.h"
 
@@ -23,7 +24,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Qos
 {
 public:
-	Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef);
+	Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef, FAccelByteMessagingSystem& InMessagingSystemRef);
 	~Qos();
 
 	/**
@@ -72,6 +73,7 @@ private:
 	// Constructor
 	Credentials& CredentialsRef;
 	const Settings& SettingsRef;
+	FAccelByteMessagingSystem& MessagingSystem;
 	TSharedPtr<bool> bValidityFlagPtr = nullptr;
 
 	static FAccelByteModelsQosServerList QosServers;
@@ -148,7 +150,33 @@ private:
 	 * @param QosServerPollIntervalSecs the interval for polling the Qos servers in seconds
 	 */
 	void InitGetServerLatenciesScheduler(float QosServerPollIntervalSecs);
-	
+
+#pragma region MessagingSystem
+private:
+	FDelegateHandle LobbyConnectedDelegateHandle;
+	FOnMessagingSystemReceivedMessage OnLobbyConnectedHandle;
+
+	/**
+	 * @brief Send cached latencies to messaging system to notify the latencies is updated.
+	 */
+	void SendQosLatenciesMessage();
+
+	/**
+	 * @brief Handler for receiving lobby connected message from messaging system
+	 *
+	 * @param Payload the payload of the message
+	 */
+	void OnLobbyConnected(const FString& Payload);
+
+	bool bQosUpdated{false};
+
+	const float QosUpdateCheckerIntervalSecs = 60.0f;
+	FTickerDelegate QosUpdateCheckerTickerDelegate{};
+	FDelegateHandleAlias QosUpdateCheckerHandle{};
+
+	bool CheckQosUpdate(float DeltaTime);
+#pragma endregion
+
 	Qos(Qos const&) = delete;
 	Qos(Qos&&) = delete;
 };

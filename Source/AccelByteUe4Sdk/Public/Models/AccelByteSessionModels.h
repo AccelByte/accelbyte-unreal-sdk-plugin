@@ -783,3 +783,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionRecentPlayers
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionRecentPlayers")
 	TArray<FAccelByteModelsV2SessionRecentPlayer> Data{};
 };
+
+USTRUCT(BlueprintType) 
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionJoinedSecret
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionJoinedSecret")
+	FString Secret{};
+};

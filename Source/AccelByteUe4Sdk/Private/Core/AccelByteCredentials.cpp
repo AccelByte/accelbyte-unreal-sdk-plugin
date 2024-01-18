@@ -20,8 +20,9 @@ DEFINE_LOG_CATEGORY(LogAccelByteCredentials);
 namespace AccelByte
 {
 
-Credentials::Credentials()
+Credentials::Credentials(FAccelByteMessagingSystem& MessagingRef)
 	: AuthToken()
+	, MessagingSystem(MessagingRef)
 {
 }
 
@@ -120,6 +121,8 @@ void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTi
 	AuthToken = NewAuthToken;
 	BackoffCount = 0;
 	SessionState = ESessionState::Valid;
+
+	MessagingSystem.SendMessage<FOauth2Token>(EAccelByteMessagingTopic::AuthTokenSet, NewAuthToken);
 }
 
 void Credentials::SetUserEmailAddress(const FString& EmailAddress)

@@ -52,6 +52,7 @@ enum class EV2SessionNotifTopic : uint8
 	OnPartyUpdated,
 	OnGameSessionUpdated,
 	OnSessionStorageChanged,
+	OnSessionJoinedSecret,
 	OnSessionEnded
 };
 
@@ -1427,6 +1428,15 @@ struct FAccelByteModelsSyncThirdPartyFriendsResponse
 // ------------------------------------------------------------------------------------------------
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsRefreshTokenResponse : public FAccelByteModelsLobbyBaseResponse
+{
+	GENERATED_BODY()
+};
+
+// ------------------------------------------------------------------------------------------------
+// Metrics
+// ------------------------------------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChangeUserRegionResponse : public FAccelByteModelsLobbyBaseResponse
 {
 	GENERATED_BODY()
 };

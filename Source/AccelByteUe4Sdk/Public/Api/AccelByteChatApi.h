@@ -8,6 +8,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteWebSocket.h"
 #include "Core/AccelByteApiBase.h"
+#include "Core/AccelByteNetworkConditioner.h"
 #include "Models/AccelByteChatModels.h"
 
 namespace AccelByte
@@ -42,6 +43,8 @@ public:
 	Chat(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetryScheduler& InHttpRef
+		, FAccelByteMessagingSystem& InMessagingSystemRef
+		, FAccelByteNetworkConditioner& InNetworkConditionerRef
 		, float PingDelay = 30.f
 		, float InitialBackoffDelay = 1.f
 		, float MaxBackoffDelay = 30.f
@@ -53,6 +56,9 @@ private:
 	const FString ChatSessionHeaderName = TEXT("X-Ab-ChatSessionID");
 
 	Credentials& ChatCredentialsRef;
+	FAccelByteMessagingSystem& MessagingSystem;
+	FAccelByteNetworkConditioner& NetworkConditioner;
+
 	bool bBanNotifReceived = false;
 	EBanType BanType = EBanType::EMPTY;
 
@@ -257,13 +263,6 @@ public:
 		ConnectionClosed = OnConnectionClosed;
 	}
 
-	static void ProcessFragmentedMessage(const FString& InMessage
-		, const FString& InEnvelopeStart
-		, const FString& InEnvelopeEnd
-		, FString& InOutEnvelopeBuffer
-		, FString& OutMessage
-		, bool& OutIsMessageEnd);
-
 private:
 
 	const float PingDelay;
@@ -288,7 +287,8 @@ private:
 	FErrorHandler ParsingError;
 	FChatDisconnectNotif DisconnectNotif;
 	FChatConnectionClosed ConnectionClosed;
-	FDelegateHandle TokenRefreshDelegateHandle;
+	FChatConnectionClosed Reconnecting;
+	FDelegateHandle AuthTokenSetDelegateHandle;
 
 	void OnConnected();
 	void OnConnectionError(const FString& Error);

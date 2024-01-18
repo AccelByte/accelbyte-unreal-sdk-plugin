@@ -9,7 +9,7 @@ namespace AccelByte
 	
 FApiClient::FApiClient()
 	: bUseSharedCredentials(false)
-	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>())
+	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(MessagingSystem))
 	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
 {
 	HttpRef->Startup();

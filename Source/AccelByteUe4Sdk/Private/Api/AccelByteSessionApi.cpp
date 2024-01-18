@@ -631,5 +631,26 @@ void Session::GetRecentPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> 
 	
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
 }
+	
+void Session::GetSessionSecret(FString const& SessionID
+	, THandler<FAccelByteModelsV2SessionJoinedSecret> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (SessionID.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("SessionID is empty!"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/secret")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *SessionID);	
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 }
 }

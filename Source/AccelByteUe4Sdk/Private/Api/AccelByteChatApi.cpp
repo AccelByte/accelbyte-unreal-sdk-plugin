@@ -4,12 +4,13 @@
 
 #include "Api/AccelByteChatApi.h"
 
+#include "Core/AccelByteMessageParser.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
-#include "Engine/Engine.h"
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
+#include "EngineMinimal.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteChat, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteChat);
@@ -395,6 +396,8 @@ namespace AccelByte
 		Chat::Chat(Credentials& InCredentialsRef
 			, Settings const& InSettingsRef
 			, FHttpRetryScheduler& InHttpRef
+			, FAccelByteMessagingSystem& InMessagingSystemRef
+			, FAccelByteNetworkConditioner& InNetworkConditionerRef
 			, float PingDelay
 			, float InitialBackoffDelay
 			, float MaxBackoffDelay
@@ -402,6 +405,8 @@ namespace AccelByte
 			, TSharedPtr<IWebSocket> WebSocket)
 			: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 			, ChatCredentialsRef{InCredentialsRef}
+			, MessagingSystem{InMessagingSystemRef}
+			, NetworkConditioner{InNetworkConditionerRef}
 			, PingDelay{PingDelay}
 			, InitialBackoffDelay{InitialBackoffDelay}
 			, MaxBackoffDelay{MaxBackoffDelay}
@@ -461,13 +466,13 @@ namespace AccelByte
 		void Chat::Disconnect()
 		{
 			FReport::Log(FString(__FUNCTION__));
-			ChatCredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
+			MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
 			if (WebSocket.IsValid())
 			{
 				WebSocket->Disconnect();
 			}
 
-			if (GEngine) UE_LOG(LogAccelByteChat, Log, TEXT("Disconnected"));
+			UE_LOG(LogAccelByteChat, Log, TEXT("Disconnected"));
 		}
 
 		bool Chat::IsConnected() const
@@ -488,17 +493,15 @@ namespace AccelByte
 		void Chat::OnConnected()
 		{
 			UE_LOG(LogAccelByteChat, Log, TEXT("Connected"));
-			TokenRefreshDelegateHandle = ChatCredentialsRef.OnTokenRefreshed().AddLambda([this](bool bSuccess)
-			{
-				if (bSuccess)
+			
+			AuthTokenSetDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet, FOnMessagingSystemReceivedMessage::CreateLambda(
+				[this](const FString& Message)
 				{
-					RefreshToken(CredentialsRef.GetAccessToken(), RefreshTokenResponse);
-				}
-				else
-				{
-					Disconnect();
-				}
-			});
+					FOauth2Token Token;
+					FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
+					RefreshToken(Token.Access_token, RefreshTokenResponse);
+				}));
+			
 			ConnectSuccess.ExecuteIfBound();
 		}
 
@@ -514,8 +517,10 @@ namespace AccelByte
 		{
 			// disconnect only if status code > 4000 and we don't receive a login ban,
 			// other ban will try to reconnect the websocket
+			bool bIsReconnecting {true};
 			if (StatusCode > 4000 && !(bBanNotifReceived && BanType != EBanType::LOGIN))
 			{
+				bIsReconnecting = false;
 				Disconnect();
 			}
 			else
@@ -523,11 +528,20 @@ namespace AccelByte
 				WebSocket->Reconnect();
 			}
 
+			MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+
 			bBanNotifReceived = false;
 			BanType = EBanType::EMPTY;
 			
 			UE_LOG(LogAccelByteChat, Log, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
-			ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
+			if(bIsReconnecting)
+			{
+				Reconnecting.ExecuteIfBound(StatusCode, Reason, WasClean);
+			}
+			else
+			{
+				ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
+			}
 		}
 
 #pragma endregion // CONNECTION
@@ -695,51 +709,6 @@ namespace AccelByte
 
 #define MODEL_RESPONSE(MessageType) FAccelByteModelsChat ## MessageType ## Response
 #define CASE_RESPONSE_ID(MessageType) CASE_RESPONSE_ID_EXPLICIT_MODEL(MessageType, MODEL_RESPONSE(MessageType))
-
-		void Chat::ProcessFragmentedMessage(const FString& InMessage
-			, const FString& InEnvelopeStart
-			, const FString& InEnvelopeEnd
-			, FString& InOutEnvelopeBuffer
-			, FString& OutMessage
-			, bool& OutIsMessageEnd)
-		{
-			OutMessage = "";
-			if(!InEnvelopeStart.IsEmpty() || !InEnvelopeStart.IsEmpty())
-			{
-				FString MessageCopy {InMessage};
-				if(!InEnvelopeStart.IsEmpty() && MessageCopy.StartsWith(InEnvelopeStart))
-				{
-					InOutEnvelopeBuffer = "";
-					MessageCopy.RemoveFromStart(InEnvelopeStart);
-				}
-
-				InOutEnvelopeBuffer.Append(MessageCopy);
-
-				if(InEnvelopeEnd.IsEmpty())
-				{
-					UE_LOG(LogAccelByteChat, Warning, TEXT("WsEnvelopeEnd is empty string, "
-						"event though WsEnvelopeStart is not empty.\nWill not detect fragmented message"));
-				}
-				else
-				{
-					if(!InOutEnvelopeBuffer.EndsWith(InEnvelopeEnd))
-					{
-						// message is fragmented, should wait next message
-						OutIsMessageEnd = false;
-						return;
-					}
-					else
-					{
-						InOutEnvelopeBuffer.RemoveFromEnd(InEnvelopeEnd);
-					}
-				}
-
-				OutMessage = InOutEnvelopeBuffer;
-				InOutEnvelopeBuffer = "";
-			}
-
-			OutIsMessageEnd = true;
-		}
 		
 		void Chat::OnMessage(const FString& Message)
 		{
@@ -752,7 +721,8 @@ namespace AccelByte
 
 			bool bIsFragmentedEnd {false};
 			FString ProcessedMessage;
-			ProcessFragmentedMessage(Message, WsEnvelopeStart, WsEnvelopeEnd, EnvelopeContentBuffer, ProcessedMessage, bIsFragmentedEnd);
+			MessageParser::ProcessFragmentedMessage(Message, WsEnvelopeStart, WsEnvelopeEnd,
+				EnvelopeContentBuffer, ProcessedMessage, bIsFragmentedEnd);
 
 			if(!bIsFragmentedEnd)
 				return;
@@ -768,6 +738,13 @@ namespace AccelByte
 			IncomingMessage::ConvertJsonTimeFormatToFDateTimeFriendly(MessageAsJsonObj);
 
 			const HandleType HandleType = IncomingMessage::GetHandleType(HandlerStringEnumMap, MessageAsJsonObj);
+			const FString MessageType = MessageAsJsonObj->GetStringField(ChatToken::Json::Field::Method);
+
+			if(NetworkConditioner.CalculateFail(MessageType))
+			{
+				UE_LOG(LogAccelByte, Log, TEXT("[AccelByteNetworkConditioner] Dropped chat message method %s"), *MessageType);
+				return;
+			}
 
 			switch (HandleType)
 			{
@@ -826,7 +803,6 @@ namespace AccelByte
 				{
 					bBanNotifReceived = true;
 					FAccelByteModelsChatUserBanUnbanNotif Data;
-					ChatCredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
 					TSharedPtr<FJsonObject> Result = MessageAsJsonObj->GetObjectField(ChatToken::Json::Field::Params);
 					if (const bool bParseSuccess = FJsonObjectConverter::JsonObjectToUStruct(Result.ToSharedRef(), &Data, 0, 0))
 					{
@@ -1243,8 +1219,8 @@ namespace AccelByte
 		}
 
 		FString Chat::RefreshToken(const FString& AccessToken
-			, const FChatRefreshTokenResponse& OnSuccess
-			, const FErrorHandler& OnError)
+		                           , const FChatRefreshTokenResponse& OnSuccess
+		                           , const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;

@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.9.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.9.0%0D24.8.0) (2024-01-18)
+
+
+### Features
+
+* add messaging system for communicating between api and automatically send user region on lobby connected ([db2e764](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/db2e7648a8e721956fe9718824afffebf0939407))
+* **HTTP:** automatically retry the request if the backend returns 429 response (too many request) ([1e98a05](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1e98a05213e45d1bc616681b55809fd626fdb475))
+* implement message envelope in lobby ([57a9360](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/57a9360c363a26f92da7ddb15e52d82f1e64fe31))
+* Implement network conditioner in chat and lobby apis ([c336c73](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c336c73db64a68509d21aba10b444a1039d96790))
+* Implement NetworkConditioner class ([f7f6763](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f7f6763f1c21c8858bf46c896d86532c0c9c647e))
+* **Login:** simultaneous login IAM function ([e660235](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e6602356fc3f67ca149c1fd2f279f9c7cb5cfe68))
+* sdk adjustment to support returning explicit 3rd party platform info ([1eec4a7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1eec4a7e2e6e38ce8c70e5f7b0383974e594359a))
+* send new access token to chat every auth token set and remove chat refresh token handlers ([442eacb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/442eacb3858eeebd07dced8a56ca52b9bbceb0e5))
+* send new auth token to lobby every time it's set ([6543d70](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6543d70889789ff829481e94ce276a0471d080ac))
+* **session:** Session Service Player Validation ([649240c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/649240cde4b227762a6dbbedbecb5abab3e270f3))
+* **session:** Session Service Player Validation ([294135f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/294135f8fd828282b97ac47a2f264953d9f59446))
+* SHA1 generator, update and set to lower case by default ([06ebd3d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/06ebd3d756594316256fd5fbb450b372fa114fe7))
+
+
+### Bug Fixes
+
+* add missing include header in AccelByteChatApi.cpp ([327b293](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/327b293a9ec9bb7e45f3dff9531c012eef0c5689))
+* add more description on platform user id ([2bfd454](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2bfd45498e40e8a5c90adcec646a3f99c23f3d1f))
+* add platform user id on login refresh token to cached when try to re-login ([e9d8aac](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e9d8aac598e881537bef2bb9e2a98f48695d1318))
+* change queue to shared pointer and add delay in PingRegionsSetLatencies to avoid intermittent enqueue error in messaging system ([0fcf7ff](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0fcf7ffcaeef1f59a10e4b3bdf9a5e807a8348c8))
+* change the parameter of platform user id position ([1ad5cec](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1ad5cec3897bcb494166e8dce1cfbcbe68dcd4fa))
+* **DeviceID:** Device ID randomizer not completely random due to uninitialize seed number ([c1f12dc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c1f12dcca90993c28761dae17e44e3e7905eb9f8))
+* fix LogPython same name warning ([440ecef](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/440ecefb251419166d93f78562a0657c2716e5d8))
+* GEngine check cause compile errors in UE 5.2 ([f770158](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f770158d04ab810c848bdab90e8b922677ff753c))
+* redo removing logphyton warning on editor startup ([0d39604](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0d396046f4ffb96a2ebfa8a419e40150c30f6a40))
+* remove ApiClient Credentials intializer ([3830167](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3830167f781297443e1e67f35e515cfc4b98ecaf))
+* remove the new function and add new platform user id optional parameter on the existing function ([b36074b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b36074b9203e0083cad382dca9d1cd7651b92b45))
+* separate SendQosLatenciesMessage from UdpPing success delegate ([6504a92](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6504a92b97ba3049ffb68c23094c943483d6ad26))
+* **utility:** ambiguous FMath::Pow ([60af48e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/60af48e93a10d01bfe52b5b42616522123cc72cd))
+
+
+### Refactors
+
+* remove lobby token refresh handlers ([9adb80a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9adb80afa4348d66b60a3eed056ce041a5b06d11))
+
 ## [24.8.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.8.0%0D24.7.1) (2024-01-09)
 
 

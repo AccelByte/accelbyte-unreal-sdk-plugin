@@ -209,6 +209,14 @@ void AccelByteWebSocket::Connect()
 
 	TickerDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickerDelegate, TickPeriod);
 
+	FString HeaderString;
+
+	for (const auto& UpgradeHeader : UpgradeHeaders)
+	{
+		HeaderString.Append(FString::Printf(TEXT("key %s, value %s\n"), *UpgradeHeader.Key, *UpgradeHeader.Value));
+	}
+	
+	UE_LOG(LogAccelByteWebsocket, VeryVerbose, TEXT("Connecting websocket with header:\n%s"), *HeaderString);
 	WebSocket->Connect();
 	WsEvents |= EWebSocketEvent::Connect;
 }

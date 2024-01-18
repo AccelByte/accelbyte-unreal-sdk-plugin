@@ -8,6 +8,7 @@
 #include "Api/AccelByteQos.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpClient.h"
+#include "Core/AccelByteNetworkConditioner.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -94,6 +95,9 @@ namespace Api
 
 		// Refresh Token
 		const FString RefreshToken = TEXT("refreshTokenRequest");
+
+		// Metrics
+		const FString ChangeUserRegion = TEXT("changeRegionRequest");
 	}
 
 	namespace LobbyResponse
@@ -205,6 +209,9 @@ namespace Api
 
 		// V2 session notif
 		const FString SessionNotif = TEXT("messageSessionNotif");
+
+		// Metrics
+		const FString ChangeUserRegion = TEXT("changeRegionResponse");
 	}
 
 	namespace Prefix
@@ -218,6 +225,7 @@ namespace Api
 		const FString Signaling = TEXT("signaling");
 		const FString Attribute = TEXT("attribute");
 		const FString Token = TEXT("token");
+		const FString Metrics = TEXT("metrics");
 	}
 
 	namespace Suffix
@@ -289,6 +297,9 @@ namespace Api
 
 		// Refresh Token
 		RefreshToken,
+
+		// Metrics
+		ChangeUserRegion,
 
 		MAX_Response,
 	};
@@ -402,6 +413,7 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Response,GetAllSessionAttribute),
 		FORM_STRING_ENUM_PAIR(Response,RefreshToken),
 		FORM_STRING_ENUM_PAIR(Response,CreateDS),
+		FORM_STRING_ENUM_PAIR(Response,ChangeUserRegion),
 	};
 
 	TMap<FString, Notif> Lobby::NotifStringEnumMap{
@@ -480,14 +492,15 @@ void Lobby::Disconnect(bool ForceCleanup)
 	FReport::Log(FString(__FUNCTION__));
 
 	ChannelSlug = "";
-	LobbyCredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
-	TokenRefreshDelegateHandle.Reset();
+	
+	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+	
 	if(WebSocket.IsValid())
 	{
 		WebSocket->Disconnect(ForceCleanup);
 	}
 
-	if (GEngine) UE_LOG(LogAccelByteLobby, Log, TEXT("Disconnected"));
+	UE_LOG(LogAccelByteLobby, Log, TEXT("Disconnected"));
 }
 
 
@@ -1457,7 +1470,19 @@ FString Lobby::RefreshToken(const FString& AccessToken)
 		, Token
 		, FString::Printf(TEXT("token: %s"), *AccessToken));
 }
-	
+
+//-------------------------------------------------------------------------------------------------
+// Metrics
+//-------------------------------------------------------------------------------------------------
+void AccelByte::Api::Lobby::ChangeUserRegion(const FString& Region)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	SEND_RAW_REQUEST_CACHED_RESPONSE(ChangeUserRegion
+		, Metrics
+		, FString::Printf(TEXT("region: %s"), *Region));
+}
+
 void Lobby::UnbindEvent()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1489,6 +1514,8 @@ void Lobby::UnbindEvent()
 	
 	UserBannedNotification.Unbind();
 	UserUnbannedNotification.Unbind();
+
+	ChangeUserRegionResponse.Unbind();
 }
 
 void Lobby::UnbindFriendNotifEvents()
@@ -1691,16 +1718,17 @@ void Lobby::OnConnected()
 {
 	UE_LOG(LogAccelByteLobby, Log, TEXT("Connected"));
 
-	TokenRefreshDelegateHandle = LobbyCredentialsRef.OnTokenRefreshed().AddLambda(
-		[this](bool bSuccess)
+	AuthTokenSetDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet, FOnMessagingSystemReceivedMessage::CreateLambda(
+		[this](const FString& Message)
 		{
-			if (bSuccess)
-			{
-				RefreshToken(CredentialsRef.GetAccessToken());
-			}
-		});
+			FOauth2Token Token;
+			FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
+			RefreshToken(Token.Access_token);
+		}));
 		
 	ConnectSuccess.ExecuteIfBound();
+
+	MessagingSystem.SendMessage(EAccelByteMessagingTopic::LobbyConnected);
 }
 
 void Lobby::OnConnectionError(const FString& Error)
@@ -1721,9 +1749,8 @@ void Lobby::OnClosed(int32 StatusCode
 		bIsReconnecting = false;
 		Disconnect();
 	}
-
-	LobbyCredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
-	TokenRefreshDelegateHandle.Reset();
+	
+	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
 
 	BanNotifReceived = false;
 	BanType = EBanType::EMPTY;
@@ -1774,6 +1801,8 @@ void Lobby::CreateWebSocket(const FString& Token)
 
 	TMap<FString, FString> Headers;
 	Headers.Add(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
+	Headers.Add(LobbyEnvelopeStartHeaderName, LobbyEnvelopeStartHeaderValue);
+	Headers.Add(LobbyEnvelopeEndHeaderName, LobbyEnvelopeEndHeaderValue);
 
 	const FString PlatformId = LobbyCredentialsRef.GetAuthToken().Platform_id;
 	const FString PlatformUserId = LobbyCredentialsRef.GetAuthToken().Platform_user_id;
@@ -2103,6 +2132,8 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType
 		CASE_RESPONSE_MESSAGE_ID(GetSessionAttribute	, FAccelByteModelsGetSessionAttributesResponse);
 		CASE_RESPONSE_MESSAGE_ID(GetAllSessionAttribute	, FAccelByteModelsGetAllSessionAttributesResponse);
 		CASE_RESPONSE_MESSAGE_ID(RefreshToken			, FAccelByteModelsRefreshTokenResponse);
+		// Metrics
+		CASE_RESPONSE_MESSAGE_ID(ChangeUserRegion, FAccelByteModelsChangeUserRegionResponse);
 		default:
 		{
 			ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error; Detected of type Response but no specific handler case assigned. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
@@ -2183,6 +2214,12 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		return;
 	}
 
+	if(NetworkConditioner.CalculateFail(Notif.Topic))
+	{
+		UE_LOG(LogAccelByte, Log, TEXT("[AccelByteNetworkConditioner] Dropped Session v2 notification %s"), *Notif.Topic);
+		return;
+	}
+
 	switch(FAccelByteUtilities::GetUEnumValueFromString<EV2SessionNotifTopic>(Notif.Topic))
 	{
 	case EV2SessionNotifTopic::OnPartyInvited:
@@ -2260,6 +2297,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionEndedEvent>(Notif.Payload, V2GameSessionEndedNotif);
 		break;
 	}
+	case EV2SessionNotifTopic::OnSessionJoinedSecret:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2SessionJoinedSecret>(Notif.Payload, V2SessionJoinedSecretNotif);
+		break;
+	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
 	}
 }
@@ -2267,6 +2309,12 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message)
 {
 	UE_LOG(LogAccelByteLobby, Log, TEXT("Received MMv2 notification with topic : %s"), *Message.Topic);
+
+	if(NetworkConditioner.CalculateFail(Message.Topic))
+	{
+		UE_LOG(LogAccelByte, Log, TEXT("[AccelByteNetworkConditioner] Dropped Matchmaking v2 notification %s"), *Message.Topic);
+		return;
+	}
 	
 	switch (FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotifTopic>(Message.Topic))
 	{
@@ -2595,8 +2643,19 @@ void Lobby::OnMessage(const FString& Message)
 		return;
 	}
 
+	bool bIsFragmentedEnd {false};
+	FString ProcessedMessage;
+	MessageParser::ProcessFragmentedMessage(Message, LobbyEnvelopeStartHeaderValue, LobbyEnvelopeEndHeaderValue,
+		EnvelopeContentBuffer, ProcessedMessage, bIsFragmentedEnd);
+
+	if(!bIsFragmentedEnd)
+	{
+		UE_LOG(LogAccelByteLobby, Verbose, TEXT("Message fragmented, current content buffer\n%s"), *EnvelopeContentBuffer);
+		return;
+	}
+
 	// Conversion : Custom -> Json
-	const FString ParsedJsonString = LobbyMessageToJson(Message);
+	const FString ParsedJsonString = LobbyMessageToJson(ProcessedMessage);
 	
 	UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("JSON Version: %s"), *ParsedJsonString);
 
@@ -2607,7 +2666,7 @@ void Lobby::OnMessage(const FString& Message)
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Failed to Deserialize. Json: %s"), *ParsedJsonString);
 
 		TSharedRef<FLobbyMessageMetaData> MetaData = MakeShared<FLobbyMessageMetaData>();
-		ExtractLobbyMessageMetaData(Message, MetaData);
+		ExtractLobbyMessageMetaData(ProcessedMessage, MetaData);
 		MetaData->Code = FString::FromInt(static_cast<int>(ErrorCodes::JsonDeserializationFailed));
 
 		// handle error message if message type is response. if notif then ignore.
@@ -2627,6 +2686,13 @@ void Lobby::OnMessage(const FString& Message)
 
 	const FString ReceivedMessageType = ParsedJsonObj->GetStringField(JsonTypeIdentifier);
 	UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("Type: %s"), *ReceivedMessageType);
+
+	// drop message if network conditioner deemed we should drop this.
+	if(NetworkConditioner.CalculateFail(ReceivedMessageType))
+	{
+		UE_LOG(LogAccelByte, Log, TEXT("[AccelByteNetworkConditioner] Dropped message type %s"), *ReceivedMessageType);
+		return;
+	}
 
 	if (ReceivedMessageType.Equals(LobbyResponse::SessionNotif))
 	{
@@ -2791,9 +2857,17 @@ void Lobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerato
 	}
 }
 
+void Lobby::InitializeMessaging()
+{
+	OnReceivedQosLatenciesUpdatedDelegate = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Lobby::OnReceivedQosLatencies);
+	QosLatenciesUpdatedDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, OnReceivedQosLatenciesUpdatedDelegate);
+}
+
 Lobby::Lobby(Credentials & InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef
+	, FAccelByteMessagingSystem& InMessagingSystemRef
+	, FAccelByteNetworkConditioner& InNetworkConditionerRef
 	, float InPingDelay
 	, float InInitialBackoffDelay
 	, float InMaxBackoffDelay
@@ -2801,6 +2875,8 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, TSharedPtr<IWebSocket> InWebSocket)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, LobbyCredentialsRef{InCredentialsRef}
+	, MessagingSystem{InMessagingSystemRef}
+	, NetworkConditioner{InNetworkConditionerRef}
 	, PingDelay{InPingDelay}
 	, InitialBackoffDelay{InInitialBackoffDelay}
 	, MaxBackoffDelay{InMaxBackoffDelay}
@@ -2812,10 +2888,19 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, TimeSinceConnectionLost{.0f}
 {
 	InitializeV2MatchmakingNotifDelegates();
+	InitializeMessaging();
 }
 
 Lobby::~Lobby()
 {
+	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, QosLatenciesUpdatedDelegateHandle);
+	OnReceivedQosLatenciesUpdatedDelegate.Unbind();
+
+	for (auto& Delegate : MatchmakingV2NotifDelegates)
+	{
+		Delegate.Value.Unbind();
+	}
+
 	// only disconnect when engine is still valid
 	if(UObjectInitialized())
 	{
@@ -2829,6 +2914,26 @@ Lobby::~Lobby()
 }
 
 TMap<FString, FString> Lobby::LobbyErrorMessages{};
+
+void Lobby::OnReceivedQosLatencies(const FString& Payload)
+{
+	if (!IsConnected())
+	{
+		return;
+	}
+
+	FAccelByteModelsQosRegionLatencies RegionLatencies;
+	FJsonObjectConverter::JsonObjectStringToUStruct(Payload, &RegionLatencies);
+
+	const FString ClosestRegion = RegionLatencies.GetClosestRegion();
+
+	if (ClosestRegion.IsEmpty())
+	{
+		return;
+	}
+
+	ChangeUserRegion(ClosestRegion);
+}
 
 } // Namespace Api
 } // Namespace AccelByte

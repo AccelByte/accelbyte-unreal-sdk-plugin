@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "AccelByteMessagingSystem.h"
 #include "Core/AccelByteBaseCredentials.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "Models/AccelByteErrorModels.h"
@@ -31,7 +32,7 @@ class ACCELBYTEUE4SDK_API Credentials : public BaseCredentials
 public:
 	using BaseCredentials::SetClientCredentials;
 
-	Credentials();
+	Credentials(FAccelByteMessagingSystem& MessagingRef);
 	virtual ~Credentials();
 
 	/** @brief The user was just authed: At this point, Credential auth tokens are already set. */
@@ -83,6 +84,7 @@ private:
 	FOnLogoutSuccessDelegate LogoutSuccessDelegate{};
 	FAccountUserData AccountUserData;
 	TMap<FString, FThirdPartyPlatformTokenData> ThirdPartyPlatformTokenData;
+	FAccelByteMessagingSystem& MessagingSystem;
 
 	static const FString DefaultSection;
 

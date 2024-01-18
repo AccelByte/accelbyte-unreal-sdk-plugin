@@ -28,7 +28,8 @@ DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FS
 DECLARE_DELEGATE_OneParam(FOnServerClaimedNotification, const FAccelByteModelsServerClaimedNotification& /*Notification*/);
 DECLARE_DELEGATE_OneParam(FOnV2BackfillProposalNotification, const FAccelByteModelsV2MatchmakingBackfillProposalNotif& /*Notification*/);
 DECLARE_DELEGATE_OneParam(FOnV2SessionMemberChangedNotification, const FAccelByteModelsV2GameSession& /*Notification*/);
-DECLARE_DELEGATE_OneParam(FOnV2SessionEndedNotification, const FAccelByteModelsSessionEndedNotification& /*Notification*/)
+DECLARE_DELEGATE_OneParam(FOnV2SessionEndedNotification, const FAccelByteModelsSessionEndedNotification& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2SessionSecretUpdateNotification, const FAccelByteModelsSessionSecretUpdateNotification& /*Notification*/);
 
 /**
  * @brief DS Hub API for communication from dedicated server to backend.
@@ -114,6 +115,13 @@ public:
 	void SetOnV2SessionEndedNotificationDelegate(const FOnV2SessionEndedNotification& InDelegate);
 
 	/**
+	 * @brief Bind a delegate to listen to session secret update from DS hub
+	 *
+	 * @param InDelegate delegate to set
+	 */
+	void SetOnV2SessionSecretUpdateNotification(const FOnV2SessionSecretUpdateNotification& InDelegate); 
+
+	/**
 	 *	Unbind notification delegates
 	 */
 	void UnbindDelegates();
@@ -173,6 +181,11 @@ private:
 	 * Delegate fired when the game session associated with this DS ended (game session deleted or all of the users left).
 	 */
 	FOnV2SessionEndedNotification OnV2SessionEndedNotification{};
+
+	/**
+	 * Delegate fired when the server associated with this DS hub connection receives session secret.
+	 */
+	FOnV2SessionSecretUpdateNotification OnV2SessionSecreteUpdateNotification{};
 
 	/**
 	 * Create an instance of our websocket to connect to the DSHub server.

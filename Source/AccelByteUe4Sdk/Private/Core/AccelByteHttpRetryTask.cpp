@@ -197,6 +197,10 @@ namespace AccelByte
 	{
 		ResponseCodeDelegates = {
 			{
+				EHttpResponseCodes::TooManyRequests,
+				FHttpRetryScheduler::FHttpResponseCodeHandler::CreateRaw(this, &FHttpRetryTask::HandleDefaultRetry)
+			},
+			{
 				EHttpResponseCodes::RetryWith,
 				FHttpRetryScheduler::FHttpResponseCodeHandler::CreateRaw(this, &FHttpRetryTask::HandleDefaultRetry)
 			},

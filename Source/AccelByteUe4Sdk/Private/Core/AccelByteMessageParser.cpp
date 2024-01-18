@@ -374,4 +374,53 @@ bool MessageParser::ParseArrayOfString(const TCHAR*& Cursor, FString& OutJsonStr
 
 	return bIsValid;
 }
+
+void MessageParser::ProcessFragmentedMessage(const FString& InMessage
+			, const FString& InEnvelopeStart
+			, const FString& InEnvelopeEnd
+			, FString& InOutEnvelopeBuffer
+			, FString& OutMessage
+			, bool& OutIsMessageEnd)
+{
+	OutMessage = "";
+	if(!InEnvelopeStart.IsEmpty() || !InEnvelopeEnd.IsEmpty())
+	{
+		FString MessageCopy {InMessage};
+		if(!InEnvelopeStart.IsEmpty() && MessageCopy.StartsWith(InEnvelopeStart))
+		{
+			InOutEnvelopeBuffer = "";
+			MessageCopy.RemoveFromStart(InEnvelopeStart);
+		}
+
+		InOutEnvelopeBuffer.Append(MessageCopy);
+
+		if(InEnvelopeEnd.IsEmpty())
+		{
+			UE_LOG(LogAccelByte, Warning, TEXT("WsEnvelopeEnd is empty string, "
+				"even though WsEnvelopeStart is not empty.\nWill not detect fragmented message"));
+		}
+		else
+		{
+			if(!InOutEnvelopeBuffer.EndsWith(InEnvelopeEnd))
+			{
+				// message is fragmented, should wait next message
+				OutIsMessageEnd = false;
+				return;
+			}
+			else
+			{
+				InOutEnvelopeBuffer.RemoveFromEnd(InEnvelopeEnd);
+			}
+		}
+
+		OutMessage = InOutEnvelopeBuffer;
+		InOutEnvelopeBuffer = "";
+	}
+	else // both message envelope is empty, just pass the inMessage directly
+	{
+		OutMessage = InMessage;
+	}
+
+	OutIsMessageEnd = true;
+}
 }

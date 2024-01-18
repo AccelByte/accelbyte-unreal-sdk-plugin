@@ -19,9 +19,11 @@ FDelegateHandleAlias Qos::PollLatenciesHandle;
 FDelegateHandleAlias Qos::PollServerLatenciesHandle;
 
 Qos::Qos(Credentials& InCredentialsRef
-	, Settings const& InSettingsRef)
+	, Settings const& InSettingsRef
+	, FAccelByteMessagingSystem& InMessagingSystemRef)
 	: CredentialsRef{InCredentialsRef}
 	, SettingsRef{InSettingsRef}
+	, MessagingSystem{InMessagingSystemRef}
 	, bValidityFlagPtr(MakeShared<bool>(true))
 {
 		// Credentials is possibly destroyed before we are so we can't remove
@@ -35,12 +37,23 @@ Qos::Qos(Credentials& InCredentialsRef
 				OnLoginSuccess(Response);
 			});
 
+
+	OnLobbyConnectedHandle = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Qos::OnLobbyConnected);
+	LobbyConnectedDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::LobbyConnected, OnLobbyConnectedHandle);
+
+	QosUpdateCheckerTickerDelegate = FTickerDelegate::CreateRaw(this, &Qos::CheckQosUpdate);
+	QosUpdateCheckerHandle = FTickerAlias::GetCoreTicker().AddTicker(QosUpdateCheckerTickerDelegate, QosUpdateCheckerIntervalSecs);
 }
 
 Qos::~Qos()
 {
+	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, LobbyConnectedDelegateHandle);
+	OnLobbyConnectedHandle.Unbind();
+
 	// Indicate to the OnLoginSuccess lambda that we have been destroyed and `this` is no longer valid.
 	bValidityFlagPtr.Reset();
+
+	FTickerAlias::GetCoreTicker().RemoveTicker(QosUpdateCheckerHandle);
 }
 
 void Qos::OnLoginSuccess(const FOauth2Token& Response)
@@ -109,7 +122,7 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 
 			// Ping -> Get the latencies on pong.
 			FAccelBytePing::SendUdpPing(Server.Ip, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
-				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError](const FPingResult& PingResult)
+				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError, this](const FPingResult& PingResult)
 				{
 					if (PingResult.Status == FPingResultStatus::Success)
 					{
@@ -130,6 +143,7 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 						if (SuccessLatencies->Num() > 0)
 						{
 							OnSuccess.ExecuteIfBound(*SuccessLatencies);
+							bQosUpdated = true;
 						}
 						else
 						{
@@ -241,5 +255,41 @@ const TArray<TPair<FString, float>>& Qos::GetCachedLatencies()
 	return Qos::Latencies;
 }
 
+void Qos::SendQosLatenciesMessage()
+{
+	if (Latencies.Num() <= 0)
+	{
+		return;
+	}
+
+	FAccelByteModelsQosRegionLatencies RegionLatencies;
+
+	for (const auto& Latency : Latencies)
+	{
+		FAccelByteModelsQosRegionLatency RegionLatency;
+		RegionLatency.Region = Latency.Key;
+		RegionLatency.Latency = Latency.Value;
+
+		RegionLatencies.Data.Add(RegionLatency);
+	}
+
+	MessagingSystem.SendMessage<FAccelByteModelsQosRegionLatencies>(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, RegionLatencies);
+}
+
+void Qos::OnLobbyConnected(const FString& Payload)
+{
+	SendQosLatenciesMessage();
+}
+
+bool Qos::CheckQosUpdate(float DeltaTime)
+{
+	if (bQosUpdated)
+	{
+		SendQosLatenciesMessage();
+		bQosUpdated = false;
+	}
+
+	return true;
+}
 } // Namespace Api
 } // Namespace AccelByte

@@ -413,6 +413,18 @@ public:
 		, FErrorHandler const& OnError
 		, const int32 Limit = 20);
 
+	/**
+	 * @brief  Used by game client to get a session secret that is saved in session service.
+	 * The secret will only return the secret value when the Enable Secret Validation option is set true (in the Admin Portal). 
+	 *
+	 * @param SessionID The ID of the game session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void GetSessionSecret(FString const& SessionID
+		, THandler<FAccelByteModelsV2SessionJoinedSecret> const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	Session() = delete;
 	Session(Session const&) = delete;
