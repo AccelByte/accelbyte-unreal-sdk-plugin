@@ -10,6 +10,7 @@
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteBaseCredentials.h"
 #include "Core/AccelByteBaseSettings.h"
+#include "../Tracing/AccelByteTracing.h"
 
 namespace AccelByte
 {
@@ -734,6 +735,9 @@ namespace AccelByte
 			{
 				Request->SetHeader(Kvp.Key, Kvp.Value); // Override existing headers
 			}
+
+			// AccelByteTracing track http request 
+			accelbyte::FUnrealTracing::http_request(Request);
 
 			return HttpRef.ProcessRequest(Request
 				, CreateHttpResultHandler(

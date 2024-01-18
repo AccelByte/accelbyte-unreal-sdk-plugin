@@ -16,6 +16,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteHttpCache.h"
 #include "Core/AccelByteTypeConverter.h"
+#include "../Tracing/AccelByteTracing.h"
 #include "AccelByteError.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE(FDHandler);
@@ -529,6 +530,7 @@ namespace AccelByte
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
+				accelbyte::FUnrealTracing::http_response(Request, Response, bFinished);
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
 					if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
@@ -569,6 +571,7 @@ namespace AccelByte
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
+				accelbyte::FUnrealTracing::http_response(Request, Response, bFinished);
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
 					if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
@@ -610,6 +613,7 @@ namespace AccelByte
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
+				accelbyte::FUnrealTracing::http_response(Request, Response, bFinished);
 				FErrorOAuthInfo ErrorOauthInfo;
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
@@ -652,6 +656,10 @@ namespace AccelByte
 			[OnSuccess, OnError, Scheduler]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 		{
+
+			// AccelByteTracing track http response Request, Response
+			accelbyte::FUnrealTracing::http_response(Request, Response, bFinished);
+
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
 				if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
@@ -689,6 +697,9 @@ namespace AccelByte
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
+				// AccelByteTracing track http response Request, Response
+				accelbyte::FUnrealTracing::http_response(Request, Response, bFinished);
+
 				FErrorCreateMatchmakingTicketV2 ErrorCreateMatchmakingV2Info;
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
