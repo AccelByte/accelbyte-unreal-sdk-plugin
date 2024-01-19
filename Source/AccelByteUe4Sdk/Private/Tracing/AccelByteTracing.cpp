@@ -151,7 +151,14 @@ void FUnrealTracing::http_response(FHttpRequestPtr Request, FHttpResponsePtr Res
 	const TArray<uint8> Payload = Response->GetContent();
 	FString String = (Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString());
 
-	if (content_type == TEXT("application/json")) {
+	String = String.Replace(TEXT("\r"), TEXT(""));
+	String = String.Replace(TEXT("\n"), TEXT(""));
+
+	if (content_type.Contains(TEXT("application/json"))) {
+		if (String[0] == '[') {
+			String = FString("{\"root\":") + String + '}'; // UNREAL ENGINE JSON Deserialize Bug
+		}
+
 		TSharedPtr<FJsonObject> JsonObject = MakeShared < FJsonObject>();
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(String);
 		bool bSuccess = FJsonSerializer::Deserialize(Reader, JsonObject);
