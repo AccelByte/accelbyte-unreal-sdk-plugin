@@ -1,49 +1,31 @@
 #include "Tracing/AccelByteTracing.h"
 #include "Api/AccelByteLobbyApi.h"
-
+#include "Networking.h"
+#include "IPAddress.h"
+#include "SocketSubsystem.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 using namespace accelbyte;
 
-FUnrealTracing& FUnrealTracing::GetTracing()
+
+FWorkerThread::FWorkerThread(TSharedPtr<TQueue<tracing_data>, ESPMode::ThreadSafe> MainQueue_):
+	MainQueue(MainQueue_)
 {
-	static FUnrealTracing instance;
-	return instance;
+	bStopThread = false;
+	Thread = FRunnableThread::Create(this, TEXT("Accelbyte Tracing Worker"), 128 * 1024, TPri_Normal, FPlatformAffinity::GetPoolThreadMask());		
 }
 
-FUnrealTracing::FUnrealTracing()
-{
-	Thread = FRunnableThread::Create(this, TEXT("Accelbyte FUnrealTracing Worker"), 128 * 1024, TPri_AboveNormal, FPlatformAffinity::GetPoolThreadMask());
-}
-
-FUnrealTracing::~FUnrealTracing()
-{
-	bIsShuttingDown = true;
-	Thread->WaitForCompletion();
-}
-
-uint32 FUnrealTracing::Run()
+uint32 FWorkerThread::Run()
 {
 	// Prepare a file
-
 	IFileHandle* pFile = FPlatformFileManager::Get().GetPlatformFile().OpenWrite(TEXT("D:\\Temp\\ags_debug_tool\\output.json"));
 	pFile->Write((uint8*)"[", 1);
 
-	for (;;)
+	while (!bStopThread)
 	{
-		if (bIsShuttingDown) {
-
-			// End of stream
-			FString EOS = "{\"message_id\": \"0\"}";
-			pFile->Write((uint8*)TCHAR_TO_ANSI(*EOS), EOS.Len());
-			pFile->Write((uint8*)"]", 1);
-			pFile->Flush();
-			return 0;
-		}
-
-
 		// process queue append into file
 		tracing_data data_to_process;
-		if (MainQueue.Dequeue(data_to_process))
+		if (MainQueue->Dequeue(data_to_process))
 		{
 			TSharedPtr<FJsonObject> message = MakeShared< FJsonObject>();
 			message->SetField(TEXT("message_id"), MakeShared<FJsonValueString>(data_to_process.MessageId));
@@ -61,18 +43,184 @@ uint32 FUnrealTracing::Run()
 
 			pFile->Write((uint8*)TCHAR_TO_ANSI(*json_row), json_row.Len());
 			pFile->Write((uint8*)",", 1);
-			//
+
+			// execute callback
+			OnWritingData.ExecuteIfBound(json_row); // TODO can be optimized
 		}
 
 
 		FPlatformProcess::Sleep(0.1);
 	}
+		
+	// End of stream
+	FString EOS = "{\"message_id\": \"0\"}";
+	pFile->Write((uint8*)TCHAR_TO_ANSI(*EOS), EOS.Len());
+	pFile->Write((uint8*)"]", 1);
+	pFile->Flush();
 	return 0;
 }
 
+	
+
+// ----------------------------------------------
+
+
+class FNetworkThread : public FRunnable
+{
+private:
+	bool bStopThread;
+	FRunnableThread* Thread;
+	FSocket* ListenSocket;
+	FSocket* ClientSocket; // object to communicate to connected client
+
+	TQueue<FString> NetworkSendQueue; // should be reference?
+	
+public:
+	FNetworkThread()		
+	{
+		ClientSocket = nullptr;
+	}
+
+	void Start() // start TCP server
+	{
+		// Prepare a socket
+		FIPv4Address Address;
+		FIPv4Address::Parse(TEXT("0.0.0.0"), Address);
+
+		FIPv4Endpoint Endpoint(Address, 5050);
+
+		int BufferMaxSize = 128 * 1024;	// should match with the server
+
+
+		ListenSocket = FTcpSocketBuilder(TEXT("accelbyte-trace-server"))
+			.AsNonBlocking()
+			.AsReusable()
+			.BoundToEndpoint(Endpoint)
+			.WithReceiveBufferSize(BufferMaxSize);
+
+		ListenSocket->SetReceiveBufferSize(BufferMaxSize, BufferMaxSize);
+		ListenSocket->SetSendBufferSize(BufferMaxSize, BufferMaxSize);
+		ListenSocket->Listen(8);
+		bool bShouldListen = true;
+
+
+		bStopThread = false;
+		Thread = FRunnableThread::Create(this, TEXT("Accelbyte Network Worker"), 128 * 1024, TPri_Normal, FPlatformAffinity::GetPoolThreadMask());
+
+
+	}
+
+	virtual uint32 Run() override
+	{
+		bool newClient = false;
+		while (!bStopThread) {
+
+			//Do we have clients trying to connect? connect them
+			bool bHasPendingConnection;
+			ListenSocket->HasPendingConnection(bHasPendingConnection);
+			if (bHasPendingConnection)
+			{
+				ClientSocket = ListenSocket->Accept(TEXT("tcp-client"));
+				newClient = true;
+			}
+
+
+			// check client socket state
+
+			if (ClientSocket != nullptr) {
+				ESocketConnectionState ConnectionState = ESocketConnectionState::SCS_NotConnected;
+				
+				ConnectionState = ClientSocket->GetConnectionState();
+				if (ConnectionState != ESocketConnectionState::SCS_Connected) {
+					// DISCONNECTED
+					ClientSocket->Close();
+					ClientSocket = nullptr;
+					newClient = false;
+					continue;
+				}
+
+				if (newClient)
+				{
+					// send the welcome sequence
+
+					int32 byteSend = 0;
+					std::string welcomeMessage = "WELCOME";
+					ClientSocket->Send((uint8*)welcomeMessage.c_str(), welcomeMessage.size(), byteSend);
+
+
+					newClient = false;
+
+				}
+
+
+				FPlatformProcess::Sleep(0.01);
+
+				FString MessageToSend;
+				if (NetworkSendQueue.Dequeue(MessageToSend))
+				{
+					// Split package into several packet
+					int32 byteSend = 0;
+					ClientSocket->Send((uint8*)"PACK", 4, byteSend); //  MAGIC, start of the packet
+
+
+					std::string Payload = TCHAR_TO_ANSI(*MessageToSend);
+
+					uint32 sizeToSend = MessageToSend.Len();
+					byteSend = 0;
+					ClientSocket->Send((uint8*)&sizeToSend, 4, byteSend); //  4 byte of length
+
+					byteSend = 0;
+					ClientSocket->Send((uint8*)Payload.c_str(), sizeToSend, byteSend); //  the payload
+				}
+			}
+		}
+		
+		return 0;
+	}
+
+	void AddToSendQueue(FString message)
+	{
+		NetworkSendQueue.Enqueue(message);
+	}
+};
+
+FUnrealTracing& FUnrealTracing::GetTracing()
+{
+	static FUnrealTracing instance;
+	return instance;
+}
+
+// test dulu
+
+TSharedPtr<FNetworkThread> NetworkThread;
+
+
+FUnrealTracing::FUnrealTracing()
+{
+	MainQueue = MakeShared<TQueue<tracing_data>>();
+	WorkerThread = MakeShared< FWorkerThread>(MainQueue);
+	WorkerThread->OnWritingData.BindRaw(this, &FUnrealTracing::SendPacket);
+
+	NetworkThread = MakeShared<FNetworkThread>();
+	NetworkThread->Start();
+	
+}
+
+FUnrealTracing::~FUnrealTracing()
+{
+	bIsShuttingDown = true;
+	
+}
+
+
 void FUnrealTracing::AddQueue(FString message_id, int type, int direction, TSharedPtr<FJsonObject> data)
 {
-	MainQueue.Enqueue(tracing_data{ message_id , type , direction, data, FDateTime::Now() });
+	MainQueue->Enqueue(tracing_data{ message_id , type , direction, data, FDateTime::Now() });
+}
+
+void FUnrealTracing::SendPacket(FString message)
+{
+	NetworkThread->AddToSendQueue(message);
 }
 
 void FUnrealTracing::http_request(FHttpRequestPtr& Request)

@@ -15,27 +15,47 @@
 
 namespace accelbyte {
 
-	class FUnrealTracing 
-		: public FRunnable {	
+	struct tracing_data {
+		FString MessageId;
+		int Type; // http = 1, websocket = 2
+		int Direction; // sending = 1, receive = 2
+		TSharedPtr<FJsonObject> Data;
+		FDateTime TimeStamp;
+	};
 
+
+
+	DECLARE_DELEGATE_OneParam(FOnWritingDataDelegate, FString);
+
+	class FWorkerThread : public FRunnable
+	{
 	private:
-		struct tracing_data {
-			FString MessageId;
-			int Type; // http = 1, websocket = 2
-			int Direction; // sending = 1, receive = 2
-			TSharedPtr<FJsonObject> Data;
-			FDateTime TimeStamp;				
-		};
-
-		TQueue<tracing_data> MainQueue;
-		FThreadSafeBool bIsShuttingDown = false;
+		bool bStopThread;
 		FRunnableThread* Thread;
+		TSharedPtr<TQueue<tracing_data>, ESPMode::ThreadSafe> MainQueue; // should be reference?
+	public:
+		FWorkerThread(TSharedPtr<TQueue<tracing_data>, ESPMode::ThreadSafe> MainQueue_);
+		virtual uint32 Run() override;
+		FOnWritingDataDelegate OnWritingData;
+	};
+
+
+	class FUnrealTracing {	
+	private:
+		TSharedPtr<TQueue<tracing_data>, ESPMode::ThreadSafe> MainQueue;
+		FThreadSafeBool bIsShuttingDown = false;
+		
+
+		TSharedPtr <FWorkerThread> WorkerThread;
+
+
 		FUnrealTracing();
 		~FUnrealTracing();
 
+		void SendPacket(FString message);
+
 
 	public:
-		virtual uint32 Run() override;
 
 		void AddQueue(FString message_id, int type, int direction, TSharedPtr<FJsonObject> data);
 

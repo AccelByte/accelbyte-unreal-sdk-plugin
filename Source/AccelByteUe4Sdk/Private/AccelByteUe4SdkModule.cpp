@@ -19,6 +19,7 @@
 #include "Api/AccelBytePredefinedEventApi.h"
 #include "Api/AccelByteGameStandardEventApi.h"
 #include "GameServerApi/AccelByteServerAMSApi.h"
+#include "Tracing/AccelByteTracing.h"
 
 #if WITH_EDITOR
 #include "ISettingsModule.h"
@@ -65,6 +66,7 @@ private:
 
 void FAccelByteUe4SdkModule::StartupModule()
 {
+	accelbyte::FUnrealTracing::GetTracing(); // 
 #if WITH_EDITOR
 	FModuleManager::Get().LoadModuleChecked("Settings");
 #endif
