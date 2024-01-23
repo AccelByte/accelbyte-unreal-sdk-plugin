@@ -17,8 +17,12 @@ FWorkerThread::FWorkerThread(TSharedPtr<TQueue<tracing_data>, ESPMode::ThreadSaf
 
 uint32 FWorkerThread::Run()
 {
+
+	// save the file into saved folder
+	FString IssueFolder = FPaths::Combine(*FPaths::ProjectSavedDir(), TEXT("accelbyte_tracing.json"));
+
 	// Prepare a file
-	IFileHandle* pFile = FPlatformFileManager::Get().GetPlatformFile().OpenWrite(TEXT("D:\\Temp\\ags_debug_tool\\output.json"));
+	IFileHandle* pFile = FPlatformFileManager::Get().GetPlatformFile().OpenWrite(*IssueFolder);
 	pFile->Write((uint8*)"[", 1);
 
 	while (!bStopThread)
@@ -88,6 +92,8 @@ public:
 		FIPv4Address::Parse(TEXT("0.0.0.0"), Address);
 
 		FIPv4Endpoint Endpoint(Address, 5050);
+		Endpoint.Initialize();
+
 
 		int BufferMaxSize = 128 * 1024;	// should match with the server
 
@@ -197,12 +203,14 @@ TSharedPtr<FNetworkThread> NetworkThread;
 
 FUnrealTracing::FUnrealTracing()
 {
+#if !WITH_EDITOR // Don't run on the editor
 	MainQueue = MakeShared<TQueue<tracing_data>>();
 	WorkerThread = MakeShared< FWorkerThread>(MainQueue);
 	WorkerThread->OnWritingData.BindRaw(this, &FUnrealTracing::SendPacket);
 
 	NetworkThread = MakeShared<FNetworkThread>();
 	NetworkThread->Start();
+#endif
 	
 }
 
