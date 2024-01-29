@@ -21,9 +21,9 @@ uint32 FWorkerThread::Run()
 	// save the file into saved folder
 	FString IssueFolder = FPaths::Combine(*FPaths::ProjectSavedDir(), TEXT("accelbyte_tracing.json"));
 
-	// Prepare a file
-	IFileHandle* pFile = FPlatformFileManager::Get().GetPlatformFile().OpenWrite(*IssueFolder);
-	pFile->Write((uint8*)"[", 1);
+	//// Prepare a file
+	//IFileHandle* pFile = FPlatformFileManager::Get().GetPlatformFile().OpenWrite(*IssueFolder);
+	//pFile->Write((uint8*)"[", 1);
 
 	while (!bStopThread)
 	{
@@ -45,8 +45,8 @@ uint32 FWorkerThread::Run()
 			FJsonSerializer::Serialize(message.ToSharedRef(), Writer);
 
 
-			pFile->Write((uint8*)TCHAR_TO_ANSI(*json_row), json_row.Len());
-			pFile->Write((uint8*)",", 1);
+			//pFile->Write((uint8*)TCHAR_TO_ANSI(*json_row), json_row.Len());
+			//pFile->Write((uint8*)",", 1);
 
 			// execute callback
 			OnWritingData.ExecuteIfBound(json_row); // TODO can be optimized
@@ -57,10 +57,10 @@ uint32 FWorkerThread::Run()
 	}
 		
 	// End of stream
-	FString EOS = "{\"message_id\": \"0\"}";
-	pFile->Write((uint8*)TCHAR_TO_ANSI(*EOS), EOS.Len());
-	pFile->Write((uint8*)"]", 1);
-	pFile->Flush();
+	//FString EOS = "{\"message_id\": \"0\"}";
+	//pFile->Write((uint8*)TCHAR_TO_ANSI(*EOS), EOS.Len());
+	//pFile->Write((uint8*)"]", 1);
+	//pFile->Flush();
 	return 0;
 }
 
@@ -190,34 +190,79 @@ public:
 	}
 };
 
+TSharedPtr<FNetworkThread> NetworkThread;
+
+//--------------------------------------------------------------------
+
+
+class MissionOutputDevice : public FOutputDevice {
+public:
+	MissionOutputDevice()
+	{
+		LogQueue = MakeShared<TQueue<FString>>();
+		check(GLog);
+		GLog->AddOutputDevice(this);
+		if (GLog->IsRedirectingTo(this))
+			return; // Never gets hit
+
+		return;
+	};
+
+	~MissionOutputDevice()
+	{
+		if (GLog != nullptr) {
+			GLog->RemoveOutputDevice(this);
+		}
+	};
+
+	void Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category) override
+	{
+		FString LogString = FOutputDeviceHelper::FormatLogLine(Verbosity, Category, V, GPrintLogTimes);
+		LogQueue->Enqueue(LogString);
+	}
+
+	void SerializeGlobalLogBacklog()
+	{
+		if (GLog != nullptr) {
+			GLog->SerializeBacklog(this);
+		}
+	}
+
+	TSharedPtr<TQueue<FString>, ESPMode::ThreadSafe> LogQueue;
+};
+
+//--------------------------------------------------------------------
+TUniquePtr<MissionOutputDevice> AccelByteLogger;
+
 FUnrealTracing& FUnrealTracing::GetTracing()
 {
 	static FUnrealTracing instance;
 	return instance;
 }
 
-// test dulu
-
-TSharedPtr<FNetworkThread> NetworkThread;
 
 
 FUnrealTracing::FUnrealTracing()
 {
-#if !WITH_EDITOR // Don't run on the editor
+	// 1
 	MainQueue = MakeShared<TQueue<tracing_data>>();
 	WorkerThread = MakeShared< FWorkerThread>(MainQueue);
 	WorkerThread->OnWritingData.BindRaw(this, &FUnrealTracing::SendPacket);
 
+	// 2
 	NetworkThread = MakeShared<FNetworkThread>();
-	NetworkThread->Start();
-#endif
-	
+	NetworkThread->Start();	
+
+	//3
+	AccelByteLogger = MakeUnique<MissionOutputDevice>();
+	AccelByteLogger->SerializeGlobalLogBacklog();
+
 }
 
 FUnrealTracing::~FUnrealTracing()
 {
 	bIsShuttingDown = true;
-	
+	AccelByteLogger.Reset();
 }
 
 
