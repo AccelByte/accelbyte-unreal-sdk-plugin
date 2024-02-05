@@ -41,5 +41,5 @@ public:
 	virtual ESettingsEnvironment const& GetSettingsEnvironment() const = 0;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() = 0;
 	virtual AccelByte::IAccelByteDataStorage * GetLocalDataStorage() = 0;
-	virtual AccelByte::FAccelBytePlatformHandler GetPlatformHandler() = 0;
+	virtual AccelByte::FAccelBytePlatformHandler& GetPlatformHandler() = 0;
 };

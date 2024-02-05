@@ -1049,4 +1049,84 @@ void UABUGC::ModifyContentShareCodeV2(FString const& ChannelId
 );
 }
 
+void UABUGC::GetStagingContents(EStagingContentRequestStatus Status
+	, FDModelsUGCPaginatedListStagingContent const& OnSuccess
+	, FDErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteStagingContentUtilitiesSortBy SortBy)
+{
+	ApiClientPtr->UGC.GetStagingContents(Status,
+	THandler<FAccelByteModelsUGCPaginatedListStagingContentResponse>::CreateLambda(
+		[OnSuccess](FAccelByteModelsUGCPaginatedListStagingContentResponse const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}
+	),
+	FErrorHandler::CreateLambda(
+		[OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}
+	), Limit, Offset, SortBy);
+}
+
+void UABUGC::GetStagingContentById(FString const& ContentId
+	, FDModelsUGCStagingContent const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.GetStagingContentById(ContentId,
+	THandler<FAccelByteModelsUGCStagingContentResponse>::CreateLambda(
+		[OnSuccess](FAccelByteModelsUGCStagingContentResponse const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}
+	),
+	FErrorHandler::CreateLambda(
+		[OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}
+	));
+}
+
+void UABUGC::UpdateStagingContent(FString const& ContentId
+	, FAccelByteModelsUGCUpdateContentFileLocationRequestV2 const& UpdateRequest
+	, FDModelsUGCStagingContent const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.UpdateStagingContent(ContentId, UpdateRequest,
+	THandler<FAccelByteModelsUGCStagingContentResponse>::CreateLambda(
+		[OnSuccess](FAccelByteModelsUGCStagingContentResponse const& Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}
+	),
+	FErrorHandler::CreateLambda(
+		[OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}
+	));
+}
+
+void UABUGC::DeleteStagingContent(FString const& ContentId
+	, FDHandler const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->UGC.DeleteStagingContent(ContentId,
+	FVoidHandler::CreateLambda(
+		[OnSuccess]()
+		{
+			OnSuccess.ExecuteIfBound();
+		}
+	),
+	FErrorHandler::CreateLambda(
+		[OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}
+	));
+}
+
 

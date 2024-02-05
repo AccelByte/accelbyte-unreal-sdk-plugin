@@ -27,6 +27,7 @@
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "Api/AccelByteAchievementApi.h"
+#include "Api/AccelByteAMSApi.h"
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteTurnManagerApi.h"
 #include "Api/AccelByteUGCApi.h"
@@ -123,6 +124,7 @@ Api::SessionBrowser FRegistry::SessionBrowser{ FRegistry::Credentials, FRegistry
 Api::TurnManager FRegistry::TurnManager{ FRegistry::Credentials, FRegistry::Settings, HttpRetryScheduler };
 Api::Session FRegistry::Session{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::MatchmakingV2 FRegistry::MatchmakingV2{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::AMS FRegistry::AMS{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 #pragma endregion
 
 #pragma region Game Client Analytics

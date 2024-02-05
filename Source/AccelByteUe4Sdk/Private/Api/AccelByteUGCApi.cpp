@@ -123,6 +123,28 @@ FString UGC::ConvertUGCUtilitiesSortByToString(const EAccelByteUGCContentUtiliti
 	}
 }
 
+FString UGC::ConvertStagingContentSortByToString(const EAccelByteStagingContentUtilitiesSortBy& SortBy)
+{
+	switch (SortBy)
+	{
+	case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME:
+		return TEXT("createdTime");
+	case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME_ASC:
+		return TEXT("createdTime:asc");
+	case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME_DESC:
+		return TEXT("createdTime:desc");
+	case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME:
+		return TEXT("updatedTime");
+	case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME_ASC:
+		return TEXT("updatedTime:asc");
+	case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME_DESC:
+		return TEXT("updatedTime:desc");
+	default:
+		return TEXT("");
+	}
+}
+
+
 #pragma endregion Utils
 
 void UGC::CreateContent(FString const& ChannelId
@@ -1824,5 +1846,77 @@ void UGC::UpdateLikeStatusToContentV2(FString const& ContentId
 
 #pragma endregion UGC V2 (Like)
 
+#pragma region UGC Staging Content
+
+void UGC::GetStagingContents(EStagingContentRequestStatus Status
+	, THandler<FAccelByteModelsUGCPaginatedListStagingContentResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteStagingContentUtilitiesSortBy SortBy)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	const TMap<FString, FString> QueryParams = {
+		{TEXT("status"), FAccelByteUtilities::GetUEnumValueAsString(Status)},
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+		{TEXT("sortBy"), SortBy == EAccelByteStagingContentUtilitiesSortBy::NONE ? TEXT("") : ConvertStagingContentSortByToString(SortBy)}
+	};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void UGC::GetStagingContentById(FString const& ContentId
+	, THandler<FAccelByteModelsUGCStagingContentResponse> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ContentId);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
+}
+
+void UGC::UpdateStagingContent(FString const& ContentId
+	, FAccelByteModelsUGCUpdateContentFileLocationRequestV2 UpdateRequest
+	, THandler<FAccelByteModelsUGCStagingContentResponse> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ContentId);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateRequest, OnSuccess, OnError);
+}
+
+void UGC::DeleteStagingContent(FString const& ContentId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
+		, *SettingsRef.UGCServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId()
+		, *ContentId);
+
+	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+#pragma endregion UGC Staging Content
+	
 }
 }

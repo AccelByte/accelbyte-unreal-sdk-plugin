@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "CoreMinimal.h"
+#include "Models/AccelByteLobbyModels.h"
 #pragma once
 
 namespace AccelByte
@@ -16,9 +17,24 @@ namespace AccelByte
 	class ACCELBYTEUE4SDK_API FAccelBytePlatformHandler
 	{
 	public:
-		TSharedPtr<IAccelBytePlatformWrapper> GetPlatformWrapper() { return PlatformWrapper; }
-		void SetPlatformWrapper(TSharedPtr<IAccelBytePlatformWrapper> Wrapper) { PlatformWrapper = Wrapper; }
+		DECLARE_MULTICAST_DELEGATE_ThreeParams(FAccelBytePlatformPresenceChanged, EAccelBytePlatformType, const FString&, EAvailability);
+		typedef FAccelBytePlatformPresenceChanged::FDelegate FAccelBytePlatformPresenceChangedDelegate;
+
+		TSharedPtr<IAccelBytePlatformWrapper> GetPlatformWrapper(EAccelBytePlatformType PlatformType);
+
+		void SetPlatformWrapper(EAccelBytePlatformType PlatformType, TSharedPtr<IAccelBytePlatformWrapper> Wrapper);
+
+		bool RemovePlatformWrapper(EAccelBytePlatformType PlatformType);
+
+		FDelegateHandle AddOnPlatformPresenceChangedDelegate(const FAccelBytePlatformPresenceChangedDelegate& InOnPlatformPresenceChanged);
+
+		void TriggerOnPlatformPresenceChangedDelegate(EAccelBytePlatformType PlatformType, const FString& PlatformUserId, EAvailability Availability);
+
+		bool RemoveOnPlatformPresenceChangedDelegate(FDelegateHandle DelegateHandle);
+
+		void ClearOnPlatformPresenceChangedDelegate();
 	private:
-		TSharedPtr<IAccelBytePlatformWrapper> PlatformWrapper = nullptr;
+		static TMap<EAccelBytePlatformType, TSharedPtr<IAccelBytePlatformWrapper>> PlatformWrappers;
+		static FAccelBytePlatformPresenceChanged OnPlatformPresenceChanged;
 	};
 }

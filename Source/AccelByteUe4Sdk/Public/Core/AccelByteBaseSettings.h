@@ -43,6 +43,7 @@ public:
 	FString MatchmakingV2ServerUrl{};
 	FString SessionServerUrl{};
 	FString GDPRServerUrl{};
+	FString AMSServerUrl{};
 	
 	float QosPingTimeout{.6f};
 	EHttpCacheType HttpCacheType = EHttpCacheType::STORAGE;

@@ -941,6 +941,62 @@ public:
 
 #pragma endregion UGC V2 (Like)
 
+#pragma region UGC Staging Content
+
+	/**
+	 * @brief Get a list of staging contents and sort by status
+	 *
+	 * @param Status Sort the response item by status of the staging list contents
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsPaginatedListStagingContentResponse.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 20
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 * @param SortBy Sorting criteria: created time with asc or desc and updated time with asc or desc. default = none.
+	 */
+	void GetStagingContents(EStagingContentRequestStatus Status
+		, THandler<FAccelByteModelsUGCPaginatedListStagingContentResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteStagingContentUtilitiesSortBy SortBy = EAccelByteStagingContentUtilitiesSortBy::NONE);
+
+	/**
+	 * @brief Get user staging content.
+	 *
+	 * @param ContentId Target content id to retrieved
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsStagingContentResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetStagingContentById(FString const& ContentId
+		, THandler<FAccelByteModelsUGCStagingContentResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Update staging content by content id using update request struct.
+	 *
+	 * @param ContentId Target content id to update the content
+	 * @param UpdateRequest Query or params in struct to request an update
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsStagingContentResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateStagingContent(FString const& ContentId
+		, FAccelByteModelsUGCUpdateContentFileLocationRequestV2 UpdateRequest
+		, THandler<FAccelByteModelsUGCStagingContentResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Delete staging content by user id and content id
+	 *
+	 * @param ContentId Target content id to update the content
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void DeleteStagingContent(FString const& ContentId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+#pragma endregion UGC Staging Content
+	
 private:
 	UGC() = delete;
 	UGC(UGC const&) = delete;
@@ -951,6 +1007,7 @@ private:
 	static FString ConvertUGCOrderByToString(const EAccelByteUgcOrderBy& OrderBy);
 	static FString ConvertGetUGContentsSortByToString(const EAccelByteUGCContentSortByV2& SortBy);
 	static FString ConvertUGCUtilitiesSortByToString(const EAccelByteUGCContentUtilitiesSortByV2& SortBy);
+	static FString ConvertStagingContentSortByToString(const EAccelByteStagingContentUtilitiesSortBy& SortBy);
 };
 
 }

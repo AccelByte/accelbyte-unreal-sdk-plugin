@@ -195,7 +195,8 @@ void Oauth2::GetTokenWithDeviceId(const FString& ClientId
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{TEXT("device_id"), *FGenericPlatformHttp::UrlEncode(*FAccelByteUtilities::GetDeviceId())},
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
-		}, TEXT(""));
+		{TEXT("additionalData"), ConstructAdditionalData()},
+	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 

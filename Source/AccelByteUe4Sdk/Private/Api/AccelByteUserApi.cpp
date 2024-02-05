@@ -1827,10 +1827,16 @@ void User::GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest
 	, const THandler<FAccountUserPlatformInfosResponse>& OnSuccess
 	, const FErrorHandler& OnError)
 {
-	FReport::Log(FString(__FUNCTION__));   
+	if (Request.UserIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, UserIds is empty."));
+		return;
+	}
+
+	FReport::Log(FString(__FUNCTION__));
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/platforms")
-	   , *SettingsRef.IamServerUrl
-	   , *CredentialsRef.GetNamespace());
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef.GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }

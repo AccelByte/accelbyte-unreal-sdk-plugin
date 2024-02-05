@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
+#include "Core/AccelByteError.h"
 #include "Models/AccelByteAchievementModels.h"
 #include "AccelByteAchievementBlueprints.generated.h"
 

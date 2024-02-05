@@ -55,6 +55,7 @@ namespace Api
 	class GDPR;
 	class PredefinedEvent;
 	class GameStandardEvent;
+	class AMS;
 }
 
 namespace GameServerApi
@@ -142,6 +143,7 @@ public:
 	static Api::TurnManager TurnManager;
 	static Api::Session Session;
 	static Api::MatchmakingV2 MatchmakingV2;
+	static Api::AMS AMS;
 #pragma endregion
 
 #pragma region Game Client Analytics

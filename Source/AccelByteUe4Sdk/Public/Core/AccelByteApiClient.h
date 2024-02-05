@@ -11,6 +11,7 @@
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteAgreementApi.h"
+#include "Api/AccelByteAMSApi.h"
 #include "Api/AccelByteBinaryCloudSaveApi.h"
 #include "Api/AccelByteCategoryApi.h"
 #include "Api/AccelByteChatApi.h"
@@ -114,6 +115,7 @@ public:
 	Api::TurnManager TurnManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Session Session{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::MatchmakingV2 MatchmakingV2{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::AMS Ams{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion
 
 #pragma region Analytics

@@ -40,7 +40,10 @@ void Settings::LoadSettings(const FString& SectionPath)
 {
 	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientId, GEngineIni))
 	{
-		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+		if (!GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni))
+		{
+			ClientSecret = TEXT("");
+		}
 	}
 	else
 	{
@@ -102,6 +105,8 @@ void Settings::LoadSettings(const FString& SectionPath)
 	MatchmakingV2ServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("MatchmakingV2ServerUrl"), BaseUrl, TEXT("match2"));
 
 	GDPRServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("GDPRServerUrl"), BaseUrl, TEXT("gdpr"));
+
+	AMSServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("AMSServerUrl"), BaseUrl, TEXT("ams"));
 
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 

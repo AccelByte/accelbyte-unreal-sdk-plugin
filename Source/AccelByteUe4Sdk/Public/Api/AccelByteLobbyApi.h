@@ -1309,7 +1309,12 @@ public:
 	 */
 	void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
 	{
-		MessageNotifBroadcaster.AddLambda([this, OnNotificationMessage](FAccelByteModelsNotificationMessage const& Message)
+		if (RemoveMessageNotifBroadcasterDelegate(NotificationMessageDelegateHandle))
+		{
+			NotificationMessageDelegateHandle.Reset();
+		}
+
+		NotificationMessageDelegateHandle = MessageNotifBroadcaster.AddLambda([this, OnNotificationMessage](FAccelByteModelsNotificationMessage const& Message)
 			{
 				OnNotificationMessage.ExecuteIfBound(Message);
 			});
@@ -1331,9 +1336,9 @@ public:
 	 * @brief Remove a trigger function when receiving a notification message
 	 * @param OnNotificationBroadcasterDelegate Delegate handle to be removed
 	 */
-	void RemoveMessageNotifBroadcasterDelegate(const FDelegateHandle& OnNotificationBroadcasterDelegate)
+	bool RemoveMessageNotifBroadcasterDelegate(const FDelegateHandle& OnNotificationBroadcasterDelegate)
 	{
-		MessageNotifBroadcaster.Remove(OnNotificationBroadcasterDelegate);
+		return MessageNotifBroadcaster.Remove(OnNotificationBroadcasterDelegate);
 	}
 
 	/**
@@ -2813,6 +2818,8 @@ private:
 private:
 	FOnMessagingSystemReceivedMessage OnReceivedQosLatenciesUpdatedDelegate;
 	FDelegateHandle QosLatenciesUpdatedDelegateHandle;
+
+	FDelegateHandle NotificationMessageDelegateHandle;
 
 	void InitializeMessaging();
 

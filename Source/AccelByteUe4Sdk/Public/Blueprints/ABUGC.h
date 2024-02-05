@@ -65,6 +65,10 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetPaginatedContentLikerResponse, F
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateContentFileLocation, FAccelByteModelsUGCUpdateContentFileLocationResponseV2, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCPaginatedListStagingContent, FAccelByteModelsUGCPaginatedListStagingContentResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCStagingContent, FAccelByteModelsUGCStagingContentResponse, Response);
+
 #pragma endregion
 
 UCLASS(BlueprintType, Blueprintable)
@@ -432,6 +436,30 @@ public:
 		FString const& ContentId,
 		FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest,
 		FDModelsUGCCreateUGCResponseV2 const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void GetStagingContents(EStagingContentRequestStatus Status,
+		FDModelsUGCPaginatedListStagingContent const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 Limit = 20,
+		int32 Offset = 0,
+		EAccelByteStagingContentUtilitiesSortBy SortBy = EAccelByteStagingContentUtilitiesSortBy::NONE);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void GetStagingContentById(FString const& ContentId,
+		FDModelsUGCStagingContent const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void UpdateStagingContent(FString const& ContentId,
+		FAccelByteModelsUGCUpdateContentFileLocationRequestV2 const& UpdateRequest,
+		FDModelsUGCStagingContent const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void DeleteStagingContent(FString const& ContentId,
+		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
 private:

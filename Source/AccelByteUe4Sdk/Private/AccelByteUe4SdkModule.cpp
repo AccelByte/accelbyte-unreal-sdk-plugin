@@ -38,7 +38,7 @@ public:
 	virtual ESettingsEnvironment const& GetSettingsEnvironment() const override;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() override;
 	virtual AccelByte::IAccelByteDataStorage * GetLocalDataStorage() override;
-	virtual AccelByte::FAccelBytePlatformHandler GetPlatformHandler() override;
+	virtual AccelByte::FAccelBytePlatformHandler& GetPlatformHandler() override;
 
 private:
 	AccelByte::Settings ClientSettings{};
@@ -373,7 +373,7 @@ AccelByte::IAccelByteDataStorage * FAccelByteUe4SdkModule::GetLocalDataStorage()
 	}
 }
 
-AccelByte::FAccelBytePlatformHandler FAccelByteUe4SdkModule::GetPlatformHandler()
+AccelByte::FAccelBytePlatformHandler& FAccelByteUe4SdkModule::GetPlatformHandler()
 {
 	return this->PlatformHandler;
 }

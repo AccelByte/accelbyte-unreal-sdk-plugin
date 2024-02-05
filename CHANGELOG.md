@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.10.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.10.0%0D24.9.0) (2024-02-05)
+
+
+### Features
+
+* add AMS fleet command API ([0933fe2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0933fe20a59a171e1ccf70b18a89f49c77c7f7ef))
+* add endpoint to get other user 3rd party platform information ([f08ed7e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f08ed7e72cc49d94ccdd56fac0b96d213355e0fc))
+* add new endpoint of UGC staging content ([675adc9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/675adc9b05674c5b6ac2d848a0337e1869f746d8))
+* **namespace:** encode namespace ([8da9113](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8da9113825fe53ab10978d9ba0b29154f62e77ad))
+* **namespace:** REVERT namespace encode ([da5ee04](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/da5ee046e3f697278c6812e01b22cc3604417da4))
+* **platformHandler:** add OnPresenceChanged delegate to notify sdk if there any presence changed from platform ([733529c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/733529cf7746c556a765ad2d2e03f2be67a4cf8e))
+
+
+### Bug Fixes
+
+* add missing FlightId header in Login with DeviceId functionality ([fcf9306](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fcf9306f15ce942aea2f320fa1d8723df9bd3ff7))
+* change achievement blueprint header ([8a7541d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8a7541d23cf1904b1f8e3c9ceed76a9cd34260ca))
+* **lobby:** store notification message delegate handle, replace instead of add new delegate ([4a47490](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4a47490a1e868239345bd72fd29a701b7595039a))
+* move DisconnectFromExternalReconnect outside of the boundary ([cbe2e90](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cbe2e902b1c225d123d550a4213db426b72cd3e7))
+* remove validation for platform information request ([da1b7ce](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/da1b7ce9e0ce6f084a82015362606c36d4e59908))
+* **settings:** ClientSecret is still using the old value when the key is not defined in the .ini file ([299a4f7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/299a4f75be0418e72ce0b540e07d0c149bbbfcde))
+
 ## [24.9.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.9.0%0D24.8.0) (2024-01-18)
 
 

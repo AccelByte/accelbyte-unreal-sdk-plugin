@@ -53,10 +53,11 @@ namespace AccelByte
 		DisconnectDueToIAMDisconnect = 4022,
 		DisconnectDueToFastReconnect = 4040,
 		DisconnectDueToMultipleSessions = 4041,
-		DisconnectFromExternalReconnect = 4042,
 		DisconnectDueCCULimiter = 4060,
 		DisconnectUnknownError = 4099,
 		OutsideBoundaryOfDisconnection = 4400,
+
+		DisconnectFromExternalReconnect = 4401,
 
 		//WILL BE DEPRECATED
 		//Translated & split into 3101-3103

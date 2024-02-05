@@ -61,6 +61,40 @@ enum class EAccelByteUGCContentUtilitiesSortByV2 : uint8
 	CREATED_TIME_DESC
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteStagingContentUtilitiesSortBy : uint8
+{
+	NONE,
+	CREATED_TIME,
+	CREATED_TIME_ASC,
+	CREATED_TIME_DESC,
+	UPDATED_TIME,
+	UPDATED_TIME_ASC,
+	UPDATED_TIME_DESC
+};
+
+UENUM(BlueprintType)
+enum class EStagingContentResponseStatus : uint8
+{
+	PENDING = 0,
+	REJECTED,
+	APPROVED
+};
+
+UENUM(BlueprintType)
+enum class EStagingContentRequestStatus : uint8
+{
+	PENDING = 0,
+	REJECTED
+};
+
+UENUM(BlueprintType)
+enum class EContentStatus : uint8
+{
+	UNDER_REVIEW = 0,
+	PUBLISHED
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPayloadUrl
 {
@@ -298,6 +332,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCResponse
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Response")
 	FJsonObjectWrapper CustomAttributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Response")
+	EContentStatus ContentStatus{EContentStatus::UNDER_REVIEW};
 };
 
 USTRUCT(BlueprintType)
@@ -921,6 +958,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCCreateUGCResponseV2
 	FString UserId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
 	FJsonObjectWrapper CustomAttributes{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | CreateUGCResponseV2")
+	EContentStatus ContentStatus{EContentStatus::UNDER_REVIEW};
 };
 
 USTRUCT(BlueprintType)
@@ -1098,4 +1137,56 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCUpdateContentFileLocationResponseV
 	FDateTime UpdatedTime{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
 	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | UpdateContentFileLocationV2")
+	EContentStatus ContentStatus{EContentStatus::UNDER_REVIEW};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCStagingContentResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString ChannelId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FDateTime CreatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FJsonObjectWrapper CustomAttributes{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString FileExtension{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString Id{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString Name{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString Note{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString PayloadURL{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	TArray<FAccelByteModelsUGCScreenshot> Screenshots{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	EStagingContentResponseStatus Status{EStagingContentResponseStatus::PENDING};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString SubType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	TArray<FString> Tags{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString Type{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FDateTime UpdatedTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPaginatedListStagingContentResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	TArray<FAccelByteModelsUGCStagingContentResponse> Data{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
+	FAccelByteModelsPaging Paging{};
 };
