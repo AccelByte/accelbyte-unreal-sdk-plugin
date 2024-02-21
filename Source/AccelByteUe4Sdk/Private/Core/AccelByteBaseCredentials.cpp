@@ -56,4 +56,19 @@ namespace AccelByte
 	{
 		return SessionState;
 	}
+
+	const TMap<FString, FString> BaseCredentials::GetAuthHeader() const
+	{
+		if (SessionState == ESessionState::Valid)
+		{
+			FString const AccessToken = GetAccessToken();
+			if(!AccessToken.IsEmpty())
+			{
+				TMap<FString, FString> Headers{};
+				Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *AccessToken));
+				return Headers;
+			}
+		}
+		return TMap<FString, FString>{};
+	}
 }

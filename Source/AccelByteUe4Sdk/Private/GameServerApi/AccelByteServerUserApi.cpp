@@ -33,7 +33,8 @@ void ServerUser::SearchUserOtherPlatformDisplayName(const FString& DisplayName
 	, const THandler<FPagedUserOtherPlatformInfo>& OnSuccess
 	, const FErrorHandler& OnError
 	, const int32& Limit
-	, const int32& Offset)
+	, const int32& Offset
+	, bool bIsSearchByUniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -50,7 +51,7 @@ void ServerUser::SearchUserOtherPlatformDisplayName(const FString& DisplayName
 		, *ServerCredentialsRef.GetClientNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
-		{ TEXT("by"), TEXT("thirdPartyPlatform") },
+		{ TEXT("by"), bIsSearchByUniqueDisplayName ? TEXT("uniqueDisplayName") : TEXT("thirdPartyPlatform") },
 		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("platformBy"), TEXT("platformDisplayName") },

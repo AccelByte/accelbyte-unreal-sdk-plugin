@@ -51,7 +51,8 @@ void StoreDisplay::ListActiveSectionContents(FString const& StoreId
 	, FString const& Region
 	, FString const& Language
 	, THandler<TArray<FAccelByteModelsSectionInfo>> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, bool AutoCalcEstimatedPrice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -66,6 +67,7 @@ void StoreDisplay::ListActiveSectionContents(FString const& StoreId
 		{ TEXT("viewId"), ViewId },
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language },
+		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 
 	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);

@@ -20,6 +20,7 @@
 #include "Core/AccelByteMessageParser.h"
 #include "Core/AccelByteUtilities.h"
 #include "JsonUtilities.h"
+#include "Core/AccelByteNotificationSender.h"
 #include "Engine/Engine.h"
 #include "Misc/Base64.h"
 
@@ -494,6 +495,9 @@ void Lobby::Disconnect(bool ForceCleanup)
 	ChannelSlug = "";
 	
 	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+
+	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::NotificationSenderLobby, NotificationSenderListenerDelegateHandle);
+	NotificationSenderListenerDelegate.Unbind();
 	
 	if(WebSocket.IsValid())
 	{
@@ -1228,9 +1232,249 @@ void Lobby::SyncThirdPartyFriends(const FAccelByteModelsSyncThirdPartyFriendsReq
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JSONString, OnSuccess, OnError);
 }
 
+void Lobby::QueryFriendList(THandler<FAccelByteModelsQueryFriendListResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
+	};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Lobby::QueryIncomingFriendRequest(THandler<FAccelByteModelsIncomingFriendRequests> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/incoming-time")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
+	};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Lobby::QueryOutgoingFriendRequest(THandler<FAccelByteModelsOutgoingFriendRequests> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/outgoing-time")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
+	};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Lobby::SendFriendRequest(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsFriendRequestByUserId Payload;
+	Payload.FriendId = UserId;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+}
+
+void Lobby::SendFriendRequestByPublicId(const FString& PublicId, FVoidHandler const& OnSuccess,
+	FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsFriendRequestByPublicId Payload;
+	Payload.FriendPublicId = PublicId;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+}
+
+void Lobby::CancelFriendRequest(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/cancel")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsCancelFriendRequest Payload;
+	Payload.FriendId = UserId;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+}
+
+void Lobby::AcceptFriendRequest(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/accept")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsAcceptFriendRequest Payload;
+	Payload.FriendId = UserId;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+}
+
+void Lobby::RejectFriendRequest(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/reject")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsRejectFriendRequest Payload;
+	Payload.FriendId = UserId;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+}
+
+void Lobby::GetFriendshipStatus(const FString& UserId
+	, THandler<FAccelByteModelsFriendshipStatusResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/status/%s")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace()
+		, *UserId);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Lobby::Unfriend(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/unfriend")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsUnfriendRequest Payload;
+	Payload.FriendId = UserId;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+}
+
+void Lobby::BlockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/block")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsBlockUserRequest Payload;
+	Payload.BlockedUserId = UserId;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+}
+
+void Lobby::UnblockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/unblock")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef.GetNamespace());
+
+	FAccelByteModelsUnlockUserRequest Payload;
+	Payload.UserId = UserId;
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+}
+
 void Lobby::GetPartyData(const FString& PartyId
-                         , const THandler<FAccelByteModelsPartyData>& OnSuccess
-                         , const FErrorHandler& OnError)
+						, const THandler<FAccelByteModelsPartyData>& OnSuccess
+						, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1483,6 +1727,43 @@ void AccelByte::Api::Lobby::ChangeUserRegion(const FString& Region)
 		, FString::Printf(TEXT("region: %s"), *Region));
 }
 
+void Lobby::GetNotifications(const THandler<FAccelByteModelsGetUserNotificationsResponse>& OnSuccess
+	, const FErrorHandler& OnError
+	, const FDateTime& StartTime
+	, const FDateTime& EndTime
+	, const int32& Offset
+	, const int32& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/notification/namespaces/{namespace}/me")
+		, *SettingsRef.BaseUrl);
+
+	TMap<FString, FString> QueryParams;
+
+	if (StartTime > FDateTime{0})
+	{
+		QueryParams.Add(TEXT("startTime"), FString::FromInt(StartTime.ToUnixTimestamp()));
+	}
+
+	if (EndTime > FDateTime{0})
+	{
+		QueryParams.Add(TEXT("endTime"), FString::FromInt(EndTime.ToUnixTimestamp()));
+	}
+
+	if (Offset >= 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 void Lobby::UnbindEvent()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1714,6 +1995,12 @@ void Lobby::UnbindV2MatchmakingEvents()
 	V2MatchmakingStartNotif.Unbind();
 }
 
+void Lobby::OnNotificationSenderMessageReceived(const FString& Payload)
+{
+	UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("Received message from notification sender, message %s"), *Payload);
+	OnMessage(Payload, true);
+}
+	
 void Lobby::OnConnected()
 {
 	UE_LOG(LogAccelByteLobby, Log, TEXT("Connected"));
@@ -1725,6 +2012,9 @@ void Lobby::OnConnected()
 			FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
 			RefreshToken(Token.Access_token);
 		}));
+
+	NotificationSenderListenerDelegate = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Lobby::OnNotificationSenderMessageReceived);
+	NotificationSenderListenerDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::NotificationSenderLobby, NotificationSenderListenerDelegate);
 		
 	ConnectSuccess.ExecuteIfBound();
 
@@ -1751,6 +2041,9 @@ void Lobby::OnClosed(int32 StatusCode
 	}
 	
 	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+
+	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::NotificationSenderLobby, NotificationSenderListenerDelegateHandle);
+	NotificationSenderListenerDelegate.Unbind();
 
 	BanNotifReceived = false;
 	BanType = EBanType::EMPTY;
@@ -1830,7 +2123,7 @@ void Lobby::CreateWebSocket(const FString& Token)
 		, TotalTimeout);
 
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
-	WebSocket->OnMessageReceived().AddRaw(this, &Lobby::OnMessage);
+	WebSocket->OnMessageReceived().AddRaw(this, &Lobby::OnMessage, false);
 	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
 	WebSocket->OnConnectionClosed().AddRaw(this, &Lobby::OnClosed);
 }
@@ -2205,7 +2498,7 @@ void DispatchV2JsonNotif(const FString& Payload
 	}
 }
 
-void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
+void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString, bool bSkipConditioner)
 {
 	FAccelByteModelsSessionNotificationMessage Notif;
 	if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif) == false)
@@ -2214,9 +2507,14 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 		return;
 	}
 
-	if(NetworkConditioner.CalculateFail(Notif.Topic))
+	if(!bSkipConditioner && NetworkConditioner.CalculateFail(Notif.Topic))
 	{
 		UE_LOG(LogAccelByte, Log, TEXT("[AccelByteNetworkConditioner] Dropped Session v2 notification %s"), *Notif.Topic);
+		return;
+	}
+
+	if (TryBufferNotification(ParsedJsonString))
+	{
 		return;
 	}
 
@@ -2306,13 +2604,20 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString)
 	}
 }
 
-void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message)
+void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message, bool bSkipConditioner)
 {
 	UE_LOG(LogAccelByteLobby, Log, TEXT("Received MMv2 notification with topic : %s"), *Message.Topic);
 
-	if(NetworkConditioner.CalculateFail(Message.Topic))
+	if(!bSkipConditioner && NetworkConditioner.CalculateFail(Message.Topic))
 	{
 		UE_LOG(LogAccelByte, Log, TEXT("[AccelByteNetworkConditioner] Dropped Matchmaking v2 notification %s"), *Message.Topic);
+		return;
+	}
+
+	FString NotifJsonString;
+	FJsonObjectConverter::UStructToJsonObjectString(Message, NotifJsonString);
+	if (TryBufferNotification(NotifJsonString))
+	{
 		return;
 	}
 	
@@ -2342,19 +2647,20 @@ void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& 
 	}
 }
 
-void Lobby::InitializeV2MatchmakingNotifDelegates()
+void Lobby::InitializeV2MatchmakingNotifTopics()
 {
-	MatchmakingV2NotifDelegates = {
-		{EV2MatchmakingNotifTopic::OnMatchFound, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
-		{EV2MatchmakingNotifTopic::OnMatchmakingStarted, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
-		{EV2MatchmakingNotifTopic::OnMatchmakingTicketExpired, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
-		{EV2MatchmakingNotifTopic::OnMatchmakingTicketCanceled, FMessageNotif::CreateRaw(this, &Lobby::HandleV2MatchmakingNotif)},
+	MatchmakingV2NotifTopics = {
+		EV2MatchmakingNotifTopic::OnMatchFound,
+		EV2MatchmakingNotifTopic::OnMatchmakingStarted,
+		EV2MatchmakingNotifTopic::OnMatchmakingTicketExpired,
+		EV2MatchmakingNotifTopic::OnMatchmakingTicketCanceled,
 	};
 }
 
 void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 	, const FString& ParsedJsonString
-	, const TSharedPtr<FJsonObject>& ParsedJsonObj)
+	, const TSharedPtr<FJsonObject>& ParsedJsonObj
+	, bool bSkipConditioner)
 {
 	Notif NotifEnum = Notif::Invalid_Notif;
 	if (const Notif* NotifEnumPointer = NotifStringEnumMap.Find(ReceivedMessageType))
@@ -2472,9 +2778,9 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 			}
 
 			EV2MatchmakingNotifTopic MMNotifEnum = FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotifTopic>(NotificationMessage.Topic);
-			if(MMNotifEnum != EV2MatchmakingNotifTopic::Invalid && MatchmakingV2NotifDelegates.Contains(MMNotifEnum))
+			if(MMNotifEnum != EV2MatchmakingNotifTopic::Invalid && MatchmakingV2NotifTopics.Contains(MMNotifEnum))
 			{
-				MatchmakingV2NotifDelegates[MMNotifEnum].ExecuteIfBound(NotificationMessage);
+				HandleV2MatchmakingNotif(NotificationMessage, bSkipConditioner);
 				break;
 			}
 				
@@ -2633,8 +2939,89 @@ bool Lobby::ExtractLobbyMessageMetaData(const FString& InLobbyMessage
 
 	return true;
 }
-	
-void Lobby::OnMessage(const FString& Message)
+
+void Lobby::SendBufferedNotifications()
+{
+	TArray<FAccelByteModelsUserNotification> BufferedNotifications = NotificationBuffer.GetSortedBuffer();
+	NotificationBuffer.Clear();
+
+	// send all buffered data sequentially
+	for (const FAccelByteModelsUserNotification& Notification : BufferedNotifications)
+	{
+		FString LobbyMessage;
+
+		if (Notification.Type.Equals(LobbyResponse::ConnectedNotif))
+		{
+			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeLobbyConnectedNotification(Notification.LobbySessionID, Notification.LoginType, Notification.ReconnectFromCode);
+		}
+		else if (Notification.Type.Equals(LobbyResponse::MessageNotif))
+		{
+			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeMMv2Notification(Notification.Topic, Notification.Payload, true);
+		}
+		else if (Notification.Type.Equals(LobbyResponse::SessionNotif))
+		{
+			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeSessionNotification(Notification.Topic, Notification.Payload, true);
+		}
+
+		if (LobbyMessage.IsEmpty())
+		{
+			continue;
+		}
+
+		OnMessage(LobbyMessage, true);
+	}
+}
+
+bool Lobby::TryBufferNotification(const FString& ParsedJsonString)
+{
+	FAccelByteModelsUserNotification ReceivedNotification;
+	if (!FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &ReceivedNotification))
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Cannot check missing notification, failed to deserialize %s to FAccelByteModelsUserNotification"), *ParsedJsonString);
+		return false;
+	}
+
+	FScopeLock Lock(&NotificationBufferLock);
+
+	if (NotificationBuffer.IsBuffering())
+	{
+		NotificationBuffer.TryAddBuffer(ReceivedNotification);
+		return true;
+	}
+
+	// Successfully buffered means there is missing notification.
+	// Only get missing notification time at the first time missing notification received.
+	// Any other notification that arrive while GetNotifications() is in process will be buffered.
+	if (NotificationBuffer.TryAddBuffer(ReceivedNotification))
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Missing notification(s) detected, received: %s"), *ParsedJsonString);
+
+		// get missing notification from the time last valid (still in order) received notification up to the most recent received notification
+		GetNotifications(THandler<FAccelByteModelsGetUserNotificationsResponse>::CreateRaw(this, &Lobby::OnGetMissingNotificationSuccess)
+			,FErrorHandler::CreateRaw(this, &Lobby::OnGetMissingNotificationError));
+
+		return true;
+	}
+
+	return false;
+}
+
+void Lobby::OnGetMissingNotificationSuccess(const FAccelByteModelsGetUserNotificationsResponse& MissingNotifications)
+{
+	FScopeLock Lock(&NotificationBufferLock);
+	UE_LOG(LogAccelByteLobby, Log, TEXT("Missing notification(s) found"));
+	NotificationBuffer.AddMissingNotifications(MissingNotifications.Notifications);
+	SendBufferedNotifications();
+}
+
+void Lobby::OnGetMissingNotificationError(int32 ErrorCode, const FString& ErrorMessage)
+{
+	// In case of failed retrieving notification via REST API just send anything we have in the buffer
+	UE_LOG(LogAccelByteLobby, Warning, TEXT("Missing notification(s) not found"));
+	SendBufferedNotifications();
+}
+
+void Lobby::OnMessage(const FString& Message, bool bSkipConditioner /* = false */)
 {
 	UE_LOG(LogAccelByteLobby, Verbose, TEXT("Raw Lobby Response\n%s"), *Message);
 
@@ -2688,15 +3075,23 @@ void Lobby::OnMessage(const FString& Message)
 	UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("Type: %s"), *ReceivedMessageType);
 
 	// drop message if network conditioner deemed we should drop this.
-	if(NetworkConditioner.CalculateFail(ReceivedMessageType))
+	if(!bSkipConditioner && NetworkConditioner.CalculateFail(ReceivedMessageType))
 	{
 		UE_LOG(LogAccelByte, Log, TEXT("[AccelByteNetworkConditioner] Dropped message type %s"), *ReceivedMessageType);
 		return;
 	}
 
+	if (ReceivedMessageType.Equals(LobbyResponse::ConnectedNotif))
+	{
+		if (TryBufferNotification(ParsedJsonString))
+		{
+			return;
+		}
+	}
+
 	if (ReceivedMessageType.Equals(LobbyResponse::SessionNotif))
 	{
-		HandleV2SessionNotif(ParsedJsonString);
+		HandleV2SessionNotif(ParsedJsonString, bSkipConditioner);
 	}
 	else if (ReceivedMessageType.Contains(Suffix::Response))
 	{
@@ -2704,13 +3099,12 @@ void Lobby::OnMessage(const FString& Message)
 	}
 	else if (ReceivedMessageType.Contains(Suffix::Notif))
 	{
-		HandleMessageNotif(ReceivedMessageType, ParsedJsonString, ParsedJsonObj);
+		HandleMessageNotif(ReceivedMessageType, ParsedJsonString, ParsedJsonObj, bSkipConditioner);
 	}
 	else // undefined; not Response nor Notif
 	{
 		ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error cannot parse message. Neither a response nor a notif type. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
 	}
-
 }
 
 void Lobby::RequestWritePartyStorage(const FString& PartyId
@@ -2887,7 +3281,7 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, TimeSinceLastReconnect{.0f}
 	, TimeSinceConnectionLost{.0f}
 {
-	InitializeV2MatchmakingNotifDelegates();
+	InitializeV2MatchmakingNotifTopics();
 	InitializeMessaging();
 }
 
@@ -2895,11 +3289,6 @@ Lobby::~Lobby()
 {
 	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, QosLatenciesUpdatedDelegateHandle);
 	OnReceivedQosLatenciesUpdatedDelegate.Unbind();
-
-	for (auto& Delegate : MatchmakingV2NotifDelegates)
-	{
-		Delegate.Value.Unbind();
-	}
 
 	// only disconnect when engine is still valid
 	if(UObjectInitialized())

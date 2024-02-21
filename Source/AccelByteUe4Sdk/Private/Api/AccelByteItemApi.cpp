@@ -30,7 +30,8 @@ void Item::GetItemById(FString const& ItemId
 	, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess
 	, FErrorHandler const& OnError
 	, FString const& StoreId
-	, bool bPopulateBundle)
+	, bool bPopulateBundle
+	, bool AutoCalcEstimatedPrice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -56,7 +57,8 @@ void Item::GetItemById(FString const& ItemId
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language },
 		{ TEXT("storeId"), StoreId },
-		{ TEXT("populateBundle"), bPopulateBundle ? TEXT("true"):TEXT("false") }
+		{ TEXT("populateBundle"), bPopulateBundle ? TEXT("true"):TEXT("false") },
+		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 	
 	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
@@ -102,7 +104,8 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 	, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
 	, FErrorHandler const& OnError
 	, TArray<EAccelByteItemListSortBy> SortBy
-	, FString const& StoreId)
+	, FString const& StoreId
+	, bool AutoCalcEstimatedPrice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -144,6 +147,7 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 		{ TEXT("sortBy"), FString::Join(SortByStringArray, TEXT(",")) },
 		{ TEXT("storeId"), StoreId },
 		{ TEXT("includeSubCategoryItem"), ItemCriteria.IncludeSubCategoryItem ? TEXT("true") : TEXT("false") },
+		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 	
 	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
@@ -155,7 +159,8 @@ void Item::SearchItem(FString const& Language
 	, int32 const& Limit
 	, FString const& Region
 	, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, bool AutoCalcEstimatedPrice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -181,7 +186,8 @@ void Item::SearchItem(FString const& Language
 		{ TEXT("language"), Language },
 		{ TEXT("keyword"), Keyword },
 		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
-		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") }
+		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 
 	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
@@ -191,7 +197,8 @@ void Item::GetItemBySku(FString const& Sku
 	, FString const& Language
 	, FString const& Region
 	, THandler<FAccelByteModelsItemInfo> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, bool AutoCalcEstimatedPrice)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -215,7 +222,8 @@ void Item::GetItemBySku(FString const& Sku
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("sku"), Sku },
 		{ TEXT("region"), Region },
-		{ TEXT("language"), Language }
+		{ TEXT("language"), Language },
+		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 	
 	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
@@ -226,7 +234,8 @@ void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 	, FString const& Language
 	, THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess
 	, FErrorHandler const& OnError
-	, FString const& StoreId)
+	, FString const& StoreId
+	, bool AutoCalcEstimatedPrice)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -251,7 +260,8 @@ void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 		{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
 		{ TEXT("region"), Region },
 		{ TEXT("language"), Language },
-		{ TEXT("storeId"), StoreId }
+		{ TEXT("storeId"), StoreId },
+		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
  
 	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);

@@ -12,6 +12,7 @@ enum class EAccelByteMessagingTopic : uint8
 	LobbyConnected,
 	QosRegionLatenciesUpdated,
 	AuthTokenSet,
+	NotificationSenderLobby,
 };
 
 struct FAccelByteModelsMessagingSystemMessage

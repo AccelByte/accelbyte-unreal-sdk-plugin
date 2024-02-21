@@ -40,17 +40,19 @@ namespace Api
 		*
 		* @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
 		* @param ViewId The ViewId.
-		* @param Language ISO 639-1 language tag, e.g., "en, "zh".
 		* @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
+		* @param Language ISO 639-1 language tag, e.g., "en, "zh".
 		* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSectionInfo.
 		* @param OnError This will be called when the operation failed.
+		* @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
 		*/
 		void ListActiveSectionContents(FString const& StoreId
 			, FString const& ViewId
-			, FString const& Language
 			, FString const& Region
+			, FString const& Language
 			, THandler<TArray<FAccelByteModelsSectionInfo>> const& OnSuccess
-			, FErrorHandler const& OnError);
+			, FErrorHandler const& OnError
+			, bool AutoCalcEstimatedPrice = false);
 		
 	private:
 		StoreDisplay() = delete;

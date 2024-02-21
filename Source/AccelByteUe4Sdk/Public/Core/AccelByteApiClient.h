@@ -8,6 +8,7 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteNetworkConditioner.h"
+#include "Core/AccelByteNotificationSender.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteAgreementApi.h"
@@ -17,6 +18,7 @@
 #include "Api/AccelByteChatApi.h"
 #include "Api/AccelByteCloudSaveApi.h"
 #include "Api/AccelByteCloudStorageApi.h"
+#include "Api/AccelByteConfigurationsApi.h"
 #include "Api/AccelByteCurrencyApi.h"
 #include "Api/AccelByteEntitlementApi.h"
 #include "Api/AccelByteFulfillmentApi.h"
@@ -63,6 +65,7 @@ public:
 #pragma region Core
 	bool bUseSharedCredentials;
 	FAccelByteMessagingSystem MessagingSystem{};
+	FAccelByteNotificationSender NotificationSender{MessagingSystem};
 	FCredentialsRef CredentialsRef;
 	FHttpRetrySchedulerRef HttpRef{};
 	FAccelByteTimeManager TimeManager{ *HttpRef };
@@ -77,6 +80,7 @@ public:
 	Api::GDPR GDPR{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Reporting Reporting{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Miscellaneous Miscellaneous{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Configurations Configurations{*CredentialsRef, FRegistry::Settings, *HttpRef};
 #pragma endregion
 
 #pragma region Commerce

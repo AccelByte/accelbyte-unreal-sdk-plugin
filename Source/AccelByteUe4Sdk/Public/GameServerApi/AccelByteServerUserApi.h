@@ -36,6 +36,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the users data result. Default value is 0.
+	 * @param bIsSearchByUniqueDisplayName Search by unique display name. This is only fulfill if the backend unique_display_name config was true.
 	 * @param Limit The limit of the users data result. Default value is 20.
 	 */
 	void SearchUserOtherPlatformDisplayName(const FString& DisplayName
@@ -43,7 +44,8 @@ public:
 		, const THandler<FPagedUserOtherPlatformInfo>& OnSuccess
 		, const FErrorHandler& OnError
 		, const int32& Limit = 20
-		, const int32& Offset = 0 );
+		, const int32& Offset = 0
+		, bool bIsSearchByUniqueDisplayName = false);
 
 	/**
 	 * @brief This function will search user by their third party Platform User ID.

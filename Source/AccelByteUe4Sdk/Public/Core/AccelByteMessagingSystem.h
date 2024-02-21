@@ -57,6 +57,15 @@ public:
 	}
 
 	/**
+	 * @brief Send message with string payload to the messaging system which later will be notified to the subscribers.
+	 *
+	 * @param Topic The topic of the message
+	 * @param Payload The payload of the message.
+	 * @return true if message successfully queued
+	 */
+	bool SendMessage(const EAccelByteMessagingTopic Topic, const FString& Payload);
+
+	/**
 	 * @brief Subscribe to particular topic in messaging system
 	 *
 	 * @param Topic The topic to subscribe, list of available topic is in EAccelByteMessagingTopic

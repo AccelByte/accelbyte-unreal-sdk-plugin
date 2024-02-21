@@ -51,6 +51,7 @@ public:
 	virtual const FString& GetNamespace() const = 0;
 	ESessionState GetSessionState() const;
 	virtual const FString& GetUserId() const = 0;
+	const TMap<FString, FString> GetAuthHeader() const;
 
 #if !UE_BUILD_SHIPPING
 	const int32 GetExpireTime()

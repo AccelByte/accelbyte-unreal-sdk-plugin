@@ -28,6 +28,7 @@
 #include "Api/AccelByteAgreementApi.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteAMSApi.h"
+#include "Api/AccelByteConfigurationsApi.h"
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteTurnManagerApi.h"
 #include "Api/AccelByteUGCApi.h"
@@ -77,6 +78,7 @@ ServerSettings FRegistry::ServerSettings;
 ServerCredentials FRegistry::ServerCredentials;
 FAccelByteTimeManager FRegistry::TimeManager{ FRegistry::HttpRetryScheduler };
 FAccelByteNetworkConditioner FRegistry::NetworkConditioner;
+FAccelByteNotificationSender FRegistry::NotificationSender{MessagingSystem};
 #pragma endregion
 
 #pragma region Game Client Access
@@ -87,6 +89,7 @@ Api::Agreement FRegistry::Agreement{ FRegistry::Credentials, FRegistry::Settings
 Api::GDPR FRegistry::GDPR{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::Reporting FRegistry::Reporting{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::Miscellaneous FRegistry::Miscellaneous{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Configurations FRegistry::Configurations{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};
 #pragma endregion
 
 #pragma region Game Client Commerce

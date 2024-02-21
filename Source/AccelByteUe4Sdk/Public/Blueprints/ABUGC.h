@@ -11,66 +11,6 @@
 #include "Models/AccelByteUGCModels.h"
 #include "ABUGC.generated.h"
 
-#pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCResponse, FAccelByteModelsUGCResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCContentResponse, FAccelByteModelsUGCContentResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCBulkContentResponse, TArray<FAccelByteModelsUGCContentResponse>, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCPreviewResponse, FAccelByteModelsUGCPreview, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayUint8, TArray<uint8>, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCTagsPagingResponse, FAccelByteModelsUGCTagsPagingResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCTypesPagingResponse, FAccelByteModelsUGCTypesPagingResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelResponse, FAccelByteModelsUGCChannelResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelsPagingResponse, FAccelByteModelsUGCChannelsPagingResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCSearchContentsPagingResponse, FAccelByteModelsUGCSearchContentsPagingResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateLikeStatusToContentResponse, FAccelByteModelsUGCUpdateLikeStatusToContentResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetListFollowersPagingResponse, FAccelByteModelsUGCGetListFollowersPagingResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateFollowStatusToUserResponse, FAccelByteModelsUGCUpdateFollowStatusToUserResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCSearchContentsPagingResponseV2, FAccelByteModelsUGCSearchContentsPagingResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCContentResponseV2, FAccelByteModelsUGCContentResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCBulkContentResponseV2, TArray<FAccelByteModelsUGCContentResponseV2>, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCCreateUGCResponseV2, FAccelByteModelsUGCCreateUGCResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCModifyUGCResponseV2, FAccelByteModelsUGCModifyUGCResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUploadContentResponse, FAccelByteModelsUGCUploadContentURLResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCContentPageResponseV2, FAccelByteModelsUGCSearchContentsPagingResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateScreenshotsV2, FAccelByteModelsUGCUpdateScreenshotsV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateContentScreenshotResponse, FAccelByteModelsUGCUpdateContentScreenshotResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCAddDownloadContentCountResponse, FAccelByteModelsUGCAddDownloadContentCountResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetPaginatedContentDownloaderResponse, FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetPaginatedContentLikerResponse, FAccelByteModelsUGCGetPaginatedContentLikerResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateContentFileLocation, FAccelByteModelsUGCUpdateContentFileLocationResponseV2, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCPaginatedListStagingContent, FAccelByteModelsUGCPaginatedListStagingContentResponse, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCStagingContent, FAccelByteModelsUGCStagingContentResponse, Response);
-
-#pragma endregion
-
 UCLASS(BlueprintType, Blueprintable)
 class UABUGC : public UObject
 {
@@ -150,7 +90,21 @@ public:
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicGetContentByContentId(
+		FString const& ContentId,
+		FDModelsUGCContentResponse const& OnSuccess,
+		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetContentByShareCode(
+		FString const& ShareCode,
+		FDModelsUGCContentResponse const& OnSuccess,
+		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicGetContentByShareCode(
 		FString const& ShareCode,
 		FDModelsUGCContentResponse const& OnSuccess,
 		FDErrorHandler const& OnError
@@ -168,6 +122,38 @@ public:
 		FString const& ContentId,
 		FDArrayUint8 const& OnSuccess,
 		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void GetContentBulk(
+		TArray<FString> const& ContentIds,
+		FDModelsUGCBulkContentResponse const& OnSuccess,
+		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicGetContentBulk(
+		TArray<FString> const& ContentIds,
+		FDModelsUGCBulkContentResponse const& OnSuccess,
+		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void GetUserContent(
+		FString const& UserId,
+		FDModelsUGCContentPagingResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 Limit = 1000,
+		int32 Offset = 0
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicGetUserContent(
+		FString const& UserId,
+		FDModelsUGCContentPagingResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 Limit = 1000,
+		int32 Offset = 0
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
@@ -241,6 +227,28 @@ public:
 		, int32 Offset = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicSearchContents(const FString& Name,
+		const FString& Creator,
+		const FString& Type,
+		const FString& Subtype,
+		const TArray<FString>& Tags,
+		bool IsOfficial,
+		const FString& UserId,
+		FDModelsUGCSearchContentsPagingResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE,
+		EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC,
+		int32 Limit = 1000,
+		int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicSearchAllContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+		, FDModelsUGCSearchContentsPagingResponse const& OnSuccess
+		, FDErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void UpdateLikeStatusToContent(const FString& ContentId,
 		bool bLikeStatus,
 		FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess,
@@ -292,7 +300,23 @@ public:
 		EAccelByteUGCContentSortByV2 SortBy = EAccelByteUGCContentSortByV2::CREATED_TIME_ASC);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicSearchContentsSpecificToChannelV2(const FString& ChannelId,
+		FDModelsUGCSearchContentsPagingResponseV2 const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 Limit = 1000,
+		int32 Offset = 0,
+		EAccelByteUGCContentSortByV2 SortBy = EAccelByteUGCContentSortByV2::CREATED_TIME_ASC);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void SearchContentsV2(const FAccelByteModelsUGCFilterRequestV2& Filter,
+		FDModelsUGCSearchContentsPagingResponseV2 const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 Limit = 1000, 
+		int32 Offset = 0, 
+		EAccelByteUGCContentSortByV2 SortBy = EAccelByteUGCContentSortByV2::CREATED_TIME_ASC);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicSearchContentsV2(const FAccelByteModelsUGCFilterRequestV2& Filter,
 		FDModelsUGCSearchContentsPagingResponseV2 const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Limit = 1000, 
@@ -305,12 +329,27 @@ public:
 		FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicGetContentBulkByIdsV2(const TArray<FString>& ContentIds, 
+		FDModelsUGCBulkContentResponseV2 const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetContentByShareCodeV2(FString const& ShareCode,
 		FDModelsUGCContentResponseV2 const& OnSuccess,
 		FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicGetContentByShareCodeV2(FString const& ShareCode,
+		FDModelsUGCContentResponseV2 const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetContentByContentIdV2(FString const& ContentId,
+		FDModelsUGCContentResponseV2 const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicGetContentByContentIdV2(FString const& ContentId,
 		FDModelsUGCContentResponseV2 const& OnSuccess,
 		FDErrorHandler const& OnError);
 
@@ -351,6 +390,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
 	void GetUserContentsV2(const FString& UserId
+		, FDModelsUGCContentPageResponseV2 const& OnSuccess
+		, FDErrorHandler const& OnError
+		, int32 Limit = 1000
+		, int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UGC | Api")
+	void PublicGetUserContentsV2(const FString& UserId
 		, FDModelsUGCContentPageResponseV2 const& OnSuccess
 		, FDErrorHandler const& OnError
 		, int32 Limit = 1000

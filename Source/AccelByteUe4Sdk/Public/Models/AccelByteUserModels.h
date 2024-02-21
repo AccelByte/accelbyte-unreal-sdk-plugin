@@ -51,7 +51,7 @@ enum class EAccelByteSearchType : uint8
 {
 	ALL,
 	DISPLAYNAME,
-	USERNAME,
+	USERNAME, // DEPRECATED
 	THIRD_PARTY_PLATFORM
 };
 
@@ -74,6 +74,13 @@ enum class EBanType : uint8
 	LEADERBOARD,
 	MATCHMAKING,
 	UGC_CREATE_UPDATE
+};
+
+UENUM(BlueprintType)
+enum class EAccountConfiguration : uint8
+{
+	UNIQUE_DISPLAY_NAME_ENABLED,
+	USERNAME_DISABLED
 };
 
 USTRUCT(BlueprintType)
@@ -117,6 +124,9 @@ struct ACCELBYTEUE4SDK_API FRegisterRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
 	FString DateOfBirth{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -144,6 +154,9 @@ struct ACCELBYTEUE4SDK_API FRegisterRequestv2
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
 	FString Username{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -174,6 +187,9 @@ struct ACCELBYTEUE4SDK_API FRegisterRequestv3
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
 	FString DateOfBirth{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -204,6 +220,9 @@ struct ACCELBYTEUE4SDK_API FRegisterResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
 	FString Username{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -231,6 +250,9 @@ struct ACCELBYTEUE4SDK_API FUserUpdateRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
 	FString AvatarUrl{}; // Optional
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -318,6 +340,9 @@ struct ACCELBYTEUE4SDK_API FAccountUserPlatformData
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfos")
 	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserPlatformInfos")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -414,6 +439,9 @@ struct ACCELBYTEUE4SDK_API FAccountUserData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
 	TArray<FAccountUserPlatformInfo> PlatformInfos{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -432,6 +460,9 @@ struct ACCELBYTEUE4SDK_API FSimpleUserData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
 	FString Username{}; //optional
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+	FString UniqueDisplayName{};
 };
 
 // backward compatibility with previous AccelByte SDK codes
@@ -542,6 +573,9 @@ struct ACCELBYTEUE4SDK_API FUpgradeAndVerifyRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
 	bool ValidateOnly{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -566,6 +600,9 @@ struct ACCELBYTEUE4SDK_API FPublicUserInfo
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | GetPublicUserInfoRequest")
 	TArray<FAccountUserPlatformInfo> UserPlatformInfos{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -776,6 +813,9 @@ struct ACCELBYTEUE4SDK_API FBaseUserInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
 	FString Username{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -875,6 +915,9 @@ struct ACCELBYTEUE4SDK_API FUserOtherPlatformInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
 	FString PlatformAvatarUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
@@ -1165,6 +1208,9 @@ struct ACCELBYTEUE4SDK_API FGetUserInformationResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
 	FString XboxUserId {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserInformation")
+	FString UniqueDisplayName {};
 };
 
 USTRUCT(BlueprintType)
@@ -1264,6 +1310,8 @@ struct ACCELBYTEUE4SDK_API FUserDataResponse
 	FString Namespace{}; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserDataResponse")
 	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserDataResponse")
+	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)

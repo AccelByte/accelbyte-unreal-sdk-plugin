@@ -543,7 +543,10 @@ void Session::StorePlayerAttributes(const FAccelByteModelsV2StorePlayerAttribute
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, AttributesRequest, OnSuccess, OnError);
+	TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(AttributesRequest);
+	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObject);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, JsonObject.ToSharedRef(), OnSuccess, OnError);
 }
 
 void Session::DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandler const& OnError)

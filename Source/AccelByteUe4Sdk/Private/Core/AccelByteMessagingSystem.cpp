@@ -113,6 +113,22 @@ bool FAccelByteMessagingSystem::SendMessage(const EAccelByteMessagingTopic Topic
 	return bMessageAdded;
 }
 
+bool FAccelByteMessagingSystem::SendMessage(const EAccelByteMessagingTopic Topic, const FString& Payload)
+{
+	if (Topic == EAccelByteMessagingTopic::None)
+	{
+		return false;
+	}
+
+	FAccelByteModelsMessagingSystemMessage Message;
+	Message.Topic = Topic;
+	Message.Payload = Payload;
+
+	const bool bMessageAdded = Messages.Enqueue(MakeShared<FAccelByteModelsMessagingSystemMessage>(Message));
+
+	return bMessageAdded;
+}
+
 bool FAccelByteMessagingSystem::PollMessages(float DeltaTime)
 {
 	while (!Messages.IsEmpty())

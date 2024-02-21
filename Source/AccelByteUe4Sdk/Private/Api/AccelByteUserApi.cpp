@@ -64,6 +64,11 @@ void User::LoginWithUsername(const FString& Username
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
+
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
 		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
 		{
@@ -78,6 +83,11 @@ void User::LoginWithUsername(const FString& Username
 	, const FOAuthErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
     	
@@ -104,6 +114,11 @@ void User::LoginWithUsernameV3(const FString& Username
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
+
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
 		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
 		{
@@ -119,6 +134,23 @@ void User::LoginWithUsernameV3(const FString& Username
 	, const bool bRememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
+
+	if (Username.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address or username is empty!"), FErrorOAuthInfo{});
+		return;
+	}
+
+	if (Password.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"), FErrorOAuthInfo{});
+		return;
+	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
@@ -195,27 +227,11 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
-	
-	Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
-		, FAccelByteUtilities::GetPlatformString(PlatformType)
+	LoginWithOtherPlatformId(FAccelByteUtilities::GetPlatformString(PlatformType)
 		, PlatformToken
-		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
-			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
-			})
-		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
-			{
-				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
-			})
-		, bCreateHeadless
-		, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+		, OnSuccess
+		, OnError
+		, bCreateHeadless);
 }
 
 void User::LoginWithOtherPlatformId(const FString& PlatformId
@@ -225,6 +241,18 @@ void User::LoginWithOtherPlatformId(const FString& PlatformId
 	, bool bCreateHeadless)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (PlatformId.IsEmpty() || PlatformId == "unknown")
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Please provide a valid PlatformType or PlatformId"), FErrorOAuthInfo{});
+		return;
+	}
+
+	if (PlatformToken.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform Token is empty!"), FErrorOAuthInfo{});
+		return;
+	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
@@ -251,21 +279,62 @@ void User::LoginWithOtherPlatformId(const FString& PlatformId
 
 void User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
 	, const FString& NativePlatformToken
-	, const EAccelBytePlatformType& SecondaryPlatform
+	, EAccelBytePlatformType SecondaryPlatform
 	, const FString& SecondaryPlatformToken
 	, const FVoidHandler& OnSuccess
 	, const FOAuthErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	LoginWithSimultaneousPlatform(FAccelByteUtilities::GetPlatformString(NativePlatform)
+		, NativePlatformToken
+		, FAccelByteUtilities::GetPlatformString(SecondaryPlatform)
+		, SecondaryPlatformToken
+		, OnSuccess
+		, OnError);
+}
+
+void User::LoginWithSimultaneousPlatform(const FString& NativePlatform
+	, const FString& NativePlatformToken
+	, const FString& SecondaryPlatform
+	, const FString& SecondaryPlatformToken
+	, const FVoidHandler& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (NativePlatform.IsEmpty() || NativePlatform == "unknown")
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Please provide a valid Native PlatformType or PlatformId"), FErrorOAuthInfo{});
+		return;
+	}
+
+	if (NativePlatformToken.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Native Platform Token is empty!"), FErrorOAuthInfo{});
+		return;
+	}
+
+	if (SecondaryPlatform.IsEmpty() || SecondaryPlatform == "unknown")
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Please provide a valid Secondary PlatformType or PlatformId"), FErrorOAuthInfo{});
+		return;
+	}
+
+	if (SecondaryPlatformToken.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Secondary Platform Token is empty!"), FErrorOAuthInfo{});
+		return;
+	}
+
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
 	Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
-		, FAccelByteUtilities::GetPlatformString(NativePlatform)
+		, NativePlatform
 		, NativePlatformToken
-		, FAccelByteUtilities::GetPlatformString(SecondaryPlatform)
-		,SecondaryPlatformToken
+		, SecondaryPlatform
+		, SecondaryPlatformToken
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
@@ -364,6 +433,7 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 		});
 	LoginWithRefreshToken(RefreshToken, OnSuccess, OnErrorHandler);
 }
+
 void User::LoginWithRefreshToken(const FString& RefreshToken
 	, const FVoidHandler& OnSuccess
 	, const FOAuthErrorHandler& OnError
@@ -385,22 +455,41 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 		, SettingsRef.IamServerUrl);
 }
 
-void User::RefreshPlatformToken(const EAccelBytePlatformType& Platform
+void User::RefreshPlatformToken(EAccelBytePlatformType NativePlatform
 	, const FString& NativePlatformToken
 	, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
 	, const FOAuthErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	RefreshPlatformToken(FAccelByteUtilities::GetPlatformString(NativePlatform)
+		, NativePlatformToken
+		, OnSuccess
+		, OnError);
+}
+
+void User::RefreshPlatformToken(const FString& NativePlatform
+	, const FString& NativePlatformToken
+	, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
+	, const FOAuthErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (NativePlatform.IsEmpty() || NativePlatform == "unknown")
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Please provide a valid Native PlatformType or PlatformId."), FErrorOAuthInfo{});
+		return;
+	}
+
 	if (NativePlatformToken.IsEmpty())
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::StatusBadRequest), TEXT("Please provide a valid NativePlatformToken"), FErrorOAuthInfo{});
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Native Platform Token is empty!"), FErrorOAuthInfo{});
 		return;
 	}
 
 	Oauth2::RefreshPlatformToken(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
-		, FAccelByteUtilities::GetPlatformString(Platform)
+		, NativePlatform
 		, NativePlatformToken
 		, OnSuccess
 		, OnError
@@ -501,6 +590,11 @@ void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
 	, const FOAuthErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
 
 	Oauth2::AuthenticationWithPlatformLink(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
@@ -641,9 +735,15 @@ void User::Register(const FString& Username
 	, const FString& Country
 	, const FString& DateOfBirth
 	, const THandler<FRegisterResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, const FString& UniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users")
 		, *SettingsRef.IamServerUrl
@@ -656,6 +756,10 @@ void User::Register(const FString& Username
 	NewUserRequest.AuthType     = TEXT("EMAILPASSWD");
 	NewUserRequest.Country      = Country;
 	NewUserRequest.DateOfBirth  = DateOfBirth;
+	if (!UniqueDisplayName.IsEmpty())
+	{
+		NewUserRequest.UniqueDisplayName = UniqueDisplayName;
+	}
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(NewUserRequest, Content);
 	
@@ -674,13 +778,19 @@ void User::Registerv2(const FString& EmailAddress
 	, const FString& Country
 	, const FString& DateOfBirth
 	, const THandler<FRegisterResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, const FString& UniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users")
 		, *SettingsRef.IamServerUrl
 		, *SettingsRef.Namespace);
+
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
 
 	FRegisterRequestv2 NewUserRequest;
 	NewUserRequest.DisplayName = DisplayName;
@@ -690,6 +800,10 @@ void User::Registerv2(const FString& EmailAddress
 	NewUserRequest.AuthType = TEXT("EMAILPASSWD");
 	NewUserRequest.Country = Country;
 	NewUserRequest.DateOfBirth = DateOfBirth;
+	if (!UniqueDisplayName.IsEmpty())
+	{
+		NewUserRequest.UniqueDisplayName = UniqueDisplayName;
+	}
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(NewUserRequest, Content);
 	
@@ -707,6 +821,9 @@ void User::Registerv3(const FRegisterRequestv3& RegisterRequest
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsValidEmail(RegisterRequest.Username))
+		FReport::Log(FString("Username is plan to deprecated - please use email instead"));
+
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users")
 		, *SettingsRef.IamServerUrl
 		, *SettingsRef.Namespace);
@@ -720,6 +837,7 @@ void User::Registerv3(const FRegisterRequestv3& RegisterRequest
 	NewUserRequest.AuthType = TEXT("EMAILPASSWD");
 	NewUserRequest.Country = RegisterRequest.Country;
 	NewUserRequest.DateOfBirth = RegisterRequest.DateOfBirth;
+	NewUserRequest.UniqueDisplayName = RegisterRequest.UniqueDisplayName;
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(NewUserRequest, Content);
 
@@ -872,18 +990,32 @@ void User::UpgradeAndVerify(const FString& Username
 	, const FString& Password
 	, const FString& VerificationCode
 	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, const FString& UniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	const FString Content = FString::Printf(TEXT("{ \"code\": \"%s\", \"emailAddress\": \"%s\", \"password\": \"%s\"}")
-		, *VerificationCode
-		, *Username
-		, *Password);
+	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+	JsonObject->SetStringField("code", VerificationCode);
+	JsonObject->SetStringField("emailAddress", Username);
+	JsonObject->SetStringField("password", Password);
+	if (!UniqueDisplayName.IsEmpty())
+	{
+		JsonObject->SetStringField("uniqueDisplayName", UniqueDisplayName);
+	}
+
+	FString Content;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -909,6 +1041,11 @@ void User::Upgrade(const FString& Username
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/verify")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace());
@@ -931,6 +1068,11 @@ void User::Upgradev2(const FString& EmailAddress
 	, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!FAccelByteUtilities::IsValidEmail(Username))
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/verify")
 		, *SettingsRef.IamServerUrl
@@ -1237,6 +1379,11 @@ void User::SearchUsers(const FString& Query
 	FString SearchId;
 	if (By != EAccelByteSearchType::ALL)
 	{
+		if (By == EAccelByteSearchType::USERNAME)
+		{
+			UE_LOG(LogAccelByte, Warning, TEXT("Search by username is plan to deprecated!"));
+		}
+		
 		SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
 	}
 
@@ -1763,14 +1910,14 @@ void User::GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& 
 }
 
 void User::CheckUserAccountAvailability(const FString& DisplayName,
-	const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	const FVoidHandler& OnSuccess, const FErrorHandler& OnError, bool bIsCheckUniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/availability")
 	   , *SettingsRef.IamServerUrl
 	   , *CredentialsRef.GetNamespace());
 
-	const FString Field = TEXT("displayName");
+	const FString Field = bIsCheckUniqueDisplayName ? TEXT("uniqueDisplayName") : TEXT("displayName");
 	const TMultiMap<FString, FString> QueryParams ({
 		{"field", *Field},
 		{"query", *DisplayName}
@@ -1827,18 +1974,66 @@ void User::GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest
 	, const THandler<FAccountUserPlatformInfosResponse>& OnSuccess
 	, const FErrorHandler& OnError)
 {
-	if (Request.UserIds.Num() <= 0)
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, UserIds is empty."));
-		return;
-	}
-
 	FReport::Log(FString(__FUNCTION__));
+
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/platforms")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef.GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+	TSharedPtr<FJsonObject> JsonObj = FJsonObjectConverter::UStructToJsonObject(Request);
+	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObj, FAccelByteUtilities::FieldRemovalFlagAll, { TEXT("userIds") });
+	FString Contents;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Contents);
+	FJsonSerializer::Serialize(JsonObj.ToSharedRef(), Writer);
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
+}
+
+void User::GetAccountConfigurationValue(EAccountConfiguration ConfigKey
+	, const THandler<bool>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FString Config;
+	switch (ConfigKey)
+	{
+	case EAccountConfiguration::UNIQUE_DISPLAY_NAME_ENABLED:
+		Config = TEXT("uniqueDisplayNameEnabled");
+		break;
+	case EAccountConfiguration::USERNAME_DISABLED:
+		Config = TEXT("usernameDisabled");
+		break;
+	}
+
+	const auto OnSuccessDelegate = THandler<FJsonObjectWrapper>::CreateLambda([OnSuccess, OnError, Config](const FJsonObjectWrapper& Result)
+	{
+		//const TSharedPtr<FJsonObject> *OutObject;
+		bool bOutConfigValue = false;
+		bool bIsFoundResult = false;
+		;
+		const TSharedPtr<FJsonObject>* OutObject;
+		if (Result.JsonObject->TryGetObjectField("result", OutObject))
+		{
+			if (OutObject->Get()->TryGetBoolField(Config, bOutConfigValue))
+			bIsFoundResult = true;
+		}
+
+		if (bIsFoundResult)
+		{
+			OnSuccess.ExecuteIfBound(bOutConfigValue);
+		}
+		else
+		{
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnknownError), TEXT("Config value not found on the response."));
+		}
+	});
+	
+	FReport::Log(FString(__FUNCTION__));   
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/config/%s")
+	   , *SettingsRef.IamServerUrl
+	   , *CredentialsRef.GetNamespace()
+	   , *Config);
+   
+	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccessDelegate, OnError);
 }
 	
 } // Namespace Api

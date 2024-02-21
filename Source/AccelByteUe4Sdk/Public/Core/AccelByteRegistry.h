@@ -10,6 +10,7 @@
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteMessagingSystem.h"
 #include "Core/AccelByteNetworkConditioner.h"
+#include "Core/AccelByteNotificationSender.h"
 
 namespace AccelByte
 {
@@ -56,6 +57,7 @@ namespace Api
 	class PredefinedEvent;
 	class GameStandardEvent;
 	class AMS;
+	class Configurations;
 }
 
 namespace GameServerApi
@@ -96,6 +98,7 @@ public:
 	static FAccelByteTimeManager TimeManager;
 	static FAccelByteMessagingSystem MessagingSystem;
 	static FAccelByteNetworkConditioner NetworkConditioner;
+	static FAccelByteNotificationSender NotificationSender;
 #pragma endregion
 
 #pragma region Game Client Access
@@ -106,6 +109,7 @@ public:
 	static Api::GDPR GDPR;
 	static Api::Reporting Reporting;
 	static Api::Miscellaneous Miscellaneous;
+	static Api::Configurations Configurations;
 #pragma endregion
 
 #pragma region Game Client Commerce

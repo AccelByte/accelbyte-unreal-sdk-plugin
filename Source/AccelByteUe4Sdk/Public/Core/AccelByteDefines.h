@@ -18,3 +18,6 @@ using FTickerAlias = FTicker;
 using FTickerObjectBaseAlias = FTickerObjectBase;
 using FDelegateHandleAlias = FDelegateHandle;
 #endif
+
+static const FString LobbyMessageEnvelopeStartContent {"LbS"};
+static const FString LobbyMessageEnvelopeEndContent {"LbE"};

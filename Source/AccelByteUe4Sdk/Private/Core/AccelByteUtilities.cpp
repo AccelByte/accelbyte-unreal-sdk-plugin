@@ -12,6 +12,8 @@
 #include "Misc/CommandLine.h"
 #include "Misc/CString.h"
 #include <memory>
+#include <regex>
+
 #include "Kismet/GameplayStatics.h"
 #include "Misc/SecureHash.h"
 #include "Misc/Base64.h"
@@ -1192,4 +1194,11 @@ const FString FAccelByteUtilities::GenerateTOTP(const FString& SecretKey, int Co
 	FString Result = FString::Printf(TEXT("%0*d"), CodeLength, TruncatedHash);
 
 	return Result;
+}
+
+bool FAccelByteUtilities::IsValidEmail(const FString& Email)
+{
+	const std::regex pattern
+	("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+");
+	return std::regex_match(TCHAR_TO_UTF8(*Email), pattern);
 }

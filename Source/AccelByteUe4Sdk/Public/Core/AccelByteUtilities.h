@@ -417,6 +417,7 @@ public:
 	static FString GetContentType(EAccelByteFileType const& FileType);
 	static const FString GenerateHashString(const FString& Message);
 	static const FString GenerateTOTP(const FString& SecretKey, int CodeLength = 6, int TimeStep = 30);
+	static bool IsValidEmail(const FString& Email);
 
 //To allow override for testing using mock class
 protected:
@@ -501,8 +502,15 @@ protected:
 	static FString AccelByteStoredSectionIdentifiers() { return FApp::GetProjectName() / FString(TEXT("Identifiers")); }
 	static FString AccelByteStoredKeyDeviceId() { return FString(TEXT("DeviceId")); }
 #pragma endregion
-
-	static FString AccelByteStored() { return FString(TEXT("AccelByteStored")); } 
+	
+	static FString AccelByteStored() 
+	{ 
+		FString Result = TEXT("AccelByteStored");
+#ifdef WITH_AUTOMATION_TESTS
+		Result = FString::Printf(TEXT("%s-%s"), *Result, *GetFlightId());
+#endif
+		return Result; 
+	} 
 	static FString AccelByteStoredSectionIAM() { return FString(TEXT("IAM")); }
 	static FString AccelByteStoredKeyAuthTrustId() { return FString(TEXT("auth-trust-id")); }
 };

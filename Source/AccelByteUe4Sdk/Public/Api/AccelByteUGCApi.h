@@ -18,9 +18,12 @@ class Settings;
 
 namespace Api
 {
-
+#ifndef MAX_BULK_CONTENT_IDS_COUNT
 #define MAX_BULK_CONTENT_IDS_COUNT 100
+#endif // !MAX_BULK_CONTENT_IDS_COUNT
+#ifndef MAX_BULK_CONTENT_SHARECODES_COUNT
 #define MAX_BULK_CONTENT_SHARECODES_COUNT 100
+#endif // !MAX_BULK_CONTENT_SHARECODES_COUNT
 
 /**
  * @brief Provide APIs to access UGC service.
@@ -169,6 +172,17 @@ public:
 	void GetContentByContentId(FString const& ContentId
 		, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	* @brief Get a content information by its content id. Can be used without logged in.
+	*
+	* @param ContentId The id of the content that will be fetched.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponse.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void PublicGetContentByContentId(FString const& ContentId
+		, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Get a content information by its share code.
@@ -178,6 +192,17 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetContentByShareCode(FString const& ShareCode
+		, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	* @brief Get a content information by its share code. Can be used without logged in.
+	*
+	* @param ShareCode The share code of the content that will be fetched.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponse.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void PublicGetContentByShareCode(FString const& ShareCode
 		, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -333,10 +358,56 @@ public:
 	 * @param Request Filter request to specify the search result.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 */
 	void SearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0);
+
+	/**
+	* @brief Search specific contents based on the given filter. Can be used without logged in.
+	*
+	* @param Name Content Name.
+	* @param Creator Creator Name.
+	* @param Type Content Type.
+	* @param Subtype Content Subtype.
+	* @param Tags Content Tags.
+	* @param IsOfficial Filter only official contents
+	* @param UserId User Id 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param SortBy Sorting criteria, name,download,like,date. default=date.
+	* @param OrderBy Sorting order: asc, desc. default=desc
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/
+	void PublicSearchContents(const FString& Name
+		, const FString& Creator
+		, const FString& Type
+		, const FString& Subtype
+		, const TArray<FString>& Tags
+		, bool IsOfficial
+		, const FString& UserId
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE
+		, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC
+		, int32 Limit = 1000
+		, int32 Offset = 0);
+
+	/**
+	* @brief Search specific contents based on the given filter. Can be used without logged in.
+	*
+	* @param Request Filter request to specify the search result.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 20
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/
+	void PublicSearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -445,6 +516,17 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	* @brief Get contents by content Ids. Can be used without logged in.
+	*
+	* @param ContentIds Content Ids Array  
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/	
+	void PublicGetContentBulk(const TArray<FString>& ContentIds
+		, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get user's generated contents
 	 *
 	 * @param UserId User Id 
@@ -454,6 +536,21 @@ public:
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 */	
 	void GetUserContent(const FString& UserId
+		, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 1000
+		, int32 Offset = 0);
+
+	/**
+	* @brief Get user's generated contents. Can be used without logged in.
+	*
+	* @param UserId User Id 
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 1000
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/	
+	void PublicGetUserContent(const FString& UserId
 		, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
@@ -609,11 +706,28 @@ public:
 	 * @param ChannelId Channel Id.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
 	 * @param OnError This will be called when the operation failed.
-	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
 	 */
 	void SearchContentsSpecificToChannelV2(FString const& ChannelId
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteUGCContentUtilitiesSortByV2 SortBy = EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_DESC);
+
+	/**
+	* @brief Search contents specific to a channel. Can be used without logged in.
+	*
+	* @param ChannelId Channel Id.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 20
+	* @param Offset The offset number to retrieve. Default value : 0
+	* @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
+	*/
+	void PublicSearchContentsSpecificToChannelV2(FString const& ChannelId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -626,11 +740,28 @@ public:
 	 * @param Filter To filter the returned UGC contets.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
 	 * @param OnError This will be called when the operation failed.
-	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria: name, download, like, created time with asc or desc. default = created time and desc.
 	 */
 	void SearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteUGCContentSortByV2 SortBy = EAccelByteUGCContentSortByV2::CREATED_TIME_DESC);
+
+	/**
+	* @brief Get all contents in current namespace. Can be used without logged in.
+	*
+	* @param Filter To filter the returned UGC contets.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 20
+	* @param Offset The offset number to retrieve. Default value : 0
+	* @param SortBy Sorting criteria: name, download, like, created time with asc or desc. default = created time and desc.
+	*/
+	void PublicSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -649,6 +780,17 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	* @brief Get contents by content Ids. Can be used without logged in.
+	*
+	* @param ContentIds Content Ids Array
+	* @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUGCContentResponseV2>.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void PublicGetContentBulkByIdsV2(TArray<FString> const& ContentIds
+		, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get a content information by its share code.
 	 *
 	 * @param ShareCode The share code of the content that will be fetched.
@@ -660,6 +802,17 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	* @brief Get a content information by its share code. Can be used without logged in.
+	*
+	* @param ShareCode The share code of the content that will be fetched.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void PublicGetContentByShareCodeV2(FString const& ShareCode
+		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get a content information by its content id
 	 *
 	 * @param ContentId The id of the content that will be fetched.
@@ -667,6 +820,17 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetContentByContentIdV2(FString const& ContentId
+		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	* @brief Get a content information by its content id. Can be used without logged in.
+	*
+	* @param ContentId The id of the content that will be fetched.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void PublicGetContentByContentIdV2(FString const& ContentId
 		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -749,10 +913,26 @@ public:
 	 * @param UserId User Id
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
 	 * @param OnError This will be called when the operation failed.
-	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 */
 	void GetUserContentsV2(FString const& UserId
+		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+		, EAccelByteUGCContentUtilitiesSortByV2 SortBy = EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_DESC);
+
+	/**
+	* @brief Get user's generated contents. Can be used without logged in.
+	*
+	* @param UserId User Id
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCSearchContentsPagingResponseV2.
+	* @param OnError This will be called when the operation failed.
+	* @param Limit Number of content per page. Default value : 20
+	* @param Offset The offset number to retrieve. Default value : 0
+	*/
+	void PublicGetUserContentsV2(FString const& UserId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -1002,12 +1182,29 @@ private:
 	UGC(UGC const&) = delete;
 	UGC(UGC&&) = delete;
 
-	static FString ConvertLikedContentSortByToString(const EAccelByteLikedContentSortBy& SortBy);
-	static FString ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy);
-	static FString ConvertUGCOrderByToString(const EAccelByteUgcOrderBy& OrderBy);
-	static FString ConvertGetUGContentsSortByToString(const EAccelByteUGCContentSortByV2& SortBy);
-	static FString ConvertUGCUtilitiesSortByToString(const EAccelByteUGCContentUtilitiesSortByV2& SortBy);
-	static FString ConvertStagingContentSortByToString(const EAccelByteStagingContentUtilitiesSortBy& SortBy);
+	void InternalSearchContents(const FString& Name
+		, const FString& Creator
+		, const FString& Type
+		, const FString& Subtype
+		, const TArray<FString>& Tags
+		, bool IsOfficial
+		, const FString& UserId
+		, EAccelByteUgcSortBy SortBy
+		, EAccelByteUgcOrderBy OrderBy
+		, int32 Limit
+		, int32 Offset
+		, FString& OutUrl
+		, TMultiMap<FString, FString>& OutQueryParams);
+
+	void InternalSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
+		, int32 Limit
+		, int32 Offset
+		, EAccelByteUGCContentSortByV2 SortBy
+		, FString& OutUrl
+		, TMap<FString, FString>& OutQueryParams);
+
+	const FString GetNamespace();
+	const TMap<FString, FString> GetDefaultHeaders();
 };
 
 }

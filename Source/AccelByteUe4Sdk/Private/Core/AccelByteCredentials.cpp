@@ -133,6 +133,8 @@ void Credentials::SetUserEmailAddress(const FString& EmailAddress)
 
 void Credentials::SetUserName(const FString& Name)
 {
+	AccelByte::FReport::LogDeprecated( FString(__FUNCTION__),
+		TEXT("Deprecated, please use email address instead"));
 	UserName = Name;
 }
 
@@ -215,7 +217,18 @@ const FString& Credentials::GetUserEmailAddress() const
 
 const FString& Credentials::GetUserName() const
 {
+	AccelByte::FReport::LogDeprecated( FString(__FUNCTION__),
+		TEXT("Deprecated, please use email address instead"));
 	return UserName;
+}
+
+const FString& Credentials::GetUniqueDisplayName() const
+{
+	if (!AuthToken.Unique_display_name.IsEmpty())
+	{
+		return AuthToken.Unique_display_name;
+	}
+	return AuthToken.Display_name;
 }
 
 const FString& Credentials::GetLinkingToken() const
@@ -425,4 +438,9 @@ FString UAccelByteBlueprintsCredentials::GetUserEmailAddress()
 FString UAccelByteBlueprintsCredentials::GetUserName()
 {
 	return FRegistry::Credentials.GetUserName();
+}
+
+FString UAccelByteBlueprintsCredentials::GetUniqueDisplayName()
+{
+	return FRegistry::Credentials.GetUniqueDisplayName();
 }

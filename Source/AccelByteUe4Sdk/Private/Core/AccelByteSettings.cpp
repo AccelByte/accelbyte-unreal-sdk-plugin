@@ -108,6 +108,8 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 	AMSServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("AMSServerUrl"), BaseUrl, TEXT("ams"));
 
+	ConfigServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ConfigServerUrl"), BaseUrl, TEXT("config"));
+
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 
 	if (!GConfig->GetString(*DefaultSection, TEXT("CustomerName"), CustomerName, GEngineIni))

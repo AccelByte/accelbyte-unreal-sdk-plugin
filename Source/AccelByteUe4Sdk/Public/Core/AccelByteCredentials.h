@@ -46,7 +46,7 @@ public:
 	virtual void SetClientCredentials(const ESettingsEnvironment Environment) override;
 	void SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime);
 	void SetUserEmailAddress(const FString& EmailAddress);
-	void SetUserName(const FString& UserName);
+	void SetUserName(const FString& UserName); // DEPRECATED
 	void SetUserDisplayName(const FString& UserDisplayName);
 	virtual void PollRefreshToken(double CurrentTime) override;
 	virtual void ScheduleRefreshToken(double NextRefreshTime) override;
@@ -64,7 +64,8 @@ public:
 	const FString& GetUserDisplayName() const;
 	virtual const FString& GetNamespace() const override;
 	const FString& GetUserEmailAddress() const;
-	const FString& GetUserName() const;
+	const FString& GetUserName() const; // DEPRECATED
+	const FString& GetUniqueDisplayName() const;
 	const FString& GetLinkingToken() const;
 	const FAccountUserData& GetAccountUserData() const;
 	const TMap<FString, FThirdPartyPlatformTokenData>& GetThridPartyPlatformTokenData() const;
@@ -78,7 +79,7 @@ public:
 private:
 	FOauth2Token AuthToken;
 	
-	FString UserName;
+	FString UserName; // DEPRECATED
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FOnLoginSuccessDelegate LoginSuccessDelegate{};
 	FOnLogoutSuccessDelegate LogoutSuccessDelegate{};
@@ -117,6 +118,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	static FString GetUserEmailAddress();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserName();
+	static FString GetUserName(); // DEPRECATED
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetUniqueDisplayName();
 };
 

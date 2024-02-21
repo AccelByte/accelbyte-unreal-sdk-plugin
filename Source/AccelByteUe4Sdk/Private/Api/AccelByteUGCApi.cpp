@@ -24,129 +24,6 @@ UGC::UGC(Credentials const& InCredentialsRef
 
 UGC::~UGC(){}
 
-#pragma region Utils
-
-FString UGC::ConvertLikedContentSortByToString(const EAccelByteLikedContentSortBy& SortBy)
-{
-	switch (SortBy)
-	{
-	case EAccelByteLikedContentSortBy::NAME:
-		return TEXT("name");
-	case EAccelByteLikedContentSortBy::DATE:
-		return TEXT("date");
-	case EAccelByteLikedContentSortBy::DOWNLOAD:
-		return TEXT("download");
-	case EAccelByteLikedContentSortBy::LIKE:
-		return TEXT("like");
-	default:
-		return TEXT("");
-	}
-}
-
-FString UGC::ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy)
-{
-	switch (SortBy)
-	{
-	case EAccelByteUgcSortBy::NAME:
-		return TEXT("name");
-	case EAccelByteUgcSortBy::DATE:
-		return TEXT("date");
-	case EAccelByteUgcSortBy::DOWNLOAD:
-		return TEXT("download");
-	case EAccelByteUgcSortBy::LIKE:
-		return TEXT("like");
-	case EAccelByteUgcSortBy::UPDATED_TIME:
-		return TEXT("updatedTime");
-	default:
-		return TEXT("");
-	}
-}
-
-FString UGC::ConvertUGCOrderByToString(const EAccelByteUgcOrderBy& OrderBy)
-{
-	switch (OrderBy)
-	{
-	case EAccelByteUgcOrderBy::ASC:
-		return TEXT("asc");
-	case EAccelByteUgcOrderBy::DESC:
-		return TEXT("desc");
-	default:
-		return TEXT("");
-	}
-}
-
-FString UGC::ConvertGetUGContentsSortByToString(const EAccelByteUGCContentSortByV2& SortBy)
-{
-	switch (SortBy)
-	{
-	case EAccelByteUGCContentSortByV2::NAME:
-		return TEXT("name");
-	case EAccelByteUGCContentSortByV2::NAME_ASC:
-		return TEXT("name:asc");
-	case EAccelByteUGCContentSortByV2::NAME_DESC:
-		return TEXT("name:desc");
-	case EAccelByteUGCContentSortByV2::DOWNLOAD:
-		return TEXT("download");
-	case EAccelByteUGCContentSortByV2::DOWNLOAD_ASC:
-		return TEXT("download:asc");
-	case EAccelByteUGCContentSortByV2::DOWNLOAD_DESC:
-		return TEXT("download:desc");
-	case EAccelByteUGCContentSortByV2::LIKE:
-		return TEXT("like");
-	case EAccelByteUGCContentSortByV2::LIKE_ASC:
-		return TEXT("like:asc");
-	case EAccelByteUGCContentSortByV2::LIKE_DESC:
-		return TEXT("like:desc");
-	case EAccelByteUGCContentSortByV2::CREATED_TIME:
-		return TEXT("createdTime");
-	case EAccelByteUGCContentSortByV2::CREATED_TIME_ASC:
-		return TEXT("createdTime:asc");
-	case EAccelByteUGCContentSortByV2::CREATED_TIME_DESC:
-		return TEXT("createdTime:desc");
-	default:
-		return TEXT("");
-	}
-}
-
-FString UGC::ConvertUGCUtilitiesSortByToString(const EAccelByteUGCContentUtilitiesSortByV2& SortBy)
-{
-	switch (SortBy)
-	{
-	case EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME:
-		return TEXT("createdTime");
-	case EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_ASC:
-		return TEXT("createdTime:asc");
-	case EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_DESC:
-		return TEXT("createdTime:desc");
-	default:
-		return TEXT("");
-	}
-}
-
-FString UGC::ConvertStagingContentSortByToString(const EAccelByteStagingContentUtilitiesSortBy& SortBy)
-{
-	switch (SortBy)
-	{
-	case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME:
-		return TEXT("createdTime");
-	case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME_ASC:
-		return TEXT("createdTime:asc");
-	case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME_DESC:
-		return TEXT("createdTime:desc");
-	case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME:
-		return TEXT("updatedTime");
-	case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME_ASC:
-		return TEXT("updatedTime:asc");
-	case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME_DESC:
-		return TEXT("updatedTime:desc");
-	default:
-		return TEXT("");
-	}
-}
-
-
-#pragma endregion Utils
-
 void UGC::CreateContent(FString const& ChannelId
 	, FAccelByteModelsUGCRequest const& CreateRequest
 	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
@@ -300,12 +177,46 @@ void UGC::GetContentByContentId(FString const& ContentId
 		return;
 	}
 
+	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+		, OnError))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is not valid."));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef.GetNamespace()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void UGC::PublicGetContentByContentId(FString const& ContentId, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ContentId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Url is invalid. ContentId is empty."));
+		return;
+	}
+
+	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+		, OnError))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is not valid."));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace()
+		, *ContentId);
+
+	HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
 void UGC::GetContentByShareCode(FString const& ShareCode
@@ -320,6 +231,18 @@ void UGC::GetContentByShareCode(FString const& ShareCode
 		, *ShareCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void UGC::PublicGetContentByShareCode(FString const& ShareCode, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace()
+		, *ShareCode);
+
+	HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
 void UGC::GetContentPreview(FString const& ContentId
@@ -489,6 +412,31 @@ void UGC::DeleteChannel(FString const& ChannelId
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void UGC::InternalSearchContents(const FString& Name, const FString& Creator, const FString& Type, const FString& Subtype, const TArray<FString>& Tags, bool IsOfficial, const FString& UserId, EAccelByteUgcSortBy SortBy, EAccelByteUgcOrderBy OrderBy, int32 Limit, int32 Offset, FString& OutUrl, TMultiMap<FString, FString>& OutQueryParams)
+{
+	OutUrl = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace());
+
+	OutQueryParams = TMultiMap<FString, FString>{
+		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(SortBy) },
+		{ TEXT("orderby"), FAccelByteUGCUtilities::ConvertUGCOrderByToString(OrderBy) },
+		{ TEXT("name"), Name },
+		{ TEXT("creator"), Creator },
+		{ TEXT("type"), Type },
+		{ TEXT("subtype"), Subtype },
+		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false") },
+		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("userId"), UserId }
+	};
+
+	for (const auto& Tag : Tags)
+	{
+		OutQueryParams.AddUnique(TEXT("tags"), Tag);
+	}
+}
+
 void UGC::SearchContents(const FString& Name
 	, const FString& Creator
 	, const FString& Type
@@ -505,27 +453,9 @@ void UGC::SearchContents(const FString& Name
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents")
-		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
-
-	TMultiMap<FString, FString> QueryParams {
-		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
-		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy) },
-		{ TEXT("name"), Name },
-		{ TEXT("creator"), Creator },
-		{ TEXT("type"), Type },
-		{ TEXT("subtype"), Subtype },
-		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false") },
-		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
-		{ TEXT("userId"), UserId }
-	};
-
-	for (const auto& Tag : Tags)
-	{
-		QueryParams.AddUnique(TEXT("tags"), Tag);
-	}
+	FString Url;
+	TMultiMap<FString, FString> QueryParams;
+	InternalSearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId, SortBy, OrderBy, Limit, Offset, Url, QueryParams);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -538,30 +468,33 @@ void UGC::SearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents")
-		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
-
-	TMultiMap<FString, FString> QueryParams {
-		{ TEXT("sortby"), ConvertUGCSortByToString(Request.SortBy) },
-		{ TEXT("orderby"), ConvertUGCOrderByToString(Request.OrderBy)  },
-		{ TEXT("name"), Request.Name },
-		{ TEXT("creator"), Request.Creator },
-		{ TEXT("type"), Request.Type },
-		{ TEXT("subtype"), Request.Subtype },
-		{ TEXT("isofficial"), Request.bIsOfficial ? TEXT("true") : TEXT("false")},
-		{ TEXT("ishidden"), Request.bIsHidden ? TEXT("true") : TEXT("false")},
-		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
-		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")  },
-		{ TEXT("userId"), Request.UserId }
-	};
-
-	for (const auto& Tag : Request.Tags)
-	{
-		QueryParams.AddUnique(TEXT("tags"), Tag);
-	}
+	FString Url;
+	TMultiMap<FString, FString> QueryParams;
+	InternalSearchContents(Request.Name, Request.Creator, Request.Type, Request.Subtype, Request.Tags, Request.bIsOfficial, Request.UserId, Request.SortBy, Request.OrderBy, Limit, Offset, Url, QueryParams);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void UGC::PublicSearchContents(const FString& Name, const FString& Creator, const FString& Type, const FString& Subtype, const TArray<FString>& Tags, bool IsOfficial, const FString& UserId, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, EAccelByteUgcSortBy SortBy, EAccelByteUgcOrderBy OrderBy, int32 Limit, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url;
+	TMultiMap<FString, FString> QueryParams;
+	InternalSearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId, SortBy, OrderBy, Limit, Offset, Url, QueryParams);
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
+}
+
+void UGC::PublicSearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url;
+	TMultiMap<FString, FString> QueryParams;
+	InternalSearchContents(Request.Name, Request.Creator, Request.Type, Request.Subtype, Request.Tags, Request.bIsOfficial, Request.UserId, Request.SortBy, Request.OrderBy, Limit, Offset, Url, QueryParams);
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
 void UGC::UpdateLikeStatusToContent(const FString& ContentId, bool bLikeStatus
@@ -661,8 +594,8 @@ void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 		, *ChannelId);
 
 	TMultiMap<FString, FString> QueryParams {
-		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
-		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy) },
+		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(SortBy) },
+		{ TEXT("orderby"), FAccelByteUGCUtilities::ConvertUGCOrderByToString(OrderBy) },
 		{ TEXT("name"), Name },
 		{ TEXT("creator"), Creator },
 		{ TEXT("type"), Type },
@@ -708,8 +641,8 @@ void UGC::SearchContentsSpecificToChannel(FString const& ChannelId
 		, *ChannelId);
 
 	TMultiMap<FString, FString> QueryParams {
-		{ TEXT("sortby"), ConvertUGCSortByToString(Request.SortBy) },
-		{ TEXT("orderby"), ConvertUGCOrderByToString(Request.OrderBy)  },
+		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(Request.SortBy) },
+		{ TEXT("orderby"), FAccelByteUGCUtilities::ConvertUGCOrderByToString(Request.OrderBy)  },
 		{ TEXT("name"), Request.Name },
 		{ TEXT("creator"), Request.Creator },
 		{ TEXT("type"), Request.Type },
@@ -745,6 +678,23 @@ void UGC::GetContentBulk(const TArray<FString>& ContentIds
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ContentRequest, OnSuccess, OnError);
 }
 
+void UGC::PublicGetContentBulk(const TArray<FString>& ContentIds, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/bulk")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace());
+
+	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
+	ContentRequest.ContentIds = ContentIds;
+
+	FString ContentString;
+	FJsonObjectConverter::UStructToJsonObjectString(ContentRequest, ContentString);
+
+	HttpClient.Request(TEXT("POST"), Url, ContentString, GetDefaultHeaders(), OnSuccess, OnError);
+}
+
 void UGC::GetUserContent(const FString& UserId
 	, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
 	, FErrorHandler const& OnError 
@@ -778,6 +728,34 @@ void UGC::GetUserContent(const FString& UserId
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
+void UGC::PublicGetUserContent(const FString& UserId, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace()
+		, *UserId);
+
+	TMultiMap<FString, FString> QueryParams;
+	if (Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Offset));
+	}
+	if (Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
+	}
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
+}
 
 void UGC::UploadContentScreenshot(const FString& ContentId
 	, const FString& UserId 
@@ -876,8 +854,8 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false")},
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("")  },
-		{ TEXT("sortby"), ConvertUGCSortByToString(SortBy) },
-		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy)  },
+		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(SortBy) },
+		{ TEXT("orderby"), FAccelByteUGCUtilities::ConvertUGCOrderByToString(OrderBy)  },
 	};
 
 	for (const auto& Tag : Tags)
@@ -913,8 +891,8 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 		{ TEXT("isofficial"), IsOfficial ? TEXT("true") : TEXT("false") },
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("offset"), Limit >= 0 ? FString::FromInt(Offset) : TEXT("") },
-		{ TEXT("sortby"), ConvertLikedContentSortByToString(SortBy) },
-		{ TEXT("orderby"), ConvertUGCOrderByToString(OrderBy) },
+		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertLikedContentSortByToString(SortBy) },
+		{ TEXT("orderby"), FAccelByteUGCUtilities::ConvertUGCOrderByToString(OrderBy) },
 	};
 
 	for (const auto& Tag : Tags)
@@ -1037,10 +1015,76 @@ void UGC::SearchContentsSpecificToChannelV2(FString const& ChannelId
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
-		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : ConvertUGCUtilitiesSortByToString(SortBy)}
+		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void UGC::PublicSearchContentsSpecificToChannelV2(FString const& ChannelId, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset, EAccelByteUGCContentUtilitiesSortByV2 SortBy)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChannelId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
+		return;
+	}
+	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/channels/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace()
+		, *ChannelId);
+
+	const TMap<FString, FString> QueryParams = {
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
+	};
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
+}
+
+void UGC::InternalSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter, int32 Limit, int32 Offset, EAccelByteUGCContentSortByV2 SortBy, FString& OutUrl, TMap<FString, FString>& OutQueryParams)
+{
+	OutUrl = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace());
+
+	FString TagValue = FString::Join(Filter.Tags, TEXT(","));
+
+	OutQueryParams = TMap<FString, FString>{
+		{TEXT("name"), Filter.Name.IsEmpty() ? TEXT("") : Filter.Name},
+		{TEXT("type"), Filter.Type.IsEmpty() ? TEXT("") : Filter.Type},
+		{TEXT("subType"), Filter.SubType.IsEmpty() ? TEXT("") : Filter.SubType},
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+		{TEXT("sortBy"), FAccelByteUGCUtilities::ConvertGetUGContentsSortByToString(SortBy)},
+		{TEXT("tags"), TagValue.IsEmpty() ? TEXT("") : TagValue}
+	};
+}
+
+const FString UGC::GetNamespace()
+{
+	if (CredentialsRef.IsSessionValid())
+	{
+		return CredentialsRef.GetNamespace();
+	}
+	return SettingsRef.Namespace;
+}
+
+const TMap<FString, FString> UGC::GetDefaultHeaders()
+{
+	auto Headers = CredentialsRef.GetAuthHeader();
+	Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
+
+	return Headers;
 }
 
 void UGC::SearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
@@ -1052,23 +1096,22 @@ void UGC::SearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents")
-		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
-
-	FString TagValue = FString::Join(Filter.Tags, TEXT(","));
-
-	const TMap<FString, FString> QueryParams = {
-		{TEXT("name"), Filter.Name.IsEmpty() ? TEXT("") : Filter.Name},
-		{TEXT("type"), Filter.Type.IsEmpty() ? TEXT("") : Filter.Type},
-		{TEXT("subType"), Filter.SubType.IsEmpty() ? TEXT("") : Filter.SubType},
-		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
-		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
-		{TEXT("sortBy"), ConvertGetUGContentsSortByToString(SortBy)},
-		{TEXT("tags"), TagValue.IsEmpty() ? TEXT("") : TagValue}
-	};
+	FString Url;
+	TMap<FString, FString> QueryParams;
+	InternalSearchContentsV2(Filter, Limit, Offset, SortBy, Url, QueryParams);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void UGC::PublicSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset, EAccelByteUGCContentSortByV2 SortBy)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url;
+	TMap<FString, FString> QueryParams;
+	InternalSearchContentsV2(Filter, Limit, Offset, SortBy, Url, QueryParams);
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
 void UGC::GetContentBulkByIdsV2(TArray<FString> const& ContentIds
@@ -1098,6 +1141,34 @@ void UGC::GetContentBulkByIdsV2(TArray<FString> const& ContentIds
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ContentRequest, OnSuccess, OnError);
 }
 
+void UGC::PublicGetContentBulkByIdsV2(TArray<FString> const& ContentIds, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ContentIds.Num() == 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentIds is empty."));
+		return;
+	}
+	if (ContentIds.Num() > MAX_BULK_CONTENT_IDS_COUNT)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), MAX_BULK_CONTENT_IDS_COUNT));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/bulk")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace());
+
+	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
+	ContentRequest.ContentIds = ContentIds;
+
+	FString ContentString;
+	FJsonObjectConverter::UStructToJsonObjectString(ContentRequest, ContentString);
+
+	HttpClient.Request(TEXT("POST"), Url, ContentString, GetDefaultHeaders(), OnSuccess, OnError);
+}
+
 void UGC::GetContentByShareCodeV2(FString const& ShareCode
 	, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -1116,6 +1187,24 @@ void UGC::GetContentByShareCodeV2(FString const& ShareCode
 		, *ShareCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void UGC::PublicGetContentByShareCodeV2(FString const& ShareCode, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/%s")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace()
+		, *ShareCode);
+
+	HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
 void UGC::GetContentByContentIdV2(FString const& ContentId
@@ -1142,6 +1231,30 @@ void UGC::GetContentByContentIdV2(FString const& ContentId
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void UGC::PublicGetContentByContentIdV2(FString const& ContentId, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ContentId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
+		return;
+	}
+	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
+		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace()
+		, *ContentId);
+
+	HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
 void UGC::CreateContentV2(FString const& ChannelId
@@ -1384,10 +1497,40 @@ void UGC::GetUserContentsV2(FString const& UserId
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
-		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : ConvertUGCUtilitiesSortByToString(SortBy)}
+		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void UGC::PublicGetUserContentsV2(FString const& UserId, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset, EAccelByteUGCContentUtilitiesSortByV2 SortBy)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (UserId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, UserId is empty."));
+		return;
+	}
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents")
+		, *SettingsRef.UGCServerUrl
+		, *GetNamespace()
+		, *UserId);
+
+	const TMap<FString, FString> QueryParams = {
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
+	};
+
+	HttpClient.Request(TEXT("GET"), Url, QueryParams, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
 void UGC::UpdateContentScreenshotV2(FString const& ContentId
@@ -1770,7 +1913,7 @@ void UGC::GetListContentDownloaderV2(FString const& ContentId
 		{TEXT("userId"), UserId.IsEmpty() ? TEXT("") : *UserId},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
-		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : ConvertUGCUtilitiesSortByToString(SortBy)}
+		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -1809,7 +1952,7 @@ void UGC::GetListContentLikerV2(FString const& ContentId
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
-		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : ConvertUGCUtilitiesSortByToString(SortBy)}
+		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -1866,7 +2009,7 @@ void UGC::GetStagingContents(EStagingContentRequestStatus Status
 		{TEXT("status"), FAccelByteUtilities::GetUEnumValueAsString(Status)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
-		{TEXT("sortBy"), SortBy == EAccelByteStagingContentUtilitiesSortBy::NONE ? TEXT("") : ConvertStagingContentSortByToString(SortBy)}
+		{TEXT("sortBy"), SortBy == EAccelByteStagingContentUtilitiesSortBy::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertStagingContentSortByToString(SortBy)}
 	};
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -1917,6 +2060,6 @@ void UGC::DeleteStagingContent(FString const& ContentId
 }
 
 #pragma endregion UGC Staging Content
-	
+
 }
 }

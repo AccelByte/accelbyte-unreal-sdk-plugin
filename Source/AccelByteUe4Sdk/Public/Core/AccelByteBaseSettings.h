@@ -44,6 +44,7 @@ public:
 	FString SessionServerUrl{};
 	FString GDPRServerUrl{};
 	FString AMSServerUrl{};
+	FString ConfigServerUrl{};
 	
 	float QosPingTimeout{.6f};
 	EHttpCacheType HttpCacheType = EHttpCacheType::STORAGE;

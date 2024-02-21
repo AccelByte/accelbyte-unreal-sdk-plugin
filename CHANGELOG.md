@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.11.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.11.0%0D24.10.0) (2024-02-21)
+
+
+### Features
+
+* add common config API ([600021d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/600021d9bbe433a8bd9007e453e3b4fa06deb25c))
+* add new autoCalcEstimatedPrice Param ([2abb5f2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2abb5f2e111b0579d7a609b0085051f46a537297))
+* add TicketIDs field in game session model ([df9ed23](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/df9ed23f427999627d0a8ed997b2158b6077869f))
+* Implement notification sender ([4f4702c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4f4702cccb0666a7660f3599c02b7518e3e7a2af))
+* **lobby:** add friend REST API ([f7afd5e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f7afd5e88adbf8ea24c58a56f41e7507df9eb4ce))
+* **lobby:** add handler for retrieving missing notifications ([732132f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/732132fe3596098c6acf7a11165b09bb9b37935c))
+* **UGC:** add some public api that can be used without login in some environment ([4562ad7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4562ad7a8a26cf038acf6599348351167e2a68e3))
+
+
+### Bug Fixes
+
+* **account:** account profile revamp ([6164cee](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6164cee7671ed7f0afa5f7a929c028342696313b))
+* add validation to User API ([d7cbc42](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d7cbc42342cb4b9a665f1f52673bf4db6baa5530))
+* incorrect request body serialized in GetUserOtherPlatformBasicPublicInfo ([f20ab79](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f20ab7996fd1271d31a2309594fd22bff2706022))
+* remove validation for platform information request ([38ef15a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/38ef15ab5181ccf0c1db21f09534795ac3542c9d))
+* **session:** remove empty fields for storePlayerAttributes's request ([23543f9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/23543f9ca1c9ca1ca2673c127082740338b0038f))
+* **support:** add Ext field for FAccelByteModelsSectionInfo model ([2b97448](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2b974482dd7928aeaceb78c77f664ace6bfe984b))
+* **support:** add SEASONAL enum type on EAccelByteCycle ([9058182](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/90581827ed99b94ad53307e5cebfcffeb6b39571))
+* **support:** repositioning the parameter on Region and Language inside ListActiveSectionContents function ([80e28c4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/80e28c44790bd63761f7834fe8b23ecf87835745))
+
+
+### Refactors
+
+* **PlatformHandler:** add dictionary as extra attributes for FetchPlatfromToken method ([f28b028](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f28b0283ad9f6033eccc54c11f326b56e2e8a011))
+
+
+### Tests
+
+* add define guard to avoid parallel tests to override stored value ([187770c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/187770c3acc7270dfd3b02f7edebd7149f723b64))
+
 ## [24.10.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.10.0%0D24.9.0) (2024-02-05)
 
 

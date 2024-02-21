@@ -175,7 +175,24 @@ public:
 	 */
 	void LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
 		, const FString& NativePlatformToken
-		, const EAccelBytePlatformType& SecondaryPlatform
+		, EAccelBytePlatformType SecondaryPlatform
+		, const FString& SecondaryPlatformToken
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief Login with native platform and secondary platform. Currently support Windows only.
+	 *
+	 * @param NativePlatform From the native subsystem
+	 * @param NativePlatformToken The auth ticket from native identity interface
+	 * @param SecondaryPlatform From the secondary platform subsystem
+	 * @param SecondaryPlatformToken The auth ticket from secondary platform interface
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithSimultaneousPlatform(const FString& NativePlatform
+		, const FString& NativePlatformToken
+		, const FString& SecondaryPlatform
 		, const FString& SecondaryPlatformToken
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
@@ -258,7 +275,22 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void RefreshPlatformToken(const EAccelBytePlatformType& Platform
+	void RefreshPlatformToken(EAccelBytePlatformType NativePlatform
+		, const FString& NativePlatformToken
+		, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief Refresh the platform token that is stored in the IAM backend.
+	 * Therefore we can prevent expiration on the backend.
+	 * This endpoint also not generate any event or AB Access/Refresh Token.
+	 *
+	 * @param Platform The targeted platform to be refreshed.
+	 * @param NativePlatformToken The platform token that will used to refresh IAM storage.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void RefreshPlatformToken(const FString& NativePlatform
 		, const FString& NativePlatformToken
 		, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
 		, const FOAuthErrorHandler& OnError);
@@ -360,6 +392,7 @@ public:
 	 * @param DateOfBirth User's date of birth, valid values are between 1905-01-01 until current date.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 	 * @param OnError This will be called when the operation failed.
+	 * @param UniqueDisplayName If uniqueDisplayNameEnabled config is enabled, this param is required to be filled.
 	 */
 	void Register(const FString& Username
 		, const FString& Password
@@ -367,7 +400,8 @@ public:
 		, const FString& Country
 		, const FString& DateOfBirth
 		, const THandler<FRegisterResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, const FString& UniqueDisplayName = TEXT(""));
 
 	/**
 	 * @brief This function will register a new user with email-based account.
@@ -380,6 +414,7 @@ public:
 	 * @param DateOfBirth User's date of birth, valid values are between 1905-01-01 until current date.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 	 * @param OnError This will be called when the operation failed.
+	 * @param UniqueDisplayName If uniqueDisplayNameEnabled config is enabled, this param is required to be filled.
 	 */
 	void Registerv2(const FString& EmailAddress
 		, const FString& Username
@@ -388,7 +423,8 @@ public:
 		, const FString& Country
 		, const FString& DateOfBirth
 		, const THandler<FRegisterResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, const FString& UniqueDisplayName = TEXT(""));
 
 	/**
 	 * @brief This function will register a new user with email-based account and complete agreement.
@@ -523,12 +559,14 @@ public:
 	 * @param VerificationCode User's verification code that obtained from email.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param UniqueDisplayName If uniqueDisplayNameEnabled config is enabled, this param is required to be filled.
 	 */
 	void UpgradeAndVerify(const FString& Username
 		, const FString& Password
 		, const FString& VerificationCode
 		, const THandler<FAccountUserData>& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, const FString& UniqueDisplayName = TEXT(""));
 
 	/**
 	* @brief This function should be called after you call SendUpgradeVerificationCode and obtain verification code.
@@ -1068,8 +1106,9 @@ public:
 	 * @param DisplayName User's display name value to be checked.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FVoidHandler
 	 * @param OnError This will be called when the operation failed.
+	 * @param bIsCheckUniqueDisplayName Check user availability by unique display name. Default as false.
 	 */
-	void CheckUserAccountAvailability(const FString& DisplayName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void CheckUserAccountAvailability(const FString& DisplayName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, bool bIsCheckUniqueDisplayName = false);
 
 	/**
 	 * @brief This function is used for retrieving third party platform token for user that login using third party,
@@ -1093,6 +1132,16 @@ public:
 	 */
 	void GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest& Request
 		, const THandler<FAccountUserPlatformInfosResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief A request to retrieve such of information related to the current account configuration value.
+	 * @param AccountConfiguration Target account configuration key to retrieve the information.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is bool.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetAccountConfigurationValue(EAccountConfiguration AccountConfiguration
+		, const THandler<bool>& OnSuccess
 		, const FErrorHandler& OnError);
 
 private:

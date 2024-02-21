@@ -4,10 +4,12 @@
 
 #include "Core/Platform/AccelBytePlatformHandler.h"
 
-TMap <EAccelBytePlatformType,TSharedPtr<AccelByte::IAccelBytePlatformWrapper>> AccelByte::FAccelBytePlatformHandler::PlatformWrappers = TMap < EAccelBytePlatformType, TSharedPtr<AccelByte::IAccelBytePlatformWrapper>>{};
-AccelByte::FAccelBytePlatformHandler::FAccelBytePlatformPresenceChanged AccelByte::FAccelBytePlatformHandler::OnPlatformPresenceChanged;
+namespace AccelByte
+{
+TMap <EAccelBytePlatformType, AccelBytePlatformWrapperPtr> FAccelBytePlatformHandler::PlatformWrappers = TMap<EAccelBytePlatformType, AccelBytePlatformWrapperPtr> {};
+FAccelBytePlatformPresenceChanged FAccelBytePlatformHandler::OnPlatformPresenceChanged;
 
-TSharedPtr<AccelByte::IAccelBytePlatformWrapper> AccelByte::FAccelBytePlatformHandler::GetPlatformWrapper(EAccelBytePlatformType PlatformType)
+AccelBytePlatformWrapperWPtr FAccelBytePlatformHandler::GetPlatformWrapper(EAccelBytePlatformType PlatformType)
 {
 	if (auto PlatformWrapper = PlatformWrappers.Find(PlatformType))
 	{
@@ -16,22 +18,28 @@ TSharedPtr<AccelByte::IAccelBytePlatformWrapper> AccelByte::FAccelBytePlatformHa
 	return nullptr;
 }
 
-void AccelByte::FAccelBytePlatformHandler::SetPlatformWrapper(EAccelBytePlatformType PlatformType, TSharedPtr<IAccelBytePlatformWrapper> Wrapper)
+bool FAccelBytePlatformHandler::SetPlatformWrapper(EAccelBytePlatformType PlatformType, AccelBytePlatformWrapperPtr const& WrapperPtr)
 {
-	PlatformWrappers.Add(PlatformType, Wrapper);
+	if (!WrapperPtr.IsValid())
+	{
+		return false;
+	}
+
+	PlatformWrappers.Add(PlatformType, WrapperPtr);
+	return true;
 }
 
-bool AccelByte::FAccelBytePlatformHandler::RemovePlatformWrapper(EAccelBytePlatformType PlatformType)
+bool FAccelBytePlatformHandler::RemovePlatformWrapper(EAccelBytePlatformType PlatformType)
 {
 	return (PlatformWrappers.Remove(PlatformType) > 0) ? true : false;
 }
 
-FDelegateHandle AccelByte::FAccelBytePlatformHandler::AddOnPlatformPresenceChangedDelegate(const FAccelBytePlatformPresenceChangedDelegate& InOnPlatformPresenceChanged)
+FDelegateHandle FAccelBytePlatformHandler::AddPlatformPresenceChangedDelegate(FAccelBytePlatformPresenceChangedDelegate const& InOnPlatformPresenceChanged)
 {
 	return OnPlatformPresenceChanged.Add(InOnPlatformPresenceChanged);
 }
 
-void AccelByte::FAccelBytePlatformHandler::TriggerOnPlatformPresenceChangedDelegate(EAccelBytePlatformType PlatformType, const FString& PlatformUserId, EAvailability Availability)
+void FAccelBytePlatformHandler::TriggerOnPlatformPresenceChangedDelegate(EAccelBytePlatformType PlatformType, const FString& PlatformUserId, EAvailability Availability)
 {
 	if (OnPlatformPresenceChanged.IsBound())
 	{
@@ -39,12 +47,13 @@ void AccelByte::FAccelBytePlatformHandler::TriggerOnPlatformPresenceChangedDeleg
 	}
 }
 
-bool AccelByte::FAccelBytePlatformHandler::RemoveOnPlatformPresenceChangedDelegate(FDelegateHandle DelegateHandle)
+bool FAccelBytePlatformHandler::RemovePlatformPresenceChangedDelegate(FDelegateHandle DelegateHandle)
 {
 	return OnPlatformPresenceChanged.Remove(DelegateHandle);
 }
 
-void AccelByte::FAccelBytePlatformHandler::ClearOnPlatformPresenceChangedDelegate()
+void FAccelBytePlatformHandler::ClearPlatformPresenceChangedDelegates()
 {
 	OnPlatformPresenceChanged.Clear();
+}
 }

@@ -108,6 +108,9 @@ struct ACCELBYTEUE4SDK_API FOauth2Token
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
 	FString Platform_user_id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
+	FString Unique_display_name{};
 };
 
 USTRUCT(BlueprintType)

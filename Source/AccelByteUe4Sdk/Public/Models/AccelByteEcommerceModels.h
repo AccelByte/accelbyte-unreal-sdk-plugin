@@ -2669,6 +2669,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSectionInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
 	FDateTime UpdatedAt{0};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+    FJsonObjectWrapper Ext{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
 	FJsonObjectWrapper LocalExt{};

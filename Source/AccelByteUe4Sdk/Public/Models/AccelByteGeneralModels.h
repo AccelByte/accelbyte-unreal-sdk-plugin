@@ -43,7 +43,8 @@ enum class EAccelByteCycle : uint8
 	MONTHLY,
 	QUARTERLY,
 	YEARLY,
-	ANNUALLY
+	ANNUALLY,
+	SEASONAL
 };
 
 UENUM(BlueprintType)

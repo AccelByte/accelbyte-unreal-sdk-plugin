@@ -494,7 +494,7 @@ public:
 		, const FString& IamUrl = TEXT(""));
 	
 	/**
-	 * @brief Log user in with authenticate a user account and perform platform link. It validates user's email / username and password.
+	 * @brief Log user in with authenticate a user account and perform platform link. It validates user's email and password.
 	 *
 	 * @param ClientId The issued OAuth2 client credentials.
 	 * @param ClientSecret The issued OAuth2 client credentials.

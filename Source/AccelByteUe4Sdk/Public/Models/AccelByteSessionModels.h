@@ -224,6 +224,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSession : public FAccelByteMode
 		FString MatchPool{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSession")
 		FString Code{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSession")
+		TArray<FString> TicketIDs{};
+	
 	FAccelByteModelsV2GameSession() : FAccelByteModelsV2BaseSession(EAccelByteV2SessionType::GameSession) {}
 };
 

@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteDefines.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/IAccelByteTokenGenerator.h"
 #include "Core/AccelByteWebSocket.h"
@@ -15,6 +16,7 @@
 #include "Models/AccelByteSessionModels.h"
 #include "Core/AccelByteMessagingSystem.h"
 #include "Core/AccelByteNetworkConditioner.h"
+#include "Core/AccelByteNotificationBuffer.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 
@@ -84,8 +86,8 @@ private:
 	const FString LobbyEnvelopeStartHeaderName = "X-Ab-EnvelopeStart";
 	const FString LobbyEnvelopeEndHeaderName = "X-Ab-EnvelopeEnd";
 	
-	const FString LobbyEnvelopeStartHeaderValue = "LbS";
-	const FString LobbyEnvelopeEndHeaderValue = "LbE";
+	const FString LobbyEnvelopeStartHeaderValue = LobbyMessageEnvelopeStartContent;
+	const FString LobbyEnvelopeEndHeaderValue = LobbyMessageEnvelopeEndContent;
 	FString EnvelopeContentBuffer;
 
 	bool BanNotifReceived = false;
@@ -921,6 +923,165 @@ public:
 
 	// Friends
 	/**
+	 * @brief Query the friend list of current user. The result is friend ids in pagination format.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the result. Default value is 0.
+	 * @param Limit The limit of the result. Default value is 20.
+	 */
+	void QueryFriendList(THandler<FAccelByteModelsQueryFriendListResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20);
+
+	/**
+	 * @brief Query the incoming friend requests for current user. The result is friend requests with requested time info in pagination format.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the result. Default value is 0.
+	 * @param Limit The limit of the result. Default value is 20.
+	 */
+	void QueryIncomingFriendRequest(THandler<FAccelByteModelsIncomingFriendRequests> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20);
+
+	/**
+	 * @brief Query the outgoing friend requests for current user. The result is friend requests with requested time info in pagination format.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the result. Default value is 0.
+	 * @param Limit The limit of the result. Default value is 20.
+	 */
+	void QueryOutgoingFriendRequest(THandler<FAccelByteModelsOutgoingFriendRequests> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20);
+
+	/**
+	 * @brief Send friend request to other user by user id.
+	 *
+	 * @param UserId Targeted user ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SendFriendRequest(const FString& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Send friend request to other user by public id.
+	 *
+	 * @param PublicId Targeted public ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SendFriendRequestByPublicId(const FString& PublicId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Cancel outgoing friend request.
+	 *
+	 * @param UserId Targeted user ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CancelFriendRequest(const FString& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Accept friend request from other user.
+	 *
+	 * @param UserId Targeted user ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void AcceptFriendRequest(const FString& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Reject friend request from other user
+	 *
+	 * @param UserId Targeted user ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void RejectFriendRequest(const FString& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get friendship status of current user with other user.
+	 *
+	 * @param UserId Targeted user ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetFriendshipStatus(const FString& UserId
+		, THandler<FAccelByteModelsFriendshipStatusResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief  Unfriend a user from friend list.
+	 *
+	 * @param UserId Targeted user ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void Unfriend(const FString& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Block specified player from being able to do certain action against current user
+	 * the specified player will be removed from friend list
+	 *
+	 * Action that blocked player can't do :
+	 * -Add Friend
+	 * -Direct Chat
+	 * -Invite to Party
+	 * -Invite to Group
+	 * -Matchmaking as one alliance
+	 *
+	 *	Additional Limitation :
+	 *	Blocked Player can't access blocker/current user's user ID
+	 *
+	 * @param UserId Targeted user ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void BlockPlayer(const FString& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	  * @brief Unblock specified player enabling them to do certain action against current user
+	  *
+	  * Action that unblocked player can do :
+	  * -Add Friend
+	  * -Direct Chat
+	  * -Invite to Party
+	  * -Invite to Group
+	  * -Matchmaking as one alliance
+	  *
+	  *	Additional Limitation :
+	  *	Unblocked Player can now access blocker/current user's user ID
+	  *
+	 * @param UserId Targeted user ID.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UnblockPlayer(const FString& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Send request friend request.
 	 *
 	 * @param UserId Targeted user ID.
@@ -1143,7 +1304,7 @@ public:
 	 * @brief Unbind all V2 matchmaking delegates set previously.
 	 */
 	void UnbindV2MatchmakingEvents();
-
+	
 	/**
 	 * @brief Set a trigger function when successfully connect to lobby.
 	 */
@@ -2453,6 +2614,23 @@ public:
 	 */
 	void ChangeUserRegion(const FString& Region);
 
+	/**
+	 * @brief Get list of notifications from current user from specified time.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsGetUserNotificationsResponse model.
+	 * @param OnError This will be called when the operation failed.
+	 * @param StartTime	[Optional] The beginning sequenceID to query.
+	 * @param EndTime [Optional] The end sequenceID to query.
+	 * @param Offset [Optional] The offset of the result. Default value is 0.
+	 * @param Limit [Optional] The limit of the result. Default value is 20.
+	 */
+	void GetNotifications(const THandler<FAccelByteModelsGetUserNotificationsResponse>& OnSuccess
+		, const FErrorHandler& OnError
+		, const FDateTime& StartTime = FDateTime{0}
+		, const FDateTime& EndTime= FDateTime{0}
+		, const int32& Offset = 0
+		, const int32& Limit = 25);
+
 	static FString LobbyMessageToJson(const FString& Message);
 
 	static void ClearLobbyErrorMessages();
@@ -2467,7 +2645,7 @@ private:
 	
 	void OnConnectionError(const FString& Error);
 	
-	void OnMessage(const FString& Message);
+	void OnMessage(const FString& Message, bool bSkipConditioner = false);
 	
 	void OnClosed(int32 StatusCode
 		, const FString& Reason
@@ -2485,11 +2663,24 @@ private:
 	
 	bool ExtractLobbyMessageMetaData(const FString& InLobbyMessage
 		, TSharedRef<FLobbyMessageMetaData>& OutLobbyMessageMetaData);
-	
+	void SendBufferedNotifications();
+
+	bool TryBufferNotification(const FString& ParsedJsonString);
+
+	void OnGetMissingNotificationSuccess(const FAccelByteModelsGetUserNotificationsResponse& MissingNotifications);
+
+	void OnGetMissingNotificationError(int32 ErrorCode, const FString& ErrorMessage);
+
 	THandler<const FString&> OnTokenReceived = THandler<const FString&>::CreateLambda([&](const FString& Token)
 	{
 		Connect(Token);
 	});
+
+#pragma region Notification Buffer
+private:
+	mutable FCriticalSection NotificationBufferLock{};
+	FAccelByteNotificationBuffer NotificationBuffer{};
+#pragma endregion
 
 #pragma region Message Parsing
 	void HandleMessageResponse(const FString& ReceivedMessageType
@@ -2499,15 +2690,18 @@ private:
 	
 	void HandleMessageNotif(const FString& ReceivedMessageType
 		, const FString& ParsedJsonString
-		, const TSharedPtr<FJsonObject>& ParsedJsonObj);
+		, const TSharedPtr<FJsonObject>& ParsedJsonObj
+		, bool bSkipConditioner);
 	
-	void HandleV2SessionNotif(const FString& ParsedJsonString);
+	void HandleV2SessionNotif(const FString& ParsedJsonString, bool bSkipConditioner);
 	
-	void HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message);
+	void HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message, bool bSkipConditioner);
 
-	void InitializeV2MatchmakingNotifDelegates();
+	void InitializeV2MatchmakingNotifTopics();
+
+	void OnNotificationSenderMessageReceived(const FString& Payload);
 	
-	TMap<EV2MatchmakingNotifTopic, FMessageNotif> MatchmakingV2NotifDelegates;
+	TArray<EV2MatchmakingNotifTopic> MatchmakingV2NotifTopics;
 	
 	static TMap<FString, Response> ResponseStringEnumMap;
 	static TMap<FString, Notif> NotifStringEnumMap;
@@ -2820,6 +3014,8 @@ private:
 	FDelegateHandle QosLatenciesUpdatedDelegateHandle;
 
 	FDelegateHandle NotificationMessageDelegateHandle;
+	FOnMessagingSystemReceivedMessage NotificationSenderListenerDelegate;
+	FDelegateHandle NotificationSenderListenerDelegateHandle;
 
 	void InitializeMessaging();
 

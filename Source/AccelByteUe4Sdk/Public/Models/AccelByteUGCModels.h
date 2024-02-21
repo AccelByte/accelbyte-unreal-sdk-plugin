@@ -95,6 +95,128 @@ enum class EContentStatus : uint8
 	PUBLISHED
 };
 
+class ACCELBYTEUE4SDK_API FAccelByteUGCUtilities
+{
+public:
+	static FString ConvertLikedContentSortByToString(const EAccelByteLikedContentSortBy& SortBy)
+	{
+		switch (SortBy)
+		{
+		case EAccelByteLikedContentSortBy::NAME:
+			return TEXT("name");
+		case EAccelByteLikedContentSortBy::DATE:
+			return TEXT("date");
+		case EAccelByteLikedContentSortBy::DOWNLOAD:
+			return TEXT("download");
+		case EAccelByteLikedContentSortBy::LIKE:
+			return TEXT("like");
+		default:
+			return TEXT("");
+		}
+	}
+
+	static FString ConvertUGCSortByToString(const EAccelByteUgcSortBy& SortBy)
+	{
+		switch (SortBy)
+		{
+		case EAccelByteUgcSortBy::NAME:
+			return TEXT("name");
+		case EAccelByteUgcSortBy::DATE:
+			return TEXT("date");
+		case EAccelByteUgcSortBy::DOWNLOAD:
+			return TEXT("download");
+		case EAccelByteUgcSortBy::LIKE:
+			return TEXT("like");
+		case EAccelByteUgcSortBy::UPDATED_TIME:
+			return TEXT("updatedTime");
+		default:
+			return TEXT("");
+		}
+	}
+
+	static FString ConvertUGCOrderByToString(const EAccelByteUgcOrderBy& OrderBy)
+	{
+		switch (OrderBy)
+		{
+		case EAccelByteUgcOrderBy::ASC:
+			return TEXT("asc");
+		case EAccelByteUgcOrderBy::DESC:
+			return TEXT("desc");
+		default:
+			return TEXT("");
+		}
+	}
+
+	static FString ConvertGetUGContentsSortByToString(const EAccelByteUGCContentSortByV2& SortBy)
+	{
+		switch (SortBy)
+		{
+		case EAccelByteUGCContentSortByV2::NAME:
+			return TEXT("name");
+		case EAccelByteUGCContentSortByV2::NAME_ASC:
+			return TEXT("name:asc");
+		case EAccelByteUGCContentSortByV2::NAME_DESC:
+			return TEXT("name:desc");
+		case EAccelByteUGCContentSortByV2::DOWNLOAD:
+			return TEXT("download");
+		case EAccelByteUGCContentSortByV2::DOWNLOAD_ASC:
+			return TEXT("download:asc");
+		case EAccelByteUGCContentSortByV2::DOWNLOAD_DESC:
+			return TEXT("download:desc");
+		case EAccelByteUGCContentSortByV2::LIKE:
+			return TEXT("like");
+		case EAccelByteUGCContentSortByV2::LIKE_ASC:
+			return TEXT("like:asc");
+		case EAccelByteUGCContentSortByV2::LIKE_DESC:
+			return TEXT("like:desc");
+		case EAccelByteUGCContentSortByV2::CREATED_TIME:
+			return TEXT("createdTime");
+		case EAccelByteUGCContentSortByV2::CREATED_TIME_ASC:
+			return TEXT("createdTime:asc");
+		case EAccelByteUGCContentSortByV2::CREATED_TIME_DESC:
+			return TEXT("createdTime:desc");
+		default:
+			return TEXT("");
+		}
+	}
+
+	static FString ConvertUGCUtilitiesSortByToString(const EAccelByteUGCContentUtilitiesSortByV2& SortBy)
+	{
+		switch (SortBy)
+		{
+		case EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME:
+			return TEXT("createdTime");
+		case EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_ASC:
+			return TEXT("createdTime:asc");
+		case EAccelByteUGCContentUtilitiesSortByV2::CREATED_TIME_DESC:
+			return TEXT("createdTime:desc");
+		default:
+			return TEXT("");
+		}
+	}
+
+	static FString ConvertStagingContentSortByToString(const EAccelByteStagingContentUtilitiesSortBy& SortBy)
+	{
+		switch (SortBy)
+		{
+		case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME:
+			return TEXT("createdTime");
+		case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME_ASC:
+			return TEXT("createdTime:asc");
+		case EAccelByteStagingContentUtilitiesSortBy::CREATED_TIME_DESC:
+			return TEXT("createdTime:desc");
+		case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME:
+			return TEXT("updatedTime");
+		case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME_ASC:
+			return TEXT("updatedTime:asc");
+		case EAccelByteStagingContentUtilitiesSortBy::UPDATED_TIME_DESC:
+			return TEXT("updatedTime:desc");
+		default:
+			return TEXT("");
+		}
+	}
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPayloadUrl
 {
@@ -1190,3 +1312,69 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPaginatedListStagingContentRespons
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | StagingContentResponse")
 	FAccelByteModelsPaging Paging{};
 };
+
+#pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCResponse, FAccelByteModelsUGCResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCContentResponse, FAccelByteModelsUGCContentResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCContentPagingResponse, FAccelByteModelsUGCContentPageResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCBulkContentResponse, TArray<FAccelByteModelsUGCContentResponse>, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCPreviewResponse, FAccelByteModelsUGCPreview, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayUint8, TArray<uint8>, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCTagsPagingResponse, FAccelByteModelsUGCTagsPagingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCTypesPagingResponse, FAccelByteModelsUGCTypesPagingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelResponse, FAccelByteModelsUGCChannelResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCChannelsPagingResponse, FAccelByteModelsUGCChannelsPagingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCSearchContentsPagingResponse, FAccelByteModelsUGCSearchContentsPagingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateLikeStatusToContentResponse, FAccelByteModelsUGCUpdateLikeStatusToContentResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetListFollowersPagingResponse, FAccelByteModelsUGCGetListFollowersPagingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateFollowStatusToUserResponse, FAccelByteModelsUGCUpdateFollowStatusToUserResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCSearchContentsPagingResponseV2, FAccelByteModelsUGCSearchContentsPagingResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCContentResponseV2, FAccelByteModelsUGCContentResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCBulkContentResponseV2, TArray<FAccelByteModelsUGCContentResponseV2>, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCCreateUGCResponseV2, FAccelByteModelsUGCCreateUGCResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCModifyUGCResponseV2, FAccelByteModelsUGCModifyUGCResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUploadContentResponse, FAccelByteModelsUGCUploadContentURLResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCContentPageResponseV2, FAccelByteModelsUGCSearchContentsPagingResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateScreenshotsV2, FAccelByteModelsUGCUpdateScreenshotsV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateContentScreenshotResponse, FAccelByteModelsUGCUpdateContentScreenshotResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCAddDownloadContentCountResponse, FAccelByteModelsUGCAddDownloadContentCountResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetPaginatedContentDownloaderResponse, FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCGetPaginatedContentLikerResponse, FAccelByteModelsUGCGetPaginatedContentLikerResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCUpdateContentFileLocation, FAccelByteModelsUGCUpdateContentFileLocationResponseV2, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCPaginatedListStagingContent, FAccelByteModelsUGCPaginatedListStagingContentResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCStagingContent, FAccelByteModelsUGCStagingContentResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCSearchContentsResponse, FAccelByteModelsUGCSearchContentsPagingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUGCServerResponse, FAccelByteModelsUGCResponse, Response);
+
+#pragma endregion

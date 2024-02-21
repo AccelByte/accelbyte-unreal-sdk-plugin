@@ -32,7 +32,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPopulatedItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 * @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
-	 * @param PopulateBundle Whether populate bundled items if it's a bundle, default value is false.
+	 * @param bPopulateBundle Whether populate bundled items if it's a bundle, default value is false.
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
 	 */
 	void GetItemById(FString const& ItemId
 		, FString const& Language
@@ -40,7 +41,8 @@ public:
 		, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess
 		, FErrorHandler const& OnError
 		, const FString& StoreId = TEXT("")
-		, bool bPopulateBundle = false);
+		, bool bPopulateBundle = false
+		, bool AutoCalcEstimatedPrice = false);
 
 	/**
 	 * @brief Get one item information from an online store.
@@ -71,6 +73,7 @@ public:
 	 * @param StoreId The Store Id, default value is published store id
 	 * Note that It will only one available published store in each game namespace, if you assigned this with other, means you will be able to expose items on draft store.
 	 * Nonetheless it will only user who has SANDBOX role (set on AP) and has permission and ability to hit this end point with other StoreId value.
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
 	 */
 	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 		, int32 const& Offset
@@ -78,7 +81,8 @@ public:
 		, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, TArray<EAccelByteItemListSortBy> SortBy = {}
-		, FString const& StoreId = TEXT(""));
+		, FString const& StoreId = TEXT("")
+		, bool AutoCalcEstimatedPrice = false);
 
 	/**
 	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
@@ -90,14 +94,16 @@ public:
 	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
-	 */
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
+	*/
 	void SearchItem(FString const& Language
 		, FString const& Keyword
 		, int32 const& Offset
 		, int32 const& Limit
 		, FString const& Region
 		, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, bool AutoCalcEstimatedPrice = false);
 
 	/**
 	 * @brief Get Item information by SKU number from an online store.
@@ -107,12 +113,14 @@ public:
 	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
 	 */
 	void GetItemBySku(FString const& Sku
 		, FString const& Language
 		, FString const& Region
 		, THandler<FAccelByteModelsItemInfo> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, bool AutoCalcEstimatedPrice = false);
 
 	/**
 	 * @brief Get Dynamic Data information from specified Item
@@ -134,13 +142,15 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 * @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
 	 */
 	void BulkGetLocaleItems(const TArray<FString>& ItemIds
 		, const FString& Region
 		, const FString& Language
 		, THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess
 		, FErrorHandler const& OnError
-		, const FString& StoreId = TEXT(""));
+		, const FString& StoreId = TEXT("")
+		, bool AutoCalcEstimatedPrice = false);
 
 	/**
 	 * @brief Get list all stores in a namespace.
