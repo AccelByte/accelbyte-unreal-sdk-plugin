@@ -8,8 +8,8 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
-#include "Models/AccelByteUserModels.h"
 #include "Core/AccelByteApiBase.h"
+#include "Models/AccelByteUserModels.h"
 
 namespace AccelByte
 {
@@ -101,6 +101,21 @@ public:
 		, const bool bRememberMe = false);
 
 	/**
+	 * @brief Log in with email/username account using v4 endpoint with 2FA enable
+	 *
+	 * @param Username User email address or username.
+	 * @param Password Password.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
+	 */
+	void LoginWithUsernameV4(const FString& Username
+		, const FString& Password
+		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const bool bRememberMe = false);
+
+	/**
 	 * @brief Log in with device ID (anonymous log in).
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
@@ -117,6 +132,16 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void LoginWithDeviceId(const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, bool bCreateHeadless = true);
+
+	/**
+	 * @brief Log in with device ID (anonymous log in).
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithDeviceIdV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
 		, const FOAuthErrorHandler& OnError
 		, bool bCreateHeadless = true);
 
@@ -164,6 +189,36 @@ public:
 		, bool bCreateHeadless = true);
 
 	/**
+	 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc. with 2FA enable
+	 *
+	 * @param PlatformType Specify platform type that chosen by user to log in.
+	 * @param PlatformToken Authentication code that provided by another platform.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true
+	 */
+	void LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType
+		, const FString& PlatformToken
+		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, bool bCreateHeadless = true);
+
+	/**
+	 * @brief Log in with another platform Id account e.g. Steam, Google, Twitch, etc especially to support OIDC (with 2FA enable)
+	 *
+	 * @param PlatformId Specify platform type, string type of this field makes support OpenID Connect (OIDC)
+	 * @param PlatformToken Authentication code that provided by another platform.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true
+	 */
+	void LoginWithOtherPlatformIdV4(const FString& PlatformId
+		, const FString& PlatformToken
+		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, bool bCreateHeadless = true);
+
+	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
 	 *
 	 * @param NativePlatform From the native subsystem
@@ -198,6 +253,40 @@ public:
 		, const FOAuthErrorHandler& OnError);
 
 	/**
+	 * @brief Login with native platform and secondary platform. Currently support Windows only.
+	 *
+	 * @param NativePlatform From the native subsystem
+	 * @param NativePlatformToken The auth ticket from native identity interface
+	 * @param SecondaryPlatform From the secondary platform subsystem
+	 * @param SecondaryPlatformToken The auth ticket from secondary platform interface
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithSimultaneousPlatformV4(EAccelBytePlatformType NativePlatform
+		, const FString& NativePlatformToken
+		, const EAccelBytePlatformType& SecondaryPlatform
+		, const FString& SecondaryPlatformToken
+		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief Login with native platform and secondary platform. Currently support Windows only.
+	 *
+	 * @param NativePlatform From the native subsystem
+	 * @param NativePlatformToken The auth ticket from native identity interface
+	 * @param SecondaryPlatform From the secondary platform subsystem
+	 * @param SecondaryPlatformToken The auth ticket from secondary platform interface
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithSimultaneousPlatformV4(const FString& NativePlatform
+		, const FString& NativePlatformToken
+		, const FString& SecondaryPlatform
+		, const FString& SecondaryPlatformToken
+		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
 	 * @brief Verify log in with new device when user enabled 2FA.
 	 *
 	 * @param MfaToken return from BE when user login with new device and 2FA enabled.
@@ -211,6 +300,23 @@ public:
 		, EAccelByteLoginAuthFactorType AuthFactorType
 		, const FString& Code
 		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, bool bRememberDevice = false);
+
+	/**
+	 * @brief Verify log in with new device when user enabled 2FA.
+	 *
+	 * @param MfaToken return from BE when user login with new device and 2FA enabled.
+	 * @param AuthFactorType 2FA factor used. Could be "authenticator" or "backupCode". User should make sure what type used
+	 * @param Code auth code from 3rd party authenticator or backupCode.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param bRememberDevice This will use for refresh token expiration extension, default value is false.
+	 */
+	void VerifyLoginWithNewDevice2FAEnabledV4(const FString& MfaToken
+		, EAccelByteLoginAuthFactorType AuthFactorType
+		, const FString& Code
+		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
 		, const FOAuthErrorHandler& OnError
 		, bool bRememberDevice = false);
 
@@ -230,6 +336,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void LoginWithLauncher(const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief Log in from AccelByte Launcher.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void LoginWithLauncherV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
 		, const FOAuthErrorHandler& OnError);
 
 	/**
@@ -263,6 +378,19 @@ public:
 	void LoginWithRefreshToken(const FString& RefreshToken
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError
+		, const FString& PlatformUserId = TEXT(""));
+
+	/**
+	 * @brief login with refresh token
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param RefreshToken the refresh token for login.
+	 * @param PlatformUserId Target platform user id to cache.
+	 */
+	void LoginWithRefreshTokenV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& RefreshToken = TEXT("")
 		, const FString& PlatformUserId = TEXT(""));
 
 	/**
@@ -318,6 +446,17 @@ public:
 		, const FOAuthErrorHandler& OnError);
 
 	/**
+	 * @brief Relogin using the previously logged-in platform account. WINDOWS ONLY
+	 *
+	 * @param PlatformUserID The user ID that used previously and used .
+	 * @param OnSuccess This will be called when the provided Platform User Account is acknowledged and not expired yet. Continue the session.
+	 * @param OnError This will be called when the Platform User Account that provided is not known yet — OR it existed but already expired.
+	 */
+	void TryReloginV4(const FString& PlatformUserID
+		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
 	 * @brief Create Headless Account And Login
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
@@ -336,6 +475,17 @@ public:
 	void CreateHeadlessAccountAndLogin(const FString& LinkingToken
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief Create Headless Account And Login
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param LinkingToken LinkingToken
+	 */
+	void CreateHeadlessAccountAndLoginV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& LinkingToken = TEXT(""));
 
 	/**
 	 * @brief Authentication With Platform Link And Login
@@ -362,6 +512,32 @@ public:
 	void AuthenticationWithPlatformLinkAndLogin(const FString& Username
 		, const FString& Password
 		, const FString& LinkingToken
+		, const FVoidHandler& OnSuccess
+		, const FOAuthErrorHandler& OnError);
+
+	/**
+	 * @brief Authentication With Platform Link And Login
+	 *
+	 * @param Username Username/user's email that will be validated.
+	 * @param Password This is password's account exist
+	 * @param LinkingToken Specified Linking token
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void AuthenticationWithPlatformLinkAndLoginV4(const FString& Username
+		, const FString& Password
+		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& LinkingToken = TEXT(""));
+
+	/**
+	 * @brief Claim Access Token using Login Ticket.
+	 *
+	 * @param LoginTicket Login Ticket to claim the access token
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ClaimAccessToken(const FString LoginTicket
 		, const FVoidHandler& OnSuccess
 		, const FOAuthErrorHandler& OnError);
 
@@ -1068,6 +1244,17 @@ public:
 	void GenerateGameToken(const FString& Code,
 		const FVoidHandler& OnSuccess,
 		const FOAuthErrorHandler & OnError);
+
+	/**
+	 * @brief This function for generate publisher user's game token. required a code from request game token
+	 *
+	 * @param Code code from request game token..
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GenerateGameTokenV4(const FString& Code,
+		const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess,
+		const FOAuthErrorHandler& OnError);
 	
 	/**
 	 * @brief This function generate a code that can be exchanged into publisher namespace token (i.e. by web portal)
@@ -1190,7 +1377,13 @@ private:
 	void SaveCachedTokenToLocalDataStorage(const FString& CachedTokenKey
 		, const FString& RefreshToken
 		, FDateTime ExpireDate);
-	 
+	/**
+	 * @brief Internal utilities to trigger invalid request error for User API.
+	 * 
+	 * @param ErrorMessage message to pass for login error.
+	 * @param OnError delegate function for error Login.
+	 */
+	void TriggerInvalidRequestError(const FString& ErrorMessage, const FOAuthErrorHandler& OnError);
 };
 
 } // Namespace Api

@@ -44,6 +44,7 @@ public:
 	FString SessionServerUrl{};
 	FString GDPRServerUrl{};
 	FString AMSServerUrl{};
+	FString ChallengeServerUrl{};
 	FString ConfigServerUrl{};
 	
 	float QosPingTimeout{.6f};

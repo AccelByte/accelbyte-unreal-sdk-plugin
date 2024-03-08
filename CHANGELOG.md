@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [25.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.0.0%0D24.11.0) (2024-03-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **CommerceBalance:** balance type on wallet is using int64 now
+
+### Features
+
+* add enablesecret field to response model in sdk ([93d1c6b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/93d1c6b3360ed7ad4e9b898e346a1cae453abc67))
+* **backfill:** add new notification for backfill ticket expired ([b501d1b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b501d1bc6393ca2cac99a512b21bfefdd78e53b7))
+* **challenge:** add client and server API methods for the challenge service ([83bb01e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/83bb01e677ee5ab514f49eda45526b3d27ed0e19))
+
+
+### Bug Fixes
+
+* **CommerceBalance:** fix wallet balance using int64 type ([58059ff](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/58059ffc4d6104e0002b312580e98d9c4c69c358))
+* **ecommerce:** add missing field DisplayOrder in FAccelByteModelsSectionInfo ([9915723](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/99157237657a94df8f8d5a9ade6062fc073c64bb))
+
 ## [24.11.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.11.0%0D24.10.0) (2024-02-21)
 
 

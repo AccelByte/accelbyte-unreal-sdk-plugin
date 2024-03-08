@@ -34,6 +34,7 @@
 #include "GameServerApi/AccelByteServerPredefinedEventApi.h"
 #include "GameServerApi/AccelByteServerGameStandardEventApi.h"
 #include "GameServerApi/AccelByteServerBinaryCloudSaveApi.h"
+#include "GameServerApi/AccelByteServerChallengeApi.h"
 
 namespace AccelByte
 {
@@ -72,6 +73,7 @@ public:
 	GameServerApi::ServerPredefinedEvent ServerPredefinedEvent{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerGameStandardEvent ServerGameStandardEvent{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerBinaryCloudSave ServerBinaryCloudSave{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerChallenge ServerChallenge{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 
 	template<typename T, typename... U>
 	T GetServerApi(U&&... Args)

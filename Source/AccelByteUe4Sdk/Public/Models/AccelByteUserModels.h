@@ -130,66 +130,21 @@ struct ACCELBYTEUE4SDK_API FRegisterRequest
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FRegisterRequestv2
+struct ACCELBYTEUE4SDK_API FRegisterRequestv2 : public FRegisterRequest
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString AuthType{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString DisplayName{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString EmailAddress{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString Password{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString Country{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString DateOfBirth{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
 	FString Username{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FRegisterRequestv3
+struct ACCELBYTEUE4SDK_API FRegisterRequestv3 : public FRegisterRequestv2
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
 	TArray<FAcceptedPolicies> AcceptedPolicies{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString AuthType{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString DisplayName{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString EmailAddress{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString Username{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString Password{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString Country{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString DateOfBirth{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-	FString UniqueDisplayName{};
 };
 
 USTRUCT(BlueprintType)

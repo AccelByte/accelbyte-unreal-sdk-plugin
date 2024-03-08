@@ -1000,6 +1000,27 @@ FString FAccelByteUtilities::ConvertItemSortByToString(EAccelByteItemListSortBy 
 	return TEXT("");
 }
 
+FString FAccelByteUtilities::ConvertChallengeSortByToString(EAccelByteModelsChallengeSortBy const& SortBy)
+{
+	switch (SortBy)
+	{
+	case EAccelByteModelsChallengeSortBy::CREATED_AT:
+		return TEXT("createdAt");
+	case EAccelByteModelsChallengeSortBy::CREATED_AT_ASC:
+		return TEXT("createdAt:asc");
+	case EAccelByteModelsChallengeSortBy::CREATED_AT_DESC:
+		return TEXT("createdAt:desc");
+	case EAccelByteModelsChallengeSortBy::UPDATED_AT:
+		return TEXT("updatedAt");
+	case EAccelByteModelsChallengeSortBy::UPDATED_AT_ASC:
+		return TEXT("updatedAt:asc");
+	case EAccelByteModelsChallengeSortBy::UPDATED_AT_DESC:
+		return TEXT("updatedAt:desc");
+	default:
+		return {};
+	}
+}
+
 bool FAccelByteUtilities::ReplaceDecimalSeparator(FString& NumberStr, const TCHAR* From, const TCHAR* To)
 {
 	if (FAccelByteUtilities::IsNumericString(NumberStr))

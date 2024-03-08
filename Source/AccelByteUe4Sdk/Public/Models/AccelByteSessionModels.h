@@ -121,6 +121,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionConfiguration
 		FString ClientVersion{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
 		TArray<FString> RequestedRegions{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")
+		bool EnableSecret{false};
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | SessionConfiguration")
 		bool TextChat{false};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionConfiguration")

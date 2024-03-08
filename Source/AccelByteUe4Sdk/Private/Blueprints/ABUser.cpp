@@ -166,6 +166,127 @@ void UABUser::LoginByExchangeCodeForToken(FString Code, FDHandler OnSuccess, FDE
 			}));
 }
 
+void UABUser::LoginWithUsernameV4(FString const& Username, FString const& Password, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
+{
+	ApiClientPtr->User.LoginWithUsernameV4(Username
+		, Password
+		, THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
+			{
+				OnError.ExecuteIfBound(Code, Message, ErrorInfo);
+			}));
+}
+
+void UABUser::LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType, FString const& PlatformToken, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError, bool bCreateHeadless)
+{
+	ApiClientPtr->User.LoginWithOtherPlatformV4(PlatformType
+		, PlatformToken
+		, THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
+			{
+				OnError.ExecuteIfBound(Code, Message, ErrorInfo);
+			}));
+}
+
+void UABUser::LoginWithOtherPlatformIdV4(FString const& PlatformId, FString const& PlatformToken, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError, bool bCreateHeadless)
+{
+	ApiClientPtr->User.LoginWithOtherPlatformIdV4(PlatformId
+		, PlatformToken
+		, THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
+			{
+				OnError.ExecuteIfBound(Code, Message, ErrorInfo);
+			}));
+}
+
+void UABUser::LoginWithDeviceIdV4(FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
+{
+	ApiClientPtr->User.LoginWithDeviceIdV4(THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
+			{
+				OnError.ExecuteIfBound(Code, Message, ErrorInfo);
+			}));
+}
+
+void UABUser::LoginWithLauncherV4(FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
+{
+	ApiClientPtr->User.LoginWithLauncherV4(THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
+			{
+				OnError.ExecuteIfBound(Code, Message, ErrorInfo);
+			}));
+}
+
+void UABUser::LoginWithRefreshTokenV4(FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
+{
+	ApiClientPtr->User.LoginWithRefreshTokenV4(THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
+			{
+				OnError.ExecuteIfBound(Code, Message, ErrorInfo);
+			}));
+}
+
+void UABUser::TryReloginV4(FString PlatformUserID, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
+{
+	ApiClientPtr->User.TryReloginV4(
+		PlatformUserID,
+		THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
+			{
+				OnError.ExecuteIfBound(Code, Message, ErrorInfo);
+			}));
+}
+
+void UABUser::LoginByExchangeCodeForTokenV4(FString Code, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
+{
+	ApiClientPtr->User.GenerateGameTokenV4(Code
+		, THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FOAuthErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FErrorOAuthInfo& Info)
+			{
+				OnError.ExecuteIfBound(Code, Message, Info);
+			}));
+}
+
 void UABUser::ForgetAllCredentials() 
 {
 	ApiClientPtr->User.ForgetAllCredentials();

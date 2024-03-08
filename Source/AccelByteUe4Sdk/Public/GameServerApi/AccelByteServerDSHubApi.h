@@ -30,6 +30,7 @@ DECLARE_DELEGATE_OneParam(FOnV2BackfillProposalNotification, const FAccelByteMod
 DECLARE_DELEGATE_OneParam(FOnV2SessionMemberChangedNotification, const FAccelByteModelsV2GameSession& /*Notification*/);
 DECLARE_DELEGATE_OneParam(FOnV2SessionEndedNotification, const FAccelByteModelsSessionEndedNotification& /*Notification*/);
 DECLARE_DELEGATE_OneParam(FOnV2SessionSecretUpdateNotification, const FAccelByteModelsSessionSecretUpdateNotification& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2BackfillTicketExpiredNotification, const FAccelByteModelsV2MatchmakingBackfillTicketExpireNotif& /*Notification*/);
 
 /**
  * @brief DS Hub API for communication from dedicated server to backend.
@@ -119,7 +120,14 @@ public:
 	 *
 	 * @param InDelegate delegate to set
 	 */
-	void SetOnV2SessionSecretUpdateNotification(const FOnV2SessionSecretUpdateNotification& InDelegate); 
+	void SetOnV2SessionSecretUpdateNotification(const FOnV2SessionSecretUpdateNotification& InDelegate);
+
+	/**
+	 * @brief Bind a delegate to listen to backfill ticket expired notifications from DS hub
+	 *
+	 * @param InDelegate delegate to set
+	 */
+	void SetOnV2BackfillTicketExpiredNotificationDelegate(const FOnV2BackfillTicketExpiredNotification& InDelegate);
 
 	/**
 	 *	Unbind notification delegates
@@ -186,6 +194,11 @@ private:
 	 * Delegate fired when the server associated with this DS hub connection receives session secret.
 	 */
 	FOnV2SessionSecretUpdateNotification OnV2SessionSecreteUpdateNotification{};
+
+	/**
+	 * Delegate fired when the server associated with this DS hub connection receives a backfill ticket expired from matchmaking V2.
+	 */
+	FOnV2BackfillTicketExpiredNotification OnV2BackfillTicketExpiredNotification{};
 
 	/**
 	 * Create an instance of our websocket to connect to the DSHub server.

@@ -108,7 +108,11 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 	AMSServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("AMSServerUrl"), BaseUrl, TEXT("ams"));
 
+	ChallengeServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ChallengeServerUrl"), BaseUrl, TEXT("challenge"));
+
 	ConfigServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ConfigServerUrl"), BaseUrl, TEXT("config"));
+	
+	LoginQueueServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("LoginQueueServerUrl"), BaseUrl, TEXT("login-queue"));
 
 	LoadFallback(SectionPath, TEXT("AppId"), AppId);
 
@@ -382,6 +386,16 @@ FString UAccelByteBlueprintsSettings::GetGDPRServerUrl()
 	return FRegistry::Settings.GDPRServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetChallengeServerUrl()
+{
+	return FRegistry::Settings.ChallengeServerUrl;
+}
+
+FString UAccelByteBlueprintsSettings::GetLoginQueueServerUrl()
+{
+	return FRegistry::Settings.LoginQueueServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetAppId()
 {
 	return FRegistry::Settings.AppId;
@@ -565,6 +579,16 @@ void UAccelByteBlueprintsSettings::SetMatchmakingV2ServerUrl(const FString& Matc
 void UAccelByteBlueprintsSettings::SetGDPRServerUrl(const FString& GDPRServerUrl)
 {
 	FRegistry::Settings.GDPRServerUrl = GDPRServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetChallengeServerUrl(const FString& ChallengeServerUrl)
+{
+	FRegistry::Settings.ChallengeServerUrl = ChallengeServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetLoginQueueServerUrl(const FString& LoginQueueServerUrl)
+{
+	FRegistry::Settings.LoginQueueServerUrl = LoginQueueServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)

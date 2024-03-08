@@ -25,6 +25,7 @@ public:
 	FString TurnManagerServerUrl{};
 	FString UGCServerUrl{};
 	FString ReportingServerUrl{};
+	FString LoginQueueServerUrl{};
 	FString AppId{};
 	FString CustomerName{};
 	FString SettingsEnvironment{};
@@ -149,6 +150,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString MatchmakingV2ServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString ChallengeServerUrl{};
+	
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString LoginQueueServerUrl{};
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AppId{};
@@ -296,6 +303,12 @@ public:
 	static FString GetGDPRServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetChallengeServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetLoginQueueServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetAppId();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -405,6 +418,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetGDPRServerUrl(const FString& GDPRServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetChallengeServerUrl(const FString& ChallengeServerUrl);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetLoginQueueServerUrl(const FString& LoginQueueServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetAppId(const FString& AppId);

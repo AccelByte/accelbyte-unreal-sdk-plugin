@@ -50,7 +50,9 @@
 #include "Api/AccelByteStoreDisplayApi.h"
 #include "Api/AccelBytePredefinedEventApi.h"
 #include "Api/AccelByteGameStandardEventApi.h"
+#include "Api/AccelByteLoginQueueApi.h"
 #include "Core/AccelByteMessagingSystem.h"
+#include "Api/AccelByteChallengeApi.h"
 
 namespace AccelByte
 {
@@ -81,6 +83,7 @@ public:
 	Api::Reporting Reporting{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Miscellaneous Miscellaneous{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Configurations Configurations{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::LoginQueue LoginQueue{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion
 
 #pragma region Commerce
@@ -108,6 +111,7 @@ public:
 	Api::Reward Reward{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::SeasonPass SeasonPass{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Group Group{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Challenge Challenge{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion
 
 #pragma region Multiplayer

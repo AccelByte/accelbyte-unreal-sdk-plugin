@@ -169,3 +169,54 @@ struct ACCELBYTEUE4SDK_API FPlatformTokenRefreshResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | FPlatformTokenRefreshResponse")
 	FString PlatformUserId{};
 };
+
+USTRUCT(BluePrintType)
+struct ACCELBYTEUE4SDK_API FOauth2TokenV4 : public FOauth2Token
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | OAuth2V4")
+	FString Ticket{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | OAuth2V4")
+	int32 Position{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | OAuth2V4")
+	int32 EstimatedWaitingTimeInSeconds{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | OAuth2V4")
+	int32 ReconnectExpiredAt{0};// UNIX seconds since epoch
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLoginQueueTicketInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | LoginQueueTicketInfo")
+	FString Ticket{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | LoginQueueTicketInfo")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | LoginQueueTicketInfo")
+	int32 Position{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | LoginQueueTicketInfo")
+	int32 EstimatedWaitingTimeInSeconds{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | LoginQueueTicketInfo")
+	int32 ReconnectExpiredAt{0};// UNIX seconds since epoch
+
+	FAccelByteModelsLoginQueueTicketInfo() {};
+
+	FAccelByteModelsLoginQueueTicketInfo(const FAccelByteModelsLoginQueueTicketInfo& TicketInfo) 
+	{
+		Ticket = TicketInfo.Ticket;
+		Namespace = TicketInfo.Namespace;
+		Position = TicketInfo.Position;
+		EstimatedWaitingTimeInSeconds = TicketInfo.EstimatedWaitingTimeInSeconds;
+		ReconnectExpiredAt = TicketInfo.ReconnectExpiredAt;
+	};
+
+	FAccelByteModelsLoginQueueTicketInfo(const FOauth2TokenV4& TicketInfo)
+	{
+		Ticket = TicketInfo.Ticket;
+		Position = TicketInfo.Position;
+		EstimatedWaitingTimeInSeconds = TicketInfo.EstimatedWaitingTimeInSeconds;
+		ReconnectExpiredAt = TicketInfo.ReconnectExpiredAt;
+	}
+
+	~FAccelByteModelsLoginQueueTicketInfo() {};
+};

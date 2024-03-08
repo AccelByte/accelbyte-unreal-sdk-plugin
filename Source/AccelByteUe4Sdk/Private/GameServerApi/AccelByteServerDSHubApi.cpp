@@ -25,6 +25,7 @@ const FString MMV2BackfillProposalTopic = TEXT("BACKFILL_PROPOSAL");
 const FString SessionMembersChangedTopic = TEXT("SESSION_MEMBER_CHANGED");
 const FString SessionEndedTopic = TEXT("SESSION_ENDED_NOTIF");
 const FString SessionSecretUpdateTopic = TEXT("SESSION_SERVER_SECRET");
+const FString MMV2BackfillTicketExpiredTopic = TEXT("BACKFILL_TICKET_EXPIRE");
 // DS HUB TOPICS END
 
 ServerDSHub::ServerDSHub(
@@ -116,6 +117,11 @@ void ServerDSHub::SetOnV2SessionEndedNotificationDelegate(const FOnV2SessionEnde
 void ServerDSHub::SetOnV2SessionSecretUpdateNotification(const FOnV2SessionSecretUpdateNotification& InDelegate)
 {
 	OnV2SessionSecreteUpdateNotification = InDelegate;
+}
+
+void ServerDSHub::SetOnV2BackfillTicketExpiredNotificationDelegate(const FOnV2BackfillTicketExpiredNotification& InDelegate)
+{
+	OnV2BackfillTicketExpiredNotification = InDelegate;
 }
 
 void ServerDSHub::UnbindDelegates()
@@ -263,6 +269,16 @@ void ServerDSHub::OnMessage(const FString& Message)
 			return;
 		}
 		OnV2SessionSecreteUpdateNotification.ExecuteIfBound(NotificationPayload);
+	}
+	else if (Topic.Equals(MMV2BackfillTicketExpiredTopic))
+	{
+		FAccelByteModelsV2MatchmakingBackfillTicketExpireNotif NotificationPayload;
+		if (!FJsonObjectConverter::JsonObjectToUStruct(PayloadObject.ToSharedRef(), &NotificationPayload))
+		{
+			UE_LOG(LogAccelByteDSHub, Warning, TEXT("Failed to convert payload for backfill ticket expired topic to an FAccelByteModelsV2MatchmakingBackfillTicketExpireNotif instance!"));
+			return;
+		}
+		OnV2BackfillTicketExpiredNotification.ExecuteIfBound(NotificationPayload);
 	}
 }
 

@@ -28,6 +28,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccountUserPlatformInfosResponse, FAccountUs
 
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDAccountLinkConflictErrorJsonResponse, int32, ErrorCode, const FString&, ErrorMessage, FAccountLinkConflictErrorJson, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDLoginQueueInfoResponse, FAccelByteModelsLoginQueueTicketInfo, Response);
+
 UCLASS(Blueprintable, BlueprintType)
 class UABUser final : public UObject
 {
@@ -59,10 +61,34 @@ public:
 	void TryRelogin(FString PlatformUserID, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void Logout(FDHandler OnSuccess, FDErrorHandler OnError);
+	void LoginByExchangeCodeForToken(FString Code, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void LoginByExchangeCodeForToken(FString Code, FDHandler OnSuccess, FDErrorHandler OnError);
+	void LoginWithUsernameV4(FString const& Username, FString const& Password, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType, FString const& PlatformToken, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError, bool bCreateHeadless = true);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void LoginWithOtherPlatformIdV4(FString const& PlatformId, FString const& PlatformToken, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError, bool bCreateHeadless = true);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void LoginWithDeviceIdV4(FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void LoginWithLauncherV4(FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void LoginWithRefreshTokenV4(FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void TryReloginV4(FString PlatformUserID, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void LoginByExchangeCodeForTokenV4(FString Code, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void Logout(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void ForgetAllCredentials();

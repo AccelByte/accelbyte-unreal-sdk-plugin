@@ -117,6 +117,7 @@ enum class EAccelBytePredefinedEventName : uint8
 	DS_BackfillProposal_Received,
 	DS_BackfillProposal_Accepted,
 	DS_BackfillProposal_Rejected,
+	DS_BackfillTicket_Expired,
 	FriendRequest_Sent,
 	FriendRequest_Cancelled,
 	FriendRequest_Accepted,
@@ -1658,6 +1659,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSBackfillProposalRejectedPayload : p
 	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_BackfillProposal_Rejected);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDSBackfillTicketExpiredPayload : public FAccelByteModelsDSRegisteredPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString TicketId{};
+
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::DS_BackfillTicket_Expired);
 	}
 };
 

@@ -1828,7 +1828,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTimeLimitedBalance
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | TimeLimitedBalance")
-	int32 Balance{0};
+	int64 Balance{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | TimeLimitedBalance")
 	FString BalanceSource{};
@@ -1859,7 +1859,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 	FString CurrencySymbol{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
-	int32 Balance{};
+	int64 Balance{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	FString BalanceOrigin{};
@@ -1874,10 +1874,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 	FDateTime UpdatedAt{0};
  
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
-	int32 TotalPermanentBalance{};
+	int64 TotalPermanentBalance{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
-	int32 TotalTimeLimitedBalance{};
+	int64 TotalTimeLimitedBalance{};
 	 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	EAccelByteItemStatus Status{ EAccelByteItemStatus::NONE };
@@ -1901,7 +1901,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfoResponse
 	FString CurrencySymbol{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
-	int32 Balance{}; 
+	int64 Balance{}; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletResponse")
 	TArray<FAccelByteModelsWalletInfo> WalletInfos;
@@ -1922,7 +1922,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreditUserWalletRequest
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
-	int32 Amount{};
+	int64 Amount{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
 	EAccelByteCreditUserWalletSource Source{};
@@ -1955,7 +1955,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletCreditResponse
 	FString CurrencyCode{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
-	int32 Balance{};
+	int64 Balance{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
 	FString BalanceOrigin {};
@@ -1970,10 +1970,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletCreditResponse
 	FDateTime UpdatedAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
-	int32 TotalPermanentBalance{};
+	int64 TotalPermanentBalance{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
-	int32 TotalTimeLimitedBalance {};
+	int64 TotalTimeLimitedBalance {};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletCreditResponse")
 	EAccelByteItemStatus Status{ EAccelByteItemStatus::NONE };
@@ -1986,7 +1986,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDebitUserWalletRequest
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
-	int32 Amount{};
+	int64 Amount{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
 	FString Reason{};
@@ -1999,7 +1999,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletTransactionInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
 		FString WalletId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
-		int32 Amount{};
+		int64 Amount{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
 		FString Reason{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
@@ -2669,6 +2669,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSectionInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
 	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
+	int32 DisplayOrder{0};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Section | Models | SectionInfo")
     FJsonObjectWrapper Ext{};

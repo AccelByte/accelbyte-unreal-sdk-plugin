@@ -58,6 +58,8 @@ namespace Api
 	class GameStandardEvent;
 	class AMS;
 	class Configurations;
+	class Challenge;
+	class LoginQueue;
 }
 
 namespace GameServerApi
@@ -84,6 +86,7 @@ namespace GameServerApi
 	class ServerMetricExporter;
 	class ServerPredefinedEvent;
 	class ServerGameStandardEvent;
+	class ServerChallenge;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -110,6 +113,7 @@ public:
 	static Api::Reporting Reporting;
 	static Api::Miscellaneous Miscellaneous;
 	static Api::Configurations Configurations;
+	static Api::LoginQueue LoginQueue;
 #pragma endregion
 
 #pragma region Game Client Commerce
@@ -136,6 +140,7 @@ public:
 	static Api::Reward Reward;
 	static Api::SeasonPass SeasonPass;
 	static Api::Group Group;
+	static Api::Challenge Challenge;
 #pragma endregion
 
 #pragma region Game Client Multiplayer
@@ -176,6 +181,7 @@ public:
 	static GameServerApi::ServerStatistic ServerStatistic;
 	static GameServerApi::ServerAchievement ServerAchievement;
 	static GameServerApi::ServerSeasonPass ServerSeasonPass;
+	static GameServerApi::ServerChallenge ServerChallenge;
 #pragma endregion
 
 #pragma region Dedicated Server Multiplayer

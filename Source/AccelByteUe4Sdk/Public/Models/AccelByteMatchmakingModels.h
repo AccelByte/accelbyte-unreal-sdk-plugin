@@ -348,3 +348,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingTicketStatuses
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingTicketStatuses")
 	FAccelByteModelsPaging Pagination{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingBackfillTicketExpireNotif
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingBackfillProposalNotif")
+	FString TicketId{};
+};

@@ -9,6 +9,7 @@
 #include "JsonObjectConverter.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Math/NumericLimits.h"
+#include "Models/AccelByteChallengeModels.h"
 #include "AccelByteUtilities.generated.h"
 
 // AccelByte IDs have a max length of 32, as they are UUIDs that are striped of their hyphens
@@ -409,6 +410,7 @@ public:
 	static bool GetValueFromCommandLineSwitch(const FString& Key, int& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, bool& Value);
 	static FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
+	static FString ConvertChallengeSortByToString(EAccelByteModelsChallengeSortBy const& SortBy);
 	static bool ReplaceDecimalSeparator(FString& NumberStr, const TCHAR* From, const TCHAR* To);
 	static bool IsNumericString(const FString& String);
 	static bool IsLanguageUseCommaDecimalSeparator();

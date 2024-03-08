@@ -44,6 +44,7 @@
 #include "Api/AccelByteStoreDisplayApi.h"
 #include "Api/AccelBytePredefinedEventApi.h"
 #include "Api/AccelByteGameStandardEventApi.h"
+#include "Api/AccelByteLoginQueueApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -90,6 +91,7 @@ Api::GDPR FRegistry::GDPR{ FRegistry::Credentials, FRegistry::Settings, FRegistr
 Api::Reporting FRegistry::Reporting{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::Miscellaneous FRegistry::Miscellaneous{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::Configurations FRegistry::Configurations{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};
+Api::LoginQueue FRegistry::LoginQueue{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 #pragma endregion
 
 #pragma region Game Client Commerce

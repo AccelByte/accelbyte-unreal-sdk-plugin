@@ -21,6 +21,7 @@
 DECLARE_DYNAMIC_DELEGATE(FDHandler);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FDErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDCustomErrorHandler, int32, ErrorCode, const FString&, ErrorMessage, const FJsonObjectWrapper&, ErrorObject);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDOAuthErrorHandler, int32, ErrorCode, const FString&, ErrrMessage, const FErrorOAuthInfo&, ErrorInfo);
 
 namespace AccelByte
 {

@@ -601,6 +601,234 @@ public:
 		, const THandler<FThirdPartyPlatformTokenData>& OnSuccess
 		, const FOAuthErrorHandler& OnError);
 
+#pragma region OAuthV4
+	/**
+	 * @brief Get access token from the user using a registered Email account with 2FA enabled and queue feature.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param Username The email address.
+	 * @param Password The password.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	 * @param OnError This will be called when the operation failed.
+	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GetTokenWithPasswordCredentialsV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& Username
+		, const FString& Password
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, bool bRememberMe = false
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Get access token using the user's device information and its unique Id.
+	 *		This will automatically obtain user's device information using a utilities function.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GetTokenWithDeviceIdV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT("")
+		, bool bCreateHeadless = true);
+
+	/**
+	 * @brief Get access token using authorization code from AccelByte Launcher with 2FA enabled.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param AuthorizationCode This should be filled with "JUSTICE_AUTHORIZATION_CODE" environment variable.
+	 * @param RedirectUri The URL the IAM server will redirect you to when the operation succeeded. Again, this doesn't work at all. Do not use this function!!!
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GetTokenWithAuthorizationCodeV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& AuthorizationCode
+		, const FString& RedirectUri
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Get access token from the user with their native platform account,
+	 *		e.g., Steam, Google, Facebook, Twitter, Twitch, etc. with 2FA enabled
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param PlatformId The PlatformId. The platform ID.
+	 * @param PlatformToken The Token.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param bCreateHeadless (optional) A boolean flag to specify new account creation if needed, default value is true
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GetTokenWithOtherPlatformTokenV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& PlatformId
+		, const FString& PlatformToken
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, bool bCreateHeadless = true
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Verify and Remember new device when user enabled 2FA.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param MfaToken Multi Factor Authentication Code, got error when user login with new device.
+	 * @param AuthFactorType Type of authentication factor. Could be "EAccelByteLoginAuthFactorType::Authenticator" or "EAccelByteLoginAuthFactorType::BackupCode".
+	 * @param Code Code to verify new device, could be obtain by 3rd party authenticator app or back up code depend on what type of AuthFactor user set as default
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	 * @param OnError This will be called when the operation failed.
+	 * @param bRememberDevice This will use for refresh token expiration extension, default value is false.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void VerifyAndRememberNewDeviceV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& MfaToken
+		, EAccelByteLoginAuthFactorType AuthFactorType
+		, const FString& Code
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, bool bRememberDevice = false
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Generate publisher user's game token. Required a code from request game token.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The IAM service URL used to call the API.
+	 * @param Code code from request game token.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GenerateGameTokenV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& Code
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Log user in with authenticate a user account and perform platform link. It validates user's email and password.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param Username The email address.
+	 * @param Password The password.
+	 * @param LinkingToken Platform Linking Token.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void AuthenticationWithPlatformLinkV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& Username
+		, const FString& Password
+		, const FString& LinkingToken
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Log user in with create headless account after 3rd platform authenticated
+	 * Will return a "user" session id.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param LinkingToken Platform Linking Token.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void CreateHeadlessAccountAndResponseTokenV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& LinkingToken
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Login with native platform and secondary platform. Currently support Windows only.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param NativePlatformName From the native subsystem
+	 * @param NativePlatformToken The auth ticket from native identity interface
+	 * @param SecondaryPlatformName From the secondary platform subsystem
+	 * @param SecondaryPlatformToken The auth ticket from secondary platform interface
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GetTokenWithSimultaneousPlatformTokenV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& NativePlatformName
+		, const FString& NativePlatformToken
+		, const FString& SecondaryPlatformName
+		, const FString& SecondaryPlatformToken
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Get access token using specified refresh token as long as the refresh token is still valid with 2FA enabled.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param RefreshToken The issued refresh token.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GetTokenWithRefreshTokenV4(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& RefreshToken
+		, const THandler<FOauth2TokenV4>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
+
+	/**
+	 * @brief Get access token from exchange login ticket.
+	 *
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param Data The Data required to exchange, also contain the login ticket itself.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
+	 *			then the value from FRegistry is used instead.
+	 */
+	static void GetTokenWithLoginTicket(const FString& ClientId
+		, const FString& ClientSecret
+		, const FString& LoginTicket
+		, const THandler<FOauth2Token>& OnSuccess
+		, const FOAuthErrorHandler& OnError
+		, const FString& IamUrl = TEXT(""));
+#pragma endregion
+
 private:
 	Oauth2() = delete; // static class can't have instance
 	Oauth2(Oauth2 const&) = delete;
