@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [24.11.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.11.1%0D24.11.0) (2024-03-15)
+
+
+### Bug Fixes
+
+* **MessagingSystem:** incorrect MessagingSystem instance when creating a default ApiClient ([cda4fe6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cda4fe6b874ca2927134ab6eb082e0049d81b777))
+
+
 ## [24.11.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.11.0%0D24.10.0) (2024-02-21)
 
 

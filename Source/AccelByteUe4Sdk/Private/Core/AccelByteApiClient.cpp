@@ -9,7 +9,8 @@ namespace AccelByte
 	
 FApiClient::FApiClient()
 	: bUseSharedCredentials(false)
-	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(MessagingSystem))
+	, MessagingSystem(MakeShared<FAccelByteMessagingSystem>())
+	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*MessagingSystem.Get()))
 	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
 {
 	HttpRef->Startup();
@@ -20,8 +21,9 @@ FApiClient::FApiClient()
 	PresenceBroadcastEvent.Startup();
 }
 
-FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http)
+FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http, TSharedPtr<AccelByte::FAccelByteMessagingSystem> MessagingRef)
 	: bUseSharedCredentials(true)
+	, MessagingSystem(MessagingRef == nullptr ? MakeShared<FAccelByteMessagingSystem>() : MessagingRef)
 	, CredentialsRef(MakeShareable<AccelByte::Credentials>(&Credentials,
 		[](AccelByte::Credentials*) {}))
 	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http,
