@@ -26,27 +26,34 @@ FString GetServerConfigUrlValue(const FString& SectionPath, const FString& Key, 
 {
 	FString Value;
 
-	if (GConfig->GetString(*SectionPath, *Key, Value, GEngineIni)) return Value;
+	// Check AccelByte command line if exist. For example "GameExecutable -abKey=Value" and fetch the ab value of the key
+	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(Key, Value))
+	{
+		// If not exist, then fetch from the game default engine ini section
+		if (GConfig->GetString(*SectionPath, *Key, Value, GEngineIni)) return Value;
 
-	return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultPrefix);
+		return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultPrefix);
+	}
+
+	return Value;
 }
 
 void ServerSettings::LoadSettings(const FString& SectionPath)
 {
 #if WITH_EDITOR || UE_SERVER || UE_BUILD_DEVELOPMENT
-	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientId, GEngineIni))
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("ClientId"), ClientId, DefaultServerSection))
 	{
-		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+		ClientId = TEXT("");
 	}
-	else
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("ClientSecret"), ClientSecret, DefaultServerSection))
 	{
-		GConfig->GetString(*DefaultServerSection, TEXT("ClientId"), ClientId, GEngineIni);
-		GConfig->GetString(*DefaultServerSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+		ClientSecret = TEXT("");
 	}
-	LoadFallback(SectionPath, TEXT("BaseUrl"), BaseUrl);
-	LoadFallback(SectionPath, TEXT("Namespace"), Namespace);
-	LoadFallback(SectionPath, TEXT("PublisherNamespace"), PublisherNamespace);
-	LoadFallback(SectionPath, TEXT("RedirectURI"), RedirectURI);
+	
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("BaseUrl"), BaseUrl, DefaultServerSection);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("Namespace"), Namespace, DefaultServerSection);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("PublisherNamespace"), PublisherNamespace, DefaultServerSection);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("RedirectURI"), RedirectURI, DefaultServerSection);
 
 	IamServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("IamServerUrl"), BaseUrl, TEXT("iam"));
 
@@ -88,7 +95,7 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 	MatchmakingV2ServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("MatchmakingV2ServerUrl"), BaseUrl, TEXT("match2"));
 
 	FString QosPingTimeoutString;
-	LoadFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString, DefaultServerSection);
 	if (QosPingTimeoutString.IsNumeric())
 	{
 		QosPingTimeout = FCString::Atof(*QosPingTimeoutString);
@@ -100,9 +107,9 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	LoadAMSSettings();
 
-	LoadFallback(SectionPath, TEXT("StatsDUrl"), StatsDServerUrl);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("StatsDUrl"), StatsDServerUrl, DefaultServerSection);
 	FString StatsDPortString;
-	LoadFallback(SectionPath, TEXT("StatsDPort"), StatsDPortString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("StatsDPort"), StatsDPortString, DefaultServerSection);
 	if (StatsDPortString.IsNumeric())
 	{
 		StatsDServerPort = FCString::Atoi(*StatsDPortString);
@@ -112,7 +119,7 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 		StatsDServerPort = 8125;
 	}
 	FString StatsDMetricIntervalString;
-	LoadFallback(SectionPath, TEXT("StatsDMetricInterval"), StatsDMetricIntervalString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("StatsDMetricInterval"), StatsDMetricIntervalString, DefaultServerSection);
 	if (StatsDMetricIntervalString.IsNumeric())
 	{
 		StatsDMetricInterval = FCString::Atoi(*StatsDMetricIntervalString);
@@ -123,7 +130,7 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 	}
 
 	FString SendPredefinedEventString;
-	LoadFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString, DefaultServerSection);
 	//Disabling PredefinedEventApi for the time being
 	//this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
 	this->bSendPredefinedEvent = false;
@@ -172,17 +179,34 @@ void ServerSettings::Reset(ESettingsEnvironment const Environment)
 
 bool AccelByte::ServerSettings::LoadAMSSettings()
 {
-	if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("watchdog_url"), AMSServerWatchdogUrl))
+	// Check if the key exist in the commandline of AccelByte format. For example "GameExecutable -abKey=Value" 
+	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(TEXT("watchdog_url"), AMSServerWatchdogUrl))
 	{
-		GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni);
+		if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(TEXT("WatchdogUrl"), AMSServerWatchdogUrl))
+		{
+			// If not exist, then check without AccelByte format. For example "GameExecutable -Key=Value"
+			if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("watchdog_url"), AMSServerWatchdogUrl))
+			{
+				// If not exist, then fetch the setting from game default engine ini file
+				GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni);
+			}
+		}
 	}
 
-	if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("heartbeat"), AMSHeartbeatInterval))
+	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(TEXT("heartbeat"), AMSHeartbeatInterval))
 	{
-		GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni);
+		if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("heartbeat"), AMSHeartbeatInterval))
+		{
+			GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni);
+		}
 	}
 
-	return FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("dsid"), DSId);
+	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(TEXT("dsid"), DSId))
+	{
+		FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("dsid"), DSId);
+	}
+
+	return true;
 }
 
 FString UAccelByteBlueprintsServerSettings::GetClientId()

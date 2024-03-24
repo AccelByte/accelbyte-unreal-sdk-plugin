@@ -50,12 +50,14 @@ public:
      * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, then it will not send the TTL (Time to live) meta data.
 	 */
 	void SaveGameRecord(FString const& Key
 		, ESetByMetadataRecord SetBy
 		, FJsonObject const& RecordRequest
 		, FVoidHandler const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, FTTLConfig const& TTLConfig = FTTLConfig{});
 		
 	/**
 	 * @brief Save a namespace-level game record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
@@ -89,12 +91,14 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, then it will not send the TTL (Time to live) meta data.
 	 */
 	void ReplaceGameRecord(const FString& Key
 		, ESetByMetadataRecord SetBy
 		, const FJsonObject& RecordRequest
 		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, const FErrorHandler& OnError
+		, const FTTLConfig& TTLConfig = FTTLConfig{});
 	
 	/**
 	 * @brief Replace a game record in namespace-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
@@ -454,6 +458,7 @@ private:
 	ServerCloudSave(ServerCloudSave&&) = delete;
 
 	FJsonObject CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy
+		, FTTLConfig const& TTLConfig
 		, FJsonObject const& RecordRequest);
 	
 	FJsonObject CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy

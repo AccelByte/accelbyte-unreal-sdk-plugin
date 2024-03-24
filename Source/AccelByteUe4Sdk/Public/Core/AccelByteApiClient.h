@@ -61,13 +61,13 @@ class ACCELBYTEUE4SDK_API FApiClient final
 {
 public:
 	FApiClient();
-	FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http);
+	FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http, TSharedPtr<AccelByte::FAccelByteMessagingSystem> MessagingSystemRef = nullptr);
 	~FApiClient();
 
 #pragma region Core
 	bool bUseSharedCredentials;
-	FAccelByteMessagingSystem MessagingSystem{};
-	FAccelByteNotificationSender NotificationSender{MessagingSystem};
+	TSharedPtr<FAccelByteMessagingSystem> MessagingSystem{};
+	FAccelByteNotificationSender NotificationSender{*MessagingSystem.Get()};
 	FCredentialsRef CredentialsRef;
 	FHttpRetrySchedulerRef HttpRef{};
 	FAccelByteTimeManager TimeManager{ *HttpRef };
@@ -116,9 +116,9 @@ public:
 
 #pragma region Multiplayer
 	Api::QosManager QosManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Qos Qos{ *CredentialsRef, FRegistry::Settings, MessagingSystem };
-	Api::Lobby Lobby{ *CredentialsRef, FRegistry::Settings, *HttpRef, MessagingSystem, NetworkConditioner };
-	Api::Chat Chat{ *CredentialsRef, FRegistry::Settings, *HttpRef, MessagingSystem, NetworkConditioner};
+	Api::Qos Qos{ *CredentialsRef, FRegistry::Settings, *MessagingSystem.Get() };
+	Api::Lobby Lobby{ *CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner };
+	Api::Chat Chat{ *CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner};
 	Api::SessionBrowser SessionBrowser{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::TurnManager TurnManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Session Session{ *CredentialsRef, FRegistry::Settings, *HttpRef };

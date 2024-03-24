@@ -50,13 +50,15 @@ public:
 	 * @param SetBy Metadata value.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, then it will not send the TTL (Time to live) meta data.
 	 */
 	void CreateGameBinaryRecord(
 		FString const& Key,
 		EAccelByteFileType FileType,
 		ESetByMetadataRecord SetBy,
 		THandler<FAccelByteModelsBinaryInfo> const& OnSuccess,
-		FErrorHandler const& OnError);
+		FErrorHandler const& OnError,
+		FTTLConfig const& TTLConfig = FTTLConfig{});
 
 	/**
 	 * @brief Get a game binary record by its key.
@@ -102,11 +104,13 @@ public:
 	 * @param SetBy Metadata value.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, then it will not send the TTL (Time to live) meta data.
 	 */
 	void UpdateGameBinaryRecordMetadata(FString const& Key,
 		ESetByMetadataRecord SetBy,
 		THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess,
-		FErrorHandler const& OnError);
+		FErrorHandler const& OnError,
+		FTTLConfig const& TTLConfig = FTTLConfig{});
 
 	/**
 	 * @brief Request presigned URL to upload the binary record to s3.

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [25.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.1.0%0D25.0.0) (2024-03-24)
+
+
+### Features
+
+* **mpv2:** add support for friends only joinability in game and party session ([d29e8c6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d29e8c6b006d3ce51cdf77c3237e988d7be6f81e))
+* **ttl:** expose ttl config on cloud save api ([7395030](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/73950303f60825a68da12ec203615e1e8a8ddd0a))
+
+
+### Bug Fixes
+
+* **chore:** change DefaultSection name to DefaultSectionPath to prevent linux shadow declaration error ([6a42e22](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6a42e226c846f973b04fd3e043feca0b86dabe2a))
+* **launcher:** get the exchange code and call generate game token if using exchange code. ([92076d0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/92076d03d1983098a0b345d92dd72aa8e0793082))
+* **MessagingSystem:** fix issue when messageSystem is not the same for api and registry when create a default apiClient ([2a38e87](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2a38e87df2b131b248acf0317b87ab7eafc796a9))
+* **setting:** update override setting using AccelByte config injection ([751459c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/751459ca210cdc274a6deccb992ce4fe93d011b7))
+
 ## [25.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.0.0%0D24.11.0) (2024-03-08)
 
 

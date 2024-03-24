@@ -26,7 +26,6 @@ enum class EAccelBytePlatformType : uint8
 	PS4,
 	PS4CrossGen,
 	PS5,
-	PSPC,
 	Live,
 	Google,
 	Apple,

@@ -20,7 +20,7 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key, bool b
 		
 		if (Key.Compare(TEXT("default")) == 0) 
 		{
-			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>(FRegistry::Credentials, FRegistry::HttpRetryScheduler);
+			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>(FRegistry::Credentials, FRegistry::HttpRetryScheduler, FRegistry::MessagingSystem);
 		}
 		else 
 		{

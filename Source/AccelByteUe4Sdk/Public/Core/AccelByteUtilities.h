@@ -380,6 +380,13 @@ public:
 	static FString GetAuthorizationCode();
 
 	/**
+	 * @brief Retrieve an information if get authorization code is using exchange method provided by AccelByte Launcher. 
+	 *
+	 * @return Whether the current exchange method using exchange code or authorization code from command line argument.
+	 */
+	static bool IsUsingExchangeCode();
+
+	/**
 	 * @brief Get game client flight id.
 	 *
 	 * @return Flight id of game client.
@@ -409,6 +416,12 @@ public:
 	static bool GetValueFromCommandLineSwitch(const FString& Key, FString& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, int& Value);
 	static bool GetValueFromCommandLineSwitch(const FString& Key, bool& Value);
+	static bool GetAccelByteConfigFromCommandLineSwitch(const FString& Key, FString& Value);
+	static bool GetAccelByteConfigFromCommandLineSwitch(const FString& Key, int& Value);
+	static bool GetAccelByteConfigFromCommandLineSwitch(const FString& Key, bool& Value);
+	static bool LoadABConfigFallback(const FString& Section, const FString& Key, FString& Value, const FString& DefaultSection = TEXT(""));
+	static bool LoadABConfigFallback(const FString& Section, const FString& Key, bool& Value, const FString& DefaultSection = TEXT(""));
+	static bool LoadABConfigFallback(const FString& Section, const FString& Key, int& Value, const FString& DefaultSection = TEXT(""));
 	static FString ConvertItemSortByToString(EAccelByteItemListSortBy const& SortBy);
 	static FString ConvertChallengeSortByToString(EAccelByteModelsChallengeSortBy const& SortBy);
 	static bool ReplaceDecimalSeparator(FString& NumberStr, const TCHAR* From, const TCHAR* To);
@@ -420,6 +433,9 @@ public:
 	static const FString GenerateHashString(const FString& Message);
 	static const FString GenerateTOTP(const FString& SecretKey, int CodeLength = 6, int TimeStep = 30);
 	static bool IsValidEmail(const FString& Email);
+
+private:
+	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);
 
 //To allow override for testing using mock class
 protected:

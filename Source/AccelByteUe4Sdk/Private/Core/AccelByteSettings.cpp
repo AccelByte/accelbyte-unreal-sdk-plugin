@@ -30,30 +30,34 @@ static const FString DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSet
 FString GetClientConfigUrlValue(const FString& SectionPath, const FString& Key, const FString& BaseUrl, const FString& DefaultPrefix)
 {
 	FString Value;
+	
+	// Check AccelByte command line if exist. For example "GameExecutable -abKey=Value" and fetch the ab value of the key
+	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(Key, Value))
+	{
+		// If not exist, then fetch from the game default engine ini section
+		if (GConfig->GetString(*SectionPath, *Key, Value, GEngineIni)) return Value;
 
-	if (GConfig->GetString(*SectionPath, *Key, Value, GEngineIni)) return Value;
-
-	return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultPrefix);
+		return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultPrefix);
+	}
+	
+	return Value;
 }
 
 void Settings::LoadSettings(const FString& SectionPath)
 {
-	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientId, GEngineIni))
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, "ClientId", ClientId, DefaultSection))
 	{
-		if (!GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni))
-		{
-			ClientSecret = TEXT("");
-		}
+		ClientId = TEXT("");
 	}
-	else
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, "ClientSecret", ClientSecret, DefaultSection))
 	{
-		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
-		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+		ClientSecret = TEXT("");
 	}
-	LoadFallback(SectionPath, TEXT("Namespace"), Namespace);
+
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("Namespace"), Namespace, DefaultSection);
 	LoadBaseUrlFallback(SectionPath, BaseUrl);
-	LoadFallback(SectionPath, TEXT("PublisherNamespace"), PublisherNamespace);
-	LoadFallback(SectionPath, TEXT("RedirectURI"), RedirectURI);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("PublisherNamespace"), PublisherNamespace, DefaultSection);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("RedirectURI"), RedirectURI, DefaultSection);
 
 	IamServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("IamServerUrl"), BaseUrl, TEXT("iam"));
 
@@ -77,7 +81,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 	StatisticServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("StatisticServerUrl"), BaseUrl, TEXT("social"));
 
 	FString ServerUseAMSString{};
-	LoadFallback(SectionPath, TEXT("bServerUseAMS"), ServerUseAMSString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("bServerUseAMS"), ServerUseAMSString, DefaultSection);
 	this->bServerUseAMS = ServerUseAMSString.IsEmpty() ? false : ServerUseAMSString.ToBool();
 	FString QoSMDefaultPrefix = this->bServerUseAMS ? TEXT("ams-qosm") : TEXT("qosm");
 	QosManagerServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("QosManagerServerUrl"), BaseUrl, QoSMDefaultPrefix);
@@ -114,9 +118,9 @@ void Settings::LoadSettings(const FString& SectionPath)
 	
 	LoginQueueServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("LoginQueueServerUrl"), BaseUrl, TEXT("login-queue"));
 
-	LoadFallback(SectionPath, TEXT("AppId"), AppId);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("AppId"), AppId, DefaultSection);
 
-	if (!GConfig->GetString(*DefaultSection, TEXT("CustomerName"), CustomerName, GEngineIni))
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("CustomerName"), CustomerName, DefaultSection))
 	{
 		CustomerName = PublisherNamespace;
 	}
@@ -131,7 +135,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
 	FString QosLatencyPollIntervalSecsString;
-	LoadFallback(SectionPath, TEXT("QosLatencyPollIntervalSecs"), QosLatencyPollIntervalSecsString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("QosLatencyPollIntervalSecs"), QosLatencyPollIntervalSecsString, DefaultSection);
 	if (QosLatencyPollIntervalSecsString.IsNumeric())
 	{
 		QosLatencyPollIntervalSecs = FCString::Atof(*QosLatencyPollIntervalSecsString);
@@ -142,7 +146,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 	}
 
 	FString QosServerLatencyPollIntervalSecsString;
-	LoadFallback(SectionPath, TEXT("QosServerLatencyPollIntervalSecs"), QosServerLatencyPollIntervalSecsString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("QosServerLatencyPollIntervalSecs"), QosServerLatencyPollIntervalSecsString, DefaultSection);
 	if (QosServerLatencyPollIntervalSecsString.IsNumeric())
 	{
 		QosServerLatencyPollIntervalSecs = FCString::Atof(*QosServerLatencyPollIntervalSecsString);
@@ -153,7 +157,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 	}
 
 	FString QosPingTimeoutString;
-	LoadFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString, DefaultSection);
 	if (QosPingTimeoutString.IsNumeric())
 	{
 		QosPingTimeout = FCString::Atof(*QosPingTimeoutString);
@@ -165,30 +169,30 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 	//If configuration value is empty/not found, assume the caching is disabled
 	FString bEnableHttpCacheString;
-	LoadFallback(SectionPath, TEXT("bEnableHttpCache"), bEnableHttpCacheString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("bEnableHttpCache"), bEnableHttpCacheString, DefaultSection);
 	this->bEnableHttpCache = bEnableHttpCacheString.IsEmpty() ? false : bEnableHttpCacheString.ToBool();
 
 	FString HttpCacheTypeString;
-	LoadFallback(SectionPath, TEXT("HttpCacheType"), HttpCacheTypeString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("HttpCacheType"), HttpCacheTypeString, DefaultSection);
 	this->HttpCacheType = FAccelByteUtilities::GetUEnumValueFromString<EHttpCacheType>(HttpCacheTypeString);
 
 	FString PresenceBroadcastEventHeartbeatIntervalString;
-	LoadFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatInterval"), PresenceBroadcastEventHeartbeatIntervalString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatInterval"), PresenceBroadcastEventHeartbeatIntervalString, DefaultSection);
 	if (PresenceBroadcastEventHeartbeatIntervalString.IsNumeric())
 	{
 		PresenceBroadcastEventHeartbeatInterval = FCString::Atoi(*PresenceBroadcastEventHeartbeatIntervalString);
 	}
 
 	FString PresenceBroadcastEventHeartbeatEnabledString;
-	LoadFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatEnabled"), PresenceBroadcastEventHeartbeatEnabledString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatEnabled"), PresenceBroadcastEventHeartbeatEnabledString, DefaultSection);
 	bEnablePresenceBroadcastEventHeartbeat = PresenceBroadcastEventHeartbeatEnabledString.IsEmpty() ? false : PresenceBroadcastEventHeartbeatEnabledString.ToBool();
 
 	FString GameTelemetryCacheEnabledString;
-	LoadFallback(SectionPath, TEXT("GameTelemetryCacheEnabled"), GameTelemetryCacheEnabledString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("GameTelemetryCacheEnabled"), GameTelemetryCacheEnabledString, DefaultSection);
 	this->bEnableGameTelemetryCache = GameTelemetryCacheEnabledString.IsEmpty() ? true : GameTelemetryCacheEnabledString.ToBool();// the default is true
 	
 	FString SendPredefinedEventString;
-	LoadFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString);
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("SendPredefinedEvent"), SendPredefinedEventString, DefaultSection);
 	//Disabling PredefinedEventApi for the time being
 	//this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
 	this->bSendPredefinedEvent = false;
@@ -196,15 +200,18 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FString& Value)
 {
-	if (!GConfig->GetString(*SectionPath, *Key, Value, GEngineIni))
+	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(Key, Value))
 	{
-		GConfig->GetString(*DefaultSection, *Key, Value, GEngineIni);
+		if (!GConfig->GetString(*SectionPath, *Key, Value, GEngineIni))
+		{
+			GConfig->GetString(*DefaultSection, *Key, Value, GEngineIni);
+		}
 	}
 }
 
 void Settings::LoadBaseUrlFallback(const FString& SectionPath, FString& Value)
 {
-	LoadFallback(*SectionPath, TEXT("BaseUrl"), Value);
+	FAccelByteUtilities::LoadABConfigFallback(*SectionPath, TEXT("BaseUrl"), Value, DefaultSection);
 
 	FRegexPattern UrlRegex(TEXT("^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$"));
 	FRegexMatcher Matcher(UrlRegex, Value);

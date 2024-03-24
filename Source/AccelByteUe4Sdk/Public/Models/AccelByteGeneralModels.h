@@ -61,6 +61,13 @@ enum class EAccelByteFileType : uint8
 	WEBP
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteTTLConfigAction : uint8
+{
+	NONE = 0,
+	DELETE_RECORD
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 {
@@ -140,4 +147,18 @@ struct FRequestBucket
 {
 	uint32 AvailableToken {0};
 	double ResetTokenTime{ 0.0f };
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FTTLConfig
+{
+	GENERATED_BODY()
+
+	/** @brief Action type after the time is expired. Example: Delete the record data after the desired time */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | TTLConfig")
+	EAccelByteTTLConfigAction Action{EAccelByteTTLConfigAction::NONE};
+	
+	/** @brief Expired time that indicates to take an action. Example: FDateTime::UtcNow() + FTimespan(0, 0, 5); */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | TTLConfig")
+	FDateTime Expires_At{0};
 };

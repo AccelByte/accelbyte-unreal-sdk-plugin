@@ -17,7 +17,10 @@ enum class EAccelByteV2SessionJoinability : uint8
 	EMPTY = 0, // Used for performing a query without a join type
 	CLOSED,
 	INVITE_ONLY,
-	OPEN
+	OPEN,
+	FRIENDS_OF_LEADER,
+	FRIENDS_OF_FRIENDS,
+	FRIENDS_OF_MEMBERS
 };
 
 UENUM(BlueprintType)

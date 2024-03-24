@@ -99,7 +99,7 @@ public:
 	static ServerSettings ServerSettings;
 	static ServerCredentials ServerCredentials;
 	static FAccelByteTimeManager TimeManager;
-	static FAccelByteMessagingSystem MessagingSystem;
+	static TSharedPtr<FAccelByteMessagingSystem> MessagingSystem;
 	static FAccelByteNetworkConditioner NetworkConditioner;
 	static FAccelByteNotificationSender NotificationSender;
 #pragma endregion

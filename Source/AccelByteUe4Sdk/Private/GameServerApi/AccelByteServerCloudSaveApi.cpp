@@ -56,11 +56,12 @@ void ServerCloudSave::SaveGameRecord(FString const& Key
 	, ESetByMetadataRecord SetBy
 	, FJsonObject const& RecordRequest
 	, FVoidHandler const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, FTTLConfig const& TTLConfig)
 { 
 	FReport::Log(FString(__FUNCTION__));
 
-	FJsonObject NewRecordRequest = CreateGameRecordWithMetadata(SetBy, RecordRequest);
+	FJsonObject NewRecordRequest = CreateGameRecordWithMetadata(SetBy, TTLConfig, RecordRequest);
 	SaveGameRecord(Key, NewRecordRequest, OnSuccess, OnError );
 }
 
@@ -123,11 +124,12 @@ void ServerCloudSave::ReplaceGameRecord(const FString& Key
 	, ESetByMetadataRecord SetBy
 	, const FJsonObject& RecordRequest
 	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+	, const FErrorHandler& OnError
+	, const FTTLConfig& TTLConfig)
 {
 	FReport::Log(FString(__FUNCTION__)); 
 
-	FJsonObject NewRecordRequest = CreateGameRecordWithMetadata(SetBy, RecordRequest);
+	FJsonObject NewRecordRequest = CreateGameRecordWithMetadata(SetBy, TTLConfig, RecordRequest);
 	ReplaceGameRecord(Key, NewRecordRequest, OnSuccess, OnError);
 }
 
@@ -808,6 +810,7 @@ FJsonObject ServerCloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord
 }
 
 FJsonObject ServerCloudSave::CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy
+	, FTTLConfig const& TTLConfig
 	, FJsonObject const& RecordRequest)
 {
 	FJsonObject NewRecordRequest = RecordRequest;
@@ -815,6 +818,13 @@ FJsonObject ServerCloudSave::CreateGameRecordWithMetadata(ESetByMetadataRecord S
 	const auto MetadataJson = MakeShared<FJsonObject>();
 	FString SetByString = FAccelByteUtilities::GetUEnumValueAsString(SetBy);
 	MetadataJson->SetStringField(TEXT("set_by"), SetByString);
+	if (TTLConfig.Action != EAccelByteTTLConfigAction::NONE)
+	{
+		const auto TTLConfigJson = MakeShared<FJsonObject>();
+		TTLConfigJson->SetStringField("action", TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD ? "DELETE" : "NONE");
+		TTLConfigJson->SetStringField("expires_at", TTLConfig.Expires_At.ToIso8601());
+		MetadataJson->SetObjectField(TEXT("ttl_config"), TTLConfigJson);
+	}
 	NewRecordRequest.SetObjectField("__META", MetadataJson);
 
 	return NewRecordRequest;

@@ -54,7 +54,8 @@ void ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& Key
 	, EAccelByteFileType FileType
 	, ESetByMetadataRecord SetBy
 	, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, FTTLConfig const& TTLConfig)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -87,6 +88,13 @@ void ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& Key
 	JsonObj.SetStringField("key", Key);
 	JsonObj.SetStringField("set_by", FAccelByteUtilities::GetUEnumValueAsString(SetBy));
 	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
+	if (TTLConfig.Action != EAccelByteTTLConfigAction::NONE)
+	{
+		const auto TTLConfigJson = MakeShared<FJsonObject>();
+		TTLConfigJson->SetStringField("action", TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD ? "DELETE" : "NONE");
+		TTLConfigJson->SetStringField("expires_at", TTLConfig.Expires_At.ToIso8601());
+		JsonObj.SetObjectField(TEXT("ttl_config"), TTLConfigJson);
+	}
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 	
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
@@ -174,7 +182,8 @@ void ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& Key
 void ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString const& Key
 	, ESetByMetadataRecord SetBy
 	, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, FTTLConfig const& TTLConfig)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -197,6 +206,13 @@ void ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString const& Key
 
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("set_by", FAccelByteUtilities::GetUEnumValueAsString(SetBy));
+	if (TTLConfig.Action != EAccelByteTTLConfigAction::NONE)
+	{
+		const auto TTLConfigJson = MakeShared<FJsonObject>();
+		TTLConfigJson->SetStringField("action", TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD ? "DELETE" : "NONE");
+		TTLConfigJson->SetStringField("expires_at", TTLConfig.Expires_At.ToIso8601());
+		JsonObj.SetObjectField(TEXT("ttl_config"), TTLConfigJson);
+	}
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 	
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);

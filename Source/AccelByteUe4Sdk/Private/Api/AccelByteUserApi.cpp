@@ -653,7 +653,13 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef.GetOAuthClientId()
+	if (FAccelByteUtilities::IsUsingExchangeCode())
+	{
+		GenerateGameToken(AuthorizationCode, OnSuccess, OnError);
+	}
+	else
+	{
+		Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, AuthorizationCode
 		, SettingsRef.RedirectURI
@@ -664,6 +670,7 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
+	}
 
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -682,7 +689,13 @@ void User::LoginWithLauncherV4(const THandler<FAccelByteModelsLoginQueueTicketIn
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithAuthorizationCodeV4(UserCredentialsRef.GetOAuthClientId()
+	if (FAccelByteUtilities::IsUsingExchangeCode())
+	{
+		GenerateGameTokenV4(AuthorizationCode, OnSuccess, OnError);
+	}
+	else
+	{
+		Oauth2::GetTokenWithAuthorizationCodeV4(UserCredentialsRef.GetOAuthClientId()
 		, UserCredentialsRef.GetOAuthClientSecret()
 		, AuthorizationCode
 		, SettingsRef.RedirectURI
@@ -703,6 +716,7 @@ void User::LoginWithLauncherV4(const THandler<FAccelByteModelsLoginQueueTicketIn
 			})
 		, OnError
 				, SettingsRef.IamServerUrl);
+	}
 
 	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }

@@ -61,6 +61,49 @@ private:
 };
 #endif
 
+class FConfigurationSettings
+{
+public:
+	FConfigurationSettings()
+	{
+	}
+
+	~FConfigurationSettings()
+	{
+	}
+
+	FString GetSettingsMapValue(const FString& Key) const
+	{
+		return SettingsMap.FindRef(Key);
+	}
+
+	bool IsSettingsMapExist(const FString& Key) const
+	{
+		return SettingsMap.Contains(Key);
+	}
+	
+private:
+	/**
+	 * @brief Default Settings Map that will mapping the configurations
+	 */
+	TMap<FString, FString> SettingsMap{
+		{"bServerUseAMS", "EnableAMS"},
+		{"bEnableHttpCache", "EnableHttpCache"},
+		{"bNonSeamlessTravelUseNewConnection", "NonSeamlessTravelUseNewConnection"},
+		{"bRequiresEncryptPackets", "RequiresEncryptPackets"},
+		{"bAutoLobbyConnectAfterLoginSuccess", "AutoLobbyConnectAfterLoginSuccess"},
+		{"bAutoChatConnectAfterLoginSuccess", "AutoChatConnectAfterLoginSuccess"},
+		{"bMultipleLocalUsersEnabled", "MultipleLocalUsersEnabled"},
+		{"bNativePlatformTokenRefreshManually", "NativePlatformTokenRefreshManually"},
+		{"bEnableMatchTicketCheck", "EnableMatchTicketCheck"},
+		{"bEnableSessionInviteCheckPolling", "EnableSessionInviteCheckPolling"},
+		{"bEnableSessionServerCheckPolling", "EnableSessionServerCheckPolling"},
+		{"bManualRegisterServer", "ManualRegisterServer"}
+	};
+};
+
+const FConfigurationSettings& ConfigSettings{};
+
 
 int32 constexpr RS256_SIGNATURE_LENGTH = 342;
 int32 constexpr RSA_MODULUS_BASE64_LENGTH = 342;
@@ -308,8 +351,6 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 	case EAccelBytePlatformType::PS4CrossGen:
 	case EAccelBytePlatformType::PS5:
 		return "ps5";
-	case EAccelBytePlatformType::PSPC:
-		return "pspc";
 	case EAccelBytePlatformType::Live:
 		return "live";
 	case EAccelBytePlatformType::Google:
@@ -866,6 +907,120 @@ bool FAccelByteUtilities::GetValueFromCommandLineSwitch(FString const& Key
 	return true;
 }
 
+bool FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(FString const& Key
+	, FString& Value)
+{	
+	FString AccelByteDefaultKey = TEXT("ab");
+	FString AccelByteKey = TEXT("");
+	if (ConfigSettings.IsSettingsMapExist(Key))
+	{
+		AccelByteKey.Append(AccelByteDefaultKey).Append(ConfigSettings.GetSettingsMapValue(Key));
+	}
+	else
+	{
+		AccelByteKey.Append(AccelByteDefaultKey).Append(Key);
+	}
+
+	bool bFoundValue = FindAccelByteKeyFromTokens(AccelByteKey, Value);
+	if (!bFoundValue)
+	{
+		// If still not exist we just using key from the param
+		if (ConfigSettings.IsSettingsMapExist(Key))
+		{
+			AccelByteKey = AccelByteDefaultKey.Append(Key);
+			bFoundValue = FindAccelByteKeyFromTokens(AccelByteKey, Value);
+		}
+	}
+	
+	return bFoundValue;
+}
+
+bool FAccelByteUtilities::FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value)
+{
+	const auto CommandParams = FCommandLine::Get();
+	TArray<FString> Tokens;
+	TArray<FString> Switches;
+	FCommandLine::Parse(CommandParams, Tokens, Switches);
+	
+	bool bFoundToken{false};
+	for (auto& Param : Tokens)
+	{
+		if (bFoundToken)
+		{
+			Value = Param;
+			return true;
+		}
+		
+		if (Param.Contains(AccelByteKey, ESearchCase::IgnoreCase, ESearchDir::FromStart))
+		{
+			bFoundToken = true;
+		}
+	}
+	return false;
+}
+
+bool FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(const FString& Key, int& Value)
+{
+	FString TempResult = "";
+	const bool bIsSuccess = GetAccelByteConfigFromCommandLineSwitch(Key, TempResult);
+	if (bIsSuccess == false)
+	{
+		return false;
+	}
+
+	Value = FCString::Atoi(*TempResult);
+	return true;
+}
+
+bool FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(const FString& Key, bool& Value)
+{
+	FString TempResult = "";
+	const bool bIsSuccess = GetAccelByteConfigFromCommandLineSwitch(Key, TempResult);
+	if (bIsSuccess == false)
+	{
+		return false;
+	}
+
+	Value = TempResult.ToBool();
+	return true;
+}
+
+bool FAccelByteUtilities::LoadABConfigFallback(const FString& Section, const FString& Key, FString& Value, const FString& DefaultSectionPath)
+{
+	if (!GetAccelByteConfigFromCommandLineSwitch(Key, Value))
+	{
+		if (!GConfig->GetString(*Section, *Key, Value, GEngineIni))
+		{
+			return GConfig->GetString(*DefaultSectionPath, *Key, Value, GEngineIni);
+		}
+	}
+	return true;
+}
+
+bool FAccelByteUtilities::LoadABConfigFallback(const FString& Section, const FString& Key, bool& Value, const FString& DefaultSectionPath)
+{
+	if (!GetAccelByteConfigFromCommandLineSwitch(Key, Value))
+	{
+		if (!GConfig->GetBool(*Section, *Key, Value, GEngineIni))
+		{
+			return GConfig->GetBool(*DefaultSectionPath, *Key, Value, GEngineIni);
+		}
+	}
+	return true;
+}
+
+bool FAccelByteUtilities::LoadABConfigFallback(const FString& Section, const FString& Key, int& Value, const FString& DefaultSectionPath)
+{
+	if (!GetAccelByteConfigFromCommandLineSwitch(Key, Value))
+	{
+		if (!GConfig->GetInt(*Section, *Key, Value, GEngineIni))
+		{
+			return GConfig->GetInt(*DefaultSectionPath, *Key, Value, GEngineIni);
+		}
+	}
+	return true;
+}
+
 void FAccelByteUtilities::SetAuthTrustId(FString const& AuthTrustId)
 { 
 	FPlatformMisc::SetStoredValue(AccelByteStored(), AccelByteStoredSectionIAM(), AccelByteStoredKeyAuthTrustId(), AuthTrustId);
@@ -876,12 +1031,25 @@ const FString AuthorizationCodeArgument = TEXT("--AB_AUTH_CODE=");
 FString FAccelByteUtilities::GetAuthorizationCode()
 {
 	FString AuthorizationCode{};
-	FParse::Value(FCommandLine::Get(), *AuthorizationCodeArgument, AuthorizationCode);
-	if (AuthorizationCode.IsEmpty())
+	if (!LoadABConfigFallback("", TEXT("ExchangeCode"), AuthorizationCode))
 	{
-		AuthorizationCode = Environment::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), 1000);
+		FParse::Value(FCommandLine::Get(), *AuthorizationCodeArgument, AuthorizationCode);
+		if (AuthorizationCode.IsEmpty())
+		{
+			AuthorizationCode = Environment::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), 1000);
+		}
 	}
 	return AuthorizationCode;
+}
+
+bool FAccelByteUtilities::IsUsingExchangeCode()
+{
+	FString AuthorizationCode{};
+	if (LoadABConfigFallback("", TEXT("ExchangeCode"), AuthorizationCode))
+	{
+		return true;
+	}
+	return false;
 }
 
 FString FAccelByteUtilities::GetFlightId()
