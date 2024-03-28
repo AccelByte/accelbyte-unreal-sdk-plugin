@@ -1123,7 +1123,7 @@ void User::ClaimAccessToken(const FString LoginTicket, const FVoidHandler& OnSuc
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
 			})		
 		, OnError
 		, SettingsRef.IamServerUrl);

@@ -163,6 +163,16 @@ const FString& Credentials::GetPlatformUserId() const
 	return AuthToken.Platform_user_id;
 }
 
+const FString& Credentials::GetSimultaneousPlatformId() const
+{
+	return AuthToken.Simultaneous_platform_id;
+}
+
+const FString& Credentials::GetSimultaneousPlatformUserId() const
+{
+	return AuthToken.Simultaneous_platform_user_id;
+}
+
 bool Credentials::IsSessionValid() const
 {
 	return SessionState == ESessionState::Valid;

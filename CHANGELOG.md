@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [25.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.1.1%0D25.1.0) (2024-03-28)
+
+
+### Features
+
+* **login:** add simultaneous user info to credentials object ([7abd0c0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7abd0c02df13c00ac1501c7b603fa50fd58e7aa9))
+* **oauth:** add additional simultaneous login info on token model ([4800023](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4800023c0632f4b39a560eceafeb036c0ce247ba))
+
+
+### Bug Fixes
+
+* add platformUserId as cachedTokenKey on ClaimAccessToken ([d954274](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d954274dafc12f33cbbce9f222b4a17452ce8007))
+
 ## [25.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.1.0%0D25.0.0) (2024-03-24)
 
 

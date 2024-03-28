@@ -61,6 +61,8 @@ public:
 	virtual const FString& GetAccessToken() const override;
 	virtual const FString& GetUserId() const override;
 	const FString& GetPlatformUserId() const;
+	const FString& GetSimultaneousPlatformId() const;
+	const FString& GetSimultaneousPlatformUserId() const;
 	const FString& GetUserDisplayName() const;
 	virtual const FString& GetNamespace() const override;
 	const FString& GetUserEmailAddress() const;
