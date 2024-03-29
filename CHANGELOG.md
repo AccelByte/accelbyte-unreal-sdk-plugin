@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [24.7.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.7.2%0D24.7.1) (2024-03-29)
+
+
+### Bug Fixes
+
+* **DSM:** add RegisterServerToDSM with detailed server registration response returned ([af49a7c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/af49a7c76cd68ec00c87e4abc8f126bfeab387cb))
+
+
 ### [24.7.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/24.7.1%0D24.7.0) (2024-01-02)
 
 

@@ -51,8 +51,21 @@ public:
 		, const FErrorHandler& OnError
 		, const FString& CustomAttribute = TEXT(""));
 
+	/**
+	 * @brief send register request to DSM
+	 *
+	 * @param Port the port where your game server run.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	  * @param CustomAttribute A value that will be sent to client that join via armada matchmaking DSNotice event
+	 */
+	void RegisterServerToDSM(int32 Port
+		, const THandler<FAccelByteModelsServerInfo>& OnSuccess
+		, const FErrorHandler& OnError
+		, const FString& CustomAttribute = TEXT(""));
 
-    /**
+
+	/**
 	 * @brief send register local server to DSM
 	 *
 	 * @param IPAddress the machine's IP address this local DS is in.
