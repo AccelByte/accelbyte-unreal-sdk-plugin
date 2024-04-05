@@ -93,6 +93,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionUser
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionUser")
 		EAccelByteV2SessionMemberStatus StatusV2 {EAccelByteV2SessionMemberStatus::EMPTY};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionUser")
+		EAccelByteV2SessionMemberStatus PreviousStatus{EAccelByteV2SessionMemberStatus::EMPTY};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionUser")
 		FDateTime UpdatedAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionUser")
 		FString PlatformID{};

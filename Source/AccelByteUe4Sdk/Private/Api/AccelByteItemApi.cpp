@@ -346,6 +346,51 @@ void Item::GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Regi
 
 	HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
 }
-	
+
+void Item::GetItemMappings(const EAccelBytePlatformMapping Platform
+	, const THandler<FAccelByteModelsItemMappingsResponse>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Platform == EAccelBytePlatformMapping::NONE)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform type can't be NONE"));
+		return;
+	}
+
+	const FString Url = FString::Printf(
+		TEXT("%s/public/namespaces/%s/iap/item/mapping"), *SettingsRef.PlatformServerUrl,
+		*CredentialsRef.GetNamespace());
+
+	const TMultiMap<FString, FString> QueryParams{{TEXT("platform"), ConvertPlatformMappingToString(Platform)}};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+FString Item::ConvertPlatformMappingToString(const EAccelBytePlatformMapping& Platform)
+{
+	switch (Platform)
+	{
+	case EAccelBytePlatformMapping::APPLE:
+		return TEXT("APPLE");
+	case EAccelBytePlatformMapping::GOOGLE:
+		return TEXT("GOOGLE");
+	case EAccelBytePlatformMapping::PLAYSTATION:
+		return TEXT("PLAYSTATION");
+	case EAccelBytePlatformMapping::STEAM:
+		return TEXT("STEAM");
+	case EAccelBytePlatformMapping::XBOX:
+		return TEXT("XBOX");
+	case EAccelBytePlatformMapping::EPIC_GAMES:
+		return TEXT("EPICGAMES");
+	case EAccelBytePlatformMapping::OCULUS:
+		return TEXT("OCULUS");
+	case EAccelBytePlatformMapping::TWITCH:
+		return TEXT("TWITCH");
+	default:
+		return TEXT("");
+	}
+}
 } // Namespace Api
 } // Namespace AccelByte

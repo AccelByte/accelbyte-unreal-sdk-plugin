@@ -2671,11 +2671,8 @@ private:
 
 	void OnGetMissingNotificationError(int32 ErrorCode, const FString& ErrorMessage);
 
-	THandler<const FString&> OnTokenReceived = THandler<const FString&>::CreateLambda([&](const FString& Token)
-	{
-		Connect(Token);
-	});
-
+	void OnTokenReceived(const FString& Token);
+	
 #pragma region Notification Buffer
 private:
 	mutable FCriticalSection NotificationBufferLock{};
@@ -2729,6 +2726,8 @@ private:
 	FConnectionClosed ConnectionClosed;
 	FConnectionClosed Reconnecting;
 	TSharedPtr<IAccelByteTokenGenerator> TokenGenerator;
+
+	FDelegateHandle OnTokenReceivedDelegateHandle{};
 
 #pragma region Unban Schedule
 	struct FUnbanSchedule

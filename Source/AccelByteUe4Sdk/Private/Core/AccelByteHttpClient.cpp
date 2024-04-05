@@ -110,10 +110,20 @@ namespace AccelByte
 
 	FString FHttpClient::FormatApiUrl(const FString& Url) const
 	{
-		FStringFormatNamedArguments const UrlArgs = {
-			{TEXT("namespace"), FStringFormatArg(CredentialsRef.GetNamespace())},
-			{TEXT("userId"), FStringFormatArg(CredentialsRef.GetUserId())},
-		};
+		FStringFormatNamedArguments UrlArgs;
+		if (CredentialsRef.GetSessionState() != BaseCredentials::ESessionState::Invalid)
+		{
+			UrlArgs = {
+				{TEXT("namespace"), FStringFormatArg(CredentialsRef.GetNamespace())},
+				{TEXT("userId"), FStringFormatArg(CredentialsRef.GetUserId())},
+			};
+		}
+		else
+		{
+			UrlArgs = {
+				{TEXT("namespace"), FStringFormatArg(SettingsRef.Namespace)}
+			};
+		}
 
 		return FString::Format(*Url, UrlArgs);
 	}

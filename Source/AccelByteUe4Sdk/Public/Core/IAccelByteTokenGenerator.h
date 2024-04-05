@@ -8,16 +8,17 @@ namespace AccelByte
 {
 class ACCELBYTEUE4SDK_API IAccelByteTokenGenerator : public TSharedFromThis<IAccelByteTokenGenerator>
 {
-	public:
+public:
 	IAccelByteTokenGenerator() = default;
 	virtual ~IAccelByteTokenGenerator() = default;
-	DECLARE_EVENT_OneParam(IAccelByteTokenGenerator, FTokenReceivedEvent, const FString&);
+
+	DECLARE_EVENT_OneParam(IAccelByteTokenGenerator, FTokenReceivedEvent, const FString&)
 
 	virtual void RequestToken() = 0;
 	virtual bool IsTokenValid() const = 0;
-	virtual  FTokenReceivedEvent& OnTokenReceived() = 0;
+	virtual FTokenReceivedEvent& OnTokenReceived() = 0;
 
-	protected:
+protected:
 	FString Token;
 	FTokenReceivedEvent TokenReceivedEvent;
 };

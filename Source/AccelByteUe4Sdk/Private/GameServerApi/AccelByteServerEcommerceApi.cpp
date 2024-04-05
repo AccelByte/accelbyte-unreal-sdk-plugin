@@ -372,6 +372,90 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DebitUserWalletRequest, OnSuccess, OnError);
 }
 
+void ServerEcommerce::DebitUserWalletV2(const FString& UserId
+	, const FString& CurrencyCode
+	, const FAccelByteModelsDebitUserWalletRequestV2& DebitUserWalletRequest
+	, const THandler<FAccelByteModelsWalletInfo>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	if(CurrencyCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("CurrencyCode parameter cannot be empty!")));
+		return;
+	}
+	
+	if(DebitUserWalletRequest.Amount < 1)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Debit amount must be a minimum of 1, request debit amount is %lld"), DebitUserWalletRequest.Amount));
+		return;
+	}
+
+	if(DebitUserWalletRequest.BalanceOrigin == EAccelBytePlatformBalanceOrigin::NONE)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Debit BalanceOrigin field cannot be NONE"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/currencies/%s/debit")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId
+		, *CurrencyCode);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DebitUserWalletRequest, OnSuccess, OnError);
+}
+
+void ServerEcommerce::PaymentWithUserWallet(const FString& UserId
+	, const FString& CurrencyCode
+	, const FAccelByteModelsPaymentUserWalletRequest& PaymentRequest
+	, const THandler<FAccelByteModelsPlatformWallet>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	if(CurrencyCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("CurrencyCode parameter cannot be empty!")));
+		return;
+	}
+	
+	if(PaymentRequest.Amount < 1)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Debit amount must be a minimum of 1, request debit amount is %lld"), PaymentRequest.Amount));
+		return;
+	}
+
+	if(PaymentRequest.WalletPlatform == EAccelByteWalletPlatform::NONE)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Payment WalletPlatform field cannot be NONE"));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/payment")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId
+		, *CurrencyCode);
+
+	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, PaymentRequest, OnSuccess, OnError);
+}
+
 void ServerEcommerce::FulfillUserItem(const FString& UserId
 	, const FAccelByteModelsFulfillmentRequest& FulfillmentRequest
 	, const THandler<FAccelByteModelsFulfillmentResult>& OnSuccess

@@ -207,6 +207,36 @@ public:
 		, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	 * @brief Debit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
+	 *
+	 * @param UserId The user who will receive credit.
+	 * @param CurrencyCode The Currency Code.
+	 * @param DebitUserWalletRequest The request to debit a user wallet.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletInfo&.
+	 * @param OnError This will be called when the operation fails.
+	 */
+	void DebitUserWalletV2(const FString& UserId
+		, const FString& CurrencyCode
+		, const FAccelByteModelsDebitUserWalletRequestV2& DebitUserWalletRequest
+		, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
+
+
+	/**
+	 * @brief Pay with user wallet by currency code and client platform, can debit to all available wallet depending on
+	 * configuration set in Admin Portal's platform wallet config
+	 *
+	 * @param UserId The user who will receive credit.
+	 * @param CurrencyCode The Currency Code.
+	 * @param PaymentRequest The request to debit a user wallet.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletInfo&.
+	 * @param OnError This will be called when the operation fails.
+	 */
+	void PaymentWithUserWallet(const FString& UserId, const FString& CurrencyCode
+		, const FAccelByteModelsPaymentUserWalletRequest& PaymentRequest
+		, const THandler<FAccelByteModelsPlatformWallet>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
 	 * @brief FulFill item to a user.
 	 *
 	 * @param UserId The user who will receive credit.

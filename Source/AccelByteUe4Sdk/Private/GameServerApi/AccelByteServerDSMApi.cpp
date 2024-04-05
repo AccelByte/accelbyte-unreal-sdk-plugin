@@ -79,6 +79,65 @@ void ServerDSM::RegisterServerToDSM(const int32 Port
 	}
 }
 
+void ServerDSM::RegisterServerToDSM(const int32 Port
+	, const THandler<FAccelByteModelsServerInfo>& OnSuccess
+	, const FErrorHandler& OnError
+	, const FString& CustomAttribute)
+{
+	FReport::Log(FString(__FUNCTION__));
+	ParseCommandParam();
+
+	if (ServerType != EServerType::NONE)
+	{
+		OnError.ExecuteIfBound(409, TEXT("Server already registered."));
+	}
+	else
+	{
+		ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
+
+		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
+			, *ServerSettingsRef.DSMControllerServerUrl
+			, *ServerCredentialsRef.GetClientNamespace());
+
+		const FAccelByteModelsRegisterServerRequest Register{
+			GameVersion,
+			DSPubIp,
+			ServerName,
+			Port,
+			Provider,
+			CustomAttribute
+		};
+
+		FReport::Log(TEXT("Starting DSM Register Request..."));
+
+		const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+			[OnSuccess, this](FJsonObject const& JSONObject)
+			{
+				FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+
+				FString JSONString;
+				const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JSONString);
+				FJsonSerializer::Serialize(MakeShared<FJsonObject>(JSONObject), Writer);
+
+				FAccelByteModelsServerInfo Result;
+				if (FJsonObjectConverter::JsonObjectStringToUStruct(JSONString, &Result, 0, 0))
+				{
+					RegisteredServerInfo = Result;
+					SetServerName(Result.Pod_name);
+				}
+				if (CountdownTimeStart != -1)
+				{
+					AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
+				}
+				SetServerType(EServerType::CLOUDSERVER);
+
+				OnSuccess.ExecuteIfBound(Result);
+			});
+
+		HttpClient.ApiRequest(TEXT("POST"), Url, {}, Register, OnSuccessHttpClient, OnError);
+	}
+}
+
 void ServerDSM::SendShutdownToDSM(const bool KillMe
 	, const FString& MatchId
 	, const FVoidHandler& OnSuccess

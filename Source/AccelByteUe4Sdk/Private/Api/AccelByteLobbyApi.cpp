@@ -23,6 +23,7 @@
 #include "Core/AccelByteNotificationSender.h"
 #include "Engine/Engine.h"
 #include "Misc/Base64.h"
+#include "Core/AccelByteEntitlementTokenGenerator.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -1727,6 +1728,17 @@ void AccelByte::Api::Lobby::ChangeUserRegion(const FString& Region)
 		, FString::Printf(TEXT("region: %s"), *Region));
 }
 
+void AccelByte::Api::Lobby::OnTokenReceived(const FString& Token)
+{
+	if (Token == AccelByte::ErrorTokenRequestFailed)
+	{
+		OnConnectionError(TEXT("Failed to request entitlement token!"));
+		return;
+	}
+
+	Connect(Token);
+}
+
 void Lobby::GetNotifications(const THandler<FAccelByteModelsGetUserNotificationsResponse>& OnSuccess
 	, const FErrorHandler& OnError
 	, const FDateTime& StartTime
@@ -3237,17 +3249,24 @@ void Lobby::ClearLobbyErrorMessages()
 
 void Lobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGeneratorRef)
 {
-	if(IsConnected())
+	if (IsConnected())
 	{
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Cannot set token generator, lobby already connected"));
 		return;
 	}
-		
-	Lobby::TokenGenerator = TokenGeneratorRef;
 	
-	if(TokenGeneratorRef.IsValid())
+	if (TokenGenerator.IsValid() && OnTokenReceivedDelegateHandle.IsValid())
 	{
-		Lobby::TokenGenerator->OnTokenReceived().Add(OnTokenReceived);
+		// Remove previously bound delegate when setting new token generator
+		TokenGenerator->OnTokenReceived().Remove(OnTokenReceivedDelegateHandle);
+		OnTokenReceivedDelegateHandle.Reset();
+	}
+
+	TokenGenerator = TokenGeneratorRef;
+	
+	if (TokenGeneratorRef.IsValid())
+	{
+		OnTokenReceivedDelegateHandle = TokenGenerator->OnTokenReceived().AddRaw(this, &Lobby::OnTokenReceived);
 	}
 }
 

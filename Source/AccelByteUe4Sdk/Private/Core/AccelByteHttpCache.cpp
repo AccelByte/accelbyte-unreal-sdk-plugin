@@ -8,6 +8,7 @@
 #include "Core/AccelByteLRUCacheFile.h"
 #include "Core/AccelByteLRUCacheMemory.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteUtilities.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpCache, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteHttpCache);
@@ -397,10 +398,10 @@ namespace AccelByte
 
 		FName FAccelByteHttpCache::ConstructKey(const FHttpRequestPtr& Request)
 		{
-			const FString KeyString = FString::Printf(TEXT("%s-%s")
+			const FString KeyString = FAccelByteUtilities::GenerateHashString(FString::Printf(TEXT("%s-%s")
 				, *Request->GetVerb()
 				, *Request->GetURL()
-			);
+			));
 
 			const FName Key = FName(*KeyString);
 

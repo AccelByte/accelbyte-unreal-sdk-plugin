@@ -28,6 +28,7 @@
 #include "Api/AccelByteAgreementApi.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteAMSApi.h"
+#include "Api/AccelByteChallengeApi.h"
 #include "Api/AccelByteConfigurationsApi.h"
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteTurnManagerApi.h"
@@ -118,6 +119,7 @@ Api::Leaderboard FRegistry::Leaderboard{ FRegistry::Credentials, FRegistry::Sett
 Api::Reward FRegistry::Reward{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::SeasonPass FRegistry::SeasonPass{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::Group FRegistry::Group{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Challenge FRegistry::Challenge{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 #pragma endregion
 
 #pragma region Game Client Multiplayer

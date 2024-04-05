@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [25.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.2.0%0D25.1.1) (2024-04-05)
+
+
+### Features
+
+* **DSMC:** Implement RegisterServerToDSM with server info on success ([adefb3c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/adefb3c996d32b5510658cb278d03971f95e3496))
+* **ecommerce:** add API for retrieving IAP items mapping ([f33aec8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f33aec81addc1e3a3b3797cddf4ca9c9996931d4))
+* **ecommerce:** Add DebitUserWalletV2 and PaymentWithUserWallet ([b025d97](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b025d97ab0dd7f82085eed0d957f6eb10699b270))
+* **lobby:** add entitlement token generation and check to lobby connection ([c9fedbc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c9fedbc2d1a8d58f16f611b3094e7819d66e0d36))
+* **session:** add 'previousStatus' field to session member model ([7edafde](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7edafdecdec5e176edc060001d80426755d0e61b))
+
+
+### Bug Fixes
+
+* **Core:** add challenge api on registry ([69ed666](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/69ed666a61a071096d28e45578519f7872eb2d25))
+* **FormatUrl:** fix format api url flow by using sdk setting if the session is not valid ([5e1074a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5e1074ab1dcd66a35f91c68ac0cffde8c8d37a63))
+* **http:** fix construct key implementation by using hash key to prevent the fname character limitation ([4e76335](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4e76335403b768ef390586a240d4230ea22c6cc0))
+
 ### [25.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.1.1%0D25.1.0) (2024-03-28)
 
 

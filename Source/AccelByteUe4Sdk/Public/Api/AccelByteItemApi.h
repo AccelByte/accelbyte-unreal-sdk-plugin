@@ -171,11 +171,24 @@ public:
 	 */
 	void GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Region, THandler<TArray<FAccelByteModelsEstimatedPrices>> const& OnSuccess
 		, FErrorHandler const& OnError);
-	
+
+	/**
+	 * @brief Retrieve other supported platform store items mapping.
+	 *
+	 * @param Platform The type of the platform.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetItemMappings(EAccelBytePlatformMapping Platform
+		, const THandler<FAccelByteModelsItemMappingsResponse>& OnSuccess
+		, const FErrorHandler& OnError);
+
 private:
 	Item() = delete;
 	Item(Item const&) = delete;
-	Item(Item&&) = delete; 
+	Item(Item&&) = delete;
+
+	static FString ConvertPlatformMappingToString(const EAccelBytePlatformMapping& Platform);
 };
 
 } // Namespace Api

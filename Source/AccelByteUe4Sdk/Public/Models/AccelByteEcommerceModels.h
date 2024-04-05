@@ -37,6 +37,14 @@ enum class EAccelByteItemStatus : uint8
 };
 
 UENUM(BlueprintType)
+enum class EAccelByteWalletStatus : uint8
+{
+	NONE = 0,
+	ACTIVE,
+	INACTIVE
+};
+
+UENUM(BlueprintType)
 enum class EAccelByteItemCurrencyType : uint8
 {
 	NONE = 0,
@@ -150,6 +158,18 @@ enum class EAccelByteCreditUserWalletSource : uint8
 	REDEEM_CODE,
 	REFUND,
 	OTHER
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteDebitUserWalletSource : uint8
+{
+	OTHER = 0,
+	ORDER_REVOCATION,
+	DLC_REVOCATION,
+	IAP_REVOCATION,
+	PAYMENT,
+	EXPIRATION,
+	TRADE,
 };
 
 UENUM(BlueprintType) 
@@ -333,6 +353,38 @@ enum class EAccelBytePlatformRewardOrigin : uint8
 	Nintendo,
 	Oculus,
 	System,
+	Other
+};
+
+UENUM(BlueprintType)
+enum class EAccelBytePlatformBalanceOrigin : uint8
+{
+	NONE = 0,
+	Playstation,
+	Xbox,
+	Steam,
+	Epic,
+	IOS,
+	GooglePlay,
+	Twitch,
+	Nintendo,
+	Oculus,
+	System,
+	Other
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteWalletPlatform : uint8
+{
+	NONE = 0,
+	Playstation,
+	Xbox,
+	Steam,
+	Epic,
+	IOS,
+	GooglePlay,
+	Nintendo,
+	Oculus,
 	Other
 };
 
@@ -1884,6 +1936,39 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformWallet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	FString Id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	FString Namespace{}; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	FString UserId{}; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	FString CurrencyCode{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	FString CurrencySymbol{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	int64 Balance{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	TArray<FAccelByteModelsWalletInfo> WalletInfos{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	EAccelByteWalletStatus WalletStatus{EAccelByteWalletStatus::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PlatformWallet")
+	EAccelByteWalletStatus Status{EAccelByteWalletStatus::NONE};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfoResponse
 {
 	GENERATED_BODY()
@@ -1985,11 +2070,44 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDebitUserWalletRequest
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | DebitUserWalletRequest")
 	int64 Amount{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | DebitUserWalletRequest")
 	FString Reason{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDebitUserWalletRequestV2 : public FAccelByteModelsDebitUserWalletRequest
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | DebitUserWalletRequest")
+	EAccelByteDebitUserWalletSource BalanceSource { EAccelByteDebitUserWalletSource::OTHER };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | DebitUserWalletRequest")
+	FJsonObjectWrapper Metadata{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | DebitUserWalletRequest")
+	EAccelBytePlatformBalanceOrigin BalanceOrigin { EAccelBytePlatformBalanceOrigin::Other };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | DebitUserWalletRequest")
+	bool AllowOverdraft{false};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaymentUserWalletRequest
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PaymentUserWalletRequest")
+	int64 Amount{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PaymentUserWalletRequest")
+	EAccelByteWalletPlatform WalletPlatform { EAccelByteWalletPlatform::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | PaymentUserWalletRequest")
+	FJsonObjectWrapper Metadata{};
 };
 
 USTRUCT(BlueprintType)
@@ -2894,4 +3012,45 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserOrdersRequest
 	int32 Offset{0};
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserOrderRequest")
 	int32 Limit{20};
-}; 
+};
+
+UENUM(BlueprintType)
+enum class EAccelBytePlatformMapping : uint8
+{
+	NONE = 0,
+	APPLE,
+	GOOGLE,
+	PLAYSTATION,
+	STEAM,
+	XBOX,
+	EPIC_GAMES,
+	OCULUS,
+	TWITCH
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemMapping
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMapping")
+	EAccelBytePlatformMapping Platform{EAccelBytePlatformMapping::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMapping")
+	FString ItemIdentityType{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMapping")
+	FString ItemIdentity{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMapping")
+	FString PlatformProductId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemMappingsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMappingsResponse")
+	TArray<FAccelByteModelsItemMapping> Data;
+};
