@@ -10,6 +10,8 @@
 
 namespace AccelByte
 {
+	#define FABBinaryFileStructure TArray<FBinaryContentIndependentSegment>
+
 	class ACCELBYTEUE4SDK_API IAccelByteDataStorage
 	{
 	public:
@@ -29,6 +31,16 @@ namespace AccelByte
 		 * @param TableName optional. The name of the table. Default will drop the default KeyValue table.
 		*/
 		virtual void DeleteItem(const FString& Key, const FVoidHandler OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) = 0;
+
+		/**
+		 * @brief Insert Item to a file by overwrite operation.
+		 *
+		 * @param Key The Key of the Item.
+		 * @param Item The Data to be inserted to the Table. The Data would be a FString.
+		 * @param OnDone This will be called when the operation done. The result is bool.
+		 * @param TableName optional. The name of the table. Default will insert an item to the default KeyValue table.
+		*/
+		virtual void SaveItemOverwiteEntireFile(const FString& Key, const FString& Item, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) = 0;
 
 		/**
 		 * @brief Insert Item to the Key Value Table.
@@ -86,5 +98,16 @@ namespace AccelByte
 		 * @param TableName optional. The name of the table. Default will get an item from the default KeyValue table.
 		*/
 		virtual void GetItem(const FString& Key, const THandler<TPair<FString, FJsonObjectWrapper>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) = 0;
+
+		/**
+		* @brief Change the old JSON-Array structure into new-line (\n) separated JSON.
+		* Telemetry will be extracted from the old cache into a Telemetry specific cache.
+		* DeviceID & refresh token will be extracted as well into a GeneralPurpose cache.
+		*
+		* @param OldCacheFilename The targeted file that will be extracted
+		* @param NewCacheFilenameForTelemetry
+		* @param NewCacheFilenameForGeneralPurpose
+		*/
+		virtual void ConvertExistingCache(const FString& OldCacheFilename, const FString& NewCacheFilenameForTelemetry, const FString& NewCacheFilenameForGeneralPurpose) = 0;
 	};
 }

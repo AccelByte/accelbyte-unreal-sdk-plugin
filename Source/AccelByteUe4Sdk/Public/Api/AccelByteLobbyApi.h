@@ -603,7 +603,9 @@ public:
 	 * @brief delegate for handling set user region response
 	 */
 	DECLARE_DELEGATE_OneParam(FChangeUserRegionResponse, const FAccelByteModelsChangeUserRegionResponse&)
-	
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOneTimeCodeLinkedNotif, const FAccelByteModelsOneTimeCodeLinked&)
+
 public:
 	/**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
@@ -2455,6 +2457,19 @@ public:
 		OnChangeUserRegionError = OnError;
 	}
 
+	FDelegateHandle AddOneTimeCodeLinkedNotifDelegate(const THandler<FAccelByteModelsOneTimeCodeLinked>& OneTimeCodeLinkedNotifDelegate)
+	{
+		return OneTimeCodeLinkedNotif.AddLambda([OneTimeCodeLinkedNotifDelegate](const FAccelByteModelsOneTimeCodeLinked& Response)
+			{
+				OneTimeCodeLinkedNotifDelegate.ExecuteIfBound(Response);
+			});
+	}
+
+	bool RemoveOneTimeCodeLinkedNotifDelegate(const FDelegateHandle& OneTimeCodeLinkedNotifDelegateHandle)
+	{
+		return OneTimeCodeLinkedNotif.Remove(OneTimeCodeLinkedNotifDelegateHandle);
+	}
+
 	/**
 	 * @brief Bulk add friend(s), don't need any confirmation from the player.
 	 *
@@ -2477,6 +2492,18 @@ public:
 	 */
 	void SyncThirdPartyFriends(const FAccelByteModelsSyncThirdPartyFriendsRequest& Request
 		, const THandler<TArray<FAccelByteModelsSyncThirdPartyFriendsResponse>>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Sync third party platform block list to the AccelByte block list. Automatically will add players from the
+	 * platform block list to the AccelByte block list, if the blocked player has linked their account with an AccelByte account.
+	 *
+	 * @param Request Request model used to configure the block list sync API call
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SyncThirdPartyBlockList(const FAccelByteModelsSyncThirdPartyBlockListRequest& Request
+		, const THandler<TArray<FAccelByteModelsSyncThirdPartyBlockListResponse>>& OnSuccess
 		, const FErrorHandler& OnError);
 
 	/**
@@ -2694,6 +2721,8 @@ private:
 	
 	void HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& Message, bool bSkipConditioner);
 
+	void HandleOneTimeCodeLinkedNotif(const FAccelByteModelsNotificationMessage& Message);
+
 	void InitializeV2MatchmakingNotifTopics();
 
 	void OnNotificationSenderMessageReceived(const FString& Payload);
@@ -2859,6 +2888,7 @@ private:
 	FNotifBroadcaster MessageNotifBroadcaster;
 	FUserBannedNotification UserBannedNotification;
 	FUserUnbannedNotification UserUnbannedNotification;
+	FOneTimeCodeLinkedNotif OneTimeCodeLinkedNotif;
 
 	// session v2
 	FV2PartyInvitedNotif V2PartyInvitedNotif;

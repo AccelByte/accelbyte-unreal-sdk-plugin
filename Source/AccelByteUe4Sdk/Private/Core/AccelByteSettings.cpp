@@ -100,6 +100,8 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 	UGCServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("UGCServerUrl"), BaseUrl, TEXT("ugc"));
 
+	InventoryServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("InventoryServerUrl"), BaseUrl, TEXT("inventory"));
+	
 	SeasonPassServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SeasonPassServerUrl"), BaseUrl, TEXT("seasonpass"));
 
 	ReportingServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ReportingServerUrl"), BaseUrl, TEXT("reporting"));
@@ -373,6 +375,11 @@ FString UAccelByteBlueprintsSettings::GetUGCServerUrl()
 	return FRegistry::Settings.UGCServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetInventoryServerUrl()
+{
+	return FRegistry::Settings.InventoryServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetReportingServerUrl()
 {
 	return FRegistry::Settings.ReportingServerUrl;
@@ -561,6 +568,11 @@ void UAccelByteBlueprintsSettings::SetTurnManagerServerUrl(const FString& TurnMa
 void UAccelByteBlueprintsSettings::SetUGCServerUrl(const FString& UGCServerUrl)
 {
 	FRegistry::Settings.UGCServerUrl = UGCServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetInventoryServerUrl(const FString& InventoryServerUrl)
+{
+	FRegistry::Settings.InventoryServerUrl = InventoryServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetSeasonPassServerUrl(const FString& SeasonPassServerUrl)

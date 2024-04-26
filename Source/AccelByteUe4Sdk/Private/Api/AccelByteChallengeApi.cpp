@@ -111,7 +111,7 @@ void Challenge::GetRewards(const THandler<FAccelByteModelsChallengeGetRewardStat
 	FReport::Log(FString(__FUNCTION__));
 
 	TMap<FString, FString> QueryParams{
-		{ TEXT("sortBy"), FAccelByteUtilities::GetUEnumValueAsString(SortBy) },
+		{ TEXT("sortBy"), FAccelByteUtilities::ConvertChallengeSortByToString(SortBy) },
 		{ TEXT("offset"), FString::FromInt(Offset) },
 		{ TEXT("limit"), FString::FromInt(Limit) },
 	};

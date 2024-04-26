@@ -51,5 +51,40 @@ void ServerAchievement::UnlockAchievement(const FString& UserId
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void ServerAchievement::BulkCreatePSNEvent(const FAccelByteModelsAchievementBulkCreatePSNEventRequest& Request
+	, const THandler<FAccelByteModelsAchievementBulkCreatePSNEventResponse>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Request.Data.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request: Request data array is empty."));
+		return;
+	}
+
+	bool bHasEmptyEvents = false;
+	for (const FAccelByteModelsAchievementPSNEventCreate& CreateEvent : Request.Data)
+	{
+		if (CreateEvent.Events.Num() <= 0)
+		{
+			bHasEmptyEvents = true;
+			break;
+		}
+	}
+
+	if (bHasEmptyEvents)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request: Events array in one of the data structures is empty."));
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/platforms/psn/bulk")
+		, *ServerSettingsRef.AchievementServerUrl
+		, *ServerCredentialsRef.GetClientNamespace());
+
+	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+}
+
 } // Namespace GameServerApi
 } // Namespace AccelByte

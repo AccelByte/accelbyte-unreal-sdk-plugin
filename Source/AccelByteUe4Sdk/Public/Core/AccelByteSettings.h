@@ -24,6 +24,7 @@ public:
 	FString AgreementServerUrl{};
 	FString TurnManagerServerUrl{};
 	FString UGCServerUrl{};
+	FString InventoryServerUrl{};
 	FString ReportingServerUrl{};
 	FString LoginQueueServerUrl{};
 	FString AppId{};
@@ -141,6 +142,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString UGCServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString InventoryServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString ReportingServerUrl{};
@@ -291,6 +295,9 @@ public:
 	static FString GetUGCServerUrl();
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetInventoryServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetReportingServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -403,6 +410,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetUGCServerUrl(const FString& UGCServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetInventoryServerUrl(const FString& InventoryServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetReportingServerUrl(const FString& ReportingServerUrl);

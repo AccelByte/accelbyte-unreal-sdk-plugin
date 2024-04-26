@@ -156,6 +156,17 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (SortBy == EAccelByteAchievementListSortBy::LISTORDER ||
+		SortBy == EAccelByteAchievementListSortBy::LISTORDER_ASC ||
+		SortBy == EAccelByteAchievementListSortBy::LISTORDER_DESC ||
+		SortBy == EAccelByteAchievementListSortBy::UPDATED_AT ||
+		SortBy == EAccelByteAchievementListSortBy::UPDATED_AT_ASC ||
+		SortBy == EAccelByteAchievementListSortBy::UPDATED_AT_DESC)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("SortBy %s is not supported."), *FAccelByteUtilities::GetUEnumValueAsString(SortBy)));
+		return;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
 		, *SettingsRef.AchievementServerUrl
 		, *CredentialsRef.GetNamespace()
@@ -163,6 +174,32 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+		{TEXT("preferUnlocked"), PreferUnlocked ? TEXT("true") : TEXT("false")},
+		{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : *TagQuery}
+	};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+void Achievement::QueryUserAchievements(EAccelByteGlobalAchievementListSortBy const& SortBy
+	, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit
+	, bool PreferUnlocked
+	, FString const& TagQuery)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
+		, *SettingsRef.AchievementServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("sortBy"), SortBy == EAccelByteGlobalAchievementListSortBy::NONE ? TEXT(""): ConvertGlobalAchievementSortByToString(SortBy)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
 		{TEXT("preferUnlocked"), PreferUnlocked ? TEXT("true") : TEXT("false")},

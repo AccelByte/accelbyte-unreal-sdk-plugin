@@ -47,6 +47,20 @@ void UAccelByteBlueprintsAchievement::QueryUserAchievements(const EAccelByteAchi
 	}), Offset, Limit, preferUnlocked, TagQuery);
 }
 
+void UAccelByteBlueprintsAchievement::QueryUserAchievementsV2(const EAccelByteGlobalAchievementListSortBy& SortBy,
+	const FQueryUserAchievementsSuccess& OnSuccess, const FDErrorHandler& OnError, const int32& Offset,
+	const int32& Limit, bool preferUnlocked, const FString& TagQuery)
+{
+	FRegistry::Achievement.QueryUserAchievements(SortBy, THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([OnSuccess](const FAccelByteModelsPaginatedUserAchievement& Result)
+		{
+			OnSuccess.ExecuteIfBound(Result);
+		}),
+			FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}), Offset, Limit, preferUnlocked, TagQuery);
+}
+
 void UAccelByteBlueprintsAchievement::UnlockAchievement(const FString& AchievementCode, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	FRegistry::Achievement.UnlockAchievement(AchievementCode, FVoidHandler::CreateLambda([OnSuccess]()

@@ -21,6 +21,7 @@
 #include "ABAchievement.h"
 #include "ABSessionBrowser.h"
 #include "ABUGC.h"
+#include "ABInventory.h"
 #include "ABPresence.h"
 #include "ABBlock.h"
 #include "ABMessage.h"
@@ -179,6 +180,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABUGC* UGC;
+
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
+	UABInventory* Inventory;
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABPresence* Presence;

@@ -101,6 +101,16 @@ namespace AccelByte
 		void GetItemFromTable(const FString& TableName, const FString& Key, const THandler<TPair<FString, T>>& OnDone);
 
 		/**
+		 * @brief Insert Item to a file by overwrite operation.
+		 *
+		 * @param Key The Key of the Item.
+		 * @param Item The Data to be inserted to the Table. The Data would be a FString.
+		 * @param OnDone This will be called when the operation done. The result is bool.
+		 * @param TableName optional. The name of the table. Default will insert an item to the default KeyValue table.
+		*/
+		void SaveItemOverwiteEntireFile(const FString& Key, const FString& Item, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultFileName")) override{}
+
+		/**
 		 * @brief Insert Item to the Key Value Table, override it if already exist.
 		 *
 		 * @param Key The Key of the Item.
@@ -156,6 +166,11 @@ namespace AccelByte
 		 * @param TableName optional. The name of the table. Default will get an item from the default KeyValue table.
 		*/
 		virtual void GetItem(const FString& Key, const THandler<TPair<FString, FJsonObjectWrapper>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
+		
+		/**
+		* @brief Do nothing. This is intended to be used by DataStorageBinary.
+		*/
+		virtual void ConvertExistingCache(const FString& OldCacheFilename, const FString& NewCacheFilenameForTelemetry, const FString& NewCacheFilenameForGeneralPurpose) override {};
 
 	private:
 		FString DatabaseName;

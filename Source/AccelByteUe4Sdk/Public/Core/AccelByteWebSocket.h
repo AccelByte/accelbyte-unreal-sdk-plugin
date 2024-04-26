@@ -174,6 +174,9 @@ private:
 	bool StateTick(float DeltaTime);
 	bool MessageTick(float DeltaTime);
 
+	void TeardownTicker();
+	void TeardownWebsocket();
+
 	AccelByteWebSocket(AccelByteWebSocket const&) = delete; // Copy constructor
 	AccelByteWebSocket(AccelByteWebSocket&&) = delete; // Move constructor
 	AccelByteWebSocket& operator=(AccelByteWebSocket const&) = delete; // Copy assignment operator

@@ -55,10 +55,10 @@ AccelByteWebSocket::AccelByteWebSocket(
 
 AccelByteWebSocket::~AccelByteWebSocket()
 {
-	if (UObjectInitialized())
-	{
-		Disconnect(true);
-	}
+	FReport::Log(FString(__FUNCTION__));
+
+	TeardownTicker();
+	TeardownWebsocket();
 
 	ClientCreds = nullptr;
 	ServerCreds = nullptr;
@@ -75,15 +75,7 @@ void AccelByteWebSocket::SetupWebSocket()
 	OnConnectionClosedQueue.Empty();
 	OnConnectionErrorQueue.Empty();
 
-	if(WebSocket.IsValid())
-	{
-		WebSocket->OnMessage().Clear();
-		WebSocket->OnConnected().Clear();
-		WebSocket->OnConnectionError().Clear();
-		WebSocket->OnClosed().Clear();
-		WebSocket->Close();
-		WebSocket.Reset();
-	}
+	TeardownWebsocket();
 
 	UpgradeHeaders.Add(TEXT("x-flight-id"), FAccelByteUtilities::GetFlightId());
 
@@ -201,11 +193,7 @@ void AccelByteWebSocket::Connect()
 
 	bConnectedBroadcasted = false;
 
-	if(TickerDelegateHandle.IsValid())
-	{
-		FTickerAlias::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
-		TickerDelegateHandle.Reset();
-	}
+	TeardownTicker();
 
 	TickerDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickerDelegate, TickPeriod);
 
@@ -220,7 +208,6 @@ void AccelByteWebSocket::Connect()
 	WebSocket->Connect();
 	WsEvents |= EWebSocketEvent::Connect;
 }
-	
 
 void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 {
@@ -233,22 +220,10 @@ void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 	else
 	{
 		bConnectedBroadcasted = false;
-		
-		if (TickerDelegateHandle.IsValid())
-		{
-			FTickerAlias::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
-			TickerDelegateHandle.Reset();
-		}
 
 		if (WebSocket.IsValid())
 		{
-			WebSocket->OnMessage().Clear();
-			WebSocket->OnConnected().Clear();
-			WebSocket->OnConnectionError().Clear();
-			WebSocket->OnClosed().Clear();
 			WebSocket->Close();
-
-			WebSocket.Reset();
 		}
 	}	
 }
@@ -271,7 +246,6 @@ void AccelByteWebSocket::Send(const FString& Message) const
 	WebSocket->Send(Message);
 }
 
-	
 void AccelByteWebSocket::OnConnectionConnected()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -473,8 +447,36 @@ bool AccelByteWebSocket::MessageTick(float DeltaTime)
 		OnConnectionClosedQueue.Dequeue(Params);
 
 		ConnectionCloseDelegate.Broadcast(Params.Code, Params.Reason, Params.WasClean);
+
+		if (Params.Code == static_cast<int32>(EWebsocketErrorTypes::NormalClosure))
+		{
+			TeardownWebsocket();
+			TeardownTicker();
+		}
 	}
 
 	return true;
+}
+
+void AccelByteWebSocket::TeardownTicker()
+{
+	if (TickerDelegateHandle.IsValid())
+	{
+		FTickerAlias::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
+		TickerDelegateHandle.Reset();
+	}
+}
+
+void AccelByteWebSocket::TeardownWebsocket()
+{
+	if(WebSocket.IsValid())
+	{
+		WebSocket->OnMessage().Clear();
+		WebSocket->OnConnected().Clear();
+		WebSocket->OnConnectionError().Clear();
+		WebSocket->OnClosed().Clear();
+		WebSocket->Close();
+		WebSocket.Reset();
+	}
 }
 }

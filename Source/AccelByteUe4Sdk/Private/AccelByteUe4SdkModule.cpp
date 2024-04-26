@@ -51,6 +51,9 @@ private:
 	// For registering settings in UE4 editor
 	void RegisterSettings();
 	void UnregisterSettings();
+	
+	void PostStartup();
+	FDelegateHandle PostStartupDelegateHandle{};
 
 	bool LoadClientSettings(ESettingsEnvironment const Environment);
 	bool LoadServerSettings(ESettingsEnvironment const Environment);
@@ -113,6 +116,27 @@ void FAccelByteUe4SdkModule::StartupModule()
 #if UE_SERVER
 	FAccelByteSignalHandler::Initialize();
 #endif
+
+	PostStartupDelegateHandle = FCoreDelegates::OnBeginFrame.AddRaw(this, &FAccelByteUe4SdkModule::PostStartup);
+}
+
+void FAccelByteUe4SdkModule::PostStartup()
+{
+	auto StoragePtr = GetLocalDataStorage();
+	if (StoragePtr != nullptr)
+	{
+		UE_LOG(LogAccelByte, Log, TEXT("LocalDataStorageUtility obtained, executing the cache migration."));
+		StoragePtr->ConvertExistingCache(
+			FAccelByteUtilities::AccelByteStorageFile(),//The old storage name
+			FAccelByteUtilities::GetCacheFilenameTelemetry(),
+			FAccelByteUtilities::GetCacheFilenameGeneralPurpose());
+	}
+	else
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("LocalDataStorageUtility can't be obtained, skipping the cache migration."));
+	}
+
+	FCoreDelegates::OnBeginFrame.Remove(this->PostStartupDelegateHandle);
 }
 
 void FAccelByteUe4SdkModule::ShutdownModule()
@@ -272,7 +296,7 @@ bool FAccelByteUe4SdkModule::NullCheckConfig(FString const& Value, FString const
 {
 	if (Value.IsEmpty())
 	{
-		UE_LOG(LogAccelByte, Error, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *ConfigField);
+		UE_LOG(LogAccelByte, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *ConfigField);
 		return false;
 	}
 

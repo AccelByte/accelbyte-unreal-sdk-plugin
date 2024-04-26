@@ -215,6 +215,19 @@ public:
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Query recently met users in a game session.
+	 *
+	 * @param UserId Target recent player User Id
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Limit Number of recent players to request, maximum value is 200.
+	 */
+	void GetRecentPlayers(const FString& UserId
+		, THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
+		, FErrorHandler const& OnError
+		, const int32 Limit = 20);
+
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;

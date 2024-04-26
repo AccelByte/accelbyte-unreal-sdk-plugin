@@ -121,10 +121,13 @@ private:
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;
 	TSet<FString> CriticalEvents;
+	
 	bool bCacheUpdated = false;
 	TQueue<TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>> JobQueue{};
+	FString EventPtrArrayAccumulation{};//Contains EventPtrArray that will be written to cache, update by EventPtrArrayAccumulation
 	TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventPtrArray;
 	mutable FCriticalSection EventPtrArrayLock;
+
 	bool bTelemetryJobStarted = false;
 	FTimespan const MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;

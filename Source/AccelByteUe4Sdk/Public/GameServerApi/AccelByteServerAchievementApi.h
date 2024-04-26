@@ -8,6 +8,7 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerApiBase.h"
+#include "Models/AccelByteAchievementModels.h"
 
 namespace AccelByte
 {
@@ -36,6 +37,13 @@ public:
 	void UnlockAchievement(const FString& UserId
 		, const FString& AchievementCode
 		, const FVoidHandler OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Create events to sync to PSN, used to unlock trophies through game server
+	 */
+	void BulkCreatePSNEvent(const FAccelByteModelsAchievementBulkCreatePSNEventRequest& Request
+		, const THandler<FAccelByteModelsAchievementBulkCreatePSNEventResponse>& OnSuccess
 		, const FErrorHandler& OnError);
 
 private:

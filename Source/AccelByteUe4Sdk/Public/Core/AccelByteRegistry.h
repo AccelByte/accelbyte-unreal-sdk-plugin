@@ -44,6 +44,7 @@ namespace Api
 	class SessionBrowser;
 	class TurnManager;
 	class UGC;
+	class Inventory;
 	class SeasonPass;
 	class Reporting;
 	class Currency;
@@ -131,6 +132,7 @@ public:
 	static Api::CloudStorage CloudStorage;
 	static Api::CloudSave CloudSave;
 	static Api::UGC UGC;
+	static Api::Inventory Inventory;
 #pragma endregion
 
 #pragma region Game Client Engagement

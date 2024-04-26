@@ -24,6 +24,7 @@
 #include "Engine/Engine.h"
 #include "Misc/Base64.h"
 #include "Core/AccelByteEntitlementTokenGenerator.h"
+#include "Core/AccelByteWebSocketErrorTypes.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -1233,6 +1234,46 @@ void Lobby::SyncThirdPartyFriends(const FAccelByteModelsSyncThirdPartyFriendsReq
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JSONString, OnSuccess, OnError);
 }
 
+void Lobby::SyncThirdPartyBlockList(const FAccelByteModelsSyncThirdPartyBlockListRequest& Request
+	, const THandler<TArray<FAccelByteModelsSyncThirdPartyBlockListResponse>>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Request.BlockListSyncDetails.Num() < 1)
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request parameter must have at least 1 element!"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request parameter must have at least 1 element!"));
+		return;
+	}
+
+	const bool bContainEmptyPlatformId = Request.BlockListSyncDetails.ContainsByPredicate([](const FAccelByteModelsSyncThirdPartyBlockListInfo& Item) {
+		return Item.PlatformId.IsEmpty();
+	});
+	
+	if (bContainEmptyPlatformId)
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request details cannot contains empty platform ID!"));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request details cannot contains empty platform ID!"));
+		return;
+	}
+
+	FString LobbyServerHttp = SettingsRef.LobbyServerUrl.Replace(TEXT("wss://"), TEXT("https://"), ESearchCase::IgnoreCase);
+
+	// #NOTE: lobby server URL has a trailing slash at the end, leading to an error when formatting the URL and sending to
+	// a request. Chop off the slash at the end to avoid the error.
+	LobbyServerHttp.RemoveFromEnd(TEXT("/"), ESearchCase::IgnoreCase);
+
+	const FString Url = FString::Printf(TEXT("%s/sync/namespaces/%s/me/block")
+		, *LobbyServerHttp
+		, *CredentialsRef.GetNamespace());
+
+	FString JSONString{};
+	FAccelByteUtilities::TArrayUStructToJsonString(Request.BlockListSyncDetails, JSONString);
+
+	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JSONString, OnSuccess, OnError);
+}
+
 void Lobby::QueryFriendList(THandler<FAccelByteModelsQueryFriendListResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 const& Offset
@@ -2046,7 +2087,7 @@ void Lobby::OnClosed(int32 StatusCode
 	// disconnect only if status code > 4000 and we don't receive a login ban,
 	// other ban will try to reconnect the websocket
 	bool bIsReconnecting {true};
-	if (StatusCode > 4000 && !(BanNotifReceived && BanType != EBanType::LOGIN))
+	if ((StatusCode > 4000 && !(BanNotifReceived && BanType != EBanType::LOGIN)) || StatusCode == static_cast<int32>(EWebsocketErrorTypes::NormalClosure))
 	{
 		bIsReconnecting = false;
 		Disconnect();
@@ -2486,6 +2527,20 @@ void HandleNotif(const FString& MessageType
 			break; \
 		} \
 		
+template <typename PayloadType>
+bool MessageNotifJsonDeserialize(const FString& Payload, PayloadType& OutResult)
+{
+	if(FAccelByteJsonConverter::JsonObjectStringToUStruct(Payload, &OutResult))
+	{
+		return true;
+	}
+	else
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Unable to json parse payload from notification\n%s"), *Payload);
+	}
+	return false;
+}
+
 template <typename PayloadType, typename CallbackType>
 void DispatchV2JsonNotif(const FString& Payload
 	, CallbackType ResponseCallback)
@@ -2500,13 +2555,9 @@ void DispatchV2JsonNotif(const FString& Payload
 	UE_LOG(LogAccelByteLobby, Log, TEXT("MPv2 notif json:\n%s"), *PayloadJsonString);
 	
 	PayloadType Result;
-	if(FAccelByteJsonConverter::JsonObjectStringToUStruct(PayloadJsonString, &Result))
+	if (MessageNotifJsonDeserialize(PayloadJsonString, Result))
 	{
 		ResponseCallback.ExecuteIfBound(Result);
-	}
-	else
-	{
-		UE_LOG(LogAccelByteLobby, Warning, TEXT("Unable to json parse payload from notification\n%s"), *Payload);
 	}
 }
 
@@ -2659,6 +2710,15 @@ void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& 
 	}
 }
 
+void Lobby::HandleOneTimeCodeLinkedNotif(const FAccelByteModelsNotificationMessage& Message)
+{
+	FAccelByteModelsOneTimeCodeLinked Result;
+	if (MessageNotifJsonDeserialize(Message.Payload, Result))
+	{
+		OneTimeCodeLinkedNotif.Broadcast(Result);
+	}
+}
+
 void Lobby::InitializeV2MatchmakingNotifTopics()
 {
 	MatchmakingV2NotifTopics = {
@@ -2793,6 +2853,12 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 			if(MMNotifEnum != EV2MatchmakingNotifTopic::Invalid && MatchmakingV2NotifTopics.Contains(MMNotifEnum))
 			{
 				HandleV2MatchmakingNotif(NotificationMessage, bSkipConditioner);
+				break;
+			}
+
+			if (NotificationMessage.Topic.Equals(TEXT("oneTimeCodeLinked")))
+			{
+				HandleOneTimeCodeLinkedNotif(NotificationMessage);
 				break;
 			}
 				

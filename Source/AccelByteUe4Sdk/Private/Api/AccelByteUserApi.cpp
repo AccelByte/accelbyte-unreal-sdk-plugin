@@ -894,7 +894,7 @@ void User::TryRelogin(const FString& PlatformUserID
 
 				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError, PlatformUserID);
 			})
-		, FAccelByteUtilities::AccelByteStorageFile());
+		, FAccelByteUtilities::GetCacheFilenameGeneralPurpose());
 #else
 	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("Cannot relogin using cached token on other platforms."), FErrorOAuthInfo{});
 #endif
@@ -931,7 +931,7 @@ void User::TryReloginV4(const FString& PlatformUserID, const THandler<FAccelByte
 
 				this->LoginWithRefreshTokenV4(OnSuccess, OnError, RefreshInfo.RefreshToken, PlatformUserID);
 			})
-		, FAccelByteUtilities::AccelByteStorageFile());
+		, FAccelByteUtilities::GetCacheFilenameGeneralPurpose());
 #else
 	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("Cannot relogin using cached token on other platforms."), FErrorOAuthInfo{});
 #endif
@@ -1215,7 +1215,7 @@ void User::SaveCachedTokenToLocalDataStorage(const FString& CachedTokenKey, cons
 				FReport::Log(FString::Printf(TEXT("[AccelByte] Save Refresh Token %s. "),
 					IsSuccess ? TEXT("Success") : TEXT("Fail")));
 			})
-		, FAccelByteUtilities::AccelByteStorageFile());
+		, FAccelByteUtilities::GetCacheFilenameGeneralPurpose());
 
 #else 
 	FReport::Log(FString::Printf(TEXT("[AccelByte] Save Cached Token to local storage is not support for this platform yet. ")));

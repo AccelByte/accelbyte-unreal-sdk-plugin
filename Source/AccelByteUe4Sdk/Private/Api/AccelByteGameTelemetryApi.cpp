@@ -41,12 +41,16 @@ void GameTelemetry::OnLoginSuccess(FOauth2Token const& Response)
 {
 	if (bCacheEvent)
 	{
-		LoadCachedEvents();
+		AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [this]()
+			{
+				LoadCachedEvents();
+			});
 	}
 }
 
 void GameTelemetry::OnLogoutSuccess()
 {
+	EventPtrArrayAccumulation.Empty();
 	EventPtrArray.Empty();
 }
 
@@ -110,7 +114,10 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 		JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>{ TelemetryPtr, OnSuccess, OnError });
 		if (bCacheEvent || CriticalEvents.Contains(TelemetryBody.EventName))
 		{
-			AppendEventToCache(TelemetryPtr);
+			AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [TelemetryPtr, this]()
+				{
+					AppendEventToCache(TelemetryPtr);
+				});
 		}
 		if (bTelemetryJobStarted == false)
 		{
@@ -184,7 +191,10 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 			, FVoidHandler::CreateLambda(
 				[this, OnSuccessCallbacks, TelemetryBodies]()
 				{
-					RemoveEventsFromCache(TelemetryBodies);
+					AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [TelemetryBodies, this]()
+						{
+							RemoveEventsFromCache(TelemetryBodies);
+						});
 					for (auto& OnSuccessCallback : OnSuccessCallbacks)
 					{
 						OnSuccessCallback.ExecuteIfBound();
@@ -259,6 +269,7 @@ void GameTelemetry::SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTeleme
 	}
 }
 
+//Should be called from async task
 void GameTelemetry::LoadCachedEvents()
 {
 	FString TelemetryKey = GetTelemetryKey();
@@ -284,7 +295,10 @@ void GameTelemetry::LoadCachedEvents()
 						, FVoidHandler::CreateLambda(
 							[this, EventList]()
 							{
-								RemoveEventsFromCache(EventList);
+								AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [EventList, this]()
+									{
+										RemoveEventsFromCache(EventList);
+									});
 							})
 						, FErrorHandler::CreateLambda([this, EventList](int32 Code, FString Message)
 							{
@@ -300,9 +314,10 @@ void GameTelemetry::LoadCachedEvents()
 					);
 				}
 			})
-		, FAccelByteUtilities::AccelByteStorageFile());
+		, FAccelByteUtilities::GetCacheFilenameTelemetry());
 }
 
+//Should be called from async task
 void GameTelemetry::AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody> Telemetry)
 {
 	FString TelemetryKey = GetTelemetryKey();
@@ -310,20 +325,49 @@ void GameTelemetry::AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody>
 	{
 		return;
 	}
-	FString TelemetryValues;
+	FScopeLock ScopeLock(&EventPtrArrayLock);
+	int AddedIndex = EventPtrArray.Add(Telemetry);
+	
+	//Mimicking GameTelemetry::JobArrayQueueAsJsonString
 	{
-		FScopeLock ScopeLock(&EventPtrArrayLock);
-		EventPtrArray.Add(Telemetry);
+		//Create new array if empty, or open the end of the bracket
+		if (EventPtrArrayAccumulation.IsEmpty())
+		{
+			EventPtrArrayAccumulation += "{\"telemetry\":[";
+		}
+		else
+		{
+			bool bCharRemoved = false;
+			EventPtrArrayAccumulation.RemoveFromEnd("]}");
+			EventPtrArrayAccumulation += ",";
+		}
+	
+		{
+			TSharedRef<FJsonObject> JsonObj = MakeShared<FJsonObject>();
+			JsonObj->SetStringField("EventName", EventPtrArray[AddedIndex]->EventName);
+			JsonObj->SetStringField("EventNamespace", EventPtrArray[AddedIndex]->EventNamespace);
+			JsonObj->SetObjectField("Payload", EventPtrArray[AddedIndex]->Payload);
+			JsonObj->SetNumberField("ClientTimestamp", EventPtrArray[AddedIndex]->ClientTimestamp.ToUnixTimestamp());
+			TSharedRef<FJsonValueObject> JsonValue = MakeShared<FJsonValueObject>(JsonObj);
+			FString WrittenResult{};
+			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&WrittenResult);
+			if (FJsonSerializer::Serialize(JsonObj, Writer))
+			{
+				EventPtrArrayAccumulation+=(WrittenResult);
+			}
+			EventPtrArrayAccumulation += "]}";
+		}
 	}
-	JobArrayQueueAsJsonString(TelemetryValues);
-	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(TelemetryKey
-		, TelemetryValues
+
+	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItemOverwiteEntireFile(TelemetryKey
+		, EventPtrArrayAccumulation
 		, THandler<bool>::CreateLambda([](bool IsSuccess){})
-		, FAccelByteUtilities::AccelByteStorageFile());
+		, FAccelByteUtilities::GetCacheFilenameTelemetry());
 
 	bCacheUpdated = true;
 }
 
+//Should be called from async task
 void GameTelemetry::RemoveEventsFromCache(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events)
 {
 	FString TelemetryKey = GetTelemetryKey();
@@ -345,13 +389,14 @@ void GameTelemetry::RemoveEventsFromCache(TArray<TSharedPtr<FAccelByteModelsTele
 			EventPtrArray.Remove(Event);
 		}
 	}
+	EventPtrArrayAccumulation.Empty();
 
 	FString TelemetryValues;
 	JobArrayQueueAsJsonString(TelemetryValues);
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(TelemetryKey
 		, TelemetryValues
 		, THandler<bool>::CreateLambda([](bool IsSuccess) {})
-		, FAccelByteUtilities::AccelByteStorageFile());
+		, FAccelByteUtilities::GetCacheFilenameTelemetry());
 
 	bCacheUpdated = false;
 }
@@ -386,7 +431,6 @@ bool GameTelemetry::JobArrayQueueAsJsonString(FString& OutJsonString)
 	}
 	return true;
 }
-
 
 const FString GameTelemetry::GetEventNamespace()
 {

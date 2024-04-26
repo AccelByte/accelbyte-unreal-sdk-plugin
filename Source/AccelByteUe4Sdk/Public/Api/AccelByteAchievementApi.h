@@ -59,6 +59,25 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief [Deprecated] Query user's achievements. Include achieved and in-progress.
+	 *
+	 * @param SortBy Sorting method for the achievements result. Only support achieveAt, createdAt
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPaginatedUserAchievement&.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the achievements result. Default value is 0.
+	 * @param Limit The limit of the achievements result. Default value is 20.
+	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
+	 * @param TagQuery A query expression consists of tags to query the achievement from
+	 */
+	void QueryUserAchievements(EAccelByteAchievementListSortBy const& SortBy
+		, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20
+		, bool PreferUnlocked = true
+		, FString const& TagQuery = TEXT(""));
+
+	/**
 	 * @brief Query user's achievements. Include achieved and in-progress.
 	 *
 	 * @param SortBy Sorting method for the achievements result.
@@ -69,7 +88,7 @@ public:
 	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
 	 * @param TagQuery A query expression consists of tags to query the achievement from
 	 */
-	void QueryUserAchievements(EAccelByteAchievementListSortBy const& SortBy
+	void QueryUserAchievements(EAccelByteGlobalAchievementListSortBy const& SortBy
 		, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0

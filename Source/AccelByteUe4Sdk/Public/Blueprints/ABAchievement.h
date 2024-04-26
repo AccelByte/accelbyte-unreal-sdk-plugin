@@ -66,6 +66,17 @@ public:
 		bool PreferUnlocked = true,
 		FString const& TagQuery = TEXT("")
 	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
+	void QueryUserAchievementsV2(
+		EAccelByteGlobalAchievementListSortBy const& SortBy,
+		FDModelsPaginatedUserAchievementResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 const& Offset = 0,
+		int32 const& Limit = 20,
+		bool PreferUnlocked = true,
+		FString const& TagQuery = TEXT("")
+	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api")
 	void UnlockAchievement(

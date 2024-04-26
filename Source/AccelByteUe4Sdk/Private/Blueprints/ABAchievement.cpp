@@ -98,6 +98,31 @@ void UABAchievement::QueryUserAchievements(
 	);
 }
 
+void UABAchievement::QueryUserAchievementsV2(EAccelByteGlobalAchievementListSortBy const& SortBy,
+	FDModelsPaginatedUserAchievementResponse const& OnSuccess, FDErrorHandler const& OnError, int32 const& Offset,
+	int32 const& Limit, bool PreferUnlocked, FString const& TagQuery)
+{
+	ApiClientPtr->Achievement.QueryUserAchievements(
+		SortBy,
+		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda(
+			[OnSuccess](FAccelByteModelsPaginatedUserAchievement const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		),
+		Offset,
+		Limit,
+		PreferUnlocked,
+		TagQuery
+	);
+}
+
 void UABAchievement::UnlockAchievement(
 	FString const& AchievementCode,
 	FDHandler const OnSuccess,

@@ -1443,6 +1443,43 @@ struct FAccelByteModelsSyncThirdPartyFriendsResponse
 };
 
 // ------------------------------------------------------------------------------------------------
+// Third Party Block List Sync
+// ------------------------------------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct FAccelByteModelsSyncThirdPartyBlockListInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString PlatformId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString PsnEnv{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsSyncThirdPartyBlockListRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	TArray<FAccelByteModelsSyncThirdPartyBlockListInfo> BlockListSyncDetails{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsSyncThirdPartyBlockListResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Detail{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString PlatformId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Status{};
+};
+
+// ------------------------------------------------------------------------------------------------
 // Refresh Token
 // ------------------------------------------------------------------------------------------------
 USTRUCT(BlueprintType)
@@ -1651,6 +1688,23 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUnlockUserRequest
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | Friends")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsOneTimeCodeLinked 
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | MessageNotif")
+	FString InitiatorGameUserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | MessageNotif")
+	FString InitiatorNamespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | MessageNotif")
+	FString InitiatorUserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | MessageNotif")
+	FString LinkPlatformId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | MessageNotif")
 	FString UserId{};
 };
 

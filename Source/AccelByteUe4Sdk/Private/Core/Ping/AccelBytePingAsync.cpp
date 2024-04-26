@@ -179,10 +179,13 @@ FPingResultStatus FAccelByteUdpPingThread::SendPing(const FString& PingString)
 		{
 			uint64 CurrentTime = GetCurrentTime();
 			const uint8 ResultPacketSize = 4;
-			uint8 ResultBuffer[ResultPacketSize];
+			uint8 ResultBuffer[ResultPacketSize + 1]; // expected "PONG" and taking accounts of null terminators 
 			int32 BytesRead = 0;
 			if (SocketReceiveData(ResultBuffer, ResultPacketSize, BytesRead))
 			{
+				// make sure buffer is null terminated
+				ResultBuffer[ResultPacketSize] = 0;
+				
 				Response = CreateResponse(ResultBuffer, BytesRead, SentTime, CurrentTime);
 			}
 			else
@@ -204,7 +207,7 @@ FPingResultStatus FAccelByteUdpPingThread::SendPing(const FString& PingString)
 FPingResponse FAccelByteUdpPingThread::CreateResponse(uint8* Data, int32 BytesRead, uint64 SentTime, uint64 CurrentTime)
 {
 	FPingResponse Response{};
-	if (BytesRead > 0)
+	if (BytesRead > 3)
 	{
 		FString Received = UTF8_TO_TCHAR(Data);
 		if (Received.StartsWith(TEXT("PONG")))

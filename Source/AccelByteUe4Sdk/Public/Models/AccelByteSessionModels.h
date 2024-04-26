@@ -488,6 +488,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyInvitedEvent
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2ImpactedUserIds
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ImpactedUserIds")
+	TArray<FString> InvitedUserIDs{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ImpactedUserIds")
+	TArray<FString> LeftUserIDs{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | ImpactedUserIds")
+	TArray<FString> KickedUserIDs{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyMembersChangedEvent
 {
 	GENERATED_BODY()
@@ -501,6 +513,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyMembersChangedEvent
 		TArray<FAccelByteModelsV2SessionUser> Members{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyMembersChangedEvent")
 		FAccelByteModelsV2PartySession Session{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyMembersChangedEvent")
+		FAccelByteModelsV2ImpactedUserIds ImpactedUserIDs{};
 };
 
 USTRUCT(BlueprintType)
@@ -567,6 +581,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionMembersChangedEvent
 		FString LeaderID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionMembersChangedEvent")
 		FAccelByteModelsV2GameSession Session{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionMembersChangedEvent")
+		FAccelByteModelsV2ImpactedUserIds ImpactedUserIDs{};
 };
 
 USTRUCT(BlueprintType)
@@ -784,6 +800,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionRecentPlayer
 	FString UserId {};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2RecentPlayer")
 	FDateTime LastPlayedTime {0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2RecentPlayer")
+	FString MatchPool {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2RecentPlayer")
+	FString SessionTemplate {};
 };
 
 USTRUCT(BlueprintType)

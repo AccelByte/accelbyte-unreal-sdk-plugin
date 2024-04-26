@@ -41,6 +41,7 @@
 #include "Api/AccelByteStatisticApi.h"
 #include "Api/AccelByteTurnManagerApi.h"
 #include "Api/AccelByteUGCApi.h"
+#include "Api/AccelByteInventoryApi.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "Api/AccelByteWalletApi.h"
@@ -102,6 +103,7 @@ public:
 	Api::CloudSave CloudSave{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::BinaryCloudSave BinaryCloudSave{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::UGC UGC{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::Inventory Inventory{*CredentialsRef, FRegistry::Settings, *HttpRef};
 #pragma endregion
 
 #pragma region Engagement

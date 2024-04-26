@@ -29,6 +29,9 @@ public:
 	static void QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy, const FQueryUserAchievementsSuccess& OnSuccess, const FDErrorHandler& OnError, const int32& Offset, const int32& Limit, bool preferUnlocked, const FString& TagQuery);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api ")
+	static void QueryUserAchievementsV2(const EAccelByteGlobalAchievementListSortBy& SortBy, const FQueryUserAchievementsSuccess& OnSuccess, const FDErrorHandler& OnError, const int32& Offset, const int32& Limit, bool preferUnlocked, const FString& TagQuery);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Achievement | Api ")
 	static void UnlockAchievement(const FString& AchievementCode, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FQueryUserGlobalAchievementsSuccess, FAccelByteModelsPaginatedUserGlobalAchievement, Result);

@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [25.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.3.0%0D25.2.1) (2024-04-26)
+
+
+### Features
+
+* **achievement:** implement method to call psn event sync endpoint from servers ([1369f77](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1369f774ce96c0dbd597803322e69c8f95405a02))
+* **cache:** migrate old cache and separate telemetry cache from other caches (deviceID, refresh token, etc). into each cache files ([b3b1cc1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b3b1cc15c008d69fb969f042e736766d166af0f7))
+* **inventory:** add new item inventory endpoints ([a661cde](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a661cdefaa788918477d05d906958f737e996ee4))
+* **lobby:** add oneTimeCodeLinked notification ([dff7514](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dff7514b4ecb1b091a13717ba40c8a908b363a3b))
+* **Oauth:** add PollingTime field in models ([4777297](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/477729799f75acc5e5bf1e6f34f43a2268474e9a))
+* **session:** add get recent team player endpoint ([ddc51fd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ddc51fd52db0b669a7c1ecc6b405bed4def2a66b))
+* **storage:** improve the storing format for telemetry by reduce the amount of serialization ([1ef650e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1ef650ef251de5829d57cbe3fc06ec220dd9e4d9))
+* **sync:** add endpoint for syncing blocked players from third party platform ([947e7ab](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/947e7ab4ebe4fb9122d8f0acac4893f28564aff6))
+* **telemetry:** accumulating the serialization partially when sending to cache ([3735d6c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3735d6c027d0a977cd00f34a422ad546683cb4e9))
+
+
+### Bug Fixes
+
+* **achievement:** deprecate old QueryUserAchievement and create new method with proper global sort by enum ([d904903](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d90490359adc6a8c5496e83ea1896cb7cfa40444))
+* **challenge:** use ConverChallengeSortByToString for query params ([455a15a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/455a15abfa74eb1b32e4ea408cc90a42be05cdcf))
+* clang error due to ordering of conditionals ([1c2fd99](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1c2fd99f0651256f8a2e729f25f90760d5289c34))
+* fix buffer overflow in UdpPing ([d2d337e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d2d337ec0d07b61ca0f376402332243c5de7a58f))
+* **telemetry:** caching telemetry without a need to do excessive JSON operation ([298569b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/298569b837c1253b162888746dc719a12d0f8991))
+* **telemetry:** move the JSON operation & file IO into background thread ([b627987](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b6279872305bb75d0c21c03e370b18b61195f166))
+* **websocket:** remove ticker after on closed triggered ([050633a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/050633ae7f50f42333e50af99c7d086deb453c00))
+
 ### [25.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.2.1%0D25.2.0) (2024-04-26)
 
 

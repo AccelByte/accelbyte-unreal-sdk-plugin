@@ -188,6 +188,8 @@ struct ACCELBYTEUE4SDK_API FOauth2TokenV4 : public FOauth2Token
 	int32 EstimatedWaitingTimeInSeconds{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | OAuth2V4")
 	int32 ReconnectExpiredAt{0};// UNIX seconds since epoch
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | OAuth2V4")
+	int32 PlayerPollingTimeInSeconds{0};
 };
 
 USTRUCT(BlueprintType)
@@ -204,6 +206,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLoginQueueTicketInfo
 	int32 EstimatedWaitingTimeInSeconds{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | LoginQueueTicketInfo")
 	int32 ReconnectExpiredAt{0};// UNIX seconds since epoch
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | LoginQueueTicketInfo")
+	int32 PlayerPollingTimeInSeconds{0};
 
 	FAccelByteModelsLoginQueueTicketInfo() {};
 
@@ -214,6 +218,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLoginQueueTicketInfo
 		Position = TicketInfo.Position;
 		EstimatedWaitingTimeInSeconds = TicketInfo.EstimatedWaitingTimeInSeconds;
 		ReconnectExpiredAt = TicketInfo.ReconnectExpiredAt;
+		PlayerPollingTimeInSeconds = TicketInfo.PlayerPollingTimeInSeconds;
 	};
 
 	FAccelByteModelsLoginQueueTicketInfo(const FOauth2TokenV4& TicketInfo)
@@ -222,6 +227,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLoginQueueTicketInfo
 		Position = TicketInfo.Position;
 		EstimatedWaitingTimeInSeconds = TicketInfo.EstimatedWaitingTimeInSeconds;
 		ReconnectExpiredAt = TicketInfo.ReconnectExpiredAt;
+		PlayerPollingTimeInSeconds = TicketInfo.PlayerPollingTimeInSeconds;
 	}
 
 	~FAccelByteModelsLoginQueueTicketInfo() {};

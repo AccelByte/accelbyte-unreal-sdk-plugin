@@ -318,6 +318,44 @@ FString FAccelByteUtilities::AccelByteStorageFile()
 	return StorageFilename;
 }
 
+FString FAccelByteUtilities::GetCacheFilenameTelemetry()
+{
+	FString StorageFilename = TEXT("AccelByteTelemetryCache");
+
+	if (IsRunningDevMode())
+	{
+		FString TempFilename;
+		if (GConfig->GetString(TEXT("AccelByte.Dev")
+			, TEXT("TelemetryCacheFilename")
+			, TempFilename
+			, GEngineIni))
+		{
+			StorageFilename = TempFilename;
+		}
+	}
+
+	return StorageFilename;
+}
+
+FString FAccelByteUtilities::GetCacheFilenameGeneralPurpose()
+{
+	FString StorageFilename = TEXT("AccelByteGeneralCache");
+
+	if (IsRunningDevMode())
+	{
+		FString TempFilename;
+		if (GConfig->GetString(TEXT("AccelByte.Dev")
+			, TEXT("GeneralCacheFilename")
+			, TempFilename
+			, GEngineIni))
+		{
+			StorageFilename = TempFilename;
+		}
+	}
+
+	return StorageFilename;
+}
+
 void FAccelByteUtilities::RemoveEmptyStrings(TSharedPtr<FJsonObject> JsonPtr)
 {
 	TArray<FString> KeysToRemove;
@@ -351,6 +389,8 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 	case EAccelBytePlatformType::PS4CrossGen:
 	case EAccelBytePlatformType::PS5:
 		return "ps5";
+	case EAccelBytePlatformType::PSPC:
+		return "pspc";
 	case EAccelBytePlatformType::Live:
 		return "live";
 	case EAccelBytePlatformType::Google:
@@ -666,7 +706,7 @@ FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)
 					bIsCached = true;
 
 				})
-			, AccelByteStorageFile());
+			, GetCacheFilenameGeneralPurpose());
 		if (!bIsCached)
 		{
 			FString PlainMacAddress = GetMacAddress(false);
@@ -681,7 +721,7 @@ FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)
 			IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(AccelByteStoredKeyDeviceId()
 				, Output
 				, THandler<bool>::CreateLambda([](bool bIsSuccess){})
-				, AccelByteStorageFile());
+				, GetCacheFilenameGeneralPurpose());
 		}
 	}
 	else //IF Platform-specific DeviceID available

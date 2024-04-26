@@ -634,7 +634,7 @@ void Session::GetRecentPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> 
 	
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
 }
-	
+
 void Session::GetSessionSecret(FString const& SessionID
 	, THandler<FAccelByteModelsV2SessionJoinedSecret> const& OnSuccess
 	, FErrorHandler const& OnError)

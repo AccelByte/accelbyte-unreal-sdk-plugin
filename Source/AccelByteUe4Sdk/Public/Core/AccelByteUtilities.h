@@ -156,7 +156,13 @@ public:
 
 	
 	static bool IsRunningDevMode();
+	
+	//Obsolete the general purpose file cache file
 	static FString AccelByteStorageFile();
+	//Filename to cache CriticalEvent telemetries
+	static FString GetCacheFilenameTelemetry();
+	//Filename to cache cache (DeviceID & refresh token)
+	static FString GetCacheFilenameGeneralPurpose();
 
 	template<typename CharType = TCHAR, template<typename> class PrintPolicy = TPrettyJsonPrintPolicy, typename InStructType>
 	static bool TArrayUStructToJsonString(TArray<InStructType> const& InArray
@@ -399,6 +405,11 @@ public:
 	static EAccelByteCurrentServerManagementType GetCurrentServerManagementType();
 
 	/**
+	 * @brief Get the key to DeviceID cache entry
+	 */
+	static FString AccelByteStoredKeyDeviceId() { return FString(TEXT("DeviceId")); }
+
+	/**
 	 * @brief Parse command line to obtain an argument that:
 	 *  * intialized by dash (-)
 	 *  * contain a value that following equal sign (=)
@@ -518,7 +529,6 @@ protected:
 	static FString GetDevModeDeviceId(FString const& Default);
 
 	static FString AccelByteStoredSectionIdentifiers() { return FApp::GetProjectName() / FString(TEXT("Identifiers")); }
-	static FString AccelByteStoredKeyDeviceId() { return FString(TEXT("DeviceId")); }
 #pragma endregion
 	
 	static FString AccelByteStored() 

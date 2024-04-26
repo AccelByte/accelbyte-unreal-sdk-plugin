@@ -1,8 +1,9 @@
-// Copyright (c) 2022 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2022-2024 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteDataStorageBinaryFile.h"
+#include "Core/AccelByteUtilities.h"
 #include "JsonUtilities.h"
 #include "Misc/FileHelper.h"
 #include "Containers/UnrealString.h"
@@ -36,6 +37,23 @@ void DataStorageBinaryFile::Reset(const THandler<bool>& Result, const FString & 
 	Result.ExecuteIfBound(FFileHelper::SaveArrayToFile(Value, *Path));
 }
 
+FString DataStorageBinaryFile::FABBinaryFileStructureToString(FABBinaryFileStructure* Structure)
+{
+	if (Structure == nullptr)
+	{
+		return "";
+	}
+	FString Value{};
+	for (int i = 0; i < Structure->Num(); i++)
+	{
+		FString SerializedText{};
+		FJsonObjectConverter::UStructToJsonObjectString<FBinaryContentIndependentSegment>(Structure->operator[](i), SerializedText, 0, 0, 0, nullptr, false);
+		Value += SerializedText + "\n";
+	}
+	Value.TrimEndInline();
+	return Value;
+}
+
 void DataStorageBinaryFile::DeleteItem(const FString & Key, const FVoidHandler OnDone, const FString & FileName)
 {
 	auto StructurePtr = ParseStructureFromFile(FileName);
@@ -44,16 +62,52 @@ void DataStorageBinaryFile::DeleteItem(const FString & Key, const FVoidHandler O
 		OnDone.ExecuteIfBound();
 	}
 
-	StructurePtr->Segments.Remove(Key);
+	auto Index = StructurePtr->IndexOfByPredicate([&](FBinaryContentIndependentSegment Segment) { return Segment.Key == Key; });
+	if (Index < 0)
+	{
+		OnDone.ExecuteIfBound();
+		return;
+	}
+	StructurePtr->RemoveAt(Index);
 
-	FString SerializedText;
-	FJsonObjectConverter::UStructToJsonObjectString<FBinaryFileStructure>(*StructurePtr.Get(), SerializedText);
+	FString SerializedText = FABBinaryFileStructureToString(StructurePtr.Get());
 	
 	TArray<uint8> ByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(SerializedText);
 
 	FString Path = CompleteAbsoluteFilePath(FileName);
 	FFileHelper::SaveArrayToFile(ByteArray, *Path);
 	OnDone.ExecuteIfBound();
+}
+
+//Specific for telemery optimization
+void DataStorageBinaryFile::SaveItemOverwiteEntireFile(const FString& Key, const FString& Item, const THandler<bool>& OnDone, const FString& FileName)
+{
+	TArray<uint8> ContentByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(Item);
+
+	FABBinaryFileStructure FileCacheStructure = FABBinaryFileStructure();
+	FileCacheStructure.Add({ Key, ContentByteArray });
+
+	FString SerializedText{};
+	{
+		//Manual serialization
+		FString ArrayByteAsString{};
+		for (int i = 0; i < ContentByteArray.Num(); i++)
+		{
+			ArrayByteAsString += FString::Printf(TEXT("%d"), ContentByteArray[i]);
+			if (i < ContentByteArray.Num() - 1)
+			{
+				ArrayByteAsString += ",";
+			}
+		}
+		SerializedText = FString::Printf(TEXT("{\"Key\": \"%s\", \"ArrayByte\": [%s]}"), *Key, *ArrayByteAsString);
+	}
+
+	TArray<uint8> FileByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(SerializedText);
+
+	FString Path = CompleteAbsoluteFilePath(FileName);
+	bool bSuccess = FFileHelper::SaveArrayToFile(FileByteArray, *Path);
+
+	OnDone.ExecuteIfBound(bSuccess);
 }
 
 void DataStorageBinaryFile::SaveItem(const FString & Key, const TArray<uint8>& Item, const THandler<bool>& OnDone, const FString & FileName)
@@ -90,10 +144,10 @@ void DataStorageBinaryFile::GetItem(const FString & Key, const THandler<TPair<FS
 		OnDone.Execute(Result);
 	}
 
-	auto ValuePtr = StructurePtr->Segments.Find(Key);
-	if (ValuePtr != nullptr && ValuePtr->Content.Num() > 0)
+	auto ValuePtr = StructurePtr->FindByPredicate([&](FBinaryContentIndependentSegment Segment) { return Segment.Key == Key; });
+	if (ValuePtr != nullptr && ValuePtr->ArrayByte.Num() > 0)
 	{
-		Result.Value = TArray<uint8>(ValuePtr->Content);
+		Result.Value = TArray<uint8>(ValuePtr->ArrayByte);
 		Result.Key = Key;
 	}
 	OnDone.Execute(Result);
@@ -109,10 +163,10 @@ void DataStorageBinaryFile::GetItem(const FString & Key, const THandler<TPair<FS
 		OnDone.Execute(Result);
 	}
 
-	auto ValuePtr = StructurePtr->Segments.Find(Key);
-	if (ValuePtr != nullptr && ValuePtr->Content.Num() > 0)
+	auto ValuePtr = StructurePtr->FindByPredicate([&](FBinaryContentIndependentSegment Segment) { return Segment.Key == Key; });
+	if (ValuePtr != nullptr && ValuePtr->ArrayByte.Num() > 0)
 	{
-		Result.Value = FAccelByteArrayByteFStringConverter::BytesToFString(ValuePtr->Content, false);
+		Result.Value = FAccelByteArrayByteFStringConverter::BytesToFString(ValuePtr->ArrayByte, false);
 		Result.Key = Key;
 	}
 	OnDone.Execute(Result);
@@ -128,10 +182,10 @@ void DataStorageBinaryFile::GetItem(const FString & Key, const THandler<TPair<FS
 		OnDone.Execute(Result);
 	}
 
-	auto ValuePtr = StructurePtr->Segments.Find(Key);
-	if (ValuePtr != nullptr && ValuePtr->Content.Num() > 0)
+	auto ValuePtr = StructurePtr->FindByPredicate([&](FBinaryContentIndependentSegment Segment) { return Segment.Key == Key; });
+	if (ValuePtr != nullptr && ValuePtr->ArrayByte.Num() > 0)
 	{
-		FString Value = FAccelByteArrayByteFStringConverter::BytesToFString(ValuePtr->Content, false);
+		FString Value = FAccelByteArrayByteFStringConverter::BytesToFString(ValuePtr->ArrayByte, false);
 		Result.Value.JsonObjectFromString(Value);
 		Result.Key = Key;
 	}
@@ -190,25 +244,23 @@ bool DataStorageBinaryFile::SaveToFile(const FString& FileName, const FString& K
 	if (StructurePtr == nullptr) 
 	{
 		//create new structure and add Key:Value
-		StructurePtr = MakeShared<FBinaryFileStructure>();
-		StructurePtr->Segments.Add(Key, FArrayByte(Value));
+		StructurePtr = MakeShared<FABBinaryFileStructure>();
+		StructurePtr->Add({ Key, Value });
 	}
 	else 
 	{
-		//check existing key, modify if the key already exist
-		auto ValuePtr = StructurePtr->Segments.Find(Key);
+		auto ValuePtr = StructurePtr->FindByPredicate([&](FBinaryContentIndependentSegment Segment) { return Segment.Key == Key; });
 		if (ValuePtr == nullptr)
 		{
-			StructurePtr->Segments.Add(Key, FArrayByte(Value));
+			StructurePtr->Add({ Key, Value });
 		}
 		else
 		{
-			ValuePtr->Content = Value;
+			ValuePtr->ArrayByte = Value;
 		}
 	}
 
-	FString SerializedText;
-	FJsonObjectConverter::UStructToJsonObjectString<FBinaryFileStructure>(*StructurePtr.Get(), SerializedText);
+	FString SerializedText = FABBinaryFileStructureToString(StructurePtr.Get());
 
 	TArray<uint8> ByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(SerializedText);
 
@@ -216,9 +268,9 @@ bool DataStorageBinaryFile::SaveToFile(const FString& FileName, const FString& K
 	return FFileHelper::SaveArrayToFile(ByteArray, *Path);
 }
 
-TSharedPtr<FBinaryFileStructure> DataStorageBinaryFile::ParseStructureFromFile(const FString& FileName)
+TSharedPtr<FABBinaryFileStructure> DataStorageBinaryFile::ParseStructureFromFile(const FString& FileName)
 {
-	TSharedPtr<FBinaryFileStructure> Collection = MakeShared<FBinaryFileStructure>();
+	TSharedPtr<FABBinaryFileStructure> Collection = MakeShared<FABBinaryFileStructure>();
 
 	if (!IsFileExist(FileName))
 	{
@@ -231,7 +283,22 @@ TSharedPtr<FBinaryFileStructure> DataStorageBinaryFile::ParseStructureFromFile(c
 		return Collection;
 	}
 
-	FJsonObjectConverter::JsonObjectStringToUStruct<FBinaryFileStructure>(LoadedString.GetValue(), Collection.Get(), 0, 0);
+	return ParseStructureOnly(LoadedString.GetValue());
+}
+
+TSharedPtr<FABBinaryFileStructure> DataStorageBinaryFile::ParseStructureOnly(const FString& LoadedString)
+{
+	TSharedPtr<FABBinaryFileStructure> Collection = MakeShared<FABBinaryFileStructure>();
+	TArray<FString> ParsedAsArray{};
+	auto Count = LoadedString.ParseIntoArray(ParsedAsArray, TEXT("\n"));
+	for (int i = 0; i < Count; i++)
+	{
+		FBinaryContentIndependentSegment Segment{};
+		if (FJsonObjectConverter::JsonObjectStringToUStruct<FBinaryContentIndependentSegment>(ParsedAsArray[i], &Segment, 0, 0))
+		{
+			Collection->Add(Segment);
+		}
+	}
 	return Collection;
 }
 
@@ -241,4 +308,77 @@ bool DataStorageBinaryFile::IsFileExist(const FString& FileName)
 	return FPaths::FileExists(Path);
 }
 
+FABBinaryFileStructure DataStorageBinaryFile::ConvertOldCacheToNewFormat(const FString& Input)
+{
+	FABBinaryFileStructure NewFormat{};
+	FAccelByteBinaryFileStructureObsolete TemporaryOldCacheContainer{};
+	bool bDeserializationSuccess = FJsonObjectConverter::JsonObjectStringToUStruct<FAccelByteBinaryFileStructureObsolete>(Input, &TemporaryOldCacheContainer);
+	if (!bDeserializationSuccess)
+	{
+		return NewFormat;
+	}
+
+	TArray<FString> OldCachedKeys{};
+	TemporaryOldCacheContainer.Segments.GetKeys(OldCachedKeys);
+	for (int i = 0; i < OldCachedKeys.Num(); i++)
+	{
+		FString& CurrentKey = OldCachedKeys[i];
+		if (!TemporaryOldCacheContainer.Segments.Contains(CurrentKey))
+		{
+			continue;
+		}
+		TArray<uint8>& CurrentValue = TemporaryOldCacheContainer.Segments[OldCachedKeys[i]].Content;
+		if (CurrentValue.Num() == 0)
+		{
+			continue;
+		}
+		FBinaryContentIndependentSegment NewSegment(CurrentKey, CurrentValue);
+		NewFormat.Add(NewSegment);
+	}
+	return NewFormat;
+}
+
+void DataStorageBinaryFile::MoveOldCacheToNewCacheFiles(const FABBinaryFileStructure& CacheContent, const FString& TelemetryCacheFilename, const FString& GenerelPurposeCacheFilename)
+{
+	for (int i = 0; i < CacheContent.Num(); i++)
+	{
+		//1.Extract DeviceID
+		if (CacheContent[i].Key.Contains(FAccelByteUtilities::AccelByteStoredKeyDeviceId()))
+		{
+			SaveItem(CacheContent[i].Key, CacheContent[i].ArrayByte, THandler<bool>::CreateLambda([](const bool& Result){}),
+				GenerelPurposeCacheFilename);
+			continue;
+		}
+
+		//2.Extract Telemetry
+		if (CacheContent[i].Key.Contains("TELEMETRY"))
+		{
+			SaveItem(CacheContent[i].Key, CacheContent[i].ArrayByte, THandler<bool>::CreateLambda([](const bool& Result){}),
+				TelemetryCacheFilename);
+			continue;
+		}
+
+		//else, might be PlatformUserID for token caching, leave it as it is in the original file
+		SaveItem(CacheContent[i].Key, CacheContent[i].ArrayByte, THandler<bool>::CreateLambda([](const bool&) {}),
+			GenerelPurposeCacheFilename);
+		continue;
+	}
+}
+
+void DataStorageBinaryFile::ConvertExistingCache(const FString& OldCacheFilename, const FString& NewCacheFilenameForTelemetry, const FString& NewCacheFilenameForGeneralPurpose)
+{
+	auto LoadedOldCache = LoadFromFile(OldCacheFilename);
+	//If new cache format is found, no need to do a migration
+	//If OldCache exist but new cache not found, then execute migration
+	if (!LoadedOldCache.IsSet() || IsFileExist(NewCacheFilenameForGeneralPurpose))
+	{
+		return;
+	}
+	auto ParsedOldCache = ConvertOldCacheToNewFormat(LoadedOldCache.GetValue());
+	if (ParsedOldCache.Num() == 0)
+	{
+		return;
+	}
+	MoveOldCacheToNewCacheFiles(ParsedOldCache, NewCacheFilenameForTelemetry, NewCacheFilenameForGeneralPurpose);
+}
 }
