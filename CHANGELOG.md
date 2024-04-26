@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [25.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.2.1%0D25.2.0) (2024-04-26)
+
+
+### Bug Fixes
+
+* **Config:** fix get config to not need auth token for request ([f5bfdf5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f5bfdf54d84cbc81ee6cd4b0246d810c5f693e6e))
+
 ## [25.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.2.0%0D25.1.1) (2024-04-05)
 
 

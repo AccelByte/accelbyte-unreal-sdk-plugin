@@ -19,10 +19,11 @@ void AccelByte::Api::Configurations::GetAll(const THandler<TArray<FAccelByteMode
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/configs")
-		, *SettingsRef.ConfigServerUrl);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/configs")
+		, *SettingsRef.ConfigServerUrl
+		, *SettingsRef.Namespace);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
 
 void AccelByte::Api::Configurations::Get(const FString& Key
@@ -37,9 +38,10 @@ void AccelByte::Api::Configurations::Get(const FString& Key
 		return;
 	}
 
-	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/{namespace}/configs/%s")
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/configs/%s")
 		, *SettingsRef.ConfigServerUrl
+		, *SettingsRef.Namespace
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
