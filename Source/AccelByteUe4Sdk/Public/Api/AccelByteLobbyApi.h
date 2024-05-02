@@ -507,6 +507,12 @@ public:
 	 * @brief Delegate for user invited to party event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2PartyInvitedNotif, FAccelByteModelsV2PartyInvitedEvent);
+	
+	/**
+	 * @brief Delegate for user party invitation timed out event.
+	 * Notification when a party invitation has been timeout.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2PartyInviteTimeoutNotif, FAccelByteModelsV2PartyInviteTimeoutEvent);
 
 	/**
 	 * @brief Delegate for user rejected invitation event.
@@ -532,6 +538,12 @@ public:
 	 * @brief Delegate for user invited to game session event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2GameSessionInvitedNotif, FAccelByteModelsV2GameSessionUserInvitedEvent);
+
+	/**
+	 * @brief Delegate for user game session invitation timed out event.
+	 * Notification when a game session invitation has been timeout.
+	 */
+	DECLARE_DELEGATE_OneParam(FV2GameSessionInviteTimeoutNotif, FAccelByteModelsV2GameSessionUserInviteTimeoutEvent);
 
 	/**
 	 * @brief Delegate for user joined game session event.
@@ -1514,6 +1526,15 @@ public:
 	}
 
 	/**
+	 * @brief Set a trigger function when an party (v2) invitation is already timeout
+	 * @param OnPartyInviteTimeoutNotif return models called FV2PartyInviteTimeoutNotif
+	 */
+	void SetV2PartyInviteTimeoutNotifDelegate(const FV2PartyInviteTimeoutNotif& OnPartyInviteTimeoutNotif)
+	{
+		V2PartyInviteTimeoutNotif = OnPartyInviteTimeoutNotif;
+	}
+
+	/**
 	 * @brief Set a trigger function when party members changed (v2)
 	 * @param OnPartyMembersChanged return models called FAccelByteModelsV2PartyMembersChangedEvent
 	 */
@@ -1556,6 +1577,15 @@ public:
 	void SetV2GameSessionInvitedNotifDelegate(const FV2GameSessionInvitedNotif& OnGameSessionInvitedNotif)
 	{
 		V2GameSessionInvitedNotif = OnGameSessionInvitedNotif;
+	}
+
+	/**
+	 * @brief Set a trigger function when an game session (v2) invitation is already timeout 
+	 * @param OnGameSessionInviteTimeoutNotif return models called FV2GameSessionInviteTimeoutNotif
+	 */
+	void SetV2GameSessionInviteTimeoutNotifDelegate(const FV2GameSessionInviteTimeoutNotif& OnGameSessionInviteTimeoutNotif)
+	{
+		V2GameSessionInviteTimeoutNotif = OnGameSessionInviteTimeoutNotif;
 	}
 
 	/**
@@ -2892,6 +2922,7 @@ private:
 
 	// session v2
 	FV2PartyInvitedNotif V2PartyInvitedNotif;
+	FV2PartyInviteTimeoutNotif V2PartyInviteTimeoutNotif;
 	FV2PartyMembersChangedNotif V2PartyMembersChangedNotif;
 	FV2PartyJoinedNotif V2PartyJoinedNotif;
 	FV2PartyRejectedNotif V2PartyRejectedNotif;
@@ -2899,6 +2930,7 @@ private:
 	FV2PartyUpdatedNotif V2PartyUpdatedNotif;
 
 	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
+	FV2GameSessionInviteTimeoutNotif V2GameSessionInviteTimeoutNotif;
 	FV2GameSessionJoinedNotif V2GameSessionJoinedNotif;
 	FV2GameSessionMembersChangedNotif V2GameSessionMembersChangedNotif;
 	FV2GameSessionUpdatedNotif V2GameSessionUpdatedNotif;

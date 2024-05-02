@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [25.3.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.3.1%0D25.3.0) (2024-05-01)
+
+
+### Features
+
+* **entitlement:** expose get user entitlement history ([9b18363](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9b18363078b2ff1b60f1f5368612502f60779256))
+* **notification:** add a listener & handler when a Party or GameSession invitation for invitee is timeout. And add ExpiredAt info to the FAccelByteModelsV2PartyInvitedEvent & FAccelByteModelsV2PartyInvitedEvent ([6686257](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6686257afda407e3ab86e8810882b8aa7afd387f))
+
 ## [25.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.3.0%0D25.2.1) (2024-04-26)
 
 

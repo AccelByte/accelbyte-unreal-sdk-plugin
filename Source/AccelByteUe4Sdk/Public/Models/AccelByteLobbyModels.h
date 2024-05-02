@@ -39,11 +39,13 @@ enum class EV2SessionNotifTopic : uint8
 {
 	Invalid,
 	OnPartyInvited,
+	OnPartyInviteTimeout,
 	OnPartyMembersChanged,
 	OnPartyJoined,
 	OnPartyRejected,
 	OnPartyKicked,
 	OnSessionInvited,
+	OnGameSessionInviteTimeout,
 	OnSessionJoined,
 	OnSessionMembersChanged,
 	OnSessionKicked,

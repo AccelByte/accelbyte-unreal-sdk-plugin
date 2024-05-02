@@ -485,6 +485,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyInvitedEvent
 		FString SenderID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyInvitedEvent")
 		FString PartyID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyInvitedEvent")
+		FDateTime ExpiredAt{0};
+};
+
+// It notifies the invitee about the expired party invitation
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyInviteTimeoutEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyInviteTimeoutNotification")
+	FString PartyID{};
 };
 
 USTRUCT(BlueprintType)
@@ -555,6 +566,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUserInvitedEvent
 		FString SessionID{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserInvitedEvent")
 		FString SenderID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserInvitedEvent")
+		FDateTime ExpiredAt{ 0 };
+};
+
+// It notifies the invitee about the expired game session invitation
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionUserInviteTimeoutEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserInviteTimeoutEvent")
+	FString SessionID{};
 };
 
 USTRUCT(BlueprintType)

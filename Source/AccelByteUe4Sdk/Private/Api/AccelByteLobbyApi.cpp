@@ -2017,6 +2017,7 @@ void Lobby::UnbindSessionAttributeEvents()
 void Lobby::UnbindV2PartyEvents()
 {
 	V2PartyInvitedNotif.Unbind();
+	V2PartyInviteTimeoutNotif.Unbind();
 	V2PartyJoinedNotif.Unbind();
 	V2PartyKickedNotif.Unbind();
 	V2PartyRejectedNotif.Unbind();
@@ -2027,6 +2028,7 @@ void Lobby::UnbindV2PartyEvents()
 void Lobby::UnbindV2GameSessionEvents()
 {
 	V2GameSessionInvitedNotif.Unbind();
+	V2GameSessionInviteTimeoutNotif.Unbind();
 	V2GameSessionJoinedNotif.Unbind();
 	V2GameSessionMembersChangedNotif.Unbind();
 	V2GameSessionUpdatedNotif.Unbind();
@@ -2588,6 +2590,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString, bool bSkipCond
 		DispatchV2JsonNotif<FAccelByteModelsV2PartyInvitedEvent>(Notif.Payload, V2PartyInvitedNotif);
 		break;
 	}
+	case EV2SessionNotifTopic::OnPartyInviteTimeout:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2PartyInviteTimeoutEvent>(Notif.Payload, V2PartyInviteTimeoutNotif);
+		break;
+	}
 	case EV2SessionNotifTopic::OnPartyMembersChanged:
 	{
 		DispatchV2JsonNotif<FAccelByteModelsV2PartyMembersChangedEvent>(Notif.Payload, V2PartyMembersChangedNotif);
@@ -2611,6 +2618,11 @@ void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString, bool bSkipCond
 	case EV2SessionNotifTopic::OnSessionInvited:
 	{
 		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserInvitedEvent>(Notif.Payload, V2GameSessionInvitedNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnGameSessionInviteTimeout:
+	{
+		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserInviteTimeoutEvent>(Notif.Payload, V2GameSessionInviteTimeoutNotif);
 		break;
 	}
 	case EV2SessionNotifTopic::OnSessionJoined:

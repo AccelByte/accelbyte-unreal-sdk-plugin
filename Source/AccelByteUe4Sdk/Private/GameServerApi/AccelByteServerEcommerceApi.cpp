@@ -354,6 +354,36 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+void ServerEcommerce::GetUserEntitlementHistory(const FString& UserId
+	, const FString& EntitlementId
+	, const THandler<TArray<FAccelByteModelsUserEntitlementHistory>>& OnSuccess
+	, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	if (!ValidateAccelByteId(EntitlementId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetEntitlementIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/history")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef.GetClientNamespace()
+		, *UserId
+		, *EntitlementId);
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 void ServerEcommerce::DebitUserWallet(const FString& UserId
 	, const FString& WalletId
 	, const FAccelByteModelsDebitUserWalletRequest& DebitUserWalletRequest

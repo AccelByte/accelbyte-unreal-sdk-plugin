@@ -91,3 +91,8 @@ FString AccelByte::FAccelByteIdValidator::GetScreenshotIdInvalidMessage(FString 
 {
 	return FString::Printf(TEXT("Invalid request, Screenshot Id format is invalid\nValue: %s"), *ScreenshotId);
 }
+
+FString AccelByte::FAccelByteIdValidator::GetEntitlementIdInvalidMessage(FString const& EntitlementId)
+{
+	return FString::Printf(TEXT("Invalid request, Entitlement Id format is invalid\nValue: %s"), *EntitlementId);
+}

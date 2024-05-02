@@ -1,10 +1,9 @@
-export DO_UPDATE=true
 export LEVEL=CRITICAL
 export REPO_NAME=justice-unreal-sdk-plugin
-export WORKDIR=/tmp/pipelines/6724914255/1269180528/
-export COMMIT_HASH=2e36fb171850d30a49ec39e70ddcd523ce7f0b32
-export GIT_HASH=2e36fb171850d30a49ec39e70ddcd523ce7f0b32
-export VERSION=25.3.0
-export REVISION_ID=25.3.0
+export WORKDIR=/tmp/pipelines/6760632072/1275296607/
+export COMMIT_HASH=7fded404c498563fbacadfa68ab6fe54ca14de5a
+export GIT_HASH=7fded404c498563fbacadfa68ab6fe54ca14de5a
+export VERSION=25.3.1
+export REVISION_ID=25.3.1
 export SLACK_EMAIL=build@accelbyte.net
-export COMMIT_MESSAGE_BASE64='Y2hvcmUocmVsZWFzZSk6IDI1LjMuMCAtIGNvbW1pdGVkIGFuZCB0YWdnZWQgYnkgSmVua2luc2Fnc1ZlcnNpb246IjMuNzIuMCIKCg=='
+export COMMIT_MESSAGE_BASE64='Y2hvcmUocmVsZWFzZSk6IDI1LjMuMSAtIGNvbW1pdGVkIGFuZCB0YWdnZWQgYnkgSmVua2lucwo='

@@ -192,6 +192,19 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
+	 * @brief Get user entitlement history.
+	 *
+	 * @param UserId The user id who have the entitlement history
+	 * @param EntitlementId The id of the entitlements
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserEntitlementHistory&.
+	 * @param OnError This will be called when the operation fails.
+	 */
+	void GetUserEntitlementHistory(const FString& UserId
+		, const FString& EntitlementId
+		, const THandler<TArray<FAccelByteModelsUserEntitlementHistory>>& OnSuccess
+		, const FErrorHandler& OnError);
+
+	/**
 	 * @brief Debit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
 	 *
 	 * @param UserId The user who will receive credit.
