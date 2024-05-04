@@ -26,6 +26,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsQosServer
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Qos | Models | QosServer")
 	FString Last_update{};
+
+	/**
+	 * Cached resolved IP for this Qos server. Only used for AMS Qos where the 'Ip' field is a domain name.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Qos | Models | QosServer")
+	FString ResolvedIp{};
 };
 
 USTRUCT(BlueprintType)

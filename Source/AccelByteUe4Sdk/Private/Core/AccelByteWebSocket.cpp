@@ -55,7 +55,15 @@ AccelByteWebSocket::AccelByteWebSocket(
 
 AccelByteWebSocket::~AccelByteWebSocket()
 {
-	FReport::Log(FString(__FUNCTION__));
+	/*
+	 * DO NOT remove UObjectInitialized check unless it doesn't work.
+	 * Checks if the UObject subsystem is active.
+	 * If it active then the core ticker or the websocket module also active, and we can safely call WebSocket->Close
+	 */
+	if (UObjectInitialized())
+	{
+		Disconnect(true);
+	}
 
 	TeardownTicker();
 	TeardownWebsocket();
@@ -475,7 +483,6 @@ void AccelByteWebSocket::TeardownWebsocket()
 		WebSocket->OnConnected().Clear();
 		WebSocket->OnConnectionError().Clear();
 		WebSocket->OnClosed().Clear();
-		WebSocket->Close();
 		WebSocket.Reset();
 	}
 }

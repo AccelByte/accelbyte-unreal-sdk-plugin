@@ -24,6 +24,8 @@ public:
 	int32 StatsDServerPort;
 	int32 StatsDMetricInterval;
 	int AMSHeartbeatInterval;
+	float DSHubReconnectTotalTimeout;
+	float AMSReconnectTotalTimeout;
 
 	virtual void Reset(ESettingsEnvironment const Environment) override;
 

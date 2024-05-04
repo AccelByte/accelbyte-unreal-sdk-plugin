@@ -57,7 +57,7 @@ protected:
 	virtual bool CreateSocket();
 	virtual void DestroySocket();
 	virtual uint64 GetCurrentTime();
-	virtual bool ResolveIp();
+	virtual bool CreateAddress();
 	virtual bool SocketReceiveData(uint8* Data, int32 BufferSize, int32& BytesRead);
 	virtual bool SocketSendData(const FString& StringToSend, int32& BytesSent);
 	virtual bool SocketWaitData();

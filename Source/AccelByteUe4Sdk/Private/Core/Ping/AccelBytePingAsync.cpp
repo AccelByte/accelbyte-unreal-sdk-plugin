@@ -25,7 +25,7 @@ FAccelByteUdpPingThread::~FAccelByteUdpPingThread()
 uint32 FAccelByteUdpPingThread::Run()
 {
 	FPingResultStatus PingResultStatus = FPingResultStatus::Invalid;
-	if (!ResolveIp() || !CreateSocket())
+	if (!CreateAddress() || !CreateSocket())
 	{
 		OnComplete.ExecuteIfBound(PingResultStatus);
 		return 0;
@@ -89,21 +89,22 @@ uint64 FAccelByteUdpPingThread::GetCurrentTime()
 	return FPlatformTime::Cycles64();
 }
 
-bool FAccelByteUdpPingThread::ResolveIp()
+bool FAccelByteUdpPingThread::CreateAddress()
 {
 	if (!SocketSubsystem)
 	{
 		return false;
 	}
 
-	FAddressInfoResult AddressInfo = SocketSubsystem->GetAddressInfo(*Config.Address, nullptr, EAddressInfoFlags::Default, NAME_None);
-	if (AddressInfo.Results.Num() < 1)
+	IpAddress = SocketSubsystem->CreateInternetAddr();
+
+	bool bIpStringValid{};
+	IpAddress->SetIp(*Config.Address, bIpStringValid);
+
+	if (!bIpStringValid)
 	{
 		return false;
 	}
-
-	IpAddress = SocketSubsystem->CreateInternetAddr();
-	IpAddress->SetRawIp(AddressInfo.Results[0].Address->GetRawIp());
 
 	if (!IpAddress->IsValid())
 	{

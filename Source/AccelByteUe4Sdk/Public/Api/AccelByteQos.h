@@ -151,6 +151,13 @@ private:
 	 */
 	void InitGetServerLatenciesScheduler(float QosServerPollIntervalSecs);
 
+	/**
+	 * @brief Resolves QOS server IP using the platform's socket subsystem.
+	 * @param OutServer QOS server structure that will be modified
+	 * @return true if resolution was successful, false otherwise
+	 */
+	bool ResolveQosServerAddress(FAccelByteModelsQosServer& OutServer);
+
 #pragma region MessagingSystem
 private:
 	FDelegateHandle LobbyConnectedDelegateHandle;

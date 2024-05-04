@@ -76,9 +76,16 @@ void Qos::GetActiveServerLatencies(const THandler<TArray<TPair<FString, float>>>
 	FRegistry::QosManager.GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
 	[this, OnSuccess, OnError](const FAccelByteModelsQosServerList Result)
 	{
+		FAccelByteModelsQosServerList ResolvedServerList{Result};
+
+		for (FAccelByteModelsQosServer& Server : ResolvedServerList.Servers)
+		{
+			ResolveQosServerAddress(Server);
+		}
+
 		if(Result.Servers.Num() > 0)
 		{
-			PingRegionsSetLatencies(Result, OnSuccess, OnError);
+			PingRegionsSetLatencies(ResolvedServerList, OnSuccess, OnError);
 		}
 	}), OnError);
 }
@@ -91,6 +98,11 @@ void Qos::CallGetQosServers(const bool bPingRegionsOnSuccess
 		[this, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError](const FAccelByteModelsQosServerList Result)
 		{
 			Qos::QosServers = Result; // Cache for the session
+
+			for (FAccelByteModelsQosServer& Server : Qos::QosServers.Servers)
+			{
+				ResolveQosServerAddress(Server);
+			}
 
 			if (bPingRegionsOnSuccess)
 			{
@@ -121,7 +133,7 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 			FString Region = Server.Region;
 
 			// Ping -> Get the latencies on pong.
-			FAccelBytePing::SendUdpPing(Server.Ip, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
+			FAccelBytePing::SendUdpPing(Server.ResolvedIp, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
 				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError, this](const FPingResult& PingResult)
 				{
 					if (PingResult.Status == FPingResultStatus::Success)
@@ -289,6 +301,36 @@ bool Qos::CheckQosUpdate(float DeltaTime)
 		bQosUpdated = false;
 	}
 
+	return true;
+}
+
+bool Qos::ResolveQosServerAddress(FAccelByteModelsQosServer& OutServer)
+{
+	if (!SettingsRef.bServerUseAMS)
+	{
+		// Armada does not use domain names in place of raw IPs, so just route the resolved IP to the reported Qos IP
+		OutServer.ResolvedIp = OutServer.Ip;
+		return true;
+	}
+
+	ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+	if (!SocketSubsystem)
+	{
+		return false;
+	}
+
+	FAddressInfoResult AddressInfo = SocketSubsystem->GetAddressInfo(*OutServer.Ip // 'Ip' field is actually the domain name in AMS
+		, nullptr
+		, EAddressInfoFlags::Default
+		, NAME_None);
+
+	if (AddressInfo.Results.Num() < 1)
+	{
+		return false;
+	}
+
+	// Retrieve the IP string from the address result and return success
+	OutServer.ResolvedIp = AddressInfo.Results[0].Address->ToString(false);
 	return true;
 }
 } // Namespace Api

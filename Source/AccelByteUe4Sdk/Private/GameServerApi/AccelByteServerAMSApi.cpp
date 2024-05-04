@@ -117,7 +117,8 @@ void ServerAMS::CreateWebSocket()
 		TEXT("ws"),
 		ServerCredentialsRef,
 		Headers,
-		TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()));
+		TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()),
+		PingDelay, InitialBackoffDelay, MaxBackoffDelay, ServerSettingsRef.AMSReconnectTotalTimeout);
 
 	WebSocket->OnConnected().AddRaw(this, &ServerAMS::OnConnected);
 	WebSocket->OnMessageReceived().AddRaw(this, &ServerAMS::OnMessage);

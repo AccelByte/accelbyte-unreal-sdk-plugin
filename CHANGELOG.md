@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [25.3.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.3.2%0D25.3.1) (2024-05-04)
+
+
+### Features
+
+* configurable websocket total timeout for DSHub and AMS ([350790d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/350790dbc6fbf02877fa673b62af6363e4ba68c2))
+
+
+### Bug Fixes
+
+* **qos:** rework qos to resolve addresses synchronously for platforms that do not support async resolution ([992f42d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/992f42d912c554f99a9961c612a0cc0c78b1d588))
+* **websocket:** check if engine is still active before calling websocket close ([bb31c5b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bb31c5bd8e9bc2bae9641e58994de94eb4c31877))
+
 ### [25.3.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.3.1%0D25.3.0) (2024-05-01)
 
 

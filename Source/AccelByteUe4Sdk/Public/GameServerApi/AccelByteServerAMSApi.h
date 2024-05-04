@@ -124,6 +124,9 @@ private:
 	
 	bool bHeartbeatJobStarted = false;
 
+	float PingDelay = 30.f;
+	float InitialBackoffDelay = 1.f;
+	float MaxBackoffDelay = 30.f;
 };
 
 }

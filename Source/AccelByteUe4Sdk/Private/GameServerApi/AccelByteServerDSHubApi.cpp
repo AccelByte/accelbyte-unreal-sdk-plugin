@@ -156,7 +156,7 @@ void ServerDSHub::CreateWebSocket()
 		PingDelay,
 		InitialBackoffDelay,
 		MaxBackoffDelay,
-		TotalTimeout);
+		ServerSettingsRef.DSHubReconnectTotalTimeout);
 
 	WebSocket->OnConnected().AddRaw(this, &ServerDSHub::OnConnected);
 	WebSocket->OnMessageReceived().AddRaw(this, &ServerDSHub::OnMessage);

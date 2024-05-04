@@ -135,6 +135,28 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 	//this->bSendPredefinedEvent = SendPredefinedEventString.IsEmpty() ? false : SendPredefinedEventString.ToBool();
 	this->bSendPredefinedEvent = false;
 #endif
+
+	FString DSHubReconnectTimeoutString;
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("DSHubReconnectTotalTimeout"), DSHubReconnectTimeoutString, DefaultServerSection);
+	if (DSHubReconnectTimeoutString.IsNumeric())
+	{
+		DSHubReconnectTotalTimeout = FCString::Atof(*DSHubReconnectTimeoutString);
+	}
+	else
+	{
+		DSHubReconnectTotalTimeout = 60.0f;
+	}
+
+	FString AMSReconnectTimeoutString;
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("AMSReconnectTotalTimeout"), AMSReconnectTimeoutString, DefaultServerSection);
+	if (AMSReconnectTimeoutString.IsNumeric())
+	{
+		AMSReconnectTotalTimeout = FCString::Atof(*AMSReconnectTimeoutString);
+	}
+	else
+	{
+		AMSReconnectTotalTimeout = 60.0f;
+	}
 }
 
 void ServerSettings::LoadFallback(const FString& SectionPath, const FString& Key, FString& Value)
