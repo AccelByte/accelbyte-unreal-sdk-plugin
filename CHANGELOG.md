@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [25.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.4.0%0D25.3.2) (2024-05-13)
+
+
+### Features
+
+* add login queue cancel error code ([6a1a52f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6a1a52f3120484890174c8ff7555d8200daf9659))
+* **analytics:** user segmentation data quality check ([9c4b4d8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9c4b4d89ca94bd34f5994354df2755143acb0129))
+* **entitlement:** expose public get user entitlement history ([7717ced](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7717ced8300d45d6ba45d3f7a671944e0879be0f))
+
+
+### Bug Fixes
+
+* **achievement:** change 'DateTime' field type to 'FString' as 'FDateTime' does not format to ISO 8601 in JSON ([c1a7364](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c1a7364b582c1c116061d3cb91f59348ff94d9f7))
+
 ### [25.3.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.3.2%0D25.3.1) (2024-05-04)
 
 

@@ -1133,51 +1133,69 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementInfo
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUserEntitlementHistory
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBaseUserEntitlementHistory
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
 	FString EntitlementId{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
 	FString Namespace{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
 	EAccelByteUserEntitlementAction Action{ EAccelByteUserEntitlementAction::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	int32 UseCount{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	int32 UseCountChange{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	FString Reason{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	EAccelByteUserEntitlementOrigin Origin{ EAccelByteUserEntitlementOrigin::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	EAccelByteEntitlementClass Clazz{ EAccelByteEntitlementClass::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	FString ItemId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | BaseUserEntitlementHistory ")
+	FString Sku{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserEntitlementHistoryPagingResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistoryPagingResult ")
+	TArray<FAccelByteModelsBaseUserEntitlementHistory> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistoryPagingResult ")
+	FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserEntitlementHistory : public FAccelByteModelsBaseUserEntitlementHistory
+{
+	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
 	FString Operator{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	FString UserId{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	int32 UseCount{0};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	int32 UseCountChange{0};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	FString Reason{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	FDateTime CreatedAt{0};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	FDateTime UpdatedAt{0};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	EAccelByteUserEntitlementOrigin Origin{ EAccelByteUserEntitlementOrigin::NONE};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	EAccelByteEntitlementClass Clazz{ EAccelByteEntitlementClass::NONE };
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	FString ItemId{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | UserEntitlementHistory ")
-	FString Sku{};
 };
 
 USTRUCT(BlueprintType)

@@ -201,6 +201,8 @@ void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadc
 	JsonObjectPtr->SetStringField("EventName", EventName);
 	JsonObjectPtr->SetObjectField("Payload", FJsonObjectConverter::UStructToJsonObject(Events));
 	JsonObjectPtr->SetNumberField("ClientTimestamp", FDateTime::UtcNow().ToUnixTimestamp());
+	JsonObjectPtr->SetStringField("flightId", FAccelByteUtilities::GetFlightId());
+	JsonObjectPtr->SetStringField("deviceType", FAccelByteUtilities::GetPlatformName());
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, JsonObjectPtr.ToSharedRef(), OnSuccess, OnError);

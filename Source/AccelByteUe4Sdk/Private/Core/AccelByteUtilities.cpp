@@ -14,6 +14,7 @@
 #include <memory>
 #include <regex>
 
+#include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/SecureHash.h"
 #include "Misc/Base64.h"
@@ -1382,11 +1383,8 @@ const FString FAccelByteUtilities::GenerateHashString(const FString& Message)
 	return FullHash.ToString().ToLower();
 }
 
-const FString FAccelByteUtilities::GenerateTOTP(const FString& SecretKey, int CodeLength, int TimeStep)
+FString FAccelByteUtilities::GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep)
 {
-	// Get the current Unix time
-	const int64 CurrentTime = FDateTime::UtcNow().ToUnixTimestamp();
-
 	// Calculate the time step
 	const uint64 TimeStepCount = CurrentTime / TimeStep;
 
@@ -1417,12 +1415,67 @@ const FString FAccelByteUtilities::GenerateTOTP(const FString& SecretKey, int Co
 	 
 	// Modulo to get the final code 
 	uint32 TruncatedHash = TruncationValue; 
-	TruncatedHash %= (uint32)FMath::Pow( 10.0f, CodeLength);
+	TruncatedHash %= static_cast<uint32>(FMath::Pow(10.0f, CodeLength));
 
 	// Convert to string with leading zeros if necessary
 	FString Result = FString::Printf(TEXT("%0*d"), CodeLength, TruncatedHash);
 
 	return Result;
+}
+
+const FString FAccelByteUtilities::GenerateTOTP(const FString& SecretKey, int CodeLength, int TimeStep)
+{
+	// Get the current Unix time
+	int64 CurrentTime;
+	if (FRegistry::TimeManager.IsInSync())
+	{
+		CurrentTime = FRegistry::TimeManager.GetCurrentServerTime().ToUnixTimestamp();
+	}
+	else
+	{
+		CurrentTime = FDateTime::UtcNow().ToUnixTimestamp();
+		UE_LOG(LogAccelByte, Warning, TEXT("TimeManager is not in sync with server, generating TOTP using local time."))
+	}
+
+	return GenerateTOTP(CurrentTime, SecretKey, CodeLength, TimeStep);
+}
+
+TArray<FString> FAccelByteUtilities::GenerateAcceptableTOTP(const FString& ServerSecretKey, const FString& UserId)
+{
+	constexpr int32 AcceptableWindow{30};
+	constexpr int32 CodeLength{6};
+	TArray<FString> AcceptableTOTP;
+	FString HashString = GenerateHashString(ServerSecretKey + UserId);
+
+	// Get the current Unix time
+	int64 CurrentTime;
+	if (FRegistry::TimeManager.IsInSync())
+	{
+		CurrentTime = FRegistry::TimeManager.GetCurrentServerTime().ToUnixTimestamp();
+	}
+	else
+	{
+		CurrentTime = FDateTime::UtcNow().ToUnixTimestamp();
+		UE_LOG(LogAccelByte, Warning, TEXT("TimeManager is not in sync with server, generating TOTP using local time."))
+	}
+
+	for (int32 i = 0; i < AcceptableWindow; i++)
+	{
+		const FString ServerGeneratedTOTP = GenerateTOTP(CurrentTime - i, HashString, CodeLength, AcceptableWindow);
+		if (!AcceptableTOTP.Contains(ServerGeneratedTOTP))
+		{
+			AcceptableTOTP.Emplace(ServerGeneratedTOTP);
+		}
+	}
+
+	return AcceptableTOTP;
+}
+
+bool FAccelByteUtilities::ValidateTOTP(const FString& ServerSecretKey, const FString& TOTP, const FString& UserId)
+{
+	TArray<FString> AcceptableTOTP = GenerateAcceptableTOTP(ServerSecretKey, UserId);
+
+	return AcceptableTOTP.Contains(TOTP);
 }
 
 bool FAccelByteUtilities::IsValidEmail(const FString& Email)

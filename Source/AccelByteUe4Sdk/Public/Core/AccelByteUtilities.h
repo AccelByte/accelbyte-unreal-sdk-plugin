@@ -443,10 +443,13 @@ public:
 	static FString GetContentType(EAccelByteFileType const& FileType);
 	static const FString GenerateHashString(const FString& Message);
 	static const FString GenerateTOTP(const FString& SecretKey, int CodeLength = 6, int TimeStep = 30);
+	static bool ValidateTOTP(const FString& ServerSecretKey, const FString& TOTP, const FString& UserId);
 	static bool IsValidEmail(const FString& Email);
 
 private:
 	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);
+	static FString GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep);
+	static TArray<FString> GenerateAcceptableTOTP(const FString& ServerSecretKey, const FString& UserId);
 
 //To allow override for testing using mock class
 protected:

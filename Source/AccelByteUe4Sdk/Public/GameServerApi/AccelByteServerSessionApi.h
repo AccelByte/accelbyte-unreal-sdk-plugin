@@ -228,6 +228,19 @@ public:
 		, FErrorHandler const& OnError
 		, const int32 Limit = 20);
 
+	/**
+	 * @brief Query user's recent player who were on the same team.
+	 *
+	 * @param UserId Target recent player User Id
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Limit Number of recent players to request, maximum value is 200.
+	 */
+	void GetRecentTeamPlayers(const FString& UserId
+		, THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
+		, FErrorHandler const& OnError
+		, const int32 Limit = 20);
+
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;

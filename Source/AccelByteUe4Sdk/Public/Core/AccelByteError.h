@@ -381,6 +381,7 @@ namespace AccelByte
 		InvalidResponse = 14004,
 		NetworkError = 14005,
 		IsNotLoggedIn = 14006,
+		LoginQueueCanceled = 14007,
 		WebSocketConnectFailed = 14201,
 		CachedTokenNotFound = 14301,
 		UnableToSerializeCachedToken = 14302,

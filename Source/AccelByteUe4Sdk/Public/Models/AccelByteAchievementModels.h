@@ -556,7 +556,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementPSNEvent
 	FString EventId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PSNEvent")
-	FDateTime DateTime{0};
+	FString DateTime{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PSNEvent")
 	FAccelByteModelsAchievementPSNEventData EventData{};

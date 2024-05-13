@@ -27,6 +27,51 @@ Entitlement::Entitlement(Credentials const& InCredentialsRef
 
 Entitlement::~Entitlement(){}
 
+void Entitlement::GetCurrentUserEntitlementHistory(THandler<FAccelByteModelsUserEntitlementHistoryPagingResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, EAccelByteEntitlementClass const& EntitlementClass
+	, FDateTime StartDate
+	, FDateTime EndDate
+	, int32 Limit
+	, int32 Offset) 
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/history")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef.GetUserId());
+
+	FString TempStartDate;
+	FString TempEndDate;
+
+	if (StartDate != 0)
+	{
+		FString AvailableDateRounded{};
+		FString AvailableDateDecimal{};
+		StartDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
+		TempStartDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
+	}
+
+	if (EndDate != 0)
+	{
+		FString AvailableDateRounded{};
+		FString AvailableDateDecimal{};
+		EndDate.ToIso8601().Split(TEXT("."), &AvailableDateRounded, &AvailableDateDecimal);
+		TempEndDate = FString::Printf(TEXT("%sZ"), *AvailableDateRounded);
+	}
+
+	const TMultiMap<FString, FString> QueryParams{
+	{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ? FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass) : TEXT("") },
+	{ TEXT("startDate"), StartDate > 0 ? TempStartDate : TEXT("")},
+	{ TEXT("endDate"), EndDate > 0 ? TempEndDate : TEXT("") },
+	{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
+	{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
+	};
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+}
+
 void Entitlement::QueryUserEntitlements(FString const& EntitlementName
 	, FString const& ItemId
 	, int32 const& Offset

@@ -21,6 +21,8 @@ struct FArrayModelsDistributionReceiver
 	TArray<FAccelByteModelsDistributionReceiver> Content;
 };
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsEntitlementHistoryPagingResponse, FAccelByteModelsUserEntitlementHistoryPagingResult, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsEntitlementPagingSlicedResultResponse, FAccelByteModelsEntitlementPagingSlicedResult, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsEntitlementInfoResponse, FAccelByteModelsEntitlementInfo, Response);
@@ -44,8 +46,11 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
-	void QueryUserEntitlements(FString const& EntitlementName, TArray<FString> const& ItemIds, int32 const& Offset, int32 const& Limit, FDAccelByteModelsEntitlementPagingSlicedResultResponse OnSuccess, FDErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void GetCurrentUserEntitlementHistory(FDAccelByteModelsEntitlementHistoryPagingResponse OnSuccess, FDErrorHandler OnError, EAccelByteEntitlementClass const& EntitlementClass, FDateTime StartDate, FDateTime EndDate, int32 Limit, int32 Offset);
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
+	void QueryUserEntitlements(FString const& EntitlementName, TArray<FString> const& ItemIds, int32 const& Offset, int32 const& Limit, FDAccelByteModelsEntitlementPagingSlicedResultResponse OnSuccess, FDErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetUserEntitlementById(FString const& Entitlementid, FDAccelByteModelsEntitlementInfoResponse OnSuccess, FDErrorHandler OnError);
 

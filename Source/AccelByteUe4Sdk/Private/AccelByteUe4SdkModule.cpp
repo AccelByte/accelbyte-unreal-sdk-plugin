@@ -18,6 +18,7 @@
 #include "Api/AccelByteHeartBeatApi.h"
 #include "Api/AccelBytePredefinedEventApi.h"
 #include "Api/AccelByteGameStandardEventApi.h"
+#include "Core/ServerTime/AccelByteTimeManager.h"
 #include "GameServerApi/AccelByteServerAMSApi.h"
 
 #if WITH_EDITOR
@@ -112,6 +113,8 @@ void FAccelByteUe4SdkModule::StartupModule()
 			AccelByte::FRegistry::ServerAMS.Connect();
 		}
 	}
+
+	AccelByte::FRegistry::TimeManager.GetServerTime({}, {});
 
 #if UE_SERVER
 	FAccelByteSignalHandler::Initialize();

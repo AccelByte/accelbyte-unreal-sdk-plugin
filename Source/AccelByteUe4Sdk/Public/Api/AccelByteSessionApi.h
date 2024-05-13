@@ -414,6 +414,17 @@ public:
 		, const int32 Limit = 20);
 
 	/**
+	 * @brief Query user's recent player who were on the same team.
+	 *
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * @param Limit Number of recent players to request, maximum value is 200.
+	 */
+	void GetRecentTeamPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
+		, FErrorHandler const& OnError
+		, const int32 Limit = 20);
+
+	/**
 	 * @brief  Used by game client to get a session secret that is saved in session service.
 	 * The secret will only return the secret value when the Enable Secret Validation option is set true (in the Admin Portal). 
 	 *

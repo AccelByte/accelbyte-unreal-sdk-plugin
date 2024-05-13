@@ -13,6 +13,29 @@ void UABEntitlement::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
+void UABEntitlement::GetCurrentUserEntitlementHistory(
+	FDAccelByteModelsEntitlementHistoryPagingResponse OnSuccess,
+	FDErrorHandler OnError,
+	EAccelByteEntitlementClass const& EntitlementClass,
+	FDateTime StartDate, 
+	FDateTime EndDate, 
+	int32 Limit, 
+	int32 Offset)
+{
+	ApiClientPtr->Entitlement.GetCurrentUserEntitlementHistory(
+		THandler<FAccelByteModelsUserEntitlementHistoryPagingResult>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUserEntitlementHistoryPagingResult const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+		EntitlementClass, StartDate, EndDate, Limit, Offset);
+}
+
 void UABEntitlement::QueryUserEntitlements(
 	FString const& EntitlementName, 
 	TArray<FString> const& ItemIds, 

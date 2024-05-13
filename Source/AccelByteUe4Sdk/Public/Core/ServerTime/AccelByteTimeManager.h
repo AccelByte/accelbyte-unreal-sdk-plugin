@@ -54,6 +54,13 @@ public:
 	 */
 	virtual FDateTime GetCurrentServerTime() const;
 
+	/**
+	 * @brief Check whether the time manager is in sync with server time or not.
+	 * 
+	 * @return True if the time manager is in sync with server time. 
+	 */
+	virtual bool IsInSync();
+
 protected:
 	/**
 	 * @brief Back calculate current Server Time from the last time when the Server Time is sync'd.

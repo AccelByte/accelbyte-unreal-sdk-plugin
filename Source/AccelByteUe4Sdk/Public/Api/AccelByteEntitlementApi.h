@@ -25,6 +25,26 @@ public:
 	~Entitlement();
 
 public:
+
+	/**
+	 * @brief Get current user entitlements history.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserEntitlementHistoryPagingResult&.
+	 * @param OnError This will be called when the operation fails.
+	 * @param EntitlementClass Class of the entitlement (optional).
+	 * @param StartDate Defines the preferred starting date or time to query user entitlement history (optional).
+	 * @param EndDate Defines the preferred ending  date or time to query user entitlement history (optional).
+	 * @param Limit Number of content per page to retrieve. Default value : 20
+	 * @param Offset Number of page to retrieve. Default value : 0
+	 */	
+	void GetCurrentUserEntitlementHistory(THandler<FAccelByteModelsUserEntitlementHistoryPagingResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, EAccelByteEntitlementClass const& EntitlementClass = EAccelByteEntitlementClass::NONE
+		, FDateTime StartDate = 0
+		, FDateTime EndDate = 0
+		, int32 Limit = 20
+		, int32 Offset = 0);
+
 	/**
 	 * @brief Get list of user's Entitlement(s).
 	 *

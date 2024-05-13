@@ -139,6 +139,11 @@ FDateTime FAccelByteTimeManager::GetCurrentServerTime() const
 	return SERVER_TIME_CURRENT;
 }
 
+bool FAccelByteTimeManager::IsInSync()
+{
+	return GetCurrentServerTime() != FDateTime::MinValue();
+}
+
 FTimespan FAccelByteTimeManager::BackCalculateServerTime() const
 {
 	FTimespan DeltaTime{ -1 };

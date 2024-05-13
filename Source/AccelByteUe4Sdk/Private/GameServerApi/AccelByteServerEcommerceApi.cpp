@@ -369,7 +369,7 @@ void ServerEcommerce::GetUserEntitlementHistory(const FString& UserId
 	}
 
 	if (!ValidateAccelByteId(EntitlementId, EAccelByteIdHypensRule::NO_HYPENS
-		, FAccelByteIdValidator::GetEntitlementIdInvalidMessage(UserId)
+		, FAccelByteIdValidator::GetEntitlementIdInvalidMessage(EntitlementId)
 		, OnError))
 	{
 		return;

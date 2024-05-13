@@ -635,6 +635,26 @@ void Session::GetRecentPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
 }
 
+void Session::GetRecentTeamPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess,
+	FErrorHandler const& OnError, const int32 Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if(Limit > 200)
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Requesting recent player limit with %d will only return 200 items"), Limit);
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/recent-team-player")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef.GetNamespace());
+
+	TMap<FString, FString> QueryParam;
+	QueryParam.Emplace(TEXT("limit"), FString::FromInt(Limit));
+	
+	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
+}
+
 void Session::GetSessionSecret(FString const& SessionID
 	, THandler<FAccelByteModelsV2SessionJoinedSecret> const& OnSuccess
 	, FErrorHandler const& OnError)
