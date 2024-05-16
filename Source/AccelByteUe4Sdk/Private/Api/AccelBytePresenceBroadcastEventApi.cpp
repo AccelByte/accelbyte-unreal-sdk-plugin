@@ -14,10 +14,10 @@ PresenceBroadcastEvent::PresenceBroadcastEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-	, CredentialsRef{ InCredentialsRef }
+	, CredentialsRef{ InCredentialsRef.AsShared() }
 {
 	SetHeartbeatInterval(FTimespan::FromSeconds(SettingsRef.PresenceBroadcastEventHeartbeatInterval));
-	PresenceBroadcastLoginSuccess = CredentialsRef.OnLoginSuccess().AddRaw(this, &PresenceBroadcastEvent::OnLoginSuccess);
+	PresenceBroadcastLoginSuccess = CredentialsRef->OnLoginSuccess().AddRaw(this, &PresenceBroadcastEvent::OnLoginSuccess);
 }
 
 PresenceBroadcastEvent::~PresenceBroadcastEvent()
@@ -27,7 +27,7 @@ PresenceBroadcastEvent::~PresenceBroadcastEvent()
 
 bool PresenceBroadcastEvent::IsGamePlatformSent()
 {
-	if (!CredentialsRef.IsSessionValid())
+	if (!CredentialsRef->IsSessionValid())
 	{
 		bIsGamePlatformSent = false;
 	}
@@ -133,7 +133,7 @@ void PresenceBroadcastEvent::Shutdown()
 		}
 		if (PresenceBroadcastLoginSuccess.IsValid())
 		{
-			CredentialsRef.OnLoginSuccess().Remove(PresenceBroadcastLoginSuccess);
+			CredentialsRef->OnLoginSuccess().Remove(PresenceBroadcastLoginSuccess);
 		}
 	}
 }
@@ -184,7 +184,7 @@ void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadc
 
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString EventNamespace = CredentialsRef.GetNamespace();
+	const FString EventNamespace = CredentialsRef->GetNamespace();
 
 	if (EventNamespace.IsEmpty())
 	{

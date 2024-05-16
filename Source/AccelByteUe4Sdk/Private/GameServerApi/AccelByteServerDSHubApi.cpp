@@ -150,7 +150,7 @@ void ServerDSHub::CreateWebSocket()
 	FAccelByteUtilities::AppendModulesVersionToMap(Headers);
 	WebSocket = AccelByteWebSocket::Create(*ServerSettingsRef.DSHubServerUrl,
 		TEXT("wss"),
-		ServerCredentialsRef,
+		ServerCredentialsRef.Get(),
 		Headers,
 		TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()),
 		PingDelay,

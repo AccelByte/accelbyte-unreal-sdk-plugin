@@ -40,7 +40,7 @@ void Challenge::GetChallenges(const THandler<FAccelByteModelsGetChallengesRespon
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/challenges")
 		, *SettingsRef.ChallengeServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -72,7 +72,7 @@ void Challenge::GetScheduledChallengeGoals(const FString& ChallengeCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/challenges/%s/goals")
 		, *SettingsRef.ChallengeServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ChallengeCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -95,7 +95,7 @@ void Challenge::GetChallengeProgress(const FString& ChallengeCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/progress/%s")
 		, *SettingsRef.ChallengeServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ChallengeCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
@@ -123,7 +123,7 @@ void Challenge::GetRewards(const THandler<FAccelByteModelsChallengeGetRewardStat
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/rewards")
 		, *SettingsRef.ChallengeServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -136,7 +136,7 @@ void Challenge::ClaimReward(const FAccelByteModelsChallengeRewardClaimRequest& R
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/rewards/claim")
 		, *SettingsRef.ChallengeServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
@@ -147,7 +147,7 @@ void Challenge::EvaluateChallengeProgress(const FVoidHandler& OnSuccess, const F
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/progress/evaluate")
 		, *SettingsRef.ChallengeServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }

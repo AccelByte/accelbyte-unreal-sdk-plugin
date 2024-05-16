@@ -41,7 +41,7 @@ void ServerQosManager::GetActiveQosServers(const THandler<FAccelByteModelsQosSer
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespace/%s/qos")
 		, *ServerSettingsRef.QosManagerServerUrl
-		, *ServerCredentialsRef.GetNamespace());
+		, *ServerCredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }

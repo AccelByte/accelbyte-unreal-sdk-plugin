@@ -93,14 +93,14 @@ void FAccelByteUe4SdkModule::StartupModule()
 #endif // defined(TEMPORARY_ENABLE_COMPAT_CHECK)
 
 	AccelByte::FRegistry::HttpRetryScheduler.Startup();
-	AccelByte::FRegistry::Credentials.Startup();
+	AccelByte::FRegistry::CredentialsRef->Startup();
 	AccelByte::FRegistry::GameTelemetry.Startup();
 	AccelByte::FRegistry::PredefinedEvent.Startup();
 	AccelByte::FRegistry::GameStandardEvent.Startup();
 #if !UE_SERVER
 	AccelByte::FRegistry::HeartBeat.Startup();
 #endif
-	AccelByte::FRegistry::ServerCredentials.Startup();
+	AccelByte::FRegistry::ServerCredentialsRef->Startup();
 
 	if (IsRunningDedicatedServer())
 	{
@@ -144,14 +144,14 @@ void FAccelByteUe4SdkModule::PostStartup()
 
 void FAccelByteUe4SdkModule::ShutdownModule()
 {
-	AccelByte::FRegistry::ServerCredentials.Shutdown();
+	AccelByte::FRegistry::ServerCredentialsRef->Shutdown();
 #if !UE_SERVER
 	AccelByte::FRegistry::HeartBeat.Shutdown();
 #endif
 	AccelByte::FRegistry::GameTelemetry.Shutdown();
 	AccelByte::FRegistry::PredefinedEvent.Shutdown();
 	AccelByte::FRegistry::GameStandardEvent.Shutdown();
-	AccelByte::FRegistry::Credentials.Shutdown();
+	AccelByte::FRegistry::CredentialsRef->Shutdown();
 	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
 	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();
 
@@ -241,7 +241,7 @@ bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Envir
 	}
 	
 	AccelByte::FRegistry::Settings.Reset(Environment);
-	AccelByte::FRegistry::Credentials.SetClientCredentials(Environment);
+	AccelByte::FRegistry::CredentialsRef->SetClientCredentials(Environment);
 	SetDefaultHttpCustomHeader(ClientSettings.Namespace);
 
 	return bResult;
@@ -263,7 +263,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 	}
 	
 	AccelByte::FRegistry::ServerSettings.Reset(Environment);
-	AccelByte::FRegistry::ServerCredentials.SetClientCredentials(Environment);
+	AccelByte::FRegistry::ServerCredentialsRef->SetClientCredentials(Environment);
 	SetDefaultHttpCustomHeader(ServerSettings.Namespace);
 	
 	return bResult;

@@ -66,7 +66,7 @@ void ServerStatistic::CreateUserStatItems(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	FString Contents = "[";
@@ -130,7 +130,7 @@ void ServerStatistic::GetUserStatItems(const FString& UserId
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	TMultiMap<FString, FString> QueryParams {
@@ -155,7 +155,7 @@ void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsB
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/statitems/value/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	FString Contents = "[";
 	FString Content;
@@ -192,7 +192,7 @@ void ServerStatistic::IncrementUserStatItems(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems/value/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	FString Contents = "[";
@@ -224,7 +224,7 @@ void ServerStatistic::BulkFetchUserStatItemValues(const FString& StatCode
 
 	FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/statitems/value/bulk/getOrDefault")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("statCode"), StatCode },
@@ -262,7 +262,7 @@ void ServerStatistic::BulkFetchStatItemsValue(const FString& StatCode
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/statitems/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("statCode"), StatCode },
@@ -280,7 +280,7 @@ void ServerStatistic::BulkUpdateMultipleUserStatItemsValue(const TArray<FAccelBy
 
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/statitems/value/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	FString Content = TEXT("");
 	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsUpdateUserStatItem>(BulkUpdateMultipleUserStatItems, Content);
@@ -305,7 +305,7 @@ void ServerStatistic::BulkResetUserStatItemsValues(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/users/%s/statitems/value/reset/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	FString Content = TEXT("");
@@ -326,7 +326,7 @@ void ServerStatistic::BulkResetMultipleUserStatItemsValue(const TArray<FAccelByt
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/statitems/value/reset/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 	FString Content = TEXT("");
 	FAccelByteUtilities::TArrayUStructToJsonString(UserStatItemValue, Content);
 
@@ -350,7 +350,7 @@ void ServerStatistic::BulkUpdateUserStatItemValue(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/users/%s/statitems/value/bulk")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	FString Content = TEXT("");
@@ -381,7 +381,7 @@ void ServerStatistic::UpdateUserStatItemValue(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/users/%s/stats/%s/statitems/value")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *StatCode);
 
@@ -409,7 +409,7 @@ void ServerStatistic::DeleteUserStatItems(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/users/%s/stats/%s/statitems")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *StatCode);
 
@@ -434,7 +434,7 @@ void ServerStatistic::GetGlobalStatItemsByStatCode(const FString& StatCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/globalstatitems/%s")
 		, *ServerSettingsRef.StatisticServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *StatCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);

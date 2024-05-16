@@ -49,7 +49,7 @@ void Reward::GetRewardByRewardCode(FString const& RewardCode
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/byCode")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("rewardCode"), RewardCode }
@@ -66,7 +66,7 @@ void Reward::GetRewardByRewardId(FString const& RewardId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *RewardId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -83,7 +83,7 @@ void Reward::QueryRewards(FString const& EventTopic
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/byCriteria")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	if (!EventTopic.IsEmpty())

@@ -27,7 +27,7 @@ LoginQueue::LoginQueue(Credentials& InCredentialsRef
 	, Settings& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-	, UserCredentialsRef{InCredentialsRef}
+	, UserCredentialsRef{InCredentialsRef.AsShared()}
 {
 }
 

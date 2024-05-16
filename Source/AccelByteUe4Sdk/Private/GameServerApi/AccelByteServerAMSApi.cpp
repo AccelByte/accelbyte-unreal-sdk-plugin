@@ -115,7 +115,7 @@ void ServerAMS::CreateWebSocket()
 	FAccelByteUtilities::AppendModulesVersionToMap(Headers);
 	WebSocket = AccelByteWebSocket::Create(*AMSWatchdogUrl,
 		TEXT("ws"),
-		ServerCredentialsRef,
+		ServerCredentialsRef.Get(),
 		Headers,
 		TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()),
 		PingDelay, InitialBackoffDelay, MaxBackoffDelay, ServerSettingsRef.AMSReconnectTotalTimeout);

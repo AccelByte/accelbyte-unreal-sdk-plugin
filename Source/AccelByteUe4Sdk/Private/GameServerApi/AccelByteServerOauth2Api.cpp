@@ -40,8 +40,8 @@ void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetAccessTokenWithClientCredentialsGrant(ServerCredentialsRef.GetOAuthClientId()
-		, ServerCredentialsRef.GetOAuthClientSecret()
+	GetAccessTokenWithClientCredentialsGrant(ServerCredentialsRef->GetOAuthClientId()
+		, ServerCredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess](const FOauth2Token& Result)
 			{
@@ -73,13 +73,13 @@ void ServerOauth2::ForgetAllCredentials()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	ServerCredentialsRef.ForgetAll();
+	ServerCredentialsRef->ForgetAll();
 }
 
 void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess
 	, const FOauth2Token& Response) const
 {
-	ServerCredentialsRef.SetClientToken(Response.Access_token, Response.Expires_in, Response.Namespace);
+	ServerCredentialsRef->SetClientToken(Response.Access_token, Response.Expires_in, Response.Namespace);
 	FHttpRetryScheduler::SetHeaderNamespace(Response.Namespace);
 	OnSuccess.ExecuteIfBound();
 }
@@ -88,7 +88,7 @@ ServerOauth2::ServerOauth2(ServerCredentials& InCredentialsRef
 	, ServerSettings& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-	, ServerCredentialsRef{InCredentialsRef}
+	, ServerCredentialsRef{InCredentialsRef.AsShared()}
 {}
 
 ServerOauth2::~ServerOauth2()

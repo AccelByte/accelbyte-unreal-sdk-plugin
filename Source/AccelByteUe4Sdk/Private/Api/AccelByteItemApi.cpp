@@ -35,7 +35,7 @@ void Item::GetItemById(FString const& ItemId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (CredentialsRef.GetNamespace().IsEmpty())
+	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
@@ -50,7 +50,7 @@ void Item::GetItemById(FString const& ItemId
 	const FString Verb            = TEXT("GET");
 	const FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ItemId);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -109,7 +109,7 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (CredentialsRef.GetNamespace().IsEmpty())
+	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
@@ -118,7 +118,7 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 	const FString Verb = TEXT("GET");
     const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria")
     	, *SettingsRef.PlatformServerUrl
-    	, *CredentialsRef.GetNamespace());
+    	, *CredentialsRef->GetNamespace());
 
 	TArray<FString> SortByStringArray = {};
 	if (SortBy.Num() > 0 )
@@ -164,7 +164,7 @@ void Item::SearchItem(FString const& Language
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (CredentialsRef.GetNamespace().IsEmpty())
+	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
@@ -179,7 +179,7 @@ void Item::SearchItem(FString const& Language
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/search")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 	
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("region"), Region },
@@ -202,7 +202,7 @@ void Item::GetItemBySku(FString const& Sku
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	if (CredentialsRef.GetNamespace().IsEmpty())
+	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
@@ -217,7 +217,7 @@ void Item::GetItemBySku(FString const& Sku
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/bySku")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("sku"), Sku },
@@ -239,7 +239,7 @@ void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	if (CredentialsRef.GetNamespace().IsEmpty())
+	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
@@ -254,7 +254,7 @@ void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/locale/byIds")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
@@ -273,7 +273,7 @@ void Item::GetItemDynamicData(FString const& ItemId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (CredentialsRef.GetNamespace().IsEmpty())
+	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
@@ -288,7 +288,7 @@ void Item::GetItemDynamicData(FString const& ItemId
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/dynamic")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ItemId);
 
 	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
@@ -299,7 +299,7 @@ void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> cons
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (CredentialsRef.GetNamespace().IsEmpty())
+	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
@@ -308,7 +308,7 @@ void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> cons
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/stores")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
@@ -318,7 +318,7 @@ void Item::GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Regi
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (CredentialsRef.GetNamespace().IsEmpty())
+	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
 		return;
@@ -342,7 +342,7 @@ void Item::GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Regi
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/estimatedPrice")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -361,7 +361,7 @@ void Item::GetItemMappings(const EAccelBytePlatformMapping Platform
 
 	const FString Url = FString::Printf(
 		TEXT("%s/public/namespaces/%s/iap/item/mapping"), *SettingsRef.PlatformServerUrl,
-		*CredentialsRef.GetNamespace());
+		*CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams{{TEXT("platform"), ConvertPlatformMappingToString(Platform)}};
 

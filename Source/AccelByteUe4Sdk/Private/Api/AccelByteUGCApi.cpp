@@ -33,8 +33,8 @@ void UGC::CreateContent(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId);
 
 	FAccelByteModelsUGCRequest Request = CreateRequest;
@@ -81,8 +81,8 @@ void UGC::ModifyContent(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ContentId);
 
@@ -157,8 +157,8 @@ void UGC::DeleteContent(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ContentId);
 
@@ -187,7 +187,7 @@ void UGC::GetContentByContentId(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -227,7 +227,7 @@ void UGC::GetContentByShareCode(FString const& ShareCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ShareCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -253,7 +253,7 @@ void UGC::GetContentPreview(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/preview")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -284,7 +284,7 @@ void UGC::GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSucce
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	
@@ -309,7 +309,7 @@ void UGC::GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuc
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/types")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -332,8 +332,8 @@ void UGC::CreateChannel(FString const& ChannelName
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
 
@@ -349,7 +349,7 @@ void UGC::UpdateChannel(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ChannelId);
+		, *CredentialsRef->GetNamespace(), *CredentialsRef->GetUserId(), *ChannelId);
 
 	const FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
 
@@ -364,7 +364,7 @@ void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const&
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetChannels(CredentialsRef.GetUserId(), OnSuccess, OnError, Limit, Offset, ChannelName);
+	GetChannels(CredentialsRef->GetUserId(), OnSuccess, OnError, Limit, Offset, ChannelName);
 }
 
 void UGC::GetChannels(FString const& UserId
@@ -385,7 +385,7 @@ void UGC::GetChannels(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	TMultiMap<FString, FString> QueryParams{
@@ -405,8 +405,8 @@ void UGC::DeleteChannel(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -505,7 +505,7 @@ void UGC::UpdateLikeStatusToContent(const FString& ContentId, bool bLikeStatus
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/like")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ContentId);
 
 	const FString Content = FString::Printf(TEXT("{\"likeStatus\": %s}"), bLikeStatus ? TEXT("true") : TEXT("false"));
@@ -530,7 +530,7 @@ void UGC::GetListFollowers(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/followers")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	TMultiMap<FString, FString> QueryParams;
@@ -562,7 +562,7 @@ void UGC::UpdateFollowStatusToUser(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/follow")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	const FString Content = FString::Printf(TEXT("{\"followStatus\": %s}"), bFollowStatus ? TEXT("true") : TEXT("false"));
@@ -590,7 +590,7 @@ void UGC::SearchContentsSpecificToChannel(const FString& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ChannelId);
 
 	TMultiMap<FString, FString> QueryParams {
@@ -637,7 +637,7 @@ void UGC::SearchContentsSpecificToChannel(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ChannelId);
 
 	TMultiMap<FString, FString> QueryParams {
@@ -670,7 +670,7 @@ void UGC::GetContentBulk(const TArray<FString>& ContentIds
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
@@ -712,7 +712,7 @@ void UGC::GetUserContent(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	TMultiMap<FString, FString> QueryParams;
@@ -774,7 +774,7 @@ void UGC::UploadContentScreenshot(const FString& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents/%s/screenshots")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId
 		, *ContentId);
 
@@ -790,7 +790,7 @@ void UGC::GetFollowedContent(THandler<FAccelByteModelsUGCContentPageResponse> co
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/followed")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -814,7 +814,7 @@ void UGC::GetFollowedUsers(THandler<FAccelByteModelsUGCFollowedUsersResponse> co
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/followed")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -845,7 +845,7 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/liked")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("name"), Name },
@@ -882,7 +882,7 @@ void UGC::GetLikedContent(const TArray<FString>& Tags
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/liked")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("name"), Name },
@@ -918,7 +918,7 @@ void UGC::GetCreator(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -941,7 +941,7 @@ void UGC::GetGroups(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/groups")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	TMultiMap<FString, FString> QueryParams;
@@ -976,7 +976,7 @@ void UGC::BulkGetContentByShareCode(const TArray<FString>& ShareCodes
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsUGCBulkGetContentByShareCodeRequest ContentRequest;
 	ContentRequest.ShareCodes = ShareCodes;
@@ -1009,7 +1009,7 @@ void UGC::SearchContentsSpecificToChannelV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ChannelId);
 
 	const TMap<FString, FString> QueryParams = {
@@ -1072,16 +1072,16 @@ void UGC::InternalSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Fil
 
 const FString UGC::GetNamespace()
 {
-	if (CredentialsRef.IsSessionValid())
+	if (CredentialsRef->IsSessionValid())
 	{
-		return CredentialsRef.GetNamespace();
+		return CredentialsRef->GetNamespace();
 	}
 	return SettingsRef.Namespace;
 }
 
 const TMap<FString, FString> UGC::GetDefaultHeaders()
 {
-	auto Headers = CredentialsRef.GetAuthHeader();
+	auto Headers = CredentialsRef->GetAuthHeader();
 	Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 
 	return Headers;
@@ -1133,7 +1133,7 @@ void UGC::GetContentBulkByIdsV2(TArray<FString> const& ContentIds
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
@@ -1183,7 +1183,7 @@ void UGC::GetContentByShareCodeV2(FString const& ShareCode
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ShareCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -1227,7 +1227,7 @@ void UGC::GetContentByContentIdV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -1278,8 +1278,8 @@ void UGC::CreateContentV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, CreateRequest, OnSuccess, OnError);
@@ -1317,8 +1317,8 @@ void UGC::DeleteContentV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ContentId);
 
@@ -1358,8 +1358,8 @@ void UGC::ModifyContentV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ContentId);
 
@@ -1404,8 +1404,8 @@ void UGC::GenerateUploadContentURLV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s/uploadUrl")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ContentId);
 
@@ -1456,8 +1456,8 @@ void UGC::UpdateContentFileLocationV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s/fileLocation")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ContentId);
 
@@ -1491,7 +1491,7 @@ void UGC::GetUserContentsV2(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	const TMap<FString, FString> QueryParams = {
@@ -1554,8 +1554,8 @@ void UGC::UpdateContentScreenshotV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents/%s/screenshots")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ScreenshotsRequest, OnSuccess, OnError);
@@ -1587,8 +1587,8 @@ void UGC::UploadContentScreenshotV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents/%s/screenshots")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ScreenshotsRequest, OnSuccess, OnError);
@@ -1626,8 +1626,8 @@ void UGC::DeleteContentScreenshotV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents/%s/screenshots/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ContentId
 		, *ScreenshotId);
 
@@ -1663,8 +1663,8 @@ void UGC::ModifyContentByShareCode(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ShareCode);
 
@@ -1725,8 +1725,8 @@ void UGC::ModifyContentShareCode(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s/sharecode")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ContentId);
 
@@ -1761,8 +1761,8 @@ void UGC::DeleteContentByShareCode(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ShareCode);
 
@@ -1788,7 +1788,7 @@ void UGC::BulkGetContentByShareCodeV2(TArray<FString> const& ShareCodes
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsUGCBulkGetContentByShareCodeRequest ContentRequest;
 	ContentRequest.ShareCodes = ShareCodes;
@@ -1844,8 +1844,8 @@ void UGC::ModifyContentShareCodeV2(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s/sharecode")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ChannelId
 		, *ContentId);
 
@@ -1876,7 +1876,7 @@ void UGC::AddDownloadContentCountV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s/downloadcount")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
@@ -1906,7 +1906,7 @@ void UGC::GetListContentDownloaderV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s/downloader")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ContentId);
 
 	const TMap<FString, FString> QueryParams = {
@@ -1946,7 +1946,7 @@ void UGC::GetListContentLikerV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s/like")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ContentId);
 
 	const TMap<FString, FString> QueryParams = {
@@ -1979,7 +1979,7 @@ void UGC::UpdateLikeStatusToContentV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s/like")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *ContentId);
 
 	const FString Content = FString::Printf(TEXT("{\"likeStatus\": %s}"), bLikeStatus ? TEXT("true") : TEXT("false"));
@@ -2002,8 +2002,8 @@ void UGC::GetStagingContents(EStagingContentRequestStatus Status
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("status"), FAccelByteUtilities::GetUEnumValueAsString(Status)},
@@ -2022,8 +2022,8 @@ void UGC::GetStagingContentById(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
@@ -2037,8 +2037,8 @@ void UGC::UpdateStagingContent(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateRequest, OnSuccess, OnError);
@@ -2052,8 +2052,8 @@ void UGC::DeleteStagingContent(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ContentId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);

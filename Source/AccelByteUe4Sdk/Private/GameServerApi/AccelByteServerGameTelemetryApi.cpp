@@ -125,7 +125,7 @@ const FString ServerGameTelemetry::GetEventNamespace()
 {
 	if (EventNamespace.IsEmpty())
 	{
-		EventNamespace = ServerCredentialsRef.GetNamespace();
+		EventNamespace = ServerCredentialsRef->GetNamespace();
 	}
 	return EventNamespace;
 }

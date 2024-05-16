@@ -35,8 +35,8 @@ void StoreDisplay::GetAllViews(FString const& StoreId
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/views")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), StoreId },
@@ -59,8 +59,8 @@ void StoreDisplay::ListActiveSectionContents(FString const& StoreId
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/sections")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), StoreId },

@@ -48,7 +48,7 @@ void ServerSeasonPass::GrantExpToUser(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/exp")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	FString Content{};
@@ -86,7 +86,7 @@ void ServerSeasonPass::GrantTierToUser(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/tiers")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	FString Content{};
@@ -121,7 +121,7 @@ void ServerSeasonPass::GetCurrentUserSeasonProgression(const FString& UserId
 	
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -143,7 +143,7 @@ void ServerSeasonPass::GetUserSeasonData(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/%s/data")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *SeasonId);
 
@@ -165,7 +165,7 @@ void ServerSeasonPass::GetCurrentUserSeasonHistory(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/exp/history")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
@@ -224,7 +224,7 @@ void ServerSeasonPass::QueryUserSeasonExp(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/exp/history/tags")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -238,7 +238,7 @@ void ServerSeasonPass::BulkGetUserSessionProgression(const TArray<FString>& User
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/seasons/current/users/bulk/progression")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	FString Content{};
 	FJsonObject DataJson; 

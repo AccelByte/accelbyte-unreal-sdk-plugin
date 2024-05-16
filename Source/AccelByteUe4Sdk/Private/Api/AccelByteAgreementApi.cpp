@@ -27,7 +27,7 @@ void Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementP
 	, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
-	GetLegalPolicies(*CredentialsRef.GetNamespace(), AgreementPolicyType, DefaultOnEmpty, OnSuccess, OnError);
+	GetLegalPolicies(*CredentialsRef->GetNamespace(), AgreementPolicyType, DefaultOnEmpty, OnSuccess, OnError);
 }
 
 void Agreement::GetLegalPolicies(FString const& Namespace
@@ -63,7 +63,7 @@ void Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementP
 
 	const FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&tags=%s&defaultOnEmpty=%s")
 		, *SettingsRef.AgreementServerUrl 
-		, *CredentialsRef.GetNamespace() 
+		, *CredentialsRef->GetNamespace() 
 		, *AgreementPolicyTypeString
 		, *TagsString
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));

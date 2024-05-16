@@ -108,7 +108,7 @@ void ServerSessionBrowser::CreateGameSession(EAccelByteSessionType SessionType
 	FString SessionTypeString = FAccelByteUtilities::GetUEnumValueAsString(SessionType);
 
 	FAccelByteModelsSessionBrowserCreateRequest NewGameSession;
-	NewGameSession.Namespace = ServerCredentialsRef.GetClientNamespace();
+	NewGameSession.Namespace = ServerCredentialsRef->GetClientNamespace();
 	NewGameSession.Session_type = SessionTypeString;
 	NewGameSession.Game_session_setting.Mode = GameMode;
 	NewGameSession.Game_session_setting.Map_name = GameMapName;
@@ -157,7 +157,7 @@ void ServerSessionBrowser::CreateGameSession(FAccelByteModelsSessionBrowserCreat
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, CreateSessionRequest, OnSuccess, OnError);
 }
@@ -211,7 +211,7 @@ void ServerSessionBrowser::UpdateGameSession(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *SessionId);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateSessionRequest, OnSuccess, OnError);
@@ -231,7 +231,7 @@ void ServerSessionBrowser::RemoveGameSession(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *SessionId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -307,7 +307,7 @@ void ServerSessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("session_type"), *SessionTypeString },
@@ -336,7 +336,7 @@ void ServerSessionBrowser::GetGameSessionBySessionId(FString const& SessionId
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *SessionId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -358,7 +358,7 @@ void ServerSessionBrowser::RegisterPlayer(FString const& SessionId
 
     const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player")
     	, *ServerSettingsRef.SessionBrowserServerUrl
-    	, *ServerCredentialsRef.GetClientNamespace()
+    	, *ServerCredentialsRef->GetClientNamespace()
     	, *SessionId);
 
 	FAccelByteModelsSessionBrowserAddPlayerRequest AddPlayerRequest;
@@ -383,7 +383,7 @@ void ServerSessionBrowser::UnregisterPlayer(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *SessionId
 		, *PlayerToRemove);
 
@@ -407,7 +407,7 @@ void ServerSessionBrowser::GetRecentPlayer(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/recentplayer/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	TMultiMap<FString, FString> QueryParams;
@@ -438,7 +438,7 @@ void ServerSessionBrowser::JoinSession(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/join")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *SessionId);
 
 	FAccelByteModelsSessionBrowserJoinSessionRequest JoinRequest;

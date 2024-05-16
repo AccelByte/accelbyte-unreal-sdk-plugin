@@ -95,7 +95,7 @@ void Leaderboard::GetUserRanking(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *LeaderboardCode
 		, *UserId);
 
@@ -111,7 +111,7 @@ void Leaderboard::GetLeaderboards(uint32 Offset
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 
@@ -133,7 +133,7 @@ void Leaderboard::GetRankingsV3(FString const& LeaderboardCode, uint32 Offset, u
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/alltime")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *LeaderboardCode);
 
 	TMultiMap<FString, FString> QueryParams;
@@ -161,7 +161,7 @@ void Leaderboard::GetRankingByCycle(FString const& LeaderboardCode
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/cycles/%s")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *LeaderboardCode
 		, *CycleId);
 
@@ -195,7 +195,7 @@ void Leaderboard::GetUserRankingV3(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/users/%s")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *LeaderboardCode
 		, *UserId);
 
@@ -229,7 +229,7 @@ void Leaderboard::GetBulkUserRankingV3(TArray<FString> const& UserIds
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/users/bulk")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *LeaderboardCode);
 
 	FAccelByteModelsBulkUserRankingDataRequestV3 ContentRequest;

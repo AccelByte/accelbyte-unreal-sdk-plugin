@@ -55,7 +55,7 @@ public:
 private:
 	const FString ChatSessionHeaderName = TEXT("X-Ab-ChatSessionID");
 
-	Credentials& ChatCredentialsRef;
+	TSharedRef<Credentials, ESPMode::ThreadSafe> ChatCredentialsRef;
 	FAccelByteMessagingSystem& MessagingSystem;
 	FAccelByteNetworkConditioner& NetworkConditioner;
 

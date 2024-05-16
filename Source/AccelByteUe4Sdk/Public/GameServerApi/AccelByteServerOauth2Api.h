@@ -69,7 +69,7 @@ private:
 		, const THandler<FOauth2Token>& OnSuccess
 		, const FErrorHandler& OnError);
 
-	ServerCredentials& ServerCredentialsRef;
+	TSharedRef<ServerCredentials, ESPMode::ThreadSafe> ServerCredentialsRef;
 	ServerOauth2() = delete; // static class can't have instance
 	ServerOauth2(ServerOauth2 const&) = delete;
 	ServerOauth2(ServerOauth2&&) = delete;

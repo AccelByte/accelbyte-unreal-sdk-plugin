@@ -23,7 +23,9 @@ class FHttpRetryScheduler;
 /**
  * @brief Singleston class for storing credentials.
  */
-class ACCELBYTEUE4SDK_API Credentials : public BaseCredentials
+class ACCELBYTEUE4SDK_API Credentials
+	: public BaseCredentials
+	, public TSharedFromThis<Credentials, ESPMode::ThreadSafe>
 {
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoginSuccessDelegate, const FOauth2Token& /*Response*/);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshTokenAdditionalActions, bool);

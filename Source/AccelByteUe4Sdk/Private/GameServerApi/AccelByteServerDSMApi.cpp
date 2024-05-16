@@ -38,7 +38,7 @@ void ServerDSM::RegisterServerToDSM(const int32 Port
 
 		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
 			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef.GetClientNamespace());
+			, *ServerCredentialsRef->GetClientNamespace());
 
 		const FAccelByteModelsRegisterServerRequest Register{
 			GameVersion,
@@ -97,7 +97,7 @@ void ServerDSM::RegisterServerToDSM(const int32 Port
 
 		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
 			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef.GetClientNamespace());
+			, *ServerCredentialsRef->GetClientNamespace());
 
 		const FAccelByteModelsRegisterServerRequest Register{
 			GameVersion,
@@ -152,7 +152,7 @@ void ServerDSM::SendShutdownToDSM(const bool KillMe
 	{
 		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/shutdown")
 			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef.GetClientNamespace());
+			, *ServerCredentialsRef->GetClientNamespace());
 
 		const FAccelByteModelsShutdownServerRequest Shutdown{
 			KillMe,
@@ -188,7 +188,7 @@ void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress
 
 		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register")
 			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef.GetClientNamespace());
+			, *ServerCredentialsRef->GetClientNamespace());
 
 		const FAccelByteModelsRegisterLocalServerRequest Register{
 			IPAddress,
@@ -258,7 +258,7 @@ void ServerDSM::DeregisterLocalServerFromDSM(const FString& ServerName_
 	{
 		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/deregister")
 			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef.GetClientNamespace());
+			, *ServerCredentialsRef->GetClientNamespace());
 
 		const FAccelByteModelsDeregisterLocalServerRequest Deregister{
 			ServerName_
@@ -300,7 +300,7 @@ void ServerDSM::RegisterServerGameSession(const FString& SessionId
 	Request.Configuration = "";
 	Request.Deployment = RegisteredServerInfo.Deployment;
 	Request.Region = RegisteredServerInfo.Region;
-	Request.Namespace = FRegistry::ServerCredentials.GetClientNamespace();
+	Request.Namespace = FRegistry::ServerCredentialsRef->GetClientNamespace();
 	Request.Matching_allies = {{{Party}}};
 	
 	if(ServerType == EServerType::LOCALSERVER)
@@ -323,7 +323,7 @@ void ServerDSM::RegisterServerGameSession( const FAccelByteModelsServerCreateSes
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestContent, OnSuccess, OnError);
 }
@@ -353,7 +353,7 @@ void ServerDSM::GetSessionTimeout(const THandler<FAccelByteModelsServerTimeoutRe
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/config/sessiontimeout")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *ServerName);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -372,7 +372,7 @@ void ServerDSM::ServerHeartbeat(const FVoidHandler& OnSuccess, const FErrorHandl
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/heartbeat")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	FString Content = TEXT("");
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
@@ -397,7 +397,7 @@ void ServerDSM::GetSessionId(const THandler<FAccelByteModelsServerSessionRespons
 	{
 		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session")
 			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef.GetClientNamespace()
+			, *ServerCredentialsRef->GetClientNamespace()
 			, *ServerName);
 
 		TDelegate<void(FAccelByteModelsServerSessionResponse const&)> OnSuccessHttpClient =

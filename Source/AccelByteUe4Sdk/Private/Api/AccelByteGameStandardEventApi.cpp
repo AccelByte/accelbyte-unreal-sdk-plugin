@@ -18,7 +18,7 @@ GameStandardEvent::GameStandardEvent(Credentials& InCredentialsRef
 FString GameStandardEvent::GetTelemetryKey()
 {
 	FString Environment = *SettingsRef.SettingsEnvironment;
-	FString UserId = *CredentialsRef.GetUserId();
+	FString UserId = *CredentialsRef->GetUserId();
 	if (UserId.IsEmpty())
 	{
 		return UserId;

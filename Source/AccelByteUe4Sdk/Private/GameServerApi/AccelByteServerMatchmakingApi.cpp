@@ -45,7 +45,7 @@ void ServerMatchmaking::QuerySessionStatus(const FString MatchId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/%s/status")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *MatchId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -59,7 +59,7 @@ void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmaking
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, MatchmakingResult, OnSuccess, OnError);
 }
@@ -72,7 +72,7 @@ void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/dequeue")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	const FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *MatchId);
 
@@ -96,7 +96,7 @@ void ServerMatchmaking::AddUserToSession(const FString& ChannelName
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *ChannelName
 		, *MatchId);
 
@@ -121,7 +121,7 @@ void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s/users/%s")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *ChannelName
 		, *MatchId
 		, *UserId);
@@ -137,7 +137,7 @@ void ServerMatchmaking::RebalanceMatchmakingBasedOnMMR(const FString& MatchId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/rebalance")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *MatchId);
 

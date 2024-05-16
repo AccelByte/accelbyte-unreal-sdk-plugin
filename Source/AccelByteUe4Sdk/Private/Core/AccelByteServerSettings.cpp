@@ -505,5 +505,5 @@ void UAccelByteBlueprintsServerSettings::SetSendPredefinedEvent(bool bEnabled)
 void UAccelByteBlueprintsServerSettings::ResetSettings(ESettingsEnvironment const Environment)
 {
 	FRegistry::ServerSettings.Reset(Environment);
-	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
+	FRegistry::ServerCredentialsRef->SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 }

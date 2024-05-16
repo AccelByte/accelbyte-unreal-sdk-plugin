@@ -32,8 +32,8 @@ void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FString Content;
 	const TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(OrderCreate);
@@ -52,8 +52,8 @@ void Order::CancelOrder(const FString& OrderNo
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/cancel")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *OrderNo);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
@@ -67,8 +67,8 @@ void Order::GetUserOrder(const FString& OrderNo
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *OrderNo);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -83,8 +83,8 @@ void Order::GetUserOrders(int32 Page
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("page"), FString::FromInt(Page)},
@@ -102,8 +102,8 @@ void Order::QueryUserOrders(const FAccelByteModelsUserOrdersRequest& UserOrderRe
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FString Status = UserOrderRequest.Status != EAccelByteOrderStatus::NONE ? 
 		FAccelByteUtilities::GetUEnumValueAsString(UserOrderRequest.Status) : TEXT("");
@@ -125,8 +125,8 @@ void Order::GetUserOrderHistory(const FString& OrderNo
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *OrderNo);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);

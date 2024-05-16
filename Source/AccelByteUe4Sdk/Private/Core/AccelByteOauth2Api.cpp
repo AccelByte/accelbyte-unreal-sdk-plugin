@@ -680,7 +680,7 @@ void Oauth2::RetrieveUserThirdPartyPlatformToken(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/namespaces/%s/users/%s/platforms/%s/platformToken")
 		, *FRegistry::Settings.IamServerUrl
-		, *FRegistry::Credentials.GetNamespace() 
+		, *FRegistry::CredentialsRef->GetNamespace() 
 		, *UserId
 		, *PlatformId);
 

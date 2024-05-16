@@ -119,7 +119,7 @@ private:
 	PresenceBroadcastEvent() = delete;
 	PresenceBroadcastEvent(PresenceBroadcastEvent const&) = delete;
 	PresenceBroadcastEvent(PresenceBroadcastEvent&&) = delete;
-	Credentials& CredentialsRef;
+	TSharedRef<Credentials, ESPMode::ThreadSafe> CredentialsRef;
 
 	bool PeriodicHeartbeat(float DeltaTime);
 	void OnLoginSuccess(FOauth2Token const& Response);

@@ -29,7 +29,7 @@ public:
 	User(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef);
 	~User();
 private:
-	Credentials& UserCredentialsRef;
+	TSharedRef<Credentials, ESPMode::ThreadSafe> UserCredentialsRef;
 public:
 	/**
 	* @brief delegate for handling upgrade headless account notification.

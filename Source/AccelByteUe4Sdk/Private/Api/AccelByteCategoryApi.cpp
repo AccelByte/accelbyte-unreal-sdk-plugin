@@ -31,7 +31,7 @@ void Category::GetRootCategories(const FString& Language
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories?language=%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -46,7 +46,7 @@ void Category::GetCategory(const FString& CategoryPath
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s?language=%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
@@ -62,7 +62,7 @@ void Category::GetChildCategories(const FString& Language
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/children?language=%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
@@ -78,7 +78,7 @@ void Category::GetDescendantCategories(const FString& Language
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/descendants?language=%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 

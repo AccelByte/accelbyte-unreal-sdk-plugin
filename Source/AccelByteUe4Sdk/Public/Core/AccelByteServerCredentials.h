@@ -14,7 +14,9 @@ namespace AccelByte
 /**
  * @brief Singleston class for storing server credentials.
  */
-class ACCELBYTEUE4SDK_API ServerCredentials : public BaseCredentials
+class ACCELBYTEUE4SDK_API ServerCredentials
+	: public BaseCredentials
+	, public TSharedFromThis<ServerCredentials, ESPMode::ThreadSafe>
 {
 public:
 	using BaseCredentials::SetClientCredentials;

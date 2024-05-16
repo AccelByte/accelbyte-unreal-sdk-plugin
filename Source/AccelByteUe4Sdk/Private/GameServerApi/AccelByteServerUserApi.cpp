@@ -48,7 +48,7 @@ void ServerUser::SearchUserOtherPlatformDisplayName(const FString& DisplayName
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/search")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("by"), bIsSearchByUniqueDisplayName ? TEXT("uniqueDisplayName") : TEXT("thirdPartyPlatform") },
@@ -73,7 +73,7 @@ void ServerUser::SearchUserOtherPlatformUserId(const FString& PlatformUserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/platforms/%s/users/%s")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *PlatformId
 		, *PlatformUserId);
 
@@ -96,7 +96,7 @@ void ServerUser::BanSingleUser(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, BanUser, OnSuccess, OnError);
@@ -119,7 +119,7 @@ void ServerUser::GetUserBans(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -144,7 +144,7 @@ void ServerUser::GetUserBanInfo(const FString& UserId, const THandler<FGetUserBa
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans?activeOnly=true")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 	
 	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
@@ -158,7 +158,7 @@ void ServerUser::ListUserByUserId(const FListUserDataRequest Request
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/bulk")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef.GetClientNamespace() );
+		, *ServerCredentialsRef->GetClientNamespace() );
  
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }

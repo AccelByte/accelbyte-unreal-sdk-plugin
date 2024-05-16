@@ -76,7 +76,7 @@ public:
 		, TSharedPtr<IWebSocket> InWebSocket = nullptr);
 	~Lobby();
 private:
-	Credentials& LobbyCredentialsRef;
+	TSharedRef<Credentials, ESPMode::ThreadSafe> LobbyCredentialsRef;
 	FAccelByteMessagingSystem& MessagingSystem;
 	FAccelByteNetworkConditioner& NetworkConditioner;
 

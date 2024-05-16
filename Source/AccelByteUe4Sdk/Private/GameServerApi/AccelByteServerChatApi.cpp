@@ -117,7 +117,7 @@ void ServerChat::CreateChannelChat(const TSet<FString> MemberUserIds
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic")
 		, *ServerSettingsRef.ChatServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	FString Content = TEXT("");
 	TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>> > JsonWriter = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&Content, 0);
@@ -147,7 +147,7 @@ void ServerChat::DeleteChannelChat(const FString& TopicId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic/%s")
 		, *ServerSettingsRef.ChatServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *TopicId);
 
 	// need to convert "processed" field from unix timestamp to FDateTime manually.
@@ -182,7 +182,7 @@ void ServerChat::AddUserToChannelChat(const FString& TopicId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic/%s/user/%s")
 		, *ServerSettingsRef.ChatServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *TopicId
 		, *UserId);
 
@@ -218,7 +218,7 @@ void ServerChat::RemoveUserFromChannelChat(const FString& TopicId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic/%s/user/%s")
 		, *ServerSettingsRef.ChatServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *TopicId
 		, *UserId);
 

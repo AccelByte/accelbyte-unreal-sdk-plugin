@@ -32,7 +32,7 @@ protected:
 		return true;
 	}
 
-	Credentials const& CredentialsRef;
+	TSharedRef<Credentials const, ESPMode::ThreadSafe> CredentialsRef;
 	Settings const& SettingsRef;
 	FHttpRetryScheduler& HttpRef;
 	FHttpClient HttpClient;

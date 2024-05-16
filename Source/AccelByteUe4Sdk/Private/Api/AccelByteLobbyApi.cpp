@@ -743,10 +743,10 @@ void Lobby::SetPartySizeLimit(const FString& PartyId
 		return;
 	}
 	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/limit")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
@@ -1181,8 +1181,8 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserIds, OnSuccess, OnError);
 }
@@ -1226,7 +1226,7 @@ void Lobby::SyncThirdPartyFriends(const FAccelByteModelsSyncThirdPartyFriendsReq
 
 	const FString Url = FString::Printf(TEXT("%s/friends/sync/namespaces/%s/me")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FString JSONString;
 	FAccelByteUtilities::TArrayUStructToJsonString(Request.FriendSyncDetails, JSONString);
@@ -1266,7 +1266,7 @@ void Lobby::SyncThirdPartyBlockList(const FAccelByteModelsSyncThirdPartyBlockLis
 
 	const FString Url = FString::Printf(TEXT("%s/sync/namespaces/%s/me/block")
 		, *LobbyServerHttp
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FString JSONString{};
 	FAccelByteUtilities::TArrayUStructToJsonString(Request.BlockListSyncDetails, JSONString);
@@ -1283,7 +1283,7 @@ void Lobby::QueryFriendList(THandler<FAccelByteModelsQueryFriendListResponse> co
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1302,7 +1302,7 @@ void Lobby::QueryIncomingFriendRequest(THandler<FAccelByteModelsIncomingFriendRe
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/incoming-time")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1321,7 +1321,7 @@ void Lobby::QueryOutgoingFriendRequest(THandler<FAccelByteModelsOutgoingFriendRe
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/outgoing-time")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1344,7 +1344,7 @@ void Lobby::SendFriendRequest(const FString& UserId, FVoidHandler const& OnSucce
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsFriendRequestByUserId Payload;
 	Payload.FriendId = UserId;
@@ -1359,7 +1359,7 @@ void Lobby::SendFriendRequestByPublicId(const FString& PublicId, FVoidHandler co
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsFriendRequestByPublicId Payload;
 	Payload.FriendPublicId = PublicId;
@@ -1380,7 +1380,7 @@ void Lobby::CancelFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/cancel")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsCancelFriendRequest Payload;
 	Payload.FriendId = UserId;
@@ -1401,7 +1401,7 @@ void Lobby::AcceptFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/accept")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsAcceptFriendRequest Payload;
 	Payload.FriendId = UserId;
@@ -1422,7 +1422,7 @@ void Lobby::RejectFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/reject")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsRejectFriendRequest Payload;
 	Payload.FriendId = UserId;
@@ -1445,7 +1445,7 @@ void Lobby::GetFriendshipStatus(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/status/%s")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -1464,7 +1464,7 @@ void Lobby::Unfriend(const FString& UserId, FVoidHandler const& OnSuccess, FErro
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/unfriend")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsUnfriendRequest Payload;
 	Payload.FriendId = UserId;
@@ -1485,7 +1485,7 @@ void Lobby::BlockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, FE
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/block")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsBlockUserRequest Payload;
 	Payload.BlockedUserId = UserId;
@@ -1506,7 +1506,7 @@ void Lobby::UnblockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, 
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/unblock")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsUnlockUserRequest Payload;
 	Payload.UserId = UserId;
@@ -1522,7 +1522,7 @@ void Lobby::GetPartyData(const FString& PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -1561,7 +1561,7 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/presence/namespaces/%s/users/presence")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnSuccess, NotProcessedUserIds](const FAccelByteModelsBulkUserStatusNotif& Result)
 		{
@@ -1579,7 +1579,7 @@ void Lobby::GetPartyStorage(const FString& PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -1596,7 +1596,7 @@ void Lobby::GetListOfBlockedUsers(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -1609,7 +1609,7 @@ void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUser
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 
@@ -1626,7 +1626,7 @@ void Lobby::GetListOfBlockers(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -1639,7 +1639,7 @@ void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked-by")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1654,7 +1654,7 @@ void Lobby::SendNotificationToUser(const FString& SendToUserId
 
 	const FString Url = FString::Printf(TEXT("%s/notification/namespaces/%s/users/%s/freeform")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SendToUserId);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -1688,7 +1688,7 @@ void Lobby::BlockPlayer(const FString& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(BlockPlayer
 		, Block
-		, FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *CredentialsRef.GetUserId(), *UserId, *CredentialsRef.GetNamespace()));
+		, FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *CredentialsRef->GetUserId(), *UserId, *CredentialsRef->GetNamespace()));
 }
 
 void Lobby::UnblockPlayer(const FString& UserId)
@@ -1697,7 +1697,7 @@ void Lobby::UnblockPlayer(const FString& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(UnblockPlayer
 		, Friends
-		, FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *CredentialsRef.GetUserId(), *UserId, *CredentialsRef.GetNamespace()));
+		, FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *CredentialsRef->GetUserId(), *UserId, *CredentialsRef->GetNamespace()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1723,7 +1723,7 @@ FString Lobby::SetSessionAttribute(const FString& Key
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(SetSessionAttribute
 		, Attribute
-		, FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *CredentialsRef.GetNamespace(), *Key, *Value));
+		, FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *CredentialsRef->GetNamespace(), *Key, *Value));
 }
 
 FString Lobby::GetSessionAttribute(const FString& Key)
@@ -1732,7 +1732,7 @@ FString Lobby::GetSessionAttribute(const FString& Key)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(GetSessionAttribute
 		, Attribute
-		, FString::Printf(TEXT("namespace: %s\nkey: %s"), *CredentialsRef.GetNamespace(), *Key));
+		, FString::Printf(TEXT("namespace: %s\nkey: %s"), *CredentialsRef->GetNamespace(), *Key));
 }
 
 FString Lobby::GetAllSessionAttribute()
@@ -1741,7 +1741,7 @@ FString Lobby::GetAllSessionAttribute()
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(GetAllSessionAttribute
 		, Attribute
-		, FString::Printf(TEXT("namespace: %s"), *CredentialsRef.GetNamespace()));
+		, FString::Printf(TEXT("namespace: %s"), *CredentialsRef->GetNamespace()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -2152,8 +2152,8 @@ void Lobby::CreateWebSocket(const FString& Token)
 	Headers.Add(LobbyEnvelopeStartHeaderName, LobbyEnvelopeStartHeaderValue);
 	Headers.Add(LobbyEnvelopeEndHeaderName, LobbyEnvelopeEndHeaderValue);
 
-	const FString PlatformId = LobbyCredentialsRef.GetAuthToken().Platform_id;
-	const FString PlatformUserId = LobbyCredentialsRef.GetAuthToken().Platform_user_id;
+	const FString PlatformId = LobbyCredentialsRef->GetAuthToken().Platform_id;
+	const FString PlatformUserId = LobbyCredentialsRef->GetAuthToken().Platform_user_id;
 	if (!PlatformId.IsEmpty())
 	{
 		Headers.Add(LobbyPlatformIdHeaderName, PlatformId);
@@ -2169,7 +2169,7 @@ void Lobby::CreateWebSocket(const FString& Token)
 
 	WebSocket = AccelByteWebSocket::Create(*SettingsRef.LobbyServerUrl
 		, TEXT("wss")
-		, CredentialsRef
+		, CredentialsRef.Get()
 		, Headers
 		, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory())
 		, PingDelay
@@ -2898,11 +2898,11 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 		{
 			BanNotifReceived = true;
 			FAccelByteModelsUserBannedNotification Result;
-			//CredentialsRef.OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
+			//CredentialsRef->OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
 			if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result))
 			{
 				BanType = Result.Ban;
-				if (Result.UserId == CredentialsRef.GetUserId())
+				if (Result.UserId == CredentialsRef->GetUserId())
 				{
 					HttpRef.BearerAuthRejected();
 				}
@@ -3207,7 +3207,7 @@ void Lobby::RequestWritePartyStorage(const FString& PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyId);
 
 	FString Contents = "{\n";
@@ -3365,7 +3365,7 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, float InTotalTimeout
 	, TSharedPtr<IWebSocket> InWebSocket)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-	, LobbyCredentialsRef{InCredentialsRef}
+	, LobbyCredentialsRef{InCredentialsRef.AsShared()}
 	, MessagingSystem{InMessagingSystemRef}
 	, NetworkConditioner{InNetworkConditionerRef}
 	, PingDelay{InPingDelay}

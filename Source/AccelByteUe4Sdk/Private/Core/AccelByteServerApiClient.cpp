@@ -17,7 +17,7 @@ namespace AccelByte
 
 	FServerApiClient::FServerApiClient(AccelByte::ServerCredentials& Credentials, AccelByte::FHttpRetryScheduler& Http)
 		: bUseSharedCredentials(true)
-		, ServerCredentialsRef(MakeShareable<AccelByte::ServerCredentials>(&Credentials, [](AccelByte::ServerCredentials*) {}))
+		, ServerCredentialsRef(Credentials.AsShared())
 		, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http, [](AccelByte::FHttpRetryScheduler*) {}))
 	{
 

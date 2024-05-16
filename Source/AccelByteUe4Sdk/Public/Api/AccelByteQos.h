@@ -71,7 +71,7 @@ public:
 	
 private:
 	// Constructor
-	Credentials& CredentialsRef;
+	TSharedRef<Credentials, ESPMode::ThreadSafe> CredentialsRef;
 	const Settings& SettingsRef;
 	FAccelByteMessagingSystem& MessagingSystem;
 	TSharedPtr<bool> bValidityFlagPtr = nullptr;

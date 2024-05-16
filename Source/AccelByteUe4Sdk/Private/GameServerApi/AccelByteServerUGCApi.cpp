@@ -33,7 +33,7 @@ void ServerUGC::SearchContents(FAccelByteModelsUGCSearchContentsRequest const& R
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/contents/search")
 		, *ServerSettingsRef.UGCServerUrl
-		, *ServerCredentialsRef.GetNamespace());
+		, *ServerCredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(Request.SortBy) },
@@ -80,7 +80,7 @@ void ServerUGC::SearchContentsSpecificToChannel(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/contents/search")
 		, *ServerSettingsRef.UGCServerUrl
-		, *ServerCredentialsRef.GetNamespace()
+		, *ServerCredentialsRef->GetNamespace()
 		, *ChannelId);
 
 	TMultiMap<FString, FString> QueryParams {
@@ -135,7 +135,7 @@ void ServerUGC::ModifyContentByShareCode(FString const& UserId
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/channels/%s/contents/s3/sharecodes/%s")
 		, *ServerSettingsRef.UGCServerUrl
-		, *ServerCredentialsRef.GetNamespace()
+		, *ServerCredentialsRef->GetNamespace()
 		, *UserId
 		, *ChannelId
 		, *ShareCode);
@@ -178,7 +178,7 @@ void ServerUGC::DeleteContentByShareCode(FString const& UserId
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/channels/%s/contents/sharecodes/%s")
 		, *ServerSettingsRef.UGCServerUrl
-		, *ServerCredentialsRef.GetNamespace()
+		, *ServerCredentialsRef->GetNamespace()
 		, *UserId
 		, *ChannelId
 		, *ShareCode);
@@ -368,16 +368,16 @@ void ServerUGC::InternalSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 cons
 
 const FString ServerUGC::GetNamespace()
 {
-	if (ServerCredentialsRef.GetSessionState() == BaseCredentials::ESessionState::Valid)
+	if (ServerCredentialsRef->GetSessionState() == BaseCredentials::ESessionState::Valid)
 	{
-		return ServerCredentialsRef.GetNamespace();
+		return ServerCredentialsRef->GetNamespace();
 	}
 	return ServerSettingsRef.Namespace;
 }
 
 const TMap<FString, FString> ServerUGC::GetDefaultHeaders()
 {
-	auto Headers = ServerCredentialsRef.GetAuthHeader();
+	auto Headers = ServerCredentialsRef->GetAuthHeader();
 	Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
 
 	return Headers;

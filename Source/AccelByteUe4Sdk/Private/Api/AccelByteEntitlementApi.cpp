@@ -39,8 +39,8 @@ void Entitlement::GetCurrentUserEntitlementHistory(THandler<FAccelByteModelsUser
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/history")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FString TempStartDate;
 	FString TempEndDate;
@@ -101,8 +101,8 @@ void Entitlement::QueryUserEntitlements(FString const& EntitlementName
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements")
 			, *SettingsRef.PlatformServerUrl
-			, *CredentialsRef.GetNamespace()
-			, *CredentialsRef.GetUserId());
+			, *CredentialsRef->GetNamespace()
+			, *CredentialsRef->GetUserId());
 	
 	TMultiMap<FString, FString> QueryParams{};
 
@@ -157,8 +157,8 @@ void Entitlement::GetUserEntitlementById(FString const& Entitlementid
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s")
-		, *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *SettingsRef.PlatformServerUrl, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Entitlementid);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -399,8 +399,8 @@ void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s/decrement")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *EntitlementId);
 
 	FString Content;
@@ -483,7 +483,7 @@ void Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase Entit
 	FReport::Log(FString(__FUNCTION__));
 
 	FString PlatformText = TEXT("");
-	FString PlatformUserId = CredentialsRef.GetPlatformUserId();
+	FString PlatformUserId = CredentialsRef->GetPlatformUserId();
 
 	// #TODO: Replace this switch statement with some kind of model backed sync or something
 	TSharedRef<FJsonObject> SyncRequestJson = MakeShared<FJsonObject>();
@@ -566,8 +566,8 @@ void Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase Entit
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *PlatformText);
 
 	FString ContentString;
@@ -591,8 +591,8 @@ void Entitlement::SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncM
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/receipt")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *PlatformText);
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
@@ -610,8 +610,8 @@ void Entitlement::SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformS
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/receipt")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *PlatformText);
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
@@ -629,8 +629,8 @@ void Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMo
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/receipt")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *PlatformText);
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
@@ -651,8 +651,8 @@ void Entitlement::SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync
 	}
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/xbl/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -662,7 +662,7 @@ void Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString platformUserId = CredentialsRef.GetPlatformUserId();
+	FString platformUserId = CredentialsRef->GetPlatformUserId();
 
 	if (platformUserId.IsEmpty()) 
 	{
@@ -673,8 +673,8 @@ void Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess
 	FString Content = TEXT("");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/steam/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FJsonObject DataJson;
 	DataJson.SetStringField("steamId", platformUserId);
@@ -697,8 +697,8 @@ void Entitlement::SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncMod
 	//	URL
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/psn/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -712,8 +712,8 @@ void Entitlement::SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlemen
 	// Url 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/twitch/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 	
 	// Content Body 
 	FString Content = TEXT("");
@@ -738,8 +738,8 @@ void Entitlement::SyncEpicGameDurableItems(FString const& EpicGamesJwtToken
 	// Url 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/epicgames/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());	 
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());	 
 	// Content Body 
 	FString Content = TEXT("");
 	FJsonObject DataJson;
@@ -761,7 +761,7 @@ void Entitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items
 	// Url 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/purchase/conditions/validate")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	// Content Body 
 	FString Content = TEXT("");
@@ -789,8 +789,8 @@ void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Id
 	// Url 
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/ownership/byItemIds")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	// Params 
 	TMultiMap<FString, FString> QueryParams{};
@@ -819,8 +819,8 @@ void Entitlement::SyncWithDLCEntitlementInPSNStore(const FAccelByteModelsPlaySta
 	FString Content = TEXT("");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/psn/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FJsonObject DataJson;
 	DataJson.SetStringField("serviceLabel", FString::FromInt(PSNModel.ServiceLabel));
@@ -840,8 +840,8 @@ void Entitlement::SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStatio
 	FString Content = TEXT("");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/psn/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FJsonObject DataJson;
 	DataJson.SetStringField("productId", PlaystationModel.ProductId);
@@ -875,8 +875,8 @@ void Entitlement::SellUserEntitlement(FString const& EntitlementId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s/sell")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *EntitlementId);
 
 	FString Content;
@@ -894,8 +894,8 @@ void Entitlement::SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteMod
 	FReport::Log(FString(__FUNCTION__));  
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/oculus/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
 }
 	
@@ -905,8 +905,8 @@ void Entitlement::SyncOculusDLC(FVoidHandler const& OnSuccess
 	FReport::Log(FString(__FUNCTION__));  
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/oculus/sync")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
 }
 
@@ -919,8 +919,8 @@ void Entitlement::SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDL
 	FString Content = TEXT("");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/psn/sync/multiServiceLabels")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(PlaystationModel);
 	FAccelByteUtilities::RemoveEmptyStrings(Json);
@@ -939,8 +939,8 @@ void Entitlement::SyncEntitlementPSNMultipleService(const FAccelByteModelsMultip
 	FString Content = TEXT("");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/psn/sync/multiServiceLabels")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(PlaystationModel);
 	FAccelByteUtilities::RemoveEmptyStrings(Json);

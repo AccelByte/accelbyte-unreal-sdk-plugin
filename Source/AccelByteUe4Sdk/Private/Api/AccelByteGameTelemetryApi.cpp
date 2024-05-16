@@ -22,13 +22,13 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, bool bInCacheEvent
 	, bool bInRetryOnFailed)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-	, CredentialsRef{InCredentialsRef}
+	, CredentialsRef{InCredentialsRef.AsShared()}
 	, ShuttingDown(false)
 	, bCacheEvent(bInCacheEvent)
 	, bRetryOnFailed(bInRetryOnFailed)
 {
-	GameTelemetryLoginSuccess = CredentialsRef.OnLoginSuccess().AddRaw(this, &GameTelemetry::OnLoginSuccess);
-	GameTelemetryLogoutSuccess = CredentialsRef.OnLogoutSuccess().AddRaw(this, &GameTelemetry::OnLogoutSuccess);
+	GameTelemetryLoginSuccess = CredentialsRef->OnLoginSuccess().AddRaw(this, &GameTelemetry::OnLoginSuccess);
+	GameTelemetryLogoutSuccess = CredentialsRef->OnLogoutSuccess().AddRaw(this, &GameTelemetry::OnLogoutSuccess);
 	bCacheEvent = SettingsRef.bEnableGameTelemetryCache;
 }
 
@@ -151,15 +151,15 @@ void GameTelemetry::Shutdown()
 			FTickerAlias::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
 			GameTelemetryTickDelegateHandle.Reset();
 		}
-
+		
 		if (GameTelemetryLoginSuccess.IsValid())
 		{
-			CredentialsRef.OnLoginSuccess().Remove(GameTelemetryLoginSuccess);
+			CredentialsRef->OnLoginSuccess().Remove(GameTelemetryLoginSuccess);
 		}
 
 		if (GameTelemetryLogoutSuccess.IsValid())
 		{
-			CredentialsRef.OnLogoutSuccess().Remove(GameTelemetryLogoutSuccess);
+			CredentialsRef->OnLogoutSuccess().Remove(GameTelemetryLogoutSuccess);
 		}
 
 		// flush events
@@ -260,7 +260,7 @@ void GameTelemetry::SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTeleme
 
 	if (ShuttingDown && !bCacheEvent)
 	{
-		if (CredentialsRef.IsSessionValid())
+		if (CredentialsRef->IsSessionValid())
 		{
 			HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, FVoidHandler{}, FErrorHandler{});
 		}
@@ -438,7 +438,7 @@ const FString GameTelemetry::GetEventNamespace()
 {
 	if (EventNamespace.IsEmpty())
 	{
-		EventNamespace = CredentialsRef.GetNamespace();
+		EventNamespace = CredentialsRef->GetNamespace();
 	}
 	return EventNamespace;
 }
@@ -483,7 +483,7 @@ bool GameTelemetry::EventsJsonToArray(FString& InJsonString
 
 FString GameTelemetry::GetTelemetryKey()
 {
-	FString UserId = *CredentialsRef.GetUserId();
+	FString UserId = *CredentialsRef->GetUserId();
 	if (UserId.IsEmpty())
 	{
 		return UserId;

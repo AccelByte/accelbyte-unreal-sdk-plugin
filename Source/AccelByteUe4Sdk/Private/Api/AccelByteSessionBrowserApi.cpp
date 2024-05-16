@@ -109,8 +109,8 @@ void SessionBrowser::CreateGameSession(EAccelByteSessionType SessionType
 	FString SessionTypeString = FAccelByteUtilities::GetUEnumValueAsString(SessionType);
 	
 	FAccelByteModelsSessionBrowserCreateRequest NewGameSession;
-	NewGameSession.Username = CredentialsRef.GetUserDisplayName();
-	NewGameSession.Namespace = CredentialsRef.GetNamespace();
+	NewGameSession.Username = CredentialsRef->GetUserDisplayName();
+	NewGameSession.Namespace = CredentialsRef->GetNamespace();
 	NewGameSession.Session_type = SessionTypeString;
 	NewGameSession.Game_session_setting.Mode = GameMode;
 	NewGameSession.Game_session_setting.Map_name = GameMapName;
@@ -159,7 +159,7 @@ void SessionBrowser::CreateGameSession(FAccelByteModelsSessionBrowserCreateReque
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, CreateSessionRequest, OnSuccess, OnError);
 }
@@ -214,7 +214,7 @@ void SessionBrowser::UpdateGameSession(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionId);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateSessionRequest, OnSuccess, OnError);
@@ -241,7 +241,7 @@ void SessionBrowser::UpdateGameSettings(FString const& SessionId
 {
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/settings")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionId);
 
 	FString Content;
@@ -265,7 +265,7 @@ void SessionBrowser::RemoveGameSession(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -341,7 +341,7 @@ void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession?session_type=%s&game_mode=%s&joinable=true&match_exist=%s&limit=%d&offset=%d")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *FGenericPlatformHttp::UrlEncode(SessionTypeString)
 		, *FGenericPlatformHttp::UrlEncode(GameMode)
 		, *FGenericPlatformHttp::UrlEncode(MatchExist)
@@ -368,7 +368,7 @@ void SessionBrowser::GetGameSessionsByUserIds(const TArray<FString>& UserIds
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/bulk?user_ids=%s")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserIdsQueryString);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -397,7 +397,7 @@ void SessionBrowser::RegisterPlayer(FString const& SessionId
 
     const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player")
     	, *SettingsRef.SessionBrowserServerUrl
-    	, *CredentialsRef.GetNamespace()
+    	, *CredentialsRef->GetNamespace()
     	, *SessionId);
 
 	FAccelByteModelsSessionBrowserAddPlayerRequest AddPlayerRequest;
@@ -429,7 +429,7 @@ void SessionBrowser::UnregisterPlayer(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player/%s")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionId
 		, *PlayerToRemove);
 
@@ -453,7 +453,7 @@ void SessionBrowser::GetRecentPlayer(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/recentplayer/%s?limit=%d&offset=%d")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId
 		, Limit
 		, Offset);
@@ -476,7 +476,7 @@ void SessionBrowser::JoinSession(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/join")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionId);
 
 	FAccelByteModelsSessionBrowserJoinSessionRequest JoinRequest;
@@ -502,7 +502,7 @@ void SessionBrowser::GetGameSession(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *SettingsRef.SessionBrowserServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);

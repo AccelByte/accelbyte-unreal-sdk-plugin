@@ -36,7 +36,7 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds
 	{
 		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/profiles")
 			, *SettingsRef.GameProfileServerUrl
-			, *CredentialsRef.GetNamespace());
+			, *CredentialsRef->GetNamespace());
 
 		for (int i = 0 ; i < UserIds.Num() ; i++)
 		{
@@ -54,8 +54,8 @@ void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameP
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -68,8 +68,8 @@ void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & G
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, GameProfileRequest, OnSuccess, OnError);
 }
@@ -82,8 +82,8 @@ void GameProfile::GetGameProfile(const FString & ProfileId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ProfileId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -98,8 +98,8 @@ void GameProfile::UpdateGameProfile(const FString & ProfileId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ProfileId);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, GameProfileRequest, OnSuccess, OnError);
@@ -113,8 +113,8 @@ void GameProfile::DeleteGameProfile(const FString & ProfileId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ProfileId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -129,8 +129,8 @@ void GameProfile::GetGameProfileAttribute(const FString & ProfileId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ProfileId, *AttributeName);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -145,8 +145,8 @@ void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *ProfileId
 		, *Attribute.name);
 

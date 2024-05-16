@@ -41,7 +41,7 @@ void Reporting::SubmitReport(const FAccelByteModelsReportingSubmitData ReportDat
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports")
 		, *SettingsRef.ReportingServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ReportData, OnSuccess, OnError);
 }
@@ -82,7 +82,7 @@ void Reporting::SubmitChatReport(const FAccelByteModelsReportingSubmitDataChat& 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports")
 	, *SettingsRef.ReportingServerUrl
-	, *CredentialsRef.GetNamespace());
+	, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
@@ -98,7 +98,7 @@ void Reporting::GetReasons(const FString& ReasonGroup
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasons")
 		, *SettingsRef.ReportingServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("group"), ReasonGroup },
@@ -119,7 +119,7 @@ void Reporting::GetReasonGroups(int32 const& Offset
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasonGroups")
 		, *SettingsRef.ReportingServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("offset"),FString::FromInt(Offset) },

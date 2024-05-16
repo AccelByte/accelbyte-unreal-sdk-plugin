@@ -26,7 +26,7 @@ public:
 	LoginQueue(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef);
 	~LoginQueue();
 private:
-	Credentials& UserCredentialsRef;
+	TSharedRef<Credentials, ESPMode::ThreadSafe> UserCredentialsRef;
 public:
 
 	/**

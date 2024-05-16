@@ -52,8 +52,8 @@ void CloudSave::SaveUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key
 		, (IsPublic ? TEXT("/public") : TEXT("")));
 
@@ -73,8 +73,8 @@ void CloudSave::GetUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
@@ -103,7 +103,7 @@ void CloudSave::GetPublicUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s/public")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId
 		, *Key);
 
@@ -140,7 +140,7 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/bulk/records/%s/public")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Key);
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
@@ -186,7 +186,7 @@ void CloudSave::BulkGetUserRecords(const TArray<FString>& Keys
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/me/records/bulk")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess](FJsonObject const& JSONObject)
@@ -237,8 +237,8 @@ void CloudSave::ReplaceUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key
 		, (IsPublic ? TEXT("/public") : TEXT("")));
 
@@ -269,8 +269,8 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 		
 	const TMultiMap<FString, FString> QueryParams = {
@@ -408,8 +408,8 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -535,8 +535,8 @@ void CloudSave::DeleteUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -551,7 +551,7 @@ void CloudSave::SaveGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Key);
 
 	FString Content = TEXT("");
@@ -570,7 +570,7 @@ void CloudSave::GetGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Key);
 
 	const auto OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
@@ -592,7 +592,7 @@ void CloudSave::ReplaceGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Key);
 
 	FString Content = TEXT("");
@@ -614,7 +614,7 @@ void CloudSave::ReplaceGameRecord(int TryAttempt
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/concurrent/records/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Key);
 
 	FJsonObject DataJson;
@@ -733,7 +733,7 @@ void CloudSave::DeleteGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -761,7 +761,7 @@ void CloudSave::BulkGetGameRecords(TArray<FString> const& Keys
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/bulk")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess](FJsonObject const& JSONObject)
@@ -801,7 +801,7 @@ void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/public")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -870,7 +870,7 @@ void CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/public/bulk")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(

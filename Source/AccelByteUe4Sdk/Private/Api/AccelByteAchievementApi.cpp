@@ -112,7 +112,7 @@ void Achievement::QueryAchievements(const FString& Language
 	
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("language"), Language.IsEmpty() ? TEXT("en-US") : Language},
@@ -140,7 +140,7 @@ void Achievement::GetAchievement(const FString& AchievementCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements/%s")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *AchievementCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -169,8 +169,8 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
@@ -195,8 +195,8 @@ void Achievement::QueryUserAchievements(EAccelByteGlobalAchievementListSortBy co
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteGlobalAchievementListSortBy::NONE ? TEXT(""): ConvertGlobalAchievementSortByToString(SortBy)},
@@ -229,7 +229,7 @@ void Achievement::QueryUserAchievements(EAccelByteGlobalAchievementListSortBy co
 
 		const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
 			, *SettingsRef.AchievementServerUrl
-			, *CredentialsRef.GetNamespace()
+			, *CredentialsRef->GetNamespace()
 			, *UserId);
 
 		const TMultiMap<FString, FString> QueryParams = {
@@ -258,8 +258,8 @@ void Achievement::UnlockAchievement(const FString& AchievementCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/%s/unlock")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *AchievementCode);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
@@ -278,7 +278,7 @@ void Achievement::QueryGlobalAchievements(FString const& AchievementCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/global/achievements")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteGlobalAchievementListSortBy::NONE ? TEXT("") : ConvertGlobalAchievementSortByToString(SortBy)},
@@ -309,7 +309,7 @@ void Achievement::QueryGlobalAchievementContributors(FString const& AchievementC
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/global/achievements/%s/contributors")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *AchievementCode);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -332,8 +332,8 @@ void Achievement::QueryGlobalAchievementUserContributed(FString const& Achieveme
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/global/achievements")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("sortBy"), SortBy == EAccelByteGlobalAchievementContributorsSortBy::NONE ? TEXT("") : ConvertGlobalAchievementContributosSortByToString(SortBy)},
@@ -359,8 +359,8 @@ void Achievement::ClaimGlobalAchievements(FString const& AchievementCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/global/achievements/%s/claim")
 		, *SettingsRef.AchievementServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *AchievementCode);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
@@ -375,7 +375,7 @@ void Achievement::GetTags(FString const& Name
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace());
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags"), *SettingsRef.AchievementServerUrl, *CredentialsRef->GetNamespace());
 	const FString Verb = TEXT("GET");
 
 	const TMultiMap<FString, FString> QueryParams = {

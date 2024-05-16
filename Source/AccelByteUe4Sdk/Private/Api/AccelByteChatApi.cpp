@@ -404,7 +404,7 @@ namespace AccelByte
 			, float TotalTimeout
 			, TSharedPtr<IWebSocket> WebSocket)
 			: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-			, ChatCredentialsRef{InCredentialsRef}
+			, ChatCredentialsRef{InCredentialsRef.AsShared()}
 			, MessagingSystem{InMessagingSystemRef}
 			, NetworkConditioner{InNetworkConditionerRef}
 			, PingDelay{PingDelay}
@@ -436,7 +436,7 @@ namespace AccelByte
 			Headers.Add(TEXT("X-Ab-RpcEnvelopeEnd"), WsEnvelopeEnd);
 			FAccelByteUtilities::AppendModulesVersionToMap(Headers);
 
-			WebSocket = AccelByteWebSocket::Create(*SettingsRef.ChatServerWsUrl, TEXT("wss"), CredentialsRef, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
+			WebSocket = AccelByteWebSocket::Create(*SettingsRef.ChatServerWsUrl, TEXT("wss"), CredentialsRef.Get(), Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
 
 			WebSocket->OnConnected().AddRaw(this, &Chat::OnConnected);
 			WebSocket->OnMessageReceived().AddRaw(this, &Chat::OnMessage);
@@ -886,10 +886,10 @@ namespace AccelByte
 				return;
 			}
 
-			const FString Self = CredentialsRef.GetUserId();
+			const FString Self = CredentialsRef->GetUserId();
 			FJsonDomBuilder::FObject Params;
 			Params.Set(ChatToken::Json::Field::Type, ChatToken::Json::Value::ChatGroupTypePrivate);
-			Params.Set(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
+			Params.Set(ChatToken::Json::Field::Namespace, CredentialsRef->GetNamespace());
 			FJsonDomBuilder::FArray Members;
 			Members.Add(Self);
 			Members.Add(TargetUserId);
@@ -913,7 +913,7 @@ namespace AccelByte
 				return;
 			}
 
-			const FString Self = CredentialsRef.GetUserId();
+			const FString Self = CredentialsRef->GetUserId();
 
 			FAccelByteModelsChatCreateTopicRequest ToSendRequest = Request;
 			if (!ToSendRequest.Members.Contains(Self))
@@ -928,7 +928,7 @@ namespace AccelByte
 
 			TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
 			FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsChatCreateTopicRequest::StaticStruct(), &ToSendRequest, Params, 0, 0);
-			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
+			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef->GetNamespace());
 			Params.Get().SetStringField(ChatToken::Json::Field::Type, ChatToken::Json::Value::ChatGroupTypePublic);
 			SEND_CONTENT_CACHE_ID(CreateTopic)
 		}
@@ -1109,7 +1109,7 @@ namespace AccelByte
 			FReport::Log(FString(__FUNCTION__));
 			TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
 			FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsChatQueryTopicRequest::StaticStruct(), &Request, Params, 0, 0);
-			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
+			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef->GetNamespace());
 			SEND_CONTENT_CACHE_ID(QueryTopic)
 		}
 
@@ -1131,7 +1131,7 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FJsonDomBuilder::FObject Params;
-			Params.Set(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
+			Params.Set(ChatToken::Json::Field::Namespace, CredentialsRef->GetNamespace());
 			Params.Set(ChatToken::Json::Field::Offset, Offset);
 			Params.Set(ChatToken::Json::Field::Limit, Limit);
 			SEND_CONTENT_CACHE_ID(QueryPersonalTopic)
@@ -1144,7 +1144,7 @@ namespace AccelByte
 			FReport::Log(FString(__FUNCTION__));
 			TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
 			FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsChatQueryTopicRequest::StaticStruct(), &Request, Params, 0, 0);
-			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
+			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef->GetNamespace());
 			SEND_CONTENT_CACHE_ID(QueryGroupTopic)
 		}
 
@@ -1155,7 +1155,7 @@ namespace AccelByte
 			FReport::Log(FString(__FUNCTION__));
 			TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
 			FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsChatQueryTopicRequest::StaticStruct(), &Request, Params, 0, 0);
-			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef.GetNamespace());
+			Params.Get().SetStringField(ChatToken::Json::Field::Namespace, CredentialsRef->GetNamespace());
 			SEND_CONTENT_CACHE_ID(QueryPublicTopic)
 		}
 

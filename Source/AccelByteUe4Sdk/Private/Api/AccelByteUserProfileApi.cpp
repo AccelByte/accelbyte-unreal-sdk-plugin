@@ -31,7 +31,7 @@ void UserProfile::GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -51,7 +51,7 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/public")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserID);
 
 	const TMap<FString, FString> Headers = {
@@ -71,7 +71,7 @@ void UserProfile::BatchGetPublicUserProfileInfos(const FString& UserIds
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("userIds"), UserIds}
@@ -92,7 +92,7 @@ void UserProfile::BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("userIds"), FString::Join(UserIds, TEXT(","))}
@@ -112,8 +112,8 @@ void UserProfile::GetCustomAttributes(const THandler<FJsonObject>& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -139,7 +139,7 @@ void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateReque
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
 }
@@ -152,8 +152,8 @@ void UserProfile::UpdateCustomAttributes(const FJsonObject& CustomAttributesUpda
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FString Content;
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(CustomAttributesUpdateRequest);
@@ -171,7 +171,7 @@ void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateReque
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FString Content;
 	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(ProfileCreateRequest);
@@ -190,7 +190,7 @@ void UserProfile::GetUserProfilePublicInfoByPublicId(const FString& PublicId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public/byPublicId")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("publicId"), *PublicId}
@@ -219,7 +219,7 @@ void UserProfile::CreateUserProfile(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	FString Content;
@@ -247,7 +247,7 @@ void UserProfile::UpdateUserProfile(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
@@ -268,7 +268,7 @@ void UserProfile::GetUserProfile(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -283,7 +283,7 @@ void UserProfile::GenerateUploadURL(const FString& Folder
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/folders/%s/files")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Folder);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -310,7 +310,7 @@ void UserProfile::GenerateUploadURLForUserContent(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/files")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -328,7 +328,7 @@ void UserProfile::GetPrivateCustomAttributes(const THandler<FJsonObjectWrapper>&
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles/privateCustomAttributes")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -340,7 +340,7 @@ void UserProfile::UpdatePrivateCustomAttributes(const FJsonObject& PrivateCustom
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles/privateCustomAttributes")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FString Content;
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(PrivateCustomAttributesUpdateRequest);

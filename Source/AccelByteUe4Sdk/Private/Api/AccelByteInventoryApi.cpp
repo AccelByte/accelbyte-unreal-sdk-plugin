@@ -130,7 +130,7 @@ void Inventory::GetInventoryConfigurations(THandler<FAccelByteModelsInventoryCon
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/inventoryConfigurations")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), ConvertInventoryConfigurationSortByToString(SortBy) },
@@ -152,7 +152,7 @@ void Inventory::GetInventoryTags(THandler<FAccelByteModelsInventoryTagPagingResp
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), ConvertItemTypeSortByToString(SortBy) },
@@ -174,7 +174,7 @@ void Inventory::GetUserInventories(THandler<FAccelByteModelsUserInventoriesPagin
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), ConvertUserInventoriesSortByToString(SortBy) },
@@ -196,7 +196,7 @@ void Inventory::GetItemTypes(THandler<FAccelByteModelsItemTypePagingResponse> co
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/itemtypes")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), ConvertItemTypeSortByToString(SortBy) },
@@ -227,7 +227,7 @@ void Inventory::GetUserInventoryAllItems(FString const& InventoryId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *InventoryId);
 
 	const TMultiMap<FString, FString> QueryParams{
@@ -268,7 +268,7 @@ void Inventory::GetUserInventoryItem(FString const& InventoryId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/slots/%s/sourceItems/%s")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *InventoryId
 		, *SlotId
 		, *SourceItemId);
@@ -301,7 +301,7 @@ void Inventory::BulkUpdateInventoryItems(FString const& InventoryId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *InventoryId);
 
 	FString Content = TEXT("");
@@ -335,7 +335,7 @@ void Inventory::BulkDeleteInventoryItems(FString const& InventoryId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *InventoryId);
 
 	FString Content = TEXT("");
@@ -374,7 +374,7 @@ void Inventory::MoveItemsBetweenInventories(FString const& TargetInventoryId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items/movement")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *TargetInventoryId);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, MoveItemsRequest, OnSuccess, OnError);
@@ -405,7 +405,7 @@ void Inventory::ConsumeUserInventoryItem(FString const& InventoryId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/consume")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *InventoryId);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ConsumedItemsRequest, OnSuccess, OnError);

@@ -31,7 +31,7 @@ User::User(Credentials& InCredentialsRef
 	, Settings& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-	, UserCredentialsRef{InCredentialsRef}
+	, UserCredentialsRef{InCredentialsRef.AsShared()}
 {
 }
 
@@ -48,9 +48,9 @@ static FString SearchStrings[] =
 
 void User::FinalPreLoginEvents()
 {
-	if (UserCredentialsRef.GetSessionState() == Credentials::ESessionState::Valid)
+	if (UserCredentialsRef->GetSessionState() == Credentials::ESessionState::Valid)
 	{
-		UserCredentialsRef.ForgetAll();
+		UserCredentialsRef->ForgetAll();
 	}
 }
 
@@ -106,8 +106,8 @@ void User::LoginWithUsername(const FString& Username
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
     	
-	Oauth2::GetTokenWithPasswordCredentials(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithPasswordCredentials(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
@@ -118,7 +118,7 @@ void User::LoginWithUsername(const FString& Username
 		, OnError
 		, SettingsRef.IamServerUrl);
 	
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithUsernameV3(const FString& Username
@@ -164,8 +164,8 @@ void User::LoginWithUsernameV3(const FString& Username
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithPasswordCredentialsV3(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithPasswordCredentialsV3(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
@@ -177,7 +177,7 @@ void User::LoginWithUsernameV3(const FString& Username
 		, bRememberMe
 		, SettingsRef.IamServerUrl);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithUsernameV4(const FString& Username, const FString& Password, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, const bool bRememberMe)
@@ -203,8 +203,8 @@ void User::LoginWithUsernameV4(const FString& Username, const FString& Password,
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithPasswordCredentialsV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithPasswordCredentialsV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2TokenV4>::CreateLambda(
@@ -226,7 +226,7 @@ void User::LoginWithUsernameV4(const FString& Username, const FString& Password,
 				, bRememberMe
 				, SettingsRef.IamServerUrl);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
@@ -249,8 +249,8 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithDeviceId(CredentialsRef.GetOAuthClientId()
-		, CredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithDeviceId(CredentialsRef->GetOAuthClientId()
+		, CredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess](const FOauth2Token& Result)
 			{
@@ -260,7 +260,7 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
 		, SettingsRef.IamServerUrl
 		, bCreateHeadless);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithDeviceIdV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, bool bCreateHeadless)
@@ -269,8 +269,8 @@ void User::LoginWithDeviceIdV4(const THandler<FAccelByteModelsLoginQueueTicketIn
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithDeviceIdV4(CredentialsRef.GetOAuthClientId()
-		, CredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithDeviceIdV4(CredentialsRef->GetOAuthClientId()
+		, CredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2TokenV4>::CreateLambda(
 			[this, OnSuccess](const FOauth2TokenV4& Result)
 			{
@@ -290,7 +290,7 @@ void User::LoginWithDeviceIdV4(const THandler<FAccelByteModelsLoginQueueTicketIn
 				, SettingsRef.IamServerUrl
 				, bCreateHeadless);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 	
 void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
@@ -345,8 +345,8 @@ void User::LoginWithOtherPlatformId(const FString& PlatformId
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, PlatformId
 		, PlatformToken
 		, THandler<FOauth2Token>::CreateLambda(
@@ -357,13 +357,13 @@ void User::LoginWithOtherPlatformId(const FString& PlatformId
 		, FOAuthErrorHandler::CreateLambda(
 			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
-				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, bCreateHeadless
 		, SettingsRef.IamServerUrl);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, bool bCreateHeadless)
@@ -389,8 +389,8 @@ void User::LoginWithOtherPlatformIdV4(const FString& PlatformId, const FString& 
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithOtherPlatformTokenV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithOtherPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, PlatformId
 		, PlatformToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
@@ -411,13 +411,13 @@ void User::LoginWithOtherPlatformIdV4(const FString& PlatformId, const FString& 
 		, FOAuthErrorHandler::CreateLambda(
 			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
-				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 				, bCreateHeadless
 				, SettingsRef.IamServerUrl);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
@@ -472,8 +472,8 @@ void User::LoginWithSimultaneousPlatform(const FString& NativePlatform
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
-	Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
 		, SecondaryPlatform
@@ -486,12 +486,12 @@ void User::LoginWithSimultaneousPlatform(const FString& NativePlatform
 		, FOAuthErrorHandler::CreateLambda(
 			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
-				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, SettingsRef.IamServerUrl);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithSimultaneousPlatformV4(EAccelBytePlatformType NativePlatform, const FString& NativePlatformToken, const EAccelBytePlatformType& SecondaryPlatform, const FString& SecondaryPlatformToken, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError)
@@ -536,8 +536,8 @@ void User::LoginWithSimultaneousPlatformV4(const FString& NativePlatform, const 
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithSimultaneousPlatformTokenV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithSimultaneousPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
 		, SecondaryPlatform
@@ -560,12 +560,12 @@ void User::LoginWithSimultaneousPlatformV4(const FString& NativePlatform, const 
 		, FOAuthErrorHandler::CreateLambda(
 			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
-				UserCredentialsRef.SetErrorOAuth(ErrorOauthInfo);
+				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 				, SettingsRef.IamServerUrl);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
@@ -577,8 +577,8 @@ void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyAndRememberNewDevice(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::VerifyAndRememberNewDevice(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
 		, Code
@@ -591,15 +591,15 @@ void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
 		, bRememberDevice
 		, SettingsRef.IamServerUrl);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::VerifyLoginWithNewDevice2FAEnabledV4(const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, bool bRememberDevice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyAndRememberNewDeviceV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::VerifyAndRememberNewDeviceV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
 		, Code
@@ -622,7 +622,7 @@ void User::VerifyLoginWithNewDevice2FAEnabledV4(const FString& MfaToken, EAccelB
 				, bRememberDevice
 				, SettingsRef.IamServerUrl);
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithLauncher(const FVoidHandler& OnSuccess
@@ -659,8 +659,8 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess
 	}
 	else
 	{
-		Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+		Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, AuthorizationCode
 		, SettingsRef.RedirectURI
 		, THandler<FOauth2Token>::CreateLambda(
@@ -672,7 +672,7 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess
 		, SettingsRef.IamServerUrl);
 	}
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithLauncherV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError)
@@ -695,8 +695,8 @@ void User::LoginWithLauncherV4(const THandler<FAccelByteModelsLoginQueueTicketIn
 	}
 	else
 	{
-		Oauth2::GetTokenWithAuthorizationCodeV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+		Oauth2::GetTokenWithAuthorizationCodeV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, AuthorizationCode
 		, SettingsRef.RedirectURI
 		, THandler<FOauth2TokenV4>::CreateLambda(
@@ -718,13 +718,13 @@ void User::LoginWithLauncherV4(const THandler<FAccelByteModelsLoginQueueTicketIn
 				, SettingsRef.IamServerUrl);
 	}
 
-	UserCredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError)
 {
-	LoginWithRefreshToken(UserCredentialsRef.GetRefreshToken(), OnSuccess, OnError);
+	LoginWithRefreshToken(UserCredentialsRef->GetRefreshToken(), OnSuccess, OnError);
 }
 
 void User::LoginWithRefreshToken(const FString& RefreshToken
@@ -756,8 +756,8 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithRefreshToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithRefreshToken(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, RefreshToken
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, PlatformUserId, OnSuccess, OnError](const FOauth2Token& Result)
@@ -772,7 +772,7 @@ void User::LoginWithRefreshTokenV4(const THandler<FAccelByteModelsLoginQueueTick
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString InRefreshToken = RefreshToken.IsEmpty() ? UserCredentialsRef.GetRefreshToken() : RefreshToken;
+	const FString InRefreshToken = RefreshToken.IsEmpty() ? UserCredentialsRef->GetRefreshToken() : RefreshToken;
 
 	if (InRefreshToken.IsEmpty())
 	{
@@ -782,8 +782,8 @@ void User::LoginWithRefreshTokenV4(const THandler<FAccelByteModelsLoginQueueTick
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithRefreshTokenV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithRefreshTokenV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, InRefreshToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
 			[this, PlatformUserId, OnSuccess, OnError](const FOauth2TokenV4& Result)
@@ -836,8 +836,8 @@ void User::RefreshPlatformToken(const FString& NativePlatform
 		return;
 	}
 
-	Oauth2::RefreshPlatformToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::RefreshPlatformToken(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
 		, OnSuccess
@@ -940,7 +940,7 @@ void User::TryReloginV4(const FString& PlatformUserID, const THandler<FAccelByte
 void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess
 	, const FOAuthErrorHandler& OnError)
 {
-	CreateHeadlessAccountAndLogin(UserCredentialsRef.GetLinkingToken(), OnSuccess, OnError);
+	CreateHeadlessAccountAndLogin(UserCredentialsRef->GetLinkingToken(), OnSuccess, OnError);
 }
 
 void User::CreateHeadlessAccountAndLogin(const FString& LinkingToken
@@ -955,8 +955,8 @@ void User::CreateHeadlessAccountAndLogin(const FString& LinkingToken
 		return;
 	}
 
-	Oauth2::CreateHeadlessAccountAndResponseToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::CreateHeadlessAccountAndResponseToken(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, LinkingToken
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
@@ -971,7 +971,7 @@ void User::CreateHeadlessAccountAndLoginV4(const THandler<FAccelByteModelsLoginQ
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString InLinkingToken = LinkingToken.IsEmpty() ? UserCredentialsRef.GetLinkingToken() : LinkingToken;
+	const FString InLinkingToken = LinkingToken.IsEmpty() ? UserCredentialsRef->GetLinkingToken() : LinkingToken;
 
 	if (InLinkingToken.IsEmpty())
 	{
@@ -979,8 +979,8 @@ void User::CreateHeadlessAccountAndLoginV4(const THandler<FAccelByteModelsLoginQ
 		return;
 	}
 
-	Oauth2::CreateHeadlessAccountAndResponseTokenV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::CreateHeadlessAccountAndResponseTokenV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, InLinkingToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
@@ -1006,7 +1006,7 @@ void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
 	, const FVoidHandler& OnSuccess
 	, const FOAuthErrorHandler& OnError)
 {
-	AuthenticationWithPlatformLinkAndLogin(Username, Password, UserCredentialsRef.GetLinkingToken(), OnSuccess, OnError);
+	AuthenticationWithPlatformLinkAndLogin(Username, Password, UserCredentialsRef->GetLinkingToken(), OnSuccess, OnError);
 }
 	
 void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
@@ -1040,8 +1040,8 @@ void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
 		return;
 	}
 
-	Oauth2::AuthenticationWithPlatformLink(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::AuthenticationWithPlatformLink(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, LinkingToken
@@ -1058,7 +1058,7 @@ void User::AuthenticationWithPlatformLinkAndLoginV4(const FString& Username, con
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString InLinkingToken = LinkingToken.IsEmpty() ? UserCredentialsRef.GetLinkingToken() : LinkingToken;
+	const FString InLinkingToken = LinkingToken.IsEmpty() ? UserCredentialsRef->GetLinkingToken() : LinkingToken;
 
 	if (Username.IsEmpty())
 	{
@@ -1083,8 +1083,8 @@ void User::AuthenticationWithPlatformLinkAndLoginV4(const FString& Username, con
 		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
 	}
 
-	Oauth2::AuthenticationWithPlatformLinkV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::AuthenticationWithPlatformLinkV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, InLinkingToken
@@ -1117,8 +1117,8 @@ void User::ClaimAccessToken(const FString LoginTicket, const FVoidHandler& OnSuc
 		return;
 	}
 
-	Oauth2::GetTokenWithLoginTicket(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GetTokenWithLoginTicket(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, LoginTicket
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
@@ -1152,7 +1152,7 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 	, const FString& CachedTokenKey)
 {
 	// Set auth token before anything: Set before anything to prevent race condition issues.
-	UserCredentialsRef.SetAuthToken(Response, FPlatformTime::Seconds());
+	UserCredentialsRef->SetAuthToken(Response, FPlatformTime::Seconds());
 
 	if (!Response.Auth_Trust_Id.IsEmpty())
 	{
@@ -1162,7 +1162,7 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 	FVoidHandler CallbackFunction = FVoidHandler::CreateLambda(
 		[this, OnSuccess, Response]()
 		{
-			UserCredentialsRef.OnLoginSuccess().Broadcast(Response); // Sets auth tokens, inits qosScheduler
+			UserCredentialsRef->OnLoginSuccess().Broadcast(Response); // Sets auth tokens, inits qosScheduler
 			OnSuccess.ExecuteIfBound();
 		});
 
@@ -1226,16 +1226,15 @@ void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::RevokeToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
-		, UserCredentialsRef.GetAccessToken()
+	Oauth2::RevokeToken(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
+		, UserCredentialsRef->GetAccessToken()
 		, FVoidHandler::CreateLambda(
-			[this, OnSuccess, OnError]() 
+			[OnSuccess, OnError, Copy = UserCredentialsRef]()
 			{
-				UserCredentialsRef.OnLogoutSuccess().Broadcast();
-				ForgetAllCredentials();
+				Copy->OnLogoutSuccess().Broadcast();	
+				Copy->ForgetAll();
 				OnSuccess.ExecuteIfBound();
-
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -1245,7 +1244,7 @@ void User::ForgetAllCredentials()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	UserCredentialsRef.ForgetAll();
+	UserCredentialsRef->ForgetAll();
 }
 
 void User::Register(const FString& Username
@@ -1411,7 +1410,7 @@ void User::GetData(const THandler<FAccountUserData>& OnSuccess
 		THandler<FAccountUserData>::CreateLambda(
 			[this, OnSuccess, OnError](const FAccountUserData& AccountUserData)
 			{
-				UserCredentialsRef.SetAccountUserData(AccountUserData);
+				UserCredentialsRef->SetAccountUserData(AccountUserData);
 				OnSuccess.ExecuteIfBound(AccountUserData);
 			});
 
@@ -1432,7 +1431,7 @@ void User::UpdateUser(FUserUpdateRequest UpdateRequest
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UpdateRequest, OnSuccess, OnError);
 }
@@ -1457,7 +1456,7 @@ void User::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/email")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateEmailRequest, OnSuccess, OnError);
 }
@@ -1473,7 +1472,7 @@ void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType);
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformString);
 
 	TMultiMap<FString, FString> QueryParams;
@@ -1492,7 +1491,7 @@ void User::SendVerificationCode(const FVoidHandler& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (CredentialsRef.GetUserEmailAddress().IsEmpty())
+	if (CredentialsRef->GetUserEmailAddress().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
 		return;
@@ -1502,7 +1501,7 @@ void User::SendVerificationCode(const FVoidHandler& OnSuccess
 	{
 		EVerificationContext::UserAccountRegistration,
 		TEXT(""),
-		CredentialsRef.GetUserEmailAddress()
+		CredentialsRef->GetUserEmailAddress()
 	};
 
 	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
@@ -1513,7 +1512,7 @@ void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (CredentialsRef.GetUserEmailAddress().IsEmpty())
+	if (CredentialsRef->GetUserEmailAddress().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
 		return;
@@ -1523,7 +1522,7 @@ void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess
 	{
 		EVerificationContext::UpdateEmailAddress,
 		TEXT(""),
-		CredentialsRef.GetUserEmailAddress()
+		CredentialsRef->GetUserEmailAddress()
 	};
 
 	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
@@ -1579,7 +1578,7 @@ void User::UpgradeAndVerify(const FString& Username
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
 	JsonObject->SetStringField("code", VerificationCode);
@@ -1623,7 +1622,7 @@ void User::UpgradeAndVerify2(const FUpgradeAndVerifyRequest& UpgradeAndVerifyReq
 	
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/code/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 	
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UpgradeAndVerifyRequest, OnSuccess, OnError);
 }
@@ -1655,7 +1654,7 @@ void User::Upgrade(const FString& Username
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const FString Content = FString::Printf(TEXT("{ \"EmailAddress\": \"%s\", \"Password\": \"%s\"}")
 		, *Username
@@ -1695,7 +1694,7 @@ void User::Upgradev2(const FString& EmailAddress
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const FString Content = FString::Printf(TEXT("{ \"emailAddress\": \"%s\", \"password\": \"%s\", \"username\": \"%s\"}")
 		, *EmailAddress
@@ -1719,7 +1718,7 @@ void User::Verify(const FString& VerificationCode
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const FString Content = FString::Printf(TEXT("{ \"Code\": \"%s\",\"ContactType\":\"%s\"}")
 		, *VerificationCode
@@ -1806,8 +1805,8 @@ void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1844,7 +1843,7 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
 	const FString Content = FString::Printf(TEXT("ticket=%s"), *FGenericPlatformHttp::UrlEncode(*Ticket));
@@ -1866,7 +1865,7 @@ void User::LinkOtherPlatformId(const FString& PlatformId
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
 	const FString Content = FString::Printf(TEXT("ticket=%s"), *FGenericPlatformHttp::UrlEncode(*Ticket));
@@ -1909,8 +1908,8 @@ void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms/link")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	auto PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
@@ -1931,7 +1930,7 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -1947,7 +1946,7 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -1961,7 +1960,7 @@ void User::UnlinkOtherPlatformId(const FString& PlatformId
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -1977,7 +1976,7 @@ void User::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -1991,7 +1990,7 @@ void User::UnlinkAllOtherPlatformId(const FString& PlatformId
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -2005,7 +2004,7 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/request")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, VerificationCodeRequest, OnSuccess, OnError);
 }
@@ -2023,7 +2022,7 @@ void User::SearchUsers(const FString& Query
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FString SearchId;
 	if (By != EAccelByteSearchType::ALL)
@@ -2127,7 +2126,7 @@ void User::GetUserByUserId(const FString& UserID
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserID);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -2144,7 +2143,7 @@ void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PlatformId
 		, *OtherPlatformUserId);
 
@@ -2259,7 +2258,7 @@ void User::Enable2FaBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode/enable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2275,7 +2274,7 @@ void User::Disable2FaBackupCode(const FVoidHandler& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode/disable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2291,7 +2290,7 @@ void User::GenerateBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
 
 	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2307,7 +2306,7 @@ void User::GetBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2323,7 +2322,7 @@ void User::Enable2FaAuthenticator(const FVoidHandler& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/enable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2339,7 +2338,7 @@ void User::Disable2FaAuthenticator(const FVoidHandler& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/disable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2355,7 +2354,7 @@ void User::GenerateSecretKeyFor2FaAuthenticator(const THandler<FUser2FaSecretKey
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/key")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2371,7 +2370,7 @@ void User::GetEnabled2FaFactors(const THandler<FUser2FaMethod>& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/factor")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2390,7 +2389,7 @@ void User::MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/factor")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const FString Content = FString::Printf(TEXT("factor=%s"), *Factor);
 
@@ -2418,7 +2417,7 @@ void User::UpdateUserV3(FUserUpdateRequest UpdateRequest
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UpdateRequest, OnSuccess, OnError);
 }
@@ -2438,7 +2437,7 @@ void User::GetPublisherUser(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/publisher")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	TMap<FString, FString> Headers = {
@@ -2452,9 +2451,9 @@ void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnEr
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
-		, UserCredentialsRef.GetAccessToken()
+	Oauth2::VerifyToken(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
+		, UserCredentialsRef->GetAccessToken()
 		, FVoidHandler::CreateLambda(
 			[this, OnSuccess, OnError]() 
 			{
@@ -2479,7 +2478,7 @@ void User::GetUserInformation(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/information")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	TMap<FString, FString> Headers = {
@@ -2496,7 +2495,7 @@ void User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType
 	FReport::Log(FString(__FUNCTION__)); 
 
 	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType); 	
-	Oauth2::GenerateOneTimeCode(UserCredentialsRef.GetAccessToken()
+	Oauth2::GenerateOneTimeCode(UserCredentialsRef->GetAccessToken()
 		, PlatformString
 		, THandler<FGeneratedOneTimeCode>::CreateLambda(
 			[this, OnSuccess, OnError](const FGeneratedOneTimeCode& Result) 
@@ -2512,8 +2511,8 @@ void User::GenerateGameToken(const FString& Code,
 	const FOAuthErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
-	Oauth2::GenerateGameToken(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GenerateGameToken(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, Code
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2Token& Result)
@@ -2527,8 +2526,8 @@ void User::GenerateGameToken(const FString& Code,
 void User::GenerateGameTokenV4(const FString& Code, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	Oauth2::GenerateGameTokenV4(UserCredentialsRef.GetOAuthClientId()
-		, UserCredentialsRef.GetOAuthClientSecret()
+	Oauth2::GenerateGameTokenV4(UserCredentialsRef->GetOAuthClientId()
+		, UserCredentialsRef->GetOAuthClientSecret()
 		, Code
 		, THandler<FOauth2TokenV4>::CreateLambda(
 			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
@@ -2554,7 +2553,7 @@ void User::GenerateCodeForPublisherTokenExchange(const FString& PublisherClientI
 	const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
-	Oauth2::GenerateCodeForPublisherTokenExchange(UserCredentialsRef.GetAccessToken()
+	Oauth2::GenerateCodeForPublisherTokenExchange(UserCredentialsRef->GetAccessToken()
 		, SettingsRef.PublisherNamespace
 		, PublisherClientID
 		, OnSuccess
@@ -2589,7 +2588,7 @@ void User::CheckUserAccountAvailability(const FString& DisplayName,
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/availability")
 	   , *SettingsRef.IamServerUrl
-	   , *CredentialsRef.GetNamespace());
+	   , *CredentialsRef->GetNamespace());
 
 	const FString Field = bIsCheckUniqueDisplayName ? TEXT("uniqueDisplayName") : TEXT("displayName");
 	const TMultiMap<FString, FString> QueryParams ({
@@ -2632,14 +2631,14 @@ void User::RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& Pla
 		return;
 	}
 
-	const FString UserId = CredentialsRef.GetUserId();
+	const FString UserId = CredentialsRef->GetUserId();
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
-	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
 	Oauth2::RetrieveUserThirdPartyPlatformToken(UserId, PlatformId, Authorization, 
 		THandler<FThirdPartyPlatformTokenData>::CreateLambda(
 			[this, PlatformId, OnSuccess](const FThirdPartyPlatformTokenData& Result)
 			{
-				UserCredentialsRef.SetThridPartyPlatformTokenData(PlatformId, Result);
+				UserCredentialsRef->SetThridPartyPlatformTokenData(PlatformId, Result);
 				OnSuccess.ExecuteIfBound(Result); 
 			}), OnError);
 }
@@ -2652,7 +2651,7 @@ void User::GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/platforms")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TSharedPtr<FJsonObject> JsonObj = FJsonObjectConverter::UStructToJsonObject(Request);
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObj, FAccelByteUtilities::FieldRemovalFlagAll, { TEXT("userIds") });
@@ -2704,7 +2703,7 @@ void User::GetAccountConfigurationValue(EAccountConfiguration ConfigKey
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/config/%s")
 	   , *SettingsRef.IamServerUrl
-	   , *CredentialsRef.GetNamespace()
+	   , *CredentialsRef->GetNamespace()
 	   , *Config);
    
 	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccessDelegate, OnError);

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [25.4.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.4.1%0D25.4.0) (2024-05-16)
+
+
+### Refactors
+
+* Credentials in ApiBase changed to SharedRef ([89ad950](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/89ad950d616c1a93a93a68cfbfa6daba98b4c7cf))
+
 ## [25.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.4.0%0D25.3.2) (2024-05-13)
 
 

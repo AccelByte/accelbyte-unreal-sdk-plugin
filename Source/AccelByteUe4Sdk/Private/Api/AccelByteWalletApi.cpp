@@ -32,8 +32,8 @@ void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *CurrencyCode);
 
 	const TDelegate<void(const FAccelByteModelsWalletInfoResponse&)> OnSuccessHttpClient =
@@ -69,8 +69,8 @@ void Wallet::GetWalletInfoByCurrencyCodeV2(const FString& CurrencyCode
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *CurrencyCode);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -86,8 +86,8 @@ void Wallet::ListWalletTransactionsByCurrencyCode(FString const& CurrencyCode
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s/transactions?offset=%d&limit=%d")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *CurrencyCode
 		, Offset
 		, Limit);

@@ -47,7 +47,7 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 		
 	TMultiMap<FString, FString> QueryParams{};
@@ -105,7 +105,7 @@ void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/entitlements/%s")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Entitlementid);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -127,7 +127,7 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *EntitlementId);
 
@@ -155,7 +155,7 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	TArray<TSharedPtr<FJsonValue>> JsonArray;
@@ -191,7 +191,7 @@ void ServerEcommerce::CreditUserWallet(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *CurrencyCode);
 
@@ -215,7 +215,7 @@ void ServerEcommerce::CreditUserWalletV2(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *CurrencyCode);
 
@@ -238,7 +238,7 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	const TMultiMap<FString, FString> QueryParams= {
@@ -264,7 +264,7 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *EntitlementId);
 
@@ -290,7 +290,7 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *EntitlementId);
 
@@ -324,7 +324,7 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *EntitlementId);
 
@@ -347,7 +347,7 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *EntitlementId);
 
@@ -377,7 +377,7 @@ void ServerEcommerce::GetUserEntitlementHistory(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/history")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *EntitlementId);
 
@@ -395,7 +395,7 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debit")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *WalletId);
 
@@ -437,7 +437,7 @@ void ServerEcommerce::DebitUserWalletV2(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/currencies/%s/debit")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *CurrencyCode);
 
@@ -479,7 +479,7 @@ void ServerEcommerce::PaymentWithUserWallet(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/payment")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *CurrencyCode);
 
@@ -512,7 +512,7 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	FString Content;
@@ -566,7 +566,7 @@ void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus
 
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/itemId/bySkus")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	TMultiMap<FString, FString> QueryParams{};
 	
@@ -588,7 +588,7 @@ void ServerEcommerce::ListStores(THandler<TArray<FAccelByteModelsPlatformStore>>
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/stores")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -601,7 +601,7 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/byCriteria")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	TArray<FString> SortByStringArray = {};
 	if (ItemCriteria.SortBy.Num() > 0 )
@@ -655,7 +655,7 @@ void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV
 
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/items/byCriteria")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	TArray<FString> SortByStringArray = {};
 	if (ItemCriteria.SortBy.Num() > 0 )
@@ -717,7 +717,7 @@ void ServerEcommerce::FulfillRewards(const FString& UserId, const FAccelByteMode
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment/rewards")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FulfillRewardsRequest, OnSuccess, OnError);

@@ -21,7 +21,7 @@ FDelegateHandleAlias Qos::PollServerLatenciesHandle;
 Qos::Qos(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FAccelByteMessagingSystem& InMessagingSystemRef)
-	: CredentialsRef{InCredentialsRef}
+	: CredentialsRef{InCredentialsRef.AsShared()}
 	, SettingsRef{InSettingsRef}
 	, MessagingSystem{InMessagingSystemRef}
 	, bValidityFlagPtr(MakeShared<bool>(true))
@@ -30,7 +30,7 @@ Qos::Qos(Credentials& InCredentialsRef
 		// from the delegate in our destructor.  This weak pointer allows us to
 		// know whether `this` is valid.
 		TWeakPtr<bool> ValidityFlag = bValidityFlagPtr;
-		CredentialsRef.OnLoginSuccess().AddLambda([ValidityFlag, this](const FOauth2Token& Response)
+		CredentialsRef->OnLoginSuccess().AddLambda([ValidityFlag, this](const FOauth2Token& Response)
 			{
 				if (!ValidityFlag.IsValid())
 					return;

@@ -476,7 +476,7 @@ void Group::CreateV2Group(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace());
+		*CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest("POST", Url, {}, RequestContent, OnSuccess, OnError);
 }
@@ -490,7 +490,7 @@ void Group::AcceptV2GroupInvitation(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/invite/accept"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
@@ -505,7 +505,7 @@ void Group::RejectV2GroupInvitation(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/invite/reject"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
@@ -520,7 +520,7 @@ void Group::JoinV2Group(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/join"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
@@ -535,7 +535,7 @@ void Group::LeaveV2Group(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/leave"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	HttpClient.ApiRequest("POST", Url, {}, FString(), OnSuccess, OnError);
@@ -558,7 +558,7 @@ void Group::InviteUserToV2Group(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/invite"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*UserId,
 		*GroupId);
 
@@ -582,7 +582,7 @@ void Group::AcceptV2GroupJoinRequest(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/join/accept"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*UserId,
 		*GroupId);
 
@@ -606,7 +606,7 @@ void Group::RejectV2GroupJoinRequest(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/join/reject"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*UserId,
 		*GroupId);
 
@@ -630,7 +630,7 @@ void Group::KickV2GroupMember(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/kick"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*UserId,
 		*GroupId);
 
@@ -648,7 +648,7 @@ void Group::AssignV2MemberRole(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/roles/%s/groups/%s/members"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*MemberRoleId,
 		*GroupId);
 
@@ -666,7 +666,7 @@ void Group::DeleteV2MemberRole(
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/roles/%s/groups/%s/members"),
 		*SettingsRef.GroupServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*MemberRoleId,
 		*GroupId);
 
@@ -681,7 +681,7 @@ void Group::GetGroupsByGroupIds(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/bulk"),
-		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
+		*SettingsRef.GroupServerUrl,*CredentialsRef->GetNamespace());
 
 	auto Request = FAccelByteModelsGetGroupsByGroupIdsRequest{GroupIds};
 	FString Content = FString("");
@@ -699,7 +699,7 @@ void Group::UpdateV2Group(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	HttpClient.ApiRequest("PATCH",Url, {}, RequestContent, OnSuccess, OnError);
@@ -710,7 +710,7 @@ void Group::DeleteV2Group(const FString& GroupId, const FVoidHandler& OnSuccess,
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	HttpClient.ApiRequest("DELETE",Url,{},OnSuccess,OnError);
@@ -725,7 +725,7 @@ void Group::UpdateV2GroupCustomAttributes(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/attributes/custom"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	HttpClient.ApiRequest("PUT", Url, {}, RequestContent,OnSuccess,OnError);
@@ -740,7 +740,7 @@ void Group::UpdateV2GroupCustomRule(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/rules/custom"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	HttpClient.ApiRequest("PUT", Url, {}, RequestContent,OnSuccess,OnError);
@@ -757,7 +757,7 @@ void Group::UpdateV2GroupPredefinedRule(
 
 	const FString AllowedActionStr = ConvertGroupAllowedActionToString(AllowedAction);
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/rules/defined/%s"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*GroupId,
 		*AllowedActionStr);
 
@@ -774,7 +774,7 @@ void Group::DeleteV2GroupPredefinedRule(
 
 	const FString AllowedActionStr = ConvertGroupAllowedActionToString(AllowedAction);
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/rules/defined/%s"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*GroupId,
 		*AllowedActionStr);
 
@@ -797,7 +797,7 @@ void Group::GetUserGroupStatusInfo(
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/status"),
-		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace(),*UserId,*GroupId);
+		*SettingsRef.GroupServerUrl,*CredentialsRef->GetNamespace(),*UserId,*GroupId);
 
 	HttpClient.ApiRequest("GET",Url, {},OnSuccess,OnError);
 }
@@ -810,7 +810,7 @@ void Group::GetMyJoinedGroupInfo(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/me/groups"),
-		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
+		*SettingsRef.GroupServerUrl,*CredentialsRef->GetNamespace());
 	const TMultiMap<FString, FString> QueryParams
 	{
 			{ "limit", FString::FromInt(RequestContent.Limit) },
@@ -828,7 +828,7 @@ void Group::GetMyJoinGroupRequest(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/me/join/request"),
-		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
+		*SettingsRef.GroupServerUrl,*CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString,FString> QueryParams
 	{
@@ -848,7 +848,7 @@ void Group::GetGroupInviteRequestList(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/invite/request"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	const TMultiMap<FString,FString> QueryParams
@@ -869,7 +869,7 @@ void Group::GetGroupJoinRequestList(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/groups/%s/join/request"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*GroupId);
 
 	const TMultiMap<FString,FString> QueryParams
@@ -897,7 +897,7 @@ void Group::CancelGroupMemberInvitation(
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/groups/%s/invite/cancel"),
-		*SettingsRef.GroupServerUrl, *CredentialsRef.GetNamespace(),
+		*SettingsRef.GroupServerUrl, *CredentialsRef->GetNamespace(),
 		*UserId,
 		*GroupId);
 
@@ -912,7 +912,7 @@ void Group::GetAllMemberRoles(
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/roles"),
-		*SettingsRef.GroupServerUrl,*CredentialsRef.GetNamespace());
+		*SettingsRef.GroupServerUrl,*CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString,FString> QueryParams
 	{

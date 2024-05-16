@@ -11,7 +11,7 @@ FApiBase::FApiBase(
 	Credentials const& InCredentialsRef,
 	Settings const& InSettingsRef,
 	FHttpRetryScheduler& InHttpRef)
-	: CredentialsRef{InCredentialsRef}
+	: CredentialsRef{InCredentialsRef.AsShared()}
 	, SettingsRef{InSettingsRef}
 	, HttpRef{InHttpRef}
 	, HttpClient(InCredentialsRef, InSettingsRef, InHttpRef)

@@ -24,8 +24,7 @@ FApiClient::FApiClient()
 FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http, TSharedPtr<AccelByte::FAccelByteMessagingSystem> MessagingRef)
 	: bUseSharedCredentials(true)
 	, MessagingSystem(MessagingRef == nullptr ? MakeShared<FAccelByteMessagingSystem>() : MessagingRef)
-	, CredentialsRef(MakeShareable<AccelByte::Credentials>(&Credentials,
-		[](AccelByte::Credentials*) {}))
+	, CredentialsRef(Credentials.AsShared())
 	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http,
 		[](AccelByte::FHttpRetryScheduler*) {}))
 {

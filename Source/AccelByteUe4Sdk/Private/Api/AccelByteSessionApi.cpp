@@ -64,7 +64,7 @@ void Session::CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesession")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const bool bIncludeTeams = CreateRequest.Teams.Num() > 0 &&
 		(CreateRequest.Teams.Num() > 1 || CreateRequest.Teams[0].UserIDs.Num() > 0);
@@ -93,7 +93,7 @@ void Session::GetGameSessionDetails(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -109,7 +109,7 @@ void Session::QueryGameSessions(FAccelByteModelsV2GameSessionQuery const& QueryO
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	// Add pagination information to query object
 	QueryObject.JsonWrapper.JsonObject->SetNumberField(TEXT("offset"), Offset);
@@ -138,7 +138,7 @@ void Session::UpdateGameSession(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	const bool bIncludeTeams = UpdateRequest.Teams.Num() > 0 &&
@@ -158,7 +158,7 @@ void Session::DeleteGameSession(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -174,7 +174,7 @@ void Session::SendGameSessionInvite(FString const& GameSessionID
 	const FAccelByteModelsV2SessionInviteRequest RequestBody = {UserID};
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/invite")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
@@ -188,7 +188,7 @@ void Session::RejectGameSessionInvite(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/reject")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -202,7 +202,7 @@ void Session::JoinGameSession(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/join")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
@@ -216,7 +216,7 @@ void Session::JoinGameSessionByCode(FString const& Code
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/join/code")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
 	Content->SetStringField(TEXT("code"), Code);
@@ -232,7 +232,7 @@ void Session::GenerateNewGameSessionCode(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
@@ -246,7 +246,7 @@ void Session::RevokeGameSessionCode(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -260,7 +260,7 @@ void Session::LeaveGameSession(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/leave")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -274,7 +274,7 @@ void Session::GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQ
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/gamesessions")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
@@ -296,7 +296,7 @@ void Session::PromoteGameSessionLeader(FString const& GameSessionID, FString con
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/leader")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *GameSessionID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
@@ -323,7 +323,7 @@ void Session::CreateParty(FAccelByteModelsV2PartyCreateRequest const& CreateRequ
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/party")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
@@ -336,7 +336,7 @@ void Session::GetPartyDetails(FString const& PartyID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -354,7 +354,7 @@ void Session::UpdateParty(const FString& PartyID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
@@ -370,7 +370,7 @@ void Session::PromotePartyLeader(FString const& PartyID
 	const FAccelByteModelsV2PartyLeaderPromotionRequest RequestBody = {NewLeaderID};
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/leader")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
@@ -386,7 +386,7 @@ void Session::SendPartyInvite(FString const& PartyID
 	const FAccelByteModelsV2SessionInviteRequest RequestBody = {InviteeID};
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/invite")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
@@ -400,7 +400,7 @@ void Session::RejectPartyInvite(FString const& PartyID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/me/reject")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -415,7 +415,7 @@ void Session::JoinParty(FString const& PartyID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/me/join")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
@@ -429,7 +429,7 @@ void Session::LeaveParty(FString const& PartyID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/me/leave")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -443,7 +443,7 @@ void Session::JoinPartyByCode(FString const& PartyCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/users/me/join/code")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
 	Content->SetStringField(TEXT("code"), PartyCode);
@@ -459,7 +459,7 @@ void Session::GenerateNewPartyCode(FString const& PartyID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/code")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
@@ -473,7 +473,7 @@ void Session::RevokePartyCode(FString const& PartyID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/code")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -495,7 +495,7 @@ void Session::KickUserFromParty(FString const& PartyID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/%s/kick")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *PartyID
 		, *UserID);
 
@@ -510,7 +510,7 @@ void Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult>
 
 	const FString Url  = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/parties")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
@@ -528,7 +528,7 @@ void Session::GetPlayerAttributes(THandler<FAccelByteModelsV2PlayerAttributes> c
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/attributes")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -541,7 +541,7 @@ void Session::StorePlayerAttributes(const FAccelByteModelsV2StorePlayerAttribute
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/attributes")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(AttributesRequest);
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObject);
@@ -555,7 +555,7 @@ void Session::DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandle
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/attributes")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -581,7 +581,7 @@ void Session::UpdateLeaderStorage(FString const& SessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/sessions/%s/storage/leader")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionID);
 
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Data.JsonObject.ToSharedRef(), OnSuccess, OnError);
@@ -608,9 +608,9 @@ void Session::UpdateMemberStorage(FString const& SessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/sessions/%s/storage/users/%s")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionID
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetUserId());
 
 	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Data.JsonObject.ToSharedRef(), OnSuccess, OnError);
 }
@@ -627,7 +627,7 @@ void Session::GetRecentPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/recent-player")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> QueryParam;
 	QueryParam.Emplace(TEXT("limit"), FString::FromInt(Limit));
@@ -647,7 +647,7 @@ void Session::GetRecentTeamPlayers(THandler<FAccelByteModelsV2SessionRecentPlaye
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/recent-team-player")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMap<FString, FString> QueryParam;
 	QueryParam.Emplace(TEXT("limit"), FString::FromInt(Limit));
@@ -669,7 +669,7 @@ void Session::GetSessionSecret(FString const& SessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/secret")
 		, *SettingsRef.SessionServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *SessionID);	
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);

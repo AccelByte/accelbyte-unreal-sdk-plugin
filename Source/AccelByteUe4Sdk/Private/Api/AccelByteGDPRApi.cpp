@@ -34,8 +34,8 @@ void GDPR::SubmitAccountDeletion(FString const& Password
 	
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/deletions")
 	, *SettingsRef.GDPRServerUrl
-	, *CredentialsRef.GetNamespace()
-	, *CredentialsRef.GetUserId());
+	, *CredentialsRef->GetNamespace()
+	, *CredentialsRef->GetUserId());
 
 	TMap<FString, FString> FormFields;
 	FormFields.Add(TEXT("password"), Password);

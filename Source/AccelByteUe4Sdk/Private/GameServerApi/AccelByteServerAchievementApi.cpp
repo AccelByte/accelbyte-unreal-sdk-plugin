@@ -44,7 +44,7 @@ void ServerAchievement::UnlockAchievement(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/achievements/%s/unlock")
 		, *ServerSettingsRef.AchievementServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *AchievementCode);
 
@@ -81,7 +81,7 @@ void ServerAchievement::BulkCreatePSNEvent(const FAccelByteModelsAchievementBulk
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/platforms/psn/bulk")
 		, *ServerSettingsRef.AchievementServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }

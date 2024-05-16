@@ -49,8 +49,8 @@ void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("key", Key);
@@ -86,8 +86,8 @@ void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("key", Key);
@@ -112,8 +112,8 @@ void BinaryCloudSave::GetCurrentUserBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -141,7 +141,7 @@ void BinaryCloudSave::GetPublicUserBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/public")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId
 		, *Key);
 
@@ -170,7 +170,7 @@ void BinaryCloudSave::BulkGetCurrentUserBinaryRecords(const TArray<FString>& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/me/binaries/bulk")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
 }
@@ -205,7 +205,7 @@ void BinaryCloudSave::BulkGetPublicUserBinaryRecords(const TArray<FString>& Keys
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/public/bulk")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
@@ -240,7 +240,7 @@ void BinaryCloudSave::BulkGetPublicUserBinaryRecords(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/bulk/binaries/%s/public")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserList, OnSuccess, OnError);
@@ -256,7 +256,7 @@ void BinaryCloudSave::BulkQueryCurrentUserBinaryRecords(FString const& Query
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/me/binaries")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("query"), *Query},
@@ -284,7 +284,7 @@ void BinaryCloudSave::BulkQueryPublicUserBinaryRecords(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/public")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -322,8 +322,8 @@ void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	FJsonObject JsonObj{};
@@ -365,8 +365,8 @@ void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	FJsonObject JsonObj{};
@@ -392,8 +392,8 @@ void BinaryCloudSave::UpdateUserBinaryRecordMetadata(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/metadata")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	FJsonObject JsonObj{};
@@ -417,8 +417,8 @@ void BinaryCloudSave::DeleteUserBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -444,8 +444,8 @@ void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/presigned")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	FJsonObject JsonObj{};
@@ -479,8 +479,8 @@ void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/presigned")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId()
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
 		, *Key);
 
 	FJsonObject JsonObj{};
@@ -504,7 +504,7 @@ void BinaryCloudSave::GetGameBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/binaries/%s")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -532,7 +532,7 @@ void BinaryCloudSave::BulkGetGameBinaryRecords(TArray<FString> const& Keys
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/binaries/bulk")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
 }
@@ -553,7 +553,7 @@ void BinaryCloudSave::BulkQueryGameBinaryRecords(FString const& Query
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/binaries")
 		, *SettingsRef.CloudSaveServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("query"), *Query},

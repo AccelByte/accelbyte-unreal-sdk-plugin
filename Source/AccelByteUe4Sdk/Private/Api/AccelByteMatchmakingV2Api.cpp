@@ -50,7 +50,7 @@ void MatchmakingV2::CreateMatchTicket(const FString& MatchPool,
 	const FString Verb = TEXT("POST");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets")
 		, *SettingsRef.MatchmakingV2ServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	FAccelByteModelsV2MatchmakingCreateTicketRequest Request;
 	Request.MatchPool = MatchPool;
@@ -78,7 +78,7 @@ void MatchmakingV2::GetMatchTicketDetails(const FString& TicketId
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/%s")
 		, *SettingsRef.MatchmakingV2ServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *TicketId);
 
 	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
@@ -97,7 +97,7 @@ void MatchmakingV2::DeleteMatchTicket(const FString& TicketId
 	const FString Verb = TEXT("DELETE");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/%s"),
 		*SettingsRef.MatchmakingV2ServerUrl,
-		*CredentialsRef.GetNamespace(),
+		*CredentialsRef->GetNamespace(),
 		*TicketId);
 
 	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
@@ -115,7 +115,7 @@ void MatchmakingV2::GetMatchmakingMetrics(const FString& MatchPool,
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-pools/%s/metrics")
 		, *SettingsRef.MatchmakingV2ServerUrl
-		, *CredentialsRef.GetNamespace()
+		, *CredentialsRef->GetNamespace()
 		, *MatchPool);
 
 	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
@@ -127,7 +127,7 @@ void MatchmakingV2::GetMyMatchTickets(const THandler<FAccelByteModelsV2Matchmaki
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/me")
 		, *SettingsRef.MatchmakingV2ServerUrl
-		, *CredentialsRef.GetNamespace());
+		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	if(!MatchPool.IsEmpty())

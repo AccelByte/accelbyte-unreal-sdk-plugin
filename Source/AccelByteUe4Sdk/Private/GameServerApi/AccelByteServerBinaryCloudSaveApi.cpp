@@ -39,7 +39,7 @@ void ServerBinaryCloudSave::QueryGameBinaryRecords(FString const& Query
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("query"), *Query},
@@ -82,7 +82,7 @@ void ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 	
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("key", Key);
@@ -114,7 +114,7 @@ void ServerBinaryCloudSave::GetGameBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 	
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -148,7 +148,7 @@ void ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	FJsonObject JsonObj{};
@@ -173,7 +173,7 @@ void ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 	
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -201,7 +201,7 @@ void ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s/metadata")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	FJsonObject JsonObj{};
@@ -242,7 +242,7 @@ void ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FString const& K
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s/presigned")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	FJsonObject JsonObj{};

@@ -96,9 +96,11 @@ public:
 #pragma region Core
 	static FHttpRetryScheduler HttpRetryScheduler;
 	static Settings Settings;
-	static Credentials Credentials;
+	static FCredentialsRef CredentialsRef;
+	static Credentials& Credentials;
 	static ServerSettings ServerSettings;
-	static ServerCredentials ServerCredentials;
+	static FServerCredentialsRef ServerCredentialsRef;
+	static ServerCredentials& ServerCredentials;
 	static FAccelByteTimeManager TimeManager;
 	static TSharedPtr<FAccelByteMessagingSystem> MessagingSystem;
 	static FAccelByteNetworkConditioner NetworkConditioner;

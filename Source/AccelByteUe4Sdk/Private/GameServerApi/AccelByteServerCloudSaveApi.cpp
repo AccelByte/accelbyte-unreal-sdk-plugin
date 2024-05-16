@@ -33,7 +33,7 @@ void ServerCloudSave::RetrieveGameRecordsKey(const THandler<FAccelByteModelsPagi
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
 	if(!Query.IsEmpty())
@@ -74,7 +74,7 @@ void ServerCloudSave::SaveGameRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	FString Content = TEXT("");
@@ -93,7 +93,7 @@ void ServerCloudSave::GetGameRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient =
@@ -142,7 +142,7 @@ void ServerCloudSave::ReplaceGameRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	FString Content = TEXT("");
@@ -161,7 +161,7 @@ void ServerCloudSave::DeleteGameRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -205,7 +205,7 @@ void ServerCloudSave::SaveUserRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key );
 
@@ -256,7 +256,7 @@ void ServerCloudSave::SaveUserRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key
 		, (bIsPublic ? TEXT("/public") : TEXT("")));
@@ -285,7 +285,7 @@ void ServerCloudSave::GetUserRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key);
 
@@ -331,7 +331,7 @@ void ServerCloudSave::GetPublicUserRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s/public")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key);
 
@@ -399,7 +399,7 @@ void ServerCloudSave::ReplaceUserRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key);
 
@@ -451,7 +451,7 @@ void ServerCloudSave::ReplaceUserRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key
 		, (bIsPublic ? TEXT("/public") : TEXT("")));
@@ -481,7 +481,7 @@ void ServerCloudSave::DeleteUserRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key
 		, (bIsPublic ? TEXT("/public") : TEXT("")));
@@ -497,7 +497,7 @@ void ServerCloudSave::BulkGetPlayerRecordSize(const FAccelByteModelsBulkGetPlaye
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/bulk/records/size")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess](FJsonObject const& JsonObject)
@@ -541,7 +541,7 @@ void ServerCloudSave::CreateAdminGameRecord(FString const& Key, FJsonObject cons
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>(RecordRequest);
@@ -563,7 +563,7 @@ void ServerCloudSave::QueryAdminGameRecordsByKey(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
@@ -587,7 +587,7 @@ void ServerCloudSave::QueryAdminGameRecordKeys(int Limit, int Offset
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
@@ -606,7 +606,7 @@ void ServerCloudSave::ReplaceAdminGameRecord(FString const& Key, FJsonObject con
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>(RecordRequest);
@@ -627,7 +627,7 @@ void ServerCloudSave::DeleteAdminGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -656,7 +656,7 @@ void ServerCloudSave::CreateAdminUserRecord(const FString& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key);
 
@@ -687,7 +687,7 @@ void ServerCloudSave::QueryAdminUserRecordsByKey(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key);
 
@@ -725,7 +725,7 @@ void ServerCloudSave::QueryAdminUserRecordKeys(const FString& UserId, int Limit,
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
@@ -754,7 +754,7 @@ void ServerCloudSave::ReplaceAdminUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key);
 
@@ -785,7 +785,7 @@ void ServerCloudSave::DeleteAdminUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key);
 

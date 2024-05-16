@@ -116,7 +116,7 @@ private:
 	GameTelemetry(GameTelemetry const&) = delete;
 	GameTelemetry(GameTelemetry&&) = delete;
 
-	Credentials& CredentialsRef;
+	TSharedRef<Credentials, ESPMode::ThreadSafe> CredentialsRef;
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;

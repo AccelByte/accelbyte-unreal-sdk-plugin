@@ -61,7 +61,7 @@ void ServerMatchmakingV2::AcceptBackfillProposal(const FString& BackfillTicketId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/backfill/%s/proposal/accept")
 		, *ServerSettingsRef.MatchmakingV2ServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *BackfillTicketId);
 
 	const TSharedRef<FJsonObject> RequestObject = MakeShared<FJsonObject>();
@@ -95,7 +95,7 @@ void ServerMatchmakingV2::RejectBackfillProposal(const FString& BackfillTicketId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/backfill/%s/proposal/reject")
 		, *ServerSettingsRef.MatchmakingV2ServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *BackfillTicketId);
 
 	const TSharedRef<FJsonObject> RequestObject = MakeShared<FJsonObject>();
@@ -134,7 +134,7 @@ void ServerMatchmakingV2::CreateBackfillTicket(const FString& MatchPool
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/backfill")
 		, *ServerSettingsRef.MatchmakingV2ServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	const TSharedRef<FJsonObject> RequestObject = MakeShared<FJsonObject>();
 	RequestObject->SetStringField(TEXT("matchPool"), MatchPool);
@@ -163,7 +163,7 @@ void ServerMatchmakingV2::DeleteBackfillTicket(const FString& BackfillTicketId, 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/backfill/%s")
 		, *ServerSettingsRef.MatchmakingV2ServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *BackfillTicketId);
 
 	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);

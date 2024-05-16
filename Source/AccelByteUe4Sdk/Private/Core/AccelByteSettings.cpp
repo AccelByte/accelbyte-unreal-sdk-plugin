@@ -669,5 +669,5 @@ void UAccelByteBlueprintsSettings::SetEnableGameTelemetryCache(bool bEnable)
 void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment Environment)
 {
 	FRegistry::Settings.Reset(Environment);
-	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+	FRegistry::CredentialsRef->SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 }

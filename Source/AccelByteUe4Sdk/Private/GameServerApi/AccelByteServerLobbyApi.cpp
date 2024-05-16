@@ -38,7 +38,7 @@ void ServerLobby::GetPartyDataByUserId(const FString & UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/users/%s/party")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -67,7 +67,7 @@ void ServerLobby::GetPartyStorage(const FString & PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *PartyId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -83,7 +83,7 @@ void ServerLobby::RequestWritePartyStorage(const FString &PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s/attributes")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *PartyId);
 
 	FString Contents = "{\n";
@@ -156,7 +156,7 @@ void ServerLobby::GetSessionAttributeAll(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -184,7 +184,7 @@ void ServerLobby::GetSessionAttribute(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes/%s")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId
 		, *Key);
 
@@ -216,7 +216,7 @@ void ServerLobby::SetSessionAttribute(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Body, OnSuccess, OnError);
@@ -254,7 +254,7 @@ void ServerLobby::GetListOfBlockedUsers(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked")
 		, *ServerSettingsRef.BaseUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -275,7 +275,7 @@ void ServerLobby::GetListOfBlockers(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by")
 		, *ServerSettingsRef.BaseUrl
-		, *ServerCredentialsRef.GetClientNamespace()
+		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);

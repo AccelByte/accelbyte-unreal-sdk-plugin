@@ -35,7 +35,7 @@ void ServerChallenge::EvaluateChallengeProgress(const FAccelByteModelsChallengeS
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/progress/evaluate")
 		, *ServerSettingsRef.ChallengeServerUrl
-		, *ServerCredentialsRef.GetClientNamespace());
+		, *ServerCredentialsRef->GetClientNamespace());
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }

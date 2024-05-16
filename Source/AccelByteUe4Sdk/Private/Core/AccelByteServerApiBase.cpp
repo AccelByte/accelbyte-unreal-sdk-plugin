@@ -10,7 +10,7 @@ namespace AccelByte
 FServerApiBase::FServerApiBase( ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: ServerCredentialsRef{InCredentialsRef}
+	: ServerCredentialsRef{InCredentialsRef.AsShared()}
 	, ServerSettingsRef{InSettingsRef}
 	, HttpRef{InHttpRef}
 	, HttpClient(InCredentialsRef, InSettingsRef, InHttpRef)

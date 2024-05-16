@@ -32,8 +32,8 @@ void Fulfillment::RedeemCode(FString const& Code
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef.GetNamespace()
-		, *CredentialsRef.GetUserId());
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	FString Content;
 	FAccelByteModelsFulFillCodeRequest CodeRequest;
