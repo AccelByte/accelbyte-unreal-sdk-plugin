@@ -20,7 +20,7 @@ Reward::Reward(Credentials const& InCredentialsRef
 Reward::~Reward()
 {}
 	
-FString Reward::ConvertRewardSortByToString(EAccelByteRewardListSortBy const& SortBy)
+FString Reward::ConvertRewardSortByToString(EAccelByteRewardListSortBy SortBy)
 {
 	switch (SortBy)
 	{
@@ -41,7 +41,7 @@ FString Reward::ConvertRewardSortByToString(EAccelByteRewardListSortBy const& So
 	}
 }
 
-void Reward::GetRewardByRewardCode(FString const& RewardCode
+FAccelByteTaskWPtr Reward::GetRewardByRewardCode(FString const& RewardCode
 	, THandler<FAccelByteModelsRewardInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -55,10 +55,10 @@ void Reward::GetRewardByRewardCode(FString const& RewardCode
 		{ TEXT("rewardCode"), RewardCode }
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Reward::GetRewardByRewardId(FString const& RewardId
+FAccelByteTaskWPtr Reward::GetRewardByRewardId(FString const& RewardId
 	, THandler<FAccelByteModelsRewardInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -69,10 +69,10 @@ void Reward::GetRewardByRewardId(FString const& RewardId
 		, *CredentialsRef->GetNamespace()
 		, *RewardId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Reward::QueryRewards(FString const& EventTopic
+FAccelByteTaskWPtr Reward::QueryRewards(FString const& EventTopic
 	, int32 Offset
 	, int32 Limit
 	, EAccelByteRewardListSortBy const& SortBy
@@ -103,7 +103,7 @@ void Reward::QueryRewards(FString const& EventTopic
 		QueryParams.Add(TEXT("sortBy"), ConvertRewardSortByToString(SortBy));
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 	
 } // Namespace Api

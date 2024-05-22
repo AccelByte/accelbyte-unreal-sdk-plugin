@@ -23,7 +23,7 @@ SeasonPass::SeasonPass(Credentials const& InCredentialsRef
 SeasonPass::~SeasonPass()
 {}
 
-void SeasonPass::GetCurrentSeason(FString const& Language
+FAccelByteTaskWPtr SeasonPass::GetCurrentSeason(FString const& Language
 	, THandler<FAccelByteModelsSeasonInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -78,10 +78,10 @@ void SeasonPass::GetCurrentSeason(FString const& Language
 			OnSuccess.ExecuteIfBound(EndResult);
 		});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
 }
 
-void SeasonPass::GetUserSeason(FString const& SeasonId
+FAccelByteTaskWPtr SeasonPass::GetUserSeason(FString const& SeasonId
 	, THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -135,10 +135,10 @@ void SeasonPass::GetUserSeason(FString const& SeasonId
 			OnSuccess.ExecuteIfBound(EndResult);
 		});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
-void SeasonPass::GetCurrentUserSeason(THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess
+FAccelByteTaskWPtr SeasonPass::GetCurrentUserSeason(THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -190,10 +190,10 @@ void SeasonPass::GetCurrentUserSeason(THandler<FAccelByteModelsUserSeasonInfo> c
 			OnSuccess.ExecuteIfBound(EndResult);
 		});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
-void SeasonPass::ClaimRewards(FAccelByteModelsSeasonClaimRewardRequest const& RewardRequest
+FAccelByteTaskWPtr SeasonPass::ClaimRewards(FAccelByteModelsSeasonClaimRewardRequest const& RewardRequest
 	, THandler<FAccelByteModelsSeasonClaimRewardResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -232,10 +232,10 @@ void SeasonPass::ClaimRewards(FAccelByteModelsSeasonClaimRewardRequest const& Re
 			OnSuccess.ExecuteIfBound(EndResult);
 		});
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RewardRequest, OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RewardRequest, OnSuccessHttpClient, OnError);
 }
 
-void SeasonPass::BulkClaimRewards(THandler<FAccelByteModelsSeasonClaimRewardResponse> const& OnSuccess
+FAccelByteTaskWPtr SeasonPass::BulkClaimRewards(THandler<FAccelByteModelsSeasonClaimRewardResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -273,10 +273,10 @@ void SeasonPass::BulkClaimRewards(THandler<FAccelByteModelsSeasonClaimRewardResp
 			OnSuccess.ExecuteIfBound(EndResult);
 		});
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-TMap<FString, TArray<FString>> SeasonPass::FJsonObjectToPassRewards(TSharedPtr<FJsonObject> JsonObject)
+TMap<FString, TArray<FString>> SeasonPass::FJsonObjectToPassRewards(TSharedPtr<FJsonObject> const& JsonObject)
 {
 	TMap<FString, TArray<FString>> PassAndRewardCode;
 	for (TTuple<FString, TSharedPtr<FJsonValue>> const& PassReward : JsonObject->Values)

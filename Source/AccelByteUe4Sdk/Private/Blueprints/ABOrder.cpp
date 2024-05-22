@@ -111,3 +111,17 @@ void UABOrder::GetUserOrderHistory(
 				OnError.ExecuteIfBound(Code, Message);
 			}));
 }
+
+void UABOrder::PreviewUserOrder(const FAccelByteModelsUserPreviewOrderRequest& OrderPreviewRequest,
+	const FDAccelByteModelsPreviewOrderResponse& OnSuccess, const FDErrorHandler& OnError)
+{
+	ApiClientPtr->Order.PreviewUserOrder(OrderPreviewRequest, THandler<FAccelByteModelsUserPreviewOrderResponse>::CreateLambda(
+		[OnSuccess](const FAccelByteModelsUserPreviewOrderResponse& Result)
+		{
+			OnSuccess.ExecuteIfBound(Result);
+		}),
+	FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}

@@ -28,12 +28,12 @@ ServerUser::~ServerUser()
 {
 }
 
-void ServerUser::SearchUserOtherPlatformDisplayName(const FString& DisplayName
+FAccelByteTaskWPtr ServerUser::SearchUserOtherPlatformDisplayName(FString const& DisplayName
 	, EAccelBytePlatformType PlatformType
-	, const THandler<FPagedUserOtherPlatformInfo>& OnSuccess
-	, const FErrorHandler& OnError
-	, const int32& Limit
-	, const int32& Offset
+	, THandler<FPagedUserOtherPlatformInfo> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
 	, bool bIsSearchByUniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -41,7 +41,7 @@ void ServerUser::SearchUserOtherPlatformDisplayName(const FString& DisplayName
 	if (PlatformType == EAccelBytePlatformType::Nintendo || PlatformType == EAccelBytePlatformType::Oculus || PlatformType == EAccelBytePlatformType::Apple)
 	{
 		OnError.ExecuteIfBound(400, TEXT("Cannot search user using this function. Use SearchUserOtherPlatformUserId instead."));
-		return;
+		return nullptr;
 	}
 
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
@@ -59,13 +59,13 @@ void ServerUser::SearchUserOtherPlatformDisplayName(const FString& DisplayName
 		{ TEXT("query"), *DisplayName }
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerUser::SearchUserOtherPlatformUserId(const FString& PlatformUserId
+FAccelByteTaskWPtr ServerUser::SearchUserOtherPlatformUserId(FString const& PlatformUserId
 	, EAccelBytePlatformType PlatformType
-	, const THandler<FUserOtherPlatformInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+	, THandler<FUserOtherPlatformInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -77,13 +77,13 @@ void ServerUser::SearchUserOtherPlatformUserId(const FString& PlatformUserId
 		, *PlatformId
 		, *PlatformUserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerUser::BanSingleUser(const FString& UserId
-	, const FBanUserRequest& BanUser
-	, const THandler<FBanUserResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerUser::BanSingleUser(FString const& UserId
+	, FBanUserRequest const& BanUser
+	, THandler<FBanUserResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -91,7 +91,7 @@ void ServerUser::BanSingleUser(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
@@ -99,14 +99,14 @@ void ServerUser::BanSingleUser(const FString& UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, BanUser, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, BanUser, OnSuccess, OnError);
 }
 
-void ServerUser::GetUserBans(const FString& UserId
-	, const FDateTime& Before
-	, const FDateTime& After
-	, const THandler<FGetUserBansResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerUser::GetUserBans(FString const& UserId
+	, FDateTime const& Before
+	, FDateTime const& After
+	, THandler<FGetUserBansResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -114,7 +114,7 @@ void ServerUser::GetUserBans(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
@@ -128,10 +128,12 @@ void ServerUser::GetUserBans(const FString& UserId
 		{TEXT("before"), *Before.ToIso8601()}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerUser::GetUserBanInfo(const FString& UserId, const THandler<FGetUserBansResponse>& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerUser::GetUserBanInfo(FString const& UserId
+	, THandler<FGetUserBansResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -139,7 +141,7 @@ void ServerUser::GetUserBanInfo(const FString& UserId, const THandler<FGetUserBa
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans?activeOnly=true")
@@ -147,12 +149,12 @@ void ServerUser::GetUserBanInfo(const FString& UserId, const THandler<FGetUserBa
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
 }
 
-void ServerUser::ListUserByUserId(const FListUserDataRequest Request
-	, const THandler<FListUserDataResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerUser::ListUserByUserId(FListUserDataRequest const& Request
+	, THandler<FListUserDataResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -160,8 +162,8 @@ void ServerUser::ListUserByUserId(const FListUserDataRequest Request
 		, *ServerSettingsRef.IamServerUrl
 		, *ServerCredentialsRef->GetClientNamespace() );
  
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 	
-}
-}
+} // Namespace GameServerApi
+} // Namespace AccelByte

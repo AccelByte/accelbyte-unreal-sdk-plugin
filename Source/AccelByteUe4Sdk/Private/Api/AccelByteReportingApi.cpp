@@ -21,49 +21,49 @@ Reporting::Reporting(Credentials const& InCredentialsRef
 Reporting::~Reporting()
 {}
 
-void Reporting::SubmitReport(const FAccelByteModelsReportingSubmitData ReportData
-	, const THandler<FAccelByteModelsReportingSubmitResponse>& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr Reporting::SubmitReport(FAccelByteModelsReportingSubmitData const& ReportData
+	, THandler<FAccelByteModelsReportingSubmitResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if(ReportData.ObjectId.IsEmpty())
+	if (ReportData.ObjectId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("ObjectID is Empty, You Should Fill it with UUID v4 without hyphen format"));
-		return;
+		return nullptr;
 	}
 
-	if(ReportData.ObjectId.Contains("-"))
+	if (ReportData.ObjectId.Contains("-"))
 	{
 		OnError.ExecuteIfBound(404, TEXT("ObjectId doesn't follow the UUID V4 without hyphen format, You Should Fill it with UUID v4 without hyphen format"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports")
 		, *SettingsRef.ReportingServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ReportData, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, ReportData, OnSuccess, OnError);
 }
 
-void Reporting::SubmitChatReport(const FAccelByteModelsReportingSubmitDataChat& ReportData
-	, const THandler<FAccelByteModelsReportingSubmitResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Reporting::SubmitChatReport(FAccelByteModelsReportingSubmitDataChat const& ReportData
+	, THandler<FAccelByteModelsReportingSubmitResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
-	if(ReportData.ChatId.IsEmpty())
+	if (ReportData.ChatId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("Chat report failed! ChatId cannot be empty."));
-		return;
+		return nullptr;
 	}
-	if(ReportData.UserId.IsEmpty())
+	if (ReportData.UserId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("Chat report failed! UserId cannot be empty."));
-		return;
+		return nullptr;
 	}
-	if(ReportData.ChatTopicId.IsEmpty())
+	if (ReportData.ChatTopicId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("Chat report failed! ChatTopicId cannot be empty."));
-		return;
+		return nullptr;
 	}
 	
 	FAccelByteModelsReportingSubmitDataChatRequest Request;
@@ -81,17 +81,17 @@ void Reporting::SubmitChatReport(const FAccelByteModelsReportingSubmitDataChat& 
 	Request.AdditionalInfo = Additions;
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports")
-	, *SettingsRef.ReportingServerUrl
-	, *CredentialsRef->GetNamespace());
+		, *SettingsRef.ReportingServerUrl
+		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 
-void Reporting::GetReasons(const FString& ReasonGroup
-	, int32 const& Offset
-	, int32 const& Limit
-	, const THandler<FAccelByteModelsReasonsResponse>& OnSuccess
-	, const FErrorHandler & OnError
+FAccelByteTaskWPtr Reporting::GetReasons(FString const& ReasonGroup
+	, int32 Offset
+	, int32 Limit
+	, THandler<FAccelByteModelsReasonsResponse> const& OnSuccess
+	, FErrorHandler const& OnError
 	, FString const& Title)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -107,13 +107,13 @@ void Reporting::GetReasons(const FString& ReasonGroup
 		{ TEXT("title"), Title },
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
-void Reporting::GetReasonGroups(int32 const& Offset
-	, int32 const& Limit
-	, const THandler<FAccelByteModelsReasonGroupsResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Reporting::GetReasonGroups(int32 Offset
+	, int32 Limit
+	, THandler<FAccelByteModelsReasonGroupsResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -126,7 +126,7 @@ void Reporting::GetReasonGroups(int32 const& Offset
 		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 } // Namespace Api

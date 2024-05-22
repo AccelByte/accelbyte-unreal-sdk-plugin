@@ -24,7 +24,7 @@ Item::Item(Credentials const& InCredentialsRef
 
 Item::~Item(){}
 
-void Item::GetItemById(FString const& ItemId
+FAccelByteTaskWPtr Item::GetItemById(FString const& ItemId
 	, FString const& Language
 	, FString const& Region
 	, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess
@@ -38,13 +38,13 @@ void Item::GetItemById(FString const& ItemId
 	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
-		return;
+		return nullptr;
 	}
 	
 	if (ItemId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemId can not be empty."));
-		return;
+		return nullptr;
 	}
 	
 	const FString Verb            = TEXT("GET");
@@ -61,10 +61,10 @@ void Item::GetItemById(FString const& ItemId
 		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 	
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
-void Item::GetItemByAppId(FString const& AppId
+FAccelByteTaskWPtr Item::GetItemByAppId(FString const& AppId
 	, FString const& Language
 	, FString const& Region
 	, THandler<FAccelByteModelsItemInfo> const& OnSuccess
@@ -75,13 +75,13 @@ void Item::GetItemByAppId(FString const& AppId
 	if (SettingsRef.PublisherNamespace.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Publisher Namespace isn't specified in the configuration file."));
-		return;
+		return nullptr;
 	}
 	
 	if (AppId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, AppId can not be empty."));
-		return;
+		return nullptr;
 	}
 	
 	const FString Verb = TEXT("GET");
@@ -95,15 +95,15 @@ void Item::GetItemByAppId(FString const& AppId
 		{ TEXT("appId"), AppId }
 	};
 
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
-void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
-	, int32 const& Offset
-	, int32 const& Limit
+FAccelByteTaskWPtr Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
+	, int32 Offset
+	, int32 Limit
 	, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
 	, FErrorHandler const& OnError
-	, TArray<EAccelByteItemListSortBy> SortBy
+	, TArray<EAccelByteItemListSortBy> const& SortBy
 	, FString const& StoreId
 	, bool AutoCalcEstimatedPrice)
 {
@@ -112,7 +112,7 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
-		return;
+		return nullptr;
 	}
 	
 	const FString Verb = TEXT("GET");
@@ -150,13 +150,13 @@ void Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 	
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
-void Item::SearchItem(FString const& Language
+FAccelByteTaskWPtr Item::SearchItem(FString const& Language
 	, FString const& Keyword
-	, int32 const& Offset
-	, int32 const& Limit
+	, int32 Offset
+	, int32 Limit
 	, FString const& Region
 	, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
 	, FErrorHandler const& OnError
@@ -167,13 +167,13 @@ void Item::SearchItem(FString const& Language
 	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
-		return;
+		return nullptr;
 	}
 	
 	if (Language.IsEmpty() || Keyword.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Language and Keyword can not be empty"));
-		return;
+		return nullptr;
 	}
 	
 	const FString Verb = TEXT("GET");
@@ -190,10 +190,10 @@ void Item::SearchItem(FString const& Language
 		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
-void Item::GetItemBySku(FString const& Sku
+FAccelByteTaskWPtr Item::GetItemBySku(FString const& Sku
 	, FString const& Language
 	, FString const& Region
 	, THandler<FAccelByteModelsItemInfo> const& OnSuccess
@@ -205,13 +205,13 @@ void Item::GetItemBySku(FString const& Sku
 	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
-		return;
+		return nullptr;
 	}
 	
 	if(Sku.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Sku number can not be empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Verb = TEXT("GET");
@@ -226,10 +226,10 @@ void Item::GetItemBySku(FString const& Sku
 		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 	
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
-void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
+FAccelByteTaskWPtr Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 	, FString const& Region
 	, FString const& Language
 	, THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess
@@ -242,13 +242,13 @@ void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
-		return;
+		return nullptr;
 	}
 
 	if (ItemIds.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemIds can not be empty"));
-		return;
+		return nullptr;
 	}
 	
 	FString Verb = TEXT("GET");
@@ -264,10 +264,10 @@ void Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
  
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
-void Item::GetItemDynamicData(FString const& ItemId
+FAccelByteTaskWPtr Item::GetItemDynamicData(FString const& ItemId
 	, THandler<FAccelByteModelsItemDynamicData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -276,13 +276,13 @@ void Item::GetItemDynamicData(FString const& ItemId
 	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
-		return;
+		return nullptr;
 	}
 	
 	if(ItemId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemId can not be empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Verb = TEXT("GET");
@@ -291,10 +291,10 @@ void Item::GetItemDynamicData(FString const& ItemId
 		, *CredentialsRef->GetNamespace()
 		, *ItemId);
 
-	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
+FAccelByteTaskWPtr Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -302,7 +302,7 @@ void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> cons
 	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
-		return;
+		return nullptr;
 	}	
 
 	const FString Verb = TEXT("GET");
@@ -310,10 +310,12 @@ void Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> cons
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Item::GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Region, THandler<TArray<FAccelByteModelsEstimatedPrices>> const& OnSuccess
+FAccelByteTaskWPtr Item::GetEstimatedPrice(const TArray<FString>& ItemIds
+	, FString const& Region
+	, THandler<TArray<FAccelByteModelsEstimatedPrices>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -321,18 +323,18 @@ void Item::GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Regi
 	if (CredentialsRef->GetNamespace().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("Not logged in, Namespace is empty due to failed login."));
-		return;
+		return nullptr;
 	} 
 
 	if (ItemIds.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ItemIds can not be empty"));
-		return;
+		return nullptr;
 	}
 
 	// There will only one published stored in a live game environment. 
 	// Here the StoreId is intended to be set as empty string, then the Platform Service will fill by default value/published store Id. 
-	const FString& StoreId = TEXT("");
+	FString const& StoreId = TEXT("");
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), StoreId },
 		{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
@@ -344,19 +346,19 @@ void Item::GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Regi
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Item::GetItemMappings(const EAccelBytePlatformMapping Platform
-	, const THandler<FAccelByteModelsItemMappingsResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Item::GetItemMappings(EAccelBytePlatformMapping Platform
+	, THandler<FAccelByteModelsItemMappingsResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (Platform == EAccelBytePlatformMapping::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform type can't be NONE"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(
@@ -365,10 +367,10 @@ void Item::GetItemMappings(const EAccelBytePlatformMapping Platform
 
 	const TMultiMap<FString, FString> QueryParams{{TEXT("platform"), ConvertPlatformMappingToString(Platform)}};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-FString Item::ConvertPlatformMappingToString(const EAccelBytePlatformMapping& Platform)
+FString Item::ConvertPlatformMappingToString(EAccelBytePlatformMapping Platform)
 {
 	switch (Platform)
 	{

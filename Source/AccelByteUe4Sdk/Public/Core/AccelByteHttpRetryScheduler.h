@@ -44,6 +44,8 @@ public:
 	FHttpRetryScheduler();
 	virtual ~FHttpRetryScheduler();
 
+	void InitializeRateLimit();
+
 	FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
 
 	void SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected);

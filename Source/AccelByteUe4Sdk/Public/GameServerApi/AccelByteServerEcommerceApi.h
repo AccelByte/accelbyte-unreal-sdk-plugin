@@ -40,18 +40,20 @@ public:
 	 * @param EntitlementClass Class of the entitlement (optional).
 	 * @param AppType This is the type of application that entitled (optional).
 	 * @param Features (optional).
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryUserEntitlements(const FString& UserId
+	FAccelByteTaskWPtr QueryUserEntitlements(FString const& UserId
 		, bool bActiveOnly
-		, const FString& EntitlementName
-		, const TArray<FString>& ItemIds
-		, const int32& Offset
-		, const int32& Limit
-		, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess
-		, const FErrorHandler& OnError
+		, FString const& EntitlementName
+		, TArray<FString> const& ItemIds
+		, int32 Offset
+		, int32 Limit
+		, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess
+		, FErrorHandler const& OnError
 		, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE
 		, EAccelByteAppType AppType = EAccelByteAppType::NONE
-		, const TArray<FString>& Features = {});
+		, TArray<FString> const& Features = {});
 
 	/**
 	 * @brief Get Entitlement's Info by the EntitlementId.
@@ -59,10 +61,12 @@ public:
 	 * @param EntitlementId The id of the entitlement.
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementById(const FString& EntitlementId
-		, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserEntitlementById(FString const& EntitlementId
+		, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get Entitlement info by the UserId and EntitlementId
@@ -71,11 +75,13 @@ public:
 	 * @param EntitlementId The id of the entitlement
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementById(const FString& UserId
-		, const FString& EntitlementId
-		, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserEntitlementById(FString const& UserId
+		, FString const& EntitlementId
+		, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Granting Entitlement(s) to a user.
@@ -84,11 +90,13 @@ public:
 	 * @param EntitlementGrant Consist of the entitlement(s) that will be granted.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsStackableEntitlementInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GrantUserEntitlements(const FString& UserId
-		, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant
-		, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GrantUserEntitlements(FString const& UserId
+		, TArray<FAccelByteModelsEntitlementGrant> const& EntitlementGrant
+		, THandler<TArray<FAccelByteModelsStackableEntitlementInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Credit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
@@ -98,11 +106,14 @@ public:
 	 * @param CreditUserWalletRequest The request to credit a user wallet.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletInfo&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreditUserWallet(const FString& UserId
-		, const FString& CurrencyCode
-		, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest
-		, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreditUserWallet(FString const& UserId
+		, FString const& CurrencyCode
+		, FAccelByteModelsCreditUserWalletRequest const& CreditUserWalletRequest
+		, THandler<FAccelByteModelsWalletInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Credit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
@@ -112,12 +123,14 @@ public:
 	 * @param CreditUserWalletRequest The request to credit a user wallet.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletCreditResponse&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreditUserWalletV2(const FString& UserId
-		, const FString& CurrencyCode
-		, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest
-		, const THandler<FAccelByteModelsWalletCreditResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreditUserWalletV2(FString const& UserId
+		, FString const& CurrencyCode
+		, FAccelByteModelsCreditUserWalletRequest const& CreditUserWalletRequest
+		, THandler<FAccelByteModelsWalletCreditResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Revoke Entitlement from a User (Many)
@@ -126,11 +139,13 @@ public:
 	 * @param EntitlementIds The ids of the entitlements
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsBulkRevokeEntitlements&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RevokeUserEntitlements(const FString& UserId
-		, const TArray<FString>& EntitlementIds
-		, const THandler<FAccelByteModelsBulkRevokeEntitlements>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr RevokeUserEntitlements(FString const& UserId
+		, TArray<FString> const& EntitlementIds
+		, THandler<FAccelByteModelsBulkRevokeEntitlements> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Revoke Entitlement from a User (Single)
@@ -139,11 +154,13 @@ public:
 	 * @param EntitlementId The id of the entitlements
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsEntitlementInfo&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RevokeUserEntitlement(const FString& UserId
-		, const FString& EntitlementId
-		, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr RevokeUserEntitlement(FString const& UserId
+		, FString const& EntitlementId
+		, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Consume Entitlement from a User
@@ -156,12 +173,14 @@ public:
 	 * @param Options Options of consumed entitlements.
 	 * @param RequestId Request id(Optional), A unique tracking ID provided by the developer, can just left it empty if they don't want to track
 	 * When a request id is submitted, it will return original successful response
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ConsumeUserEntitlement(const FString& UserId
-		, const FString& EntitlementId
+	FAccelByteTaskWPtr ConsumeUserEntitlement(FString const& UserId
+		, FString const& EntitlementId
 		, int32 UseCount
-		, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-		, const FErrorHandler& OnError
+		, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+		, FErrorHandler const& OnError
 		, TArray<FString> Options = {}
 		, FString const& RequestId = {});
 
@@ -172,11 +191,13 @@ public:
 	 * @param EntitlementId The id of the entitlements
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsEntitlementInfo&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DisableUserEntitlement(const FString& UserId
-		, const FString& EntitlementId
-		, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DisableUserEntitlement(FString const& UserId
+		, FString const& EntitlementId
+		, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Enable Entitlement that has been disabled
@@ -185,11 +206,13 @@ public:
 	 * @param EntitlementId The id of the entitlements
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsBulkRevokeEntitlements&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void EnableUserEntitlement(const FString& UserId
-		, const FString& EntitlementId
-		, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr EnableUserEntitlement(FString const& UserId
+		, FString const& EntitlementId
+		, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get user entitlement history.
@@ -198,11 +221,13 @@ public:
 	 * @param EntitlementId The id of the entitlements
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserEntitlementHistory&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementHistory(const FString& UserId
-		, const FString& EntitlementId
-		, const THandler<TArray<FAccelByteModelsUserEntitlementHistory>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserEntitlementHistory(FString const& UserId
+		, FString const& EntitlementId
+		, THandler<TArray<FAccelByteModelsUserEntitlementHistory>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Debit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
@@ -212,12 +237,15 @@ public:
 	 * @param DebitUserWalletRequest The request to debit a user wallet.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletInfo&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	// This end point will be deprecated, old wallet id means one currency, but now it only means one wallet, so we wanna use currency and source instead it. 
-	void DebitUserWallet(const FString& UserId
-		, const FString& WalletId
-		, const FAccelByteModelsDebitUserWalletRequest& DebitUserWalletRequest
-		, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DebitUserWallet(FString const& UserId
+		, FString const& WalletId
+		, FAccelByteModelsDebitUserWalletRequest const& DebitUserWalletRequest
+		, THandler<FAccelByteModelsWalletInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Debit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
@@ -227,11 +255,14 @@ public:
 	 * @param DebitUserWalletRequest The request to debit a user wallet.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletInfo&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DebitUserWalletV2(const FString& UserId
-		, const FString& CurrencyCode
-		, const FAccelByteModelsDebitUserWalletRequestV2& DebitUserWalletRequest
-		, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DebitUserWalletV2(FString const& UserId
+		, FString const& CurrencyCode
+		, FAccelByteModelsDebitUserWalletRequestV2 const& DebitUserWalletRequest
+		, THandler<FAccelByteModelsWalletInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 
 	/**
@@ -243,11 +274,14 @@ public:
 	 * @param PaymentRequest The request to debit a user wallet.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletInfo&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void PaymentWithUserWallet(const FString& UserId, const FString& CurrencyCode
-		, const FAccelByteModelsPaymentUserWalletRequest& PaymentRequest
-		, const THandler<FAccelByteModelsPlatformWallet>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr PaymentWithUserWallet(FString const& UserId
+		, FString const& CurrencyCode
+		, FAccelByteModelsPaymentUserWalletRequest const& PaymentRequest
+		, THandler<FAccelByteModelsPlatformWallet> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief FulFill item to a user.
@@ -256,11 +290,13 @@ public:
 	 * @param FulfillmentRequest The request to fulfill an item to user.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsFulfillmentResult&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void FulfillUserItem(const FString& UserId
-		, const FAccelByteModelsFulfillmentRequest& FulfillmentRequest
-		, const THandler<FAccelByteModelsFulfillmentResult>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr FulfillUserItem(FString const& UserId
+		, FAccelByteModelsFulfillmentRequest const& FulfillmentRequest
+		, THandler<FAccelByteModelsFulfillmentResult> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get items by multiple Sku.
@@ -268,8 +304,10 @@ public:
 	 * @param Skus Sku of the Item.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGetBulkItemsBySkus&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetItemsBySkus(TArray<FString> const& Skus
+	FAccelByteTaskWPtr BulkGetItemsBySkus(TArray<FString> const& Skus
 		, THandler<TArray<FAccelByteModelsBulkGetItemsBySkus>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -278,8 +316,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsPlatformStore>&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ListStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
+	FAccelByteTaskWPtr ListStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -288,8 +328,10 @@ public:
 	 * @param ItemCriteria Struct of item criteria 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2& ItemCriteria
+	FAccelByteTaskWPtr QueryItemsByCriteria(FAccelByteModelsItemCriteriaV2 const& ItemCriteria
 		, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -299,8 +341,10 @@ public:
 	 * @param ItemCriteria Struct of item criteria, FAccelByteModelsItemCriteriaV3
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV3& ItemCriteria
+	FAccelByteTaskWPtr QueryItemsByCriteriaV2(FAccelByteModelsItemCriteriaV3 const& ItemCriteria
 		, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -311,8 +355,11 @@ public:
 	 * @param FulfillRewardsRequest Struct of Fulfill Rewards, FAccelByteModelsFulfillRewards
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation fails.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void FulfillRewards(const FString& UserId, const FAccelByteModelsFulfillRewards& FulfillRewardsRequest
+	FAccelByteTaskWPtr FulfillRewards(FString const& UserId
+		, FAccelByteModelsFulfillRewards const& FulfillRewardsRequest
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 

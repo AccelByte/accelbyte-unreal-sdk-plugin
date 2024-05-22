@@ -454,7 +454,7 @@ bool GameTelemetry::EventsJsonToArray(FString& InJsonString
 	}
 
 	TArray<TSharedPtr<FJsonValue>> const* ArrayValue;
-	if (!JsonObjectPtr->TryGetArrayField("telemetry", ArrayValue))
+	if (!JsonObjectPtr->TryGetArrayField(TEXT("telemetry"), ArrayValue))
 	{
 		return false;
 	}
@@ -471,10 +471,10 @@ bool GameTelemetry::EventsJsonToArray(FString& InJsonString
 		TSharedPtr<FJsonObject> const* Payload = nullptr;
 		int32 ClientTimestamp = 0;
 		FAccelByteModelsTelemetryBody TelemetryBody;
-		TelemetryBody.EventName = JsonObj->GetStringField("EventName");
-		TelemetryBody.EventNamespace = JsonObj->GetStringField("EventNamespace");
-		TelemetryBody.Payload = JsonObj->GetObjectField("Payload");
-		ClientTimestamp = JsonObj->GetIntegerField("ClientTimestamp");
+		TelemetryBody.EventName = JsonObj->GetStringField(TEXT("EventName"));
+		TelemetryBody.EventNamespace = JsonObj->GetStringField(TEXT("EventNamespace"));
+		TelemetryBody.Payload = JsonObj->GetObjectField(TEXT("Payload"));
+		ClientTimestamp = JsonObj->GetIntegerField(TEXT("ClientTimestamp"));
 		TelemetryBody.ClientTimestamp = FDateTime::FromUnixTimestamp(ClientTimestamp);
 		OutArray.Add(MakeShared<FAccelByteModelsTelemetryBody>(TelemetryBody));
 	}

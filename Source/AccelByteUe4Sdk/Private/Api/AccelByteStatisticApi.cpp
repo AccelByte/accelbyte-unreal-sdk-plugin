@@ -23,7 +23,7 @@ Statistic::Statistic(Credentials const& InCredentialsRef
 Statistic::~Statistic()
 {}
 
-FString Statistic::ConvertUserStatisticSortByToString(const EAccelByteStatisticSortBy& SortBy)
+FString Statistic::ConvertUserStatisticSortByToString(EAccelByteStatisticSortBy SortBy)
 {
 	switch (SortBy)
 	{
@@ -50,9 +50,9 @@ FString Statistic::ConvertUserStatisticSortByToString(const EAccelByteStatisticS
 	}
 }
 
-void Statistic::CreateUserStatItems(const TArray<FString>& StatCodes
-	, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::CreateUserStatItems(TArray<FString> const& StatCodes
+	, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -80,38 +80,38 @@ void Statistic::CreateUserStatItems(const TArray<FString>& StatCodes
 	TMap<FString, FString> Headers;
 	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, Headers, OnSuccess, OnError);
 }
 
-void Statistic::GetAllUserStatItems(const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr Statistic::GetAllUserStatItems(THandler<FAccelByteModelsUserStatItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
 	, int32 Limit
 	, int32 Offset
 	, EAccelByteStatisticSortBy SortBy)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetUserStatItems({}, {}, OnSuccess, OnError, Limit, Offset, SortBy);
+	return GetUserStatItems({}, {}, OnSuccess, OnError, Limit, Offset, SortBy);
 }
 
-void Statistic::GetUserStatItems(const TArray<FString>& StatCodes
-	, const TArray<FString>& Tags
-	, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-	, const FErrorHandler & OnError
+FAccelByteTaskWPtr Statistic::GetUserStatItems(TArray<FString> const& StatCodes
+	, TArray<FString> const& Tags
+	, THandler<FAccelByteModelsUserStatItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
 	, int32 Limit
 	, int32 Offset
 	, EAccelByteStatisticSortBy SortBy)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetUserStatItems(CredentialsRef->GetUserId(), StatCodes, Tags, OnSuccess, OnError, Limit, Offset, SortBy);
+	return GetUserStatItems(CredentialsRef->GetUserId(), StatCodes, Tags, OnSuccess, OnError, Limit, Offset, SortBy);
 }
 
-void Statistic::GetUserStatItems(const FString& UserId
-	, const TArray<FString>& StatCodes
-	, const TArray<FString>& Tags
-	, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr Statistic::GetUserStatItems(FString const& UserId
+	, TArray<FString> const& StatCodes
+	, TArray<FString> const& Tags
+	, THandler<FAccelByteModelsUserStatItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
 	, int32 Limit
 	, int32 Offset
 	, EAccelByteStatisticSortBy SortBy)
@@ -121,14 +121,14 @@ void Statistic::GetUserStatItems(const FString& UserId
 	if (UserId.IsEmpty())
 	{
 		OnSuccess.ExecuteIfBound(FAccelByteModelsUserStatItemPagingSlicedResult{});
-		return;
+		return nullptr;
 	}
 
 	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems")
@@ -150,12 +150,12 @@ void Statistic::GetUserStatItems(const FString& UserId
 	TMap<FString, FString> Headers;
 	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
-	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest("GET", Url, QueryParams, FString(), Headers, OnSuccess, OnError);
 }
 
-void Statistic::IncrementUserStatItems(const TArray<FAccelByteModelsBulkStatItemInc>& Data
-	, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::IncrementUserStatItems(TArray<FAccelByteModelsBulkStatItemInc> const& Data
+	, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -180,14 +180,14 @@ void Statistic::IncrementUserStatItems(const TArray<FAccelByteModelsBulkStatItem
 	TMap<FString, FString> Headers;
 	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, Headers, OnSuccess, OnError);
 } 
 
-void Statistic::ListUserStatItems(const TArray<FString>& StatCodes
-	, const TArray<FString>& Tags
-	, const FString& AdditionalKey 
-	, const THandler<TArray<FAccelByteModelsFetchUser>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::ListUserStatItems(TArray<FString> const& StatCodes
+	, TArray<FString> const& Tags
+	, FString const& AdditionalKey 
+	, THandler<TArray<FAccelByteModelsFetchUser>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -210,13 +210,13 @@ void Statistic::ListUserStatItems(const TArray<FString>& StatCodes
 		QueryParams.AddUnique(TEXT("tags"), Tag);
 	}
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Statistic::BulkUpdateUserStatItemsValue(const FString& AdditionalKey
-	, const TArray<FAccelByteModelsUpdateUserStatItemWithStatCode>& BulkUpdateUserStatItems
-	, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::BulkUpdateUserStatItemsValue(FString const& AdditionalKey
+	, TArray<FAccelByteModelsUpdateUserStatItemWithStatCode> const& BulkUpdateUserStatItems
+	, THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -232,14 +232,14 @@ void Statistic::BulkUpdateUserStatItemsValue(const FString& AdditionalKey
 		{TEXT("additionalKey"), AdditionalKey }
 	};
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 
-void Statistic::UpdateUserStatItemsValue(const FString& StatCode
-	, const FString& AdditionalKey
-	, const FAccelByteModelsPublicUpdateUserStatItem& UpdateUserStatItem
-	, const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::UpdateUserStatItemsValue(FString const& StatCode
+	, FString const& AdditionalKey
+	, FAccelByteModelsPublicUpdateUserStatItem const& UpdateUserStatItem
+	, THandler<FAccelByteModelsUpdateUserStatItemValueResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -256,25 +256,25 @@ void Statistic::UpdateUserStatItemsValue(const FString& StatCode
 		{TEXT("additionalKey"), AdditionalKey}
 	};
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 
-void Statistic::BulkFetchStatItemsValue(const FString StatCode
-	, const TArray<FString>& UserIds
-	, const THandler<TArray<FAccelByteModelsStatItemValueResponse>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::BulkFetchStatItemsValue(FString const& StatCode
+	, TArray<FString> const& UserIds
+	, THandler<TArray<FAccelByteModelsStatItemValueResponse>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (StatCode.IsEmpty())
 	{
 		OnSuccess.ExecuteIfBound(TArray<FAccelByteModelsStatItemValueResponse>{});
-		return;
+		return nullptr;
 	}
 	if (UserIds.Num() <= 0)
 	{
 		OnSuccess.ExecuteIfBound(TArray<FAccelByteModelsStatItemValueResponse>{});
-		return;
+		return nullptr;
 	}
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statitems/bulk")
@@ -287,12 +287,12 @@ void Statistic::BulkFetchStatItemsValue(const FString StatCode
 		{ TEXT("userIds"), FString::Join(UserIds, TEXT(",")) },
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Statistic::ResetUserStatItemValue(const FString& StatCode
-	, const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::ResetUserStatItemValue(FString const& StatCode
+	, THandler<FAccelByteModelsUpdateUserStatItemValueResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -302,19 +302,19 @@ void Statistic::ResetUserStatItemValue(const FString& StatCode
 		, *CredentialsRef->GetUserId()
 		, *StatCode);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Statistic::GetGlobalStatItemsByStatCode(const FString& StatCode
-	, const THandler<FAccelByteModelsGlobalStatItemValueResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::GetGlobalStatItemsByStatCode(FString const& StatCode
+	, THandler<FAccelByteModelsGlobalStatItemValueResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (StatCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("Url is invalid. StatCode is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/globalstatitems/%s")
@@ -322,16 +322,15 @@ void Statistic::GetGlobalStatItemsByStatCode(const FString& StatCode
 		, *CredentialsRef->GetNamespace()
 		, *StatCode);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Statistic::GetUserStatCycleItems(
-	const FString& CycleId,
-	const THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult>& OnSuccess,
-	const FErrorHandler& OnError,
-	const int32 Limit,
-	const int32 Offset,
-	const TArray<FString> StatCodes)
+FAccelByteTaskWPtr Statistic::GetUserStatCycleItems(FString const& CycleId
+	, THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
+	, TArray<FString> const& StatCodes)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -347,12 +346,12 @@ void Statistic::GetUserStatCycleItems(
 		{ TEXT("offset"), FString::FromInt(Offset) },
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Statistic::GetStatCycleConfig(const FString& CycleId
-	,const THandler<FAccelByteModelsStatCycleConfig>& OnSuccess
-	,const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::GetStatCycleConfig(FString const& CycleId
+	, THandler<FAccelByteModelsStatCycleConfig> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -361,14 +360,14 @@ void Statistic::GetStatCycleConfig(const FString& CycleId
 		, *CredentialsRef->GetNamespace()
 		, *CycleId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Statistic::GetListStatCycleConfigs(const EAccelByteCycle& CycleType,
-	const THandler<FAccelByteModelsStatCycleConfigPagingResult>& OnSuccess,
-	const FErrorHandler& OnError,
-	const int32 Limit,
-	const int32 Offset)
+FAccelByteTaskWPtr Statistic::GetListStatCycleConfigs(EAccelByteCycle CycleType
+	, THandler<FAccelByteModelsStatCycleConfigPagingResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -387,16 +386,16 @@ void Statistic::GetListStatCycleConfigs(const EAccelByteCycle& CycleType,
 		QueryParams.Add(TEXT("cycleType"), EnumText.ToUpper());
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Statistic::GetMyStatItems(const TArray<FString>& StatCodes,
-	const TArray<FString>& Tags,
-	const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess,
-	const FErrorHandler& OnError,
-	const EAccelByteStatisticSortBy& SortBy,
-	const int32 Limit,
-	const int32 Offset)
+FAccelByteTaskWPtr Statistic::GetMyStatItems(TArray<FString> const& StatCodes
+	, TArray<FString> const& Tags
+	, THandler<FAccelByteModelsUserStatItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, EAccelByteStatisticSortBy SortBy
+	, int32 Limit
+	, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -423,15 +422,14 @@ void Statistic::GetMyStatItems(const TArray<FString>& StatCodes,
 		QueryParams.AddUnique("tags", Tag);
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"),Url,QueryParams,OnSuccess,OnError);
+	return HttpClient.ApiRequest(TEXT("GET"),Url,QueryParams,OnSuccess,OnError);
 }
 
-void Statistic::GetMyStatItemValues(
-	const TArray<FString>& StatCodes,
-	const TArray<FString>& Tags,
-	const FString& AdditionalKey,
-	const THandler<TArray<FAccelByteModelsFetchUser>>& OnSuccess,
-	const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::GetMyStatItemValues(TArray<FString> const& StatCodes
+	, TArray<FString> const& Tags
+	, FString const& AdditionalKey
+	, THandler<TArray<FAccelByteModelsFetchUser>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -453,17 +451,16 @@ void Statistic::GetMyStatItemValues(
 		QueryParams.AddUnique("tags", Tag);
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"),Url,QueryParams,OnSuccess,OnError);
+	return HttpClient.ApiRequest(TEXT("GET"),Url,QueryParams,OnSuccess,OnError);
 }
 
-void Statistic::GetMyStatCycleItems(
-	const FString& CycleId,
-	const TArray<FString>& StatCodes,
-	const THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult>& OnSuccess,
-	const FErrorHandler& OnError,
-	const EAccelByteStatisticSortBy& SortBy,
-	const int32 Limit,
-	const int32 Offset)
+FAccelByteTaskWPtr Statistic::GetMyStatCycleItems(FString const& CycleId
+	, TArray<FString> const& StatCodes
+	, THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, EAccelByteStatisticSortBy SortBy
+	, int32 Limit
+	, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -483,13 +480,13 @@ void Statistic::GetMyStatCycleItems(
 		QueryParams.AddUnique("statCodes", StatCode);
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
 #if !UE_BUILD_SHIPPING
-void Statistic::BulkResetMultipleUserStatItemsValue(const TArray<FAccelByteModelsResetUserStatItemValue>& UserStatItemValue
-		, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess
-		, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Statistic::BulkResetMultipleUserStatItemsValue(TArray<FAccelByteModelsResetUserStatItemValue> const& UserStatItemValue
+		, THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>> const& OnSuccess
+		, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -501,7 +498,7 @@ void Statistic::BulkResetMultipleUserStatItemsValue(const TArray<FAccelByteModel
 	FString Content = TEXT(""); 
 	FAccelByteUtilities::TArrayUStructToJsonString(UserStatItemValue, Content);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 #endif // !UE_BUILD_SHIPPING
 

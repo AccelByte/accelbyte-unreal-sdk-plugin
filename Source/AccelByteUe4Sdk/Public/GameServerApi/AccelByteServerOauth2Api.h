@@ -39,11 +39,13 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void LoginWithClientCredentials(const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr LoginWithClientCredentials(FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
-	void GetJwks(THandler<FJwkSet> const& OnSuccess
+	FAccelByteTaskWPtr GetJwks(THandler<FJwkSet> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -52,8 +54,8 @@ public:
 	void ForgetAllCredentials();
 
 private:
-	void OnLoginSuccess(const FVoidHandler& OnSuccess
-		, const FOauth2Token& Response) const;
+	void OnLoginSuccess(FVoidHandler const& OnSuccess
+		, FOauth2Token const& Response) const;
 
 	/**
 	* @brief Get client token.
@@ -63,11 +65,13 @@ private:
 	* @param ClientSecret The issued OAuth2 client credentials.
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
-	*/
-	void GetAccessTokenWithClientCredentialsGrant(const FString& ClientId
-		, const FString& ClientSecret
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetAccessTokenWithClientCredentialsGrant(FString const& ClientId
+		, FString const& ClientSecret
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	TSharedRef<ServerCredentials, ESPMode::ThreadSafe> ServerCredentialsRef;
 	ServerOauth2() = delete; // static class can't have instance

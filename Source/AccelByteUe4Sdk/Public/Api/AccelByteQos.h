@@ -39,7 +39,7 @@ public:
 	 * @param OnError If polling, this will also call every ping update error.
 	 */
 	void GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
-		, const FErrorHandler& OnError);
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Check server latencies (ping) per-region that have status ACTIVE
@@ -47,7 +47,7 @@ public:
 	 * @param OnError If polling, this will also call every ping update error.
 	 */
 	void GetActiveServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
-		, const FErrorHandler& OnError);
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Start the latency polling schedulers
@@ -111,7 +111,7 @@ private:
 	 */
 	void PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServerList
 		, const THandler<TArray<TPair<FString, float>>>& OnSuccess
-		, const FErrorHandler& OnError);
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Sets QosServers, using this cache for future calls.
@@ -125,7 +125,7 @@ private:
 	 */
 	void CallGetQosServers(const bool bPingRegionsOnSuccess
 		, const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess
-		, const FErrorHandler& OnError);
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Poll every x second to refresh Latencies (pings) with cached (via QosServers) regions.

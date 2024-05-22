@@ -26,16 +26,16 @@ GDPR::GDPR(Credentials const& InCredentialsRef
 	
 GDPR::~GDPR(){}
 
-void GDPR::SubmitAccountDeletion(FString const& Password
-	, const THandler<FAccelByteModelsGDPRSubmitAccountDeletionResponse>& OnSuccess
+FAccelByteTaskWPtr GDPR::SubmitAccountDeletion(FString const& Password
+	, THandler<FAccelByteModelsGDPRSubmitAccountDeletionResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/deletions")
-	, *SettingsRef.GDPRServerUrl
-	, *CredentialsRef->GetNamespace()
-	, *CredentialsRef->GetUserId());
+		, *SettingsRef.GDPRServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
 
 	TMap<FString, FString> FormFields;
 	FormFields.Add(TEXT("password"), Password);
@@ -45,18 +45,18 @@ void GDPR::SubmitAccountDeletion(FString const& Password
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
 }
 
-void GDPR::SubmitAccountDeletionOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& PlatformToken
-	, const THandler<FAccelByteModelsGDPRSubmitAccountDeletionResponse>& OnSuccess
+FAccelByteTaskWPtr GDPR::SubmitAccountDeletionOtherPlatform(EAccelBytePlatformType PlatformType
+	, FString const& PlatformToken
+	, THandler<FAccelByteModelsGDPRSubmitAccountDeletionResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
 	FString Url = FString::Printf(TEXT("%s/public/users/me/deletions")
-	, *SettingsRef.GDPRServerUrl);
+		, *SettingsRef.GDPRServerUrl);
 
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 	TMap<FString, FString> FormFields;
@@ -68,18 +68,18 @@ void GDPR::SubmitAccountDeletionOtherPlatform(EAccelBytePlatformType PlatformTyp
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
 }
 
-void GDPR::SubmitAccountDeletionOtherPlatformId(const FString& PlatformId
-	, const FString& PlatformToken
-	, const THandler<FAccelByteModelsGDPRSubmitAccountDeletionResponse>& OnSuccess
+FAccelByteTaskWPtr GDPR::SubmitAccountDeletionOtherPlatformId(FString const& PlatformId
+	, FString const& PlatformToken
+	, THandler<FAccelByteModelsGDPRSubmitAccountDeletionResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
 	FString Url = FString::Printf(TEXT("%s/public/users/me/deletions")
-	, *SettingsRef.GDPRServerUrl);
+		, *SettingsRef.GDPRServerUrl);
 	
 	TMap<FString, FString> FormFields;
 	FormFields.Add(TEXT("platformId"), PlatformId);
@@ -90,29 +90,29 @@ void GDPR::SubmitAccountDeletionOtherPlatformId(const FString& PlatformId
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
 }
 	
-void GDPR::GetStatusAccountDeletion(const THandler<FAccelByteModelsGDPRAccountDeletionStatusResponse>& OnSuccess
+FAccelByteTaskWPtr GDPR::GetStatusAccountDeletion(THandler<FAccelByteModelsGDPRAccountDeletionStatusResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
 	FString Url = FString::Printf(TEXT("%s/public/users/me/deletions/status")
-	, *SettingsRef.GDPRServerUrl);
+		, *SettingsRef.GDPRServerUrl);
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void GDPR::CancelAccountDeletion(const FVoidHandler& OnSuccess
+FAccelByteTaskWPtr GDPR::CancelAccountDeletion(FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
 	FString Url = FString::Printf(TEXT("%s/public/users/me/deletions")
-	, *SettingsRef.GDPRServerUrl);
+		, *SettingsRef.GDPRServerUrl);
 	
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 } // Namespace Api

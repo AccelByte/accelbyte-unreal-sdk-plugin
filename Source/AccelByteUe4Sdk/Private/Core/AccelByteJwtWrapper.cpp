@@ -37,7 +37,7 @@ bool AccelByteJwtWrapper::TryDecode(const FString& Token, const FString& PublicK
 		if( VerifyResult != EJwtResult::Ok)
 		{
 			ErrorOut.Code = 4001;
-			ErrorOut.Message = "Verify signature failed";
+			ErrorOut.Message = TEXT("Verify signature failed");
 			UE_LOG(FLogCategoryLogAccelByteJwtWrapper, Display, TEXT("JWT signature verification failed with jwt result index %d"), VerifyResult);
 			return false;
 		}
@@ -45,36 +45,36 @@ bool AccelByteJwtWrapper::TryDecode(const FString& Token, const FString& PublicK
 
 	if(VerifyExpiration)
 	{
-		if(!Jwt.Payload()->HasField("exp"))
+		if (!Jwt.Payload()->HasField(TEXT("exp")))
 		{
 			ErrorOut.Code = 4101;
-			ErrorOut.Message = "Verify expiration failed, payload has no exp field";
+			ErrorOut.Message = TEXT("Verify expiration failed, payload has no exp field");
 			return false;
 		}
 
-		const FDateTime ExpDate {FDateTime::FromUnixTimestamp(Jwt.Payload()->GetIntegerField("exp"))};
+		const FDateTime ExpDate{ FDateTime::FromUnixTimestamp(Jwt.Payload()->GetIntegerField(TEXT("exp"))) };
 
 		if(ExpDate < FDateTime::UtcNow())
 		{
 			ErrorOut.Code = 4102;
-			ErrorOut.Message = "Verify expiration failed, token expired";
+			ErrorOut.Message = TEXT("Verify expiration failed, token expired");
 			return false;
 		}
 	}
 
 	if(!VerifySubject.IsEmpty())
 	{
-		if(!Jwt.Payload()->HasField("sub"))
+		if (!Jwt.Payload()->HasField(TEXT("sub")))
 		{
 			ErrorOut.Code = 4201;
-			ErrorOut.Message = "Verify subject failed, payload has no sub field";
+			ErrorOut.Message = TEXT("Verify subject failed, payload has no sub field");
 			return false;
 		}
 
-		if(Jwt.Payload()->GetStringField("sub") != VerifySubject)
+		if (Jwt.Payload()->GetStringField(TEXT("sub")) != VerifySubject)
 		{
 			ErrorOut.Code = 4202;
-			ErrorOut.Message = "Verify subject failed, subject content not equal";
+			ErrorOut.Message = TEXT("Verify subject failed, subject content not equal");
 			return false;
 		}
 	}
@@ -94,11 +94,11 @@ void AccelByteJwtWrapper::GetExpirationDateTime(const FString& InToken, FDateTim
 		return;
 	}
 
-	if(!Jwt.Payload()->HasField("exp"))
+	if (!Jwt.Payload()->HasField(TEXT("exp")))
 	{
 		UE_LOG(FLogCategoryLogAccelByteJwtWrapper, Warning, TEXT("Jwt exp field not found"));
 		return;
 	}
 	
-	OutExpiration = FDateTime::FromUnixTimestamp(Jwt.Payload()->GetIntegerField("exp"));
+	OutExpiration = FDateTime::FromUnixTimestamp(Jwt.Payload()->GetIntegerField(TEXT("exp")));
 }

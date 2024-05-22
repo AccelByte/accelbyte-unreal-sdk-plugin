@@ -1053,3 +1053,30 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUnmutedNotif
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatUnmutedNotif")
 	FString TopicId{};
 };
+
+#pragma region CHAT CONFIGURATION
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatPublicConfigResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatConfig")
+	int32 ChatRateLimitBurst{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatConfig")
+	int64 ChatRateLimitDuration{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatConfig")
+	int32 GeneralRateLimitBurst{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatConfig")
+	int64 GeneralRateLimitDuration{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatConfig")
+	int32 MaxChatMessageLength{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatConfig")
+	int32 SpamChatBurst{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatConfig")
+	int64 SpamChatDuration{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatConfig")
+	int64 SpamMuteDuration{};
+};
+
+#pragma endregion 

@@ -24,9 +24,9 @@ Currency::Currency(Credentials const& InCredentialsRef
 Currency::~Currency()
 {}
 
-void Currency::GetCurrencyList(const FString& Namespace
-	, const THandler<TArray<FAccelByteModelsCurrencyList>>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr Currency::GetCurrencyList(FString const& Namespace
+	, THandler<TArray<FAccelByteModelsCurrencyList>> const& OnSuccess
+	, FErrorHandler const& OnError
 	, EAccelByteCurrencyType CurrencyType)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -41,7 +41,7 @@ void Currency::GetCurrencyList(const FString& Namespace
 		QueryParams.Add(TEXT("currencyType"), *FAccelByteUtilities::GetUEnumValueAsString(CurrencyType));
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 } // Namespace Api

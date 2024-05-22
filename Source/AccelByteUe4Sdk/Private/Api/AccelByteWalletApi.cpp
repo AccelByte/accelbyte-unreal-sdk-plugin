@@ -23,9 +23,9 @@ Wallet::Wallet(Credentials const& InCredentialsRef
 Wallet::~Wallet()
 {}
 
-void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode
-	, const THandler<FAccelByteModelsWalletInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Wallet::GetWalletInfoByCurrencyCode(FString const& CurrencyCode
+	, THandler<FAccelByteModelsWalletInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), "This does not support for multiplatform wallet, use GetWalletInfoByCurrencyCodeV2 instead.");
@@ -58,12 +58,12 @@ void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode
 				OnSuccess.ExecuteIfBound(WalletInfo);
 			});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
-void Wallet::GetWalletInfoByCurrencyCodeV2(const FString& CurrencyCode
-	, const THandler<FAccelByteModelsWalletInfoResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Wallet::GetWalletInfoByCurrencyCodeV2(FString const& CurrencyCode
+	, THandler<FAccelByteModelsWalletInfoResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -73,10 +73,10 @@ void Wallet::GetWalletInfoByCurrencyCodeV2(const FString& CurrencyCode
 		, *CredentialsRef->GetUserId()
 		, *CurrencyCode);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Wallet::ListWalletTransactionsByCurrencyCode(FString const& CurrencyCode
+FAccelByteTaskWPtr Wallet::ListWalletTransactionsByCurrencyCode(FString const& CurrencyCode
 	, THandler<FAccelByteModelsWalletTransactionPaging> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 Offset
@@ -92,7 +92,7 @@ void Wallet::ListWalletTransactionsByCurrencyCode(FString const& CurrencyCode
 		, Offset
 		, Limit);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 } // Namespace Api

@@ -33,8 +33,10 @@ public:
 	 * @param Language ISO 639-1 language tag, e.g., "en", "zh".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetRootCategories(FString const& Language
+	FAccelByteTaskWPtr GetRootCategories(FString const& Language
 		, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -45,8 +47,10 @@ public:
 	 * @param Language ISO 639-1 language tag, e.g., "en", "zh".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsCategoryInfo&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetCategory(FString const& CategoryPath
+	FAccelByteTaskWPtr GetCategory(FString const& CategoryPath
 		, FString const& Language
 		, THandler<FAccelByteModelsCategoryInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -58,8 +62,10 @@ public:
 	 * @param CategoryPath Category path, e.g., "/equipments/pay2win/super_badass_armor/chest".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetChildCategories(FString const& Language
+	FAccelByteTaskWPtr GetChildCategories(FString const& Language
 		, FString const& CategoryPath
 		, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -71,8 +77,10 @@ public:
 	 * @param CategoryPath Category path, e.g., "/equipments/pay2win/super_badass_armor/chest".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetDescendantCategories(FString const& Language
+	FAccelByteTaskWPtr GetDescendantCategories(FString const& Language
 		, FString const& CategoryPath
 		, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
 		, FErrorHandler const& OnError);

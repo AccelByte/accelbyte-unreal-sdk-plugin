@@ -28,8 +28,8 @@ public:
 	/**
 	 * @brief Query all achievements in the related namespace.
 	 *
-	 * @param Language The language to display the appropriate achievement's name and description. If it is empty, it will use the its default language.
-				If the achievement does not have the expected language, it will use its default language.
+	 * @param Language The language to display the appropriate achievement's name and description. If it is empty, it will use its 
+	 *			default language. If the achievement does not have the expected language, it will use its default language.
 	 * @param SortBy Sorting method for the achievements result.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPaginatedPublicAchievement&.
 	 * @param OnError This will be called when the operation failed.
@@ -37,8 +37,10 @@ public:
 	 * @param Limit The limit of the achievements result. Default value is 20.
 	 * @param TagQuery A query expression consists of tags to query the achievement from.
 	 * @param bGlobal True if the configuration to display global achievements.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryAchievements(FString const& Language
+	FAccelByteTaskWPtr QueryAchievements(FString const& Language
 		, EAccelByteAchievementListSortBy const& SortBy
 		, THandler<FAccelByteModelsPaginatedPublicAchievement> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -53,8 +55,10 @@ public:
 	 * @param AchievementCode The code of the expected achievement.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsMultiLanguageAchievement&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetAchievement(FString const& AchievementCode
+	FAccelByteTaskWPtr GetAchievement(FString const& AchievementCode
 		, THandler<FAccelByteModelsMultiLanguageAchievement> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -66,10 +70,13 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
-	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
+	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display 
+	 *			unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
 	 * @param TagQuery A query expression consists of tags to query the achievement from
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryUserAchievements(EAccelByteAchievementListSortBy const& SortBy
+	FAccelByteTaskWPtr QueryUserAchievements(EAccelByteAchievementListSortBy const& SortBy
 		, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0
@@ -85,10 +92,13 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
-	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
-	 * @param TagQuery A query expression consists of tags to query the achievement from
+	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display 
+	 *			unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
+	 * @param TagQuery A query expression consists of tags to query the achievement from.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryUserAchievements(EAccelByteGlobalAchievementListSortBy const& SortBy
+	FAccelByteTaskWPtr QueryUserAchievements(EAccelByteGlobalAchievementListSortBy const& SortBy
 		, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0
@@ -105,11 +115,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
-	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
-	 * @param TagQuery A query expression consists of tags to query the achievement from
+	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display 
+	 *			unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
+	 * @param TagQuery A query expression consists of tags to query the achievement from.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 
-	void QueryUserAchievementsByUserId(FString const& UserId
+	FAccelByteTaskWPtr QueryUserAchievementsByUserId(FString const& UserId
 		, EAccelByteAchievementListSortBy const& SortBy
 		, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -124,8 +137,10 @@ public:
 	 * @param AchievementCode The achievement code which will be unlock.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UnlockAchievement(FString const& AchievementCode
+	FAccelByteTaskWPtr UnlockAchievement(FString const& AchievementCode
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -139,9 +154,11 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
-	 * @param TagQuery A query expression consists of tags to query the achievement from
+	 * @param TagQuery A query expression consists of tags to query the achievement from.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryGlobalAchievements(FString const& AchievementCode
+	FAccelByteTaskWPtr QueryGlobalAchievements(FString const& AchievementCode
 		, EAccelByteGlobalAchievementStatus const& AchievementStatus
 		, EAccelByteGlobalAchievementListSortBy const& SortBy
 		, THandler<FAccelByteModelsPaginatedUserGlobalAchievement> const& OnSuccess
@@ -159,8 +176,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryGlobalAchievementContributors(FString const& AchievementCode
+	FAccelByteTaskWPtr QueryGlobalAchievementContributors(FString const& AchievementCode
 		, EAccelByteGlobalAchievementContributorsSortBy const& SortBy
 		, THandler<FAccelByteModelsPaginatedGlobalAchievementContributors> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -176,8 +195,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryGlobalAchievementUserContributed(FString const& AchievementCode
+	FAccelByteTaskWPtr QueryGlobalAchievementUserContributed(FString const& AchievementCode
 		, EAccelByteGlobalAchievementContributorsSortBy const& SortBy
 		, THandler<FAccelByteModelsPaginatedGlobalAchievementUserContributed> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -190,13 +211,15 @@ public:
 	 * @param AchievementCode The global achievement code which will be claimed.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ClaimGlobalAchievements(FString const& AchievementCode
+	FAccelByteTaskWPtr ClaimGlobalAchievements(FString const& AchievementCode
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Get public tag data.
+	 * @brief Get available public achievement tag.
 	 *
 	 * @param Name The name of the public tag.
 	 * @param SortBy Sorting method for the public tag result.
@@ -204,8 +227,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
-	*/
-	void GetTags(FString const& Name,EAccelByteAchievementListSortBy const& SortBy,THandler<FAccelByteModelsPaginatedPublicTag> const& OnSuccess, FErrorHandler const& OnError,int32 const& Offset = 0, int32 const& Limit = 20);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetTags(FString const& Name, EAccelByteAchievementListSortBy const& SortBy,THandler<FAccelByteModelsPaginatedPublicTag> const& OnSuccess, FErrorHandler const& OnError,int32 const& Offset = 0, int32 const& Limit = 20);
 
 private:
 	Achievement() = delete;

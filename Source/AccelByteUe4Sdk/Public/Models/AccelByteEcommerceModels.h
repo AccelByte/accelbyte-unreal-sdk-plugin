@@ -1732,6 +1732,117 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderBundleItemInfo
 	bool Purchased{};
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteDeductionType : uint8
+{
+	NONE = 0,
+	DISCOUNT_CODE
+};
+
+UENUM(BlueprintType)
+enum class EDiscountType : uint8
+{
+	NONE = 0,
+	AMOUNT,
+	PERCENTAGE
+};
+
+UENUM(BlueprintType)
+enum class ERestrictType : uint8
+{
+	NONE = 0,
+	ITEMS_AND_CATEGORIES
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FDiscountItemModel
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountItem")
+	FString ItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountItem")
+	FString ItemName{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FDiscountCategoryModel
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCategory")
+	FString CategoryPath{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCategory")
+	bool IncludeSubCategories{false};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDiscountConfig
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	FString CurrencyNamespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	FString CurrencyCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	EDiscountType DiscountType{EDiscountType::NONE};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	int32 DiscountPercentage{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	int32 DiscountAmount{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	bool Stackable{false};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	ERestrictType RestrictType{ERestrictType::NONE};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	TArray<FDiscountItemModel> Items{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountConfig")
+	TArray<FDiscountCategoryModel> Categories{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDiscountCodeInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	FString Code{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	FString CampaignName{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	FString CampaignId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	int32 Deduction{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	FAccelByteModelsDiscountConfig DiscountConfig{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDiscountCodeDeductionDetail
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	int32 TotalDeduction{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	int32 TotalPercentageDeduction{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	int32 TotalAmountDeduction{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	TArray<FAccelByteModelsDiscountCodeInfo> DiscountPercentageCodes{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DiscountCodeDeductionDetail")
+	TArray<FAccelByteModelsDiscountCodeInfo> DiscountAmountCodes{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDeductionDetail
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DeductionDetail")
+	EAccelByteDeductionType	DeductionType{EAccelByteDeductionType::NONE};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | DeductionDetail")
+	FAccelByteModelsDiscountCodeDeductionDetail DiscountCodeDeductionDetail{};
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderInfo
 {
@@ -1844,6 +1955,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
 	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
+	int32 Deduction{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
+	TArray<FAccelByteModelsDeductionDetail> DeductionDetails{};
 };
 
 USTRUCT(BlueprintType)
@@ -1919,6 +2036,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderCreate
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderCreate")
 	FString SectionId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderCreate")
+	TArray<FString> DiscountCodes{};
 };
 
 USTRUCT(BlueprintType)
@@ -3108,6 +3228,48 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserOrdersRequest
 	int32 Offset{0};
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserOrderRequest")
 	int32 Limit{20};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserOrderRequest")
+	bool Discounted{false};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserPreviewOrderRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderRequest")
+	FString ItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderRequest")
+	int32 Quantity{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderRequest")
+	int32 Price{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderRequest")
+	int32 DiscountedPrice{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderRequest")
+	FString CurrencyCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderRequest")
+	TArray<FString> DiscountCodes{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserPreviewOrderResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderResponse")
+	FString ItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderResponse")
+	int32 Quantity{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderResponse")
+	int32 Price{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderResponse")
+	int32 DiscountedPrice{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderResponse")
+	int32 Deduction{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderResponse")
+	TArray<FAccelByteModelsDeductionDetail> DeductionDetails{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PreviewOrderResponse")
+	int32 FinalPrice{0};
 };
 
 UENUM(BlueprintType)

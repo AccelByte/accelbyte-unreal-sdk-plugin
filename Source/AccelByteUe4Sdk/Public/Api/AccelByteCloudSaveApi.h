@@ -36,8 +36,10 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveUserRecord(const FString& Key
+	FAccelByteTaskWPtr SaveUserRecord(const FString& Key
 		, bool bSetPublic
 		, const FJsonObject& RecordRequest
 		, const FVoidHandler& OnSuccess
@@ -52,8 +54,10 @@ public:
 	 * @param IsPublic Save the record as a public/private record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveUserRecord(FString const& Key
+	FAccelByteTaskWPtr SaveUserRecord(FString const& Key
 		, FJsonObject RecordRequest
 		, bool IsPublic
 		, FVoidHandler const& OnSuccess
@@ -65,8 +69,10 @@ public:
 	 * @param Key Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserRecord(FString const& Key
+	FAccelByteTaskWPtr GetUserRecord(FString const& Key
 		, THandler<FAccelByteModelsUserRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -77,8 +83,10 @@ public:
 	 * @param UserId UserId of the record owner.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPublicUserRecord(FString const& Key
+	FAccelByteTaskWPtr GetPublicUserRecord(FString const& Key
 		, FString const& UserId
 		, THandler<FAccelByteModelsUserRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -90,8 +98,10 @@ public:
 	 * @param UserIds List UserId(s) of the record owner.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetPublicUserRecord(FString const& Key
+	FAccelByteTaskWPtr BulkGetPublicUserRecord(FString const& Key
 		, const TArray<FString>& UserIds
 		, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -102,8 +112,10 @@ public:
 	 * @param Keys List Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetUserRecords(TArray<FString> const& Keys
+	FAccelByteTaskWPtr BulkGetUserRecords(TArray<FString> const& Keys
 		, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -114,8 +126,10 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecord(const FString& Key
+	FAccelByteTaskWPtr ReplaceUserRecord(const FString& Key
 		, bool bSetPublic
 		, const FJsonObject& RecordRequest
 		, const FVoidHandler& OnSuccess
@@ -129,8 +143,10 @@ public:
 	 * @param IsPublic Save the record as a public/private record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecord(FString const& Key
+	FAccelByteTaskWPtr ReplaceUserRecord(FString const& Key
 		, FJsonObject RecordRequest
 		, bool IsPublic
 		, FVoidHandler const& OnSuccess
@@ -144,8 +160,10 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecordCheckLatest(FString const& Key
+	FAccelByteTaskWPtr ReplaceUserRecordCheckLatest(FString const& Key
 		, FDateTime const LastUpdated
 		, FJsonObjectWrapper RecordRequest
 		, FVoidHandler const& OnSuccess
@@ -160,8 +178,10 @@ public:
 	 * @param PayloadModifier Function to modify the latest record value with your customized modifier.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecordCheckLatest(int TryAttempt
+	FAccelByteTaskWPtr ReplaceUserRecordCheckLatest(int TryAttempt
 		, FString const& Key
 		, FJsonObjectWrapper RecordRequest
 		, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
@@ -177,8 +197,10 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsReplaceUserRecordResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecordCheckLatest(FString const& Key
+	FAccelByteTaskWPtr ReplaceUserRecordCheckLatest(FString const& Key
 		, FDateTime LastUpdated
 		, FJsonObjectWrapper RecordRequest
 		, THandler<FAccelByteModelsReplaceUserRecordResponse> const& OnSuccess
@@ -195,8 +217,10 @@ public:
 	 * @param PayloadModifier Function to modify the latest record value with your customized modifier.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsReplaceUserRecordResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecordCheckLatest(int TryAttempt
+	FAccelByteTaskWPtr ReplaceUserRecordCheckLatest(int TryAttempt
 		, FString const& Key
 		, FJsonObjectWrapper RecordRequest
 		,THandlerPayloadModifier<FJsonObjectWrapper
@@ -210,8 +234,10 @@ public:
 	 * @param Key Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteUserRecord(FString const& Key
+	FAccelByteTaskWPtr DeleteUserRecord(FString const& Key
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -222,8 +248,10 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveGameRecord(FString const& Key
+	FAccelByteTaskWPtr SaveGameRecord(FString const& Key
 		, FJsonObject RecordRequest
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -234,8 +262,10 @@ public:
 	 * @param Key Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGameRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGameRecord(FString const& Key
+	FAccelByteTaskWPtr GetGameRecord(FString const& Key
 		, THandler<FAccelByteModelsGameRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -246,8 +276,10 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceGameRecord(FString const& Key
+	FAccelByteTaskWPtr ReplaceGameRecord(FString const& Key
 		, FJsonObject RecordRequest
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -260,8 +292,10 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceGameRecordCheckLatest(FString const& Key
+	FAccelByteTaskWPtr ReplaceGameRecordCheckLatest(FString const& Key
 		, FDateTime const LastUpdated
 		, FJsonObjectWrapper RecordRequest
 		, FVoidHandler const& OnSuccess
@@ -276,8 +310,10 @@ public:
 	 * @param PayloadModifier Function to modify the latest record value with your customized modifier.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceGameRecordCheckLatest(int TryAttempt
+	FAccelByteTaskWPtr ReplaceGameRecordCheckLatest(int TryAttempt
 		, FString const& Key
 		, FJsonObjectWrapper RecordRequest
 		, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
@@ -290,8 +326,10 @@ public:
 	 * @param Key Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteGameRecord(FString const& Key
+	FAccelByteTaskWPtr DeleteGameRecord(FString const& Key
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -301,8 +339,10 @@ public:
 	 * @param Keys List Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsListGameRecords&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetGameRecords(TArray<FString> const& Keys
+	FAccelByteTaskWPtr BulkGetGameRecords(TArray<FString> const& Keys
 		, THandler<FAccelByteModelsListGameRecords> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -314,8 +354,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the cloudsave result. Default value is 0.
 	 * @param Limit The limit of the cloudsave result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
+	FAccelByteTaskWPtr BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 		, THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0
@@ -328,8 +370,10 @@ public:
 	 * @param Keys List Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FListAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetOtherPlayerPublicRecords(FString const& UserId
+	FAccelByteTaskWPtr BulkGetOtherPlayerPublicRecords(FString const& UserId
 		, TArray<FString> const& Keys
 		, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -340,22 +384,22 @@ private:
 	CloudSave() = delete;
 	CloudSave(CloudSave const&) = delete;
 	CloudSave(CloudSave&&) = delete;
-
-	void ReplaceUserRecord(int TryAttempt
+	
+	FAccelByteTaskWPtr ReplaceUserRecord(int TryAttempt
 		, FString const& Key
 		, FAccelByteModelsConcurrentReplaceRequest const& Data
 		, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
-	void ReplaceUserRecord(int TryAttempt
+	FAccelByteTaskWPtr ReplaceUserRecord(int TryAttempt
 		, FString const& Key
 		, FAccelByteModelsConcurrentReplaceRequest const& Data
 		, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
 		, THandler<FAccelByteModelsReplaceUserRecordResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
-	void ReplaceGameRecord(int TryAttempt
+	FAccelByteTaskWPtr ReplaceGameRecord(int TryAttempt
 		, FString const& Key
 		, FAccelByteModelsConcurrentReplaceRequest const& Data
 		, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier

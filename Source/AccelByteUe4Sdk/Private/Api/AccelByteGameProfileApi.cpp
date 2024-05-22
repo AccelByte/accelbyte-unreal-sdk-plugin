@@ -22,9 +22,9 @@ GameProfile::GameProfile(Credentials const& InCredentialsRef
 GameProfile::~GameProfile()
 {}
 
-void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds
-	, const THandler<TArray<FAccelByteModelsPublicGameProfile>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr GameProfile::BatchGetPublicGameProfiles(TArray<FString> const& UserIds
+	, THandler<TArray<FAccelByteModelsPublicGameProfile>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -43,12 +43,13 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds
 			Url.Append((i == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("userIds=")).Append(UserIds[i]);
 		}
 
-		HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+		return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 	}
+	return nullptr;
 }
 
-void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameProfile>>& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr GameProfile::GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -57,12 +58,12 @@ void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameP
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & GameProfileRequest
-	, const THandler<FAccelByteModelsGameProfile>& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr GameProfile::CreateGameProfile(FAccelByteModelsGameProfileRequest const& GameProfileRequest
+	, THandler<FAccelByteModelsGameProfile> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -71,12 +72,12 @@ void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & G
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, GameProfileRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, GameProfileRequest, OnSuccess, OnError);
 }
 
-void GameProfile::GetGameProfile(const FString & ProfileId
-	, const THandler<FAccelByteModelsGameProfile>& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr GameProfile::GetGameProfile(FString const& ProfileId
+	, THandler<FAccelByteModelsGameProfile> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -86,13 +87,13 @@ void GameProfile::GetGameProfile(const FString & ProfileId
 		, *CredentialsRef->GetUserId()
 		, *ProfileId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void GameProfile::UpdateGameProfile(const FString & ProfileId
-	, const FAccelByteModelsGameProfileRequest & GameProfileRequest
-	, const THandler<FAccelByteModelsGameProfile>& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr GameProfile::UpdateGameProfile(FString const& ProfileId
+	, FAccelByteModelsGameProfileRequest const& GameProfileRequest
+	, THandler<FAccelByteModelsGameProfile> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -102,12 +103,12 @@ void GameProfile::UpdateGameProfile(const FString & ProfileId
 		, *CredentialsRef->GetUserId()
 		, *ProfileId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, GameProfileRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, GameProfileRequest, OnSuccess, OnError);
 }
 
-void GameProfile::DeleteGameProfile(const FString & ProfileId
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr GameProfile::DeleteGameProfile(FString const& ProfileId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -117,13 +118,13 @@ void GameProfile::DeleteGameProfile(const FString & ProfileId
 		, *CredentialsRef->GetUserId()
 		, *ProfileId);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void GameProfile::GetGameProfileAttribute(const FString & ProfileId
-	, const FString & AttributeName
-	, const THandler<FAccelByteModelsGameProfileAttribute>& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr GameProfile::GetGameProfileAttribute(FString const& ProfileId
+	, FString const& AttributeName
+	, THandler<FAccelByteModelsGameProfileAttribute> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -133,13 +134,13 @@ void GameProfile::GetGameProfileAttribute(const FString & ProfileId
 		, *CredentialsRef->GetUserId()
 		, *ProfileId, *AttributeName);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId
-	, const FAccelByteModelsGameProfileAttribute& Attribute
-	, const THandler<FAccelByteModelsGameProfile>& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr GameProfile::UpdateGameProfileAttribute(FString const& ProfileId
+	, FAccelByteModelsGameProfileAttribute const& Attribute
+	, THandler<FAccelByteModelsGameProfile> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -150,7 +151,7 @@ void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId
 		, *ProfileId
 		, *Attribute.name);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Attribute, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Attribute, OnSuccess, OnError);
 }
 
 } // Namespace Api

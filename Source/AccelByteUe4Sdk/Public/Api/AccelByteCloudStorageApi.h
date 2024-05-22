@@ -32,9 +32,11 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsSlot>&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetAllSlots(THandler<TArray<FAccelByteModelsSlot>> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief DEPRECATED.This function creates a slot for an uploaded binary data. Cloud Storage is DEPRECATED.
@@ -47,15 +49,17 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateSlot(TArray<uint8> BinaryData
-		, const FString& FileName
-		, const TArray<FString>& Tags
-		, const FString& Label
-		, const FString& CustomAttribute
-		, const THandler<FAccelByteModelsSlot>& OnSuccess
-		, FHttpRequestProgressDelegate OnProgress
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateSlot(TArray<uint8> const& BinaryData
+		, FString const& FileName
+		, TArray<FString> const& Tags
+		, FString const& Label
+		, FString const& CustomAttribute
+		, THandler<FAccelByteModelsSlot> const& OnSuccess
+		, FHttpRequestProgressDelegate const& OnProgress
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief DEPRECATED.This function updates a stored slot. Cloud Storage is DEPRECATED.
@@ -69,16 +73,18 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateSlot(FString SlotId
-		, const TArray<uint8> BinaryData
-		, const FString& FileName
-		, const TArray<FString>& Tags
-		, const FString& Label
-		, const FString& CustomAttribute
-		, const THandler<FAccelByteModelsSlot>& OnSuccess
-		, FHttpRequestProgressDelegate OnProgress
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateSlot(FString const& SlotId
+		, TArray<uint8> const& BinaryData
+		, FString const& FileName
+		, TArray<FString> const& Tags
+		, FString const& Label
+		, FString const& CustomAttribute
+		, THandler<FAccelByteModelsSlot> const& OnSuccess
+		, FHttpRequestProgressDelegate const& OnProgress
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief DEPRECATED.This function updates stored slot's metadata. Cloud Storage is DEPRECATED.
@@ -91,15 +97,17 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateSlotMetadata(const FString& SlotId
-		, const FString& FileName
-		, const TArray<FString>& Tags
-		, const FString& Label
-		, const FString& CustomAttribute
-		, const THandler<FAccelByteModelsSlot>& OnSuccess
-		, FHttpRequestProgressDelegate OnProgress
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateSlotMetadata(FString const& SlotId
+		, FString const& FileName
+		, TArray<FString> const& Tags
+		, FString const& Label
+		, FString const& CustomAttribute
+		, THandler<FAccelByteModelsSlot> const& OnSuccess
+		, FHttpRequestProgressDelegate const& OnProgress
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief DEPRECATED.This function updates stored slot's metadata. Cloud Storage is DEPRECATED.
@@ -111,14 +119,16 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateSlotMetadata(const FString& SlotId
-		, const TArray<FString>& Tags
-		, const FString& Label
-		, const FString& CustomAttribute
-		, const THandler<FAccelByteModelsSlot>& OnSuccess
-		, FHttpRequestProgressDelegate OnProgress
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateSlotMetadata(FString const& SlotId
+		, TArray<FString> const& Tags
+		, FString const& Label
+		, FString const& CustomAttribute
+		, THandler<FAccelByteModelsSlot> const& OnSuccess
+		, FHttpRequestProgressDelegate const& OnProgress
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief DEPRECATED.This function gets the data that stored in the slot. Cloud Storage is DEPRECATED.
@@ -126,10 +136,12 @@ public:
 	 * @param SlotId Specify the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<uint8>&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetSlot(FString SlotId
-		, const THandler<TArray<uint8>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetSlot(FString SlotId
+		, THandler<TArray<uint8>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief DEPRECATED.This function delete the specified slot. Cloud Storage is DEPRECATED.
@@ -137,19 +149,21 @@ public:
 	 * @param SlotId Specify the slot.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	*/
-	void DeleteSlot(FString SlotId
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr DeleteSlot(FString const& SlotId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	CloudStorage() = delete;
 	CloudStorage(CloudStorage const&) = delete;
 	CloudStorage(CloudStorage&&) = delete;
 
-	TArray<uint8> FormDataBuilder(TArray<uint8> BinaryData
-		, FString BoundaryGuid
-		, FString FileName);
+	TArray<uint8> FormDataBuilder(TArray<uint8> const& BinaryData
+		, FString const& BoundaryGuid
+		, FString const& FileName);
 	
 	/**
 	 * @brief DEPRECATED.Generate custom attribute form data. Cloud Storage is DEPRECATED.
@@ -158,8 +172,8 @@ private:
 	 * @param BoundaryGuid This is the boundary.
 	 * @param CloseFooter TRUE = the boundary will be close with extra double dash "--"; FALSE = the boundary will be left open and it can be appended with another form data.
 	*/
-	TArray<uint8> CustomAttributeFormDataBuilder(const FString& CustomAttribute
-		, FString BoundaryGuid
+	TArray<uint8> CustomAttributeFormDataBuilder(FString const& CustomAttribute
+		, FString const& BoundaryGuid
 		, bool CloseFooter);
 };
 

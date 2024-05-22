@@ -19,6 +19,7 @@ namespace AccelByte
 {
 namespace Api
 {
+
 BinaryCloudSave::BinaryCloudSave(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
@@ -28,7 +29,7 @@ BinaryCloudSave::BinaryCloudSave(Credentials const& InCredentialsRef
 BinaryCloudSave::~BinaryCloudSave()
 {}
 	
-void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 	, FString const& FileType
 	, bool bIsPublic
 	, FVoidHandler const& OnSuccess
@@ -39,12 +40,12 @@ void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (SupportedFileTypes.Find(FileType) == INDEX_NONE) {
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("FileType is not supported! Supported file types are jpeg, jpg, png, bmp, gif, mp3, webp, and bin."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries")
@@ -58,10 +59,10 @@ void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 	JsonObj.SetStringField("file_type", FileType);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 	, EAccelByteFileType FileType
 	, bool bIsPublic
 	, FVoidHandler const& OnSuccess
@@ -72,7 +73,7 @@ void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (FileType == EAccelByteFileType::NONE)
@@ -81,7 +82,7 @@ void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 							   "(e.g., EAccelByteFileType::JPG, EAccelByteFileType::PNG, etc.). "
 							   "Please set a valid 'FileType' value to fulfill the request.");
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), Message);
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries")
@@ -95,10 +96,10 @@ void BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::GetCurrentUserBinaryRecord(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::GetCurrentUserBinaryRecord(FString const& Key
 	, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -107,7 +108,7 @@ void BinaryCloudSave::GetCurrentUserBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
@@ -116,10 +117,10 @@ void BinaryCloudSave::GetCurrentUserBinaryRecord(FString const& Key
 		, *CredentialsRef->GetUserId()
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void BinaryCloudSave::GetPublicUserBinaryRecord(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::GetPublicUserBinaryRecord(FString const& Key
 	, FString const& UserId
 	, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -129,14 +130,14 @@ void BinaryCloudSave::GetPublicUserBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/public")
@@ -145,10 +146,10 @@ void BinaryCloudSave::GetPublicUserBinaryRecord(FString const& Key
 		, *UserId
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void BinaryCloudSave::BulkGetCurrentUserBinaryRecords(const TArray<FString>& Keys
+FAccelByteTaskWPtr BinaryCloudSave::BulkGetCurrentUserBinaryRecords(const TArray<FString>& Keys
 	, THandler<FAccelByteModelsListUserBinaryRecords> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -157,13 +158,13 @@ void BinaryCloudSave::BulkGetCurrentUserBinaryRecords(const TArray<FString>& Key
 	if (Keys.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Keys cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Keys.Num() > KeysRequestLimit)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), KeysRequestLimit));
-		return;
+		return nullptr;
 	}
 
 	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
@@ -172,10 +173,10 @@ void BinaryCloudSave::BulkGetCurrentUserBinaryRecords(const TArray<FString>& Key
 		, *SettingsRef.CloudSaveServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::BulkGetPublicUserBinaryRecords(const TArray<FString>& Keys
+FAccelByteTaskWPtr BinaryCloudSave::BulkGetPublicUserBinaryRecords(const TArray<FString>& Keys
 	, FString const& UserId
 	, THandler<FAccelByteModelsListUserBinaryRecords> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -185,20 +186,20 @@ void BinaryCloudSave::BulkGetPublicUserBinaryRecords(const TArray<FString>& Keys
 	if (Keys.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Keys cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Keys.Num() > KeysRequestLimit)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), KeysRequestLimit));
-		return;
+		return nullptr;
 	}
 
 	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
@@ -208,10 +209,10 @@ void BinaryCloudSave::BulkGetPublicUserBinaryRecords(const TArray<FString>& Keys
 		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::BulkGetPublicUserBinaryRecords(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::BulkGetPublicUserBinaryRecords(FString const& Key
 	, const TArray<FString>& UserIds
 	, THandler<FAccelByteModelsListUserBinaryRecords> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -221,19 +222,19 @@ void BinaryCloudSave::BulkGetPublicUserBinaryRecords(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (UserIds.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (UserIds.Num() > UserIdsRequestLimit)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("UserIds cannot exceed %d!"), UserIdsRequestLimit));
-		return;
+		return nullptr;
 	}
 
 	const FListBulkUserInfoRequest UserList{ UserIds };
@@ -243,10 +244,10 @@ void BinaryCloudSave::BulkGetPublicUserBinaryRecords(FString const& Key
 		, *CredentialsRef->GetNamespace()
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserList, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserList, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::BulkQueryCurrentUserBinaryRecords(FString const& Query
+FAccelByteTaskWPtr BinaryCloudSave::BulkQueryCurrentUserBinaryRecords(FString const& Query
 	, THandler<FAccelByteModelsPaginatedUserBinaryRecords> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 const& Offset
@@ -264,10 +265,10 @@ void BinaryCloudSave::BulkQueryCurrentUserBinaryRecords(FString const& Query
 		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void BinaryCloudSave::BulkQueryPublicUserBinaryRecords(FString const& UserId
+FAccelByteTaskWPtr BinaryCloudSave::BulkQueryPublicUserBinaryRecords(FString const& UserId
 	, THandler<FAccelByteModelsPaginatedUserBinaryRecords> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 const& Offset
@@ -279,7 +280,7 @@ void BinaryCloudSave::BulkQueryPublicUserBinaryRecords(FString const& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/public")
@@ -292,10 +293,10 @@ void BinaryCloudSave::BulkQueryPublicUserBinaryRecords(FString const& UserId
 		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 	, FString const& FileType
 	, FString const& FileLocation
 	, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
@@ -306,18 +307,18 @@ void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (FileLocation.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("File Location cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (SupportedFileTypes.Find(FileType) == INDEX_NONE) {
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("FileType is not supported! Supported file types are jpeg, jpg, png, bmp, gif, mp3, webp, and bin."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
@@ -331,10 +332,10 @@ void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 	JsonObj.SetStringField("file_location", FileLocation);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 	, EAccelByteFileType ContentType
 	, FString const& FileLocation
 	, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
@@ -345,13 +346,13 @@ void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (FileLocation.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("File Location cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (ContentType == EAccelByteFileType::NONE)
@@ -360,7 +361,7 @@ void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 							   "(e.g., EAccelByteFileType::JPG, EAccelByteFileType::PNG, etc.). "
 							   "Please set a valid 'ContentType' value to fulfill the request.");
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), Message);
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
@@ -374,10 +375,10 @@ void BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Key
 	JsonObj.SetStringField("file_location", FileLocation);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::UpdateUserBinaryRecordMetadata(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::UpdateUserBinaryRecordMetadata(FString const& Key
 	, bool bIsPublic
 	, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -387,7 +388,7 @@ void BinaryCloudSave::UpdateUserBinaryRecordMetadata(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/metadata")
@@ -400,10 +401,10 @@ void BinaryCloudSave::UpdateUserBinaryRecordMetadata(FString const& Key
 	JsonObj.SetBoolField("is_public", bIsPublic);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::DeleteUserBinaryRecord(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::DeleteUserBinaryRecord(FString const& Key
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -412,7 +413,7 @@ void BinaryCloudSave::DeleteUserBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s")
@@ -421,10 +422,10 @@ void BinaryCloudSave::DeleteUserBinaryRecord(FString const& Key
 		, *CredentialsRef->GetUserId()
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 	, FString const& FileType
 	, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -434,12 +435,12 @@ void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (SupportedFileTypes.Find(FileType) == INDEX_NONE) {
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("FileType is not supported! Supported file types are jpeg, jpg, png, bmp, gif, mp3, webp, and bin."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/presigned")
@@ -452,10 +453,10 @@ void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 	JsonObj.SetStringField("file_type", FileType);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 	, EAccelByteFileType FileType
 	, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -465,7 +466,7 @@ void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (FileType == EAccelByteFileType::NONE)
@@ -474,7 +475,7 @@ void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 							   "(e.g., EAccelByteFileType::JPG, EAccelByteFileType::PNG, etc.). "
 							   "Please set a valid 'FileType' value to fulfill the request.");
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), Message);
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/binaries/%s/presigned")
@@ -487,10 +488,10 @@ void BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString const& Key
 	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::GetGameBinaryRecord(FString const& Key
+FAccelByteTaskWPtr BinaryCloudSave::GetGameBinaryRecord(FString const& Key
 	, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -499,7 +500,7 @@ void BinaryCloudSave::GetGameBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/binaries/%s")
@@ -507,10 +508,10 @@ void BinaryCloudSave::GetGameBinaryRecord(FString const& Key
 		, *CredentialsRef->GetNamespace()
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void BinaryCloudSave::BulkGetGameBinaryRecords(TArray<FString> const& Keys
+FAccelByteTaskWPtr BinaryCloudSave::BulkGetGameBinaryRecords(TArray<FString> const& Keys
 	, THandler<FAccelByteModelsListGameBinaryRecords> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -519,13 +520,13 @@ void BinaryCloudSave::BulkGetGameBinaryRecords(TArray<FString> const& Keys
 	if (Keys.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Keys cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Keys.Num() > KeysRequestLimit)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), KeysRequestLimit));
-		return;
+		return nullptr;
 	}
 
 	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
@@ -534,10 +535,10 @@ void BinaryCloudSave::BulkGetGameBinaryRecords(TArray<FString> const& Keys
 		, *SettingsRef.CloudSaveServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccess, OnError);
 }
 
-void BinaryCloudSave::BulkQueryGameBinaryRecords(FString const& Query
+FAccelByteTaskWPtr BinaryCloudSave::BulkQueryGameBinaryRecords(FString const& Query
 	, THandler<FAccelByteModelsPaginatedGameBinaryRecords> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 const& Offset
@@ -548,7 +549,7 @@ void BinaryCloudSave::BulkQueryGameBinaryRecords(FString const& Query
 	if (Query.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Query cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/binaries")
@@ -561,7 +562,7 @@ void BinaryCloudSave::BulkQueryGameBinaryRecords(FString const& Query
 		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 } // Namespace Api

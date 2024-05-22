@@ -23,7 +23,7 @@ ServerUGC::ServerUGC(ServerCredentials const& InCredentialsRef
 ServerUGC::~ServerUGC()
 {}
 
-void ServerUGC::SearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+FAccelByteTaskWPtr ServerUGC::SearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
 	, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 Limit
@@ -54,10 +54,10 @@ void ServerUGC::SearchContents(FAccelByteModelsUGCSearchContentsRequest const& R
 		QueryParams.AddUnique(TEXT("tags"), Tag);
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerUGC::SearchContentsSpecificToChannel(FString const& ChannelId
+FAccelByteTaskWPtr ServerUGC::SearchContentsSpecificToChannel(FString const& ChannelId
 	, FAccelByteModelsUGCSearchContentsRequest const& Request
 	, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
@@ -69,13 +69,13 @@ void ServerUGC::SearchContentsSpecificToChannel(FString const& ChannelId
 	if (ChannelId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return;
+		return nullptr;
 	}
 	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
 		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/contents/search")
@@ -102,10 +102,10 @@ void ServerUGC::SearchContentsSpecificToChannel(FString const& ChannelId
 		QueryParams.AddUnique(TEXT("tags"), Tag);
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerUGC::ModifyContentByShareCode(FString const& UserId
+FAccelByteTaskWPtr ServerUGC::ModifyContentByShareCode(FString const& UserId
 	, FString const& ChannelId
 	, FString const& ShareCode
 	, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
@@ -117,20 +117,20 @@ void ServerUGC::ModifyContentByShareCode(FString const& UserId
 	if (ChannelId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return;
+		return nullptr;
 	}
 
 	if (ShareCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
-		return;
+		return nullptr;
 	}
 	
 	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
 		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/channels/%s/contents/s3/sharecodes/%s")
@@ -146,10 +146,10 @@ void ServerUGC::ModifyContentByShareCode(FString const& UserId
 		Request.ContentType = TEXT("application/octet-stream");
 	}
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
 }
 
-void ServerUGC::DeleteContentByShareCode(FString const& UserId
+FAccelByteTaskWPtr ServerUGC::DeleteContentByShareCode(FString const& UserId
 	, FString const& ChannelId
 	, FString const& ShareCode
 	, FVoidHandler const& OnSuccess
@@ -160,20 +160,20 @@ void ServerUGC::DeleteContentByShareCode(FString const& UserId
 	if (ChannelId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return;
+		return nullptr;
 	}
 
 	if (ShareCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
-		return;
+		return nullptr;
 	}
 	
 	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
 		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/channels/%s/contents/sharecodes/%s")
@@ -183,17 +183,19 @@ void ServerUGC::DeleteContentByShareCode(FString const& UserId
 		, *ChannelId
 		, *ShareCode);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicGetContentByContentId(FString const& ContentId, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerUGC::PublicGetContentByContentId(FString const& ContentId
+	, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ContentId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Url is invalid. ContentId is empty."));
-		return;
+		return nullptr;
 	}
 
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
@@ -201,7 +203,7 @@ void ServerUGC::PublicGetContentByContentId(FString const& ContentId, THandler<F
 		, OnError))
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is not valid."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s")
@@ -209,10 +211,12 @@ void ServerUGC::PublicGetContentByContentId(FString const& ContentId, THandler<F
 		, *GetNamespace()
 		, *ContentId);
 
-	HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicGetContentByShareCode(FString const& ShareCode, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerUGC::PublicGetContentByShareCode(FString const& ShareCode
+	, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -221,10 +225,22 @@ void ServerUGC::PublicGetContentByShareCode(FString const& ShareCode, THandler<F
 		, *GetNamespace()
 		, *ShareCode);
 
-	HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::InternalSearchContents(const FString& Name, const FString& Creator, const FString& Type, const FString& Subtype, const TArray<FString>& Tags, bool IsOfficial, const FString& UserId, EAccelByteUgcSortBy SortBy, EAccelByteUgcOrderBy OrderBy, int32 Limit, int32 Offset, FString& OutUrl, TMultiMap<FString, FString>& OutQueryParams)
+void ServerUGC::InternalSearchContents(FString const& Name
+	, FString const& Creator
+	, FString const& Type
+	, FString const& Subtype
+	, TArray<FString> const& Tags
+	, bool IsOfficial
+	, FString const& UserId
+	, EAccelByteUgcSortBy SortBy
+	, EAccelByteUgcOrderBy OrderBy
+	, int32 Limit
+	, int32 Offset
+	, FString& OutUrl
+	, TMultiMap<FString, FString>& OutQueryParams)
 {
 	OutUrl = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents")
 		, *ServerSettingsRef.UGCServerUrl
@@ -249,7 +265,19 @@ void ServerUGC::InternalSearchContents(const FString& Name, const FString& Creat
 	}
 }
 
-void ServerUGC::PublicSearchContents(const FString & Name, const FString & Creator, const FString & Type, const FString & Subtype, const TArray<FString>&Tags, bool IsOfficial, const FString & UserId, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, EAccelByteUgcSortBy SortBy, EAccelByteUgcOrderBy OrderBy, int32 Limit, int32 Offset)
+FAccelByteTaskWPtr ServerUGC::PublicSearchContents(FString const& Name
+	, FString const& Creator
+	, FString const& Type
+	, FString const& Subtype
+	, TArray<FString> const& Tags
+	, bool IsOfficial
+	, FString const& UserId
+	, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, EAccelByteUgcSortBy SortBy
+	, EAccelByteUgcOrderBy OrderBy
+	, int32 Limit
+	, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -257,10 +285,14 @@ void ServerUGC::PublicSearchContents(const FString & Name, const FString & Creat
 	TMultiMap<FString, FString> QueryParams;
 	InternalSearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId, SortBy, OrderBy, Limit, Offset, Url, QueryParams);
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicSearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
+FAccelByteTaskWPtr ServerUGC::PublicSearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+	, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -268,10 +300,12 @@ void ServerUGC::PublicSearchContents(FAccelByteModelsUGCSearchContentsRequest co
 	TMultiMap<FString, FString> QueryParams;
 	InternalSearchContents(Request.Name, Request.Creator, Request.Type, Request.Subtype, Request.Tags, Request.bIsOfficial, Request.UserId, Request.SortBy, Request.OrderBy, Limit, Offset, Url, QueryParams);
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicGetContentBulk(const TArray<FString>&ContentIds, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerUGC::PublicGetContentBulk(TArray<FString> const& ContentIds
+	, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -285,10 +319,14 @@ void ServerUGC::PublicGetContentBulk(const TArray<FString>&ContentIds, THandler<
 	FString ContentString;
 	FJsonObjectConverter::UStructToJsonObjectString(ContentRequest, ContentString);
 
-	HttpClient.Request(TEXT("POST"), Url, ContentString, GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("POST"), Url, ContentString, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicGetUserContent(const FString & UserId, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
+FAccelByteTaskWPtr ServerUGC::PublicGetUserContent(FString const& UserId
+	, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -296,7 +334,7 @@ void ServerUGC::PublicGetUserContent(const FString & UserId, THandler<FAccelByte
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents")
@@ -314,23 +352,28 @@ void ServerUGC::PublicGetUserContent(const FString & UserId, THandler<FAccelByte
 		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
 	}
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicSearchContentsSpecificToChannelV2(FString const& ChannelId, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset, EAccelByteUGCContentUtilitiesSortByV2 SortBy)
+FAccelByteTaskWPtr ServerUGC::PublicSearchContentsSpecificToChannelV2(FString const& ChannelId
+	, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteUGCContentUtilitiesSortByV2 SortBy)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ChannelId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return;
+		return nullptr;
 	}
 	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
 		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/channels/%s/contents")
@@ -344,10 +387,15 @@ void ServerUGC::PublicSearchContentsSpecificToChannelV2(FString const& ChannelId
 		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::InternalSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter, int32 Limit, int32 Offset, EAccelByteUGCContentSortByV2 SortBy, FString & OutUrl, TMap<FString, FString>&OutQueryParams)
+void ServerUGC::InternalSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteUGCContentSortByV2 SortBy
+	, FString & OutUrl
+	, TMap<FString, FString>&OutQueryParams)
 {
 	OutUrl = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents")
 		, *ServerSettingsRef.UGCServerUrl
@@ -383,7 +431,12 @@ const TMap<FString, FString> ServerUGC::GetDefaultHeaders()
 	return Headers;
 }
 
-void ServerUGC::PublicSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset, EAccelByteUGCContentSortByV2 SortBy)
+FAccelByteTaskWPtr ServerUGC::PublicSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
+	, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteUGCContentSortByV2 SortBy)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -391,22 +444,24 @@ void ServerUGC::PublicSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const&
 	TMap<FString, FString> QueryParams;
 	InternalSearchContentsV2(Filter, Limit, Offset, SortBy, Url, QueryParams);
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicGetContentBulkByIdsV2(TArray<FString> const& ContentIds, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerUGC::PublicGetContentBulkByIdsV2(TArray<FString> const& ContentIds
+	, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ContentIds.Num() == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentIds is empty."));
-		return;
+		return nullptr;
 	}
 	if (ContentIds.Num() > MAX_BULK_CONTENT_IDS_COUNT)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), MAX_BULK_CONTENT_IDS_COUNT));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/bulk")
@@ -419,17 +474,19 @@ void ServerUGC::PublicGetContentBulkByIdsV2(TArray<FString> const& ContentIds, T
 	FString ContentString;
 	FJsonObjectConverter::UStructToJsonObjectString(ContentRequest, ContentString);
 
-	HttpClient.Request(TEXT("POST"), Url, ContentString, GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("POST"), Url, ContentString, GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicGetContentByShareCodeV2(FString const& ShareCode, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerUGC::PublicGetContentByShareCodeV2(FString const& ShareCode
+	, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ShareCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/%s")
@@ -437,23 +494,25 @@ void ServerUGC::PublicGetContentByShareCodeV2(FString const& ShareCode, THandler
 		, *GetNamespace()
 		, *ShareCode);
 
-	HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicGetContentByContentIdV2(FString const& ContentId, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerUGC::PublicGetContentByContentIdV2(FString const& ContentId
+	, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ContentId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return;
+		return nullptr;
 	}
 	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
 		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s")
@@ -461,23 +520,28 @@ void ServerUGC::PublicGetContentByContentIdV2(FString const& ContentId, THandler
 		, *GetNamespace()
 		, *ContentId);
 
-	HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
-void ServerUGC::PublicGetUserContentsV2(FString const& UserId, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset, EAccelByteUGCContentUtilitiesSortByV2 SortBy)
+FAccelByteTaskWPtr ServerUGC::PublicGetUserContentsV2(FString const& UserId
+	, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
+	, EAccelByteUGCContentUtilitiesSortByV2 SortBy)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (UserId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, UserId is empty."));
-		return;
+		return nullptr;
 	}
 	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents")
@@ -491,7 +555,7 @@ void ServerUGC::PublicGetUserContentsV2(FString const& UserId, THandler<FAccelBy
 		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, FString(), GetDefaultHeaders(), OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
 
 } // Namespace GameServerApi

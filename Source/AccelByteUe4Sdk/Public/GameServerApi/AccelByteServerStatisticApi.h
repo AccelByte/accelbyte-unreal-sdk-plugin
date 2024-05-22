@@ -36,11 +36,13 @@ public:
 	 * @param StatCodes
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsUserStatItemPagingSlicedResult.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateUserStatItems(const FString& UserId
-		, const TArray<FString>& StatCodes
-		, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateUserStatItems(FString const& UserId
+		, TArray<FString> const& StatCodes
+		, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get all stat items from a specified user id.
@@ -51,10 +53,12 @@ public:
 	 * @param Limit Page size, default value is 20.
 	 * @param Offset Page number, default value is 0.
 	 * @param SortBy Sorting method for the statistic result.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetAllUserStatItems(const FString& UserId
-		, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-		, const FErrorHandler& OnError
+	FAccelByteTaskWPtr GetAllUserStatItems(FString const& UserId
+		, THandler<FAccelByteModelsUserStatItemPagingSlicedResult> const& OnSuccess
+		, FErrorHandler const& OnError
 		, int32 Limit = 20
 		, int32 Offset = 0
 		, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC);
@@ -71,12 +75,14 @@ public:
 	 * @param Limit Page size, default value is 20.
 	 * @param Offset Page number, default value is 0.
 	 * @param SortBy Sorting method for the statistic result.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserStatItems(const FString& UserId
-		, const TArray<FString>& StatCodes
-		, const TArray<FString>& Tags
-		, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess
-		, const FErrorHandler& OnError
+	FAccelByteTaskWPtr GetUserStatItems(FString const& UserId
+		, TArray<FString> const& StatCodes
+		, TArray<FString> const& Tags
+		, THandler<FAccelByteModelsUserStatItemPagingSlicedResult> const& OnSuccess
+		, FErrorHandler const& OnError
 		, int32 Limit = 20
 		, int32 Offset = 0
 		, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC );
@@ -87,10 +93,12 @@ public:
 	 * @param Data array consist of increased value, user id, and stat code.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void IncrementManyUsersStatItems(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data
-		, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr IncrementManyUsersStatItems(TArray<FAccelByteModelsBulkUserStatItemInc> const& Data
+		, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Increment stat items of a user (could be negative)
@@ -99,11 +107,13 @@ public:
 	 * @param Data array consist of increased value and stat code.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void IncrementUserStatItems(const FString& UserId
-		, const TArray<FAccelByteModelsBulkStatItemInc>& Data
-		, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr IncrementUserStatItems(FString const& UserId
+		, TArray<FAccelByteModelsBulkStatItemInc> const& Data
+		, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Bulk fetch multiple user's stat item values for a given namespace and statCode.
@@ -114,12 +124,14 @@ public:
 	 * @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsFetchUser.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkFetchUserStatItemValues(const FString& StatCode
-		, const TArray<FString>& UserIds
-		, const FString& AdditionalKey
-		, const THandler<TArray<FAccelByteModelsFetchUser>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr BulkFetchUserStatItemValues(FString const& StatCode
+		, TArray<FString> const& UserIds
+		, FString const& AdditionalKey
+		, THandler<TArray<FAccelByteModelsFetchUser>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Bulk fetch multiple user's stat item values for a given namespace and statCode.
@@ -128,11 +140,13 @@ public:
 	 * @param UserIds This is the UserId array that will be stored in the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsStatItemValueResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkFetchStatItemsValue(const FString& StatCode
-		, const TArray<FString>& UserIds
-		, const THandler<TArray<FAccelByteModelsStatItemValueResponse>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr BulkFetchStatItemsValue(FString const& StatCode
+		, TArray<FString> const& UserIds
+		, THandler<TArray<FAccelByteModelsStatItemValueResponse>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Bulk update multiple user's statitems value with specific update strategy.
@@ -140,10 +154,12 @@ public:
 	 * @param BulkUpdateMultipleUserStatItems This is the BulkUpdateMultipleUserStatItem array that will be stored in the slot. 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsUpdateUserStatItemsResponse.
 	 * @param OnError This will be called when the operation failed.
-	 */ 
-	void BulkUpdateMultipleUserStatItemsValue(const TArray<FAccelByteModelsUpdateUserStatItem>& BulkUpdateMultipleUserStatItems
-		, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkUpdateMultipleUserStatItemsValue(TArray<FAccelByteModelsUpdateUserStatItem> const& BulkUpdateMultipleUserStatItems
+		, THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Bulk reset user's statitem values for given namespace and user.
@@ -153,12 +169,14 @@ public:
 	 * @param BulkUserStatItems This is the BulkUserStatItem array that will be stored in the slot. 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsUpdateUserStatItemsResponse.
 	 * @param OnError This will be called when the operation failed.
-	 */ 
-	void BulkResetUserStatItemsValues(const FString& UserId
-		, const FString& AdditionalKey
-		, const TArray<FAccelByteModelsUserStatItem>& BulkUserStatItems
-		, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkResetUserStatItemsValues(FString const& UserId
+		, FString const& AdditionalKey
+		, TArray<FAccelByteModelsUserStatItem> const& BulkUserStatItems
+		, THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Bulk reset multiple user's statitems value.
@@ -167,10 +185,12 @@ public:
 	 * @param UserStatItemValue Array of UserId and StatCode.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUpdateUserStatItemsResponse>.
 	 * @param OnError This will be called when the operation failed.
-	 */ 
-	void BulkResetMultipleUserStatItemsValue(const TArray<FAccelByteModelsResetUserStatItemValue>& UserStatItemValue
-		, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkResetMultipleUserStatItemsValue(TArray<FAccelByteModelsResetUserStatItemValue> const& UserStatItemValue
+		, THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	* @brief Bulk update user's statitems value for given namespace and user with specific update strategy.
@@ -180,12 +200,14 @@ public:
 	* @param BulkUpdateUserStatItems This is the BulkUpdateUserStatItem array that will be stored in the slot.
 	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsUpdateUserStatItemsResponse.
 	* @param OnError This will be called when the operation failed.
-	*/ 
-	void BulkUpdateUserStatItemValue(const FString& UserId
-		, const FString& AdditionalKey
-		, const TArray<FAccelByteModelsUpdateUserStatItemWithStatCode>& BulkUpdateUserStatItems
-		, const THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkUpdateUserStatItemValue(FString const& UserId
+		, FString const& AdditionalKey
+		, TArray<FAccelByteModelsUpdateUserStatItemWithStatCode> const& BulkUpdateUserStatItems
+		, THandler<TArray<FAccelByteModelsUpdateUserStatItemsResponse>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update user's statitem value for a given namespace and user with a certain update strategy.
@@ -196,13 +218,15 @@ public:
 	 * @param UpdateUserStatItemValue This is the FAccelByteModelsUpdateUserStatItem that will be stored in the slot. 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUpdateUserStatItemValueResponse.
 	 * @param OnError This will be called when the operation failed.
-	 */ 			
-	void UpdateUserStatItemValue(const FString& UserId
-		, const FString& StatCode
-		, const FString& AdditionalKey
-		, const FAccelByteModelsUpdateUserStatItem& UpdateUserStatItemValue
-		, const THandler<FAccelByteModelsUpdateUserStatItemValueResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr UpdateUserStatItemValue(FString const& UserId
+		, FString const& StatCode
+		, FString const& AdditionalKey
+		, FAccelByteModelsUpdateUserStatItem const& UpdateUserStatItemValue
+		, THandler<FAccelByteModelsUpdateUserStatItemValueResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete user's stat items for given namespace, statCode, and user Id.
@@ -214,12 +238,14 @@ public:
 	 * @param AdditionalKey This is the AdditionalKey that will be stored in the slot.
 	 * @param OnSuccess This will be called when the operation succeeded.  
 	 * @param OnError This will be called when the operation failed.
-	 */ 				
-	void DeleteUserStatItems(const FString& UserId
-		, const FString& StatCode
-		, const FString& AdditionalKey
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr DeleteUserStatItems(FString const& UserId
+		, FString const& StatCode
+		, FString const& AdditionalKey
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get global stat items by specifying statCodes.
@@ -227,10 +253,12 @@ public:
 	 * @param StatCode The StatCode of the global stat items
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsGlobalStatItemValueResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGlobalStatItemsByStatCode(const FString& StatCode
-		, const THandler<FAccelByteModelsGlobalStatItemValueResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGlobalStatItemsByStatCode(FString const& StatCode
+		, THandler<FAccelByteModelsGlobalStatItemValueResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	ServerStatistic() = delete;
@@ -240,5 +268,5 @@ private:
 	static FString ConvertUserStatisticSortByToString(const EAccelByteStatisticSortBy& SortBy);
 };
 
-} // Namespace Api
+} // Namespace GameServerApi
 } // Namespace AccelByte

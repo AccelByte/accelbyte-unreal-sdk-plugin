@@ -298,15 +298,16 @@ namespace AccelByte
 			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
 
-		template<typename  U, typename V, typename W>
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+		template<typename  U, typename V>
 		FAccelByteTaskPtr Request(FString const& Verb
 			, FString const& Url
 			, FHttpFormData const& QueryParams
 			, TArray<uint8> const& Content
 			, TMap<FString, FString> const& Headers
 			, U const& OnSuccess
-			, V const& OnProgress
-			, W const& OnError)
+			, FHttpRequestProgressDelegate64 const& OnProgress
+			, V const& OnError)
 		{
 			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
@@ -319,20 +320,55 @@ namespace AccelByte
 				Request->SetContent(Content);
 			}
 
-			Request->OnRequestProgress() = OnProgress;
-
+			Request->OnRequestProgress64() = OnProgress;
 			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
+#endif
+		
+		template<typename  U, typename V>
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TArray<uint8> const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, FHttpRequestProgressDelegate const& OnProgress
+			, V const& OnError)
+		{
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+			FHttpRequestProgressDelegate64 OnRequestProgress64 = FHttpRequestProgressDelegate64::CreateLambda([OnProgress](FHttpRequestPtr Request, uint64 BytesSent, uint64 BytesReceived)
+				{
+					OnProgress.ExecuteIfBound(Request, (int32)BytesSent, (int32)BytesReceived);
+				});
 
-		template<typename  U, typename V, typename W>
+			return Request(Verb, Url, QueryParams, Content, Headers, OnSuccess, OnRequestProgress64, OnError);
+#else
+			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+
+			if (!Verb.ToUpper().Equals(TEXT("GET")) && Content.Num() > 0) // https://stackoverflow.com/a/14710450
+			{
+				if (Request->GetHeader(TEXT("Content-Type")).IsEmpty())
+				{
+					Request->SetHeader(TEXT("Content-Type"), TEXT("application/octet-stream"));
+				}
+				Request->SetContent(Content);
+			}
+
+			Request->OnRequestProgress() = OnProgress;
+			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
+#endif
+		}
+
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+		template<typename  U, typename V>
 		FAccelByteTaskPtr Request(FString const& Verb
 			, FString const& Url
 			, FHttpFormData const& QueryParams
 			, FString const& Content
 			, TMap<FString, FString> const& Headers
 			, U const& OnSuccess
-			, V const& OnProgress
-			, W const& OnError)
+			, FHttpRequestProgressDelegate64 const& OnProgress
+			, V const& OnError)
 		{
 			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
@@ -340,11 +376,40 @@ namespace AccelByte
 			{
 				Request->SetContentAsString(Content);
 			}
-
-			Request->OnRequestProgress() = OnProgress;
-
+			Request->OnRequestProgress64() = OnProgress;
 			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
+#endif
+
+		template<typename  U, typename V>
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, FString const& Content
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, FHttpRequestProgressDelegate const& OnProgress
+			, V const& OnError)
+		{
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+			FHttpRequestProgressDelegate64 OnRequestProgress64 = FHttpRequestProgressDelegate64::CreateLambda([OnProgress](FHttpRequestPtr Request, uint64 BytesSent, uint64 BytesReceived)
+				{
+					OnProgress.ExecuteIfBound(Request, (int32)BytesSent, (int32)BytesReceived);
+				});
+
+			return Request(Verb, Url, QueryParams, Content, Headers, OnSuccess, OnRequestProgress64, OnError);
+#else
+			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+
+			if (!Verb.ToUpper().Equals(TEXT("GET")) && !Content.IsEmpty()) // https://stackoverflow.com/a/14710450
+			{
+				Request->SetContentAsString(Content);
+			}
+			Request->OnRequestProgress() = OnProgress;
+			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
+#endif
+		}
+
 
 		/**
 		 * @brief API request with credentials access token (if available)

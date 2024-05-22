@@ -37,10 +37,12 @@ public:
 	 * @param Limit Number of content per page to retrieve. Default value : 20
 	 * @param Offset Number of page to retrieve. Default value : 0
 	 * @param InventoryConfigurationCode The code of a certain inventory configuration.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetInventoryConfigurations(THandler<FAccelByteModelsInventoryConfigurationsPagingResponse> const& OnSuccess
+	FAccelByteTaskWPtr GetInventoryConfigurations(THandler<FAccelByteModelsInventoryConfigurationsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, EAccelByteInventoryConfigurationSortBy const& SortBy = EAccelByteInventoryConfigurationSortBy::CREATED_AT_DESC
+		, EAccelByteInventoryConfigurationSortBy SortBy = EAccelByteInventoryConfigurationSortBy::CREATED_AT_DESC
 		, int32 Limit = 20
 		, int32 Offset = 0
 		, FString const& InventoryConfigurationCode = TEXT(""));
@@ -53,10 +55,12 @@ public:
 	 * @param SortBy The sorting criteria for the list of inventory types. Value: createdAt, name. default = createdAt:desc.
 	 * @param Limit Number of content per page to retrieve. Default value : 20
 	 * @param Offset Number of page to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetInventoryTags(THandler<FAccelByteModelsInventoryTagPagingResponse> const& OnSuccess
+	FAccelByteTaskWPtr GetInventoryTags(THandler<FAccelByteModelsInventoryTagPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, EAccelByteInventoryUtilitiesSortBy const& SortBy = EAccelByteInventoryUtilitiesSortBy::CREATED_AT_DESC
+		, EAccelByteInventoryUtilitiesSortBy SortBy = EAccelByteInventoryUtilitiesSortBy::CREATED_AT_DESC
 		, int32 Limit = 20
 		, int32 Offset = 0);
 
@@ -69,10 +73,12 @@ public:
 	 * @param Limit Number of content per page to retrieve. Default value : 20
 	 * @param Offset Number of page to retrieve. Default value : 0
 	 * @param InventoryConfigurationCode The code of a certain inventory configuration.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserInventories(THandler<FAccelByteModelsUserInventoriesPagingResponse> const& OnSuccess
+	FAccelByteTaskWPtr GetUserInventories(THandler<FAccelByteModelsUserInventoriesPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, EAccelByteUserInventoriesSortBy const& SortBy = EAccelByteUserInventoriesSortBy::CREATED_AT_DESC
+		, EAccelByteUserInventoriesSortBy SortBy = EAccelByteUserInventoriesSortBy::CREATED_AT_DESC
 		, int32 Limit = 20
 		, int32 Offset = 0
 		, FString const& InventoryConfigurationCode = TEXT(""));
@@ -89,10 +95,12 @@ public:
 	 * @param SortBy The sorting criteria for the list of inventory types. Value: createdAt, name. default = createdAt:desc.
 	 * @param Limit Number of content per page to retrieve. Default value : 20
 	 * @param Offset Number of page to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetItemTypes(THandler<FAccelByteModelsItemTypePagingResponse> const& OnSuccess
+	FAccelByteTaskWPtr GetItemTypes(THandler<FAccelByteModelsItemTypePagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, EAccelByteInventoryUtilitiesSortBy const& SortBy = EAccelByteInventoryUtilitiesSortBy::CREATED_AT_DESC
+		, EAccelByteInventoryUtilitiesSortBy SortBy = EAccelByteInventoryUtilitiesSortBy::CREATED_AT_DESC
 		, int32 Limit = 20
 		, int32 Offset = 0);
 
@@ -108,11 +116,13 @@ public:
 	 * @param SourceItemId The id of source item.
 	 * @param Tags The Tags of user's item.
 	 * @param Quantity The preferred minimum quantity of an item.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserInventoryAllItems(FString const& InventoryId
+	FAccelByteTaskWPtr GetUserInventoryAllItems(FString const& InventoryId
 		, THandler<FAccelByteModelsUserItemsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, EAccelByteUserItemsSortBy const& SortBy = EAccelByteUserItemsSortBy::CREATED_AT_DESC
+		, EAccelByteUserItemsSortBy SortBy = EAccelByteUserItemsSortBy::CREATED_AT_DESC
 		, int32 Limit = 20
 		, int32 Offset = 0
 		, FString const& SourceItemId = TEXT("")
@@ -127,8 +137,10 @@ public:
 	 * @param SourceItemId The id of item source.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserItemResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserInventoryItem(FString const& InventoryId
+	FAccelByteTaskWPtr GetUserInventoryItem(FString const& InventoryId
 		, FString const& SlotId
 		, FString const& SourceItemId
 		, THandler<FAccelByteModelsUserItemResponse> const& OnSuccess
@@ -141,8 +153,10 @@ public:
 	 * @param UpdatedItemsRequest An array of items that will be updated.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUpdateUserInventoryItemResponse>.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkUpdateInventoryItems(FString const& InventoryId
+	FAccelByteTaskWPtr BulkUpdateInventoryItems(FString const& InventoryId
 		, TArray<FAccelByteModelsUpdateUserInventoryItemRequest> const& UpdatedItemsRequest
 		, THandler<TArray<FAccelByteModelsUpdateUserInventoryItemResponse>> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -154,8 +168,10 @@ public:
 	 * @param DeletedItemsRequest An array of items that will be deleted.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsDeleteUserInventoryItemResponse>.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkDeleteInventoryItems(FString const& InventoryId
+	FAccelByteTaskWPtr BulkDeleteInventoryItems(FString const& InventoryId
 		, TArray<FAccelByteModelsDeleteUserInventoryItemsRequest> const& DeletedItemsRequest
 		, THandler<TArray<FAccelByteModelsDeleteUserInventoryItemResponse>> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -167,8 +183,10 @@ public:
 	 * @param MoveItemsRequest Variable contains an array of items that will be moved as well as the inventory destination id.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsMoveUserItemsBetweenInventoriesResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void MoveItemsBetweenInventories(FString const& TargetInventoryId
+	FAccelByteTaskWPtr MoveItemsBetweenInventories(FString const& TargetInventoryId
 		, FAccelByteModelsMoveUserItemsBetweenInventoriesRequest const& MoveItemsRequest
 		, THandler<FAccelByteModelsMoveUserItemsBetweenInventoriesResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -180,8 +198,10 @@ public:
 	 * @param ConsumedItemsRequest Variable contains an array of items that will be consumed.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserItemResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ConsumeUserInventoryItem(FString const& InventoryId
+	FAccelByteTaskWPtr ConsumeUserInventoryItem(FString const& InventoryId
 		, FAccelByteModelsConsumeUserItemsRequest const& ConsumedItemsRequest
 		, THandler<FAccelByteModelsUserItemResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -195,12 +215,12 @@ private:
 
 	static constexpr int32 InventoryItemsLimit = 40;
 
-	static FString ConvertInventoryConfigurationSortByToString(EAccelByteInventoryConfigurationSortBy const& SortBy);
-	static FString ConvertUserInventoriesSortByToString(EAccelByteUserInventoriesSortBy const& SortBy);
-	static FString ConvertItemTypeSortByToString(EAccelByteInventoryUtilitiesSortBy const& SortBy);
-	static FString ConvertUserItemsSortByToString(EAccelByteUserItemsSortBy const& SortBy);
+	static FString ConvertInventoryConfigurationSortByToString(EAccelByteInventoryConfigurationSortBy SortBy);
+	static FString ConvertUserInventoriesSortByToString(EAccelByteUserInventoriesSortBy SortBy);
+	static FString ConvertItemTypeSortByToString(EAccelByteInventoryUtilitiesSortBy SortBy);
+	static FString ConvertUserItemsSortByToString(EAccelByteUserItemsSortBy SortBy);
 
 };
 
-}
-}
+} // Namespace Api
+} // Namespace AccelByte

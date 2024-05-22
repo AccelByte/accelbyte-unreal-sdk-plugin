@@ -14,6 +14,7 @@ namespace AccelByte
 {
 namespace Api
 {
+
 Category::Category(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
@@ -23,9 +24,10 @@ Category::Category(Credentials const& InCredentialsRef
 Category::~Category()
 {}
 
-void Category::GetRootCategories(const FString& Language
-	, const THandler<TArray<FAccelByteModelsCategoryInfo>>& OnSuccess
-	, const FErrorHandler& OnError)
+
+FAccelByteTaskWPtr Category::GetRootCategories(FString const& Language
+	, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -34,13 +36,13 @@ void Category::GetRootCategories(const FString& Language
 		, *CredentialsRef->GetNamespace()
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Category::GetCategory(const FString& CategoryPath
-	, const FString& Language
-	, const THandler<FAccelByteModelsCategoryInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Category::GetCategory(FString const& CategoryPath
+	, FString const& Language
+	, THandler<FAccelByteModelsCategoryInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -50,13 +52,13 @@ void Category::GetCategory(const FString& CategoryPath
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Category::GetChildCategories(const FString& Language
-	, const FString& CategoryPath
-	, const THandler<TArray<FAccelByteModelsCategoryInfo>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Category::GetChildCategories(FString const& Language
+	, FString const& CategoryPath
+	, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -66,13 +68,13 @@ void Category::GetChildCategories(const FString& Language
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Category::GetDescendantCategories(const FString& Language
-	, const FString& CategoryPath
-	, const THandler<TArray<FAccelByteModelsCategoryInfo>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Category::GetDescendantCategories(FString const& Language
+	, FString const& CategoryPath
+	, THandler<TArray<FAccelByteModelsCategoryInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -82,7 +84,7 @@ void Category::GetDescendantCategories(const FString& Language
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 } // Namespace Api

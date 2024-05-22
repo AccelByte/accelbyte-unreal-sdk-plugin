@@ -36,12 +36,14 @@ public:
 	 * @param EndDate Defines the preferred ending  date or time to query user entitlement history (optional).
 	 * @param Limit Number of content per page to retrieve. Default value : 20
 	 * @param Offset Number of page to retrieve. Default value : 0
-	 */	
-	void GetCurrentUserEntitlementHistory(THandler<FAccelByteModelsUserEntitlementHistoryPagingResult> const& OnSuccess
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetCurrentUserEntitlementHistory(THandler<FAccelByteModelsUserEntitlementHistoryPagingResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteEntitlementClass const& EntitlementClass = EAccelByteEntitlementClass::NONE
-		, FDateTime StartDate = 0
-		, FDateTime EndDate = 0
+		, FDateTime const& StartDate = 0
+		, FDateTime const& EndDate = 0
 		, int32 Limit = 20
 		, int32 Offset = 0);
 
@@ -56,11 +58,13 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param EntitlementClass Class of the entitlement (optional).
 	 * @param AppType This is the type of application that entitled (optional).
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryUserEntitlements(FString const& EntitlementName
+	FAccelByteTaskWPtr QueryUserEntitlements(FString const& EntitlementName
 		, FString const& ItemId
-		, int32 const& Offset
-		, int32 const& Limit
+		, int32 Offset
+		, int32 Limit
 		, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE
@@ -79,11 +83,13 @@ public:
 	 * @param EntitlementClass Class of the entitlement (optional).
 	 * @param AppType This is the type of application that entitled (optional).
 	 * @param Features The feature array.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryUserEntitlements(FString const& EntitlementName
+	FAccelByteTaskWPtr QueryUserEntitlements(FString const& EntitlementName
 		, TArray<FString> const& ItemIds
-		, int32 const& Offset
-		, int32 const& Limit
+		, int32 Offset
+		, int32 Limit
 		, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE
@@ -96,8 +102,10 @@ public:
 	 * @param EntitlementId The id of the entitlement.
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementById(FString const& EntitlementId
+	FAccelByteTaskWPtr GetUserEntitlementById(FString const& EntitlementId
 		, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -108,8 +116,10 @@ public:
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementOwnershipByAppId(FString const& AppId
+	FAccelByteTaskWPtr GetUserEntitlementOwnershipByAppId(FString const& AppId
 		, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bUsePublisherNamespace = true);
@@ -121,8 +131,10 @@ public:
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementOwnershipBySku(FString const& Sku
+	FAccelByteTaskWPtr GetUserEntitlementOwnershipBySku(FString const& Sku
 		, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bUsePublisherNamespace = true);
@@ -134,8 +146,10 @@ public:
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is false (to preserve the previous behaviour).
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementOwnershipByItemId(FString const& ItemId
+	FAccelByteTaskWPtr GetUserEntitlementOwnershipByItemId(FString const& ItemId
 		, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bUsePublisherNamespace = false);
@@ -149,11 +163,13 @@ public:
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership will return true if any one parameters are owned.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementOwnershipAny(TArray<FString> const ItemIds
-		, TArray<FString> const AppIds
-		, TArray<FString> const Skus
-		, THandler<FAccelByteModelsEntitlementOwnership> const OnSuccess
+	FAccelByteTaskWPtr GetUserEntitlementOwnershipAny(TArray<FString> const& ItemIds
+		, TArray<FString> const& AppIds
+		, TArray<FString> const& Skus
+		, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bUsePublisherNamespace = true);
 
@@ -170,16 +186,18 @@ public:
 	 * @param VerifyExpiration Optional param, if true will verify the token's expiration.
 	 * @param VerifySub Optional param, verify the token's sub field content.
 	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementOwnershipViaToken(const FString& PublicKey
-		, const TArray<FString>& ItemIds
-		, const TArray<FString>& AppIds
-		, const TArray<FString>& Skus
-		, const THandler<FAccelByteModelsEntitlementOwnershipDetails>& OnSuccess
-		, const FErrorHandler& OnError
-		, const bool VerifySignature = true
-		, const bool VerifyExpiration = true
-		, const FString& VerifySub = TEXT("")
+	FAccelByteTaskWPtr GetUserEntitlementOwnershipViaToken(FString const& PublicKey
+		, TArray<FString> const& ItemIds
+		, TArray<FString> const& AppIds
+		, TArray<FString> const& Skus
+		, THandler<FAccelByteModelsEntitlementOwnershipDetails> const& OnSuccess
+		, FErrorHandler const& OnError
+		, bool VerifySignature = true
+		, bool VerifyExpiration = true
+		, FString const& VerifySub = TEXT("")
 		, bool bUsePublisherNamespace = true);
 	
 	/**
@@ -191,12 +209,14 @@ public:
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsOwnershipToken.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bUsePublisherNamespace check user entitlement in publisher namespace, by default is true.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& ItemIds
-		, const TArray<FString>& AppIds
-		, const TArray<FString>& Skus
-		, const THandler<FAccelByteModelsOwnershipToken>& OnSuccess
-		, const FErrorHandler& OnError
+	FAccelByteTaskWPtr GetUserEntitlementOwnershipTokenOnly(TArray<FString> const& ItemIds
+		, TArray<FString> const& AppIds
+		, TArray<FString> const& Skus
+		, THandler<FAccelByteModelsOwnershipToken> const& OnSuccess
+		, FErrorHandler const& OnError
 		, bool bUsePublisherNamespace = true);
 	
 	/**
@@ -209,13 +229,15 @@ public:
 	 * @param Options Options of consumed entitlements.
 	 * @param RequestId Request id(Optional), A unique tracking ID provided by the developer, can just left it empty if they don't want to track
 	 * When a request id is submitted, it will return original successful response
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ConsumeUserEntitlement(FString const& EntitlementId
-		, int32 const& UseCount
+	FAccelByteTaskWPtr ConsumeUserEntitlement(FString const& EntitlementId
+		, int32 UseCount
 		, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
 		, FErrorHandler const& OnError
-		, TArray<FString> Options = {}
-		, FString const& RequestId = {} );
+		, TArray<FString> const& Options = {}
+		, FString const& RequestId = TEXT(""));
 	
 	/**
 	 * @brief Create Distribution Receiver.
@@ -224,9 +246,11 @@ public:
 	 * @param Attributes That contain of ServerId, ServerName, CharacterId, and CharacterName.
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateDistributionReceiver(FString const& ExtUserId
-		, FAccelByteModelsAttributes const Attributes
+	FAccelByteTaskWPtr CreateDistributionReceiver(FString const& ExtUserId
+		, FAccelByteModelsAttributes const& Attributes
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -237,8 +261,10 @@ public:
 	 * @param UserId The user id from the game.
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteDistributionReceiver(FString const& ExtUserId
+	FAccelByteTaskWPtr DeleteDistributionReceiver(FString const& ExtUserId
 		, FString const& UserId
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -250,8 +276,10 @@ public:
 	 * @param PublisherUserId The user id from the publisher or user id from the game.
 	 * @param OnSuccess This will be called when the operation success. The result is const TArray<FAccelByteModelsDistributionReceiver>.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetDistributionReceiver(FString const& PublisherNamespace
+	FAccelByteTaskWPtr GetDistributionReceiver(FString const& PublisherNamespace
 		, FString const& PublisherUserId
 		, THandler<TArray<FAccelByteModelsDistributionReceiver>> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -263,9 +291,11 @@ public:
 	 * @param Attributes That contain of ServerId, ServerName, CharacterId, and CharacterName.
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateDistributionReceiver(FString const& ExtUserId
-		, FAccelByteModelsAttributes const Attributes
+	FAccelByteTaskWPtr UpdateDistributionReceiver(FString const& ExtUserId
+		, FAccelByteModelsAttributes const& Attributes
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -275,8 +305,10 @@ public:
 	 * @param PlatformType The platform type identifier for sync entitlement.
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType
+	FAccelByteTaskWPtr SyncPlatformPurchase(EAccelBytePlatformSync PlatformType
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -287,8 +319,10 @@ public:
 	 * @param PSSyncModel Contains ServiceLabel needed for PlayStation DLC sync
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType
+	FAccelByteTaskWPtr SyncPlatformPurchase(EAccelBytePlatformSync PlatformType
 		, FAccelByteModelsPlayStationDLCSync const& PSSyncModel
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -300,8 +334,10 @@ public:
 	 * @param PlatformType The platform type identifier for sync entitlement.
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase EntitlementSyncBase
+	FAccelByteTaskWPtr SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase const& EntitlementSyncBase
 		, EAccelBytePlatformSync PlatformType
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -312,8 +348,10 @@ public:
 	 * @param SyncRequest That contain of OrderId, PackageName, ProductId, PurchaseTime, and PurchaseToken to verify and sync item user bought from Google Play. 
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest
+	FAccelByteTaskWPtr SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -323,8 +361,10 @@ public:
 	 * @param SyncRequest That contain of OrderId, PackageName, ProductId, PurchaseTime, and PurchaseToken to verify and sync item user bought from Google Play. 
 	 * @param OnSuccess This will be called when the operation success. The result is boolean with true value.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest
+	FAccelByteTaskWPtr SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest
 		, THandler<FAccelByteModelsPlatformSyncMobileGoogleResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -334,8 +374,10 @@ public:
 	 * @param SyncRequest That contain of ProductId, TransactionId, ReceiptData, and ExcludeOldTransactions to verify and sync item user bought from Apple Store. 
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest
+	FAccelByteTaskWPtr SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -345,8 +387,10 @@ public:
 	 * @param XboxDLCSync Contains XSTSToken needed for Xbox DLC sync
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync
+	FAccelByteTaskWPtr SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -355,8 +399,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncSteamDLC(FVoidHandler const& OnSuccess
+	FAccelByteTaskWPtr SyncSteamDLC(FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -365,8 +411,10 @@ public:
 	 * @param PSSyncModel Contains ServiceLabel needed for PlayStation DLC sync
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncModel
+	FAccelByteTaskWPtr SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncModel
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -376,8 +424,10 @@ public:
 	 * @param TwitchDropModel Contains GameId, Region, and Language.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel
+	FAccelByteTaskWPtr SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -387,8 +437,10 @@ public:
 	 * @param EpicGamesJwtToken Epic game Jwt token.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SyncEpicGameDurableItems(FString const& EpicGamesJwtToken
+	FAccelByteTaskWPtr SyncEpicGameDurableItems(FString const& EpicGamesJwtToken
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -398,8 +450,10 @@ public:
 	 * @param Items Items to be validated.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ValidateUserItemPurchaseCondition(TArray<FString> const& Items
+	FAccelByteTaskWPtr ValidateUserItemPurchaseCondition(TArray<FString> const& Items
 		, THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -409,8 +463,10 @@ public:
 	 * @param Ids ItemsIds.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Ids
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Ids
 		, THandler<TArray<FAccelByteModelsEntitlementOwnershipItemIds>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -420,8 +476,10 @@ public:
 	 * @param PlaystationModel Playstation's DLC Model Sync Request  
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void SyncWithDLCEntitlementInPSNStore(const FAccelByteModelsPlayStationDLCSync& PlaystationModel
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncWithDLCEntitlementInPSNStore(FAccelByteModelsPlayStationDLCSync const& PlaystationModel
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -431,8 +489,10 @@ public:
 	 * @param PlaystationModel Playstation's IAP Model Sync Request  
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStationIAPSync& PlaystationModel
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncWithEntitlementInPSNStore(FAccelByteModelsPlayStationIAPSync const& PlaystationModel
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -444,9 +504,11 @@ public:
 	 * @param RequestId The id of the request.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void SellUserEntitlement(FString const& EntitlementId
-		, int32 const& UseCount
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SellUserEntitlement(FString const& EntitlementId
+		, int32 UseCount
 		, FString const& RequestId
 		, THandler<FAccelByteModelsSellItemEntitlementInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -456,8 +518,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteModelsSyncOculusConsumableEntitlementInfo>> const& OnSuccess
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteModelsSyncOculusConsumableEntitlementInfo>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -465,8 +529,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void SyncOculusDLC(FVoidHandler const& OnSuccess
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncOculusDLC(FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -475,8 +541,10 @@ public:
 	 * @param PlaystationModel Contains ServiceLabel needed for PlayStation DLC Multiple Service sync.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDLCSync const& PlaystationModel
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDLCSync const& PlaystationModel
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -486,8 +554,10 @@ public:
 	 * @param PlaystationModel Contains ServiceLabel needed for PlayStation IAP Multiple Service sync.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void SyncEntitlementPSNMultipleService(const FAccelByteModelsMultipleServicePSNIAPSync& PlaystationModel
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncEntitlementPSNMultipleService(FAccelByteModelsMultipleServicePSNIAPSync const& PlaystationModel
 		, THandler<TArray<FAccelByteModelsMultipleServicePlayStationInfo>> const& OnSuccess
 		, FErrorHandler const& OnError);
 	

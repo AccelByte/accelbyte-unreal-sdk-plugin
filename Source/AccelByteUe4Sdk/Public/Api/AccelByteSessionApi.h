@@ -38,8 +38,10 @@ public:
 	 * @param CreateRequest The game session creation request body.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest
+	FAccelByteTaskWPtr CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -49,8 +51,10 @@ public:
 	 * @param GameSessionID The ID of the session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGameSessionDetails(FString const& GameSessionID
+	FAccelByteTaskWPtr GetGameSessionDetails(FString const& GameSessionID
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -62,12 +66,14 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 * @param Offset Pagination offset.
 	 * @param Limit Pagination limit.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryGameSessions(FAccelByteModelsV2GameSessionQuery const& QueryObject
+	FAccelByteTaskWPtr QueryGameSessions(FAccelByteModelsV2GameSessionQuery const& QueryObject
 		, THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess
 		, FErrorHandler const& OnError
-		, int32 const& Offset = 0
-		, int32 const& Limit = 20);
+		, int32 Offset = 0
+		, int32 Limit = 20);
 
 	/**
 	 * @brief Update a game session by ID.
@@ -76,8 +82,10 @@ public:
 	 * @param UpdateRequest The game session update request body.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGameSession(FString const& GameSessionID
+	FAccelByteTaskWPtr UpdateGameSession(FString const& GameSessionID
 		, FAccelByteModelsV2GameSessionUpdateRequest const& UpdateRequest
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -88,8 +96,10 @@ public:
 	 * @param GameSessionID The ID of the session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteGameSession(FString const& GameSessionID
+	FAccelByteTaskWPtr DeleteGameSession(FString const& GameSessionID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -100,8 +110,10 @@ public:
 	 * @param UserID The ID of the user to invite.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SendGameSessionInvite(FString const& GameSessionID
+	FAccelByteTaskWPtr SendGameSessionInvite(FString const& GameSessionID
 		, FString const& UserID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -112,8 +124,10 @@ public:
 	 * @param GameSessionID The ID of the session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RejectGameSessionInvite(FString const& GameSessionID
+	FAccelByteTaskWPtr RejectGameSessionInvite(FString const& GameSessionID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -123,8 +137,10 @@ public:
 	 * @param GameSessionID The ID of the session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void JoinGameSession(FString const& GameSessionID
+	FAccelByteTaskWPtr JoinGameSession(FString const& GameSessionID
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -134,8 +150,10 @@ public:
 	 * @param Code The session's code.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void JoinGameSessionByCode(FString const& Code
+	FAccelByteTaskWPtr JoinGameSessionByCode(FString const& Code
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -145,8 +163,10 @@ public:
 	 * @param GameSessionID ID of the game session that a new code should be generated for.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GenerateNewGameSessionCode(FString const& GameSessionID
+	FAccelByteTaskWPtr GenerateNewGameSessionCode(FString const& GameSessionID
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -156,8 +176,10 @@ public:
 	 * @param GameSessionID ID of the game session that a code should be revoked for.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RevokeGameSessionCode(FString const& GameSessionID
+	FAccelByteTaskWPtr RevokeGameSessionCode(FString const& GameSessionID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -167,8 +189,10 @@ public:
 	 * @param GameSessionID The ID of the session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void LeaveGameSession(FString const& GameSessionID
+	FAccelByteTaskWPtr LeaveGameSession(FString const& GameSessionID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -178,8 +202,10 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Status Optional membership status to query for - either active or invited.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess
+	FAccelByteTaskWPtr GetMyGameSessions(THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
 
@@ -190,8 +216,10 @@ public:
 	 * @param NewLeaderID The user ID of the new leader to promote.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void PromoteGameSessionLeader(FString const& GameSessionID
+	FAccelByteTaskWPtr PromoteGameSessionLeader(FString const& GameSessionID
 		, FString const& NewLeaderID
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -202,8 +230,10 @@ public:
 	 * @param CreateRequest The party creation request with attributes, join type, and members.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateParty(FAccelByteModelsV2PartyCreateRequest const& CreateRequest
+	FAccelByteTaskWPtr CreateParty(FAccelByteModelsV2PartyCreateRequest const& CreateRequest
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -213,8 +243,10 @@ public:
 	 * @param PartyID The ID of the party session to retrieve.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPartyDetails(FString const& PartyID
+	FAccelByteTaskWPtr GetPartyDetails(FString const& PartyID
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -225,8 +257,10 @@ public:
 	 * @param UpdateRequest The request body to update the party with.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateParty(FString const& PartyID
+	FAccelByteTaskWPtr UpdateParty(FString const& PartyID
 		, FAccelByteModelsV2PartyUpdateRequest const& UpdateRequest
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -238,8 +272,10 @@ public:
 	 * @param NewLeaderID The user ID of the new leader to promote.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void PromotePartyLeader(FString const& PartyID
+	FAccelByteTaskWPtr PromotePartyLeader(FString const& PartyID
 		, FString const& NewLeaderID
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -251,8 +287,10 @@ public:
 	 * @param UserID The ID of the user to invite.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SendPartyInvite(FString const& PartyID
+	FAccelByteTaskWPtr SendPartyInvite(FString const& PartyID
 		, FString const& UserID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -263,8 +301,10 @@ public:
 	 * @param PartyID The ID of the party session containing the invite to reject.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RejectPartyInvite(FString const& PartyID
+	FAccelByteTaskWPtr RejectPartyInvite(FString const& PartyID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -274,8 +314,10 @@ public:
 	 * @param PartyID The ID of the party session which will be joined.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void JoinParty(FString const& PartyID
+	FAccelByteTaskWPtr JoinParty(FString const& PartyID
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -285,8 +327,10 @@ public:
 	 * @param PartyID The ID of the party session which will be joined.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void LeaveParty(FString const& PartyID
+	FAccelByteTaskWPtr LeaveParty(FString const& PartyID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -296,8 +340,10 @@ public:
 	 * @param PartyCode Code used to try and join a party.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void JoinPartyByCode(FString const& PartyCode
+	FAccelByteTaskWPtr JoinPartyByCode(FString const& PartyCode
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -307,8 +353,10 @@ public:
 	 * @param PartyID ID of the party that a new code should be generated for.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GenerateNewPartyCode(FString const& PartyID
+	FAccelByteTaskWPtr GenerateNewPartyCode(FString const& PartyID
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -318,8 +366,10 @@ public:
 	 * @param PartyID ID of the party that a code should be revoked for.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RevokePartyCode(FString const& PartyID
+	FAccelByteTaskWPtr RevokePartyCode(FString const& PartyID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -330,8 +380,10 @@ public:
 	 * @param UserID The ID of the user to kick 
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void KickUserFromParty(FString const& PartyID
+	FAccelByteTaskWPtr KickUserFromParty(FString const& PartyID
 		, FString const& UserID
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -342,8 +394,10 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Status Optional membership status to query for - either active or invited.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess
+	FAccelByteTaskWPtr GetMyParties(THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteV2SessionMemberStatus Status = EAccelByteV2SessionMemberStatus::EMPTY);
 
@@ -352,8 +406,11 @@ public:
 	 *
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPlayerAttributes(THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess, FErrorHandler const& OnError);
+	FAccelByteTaskWPtr GetPlayerAttributes(THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update stored attributes for the current player.
@@ -361,8 +418,10 @@ public:
 	 * @param AttributesRequest Request model for updating attributes for this player.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void StorePlayerAttributes(FAccelByteModelsV2StorePlayerAttributesRequest const& AttributesRequest
+	FAccelByteTaskWPtr StorePlayerAttributes(FAccelByteModelsV2StorePlayerAttributesRequest const& AttributesRequest
 		, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -371,8 +430,11 @@ public:
 	 *
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	FAccelByteTaskWPtr DeletePlayerAttributes(FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update leader's session storage data, can only be updated by current session leader.
@@ -382,8 +444,10 @@ public:
 	 * @param Data Data to update leader storage.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateLeaderStorage(FString const& SessionID
+	FAccelByteTaskWPtr UpdateLeaderStorage(FString const& SessionID
 		, FJsonObjectWrapper const& Data
 		, THandler<FJsonObjectWrapper> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -396,8 +460,10 @@ public:
 	 * @param Data Data to update member storage.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateMemberStorage(FString const& SessionID
+	FAccelByteTaskWPtr UpdateMemberStorage(FString const& SessionID
 		, FJsonObjectWrapper const& Data
 		, THandler<FJsonObjectWrapper> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -408,8 +474,10 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Limit Number of recent players to request, maximum value is 200.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetRecentPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
+	FAccelByteTaskWPtr GetRecentPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
 		, FErrorHandler const& OnError
 		, const int32 Limit = 20);
 
@@ -419,8 +487,10 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Limit Number of recent players to request, maximum value is 200.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetRecentTeamPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
+	FAccelByteTaskWPtr GetRecentTeamPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
 		, FErrorHandler const& OnError
 		, const int32 Limit = 20);
 
@@ -431,8 +501,10 @@ public:
 	 * @param SessionID The ID of the game session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetSessionSecret(FString const& SessionID
+	FAccelByteTaskWPtr GetSessionSecret(FString const& SessionID
 		, THandler<FAccelByteModelsV2SessionJoinedSecret> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -444,15 +516,15 @@ private:
 	// The server session API class needs access to `SerializeAndRemoveEmptyValues`
 	friend class GameServerApi::ServerSession;
 
-	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> JsonObjectPtr
-		, const FString& EnumFieldName);
+	static void RemoveEmptyEnumValue(TSharedPtr<FJsonObject> & JsonObjectPtr
+		, FString const& EnumFieldName);
 	
-	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> JsonObjectPtr
-		, const FString& FieldName
-		, const FString& EnumFieldName);
+	static void RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> & JsonObjectPtr
+		, FString const& FieldName
+		, FString const& EnumFieldName);
 
 	template <typename DataStruct>
-	static void SerializeAndRemoveEmptyValues(const DataStruct& Model
+	static void SerializeAndRemoveEmptyValues(DataStruct const& Model
 		, FString& OutputString
 		, bool bIncludeTeams = true)
 	{
@@ -464,7 +536,7 @@ private:
 	}
 
 	template <typename DataStruct>
-	static void SerializeAndRemoveEmptyValues(const DataStruct& Model
+	static void SerializeAndRemoveEmptyValues(DataStruct const& Model
 		, TSharedPtr<FJsonObject>& OutJsonObjectPtr
 		, bool bIncludeTeams = true)
 	{
@@ -486,5 +558,5 @@ private:
 	}
 };
 
-}
-}
+} // Namespace Api
+} // Namespace AccelByte

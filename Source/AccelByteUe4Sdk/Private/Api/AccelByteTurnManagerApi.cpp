@@ -27,20 +27,20 @@ TurnManager::TurnManager(Credentials const& InCredentialsRef
 TurnManager::~TurnManager()
 {}
 
-void TurnManager::GetTurnServers(const THandler<FAccelByteModelsTurnServerList>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr TurnManager::GetTurnServers(THandler<FAccelByteModelsTurnServerList> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/public/turn"), *GetTurnManagerServerUrl());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void TurnManager::GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr TurnManager::GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer>& OnSuccess
+	, FErrorHandler const& OnError)
 {
-	GetTurnServers(THandler<FAccelByteModelsTurnServerList>::CreateLambda(
+	return GetTurnServers(THandler<FAccelByteModelsTurnServerList>::CreateLambda(
 			[this, OnError, OnSuccess](const FAccelByteModelsTurnServerList& Result)
 			{
 				if(Result.Servers.Num() == 0)
@@ -82,11 +82,11 @@ void TurnManager::GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer
 			}));
 }
 
-void TurnManager::GetTurnCredential(const FString &Region
-	, const FString &Ip
+FAccelByteTaskWPtr TurnManager::GetTurnCredential(FString const& Region
+	, FString const& Ip
 	, int Port
-	, const THandler<FAccelByteModelsTurnServerCredential>& OnSuccess
-	, const FErrorHandler& OnError)
+	, THandler<FAccelByteModelsTurnServerCredential> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -96,7 +96,7 @@ void TurnManager::GetTurnCredential(const FString &Region
 		, *Ip
 		, Port);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 FString TurnManager::GetTurnManagerServerUrl() const
@@ -106,9 +106,10 @@ FString TurnManager::GetTurnManagerServerUrl() const
 		: SettingsRef.TurnManagerServerUrl;
 }
 
-void TurnManager::SendMetric(const FString &SelectedTurnServerRegion, const EP2PConnectionType &P2PConnectionType,
-	const FVoidHandler &OnSuccess,
-	const FErrorHandler &OnError)
+FAccelByteTaskWPtr TurnManager::SendMetric(FString const& SelectedTurnServerRegion
+	, EP2PConnectionType P2PConnectionType
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -120,7 +121,7 @@ void TurnManager::SendMetric(const FString &SelectedTurnServerRegion, const EP2P
 	Data.Region = SelectedTurnServerRegion;
 	Data.Type = FAccelByteUtilities::GetUEnumValueAsString(P2PConnectionType).ToLower();
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Data,  OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Data,  OnSuccess, OnError);
 }
 
 } // Namespace Api

@@ -35,24 +35,30 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset Distance between the beginning of the data list and a given point (optional, default = 0).
 	 * @param Limit The limit of the GameRecord data result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RetrieveGameRecordsKey(const THandler<FAccelByteModelsPaginatedRecordsKey>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& Query = TEXT("{}")
+	FAccelByteTaskWPtr RetrieveGameRecordsKey(THandler<FAccelByteModelsPaginatedRecordsKey> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& Query = TEXT("{}")
 		, int32 Offset = 0
 		, int32 Limit = 20);
 
 	/**
-	 * @brief Save a namespace-level game record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
+	 * @brief Save a namespace-level game record. If the record doesn't exist, it will create and save the record, 
+	 *		if already exists, it will append to the existing one.
 	 *
 	 * @param Key Key of record.
 	 * @param SetBy Metadata value 
      * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, then it will not send the TTL (Time to live) meta data.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, 
+	 *		then it will not send the TTL (Time to live) meta data.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveGameRecord(FString const& Key
+	FAccelByteTaskWPtr SaveGameRecord(FString const& Key
 		, ESetByMetadataRecord SetBy
 		, FJsonObject const& RecordRequest
 		, FVoidHandler const& OnSuccess
@@ -60,17 +66,20 @@ public:
 		, FTTLConfig const& TTLConfig = FTTLConfig{});
 		
 	/**
-	 * @brief Save a namespace-level game record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
+	 * @brief Save a namespace-level game record. If the record doesn't exist, it will create and save the record,
+	 *		if already exists, it will append to the existing one.
 	 *
 	 * @param Key Key of record.
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveGameRecord(const FString& Key
-		, const FJsonObject& RecordRequest
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr SaveGameRecord(FString const& Key
+		, FJsonObject const& RecordRequest
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get a game record by its key in namespace-level.
@@ -78,40 +87,49 @@ public:
 	 * @param Key Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGameRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGameRecord(const FString& Key
-		, const THandler<FAccelByteModelsGameRecord>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGameRecord(FString const& Key
+		, THandler<FAccelByteModelsGameRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Replace a game record in namespace-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
+	 * @brief Replace a game record in namespace-level. If the record doesn't exist, it will create and save the record. 
+	 *		If already exists, it will replace the existing one.
 	 *
 	 * @param Key Key of record.
 	 * @param SetBy Metadata Value 
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, then it will not send the TTL (Time to live) meta data.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE,
+	 *		then it will not send the TTL (Time to live) meta data.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceGameRecord(const FString& Key
+	FAccelByteTaskWPtr ReplaceGameRecord(FString const& Key
 		, ESetByMetadataRecord SetBy
-		, const FJsonObject& RecordRequest
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError
-		, const FTTLConfig& TTLConfig = FTTLConfig{});
+		, FJsonObject const& RecordRequest
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FTTLConfig const& TTLConfig = FTTLConfig{});
 	
 	/**
-	 * @brief Replace a game record in namespace-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
+	 * @brief Replace a game record in namespace-level. If the record doesn't exist, it will create and save the record. 
+	 *		If already exists, it will replace the existing one.
 	 *
 	 * @param Key Key of record.
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceGameRecord(const FString& Key
-		, const FJsonObject& RecordRequest
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr ReplaceGameRecord(FString const& Key
+		, FJsonObject const& RecordRequest
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete a game record under the given key in namespace-level.
@@ -119,10 +137,12 @@ public:
 	 * @param Key Key of record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteGameRecord(const FString& Key
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteGameRecord(FString const& Key
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Save a user-level record with Metadata input value
@@ -134,14 +154,16 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted. 
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveUserRecord(const FString& Key
-		, const FString& UserId
+	FAccelByteTaskWPtr SaveUserRecord(FString const& Key
+		, FString const& UserId
 		, ESetByMetadataRecord SetBy
 		, bool SetPublic
-		, const FJsonObject& RecordRequest
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FJsonObject const& RecordRequest
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Save a user-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
@@ -151,12 +173,14 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted. 
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveUserRecord(const FString& Key
-		, const FString& UserId
-		, const FJsonObject& RecordRequest
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr SaveUserRecord(FString const& Key
+		, FString const& UserId
+		, FJsonObject const& RecordRequest
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief This function that contains option adding suffix /public in the Url will be DEPRECATED.
@@ -170,15 +194,17 @@ public:
 	 * @param bIsPublic Save the record as a public/private record. If true, no support metadata object field/will not included in record. 
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveUserRecord(const FString& Key
-		, const FString& UserId
+	FAccelByteTaskWPtr SaveUserRecord(FString const& Key
+		, FString const& UserId
 		, ESetByMetadataRecord SetBy
 		, bool SetPublic
-		, const FJsonObject& RecordRequest
+		, FJsonObject const& RecordRequest
 		, bool bIsPublic
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief This function that contains option adding suffix /public in the Url will be DEPRECATED.
@@ -191,13 +217,15 @@ public:
 	 * @param bIsPublic Save the record as a public/private record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveUserRecord(const FString& Key
-		, const FString& UserId
-		, const FJsonObject& RecordRequest
+	FAccelByteTaskWPtr SaveUserRecord(FString const& Key
+		, FString const& UserId
+		, FJsonObject const& RecordRequest
 		, bool bIsPublic
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get a record (arbitrary JSON data) by its key in user-level.
@@ -206,11 +234,13 @@ public:
 	 * @param UserId UserId of the record owner.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserRecord(const FString& Key
-		, const FString& UserId
-		, const THandler<FAccelByteModelsUserRecord>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserRecord(FString const& Key
+		, FString const& UserId
+		, THandler<FAccelByteModelsUserRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get a public record (arbitrary JSON data) by its key and userId in user-level.
@@ -219,11 +249,13 @@ public:
 	 * @param UserId UserId of the record owner.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPublicUserRecord(const FString& Key
-		, const FString& UserId
-		, const THandler<FAccelByteModelsUserRecord>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetPublicUserRecord(FString const& Key
+		, FString const& UserId
+		, THandler<FAccelByteModelsUserRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
@@ -232,14 +264,16 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecord(const FString& Key
+	FAccelByteTaskWPtr ReplaceUserRecord(FString const& Key
 		, ESetByMetadataRecord SetBy
 		, bool SetPublic
-		, const FString& UserId
-		, const FJsonObject& RecordRequest
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FString const& UserId
+		, FJsonObject const& RecordRequest
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**         
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
@@ -249,12 +283,14 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted. 
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecord(const FString& Key
-		, const FString& UserId
-		, const FJsonObject& RecordRequest
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr ReplaceUserRecord(FString const& Key
+		, FString const& UserId
+		, FJsonObject const& RecordRequest
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief 
@@ -266,15 +302,17 @@ public:
 	 * @param bIsPublic Save the record as a public/private record. If true, no support metadata object field/will not included in record. 
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecord(const FString& Key
-		, const FString& UserId
+	FAccelByteTaskWPtr ReplaceUserRecord(FString const& Key
+		, FString const& UserId
 		, ESetByMetadataRecord SetBy
 		, bool SetPublic
-		, const FJsonObject& RecordRequest
+		, FJsonObject const& RecordRequest
 		, bool bIsPublic
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
@@ -286,13 +324,15 @@ public:
 	 * @param bIsPublic Save the record as a public/private record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceUserRecord(const FString& Key
-		, const FString& UserId
-		, const FJsonObject& RecordRequest
+	FAccelByteTaskWPtr ReplaceUserRecord(FString const& Key
+		, FString const& UserId
+		, FJsonObject const& RecordRequest
 		, bool bIsPublic
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete a record under the given key in user-level.
@@ -303,12 +343,14 @@ public:
 	 * @param bIsPublic Save the record as a public/private record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteUserRecord(const FString& Key
-		, const FString& UserId
+	FAccelByteTaskWPtr DeleteUserRecord(FString const& Key
+		, FString const& UserId
 		, bool bIsPublic
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Bulk Get Multiple Size of Player Record 
@@ -316,10 +358,12 @@ public:
 	 * @param GetPlayerRecordSizeRequest Detail information for the Player Record Request.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetPlayerRecordSize(const FAccelByteModelsBulkGetPlayerRecordSizeRequest& GetPlayerRecordSizeRequest
-		, const THandler<FAccelByteModelsPaginatedBulkGetPlayerRecordSizeResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr BulkGetPlayerRecordSize(FAccelByteModelsBulkGetPlayerRecordSizeRequest const& GetPlayerRecordSizeRequest
+		, THandler<FAccelByteModelsPaginatedBulkGetPlayerRecordSizeResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 #pragma region AdminRecord
 
@@ -330,10 +374,13 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateAdminGameRecord(FString const& Key, FJsonObject const& RecordRequest
-		, const THandler<FAccelByteModelsAdminGameRecord>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateAdminGameRecord(FString const& Key
+		, FJsonObject const& RecordRequest
+		, THandler<FAccelByteModelsAdminGameRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get a record by its key in namespace-level.
@@ -341,8 +388,10 @@ public:
 	 * @param Key Key of record
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryAdminGameRecordsByKey(FString const& Key
+	FAccelByteTaskWPtr QueryAdminGameRecordsByKey(FString const& Key
 		, THandler<FAccelByteModelsAdminGameRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -353,8 +402,11 @@ public:
 	 * @param Offset Distance between the beginning of the data list and a given point.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryAdminGameRecordKeys(int Limit, int Offset
+	FAccelByteTaskWPtr QueryAdminGameRecordKeys(int Limit
+		, int Offset
 		, THandler<FAccelByteModelsPaginatedRecordsKey> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -365,8 +417,11 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceAdminGameRecord(FString const& Key, FJsonObject const& RecordRequest
+	FAccelByteTaskWPtr ReplaceAdminGameRecord(FString const& Key
+		, FJsonObject const& RecordRequest
 		, THandler<FAccelByteModelsAdminGameRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -376,8 +431,10 @@ public:
 	 * @param Key Key of record
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteAdminGameRecord(FString const& Key
+	FAccelByteTaskWPtr DeleteAdminGameRecord(FString const& Key
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -389,12 +446,14 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateAdminUserRecord(const FString& Key
-		, const FString& UserId
-		, const FJsonObject& RecordRequest
-		, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateAdminUserRecord(FString const& Key
+		, FString const& UserId
+		, FJsonObject const& RecordRequest
+		, THandler<FAccelByteModelsAdminUserRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Query admin user records by Key
@@ -403,11 +462,13 @@ public:
 	 * @param UserId UserId of the record owner.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryAdminUserRecordsByKey(const FString& Key
-		, const FString& UserId
-		, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr QueryAdminUserRecordsByKey(FString const& Key
+		, FString const& UserId
+		, THandler<FAccelByteModelsAdminUserRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Query admin user record Keys
@@ -417,10 +478,14 @@ public:
 	 * @param Offset
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryAdminUserRecordKeys(const FString& UserId, int Limit, int Offset
-		, const THandler<FAccelByteModelsPaginatedGetAdminUserRecordKeysResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr QueryAdminUserRecordKeys(FString const& UserId
+		, int Limit
+		, int Offset
+		, THandler<FAccelByteModelsPaginatedGetAdminUserRecordKeysResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replace admin user record
@@ -430,12 +495,14 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ReplaceAdminUserRecord(const FString& Key
-		, const FString& UserId
-		, const FJsonObject& RecordRequest
-		, const THandler<FAccelByteModelsAdminUserRecord>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr ReplaceAdminUserRecord(FString const& Key
+		, FString const& UserId
+		, FJsonObject const& RecordRequest
+		, THandler<FAccelByteModelsAdminUserRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete admin user record
@@ -444,11 +511,13 @@ public:
 	 * @param UserId UserId of the record owner.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteAdminUserRecord(const FString& Key
-		, const FString& UserId
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteAdminUserRecord(FString const& Key
+		, FString const& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 #pragma endregion
 
@@ -465,7 +534,7 @@ private:
 		, bool SetPublic
 		, FJsonObject const& RecordRequest);
 	
-	static FJsonObjectWrapper ConvertJsonObjToJsonObjWrapper(const TSharedPtr<FJsonObject>*& value);
+	static FJsonObjectWrapper ConvertJsonObjToJsonObjWrapper(TSharedPtr<FJsonObject> const*& value);
 };
 
 } // namespace GameServerApi

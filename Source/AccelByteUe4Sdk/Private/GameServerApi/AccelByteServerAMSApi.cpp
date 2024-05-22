@@ -217,7 +217,7 @@ void ServerAMS::SendReadyMessage()
 		bHeartbeatJobStarted = true;
 		AMSHeartbeatTickDelegate = FTickerDelegate::CreateRaw(this, &ServerAMS::PeriodicHeartbeat);
 		AMSHeartbeatTickDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AMSHeartbeatTickDelegate, static_cast<float>(AMSHeartbeatInterval.GetTotalSeconds()));
-		UE_LOG(LogAccelByteAMS, Log, TEXT("Added AMS heartbeat event periodically: %i seconds"), AMSHeartbeatInterval.GetTotalSeconds());
+		UE_LOG(LogAccelByteAMS, Log, TEXT("Added AMS heartbeat event periodically: %i seconds"), (int)AMSHeartbeatInterval.GetTotalSeconds());
 	}
 }
 

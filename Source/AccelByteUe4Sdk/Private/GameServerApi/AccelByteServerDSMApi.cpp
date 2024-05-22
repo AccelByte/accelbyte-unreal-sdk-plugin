@@ -20,10 +20,10 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-void ServerDSM::RegisterServerToDSM(const int32 Port
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError
-	, const FString& CustomAttribute)
+FAccelByteTaskWPtr ServerDSM::RegisterServerToDSM(int32 Port
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& CustomAttribute)
 {
 	FReport::Log(FString(__FUNCTION__));
 	ParseCommandParam();
@@ -31,58 +31,57 @@ void ServerDSM::RegisterServerToDSM(const int32 Port
 	if (ServerType != EServerType::NONE)
 	{
 		OnError.ExecuteIfBound(409, TEXT("Server already registered."));
+		return nullptr;
 	}
-	else
-	{
-		ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
 
-		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
-			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef->GetClientNamespace());
+	ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
 
-		const FAccelByteModelsRegisterServerRequest Register{
-			GameVersion,
-			DSPubIp,
-			ServerName,
-			Port,
-			Provider,
-			CustomAttribute
-		};
+	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
+		, *ServerSettingsRef.DSMControllerServerUrl
+		, *ServerCredentialsRef->GetClientNamespace());
 
-		FReport::Log(TEXT("Starting DSM Register Request..."));
+	const FAccelByteModelsRegisterServerRequest Register{
+		GameVersion,
+		DSPubIp,
+		ServerName,
+		Port,
+		Provider,
+		CustomAttribute
+	};
 
-		const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
-			[OnSuccess, this](FJsonObject const& JSONObject)
+	FReport::Log(TEXT("Starting DSM Register Request..."));
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess, this](FJsonObject const& JSONObject)
+		{
+			FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+
+			FString JSONString;
+			const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JSONString);
+			FJsonSerializer::Serialize(MakeShared<FJsonObject>(JSONObject), Writer);
+
+			FAccelByteModelsServerInfo Result;
+			if (FJsonObjectConverter::JsonObjectStringToUStruct(JSONString, &Result, 0, 0))
 			{
-				FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+				RegisteredServerInfo = Result;
+				SetServerName(Result.Pod_name);
+			}
+			if (CountdownTimeStart != -1)
+			{
+				AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
+			}
+			SetServerType(EServerType::CLOUDSERVER);
 
-				FString JSONString;
-				const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JSONString);
-				FJsonSerializer::Serialize(MakeShared<FJsonObject>(JSONObject), Writer);
+			OnSuccess.ExecuteIfBound();
+		});
 
-				FAccelByteModelsServerInfo Result;
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(JSONString, &Result, 0, 0))
-				{
-					RegisteredServerInfo = Result;
-					SetServerName(Result.Pod_name);
-				}
-				if (CountdownTimeStart != -1)
-				{
-					AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
-				}
-				SetServerType(EServerType::CLOUDSERVER);
-
-				OnSuccess.ExecuteIfBound();
-			});
-
-		HttpClient.ApiRequest(TEXT("POST"), Url, {}, Register, OnSuccessHttpClient, OnError);
-	}
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Register, OnSuccessHttpClient, OnError);
 }
 
-void ServerDSM::RegisterServerToDSM(const int32 Port
-	, const THandler<FAccelByteModelsServerInfo>& OnSuccess
-	, const FErrorHandler& OnError
-	, const FString& CustomAttribute)
+FAccelByteTaskWPtr ServerDSM::RegisterServerToDSM(int32 Port
+	, THandler<FAccelByteModelsServerInfo> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& CustomAttribute)
 {
 	FReport::Log(FString(__FUNCTION__));
 	ParseCommandParam();
@@ -90,152 +89,148 @@ void ServerDSM::RegisterServerToDSM(const int32 Port
 	if (ServerType != EServerType::NONE)
 	{
 		OnError.ExecuteIfBound(409, TEXT("Server already registered."));
+		return nullptr;
 	}
-	else
-	{
-		ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
 
-		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
-			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef->GetClientNamespace());
+	ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
 
-		const FAccelByteModelsRegisterServerRequest Register{
-			GameVersion,
-			DSPubIp,
-			ServerName,
-			Port,
-			Provider,
-			CustomAttribute
-		};
+	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
+		, *ServerSettingsRef.DSMControllerServerUrl
+		, *ServerCredentialsRef->GetClientNamespace());
 
-		FReport::Log(TEXT("Starting DSM Register Request..."));
+	const FAccelByteModelsRegisterServerRequest Register{
+		GameVersion,
+		DSPubIp,
+		ServerName,
+		Port,
+		Provider,
+		CustomAttribute
+	};
 
-		const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
-			[OnSuccess, this](FJsonObject const& JSONObject)
+	FReport::Log(TEXT("Starting DSM Register Request..."));
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess, this](FJsonObject const& JSONObject)
+		{
+			FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+
+			FString JSONString;
+			const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JSONString);
+			FJsonSerializer::Serialize(MakeShared<FJsonObject>(JSONObject), Writer);
+
+			FAccelByteModelsServerInfo Result;
+			if (FJsonObjectConverter::JsonObjectStringToUStruct(JSONString, &Result, 0, 0))
 			{
-				FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+				RegisteredServerInfo = Result;
+				SetServerName(Result.Pod_name);
+			}
+			if (CountdownTimeStart != -1)
+			{
+				AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
+			}
+			SetServerType(EServerType::CLOUDSERVER);
 
-				FString JSONString;
-				const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JSONString);
-				FJsonSerializer::Serialize(MakeShared<FJsonObject>(JSONObject), Writer);
+			OnSuccess.ExecuteIfBound(Result);
+		});
 
-				FAccelByteModelsServerInfo Result;
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(JSONString, &Result, 0, 0))
-				{
-					RegisteredServerInfo = Result;
-					SetServerName(Result.Pod_name);
-				}
-				if (CountdownTimeStart != -1)
-				{
-					AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
-				}
-				SetServerType(EServerType::CLOUDSERVER);
-
-				OnSuccess.ExecuteIfBound(Result);
-			});
-
-		HttpClient.ApiRequest(TEXT("POST"), Url, {}, Register, OnSuccessHttpClient, OnError);
-	}
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Register, OnSuccessHttpClient, OnError);
 }
 
-void ServerDSM::SendShutdownToDSM(const bool KillMe
-	, const FString& MatchId
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerDSM::SendShutdownToDSM(bool KillMe
+	, FString const& MatchId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	if (ServerType == EServerType::LOCALSERVER)
 	{
 		OnError.ExecuteIfBound(409, TEXT("Server not registered as Cloud Server."));
+		return nullptr;
 	}
-	else
-	{
-		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/shutdown")
-			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef->GetClientNamespace());
 
-		const FAccelByteModelsShutdownServerRequest Shutdown{
-			KillMe,
-			ServerName,
-			MatchId
-		};
+	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/shutdown")
+		, *ServerSettingsRef.DSMControllerServerUrl
+		, *ServerCredentialsRef->GetClientNamespace());
 
-		FReport::Log(TEXT("Starting DSM Shutdown Request..."));
-		FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
-		ServerType = EServerType::NONE;
+	const FAccelByteModelsShutdownServerRequest Shutdown{
+		KillMe,
+		ServerName,
+		MatchId
+	};
 
-		HttpClient.ApiRequest(TEXT("POST"), Url, {}, Shutdown, OnSuccess, OnError);
+	FReport::Log(TEXT("Starting DSM Shutdown Request..."));
+	FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+	ServerType = EServerType::NONE;
+	RegisteredServerInfo = FAccelByteModelsServerInfo();
 
-		RegisteredServerInfo = FAccelByteModelsServerInfo();
-	}
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Shutdown, OnSuccess, OnError);
 }
 
-void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress
-	, const int32 Port
-	, const FString ServerName_
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError
-	, const FString& CustomAttribute)
+FAccelByteTaskWPtr ServerDSM::RegisterLocalServerToDSM(FString const& IPAddress
+	, int32 Port
+	, FString const& ServerName_
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& CustomAttribute)
 {
 	FReport::Log(FString(__FUNCTION__));
 	if (ServerType != EServerType::NONE)
 	{
 		OnError.ExecuteIfBound(409, TEXT("Server already registered."));
+		return nullptr;
 	}
-	else
-	{
-		this->ServerName = ServerName_;
 
-		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register")
-			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef->GetClientNamespace());
+	this->ServerName = ServerName_;
 
-		const FAccelByteModelsRegisterLocalServerRequest Register{
-			IPAddress,
-			ServerName_,
-			Port,
-			CustomAttribute
-		};
+	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register")
+		, *ServerSettingsRef.DSMControllerServerUrl
+		, *ServerCredentialsRef->GetClientNamespace());
 
-		FReport::Log(TEXT("Starting DSM Register Local Request..."));
+	const FAccelByteModelsRegisterLocalServerRequest Register{
+		IPAddress,
+		ServerName_,
+		Port,
+		CustomAttribute
+	};
 
-		const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
-			[OnSuccess, this](FJsonObject const& JSONObject)
+	FReport::Log(TEXT("Starting DSM Register Local Request..."));
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess, this](FJsonObject const& JSONObject)
+		{
+			FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+
+			FString JSONString;
+			const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JSONString);
+			FJsonSerializer::Serialize(MakeShared<FJsonObject>(JSONObject), Writer);
+
+			FAccelByteModelsServerInfo Result;
+			if (FJsonObjectConverter::JsonObjectStringToUStruct(JSONString, &Result, 0, 0))
 			{
-				FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+				RegisteredServerInfo = Result;
+			}
+			if (CountdownTimeStart != -1)
+			{
+				AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
+			}
+			SetServerType(EServerType::LOCALSERVER);
 
-				FString JSONString;
-				const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JSONString);
-				FJsonSerializer::Serialize(MakeShared<FJsonObject>(JSONObject), Writer);
+			OnSuccess.ExecuteIfBound();
+		});
 
-				FAccelByteModelsServerInfo Result;
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(JSONString, &Result, 0, 0))
-				{
-					RegisteredServerInfo = Result;
-				}
-				if (CountdownTimeStart != -1)
-				{
-					AutoShutdownDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
-				}
-				SetServerType(EServerType::LOCALSERVER);
-
-				OnSuccess.ExecuteIfBound();
-			});
-
-		HttpClient.ApiRequest(TEXT("POST"), Url, {}, Register, OnSuccessHttpClient, OnError);
-	}
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Register, OnSuccessHttpClient, OnError);
 }
 
-void ServerDSM::RegisterLocalServerToDSM(const int32 Port
-	, const FString ServerName_
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError
-	, const FString& CustomAttribute)
+FAccelByteTaskWPtr ServerDSM::RegisterLocalServerToDSM(int32 Port
+	, FString const& ServerName_
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& CustomAttribute)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
-		TEXT("Please use RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)"));
+		TEXT("Please use RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)"));
 
 	GetPubIpDelegate.BindLambda(
 		[this, Port, ServerName_, OnSuccess, OnError, CustomAttribute](const FAccelByteModelsPubIp& Result)
@@ -243,48 +238,48 @@ void ServerDSM::RegisterLocalServerToDSM(const int32 Port
 			RegisterLocalServerToDSM(Result.Ip, Port, ServerName_, OnSuccess, OnError, CustomAttribute);
 		});
 	FAccelByteNetUtilities::GetPublicIP(GetPubIpDelegate, OnError);
+	return nullptr;
 }
 
-void ServerDSM::DeregisterLocalServerFromDSM(const FString& ServerName_
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerDSM::DeregisterLocalServerFromDSM(FString const& ServerName_
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	if (ServerType == EServerType::CLOUDSERVER)
 	{
 		OnError.ExecuteIfBound(409, TEXT("Server not registered as Local Server."));
+		return nullptr;
 	}
-	else
-	{
-		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/deregister")
-			, *ServerSettingsRef.DSMControllerServerUrl
+
+	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/deregister")
+		, *ServerSettingsRef.DSMControllerServerUrl
 			, *ServerCredentialsRef->GetClientNamespace());
 
-		const FAccelByteModelsDeregisterLocalServerRequest Deregister{
-			ServerName_
-		};
+	const FAccelByteModelsDeregisterLocalServerRequest Deregister{
+		ServerName_
+	};
 
-		FReport::Log(TEXT("Starting DSM Deregister Request..."));
-		FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
-		ServerType = EServerType::NONE;
+	FReport::Log(TEXT("Starting DSM Deregister Request..."));
+	FTickerAlias::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+	ServerType = EServerType::NONE;
 
-		HttpClient.ApiRequest(TEXT("POST"), Url, {}, Deregister, OnSuccess, OnError);
+	RegisteredServerInfo = FAccelByteModelsServerInfo();
 
-		RegisteredServerInfo = FAccelByteModelsServerInfo();
-	}
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Deregister, OnSuccess, OnError);
 }
 
-void ServerDSM::RegisterServerGameSession(const FString& SessionId
-    , const FString& GameMode
-    , const THandler<FAccelByteModelsServerCreateSessionResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerDSM::RegisterServerGameSession(FString const& SessionId
+    , FString const& GameMode
+    , THandler<FAccelByteModelsServerCreateSessionResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if(ServerType == EServerType::NONE)
 	{
 		OnError.ExecuteIfBound(400, TEXT("Server not Registered."));
-		return;
+		return nullptr;
 	}
 
 	FAccelByteModelsUser User;
@@ -312,12 +307,12 @@ void ServerDSM::RegisterServerGameSession(const FString& SessionId
 		Request.Pod_name = "";
 	}
 
-	RegisterServerGameSession(Request, OnSuccess, OnError);
+	return RegisterServerGameSession(Request, OnSuccess, OnError);
 }
 
-void ServerDSM::RegisterServerGameSession( const FAccelByteModelsServerCreateSessionRequest& RequestContent
-    , const THandler<FAccelByteModelsServerCreateSessionResponse>& OnSuccess
-    , const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerDSM::RegisterServerGameSession(FAccelByteModelsServerCreateSessionRequest const& RequestContent
+    , THandler<FAccelByteModelsServerCreateSessionResponse> const& OnSuccess
+    , FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -325,11 +320,11 @@ void ServerDSM::RegisterServerGameSession( const FAccelByteModelsServerCreateSes
 		, *ServerSettingsRef.DSMControllerServerUrl
 		, *ServerCredentialsRef->GetClientNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestContent, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestContent, OnSuccess, OnError);
 }
 
-void ServerDSM::GetServerInfo(const THandler<FAccelByteModelsServerInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerDSM::GetServerInfo(THandler<FAccelByteModelsServerInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if (!RegisteredServerInfo.Pod_name.IsEmpty())
 	{
@@ -339,16 +334,18 @@ void ServerDSM::GetServerInfo(const THandler<FAccelByteModelsServerInfo>& OnSucc
 	{
 		OnError.ExecuteIfBound(400, TEXT("No Server Registered."));
 	}
+	return nullptr;
 }
 
-void ServerDSM::GetSessionTimeout(const THandler<FAccelByteModelsServerTimeoutResponse>& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerDSM::GetSessionTimeout(THandler<FAccelByteModelsServerTimeoutResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ServerType == EServerType::NONE)
 	{
 		OnError.ExecuteIfBound((int32)ErrorCodes::StatusBadRequest, TEXT("Server not Registered."));
-		return;
+		return nullptr;
 	}
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/config/sessiontimeout")
@@ -356,18 +353,18 @@ void ServerDSM::GetSessionTimeout(const THandler<FAccelByteModelsServerTimeoutRe
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *ServerName);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
-	
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerDSM::ServerHeartbeat(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerDSM::ServerHeartbeat(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ServerType == EServerType::NONE)
 	{
 		OnError.ExecuteIfBound((int32)ErrorCodes::StatusBadRequest, TEXT("Server not Registered."));
-		return;
+		return nullptr;
 	}
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/heartbeat")
@@ -380,39 +377,38 @@ void ServerDSM::ServerHeartbeat(const FVoidHandler& OnSuccess, const FErrorHandl
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 	
 }
 
-void ServerDSM::GetSessionId(const THandler<FAccelByteModelsServerSessionResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerDSM::GetSessionId(THandler<FAccelByteModelsServerSessionResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ServerType == EServerType::NONE)
 	{
 		OnError.ExecuteIfBound(400, TEXT("Server not Registered."));
+		return nullptr;
 	}
-	else
-	{
-		const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session")
-			, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef->GetClientNamespace()
-			, *ServerName);
 
-		TDelegate<void(FAccelByteModelsServerSessionResponse const&)> OnSuccessHttpClient =
-			THandler<FAccelByteModelsServerSessionResponse>::CreateLambda(
-				[OnSuccess, this](const FAccelByteModelsServerSessionResponse& Result)
+	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session")
+		, *ServerSettingsRef.DSMControllerServerUrl
+		, *ServerCredentialsRef->GetClientNamespace()
+		, *ServerName);
+
+	TDelegate<void(FAccelByteModelsServerSessionResponse const&)> OnSuccessHttpClient =
+		THandler<FAccelByteModelsServerSessionResponse>::CreateLambda(
+			[OnSuccess, this](const FAccelByteModelsServerSessionResponse& Result)
+			{
+				if (!Result.Session_id.IsEmpty())
 				{
-					if (!Result.Session_id.IsEmpty())
-					{
-						bIsDSClaimed = true;
-					}
-					OnSuccess.ExecuteIfBound(Result);
-				});
+					bIsDSClaimed = true;
+				}
+				OnSuccess.ExecuteIfBound(Result);
+			});
 
-		HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
-	}
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 bool ServerDSM::ShutdownTick(float DeltaTime)
@@ -466,12 +462,12 @@ void ServerDSM::ConfigureAutoShutdown(uint32 TickSeconds
 	}
 }
 
-void ServerDSM::SetOnAutoShutdownResponse(FVoidHandler OnAutoShutdown_)
+void ServerDSM::SetOnAutoShutdownResponse(FVoidHandler const& OnAutoShutdown_)
 {
 	OnAutoShutdown = OnAutoShutdown_;
 }
 
-void ServerDSM::SetOnAutoShutdownErrorDelegate(const FErrorHandler& OnError)
+void ServerDSM::SetOnAutoShutdownErrorDelegate(FErrorHandler const& OnError)
 {
 	OnAutoShutdownError = OnError;
 }
@@ -484,12 +480,12 @@ void ServerDSM::ParseCommandParam()
 	FAccelByteUtilities::GetValueFromCommandLineSwitch("region", Region);
 }
 
-void ServerDSM::SetOnHeartbeatSuccessDelegate(const FVoidHandler& OnSuccess)
+void ServerDSM::SetOnHeartbeatSuccessDelegate(FVoidHandler const& OnSuccess)
 {
 	OnHeartbeatSuccess = OnSuccess;
 }
 
-void ServerDSM::SetOnHeartbeatErrorDelegate(const FErrorHandler& OnError)
+void ServerDSM::SetOnHeartbeatErrorDelegate(FErrorHandler const& OnError)
 {
 	OnHeartbeatError = OnError;
 }

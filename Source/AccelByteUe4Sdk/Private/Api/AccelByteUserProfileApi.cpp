@@ -24,8 +24,8 @@ UserProfile::UserProfile(Credentials const& InCredentialsRef
 
 UserProfile::~UserProfile(){}
 
-void UserProfile::GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::GetUserProfile(THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -33,12 +33,12 @@ void UserProfile::GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void UserProfile::GetPublicUserProfileInfo(FString UserID
-	, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::GetPublicUserProfileInfo(FString const& UserID
+	, THandler<FAccelByteModelsPublicUserProfileInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -46,7 +46,7 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/public")
@@ -58,12 +58,12 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, FString(), Headers, OnSuccess, OnError);
 }
 
-void UserProfile::BatchGetPublicUserProfileInfos(const FString& UserIds
-	, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::BatchGetPublicUserProfileInfos(FString const& UserIds
+	, THandler<TArray<FAccelByteModelsPublicUserProfileInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__)
@@ -81,12 +81,12 @@ void UserProfile::BatchGetPublicUserProfileInfos(const FString& UserIds
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 
-void UserProfile::BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
-	, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::BulkGetPublicUserProfileInfos(TArray<FString> const& UserIds
+	, THandler<TArray<FAccelByteModelsPublicUserProfileInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -102,11 +102,11 @@ void UserProfile::BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 
-void UserProfile::GetCustomAttributes(const THandler<FJsonObject>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::GetCustomAttributes(THandler<FJsonObject> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -115,12 +115,12 @@ void UserProfile::GetCustomAttributes(const THandler<FJsonObject>& OnSuccess
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void UserProfile::GetPublicCustomAttributes(const FString& UserId
-	, const THandler<FJsonObject>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::GetPublicCustomAttributes(FString const& UserId
+	, THandler<FJsonObject> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), "This will no longer able to use since will give security hole issue for other player/user, "
@@ -128,12 +128,12 @@ void UserProfile::GetPublicCustomAttributes(const FString& UserId
 
 	OnError.ExecuteIfBound(static_cast<int>(ErrorCodes::Deprecated),
 		TEXT("This will no longer able to use since will give security hole issue for other player/user, use GetPublicUserProfileInfo instead"));
-
+	return nullptr;
 }
 
-void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest
-	, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::UpdateUserProfile(FAccelByteModelsUserProfileUpdateRequest const& ProfileUpdateRequest
+	, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -141,12 +141,12 @@ void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateReque
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
 }
 
-void UserProfile::UpdateCustomAttributes(const FJsonObject& CustomAttributesUpdateRequest
-	, const THandler<FJsonObject>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::UpdateCustomAttributes(FJsonObject const& CustomAttributesUpdateRequest
+	, THandler<FJsonObject> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -160,12 +160,12 @@ void UserProfile::UpdateCustomAttributes(const FJsonObject& CustomAttributesUpda
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest
-	, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::CreateUserProfile(FAccelByteModelsUserProfileCreateRequest const& ProfileCreateRequest
+	, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -179,12 +179,12 @@ void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateReque
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void UserProfile::GetUserProfilePublicInfoByPublicId(const FString& PublicId
-	, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess
-	, const FCustomErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::GetUserProfilePublicInfoByPublicId(FString const& PublicId
+	, THandler<FAccelByteModelsPublicUserProfileInfo> const& OnSuccess
+	, FCustomErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -200,13 +200,13 @@ void UserProfile::GetUserProfilePublicInfoByPublicId(const FString& PublicId
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 
-void UserProfile::CreateUserProfile(const FString& UserId
-	, FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest
-	, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::CreateUserProfile(FString const& UserId
+	, FAccelByteModelsUserProfileCreateRequest const& ProfileCreateRequest
+	, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -214,7 +214,7 @@ void UserProfile::CreateUserProfile(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
@@ -228,13 +228,13 @@ void UserProfile::CreateUserProfile(const FString& UserId
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 	
-void UserProfile::UpdateUserProfile(const FString& UserId
-	, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest
-	, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::UpdateUserProfile(FString const& UserId
+	, FAccelByteModelsUserProfileUpdateRequest const& ProfileUpdateRequest
+	, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -242,7 +242,7 @@ void UserProfile::UpdateUserProfile(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
@@ -250,12 +250,12 @@ void UserProfile::UpdateUserProfile(const FString& UserId
 		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
 }
 
-void UserProfile::GetUserProfile(const FString& UserId
-	, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::GetUserProfile(FString const& UserId
+	, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -263,7 +263,7 @@ void UserProfile::GetUserProfile(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
@@ -271,10 +271,10 @@ void UserProfile::GetUserProfile(const FString& UserId
 		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void UserProfile::GenerateUploadURL(const FString& Folder
+FAccelByteTaskWPtr UserProfile::GenerateUploadURL(FString const& Folder
 	, EAccelByteFileType FileType
 	, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -290,10 +290,10 @@ void UserProfile::GenerateUploadURL(const FString& Folder
 		{TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void UserProfile::GenerateUploadURLForUserContent(const FString& UserId
+FAccelByteTaskWPtr UserProfile::GenerateUploadURLForUserContent(FString const& UserId
 	, EAccelByteFileType FileType
 	, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess
 	, FErrorHandler const& OnError
@@ -305,7 +305,7 @@ void UserProfile::GenerateUploadURLForUserContent(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/files")
@@ -318,11 +318,11 @@ void UserProfile::GenerateUploadURLForUserContent(const FString& UserId
 		{ TEXT("category"), FAccelByteUtilities::GetUEnumValueAsString(Category).ToLower()}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void UserProfile::GetPrivateCustomAttributes(const THandler<FJsonObjectWrapper>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::GetPrivateCustomAttributes(THandler<FJsonObjectWrapper> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -330,11 +330,12 @@ void UserProfile::GetPrivateCustomAttributes(const THandler<FJsonObjectWrapper>&
 		, *SettingsRef.BasicServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void UserProfile::UpdatePrivateCustomAttributes(const FJsonObject& PrivateCustomAttributesUpdateRequest
-	, const THandler<FJsonObjectWrapper>& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr UserProfile::UpdatePrivateCustomAttributes(FJsonObject const& PrivateCustomAttributesUpdateRequest
+	, THandler<FJsonObjectWrapper> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -347,7 +348,7 @@ void UserProfile::UpdatePrivateCustomAttributes(const FJsonObject& PrivateCustom
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
   
 } // Namespace Api

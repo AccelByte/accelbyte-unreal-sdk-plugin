@@ -54,8 +54,8 @@ void User::FinalPreLoginEvents()
 	}
 }
 
-void User::TriggerInvalidRequestError(const FString& ErrorMessage
-	, const FOAuthErrorHandler& OnError)
+void User::TriggerInvalidRequestError(FString const& ErrorMessage
+	, FOAuthErrorHandler const& OnError)
 {
 	FErrorOAuthInfo ErrorOAuth{};
 	ErrorOAuth.ErrorCode = static_cast<int32>(ErrorCodes::InvalidRequest);
@@ -65,25 +65,25 @@ void User::TriggerInvalidRequestError(const FString& ErrorMessage
 	
 #pragma region Login Methods
 	
-void User::LoginWithUsername(const FString& Username
-	, const FString& Password
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithUsername(FString const& Username
+	, FString const& Password
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
-		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		[OnError](int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo&)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		});
-	LoginWithUsername(Username, Password, OnSuccess, OnErrorHandler);
+	return LoginWithUsername(Username, Password, OnSuccess, OnErrorHandler);
 }
 
-void User::LoginWithUsername(const FString& Username
-	, const FString& Password
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithUsername(FString const& Username
+	, FString const& Password
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -95,53 +95,53 @@ void User::LoginWithUsername(const FString& Username
 	if (Username.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("E-mail address or username is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Password is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
     	
-	Oauth2::GetTokenWithPasswordCredentials(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GetTokenWithPasswordCredentials(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError, Username](const FOauth2Token& Result)
+			[this, OnSuccess, OnError, Username](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, Username);
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
-	
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithUsernameV3(const FString& Username
-	, const FString& Password
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError
-	, const bool bRememberMe)
+FAccelByteTaskWPtr User::LoginWithUsernameV3(FString const& Username
+	, FString const& Password
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, bool bRememberMe)
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
-		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		[OnError](int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo&)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		});
-	LoginWithUsernameV3(Username, Password, OnSuccess, OnErrorHandler, bRememberMe);
+	return LoginWithUsernameV3(Username, Password, OnSuccess, OnErrorHandler, bRememberMe);
 }
 
-void User::LoginWithUsernameV3(const FString& Username
-	, const FString& Password
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError
-	, const bool bRememberMe)
+FAccelByteTaskWPtr User::LoginWithUsernameV3(FString const& Username
+	, FString const& Password
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, bool bRememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -153,47 +153,51 @@ void User::LoginWithUsernameV3(const FString& Username
 	if (Username.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("E-mail address or username is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Password is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
-	Oauth2::GetTokenWithPasswordCredentialsV3(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GetTokenWithPasswordCredentialsV3(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError, Username](const FOauth2Token& Result)
+			[this, OnSuccess, OnError, Username](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, Username);
 			})
 		, OnError
 		, bRememberMe
 		, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithUsernameV4(const FString& Username, const FString& Password, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, const bool bRememberMe)
+FAccelByteTaskWPtr User::LoginWithUsernameV4(FString const& Username
+	, FString const& Password
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, bool bRememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (Username.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("E-mail address or username is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Password is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (!FAccelByteUtilities::IsValidEmail(Username))
@@ -203,12 +207,14 @@ void User::LoginWithUsernameV4(const FString& Username, const FString& Password,
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithPasswordCredentialsV4(UserCredentialsRef->GetOAuthClientId()
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	return Oauth2::GetTokenWithPasswordCredentialsV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError, Username](const FOauth2TokenV4& Result)
+			[this, OnSuccess, OnError, Username](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -223,56 +229,58 @@ void User::LoginWithUsernameV4(const FString& Username, const FString& Password,
 				}
 			})
 		, OnError
-				, bRememberMe
-				, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+		, bRememberMe
+		, SettingsRef.IamServerUrl);
 }
 
-void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr User::LoginWithDeviceId(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
 	, bool bCreateHeadless)
 {
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
-		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		[OnError](int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo&)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		});
-	LoginWithDeviceId(OnSuccess, OnErrorHandler, bCreateHeadless);
+	return LoginWithDeviceId(OnSuccess, OnErrorHandler, bCreateHeadless);
 } 
 
-void User::LoginWithDeviceId(const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError
+FAccelByteTaskWPtr User::LoginWithDeviceId(FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError
 	, bool bCreateHeadless)
 { 
 	FReport::Log(FString(__FUNCTION__));
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
-	Oauth2::GetTokenWithDeviceId(CredentialsRef->GetOAuthClientId()
+	return Oauth2::GetTokenWithDeviceId(CredentialsRef->GetOAuthClientId()
 		, CredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
+			[this, OnSuccess](FOauth2Token const& Result)
 			{
 				OnLoginSuccess(OnSuccess, Result, Result.Platform_user_id); // Curry to general handler	
 			})
 		, OnError
 		, SettingsRef.IamServerUrl
 		, bCreateHeadless);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithDeviceIdV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, bool bCreateHeadless)
+FAccelByteTaskWPtr User::LoginWithDeviceIdV4(THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, bool bCreateHeadless)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithDeviceIdV4(CredentialsRef->GetOAuthClientId()
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	return Oauth2::GetTokenWithDeviceIdV4(CredentialsRef->GetOAuthClientId()
 		, CredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess](const FOauth2TokenV4& Result)
+			[this, OnSuccess](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -287,46 +295,44 @@ void User::LoginWithDeviceIdV4(const THandler<FAccelByteModelsLoginQueueTicketIn
 				}
 			})
 		, OnError
-				, SettingsRef.IamServerUrl
-				, bCreateHeadless);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+		, SettingsRef.IamServerUrl
+		, bCreateHeadless);
 }
 	
-void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& PlatformToken
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
+	, FString const& PlatformToken
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
-		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		[OnError](int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo&)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		});
-	LoginWithOtherPlatform(PlatformType, PlatformToken, OnSuccess, OnErrorHandler, true);
+	return LoginWithOtherPlatform(PlatformType, PlatformToken, OnSuccess, OnErrorHandler, true);
 }
 
-void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& PlatformToken
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError
+FAccelByteTaskWPtr User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
+	, FString const& PlatformToken
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError
 	, bool bCreateHeadless)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	LoginWithOtherPlatformId(FAccelByteUtilities::GetPlatformString(PlatformType)
+	return LoginWithOtherPlatformId(FAccelByteUtilities::GetPlatformString(PlatformType)
 		, PlatformToken
 		, OnSuccess
 		, OnError
 		, bCreateHeadless);
 }
 
-void User::LoginWithOtherPlatformId(const FString& PlatformId
-	, const FString& PlatformToken
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError
+FAccelByteTaskWPtr User::LoginWithOtherPlatformId(FString const& PlatformId
+	, FString const& PlatformToken
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError
 	, bool bCreateHeadless)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -334,67 +340,77 @@ void User::LoginWithOtherPlatformId(const FString& PlatformId
 	if (PlatformId.IsEmpty() || PlatformId == "unknown")
 	{
 		TriggerInvalidRequestError(TEXT("Please provide a valid PlatformType or PlatformId"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (PlatformToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Platform Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
-	Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, PlatformId
 		, PlatformToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
 			})
 		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			[this, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
 				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, bCreateHeadless
 		, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, bool bCreateHeadless)
+FAccelByteTaskWPtr User::LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType
+	, FString const& PlatformToken
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, bool bCreateHeadless)
 {
-	LoginWithOtherPlatformIdV4(FAccelByteUtilities::GetPlatformString(PlatformType), PlatformToken, OnSuccess, OnError, bCreateHeadless);
+	return LoginWithOtherPlatformIdV4(FAccelByteUtilities::GetPlatformString(PlatformType), PlatformToken, OnSuccess, OnError, bCreateHeadless);
 }
 
-void User::LoginWithOtherPlatformIdV4(const FString& PlatformId, const FString& PlatformToken, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, bool bCreateHeadless)
+FAccelByteTaskWPtr User::LoginWithOtherPlatformIdV4(FString const& PlatformId
+	, FString const& PlatformToken
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, bool bCreateHeadless)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (PlatformId.IsEmpty() || PlatformId == "unknown")
 	{
 		TriggerInvalidRequestError(TEXT("Please provide a valid PlatformType or PlatformId"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (PlatformToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Platform Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithOtherPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	return Oauth2::GetTokenWithOtherPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, PlatformId
 		, PlatformToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
+			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -409,27 +425,25 @@ void User::LoginWithOtherPlatformIdV4(const FString& PlatformId, const FString& 
 				}
 			})
 		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			[this, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
 				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
-				, bCreateHeadless
-				, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+		, bCreateHeadless
+		, SettingsRef.IamServerUrl);
 }
 
-void User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
-	, const FString& NativePlatformToken
+FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
+	, FString const& NativePlatformToken
 	, EAccelBytePlatformType SecondaryPlatform
-	, const FString& SecondaryPlatformToken
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+	, FString const& SecondaryPlatformToken
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	LoginWithSimultaneousPlatform(FAccelByteUtilities::GetPlatformString(NativePlatform)
+	return LoginWithSimultaneousPlatform(FAccelByteUtilities::GetPlatformString(NativePlatform)
 		, NativePlatformToken
 		, FAccelByteUtilities::GetPlatformString(SecondaryPlatform)
 		, SecondaryPlatformToken
@@ -437,68 +451,73 @@ void User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
 		, OnError);
 }
 
-void User::LoginWithSimultaneousPlatform(const FString& NativePlatform
-	, const FString& NativePlatformToken
-	, const FString& SecondaryPlatform
-	, const FString& SecondaryPlatformToken
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(FString const& NativePlatform
+	, FString const& NativePlatformToken
+	, FString const& SecondaryPlatform
+	, FString const& SecondaryPlatformToken
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (NativePlatform.IsEmpty() || NativePlatform == "unknown")
 	{
 		TriggerInvalidRequestError(TEXT("Please provide a valid Native PlatformType or PlatformId"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (NativePlatformToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Native Platform Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (SecondaryPlatform.IsEmpty() || SecondaryPlatform == "unknown")
 	{
 		TriggerInvalidRequestError(TEXT("Please provide a valid Secondary PlatformType or PlatformId"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (SecondaryPlatformToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Secondary Platform Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
-	Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
 		, SecondaryPlatform
 		, SecondaryPlatformToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
 			})
 		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			[this, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
 				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithSimultaneousPlatformV4(EAccelBytePlatformType NativePlatform, const FString& NativePlatformToken, const EAccelBytePlatformType& SecondaryPlatform, const FString& SecondaryPlatformToken, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(EAccelBytePlatformType NativePlatform
+	, FString const& NativePlatformToken
+	, EAccelBytePlatformType SecondaryPlatform
+	, FString const& SecondaryPlatformToken
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	LoginWithSimultaneousPlatformV4(FAccelByteUtilities::GetPlatformString(NativePlatform)
+	return LoginWithSimultaneousPlatformV4(FAccelByteUtilities::GetPlatformString(NativePlatform)
 		, NativePlatformToken
 		, FAccelByteUtilities::GetPlatformString(SecondaryPlatform)
 		, SecondaryPlatformToken
@@ -506,44 +525,51 @@ void User::LoginWithSimultaneousPlatformV4(EAccelBytePlatformType NativePlatform
 		, OnError);
 }
 
-void User::LoginWithSimultaneousPlatformV4(const FString& NativePlatform, const FString& NativePlatformToken, const FString& SecondaryPlatform, const FString& SecondaryPlatformToken, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePlatform
+	, FString const& NativePlatformToken
+	, FString const& SecondaryPlatform
+	, FString const& SecondaryPlatformToken
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (NativePlatform.IsEmpty() || NativePlatform == "unknown")
 	{
 		TriggerInvalidRequestError(TEXT("Please provide a valid Native PlatformType or PlatformId"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (NativePlatformToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Native Platform Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (SecondaryPlatform.IsEmpty() || SecondaryPlatform == "unknown")
 	{
 		TriggerInvalidRequestError(TEXT("Please provide a valid Secondary PlatformType or PlatformId"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (SecondaryPlatformToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Secondary Platform Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithSimultaneousPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	return Oauth2::GetTokenWithSimultaneousPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
 		, SecondaryPlatform
 		, SecondaryPlatformToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
+			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -558,53 +584,58 @@ void User::LoginWithSimultaneousPlatformV4(const FString& NativePlatform, const 
 				}
 			})
 		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			[this, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
 				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
-				, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+		, SettingsRef.IamServerUrl);
 }
 
-void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken
+FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabled(FString const& MfaToken
 	, EAccelByteLoginAuthFactorType AuthFactorType
-	, const FString& Code
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError
+	, FString const& Code
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError
 	, bool bRememberDevice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyAndRememberNewDevice(UserCredentialsRef->GetOAuthClientId()
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	return Oauth2::VerifyAndRememberNewDevice(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
 		, Code
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})
 		, OnError
 		, bRememberDevice
 		, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::VerifyLoginWithNewDevice2FAEnabledV4(const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, bool bRememberDevice)
+FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabledV4(FString const& MfaToken
+	, EAccelByteLoginAuthFactorType AuthFactorType
+	, FString const& Code
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, bool bRememberDevice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyAndRememberNewDeviceV4(UserCredentialsRef->GetOAuthClientId()
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	return Oauth2::VerifyAndRememberNewDeviceV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
 		, Code
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
+			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -619,27 +650,25 @@ void User::VerifyLoginWithNewDevice2FAEnabledV4(const FString& MfaToken, EAccelB
 				}
 			})
 		, OnError
-				, bRememberDevice
-				, SettingsRef.IamServerUrl);
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+		, bRememberDevice
+		, SettingsRef.IamServerUrl);
 }
 
-void User::LoginWithLauncher(const FVoidHandler& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr User::LoginWithLauncher(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
-		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		[OnError](int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo&)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		});
-	LoginWithLauncher(OnSuccess, OnErrorHandler);
+	return LoginWithLauncher(OnSuccess, OnErrorHandler);
 }
 	
-void User::LoginWithLauncher(const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler & OnError)
+FAccelByteTaskWPtr User::LoginWithLauncher(FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -648,34 +677,35 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess
 	if (AuthorizationCode.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Authorization code is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
 	if (FAccelByteUtilities::IsUsingExchangeCode())
 	{
-		GenerateGameToken(AuthorizationCode, OnSuccess, OnError);
+		return GenerateGameToken(AuthorizationCode, OnSuccess, OnError);
 	}
 	else
 	{
-		Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef->GetOAuthClientId()
-		, UserCredentialsRef->GetOAuthClientSecret()
-		, AuthorizationCode
-		, SettingsRef.RedirectURI
-		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
-			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
-			})
-		, OnError
-		, SettingsRef.IamServerUrl);
+		return Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef->GetOAuthClientId()
+			, UserCredentialsRef->GetOAuthClientSecret()
+			, AuthorizationCode
+			, SettingsRef.RedirectURI
+			, THandler<FOauth2Token>::CreateLambda(
+				[this, OnSuccess, OnError](FOauth2Token const& Result)
+				{
+					ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				})
+			, OnError
+			, SettingsRef.IamServerUrl);
 	}
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithLauncherV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithLauncherV4(THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -684,83 +714,83 @@ void User::LoginWithLauncherV4(const THandler<FAccelByteModelsLoginQueueTicketIn
 	if (AuthorizationCode.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Authorization code is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
+	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
 	if (FAccelByteUtilities::IsUsingExchangeCode())
 	{
-		GenerateGameTokenV4(AuthorizationCode, OnSuccess, OnError);
+		return GenerateGameTokenV4(AuthorizationCode, OnSuccess, OnError);
 	}
 	else
 	{
-		Oauth2::GetTokenWithAuthorizationCodeV4(UserCredentialsRef->GetOAuthClientId()
-		, UserCredentialsRef->GetOAuthClientSecret()
-		, AuthorizationCode
-		, SettingsRef.RedirectURI
-		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
-			{
-				if (Result.Ticket.IsEmpty())
+		return Oauth2::GetTokenWithAuthorizationCodeV4(UserCredentialsRef->GetOAuthClientId()
+			, UserCredentialsRef->GetOAuthClientSecret()
+			, AuthorizationCode
+			, SettingsRef.RedirectURI
+			, THandler<FOauth2TokenV4>::CreateLambda(
+				[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
-						{
-							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
-						}), OnError, TEXT(""));
-				}
-				else
-				{
-					OnSuccess.ExecuteIfBound(Result);
-				}
-			})
-		, OnError
-				, SettingsRef.IamServerUrl);
+					if (Result.Ticket.IsEmpty())
+					{
+						ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
+							{
+								OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
+							}), OnError, TEXT(""));
+					}
+					else
+					{
+						OnSuccess.ExecuteIfBound(Result);
+					}
+				})
+			, OnError
+			, SettingsRef.IamServerUrl);
 	}
-
-	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 }
 
-void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithRefreshToken(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
-	LoginWithRefreshToken(UserCredentialsRef->GetRefreshToken(), OnSuccess, OnError);
+	return LoginWithRefreshToken(UserCredentialsRef->GetRefreshToken(), OnSuccess, OnError);
 }
 
-void User::LoginWithRefreshToken(const FString& RefreshToken
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::LoginWithRefreshToken(FString const& RefreshToken
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
 
 	auto OnErrorHandler = FOAuthErrorHandler::CreateLambda(
-		[OnError](int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo&)
+		[OnError](int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo&)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		});
-	LoginWithRefreshToken(RefreshToken, OnSuccess, OnErrorHandler);
+	return LoginWithRefreshToken(RefreshToken, OnSuccess, OnErrorHandler);
 }
 
-void User::LoginWithRefreshToken(const FString& RefreshToken
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError
-	, const FString& PlatformUserId)
+FAccelByteTaskWPtr User::LoginWithRefreshToken(FString const& RefreshToken
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, FString const& PlatformUserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (RefreshToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Refresh Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithRefreshToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GetTokenWithRefreshToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, RefreshToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, PlatformUserId, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, PlatformUserId, OnSuccess, OnError](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, PlatformUserId);
 			})
@@ -768,7 +798,10 @@ void User::LoginWithRefreshToken(const FString& RefreshToken
 		, SettingsRef.IamServerUrl);
 }
 
-void User::LoginWithRefreshTokenV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, const FString& RefreshToken, const FString& PlatformUserId)
+FAccelByteTaskWPtr User::LoginWithRefreshTokenV4(THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, FString const& RefreshToken
+	, FString const& PlatformUserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -777,16 +810,16 @@ void User::LoginWithRefreshTokenV4(const THandler<FAccelByteModelsLoginQueueTick
 	if (InRefreshToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Refresh Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
-	Oauth2::GetTokenWithRefreshTokenV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GetTokenWithRefreshTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, InRefreshToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, PlatformUserId, OnSuccess, OnError](const FOauth2TokenV4& Result)
+			[this, PlatformUserId, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -801,42 +834,42 @@ void User::LoginWithRefreshTokenV4(const THandler<FAccelByteModelsLoginQueueTick
 				}
 			})
 		, OnError
-				, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl);
 }
 
-void User::RefreshPlatformToken(EAccelBytePlatformType NativePlatform
-	, const FString& NativePlatformToken
-	, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::RefreshPlatformToken(EAccelBytePlatformType NativePlatform
+	, FString const& NativePlatformToken
+	, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	RefreshPlatformToken(FAccelByteUtilities::GetPlatformString(NativePlatform)
+	return RefreshPlatformToken(FAccelByteUtilities::GetPlatformString(NativePlatform)
 		, NativePlatformToken
 		, OnSuccess
 		, OnError);
 }
 
-void User::RefreshPlatformToken(const FString& NativePlatform
-	, const FString& NativePlatformToken
-	, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::RefreshPlatformToken(FString const& NativePlatform
+	, FString const& NativePlatformToken
+	, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (NativePlatform.IsEmpty() || NativePlatform == "unknown")
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Please provide a valid Native PlatformType or PlatformId."), FErrorOAuthInfo{});
-		return;
+		return nullptr;
 	}
 
 	if (NativePlatformToken.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Native Platform Token is empty!"), FErrorOAuthInfo{});
-		return;
+		return nullptr;
 	}
 
-	Oauth2::RefreshPlatformToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::RefreshPlatformToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
@@ -850,20 +883,20 @@ bool IsTokenExpired(FRefreshInfo RefreshInfo)
 	return RefreshInfo.Expiration <= FDateTime::UtcNow();
 }
 
-void User::TryRelogin(const FString& PlatformUserID
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::TryRelogin(FString const& PlatformUserID
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
-	TryRelogin(PlatformUserID, OnSuccess, FOAuthErrorHandler::CreateLambda([OnError]
-		(int32 ErrorCode, const FString& ErrorMessage, const FErrorOAuthInfo& ErrorObject )
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	})); 
+	return TryRelogin(PlatformUserID, OnSuccess, FOAuthErrorHandler::CreateLambda(
+		[OnError](int32 ErrorCode, FString const& ErrorMessage, FErrorOAuthInfo const& ErrorObject )
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		})); 
 }
 
-void User::TryRelogin(const FString& PlatformUserID
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::TryRelogin(FString const& PlatformUserID
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 #if PLATFORM_WINDOWS || PLATFORM_LINUX || PLATFORM_MAC
 	FReport::Log(FString(__FUNCTION__));
@@ -898,9 +931,12 @@ void User::TryRelogin(const FString& PlatformUserID
 #else
 	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("Cannot relogin using cached token on other platforms."), FErrorOAuthInfo{});
 #endif
+	return nullptr;
 }
 
-void User::TryReloginV4(const FString& PlatformUserID, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::TryReloginV4(FString const& PlatformUserID
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 #if PLATFORM_WINDOWS || PLATFORM_LINUX || PLATFORM_MAC
 	FReport::Log(FString(__FUNCTION__));
@@ -935,31 +971,32 @@ void User::TryReloginV4(const FString& PlatformUserID, const THandler<FAccelByte
 #else
 	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenNotFound), TEXT("Cannot relogin using cached token on other platforms."), FErrorOAuthInfo{});
 #endif
+	return nullptr;
 }
 
-void User::CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::CreateHeadlessAccountAndLogin(FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
-	CreateHeadlessAccountAndLogin(UserCredentialsRef->GetLinkingToken(), OnSuccess, OnError);
+	return CreateHeadlessAccountAndLogin(UserCredentialsRef->GetLinkingToken(), OnSuccess, OnError);
 }
 
-void User::CreateHeadlessAccountAndLogin(const FString& LinkingToken
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::CreateHeadlessAccountAndLogin(FString const& LinkingToken
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
 
 	if (LinkingToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Linking Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
-	Oauth2::CreateHeadlessAccountAndResponseToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::CreateHeadlessAccountAndResponseToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, LinkingToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})	
@@ -967,7 +1004,9 @@ void User::CreateHeadlessAccountAndLogin(const FString& LinkingToken
 		, SettingsRef.IamServerUrl); 
 }
 
-void User::CreateHeadlessAccountAndLoginV4(const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, const FString& LinkingToken)
+FAccelByteTaskWPtr User::CreateHeadlessAccountAndLoginV4(THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, FString const& LinkingToken)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -976,14 +1015,14 @@ void User::CreateHeadlessAccountAndLoginV4(const THandler<FAccelByteModelsLoginQ
 	if (InLinkingToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Linking Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
-	Oauth2::CreateHeadlessAccountAndResponseTokenV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::CreateHeadlessAccountAndResponseTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, InLinkingToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
+			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -998,22 +1037,22 @@ void User::CreateHeadlessAccountAndLoginV4(const THandler<FAccelByteModelsLoginQ
 				}
 			})
 		, OnError
-				, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl);
 }
 	
-void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
-	, const FString& Password
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::AuthenticationWithPlatformLinkAndLogin(FString const& Username
+	, FString const& Password
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
-	AuthenticationWithPlatformLinkAndLogin(Username, Password, UserCredentialsRef->GetLinkingToken(), OnSuccess, OnError);
+	return AuthenticationWithPlatformLinkAndLogin(Username, Password, UserCredentialsRef->GetLinkingToken(), OnSuccess, OnError);
 }
 	
-void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
-	, const FString& Password
-	, const FString& LinkingToken
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::AuthenticationWithPlatformLinkAndLogin(FString const& Username
+	, FString const& Password
+	, FString const& LinkingToken
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1025,28 +1064,28 @@ void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
 	if (Username.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("E-mail address or username is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Password is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (LinkingToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Linking Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
-	Oauth2::AuthenticationWithPlatformLink(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::AuthenticationWithPlatformLink(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, LinkingToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})		
@@ -1054,7 +1093,11 @@ void User::AuthenticationWithPlatformLinkAndLogin(const FString& Username
 		, SettingsRef.IamServerUrl);
 }
 
-void User::AuthenticationWithPlatformLinkAndLoginV4(const FString& Username, const FString& Password, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError, const FString& LinkingToken)
+FAccelByteTaskWPtr User::AuthenticationWithPlatformLinkAndLoginV4(FString const& Username
+	, FString const& Password
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, FString const& LinkingToken)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1063,19 +1106,19 @@ void User::AuthenticationWithPlatformLinkAndLoginV4(const FString& Username, con
 	if (Username.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("E-mail address or username is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Password is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (InLinkingToken.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Linking Token is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
 	if (!FAccelByteUtilities::IsValidEmail(Username))
@@ -1083,13 +1126,13 @@ void User::AuthenticationWithPlatformLinkAndLoginV4(const FString& Username, con
 		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
 	}
 
-	Oauth2::AuthenticationWithPlatformLinkV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::AuthenticationWithPlatformLinkV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, InLinkingToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
+			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -1104,24 +1147,26 @@ void User::AuthenticationWithPlatformLinkAndLoginV4(const FString& Username, con
 				}
 			})
 		, OnError
-				, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl);
 }
 
-void User::ClaimAccessToken(const FString LoginTicket, const FVoidHandler& OnSuccess, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::ClaimAccessToken(FString const& LoginTicket
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (LoginTicket.IsEmpty())
 	{
 		TriggerInvalidRequestError(TEXT("Login Ticket is empty!"), OnError);
-		return;
+		return nullptr;
 	}
 
-	Oauth2::GetTokenWithLoginTicket(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GetTokenWithLoginTicket(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, LoginTicket
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
 			})		
@@ -1131,10 +1176,10 @@ void User::ClaimAccessToken(const FString LoginTicket, const FVoidHandler& OnSuc
 
 #pragma endregion /Login Methods
 
-void User::ProcessLoginResponse(const FOauth2Token& Response
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError
-	, const FString& CachedTokenKey)
+void User::ProcessLoginResponse(FOauth2Token const& Response
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError
+	, FString const& CachedTokenKey)
 {
 	if (Response.Access_token.IsEmpty() || Response.Expires_in <= 0.0f)
 	{
@@ -1147,9 +1192,9 @@ void User::ProcessLoginResponse(const FOauth2Token& Response
 	}
 }
 	
-void User::OnLoginSuccess(const FVoidHandler& OnSuccess
-	, const FOauth2Token& Response
-	, const FString& CachedTokenKey)
+void User::OnLoginSuccess(FVoidHandler const& OnSuccess
+	, FOauth2Token const& Response
+	, FString const& CachedTokenKey)
 {
 	// Set auth token before anything: Set before anything to prevent race condition issues.
 	UserCredentialsRef->SetAuthToken(Response, FPlatformTime::Seconds());
@@ -1172,7 +1217,7 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 				CallbackFunction.Execute();
 			})
 		, FErrorHandler::CreateLambda(
-			[CallbackFunction](int ErrorCode, const FString& ErrorMessage)
+			[CallbackFunction](int ErrorCode, FString const& ErrorMessage)
 			{
 				FReport::Log(FString::Printf(TEXT("[AccelByte] Error GetData after Login Success, Error Code: %d Message: %s"), ErrorCode, *ErrorMessage));
 				CallbackFunction.Execute();
@@ -1186,7 +1231,9 @@ void User::OnLoginSuccess(const FVoidHandler& OnSuccess
 	SaveCachedTokenToLocalDataStorage(CachedTokenKey, Response.Refresh_token, ExpireDate);
 }
 
-void User::SaveCachedTokenToLocalDataStorage(const FString& CachedTokenKey, const FString& RefreshToken, FDateTime ExpireDate)
+void User::SaveCachedTokenToLocalDataStorage(FString const& CachedTokenKey
+	, FString const& RefreshToken
+	, FDateTime const& ExpireDate)
 {
 #if PLATFORM_WINDOWS || PLATFORM_LINUX || PLATFORM_MAC 
 
@@ -1222,19 +1269,21 @@ void User::SaveCachedTokenToLocalDataStorage(const FString& CachedTokenKey, cons
 #endif 
 }
 
-void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::Logout(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::RevokeToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::RevokeToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, UserCredentialsRef->GetAccessToken()
 		, FVoidHandler::CreateLambda(
 			[OnSuccess, OnError, Copy = UserCredentialsRef]()
 			{
-				Copy->OnLogoutSuccess().Broadcast();	
+				Copy->OnLogoutSuccess().Broadcast();
 				Copy->ForgetAll();
 				OnSuccess.ExecuteIfBound();
+
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -1247,14 +1296,14 @@ void User::ForgetAllCredentials()
 	UserCredentialsRef->ForgetAll();
 }
 
-void User::Register(const FString& Username
-	, const FString& Password
-	, const FString& DisplayName
-	, const FString& Country
-	, const FString& DateOfBirth
-	, const THandler<FRegisterResponse>& OnSuccess
-	, const FErrorHandler& OnError
-	, const FString& UniqueDisplayName)
+FAccelByteTaskWPtr User::Register(FString const& Username
+	, FString const& Password
+	, FString const& DisplayName
+	, FString const& Country
+	, FString const& DateOfBirth
+	, THandler<FRegisterResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& UniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1266,13 +1315,13 @@ void User::Register(const FString& Username
 	if (Username.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address or username is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users")
@@ -1298,18 +1347,18 @@ void User::Register(const FString& Username
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 	
-	HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
 }
 
-void User::Registerv2(const FString& EmailAddress
-	, const FString& Username
-	, const FString& Password
-	, const FString& DisplayName
-	, const FString& Country
-	, const FString& DateOfBirth
-	, const THandler<FRegisterResponse>& OnSuccess
-	, const FErrorHandler& OnError
-	, const FString& UniqueDisplayName)
+FAccelByteTaskWPtr User::Registerv2(FString const& EmailAddress
+	, FString const& Username
+	, FString const& Password
+	, FString const& DisplayName
+	, FString const& Country
+	, FString const& DateOfBirth
+	, THandler<FRegisterResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& UniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1321,19 +1370,19 @@ void User::Registerv2(const FString& EmailAddress
 	if (EmailAddress.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Username.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Username is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"));
-		return;
+		return nullptr;
 	}
 
 	FRegisterRequestv3 NewUserRequest;
@@ -1346,12 +1395,12 @@ void User::Registerv2(const FString& EmailAddress
 	NewUserRequest.DateOfBirth = DateOfBirth;
 	NewUserRequest.UniqueDisplayName = UniqueDisplayName;
 
-	Registerv3(NewUserRequest, OnSuccess, OnError);
+	return Registerv3(NewUserRequest, OnSuccess, OnError);
 }
 
-void User::Registerv3(const FRegisterRequestv3& RegisterRequest
-	, const THandler<FRegisterResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::Registerv3(FRegisterRequestv3 const& RegisterRequest
+	, THandler<FRegisterResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1363,19 +1412,19 @@ void User::Registerv3(const FRegisterRequestv3& RegisterRequest
 	if (RegisterRequest.EmailAddress.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (RegisterRequest.Username.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Username is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (RegisterRequest.Password.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users")
@@ -1390,11 +1439,11 @@ void User::Registerv3(const FRegisterRequestv3& RegisterRequest
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
 }
 
-void User::GetData(const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr User::GetData(THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError
 	, bool bIncludeAllPlatforms)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1414,58 +1463,58 @@ void User::GetData(const THandler<FAccountUserData>& OnSuccess
 				OnSuccess.ExecuteIfBound(AccountUserData);
 			});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
 }
 
-void User::UpdateUser(FUserUpdateRequest UpdateRequest
-	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::UpdateUser(FUserUpdateRequest const& UpdateRequest
+	, THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (!UpdateRequest.EmailAddress.IsEmpty())
 	{
 		OnError.ExecuteIfBound(400, TEXT("Cannot update user email using this function. Use UpdateEmail address instead."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UpdateRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UpdateRequest, OnSuccess, OnError);
 }
 
-void User::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest
-	, const FVoidHandler & OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr User::UpdateEmail(FUpdateEmailRequest const& UpdateEmailRequest
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (UpdateEmailRequest.EmailAddress.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (UpdateEmailRequest.Code.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Update Code is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/email")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateEmailRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateEmailRequest, OnSuccess, OnError);
 }
 
-void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
-	, const TArray<FString>& OtherPlatformUserId
-	, const THandler<FBulkPlatformUserIdResponse>& OnSuccess
-	, const FErrorHandler & OnError
-	, const bool bRawPuid)
+FAccelByteTaskWPtr User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
+	, TArray<FString> const& OtherPlatformUserId
+	, THandler<FBulkPlatformUserIdResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, bool bRawPuid)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1483,18 +1532,18 @@ void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 
 	const FBulkPlatformUserIdRequest UserIdRequests{ OtherPlatformUserId };
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, UserIdRequests, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, UserIdRequests, OnSuccess, OnError);
 }
 
-void User::SendVerificationCode(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::SendVerificationCode(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (CredentialsRef->GetUserEmailAddress().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
-		return;
+		return nullptr;
 	}
 
 	FVerificationCodeRequest SendVerificationCodeRequest
@@ -1504,18 +1553,18 @@ void User::SendVerificationCode(const FVoidHandler& OnSuccess
 		CredentialsRef->GetUserEmailAddress()
 	};
 
-	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
+	return SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
 }
 
-void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::SendUpdateEmailVerificationCode(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (CredentialsRef->GetUserEmailAddress().IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
-		return;
+		return nullptr;
 	}
 
 	FVerificationCodeRequest SendVerificationCodeRequest
@@ -1525,12 +1574,12 @@ void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess
 		CredentialsRef->GetUserEmailAddress()
 	};
 
-	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
+	return SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
 }
 
-void User::SendUpgradeVerificationCode(const FString& EmailAddress
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::SendUpgradeVerificationCode(FString const& EmailAddress
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1541,15 +1590,15 @@ void User::SendUpgradeVerificationCode(const FString& EmailAddress
 		EmailAddress
 	};
 
-	SendVerificationCode(SendUpgradeVerificationCodeRequest, OnSuccess, OnError);
+	return SendVerificationCode(SendUpgradeVerificationCodeRequest, OnSuccess, OnError);
 }
 
-void User::UpgradeAndVerify(const FString& Username
-	, const FString& Password
-	, const FString& VerificationCode
-	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError
-	, const FString& UniqueDisplayName)
+FAccelByteTaskWPtr User::UpgradeAndVerify(FString const& Username
+	, FString const& Password
+	, FString const& VerificationCode
+	, THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& UniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1561,19 +1610,19 @@ void User::UpgradeAndVerify(const FString& Username
 	if (Username.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address or Username is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (VerificationCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Verification Code is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify")
@@ -1593,44 +1642,44 @@ void User::UpgradeAndVerify(const FString& Username
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void User::UpgradeAndVerify2(const FUpgradeAndVerifyRequest& UpgradeAndVerifyRequest
-	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::UpgradeAndVerify2(FUpgradeAndVerifyRequest const& UpgradeAndVerifyRequest
+	, THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (UpgradeAndVerifyRequest.EmailAddress.IsEmpty() || UpgradeAndVerifyRequest.Username.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address or Username is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (UpgradeAndVerifyRequest.Password.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (UpgradeAndVerifyRequest.Code.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Verification Code is empty!"));
-		return;
+		return nullptr;
 	}
 	
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/code/verify")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef->GetNamespace());
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UpgradeAndVerifyRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, UpgradeAndVerifyRequest, OnSuccess, OnError);
 }
 
-void User::Upgrade(const FString& Username
-	, const FString& Password
-	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr User::Upgrade(FString const& Username
+	, FString const& Password
+	, THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError
 	, bool bNeedVerificationCode)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1643,13 +1692,13 @@ void User::Upgrade(const FString& Username
 	if (Username.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address or Username is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/verify")
@@ -1664,14 +1713,14 @@ void User::Upgrade(const FString& Username
 		{"needVerificationCode", bNeedVerificationCode ? TEXT("true") : TEXT("false")}
 	});
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 
-void User::Upgradev2(const FString& EmailAddress
-	, const FString& Username
-	, const FString& Password
-	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::Upgradev2(FString const& EmailAddress
+	, FString const& Username
+	, FString const& Password
+	, THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1683,13 +1732,13 @@ void User::Upgradev2(const FString& EmailAddress
 	if (EmailAddress.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address or Username is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Password.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/verify")
@@ -1701,19 +1750,19 @@ void User::Upgradev2(const FString& EmailAddress
 		, *Password
 		, *Username);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void User::Verify(const FString& VerificationCode
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::Verify(FString const& VerificationCode
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (VerificationCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Verification Code is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/verify")
@@ -1724,19 +1773,19 @@ void User::Verify(const FString& VerificationCode
 		, *VerificationCode
 		, TEXT("email"));
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void User::SendResetPasswordCode(const FString& EmailAddress
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::SendResetPasswordCode(FString const& EmailAddress
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (EmailAddress.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/forgot")
@@ -1750,33 +1799,33 @@ void User::SendResetPasswordCode(const FString& EmailAddress
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
 }
 
-void User::ResetPassword(const FString& VerificationCode
-	, const FString& EmailAddress
-	, const FString& NewPassword
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::ResetPassword(FString const& VerificationCode
+	, FString const& EmailAddress
+	, FString const& NewPassword
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (EmailAddress.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("E-mail address is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (NewPassword.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Password is empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (VerificationCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Verification Code is empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/reset")
@@ -1795,11 +1844,11 @@ void User::ResetPassword(const FString& VerificationCode
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
 }
 
-void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetPlatformLinks(THandler<FPagedPlatformLinks> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1808,19 +1857,19 @@ void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& Ticket
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, FString const& Ticket
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
-	LinkOtherPlatform(PlatformType
+	return LinkOtherPlatform(PlatformType
 		, Ticket
 		, OnSuccess
 		, FCustomErrorHandler::CreateLambda(
-			[OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& Result)
+			[OnError](int32 ErrorCode, FString const& ErrorMessage, const FJsonObject& Result)
 			{
 				FString JsonString;
 				TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonString);
@@ -1832,10 +1881,10 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 			}));
 }
 	
-void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& Ticket
-	, const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError)
+FAccelByteTaskWPtr User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, FString const& Ticket
+	, FVoidHandler const& OnSuccess
+	, FCustomErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1853,13 +1902,13 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
-void User::LinkOtherPlatformId(const FString& PlatformId
-	, const FString& Ticket
-	, const FVoidHandler& OnSuccess
-	, const FCustomErrorHandler& OnError)
+FAccelByteTaskWPtr User::LinkOtherPlatformId(FString const& PlatformId
+	, FString const& Ticket
+	, FVoidHandler const& OnSuccess
+	, FCustomErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -1875,19 +1924,19 @@ void User::LinkOtherPlatformId(const FString& PlatformId
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
-void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& PlatformUserId
-	, const FVoidHandler& OnSuccess
-	, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, FString const& PlatformUserId
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
-	ForcedLinkOtherPlatform(PlatformType
+	return ForcedLinkOtherPlatform(PlatformType
 		, PlatformUserId
 		, OnSuccess
 		, FCustomErrorHandler::CreateLambda(
-			[OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& Result)
+			[OnError](int32 ErrorCode, FString const& ErrorMessage, const FJsonObject& Result)
 			{
 				FString JsonString;
 				TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonString);
@@ -1899,9 +1948,9 @@ void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
 			}));
 }
 	
-void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FString& PlatformUserId
-	, const FVoidHandler& OnSuccess
+FAccelByteTaskWPtr User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, FString const& PlatformUserId
+	, FVoidHandler const& OnSuccess
 	, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1917,12 +1966,12 @@ void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
 	LinkRequest.PlatformId = PlatformId;
 	LinkRequest.PlatformUserId = PlatformUserId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, LinkRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, LinkRequest, OnSuccess, OnError);
 }
 
-void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1933,11 +1982,11 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FVoidHandler& OnSuccess
+FAccelByteTaskWPtr User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
+	, FVoidHandler const& OnSuccess
 	, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1949,11 +1998,11 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 	
-void User::UnlinkOtherPlatformId(const FString& PlatformId
-	, const FVoidHandler& OnSuccess
+FAccelByteTaskWPtr User::UnlinkOtherPlatformId(FString const& PlatformId
+	, FVoidHandler const& OnSuccess
 	, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1963,11 +2012,11 @@ void User::UnlinkOtherPlatformId(const FString& PlatformId
 		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void User::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType
-	, const FVoidHandler& OnSuccess
+FAccelByteTaskWPtr User::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType
+	, FVoidHandler const& OnSuccess
 	, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1979,11 +2028,11 @@ void User::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformType
 		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 	
-void User::UnlinkAllOtherPlatformId(const FString& PlatformId
-		, const FVoidHandler& OnSuccess
+FAccelByteTaskWPtr User::UnlinkAllOtherPlatformId(FString const& PlatformId
+		, FVoidHandler const& OnSuccess
 		, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1993,12 +2042,12 @@ void User::UnlinkAllOtherPlatformId(const FString& PlatformId
 		, *CredentialsRef->GetNamespace()
 		, *PlatformId);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCodeRequest
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::SendVerificationCode(FVerificationCodeRequest const& VerificationCodeRequest
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2006,16 +2055,16 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, VerificationCodeRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, VerificationCodeRequest, OnSuccess, OnError);
 }
 
-void User::SearchUsers(const FString& Query
+FAccelByteTaskWPtr User::SearchUsers(FString const& Query
 	, EAccelByteSearchType By
-	, const THandler<FPagedPublicUsersInfo>& OnSuccess
-	, const FErrorHandler& OnError
-	, const int32& Offset
-	, const int32& Limit
-	, const FString& PlatformId
+	, THandler<FPagedPublicUsersInfo> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Offset
+	, int32 Limit
+	, FString const& PlatformId
 	, EAccelByteSearchPlatformType PlatformBy)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -2045,7 +2094,7 @@ void User::SearchUsers(const FString& Query
 		SearchPlatformBy = TEXT("platformDisplayName");
 		break;
 	default:
-		return;
+		return nullptr;
 	}
 
 	const TMultiMap<FString, FString> QueryParams = {
@@ -2057,71 +2106,73 @@ void User::SearchUsers(const FString& Query
 		{ TEXT("platformBy"), SearchPlatformBy },
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void User::SearchUsers(const FString& Query
-	, const THandler<FPagedPublicUsersInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::SearchUsers(FString const& Query
+	, THandler<FPagedPublicUsersInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
-	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError);
+	return SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError);
 }
 
-void User::SearchUsers(const FString& Query
+FAccelByteTaskWPtr User::SearchUsers(FString const& Query
 	, int32 Offset
 	, int32 Limit
-	, const THandler<FPagedPublicUsersInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+	, THandler<FPagedPublicUsersInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
-	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError, Offset, Limit);
+	return SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError, Offset, Limit);
 }
 
-void User::SearchUsers(const FString& Query
+FAccelByteTaskWPtr User::SearchUsers(FString const& Query
 	, EAccelBytePlatformType PlatformType
 	, EAccelByteSearchPlatformType PlatformBy
-	, const THandler<FPagedPublicUsersInfo>& OnSuccess
-	, const FErrorHandler& OnError
-	, const int32 Offset
-	, const int32 Limit)
+	, THandler<FPagedPublicUsersInfo> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Offset
+	, int32 Limit)
 {
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 	if (PlatformId.IsEmpty() && PlatformBy == EAccelByteSearchPlatformType::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest),
 			TEXT("platformId and platformBy can not be empty, platformBy only supports value [platformDisplayName]"));
-		return;
+		return nullptr;
 	}
-	SearchUsers(Query, EAccelByteSearchType::THIRD_PARTY_PLATFORM, OnSuccess, OnError, Offset, Limit, PlatformId, PlatformBy);
+	return SearchUsers(Query, EAccelByteSearchType::THIRD_PARTY_PLATFORM, OnSuccess, OnError, Offset, Limit, PlatformId, PlatformBy);
 }
 
-void User::SearchUsers(const FString& Query
-	, const FString& PlatformId
+FAccelByteTaskWPtr User::SearchUsers(FString const& Query
+	, FString const& PlatformId
 	, EAccelByteSearchPlatformType PlatformBy
-	, const THandler<FPagedPublicUsersInfo>& OnSuccess
-	, const FErrorHandler& OnError
-	, const int32 Offset
-	, const int32 Limit)
+	, THandler<FPagedPublicUsersInfo> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Offset
+	, int32 Limit)
 {
 	if (PlatformId.IsEmpty() && PlatformBy == EAccelByteSearchPlatformType::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest),
 			TEXT("platformId and platformBy can not be empty, platformBy only supports value [platformDisplayName]"));
-		return;
+		return nullptr;
 	}
-	SearchUsers(Query, EAccelByteSearchType::THIRD_PARTY_PLATFORM, OnSuccess, OnError, Offset, Limit, PlatformId, PlatformBy);
+	return SearchUsers(Query, EAccelByteSearchType::THIRD_PARTY_PLATFORM, OnSuccess, OnError, Offset, Limit, PlatformId, PlatformBy);
 }	
 	
-void User::GetUserByUserId(const FString& UserID
-	, const THandler<FSimpleUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetUserByUserId(FString const& UserID
+	, THandler<FSimpleUserData> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Get user public info V3 is deprecated & might be removed without notice - please use GetUserPublicInfoByUserId (V4) instead!!"));
 
 	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s")
@@ -2129,13 +2180,34 @@ void User::GetUserByUserId(const FString& UserID
 		, *CredentialsRef->GetNamespace()
 		, *UserID);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType
-	, const FString& OtherPlatformUserId
-	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetUserPublicInfoByUserId(FString const& UserID
+	, THandler<FUserPublicInfoResponseV4> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/%s")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *UserID);
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType
+	, FString const& OtherPlatformUserId
+	, THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2151,11 +2223,11 @@ void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetCountryFromIP(THandler<FCountryInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2166,16 +2238,16 @@ void User::GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetUserEligibleToPlay(THandler<bool> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	auto onItemInfoGot = THandler<FAccelByteModelsItemInfo>::CreateLambda(
-		[this, OnSuccess, OnError](const FAccelByteModelsItemInfo& itemInfoResult)
+		[this, OnSuccess, OnError](FAccelByteModelsItemInfo const& itemInfoResult)
 		{
 
 			TArray<FString> itemIds;
@@ -2186,30 +2258,31 @@ void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess
 			FRegistry::Entitlement.GetUserEntitlementOwnershipAny(itemIds, appIds, skus, THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([OnSuccess, OnError](FAccelByteModelsEntitlementOwnership ownership)
 			{
 				OnSuccess.ExecuteIfBound(ownership.Owned);
-			}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMsg)
+			}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString const& ErrorMsg)
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMsg);
 			}));
 		});
 
 	// #TODO: Change the FRegistry implementation with ApiClient
-	FRegistry::Item.GetItemByAppId(*SettingsRef.AppId
-		, "", "", onItemInfoGot, FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMsg)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMsg);
-	}));
+	return FRegistry::Item.GetItemByAppId(*SettingsRef.AppId
+		, TEXT(""), TEXT(""), onItemInfoGot, FErrorHandler::CreateLambda(
+			[OnError](int32 ErrorCode, FString const& ErrorMsg)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMsg);
+			}));
 }
 
-void User::BulkGetUserInfo(const TArray<FString>& UserIds
-	, const THandler<FListBulkUserInfo>& OnSuccess
-	, const FErrorHandler& OnError) 
+FAccelByteTaskWPtr User::BulkGetUserInfo(TArray<FString> const& UserIds
+	, THandler<FListBulkUserInfo> const& OnSuccess
+	, FErrorHandler const& OnError) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (UserIds.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FListBulkUserInfoRequest UserList{ UserIds };
@@ -2226,10 +2299,10 @@ void User::BulkGetUserInfo(const TArray<FString>& UserIds
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
 }
 
-void User::GetInputValidations(const FString& LanguageCode
+FAccelByteTaskWPtr User::GetInputValidations(FString const& LanguageCode
 	, THandler<FInputValidation> const& OnSuccess
 	, FErrorHandler const& OnError
 	, bool bDefaultOnEmpty)
@@ -2248,11 +2321,11 @@ void User::GetInputValidations(const FString& LanguageCode
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 	
-void User::Enable2FaBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::Enable2FaBackupCode(THandler<FUser2FaBackupCode> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2264,11 +2337,11 @@ void User::Enable2FaBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::Disable2FaBackupCode(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::Disable2FaBackupCode(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2280,11 +2353,11 @@ void User::Disable2FaBackupCode(const FVoidHandler& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::GenerateBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GenerateBackupCode(THandler<FUser2FaBackupCode> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2296,11 +2369,11 @@ void User::GenerateBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::GetBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetBackupCode(THandler<FUser2FaBackupCode> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2312,11 +2385,11 @@ void User::GetBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::Enable2FaAuthenticator(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::Enable2FaAuthenticator(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2328,11 +2401,11 @@ void User::Enable2FaAuthenticator(const FVoidHandler& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::Disable2FaAuthenticator(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::Disable2FaAuthenticator(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2344,11 +2417,11 @@ void User::Disable2FaAuthenticator(const FVoidHandler& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::GenerateSecretKeyFor2FaAuthenticator(const THandler<FUser2FaSecretKey>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GenerateSecretKeyFor2FaAuthenticator(THandler<FUser2FaSecretKey> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2360,11 +2433,11 @@ void User::GenerateSecretKeyFor2FaAuthenticator(const THandler<FUser2FaSecretKey
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::GetEnabled2FaFactors(const THandler<FUser2FaMethod>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetEnabled2FaFactors(THandler<FUser2FaMethod> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2376,12 +2449,12 @@ void User::GetEnabled2FaFactors(const THandler<FUser2FaMethod>& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2398,12 +2471,12 @@ void User::MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
-void User::UpdateUserV3(FUserUpdateRequest UpdateRequest
-	, const THandler<FAccountUserData>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::UpdateUserV3(FUserUpdateRequest const& UpdateRequest
+	, THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__),
@@ -2412,19 +2485,19 @@ void User::UpdateUserV3(FUserUpdateRequest UpdateRequest
 	if (!UpdateRequest.EmailAddress.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Cannot update user email using this function. Use UpdateE-mail address instead."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UpdateRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UpdateRequest, OnSuccess, OnError);
 }
 
-void User::GetPublisherUser(const FString& UserId
-	, const THandler<FGetPublisherUserResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetPublisherUser(FString const& UserId
+	, THandler<FGetPublisherUserResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2432,7 +2505,7 @@ void User::GetPublisherUser(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/publisher")
@@ -2444,14 +2517,15 @@ void User::GetPublisherUser(const FString& UserId
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
+FAccelByteTaskWPtr User::VerifyToken(FVoidHandler const& OnSuccess
+	, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Oauth2::VerifyToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::VerifyToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, UserCredentialsRef->GetAccessToken()
 		, FVoidHandler::CreateLambda(
@@ -2463,9 +2537,9 @@ void User::VerifyToken(const FVoidHandler& OnSuccess, const FErrorHandler & OnEr
 		, SettingsRef.IamServerUrl);
 }
 
-void User::GetUserInformation(const FString& UserId
-	, const THandler<FGetUserInformationResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetUserInformation(FString const& UserId
+	, THandler<FGetUserInformationResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2473,7 +2547,7 @@ void User::GetUserInformation(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/information")
@@ -2485,17 +2559,17 @@ void User::GetUserInformation(const FString& UserId
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType
-	, const THandler<FGeneratedOneTimeCode>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType
+	, THandler<FGeneratedOneTimeCode> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
 
 	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType); 	
-	Oauth2::GenerateOneTimeCode(UserCredentialsRef->GetAccessToken()
+	return Oauth2::GenerateOneTimeCode(UserCredentialsRef->GetAccessToken()
 		, PlatformString
 		, THandler<FGeneratedOneTimeCode>::CreateLambda(
 			[this, OnSuccess, OnError](const FGeneratedOneTimeCode& Result) 
@@ -2506,16 +2580,16 @@ void User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType
 		, SettingsRef.IamServerUrl);
 }
 
-void User::GenerateGameToken(const FString& Code,
-	const FVoidHandler& OnSuccess,
-	const FOAuthErrorHandler & OnError)
+FAccelByteTaskWPtr User::GenerateGameToken(FString const& Code
+	, FVoidHandler const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
-	Oauth2::GenerateGameToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GenerateGameToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Code
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2Token& Result)
+			[this, OnSuccess, OnError](FOauth2Token const& Result)
 			{
 				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
 			})		
@@ -2523,14 +2597,16 @@ void User::GenerateGameToken(const FString& Code,
 		, SettingsRef.IamServerUrl);
 }
 
-void User::GenerateGameTokenV4(const FString& Code, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::GenerateGameTokenV4(FString const& Code
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	Oauth2::GenerateGameTokenV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth2::GenerateGameTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Code
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](const FOauth2TokenV4& Result)
+			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
 				if (Result.Ticket.IsEmpty())
 				{
@@ -2545,32 +2621,35 @@ void User::GenerateGameTokenV4(const FString& Code, const THandler<FAccelByteMod
 				}
 			})
 		, OnError
-				, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl);
 }
 
-void User::GenerateCodeForPublisherTokenExchange(const FString& PublisherClientID,
-	const THandler<FCodeForTokenExchangeResponse>& OnSuccess,
-	const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GenerateCodeForPublisherTokenExchange(FString const& PublisherClientID
+	, THandler<FCodeForTokenExchangeResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
-	Oauth2::GenerateCodeForPublisherTokenExchange(UserCredentialsRef->GetAccessToken()
+	return Oauth2::GenerateCodeForPublisherTokenExchange(UserCredentialsRef->GetAccessToken()
 		, SettingsRef.PublisherNamespace
 		, PublisherClientID
 		, OnSuccess
 		, OnError);
 }
 
-void User::LinkHeadlessAccountToCurrentFullAccount(const FLinkHeadlessAccountRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::LinkHeadlessAccountToCurrentFullAccount(FLinkHeadlessAccountRequest const& Request
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/users/me/headless/linkWithProgression")
 	   , *SettingsRef.IamServerUrl); 
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 
-void User::GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& OneTimeLinkCode,
-	const THandler<FConflictLinkHeadlessAccountResult>& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetConflictResultWhenLinkHeadlessAccountToFullAccount(FString const& OneTimeLinkCode,
+	THandler<FConflictLinkHeadlessAccountResult> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/users/me/headless/link/conflict")
@@ -2579,11 +2658,13 @@ void User::GetConflictResultWhenLinkHeadlessAccountToFullAccount(const FString& 
 	const TMultiMap<FString, FString> QueryParams ({
 		{"oneTimeLinkCode", *OneTimeLinkCode}
 	}); 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void User::CheckUserAccountAvailability(const FString& DisplayName,
-	const FVoidHandler& OnSuccess, const FErrorHandler& OnError, bool bIsCheckUniqueDisplayName)
+FAccelByteTaskWPtr User::CheckUserAccountAvailability(FString const& DisplayName
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, bool bIsCheckUniqueDisplayName)
 {
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/availability")
@@ -2595,8 +2676,8 @@ void User::CheckUserAccountAvailability(const FString& DisplayName,
 		{"field", *Field},
 		{"query", *DisplayName}
 	}); 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess,
-		FErrorHandler::CreateLambda([this, OnError](int32 ErrorCode, const FString& ErrorMessage)
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess,
+		FErrorHandler::CreateLambda([this, OnError](int32 ErrorCode, FString const& ErrorMessage)
 		{
 			FString Message = ErrorMessage;
 			if (ErrorCode == EHttpResponseCodes::NotFound)
@@ -2612,8 +2693,9 @@ void User::CheckUserAccountAvailability(const FString& DisplayName,
 		}));
 }
 
-void User::RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& PlatformType,
-	const THandler<FThirdPartyPlatformTokenData>& OnSuccess, const FOAuthErrorHandler& OnError)
+FAccelByteTaskWPtr User::RetrieveUserThirdPartyPlatformToken(EAccelBytePlatformType PlatformType
+	, THandler<FThirdPartyPlatformTokenData> const& OnSuccess
+	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
 
@@ -2628,13 +2710,13 @@ void User::RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& Pla
 		break;
 	default:
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::BadRequestException), TEXT("Platform Type is not supported"), {});
-		return;
+		return nullptr;
 	}
 
 	const FString UserId = CredentialsRef->GetUserId();
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
-	Oauth2::RetrieveUserThirdPartyPlatformToken(UserId, PlatformId, Authorization, 
+	return Oauth2::RetrieveUserThirdPartyPlatformToken(UserId, PlatformId, Authorization, 
 		THandler<FThirdPartyPlatformTokenData>::CreateLambda(
 			[this, PlatformId, OnSuccess](const FThirdPartyPlatformTokenData& Result)
 			{
@@ -2643,9 +2725,9 @@ void User::RetrieveUserThirdPartyPlatformToken(const EAccelBytePlatformType& Pla
 			}), OnError);
 }
 
-void User::GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest& Request
-	, const THandler<FAccountUserPlatformInfosResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetUserOtherPlatformBasicPublicInfo(FPlatformAccountInfoRequest const& Request
+	, THandler<FAccountUserPlatformInfosResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2659,12 +2741,12 @@ void User::GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Contents);
 	FJsonSerializer::Serialize(JsonObj.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }
 
-void User::GetAccountConfigurationValue(EAccountConfiguration ConfigKey
-	, const THandler<bool>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr User::GetAccountConfigurationValue(EAccountConfiguration ConfigKey
+	, THandler<bool> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FString Config;
 	switch (ConfigKey)
@@ -2684,7 +2766,7 @@ void User::GetAccountConfigurationValue(EAccountConfiguration ConfigKey
 		bool bIsFoundResult = false;
 		;
 		const TSharedPtr<FJsonObject>* OutObject;
-		if (Result.JsonObject->TryGetObjectField("result", OutObject))
+		if (Result.JsonObject->TryGetObjectField(TEXT("result"), OutObject))
 		{
 			if (OutObject->Get()->TryGetBoolField(Config, bOutConfigValue))
 			bIsFoundResult = true;
@@ -2706,7 +2788,7 @@ void User::GetAccountConfigurationValue(EAccountConfiguration ConfigKey
 	   , *CredentialsRef->GetNamespace()
 	   , *Config);
    
-	HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccessDelegate, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccessDelegate, OnError);
 }
 	
 } // Namespace Api

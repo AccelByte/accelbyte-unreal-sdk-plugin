@@ -13,19 +13,17 @@ namespace Api
 Challenge::Challenge(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef
-		, InSettingsRef
-		, InHttpRef)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {}
 
 Challenge::~Challenge()
 {
 }
 
-void Challenge::GetChallenges(const THandler<FAccelByteModelsGetChallengesResponse>& OnSuccess
-	, const FErrorHandler& OnError
-	, const EAccelByteModelsChallengeSortBy& SortBy
-	, const EAccelByteModelsChallengeStatus& Status
+FAccelByteTaskWPtr Challenge::GetChallenges(THandler<FAccelByteModelsGetChallengesResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, EAccelByteModelsChallengeSortBy SortBy
+	, EAccelByteModelsChallengeStatus Status
 	, uint64 Offset
 	, uint64 Limit)
 {
@@ -42,13 +40,13 @@ void Challenge::GetChallenges(const THandler<FAccelByteModelsGetChallengesRespon
 		, *SettingsRef.ChallengeServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Challenge::GetScheduledChallengeGoals(const FString& ChallengeCode
-	, const THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse>& OnSuccess
-	, const FErrorHandler& OnError
-	, const TArray<FString>& Tags
+FAccelByteTaskWPtr Challenge::GetScheduledChallengeGoals(FString const& ChallengeCode
+	, THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, TArray<FString> Tags
 	, uint64 Offset
 	, uint64 Limit)
 {
@@ -75,13 +73,13 @@ void Challenge::GetScheduledChallengeGoals(const FString& ChallengeCode
 		, *CredentialsRef->GetNamespace()
 		, *ChallengeCode);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Challenge::GetChallengeProgress(const FString& ChallengeCode
-	, const FString& GoalCode
-	, const THandler<FAccelByteModelsChallengeProgressResponse>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr Challenge::GetChallengeProgress(FString const& ChallengeCode
+	, FString const& GoalCode
+	, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
+	, FErrorHandler const& OnError
 	, uint64 Offset
 	, uint64 Limit)
 {
@@ -98,13 +96,13 @@ void Challenge::GetChallengeProgress(const FString& ChallengeCode
 		, *CredentialsRef->GetNamespace()
 		, *ChallengeCode);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Challenge::GetRewards(const THandler<FAccelByteModelsChallengeGetRewardStatusResponse>& OnSuccess
-	, const FErrorHandler& OnError
-	, const EAccelByteModelsChallengeRewardStatus& Status
-	, const EAccelByteModelsChallengeSortBy& SortBy
+FAccelByteTaskWPtr Challenge::GetRewards(THandler<FAccelByteModelsChallengeGetRewardStatusResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, EAccelByteModelsChallengeRewardStatus Status
+	, EAccelByteModelsChallengeSortBy SortBy
 	, uint64 Offset
 	, uint64 Limit)
 {
@@ -125,12 +123,12 @@ void Challenge::GetRewards(const THandler<FAccelByteModelsChallengeGetRewardStat
 		, *SettingsRef.ChallengeServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Challenge::ClaimReward(const FAccelByteModelsChallengeRewardClaimRequest& Request
-	, const THandler<TArray<FAccelByteModelsChallengeReward>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Challenge::ClaimReward(FAccelByteModelsChallengeRewardClaimRequest const& Request
+	, THandler<TArray<FAccelByteModelsChallengeReward>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -138,10 +136,11 @@ void Challenge::ClaimReward(const FAccelByteModelsChallengeRewardClaimRequest& R
 		, *SettingsRef.ChallengeServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 
-void Challenge::EvaluateChallengeProgress(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Challenge::EvaluateChallengeProgress(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -149,7 +148,7 @@ void Challenge::EvaluateChallengeProgress(const FVoidHandler& OnSuccess, const F
 		, *SettingsRef.ChallengeServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 

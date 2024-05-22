@@ -71,5 +71,5 @@ private:
 	FString HeartBeatData;
 };
 
-}
-}
+} // Namespace Api
+} // Namespace AccelByte

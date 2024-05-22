@@ -36,4 +36,8 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrderHistorySuccess, const TArray<FAccelByteModelsOrderHistoryInfo>&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
 	static void GetUserOrderHistory(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FPreviewUserOrderSuccess, const FAccelByteModelsUserPreviewOrderResponse&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
+	static void PreviewUserOrder(const FAccelByteModelsUserPreviewOrderRequest& OrderPreviewRequest, const FPreviewUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 };

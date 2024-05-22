@@ -23,7 +23,7 @@ SessionBrowser::SessionBrowser(Credentials const& InCredentialsRef
 SessionBrowser::~SessionBrowser()
 {}
 
-void SessionBrowser::CreateGameSession(FString const& GameMode
+FAccelByteTaskWPtr SessionBrowser::CreateGameSession(FString const& GameMode
 	, FString const& GameMapName
 	, FString const& GameVersion
 	, uint32 BotCount
@@ -32,7 +32,7 @@ void SessionBrowser::CreateGameSession(FString const& GameMode
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
-	CreateGameSession(GameMode
+	return CreateGameSession(GameMode
 		, GameMapName
 		, GameVersion
 		, BotCount
@@ -44,7 +44,7 @@ void SessionBrowser::CreateGameSession(FString const& GameMode
 		, OnError);
 }
 
-void SessionBrowser::CreateGameSession(FString const& GameMode
+FAccelByteTaskWPtr SessionBrowser::CreateGameSession(FString const& GameMode
 	, FString const& GameMapName
 	, FString const& GameVersion
 	, uint32 BotCount
@@ -55,7 +55,7 @@ void SessionBrowser::CreateGameSession(FString const& GameMode
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
-	CreateGameSession(EAccelByteSessionType::p2p
+	return CreateGameSession(EAccelByteSessionType::p2p
 		, GameMode
 		, GameMapName
 		, GameVersion
@@ -68,7 +68,7 @@ void SessionBrowser::CreateGameSession(FString const& GameMode
 		, OnError);
 }
 
-void SessionBrowser::CreateGameSession(FString const& SessionTypeString
+FAccelByteTaskWPtr SessionBrowser::CreateGameSession(FString const& SessionTypeString
 	, FString const& GameMode
 	, FString const& GameMapName
 	, FString const& GameVersion
@@ -81,7 +81,7 @@ void SessionBrowser::CreateGameSession(FString const& SessionTypeString
 	, FErrorHandler const& OnError)
 {
 	EAccelByteSessionType SessionType = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteSessionType>(SessionTypeString);
-	CreateGameSession(SessionType
+	return CreateGameSession(SessionType
 		, GameMode
 		, GameMapName
 		, GameVersion
@@ -94,7 +94,7 @@ void SessionBrowser::CreateGameSession(FString const& SessionTypeString
 		, OnError);
 }
 
-void SessionBrowser::CreateGameSession(EAccelByteSessionType SessionType
+FAccelByteTaskWPtr SessionBrowser::CreateGameSession(EAccelByteSessionType SessionType
 	, FString const& GameMode
 	, FString const& GameMapName
 	, FString const& GameVersion
@@ -120,7 +120,7 @@ void SessionBrowser::CreateGameSession(EAccelByteSessionType SessionType
 	NewGameSession.Game_session_setting.Max_internal_player = MaxSpectator;
 	NewGameSession.Game_session_setting.Current_internal_player = 0;
 	
-	if(!Password.IsEmpty())
+	if (!Password.IsEmpty())
 	{
 		NewGameSession.Game_session_setting.Password = FMD5::HashAnsiString(*Password);
 	}
@@ -128,10 +128,10 @@ void SessionBrowser::CreateGameSession(EAccelByteSessionType SessionType
 	NewGameSession.Game_session_setting.Settings.JsonObject = OtherSettings;
 	NewGameSession.Game_version = GameVersion;
 
-	CreateGameSession(NewGameSession, OnSuccess, OnError);
+	return CreateGameSession(NewGameSession, OnSuccess, OnError);
 }
 
-void SessionBrowser::CreateGameSession(FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequest
+FAccelByteTaskWPtr SessionBrowser::CreateGameSession(FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequest
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -142,29 +142,29 @@ void SessionBrowser::CreateGameSession(FAccelByteModelsSessionBrowserCreateReque
 	if (SessionType == EAccelByteSessionType::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Wrong session type"));
-		return;
+		return nullptr;
 	}
 	
 	if (CreateSessionRequest.Game_session_setting.Max_player == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Max players must greather then 0"));
-		return;
+		return nullptr;
 	}
 
 	if (CreateSessionRequest.Game_session_setting.Mode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Game mode can't be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession")
 		, *SettingsRef.SessionBrowserServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, CreateSessionRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, CreateSessionRequest, OnSuccess, OnError);
 }
 
-void SessionBrowser::UpdateGameSession(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::UpdateGameSession(FString const& SessionId
 	, uint32 MaxPlayer
 	, uint32 CurrentPlayerCount
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
@@ -174,10 +174,10 @@ void SessionBrowser::UpdateGameSession(FString const& SessionId
 	UpdateSessionRequest.Game_max_player = MaxPlayer;
 	UpdateSessionRequest.Game_current_player = CurrentPlayerCount;
 
-	UpdateGameSession(SessionId, UpdateSessionRequest, OnSuccess, OnError);
+	return UpdateGameSession(SessionId, UpdateSessionRequest, OnSuccess, OnError);
 }
 
-void SessionBrowser::UpdateGameSession(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::UpdateGameSession(FString const& SessionId
 	, uint32 MaxPlayer
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -185,16 +185,16 @@ void SessionBrowser::UpdateGameSession(FString const& SessionId
 	FAccelByteModelsSessionBrowserUpdateRequest UpdateSessionRequest;
 	UpdateSessionRequest.Game_max_player = MaxPlayer;
 
-	UpdateGameSession(SessionId, UpdateSessionRequest, OnSuccess, OnError);
+	return UpdateGameSession(SessionId, UpdateSessionRequest, OnSuccess, OnError);
 }
 
-void SessionBrowser::UpdateGameSession(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::UpdateGameSession(FString const& SessionId
 	, FAccelByteModelsSessionBrowserUpdateRequest const& UpdateSessionRequest
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	if(UpdateSessionRequest.Game_current_player != 0)
+	if (UpdateSessionRequest.Game_current_player != 0)
 	{
 		FReport::LogDeprecated(FString(__FUNCTION__),
 			TEXT("Update player count deprecated from UpdateGameSession. Use register/unregister player to update player count"));
@@ -203,13 +203,13 @@ void SessionBrowser::UpdateGameSession(FString const& SessionId
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
-		return;
+		return nullptr;
 	}
 
 	if (UpdateSessionRequest.Game_max_player == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Max player must greather then 0"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
@@ -217,10 +217,10 @@ void SessionBrowser::UpdateGameSession(FString const& SessionId
 		, *CredentialsRef->GetNamespace()
 		, *SessionId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateSessionRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateSessionRequest, OnSuccess, OnError);
 }
 
-void SessionBrowser::UpdateGameSettings(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::UpdateGameSettings(FString const& SessionId
 	, TMap<FString, FString> Settings
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -231,10 +231,10 @@ void SessionBrowser::UpdateGameSettings(FString const& SessionId
 		SettingJson->SetStringField(Set.Key, Set.Value);
 	}
 
-	UpdateGameSettings(SessionId, SettingJson, OnSuccess, OnError);
+	return UpdateGameSettings(SessionId, SettingJson, OnSuccess, OnError);
 }
 
-void SessionBrowser::UpdateGameSettings(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::UpdateGameSettings(FString const& SessionId
 	, TSharedPtr<FJsonObject> Settings
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -248,10 +248,10 @@ void SessionBrowser::UpdateGameSettings(FString const& SessionId
 	const TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Settings.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void SessionBrowser::RemoveGameSession(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::RemoveGameSession(FString const& SessionId
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -260,7 +260,7 @@ void SessionBrowser::RemoveGameSession(FString const& SessionId
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
@@ -268,17 +268,17 @@ void SessionBrowser::RemoveGameSession(FString const& SessionId
 		, *CredentialsRef->GetNamespace()
 		, *SessionId);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void SessionBrowser::GetGameSessions(FString const& SessionTypeString
+FAccelByteTaskWPtr SessionBrowser::GetGameSessions(FString const& SessionTypeString
 	, FString const& GameMode
 	, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess
 	, FErrorHandler const& OnError
 	, uint32 Offset
 	, uint32 Limit)
 {
-	GetGameSessions(SessionTypeString
+	return GetGameSessions(SessionTypeString
 		, GameMode
 		, FString()
 		, OnSuccess
@@ -287,14 +287,14 @@ void SessionBrowser::GetGameSessions(FString const& SessionTypeString
 		, Limit);
 }
 
-void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
+FAccelByteTaskWPtr SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
 	, FString const& GameMode
 	, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess
 	, FErrorHandler const& OnError
 	, uint32 Offset
 	, uint32 Limit)
 {
-	GetGameSessions(SessionType
+	return GetGameSessions(SessionType
 		, GameMode
 		, FString()
 		, OnSuccess
@@ -303,7 +303,7 @@ void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
 		, Limit);
 }
 
-void SessionBrowser::GetGameSessions(FString const& SessionTypeString
+FAccelByteTaskWPtr SessionBrowser::GetGameSessions(FString const& SessionTypeString
 	, FString const& GameMode
 	, FString const& MatchExist
 	, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess
@@ -312,7 +312,7 @@ void SessionBrowser::GetGameSessions(FString const& SessionTypeString
 	, uint32 Limit)
 {
 	EAccelByteSessionType SessionType = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteSessionType>(SessionTypeString);
-	GetGameSessions(SessionType
+	return GetGameSessions(SessionType
 		, GameMode
 		, MatchExist
 		, OnSuccess
@@ -321,7 +321,7 @@ void SessionBrowser::GetGameSessions(FString const& SessionTypeString
 		, Limit);
 }
 
-void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
+FAccelByteTaskWPtr SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
 	, FString const& GameMode
 	, FString const& MatchExist
 	, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess
@@ -334,7 +334,7 @@ void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
 	if (SessionType == EAccelByteSessionType::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Wrong session type"));
-		return;
+		return nullptr;
 	}
 
 	const FString SessionTypeString = FAccelByteUtilities::GetUEnumValueAsString(SessionType);
@@ -348,10 +348,10 @@ void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
 		, Limit
 		, Offset);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void SessionBrowser::GetGameSessionsByUserIds(const TArray<FString>& UserIds
+FAccelByteTaskWPtr SessionBrowser::GetGameSessionsByUserIds(const TArray<FString>& UserIds
 	, THandler<FAccelByteModelsSessionBrowserGetByUserIdsResult> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -360,7 +360,7 @@ void SessionBrowser::GetGameSessionsByUserIds(const TArray<FString>& UserIds
 	if (UserIds.Num() == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Empty userIds"));
-		return;
+		return nullptr;
 	}
 
 	FString UserIdsQueryString = FString::Join(UserIds, TEXT(","));
@@ -371,10 +371,10 @@ void SessionBrowser::GetGameSessionsByUserIds(const TArray<FString>& UserIds
 		, *CredentialsRef->GetNamespace()
 		, *UserIdsQueryString);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void SessionBrowser::RegisterPlayer(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::RegisterPlayer(FString const& SessionId
 	, FString const& PlayerToAdd
 	, bool AsSpectator
 	, THandler<FAccelByteModelsSessionBrowserAddPlayerResponse> const& OnSuccess
@@ -386,13 +386,13 @@ void SessionBrowser::RegisterPlayer(FString const& SessionId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(PlayerToAdd)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
-		return;
+		return nullptr;
 	}
 
     const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player")
@@ -404,10 +404,10 @@ void SessionBrowser::RegisterPlayer(FString const& SessionId
 	AddPlayerRequest.User_id = PlayerToAdd;
 	AddPlayerRequest.As_spectator = AsSpectator;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, AddPlayerRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, AddPlayerRequest, OnSuccess, OnError);
 }
 
-void SessionBrowser::UnregisterPlayer(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::UnregisterPlayer(FString const& SessionId
 	, FString const& PlayerToRemove
 	, THandler<FAccelByteModelsSessionBrowserAddPlayerResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -418,13 +418,13 @@ void SessionBrowser::UnregisterPlayer(FString const& SessionId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(PlayerToRemove)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player/%s")
@@ -433,10 +433,10 @@ void SessionBrowser::UnregisterPlayer(FString const& SessionId
 		, *SessionId
 		, *PlayerToRemove);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void SessionBrowser::GetRecentPlayer(FString const& UserId
+FAccelByteTaskWPtr SessionBrowser::GetRecentPlayer(FString const& UserId
 	, THandler<FAccelByteModelsSessionBrowserRecentPlayerGetResult> const& OnSuccess
 	, FErrorHandler const& OnError
 	, uint32 Offset
@@ -448,7 +448,7 @@ void SessionBrowser::GetRecentPlayer(FString const& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/recentplayer/%s?limit=%d&offset=%d")
@@ -458,10 +458,10 @@ void SessionBrowser::GetRecentPlayer(FString const& UserId
 		, Limit
 		, Offset);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void SessionBrowser::JoinSession(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::JoinSession(FString const& SessionId
 	, FString const& Password
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -471,7 +471,7 @@ void SessionBrowser::JoinSession(FString const& SessionId
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/join")
@@ -480,15 +480,15 @@ void SessionBrowser::JoinSession(FString const& SessionId
 		, *SessionId);
 
 	FAccelByteModelsSessionBrowserJoinSessionRequest JoinRequest;
-	if(!Password.IsEmpty())
+	if (!Password.IsEmpty())
 	{
 		JoinRequest.Password = FMD5::HashAnsiString(*Password);			
 	}		
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, JoinRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, JoinRequest, OnSuccess, OnError);
 }
 
-void SessionBrowser::GetGameSession(FString const& SessionId
+FAccelByteTaskWPtr SessionBrowser::GetGameSession(FString const& SessionId
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -497,7 +497,7 @@ void SessionBrowser::GetGameSession(FString const& SessionId
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
@@ -505,8 +505,8 @@ void SessionBrowser::GetGameSession(FString const& SessionId
 		, *CredentialsRef->GetNamespace()
 		, *SessionId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-}
-}
+} // Namespace Api
+} // Namespace AccelByte

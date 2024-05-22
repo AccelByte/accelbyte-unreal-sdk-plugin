@@ -47,7 +47,10 @@ public:
 	 * @param OnError Callback for failed send game state
 	 * @param Description Description for current game state
 	 */
-	void SetGameState(EAccelByteGameState State, FVoidHandler OnSuccess, FErrorHandler OnError, const FString& Description = "");
+	void SetGameState(EAccelByteGameState State
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& Description = "");
 
 	/**
 	 * @brief Set the interval of sending presence event.
@@ -56,21 +59,21 @@ public:
 	 *
 	 * @param Interval The interval between telemetry event
 	 */
-	void SetHeartbeatInterval(FTimespan Interval);
+	void SetHeartbeatInterval(FTimespan const& Interval);
 
 	/**
 	 * @brief Set a delegate to be triggered when error sending presence event.
 	 *
 	 * @param OnError delegate to set.
 	 */
-	void SetOnSendPresenceHeartbeatError(const FErrorHandler& OnError);
+	void SetOnSendPresenceHeartbeatError(FErrorHandler const& OnError);
 
 	/**
 	 * @brief Set a delegate to be triggered when succeeded sending presence event.
 	 *
 	 * @param OnSuccess delegate to set.
 	 */
-	void SetOnSendPresenceHeartbeatSuccess(const FVoidHandler& OnSuccess);
+	void SetOnSendPresenceHeartbeatSuccess(FVoidHandler const& OnSuccess);
 
 	/**
 	 * @brief Send platform info event.
@@ -78,7 +81,7 @@ public:
 	 * @param OnSuccess Callback for successful send game platform
 	 * @param OnError Callback for failed send game platform
 	 */
-	void SendPlatform(FVoidHandler OnSuccess, FErrorHandler OnError);
+	void SendPlatform(FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Add presence information
@@ -86,14 +89,14 @@ public:
 	 * @param Key Presence event key
 	 * @param Value Presence event value
 	 */
-	void AddPresenceData(const FString& Key, const FString& Value);
+	void AddPresenceData(FString const& Key, FString const& Value);
 
 	/**
 	 * @brief Remove presence information
 	 *
 	 * @param Key Presence event key
 	 */
-	void RemovePresenceData(const FString& Key);
+	void RemovePresenceData(FString const& Key);
 
 	/**
 	 * @brief Startup module
@@ -123,7 +126,9 @@ private:
 
 	bool PeriodicHeartbeat(float DeltaTime);
 	void OnLoginSuccess(FOauth2Token const& Response);
-	void SendPresenceBroadcastEvent(FAccelBytePresenceBroadcastEventPayload const& Events, FVoidHandler OnSuccess, FErrorHandler OnError);
+	void SendPresenceBroadcastEvent(FAccelBytePresenceBroadcastEventPayload const& Events
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	FTimespan BroadcastInterval = FTimespan(0, 10, 0);
 	const FTimespan MinimumBroadcastInterval = FTimespan(0, 0, 5);

@@ -16,6 +16,7 @@ namespace AccelByte
 {
 
 class FHttpRetryScheduler;
+class FHttpClient;
 class FAccelByteTimeManager;
 
 namespace Api
@@ -105,6 +106,7 @@ public:
 	static TSharedPtr<FAccelByteMessagingSystem> MessagingSystem;
 	static FAccelByteNetworkConditioner NetworkConditioner;
 	static FAccelByteNotificationSender NotificationSender;
+	static FHttpClient HttpClient;
 #pragma endregion
 
 #pragma region Game Client Access

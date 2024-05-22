@@ -22,8 +22,8 @@ CloudStorage::CloudStorage(Credentials const& InCredentialsRef
 CloudStorage::~CloudStorage()
 {}
 
-void CloudStorage::GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -35,17 +35,17 @@ void CloudStorage::GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnS
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void CloudStorage::CreateSlot(TArray<uint8> BinaryData
-	, const FString& FileName
-	, const TArray<FString>& Tags
-	, const FString& Label
-	, const FString& CustomAttribute
-	, const THandler<FAccelByteModelsSlot>& OnSuccess
-	, FHttpRequestProgressDelegate OnProgress
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr CloudStorage::CreateSlot(TArray<uint8> const& BinaryData
+	, FString const& FileName
+	, TArray<FString> const& Tags
+	, FString const& Label
+	, FString const& CustomAttribute
+	, THandler<FAccelByteModelsSlot> const& OnSuccess
+	, FHttpRequestProgressDelegate const& OnProgress
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -85,11 +85,12 @@ void CloudStorage::CreateSlot(TArray<uint8> BinaryData
 		{TEXT("Accept"), TEXT("*/*")}
 	};
 
-	HttpClient.Request(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnProgress, OnError);
 	FReport::Log(TEXT("[AccelByte] Cloud Storage Start uploading..."));
+
+	return HttpClient.Request(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnProgress, OnError);
 }
 
-void CloudStorage::GetSlot(FString SlotID
+FAccelByteTaskWPtr CloudStorage::GetSlot(FString SlotID
 	, const THandler<TArray<uint8>> & OnSuccess
 	, const FErrorHandler & OnError)
 {
@@ -111,18 +112,18 @@ void CloudStorage::GetSlot(FString SlotID
 		{TEXT("Accept"), TEXT("*/*")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-void CloudStorage::UpdateSlot(FString SlotID
-	, const TArray<uint8> BinaryData
-	, const FString& FileName
-	, const TArray<FString> & Tags
-	, const FString& Label
-	, const FString& CustomAttribute
-	, const THandler<FAccelByteModelsSlot> & OnSuccess
-	, FHttpRequestProgressDelegate OnProgress
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr CloudStorage::UpdateSlot(FString const& SlotID
+	, TArray<uint8> const& BinaryData
+	, FString const& FileName
+	, TArray<FString> const& Tags
+	, FString const& Label
+	, FString const& CustomAttribute
+	, THandler<FAccelByteModelsSlot> const& OnSuccess
+	, FHttpRequestProgressDelegate const& OnProgress
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -163,34 +164,34 @@ void CloudStorage::UpdateSlot(FString SlotID
 		{TEXT("Accept"), TEXT("*/*")}
 	};
 
-	HttpClient.Request(TEXT("PUT"), Url, {}, Content, Headers, OnSuccess, OnProgress, OnError);
-
 	FReport::Log(TEXT("[AccelByte] Cloud Storage Start uploading..."));
+
+	return HttpClient.Request(TEXT("PUT"), Url, {}, Content, Headers, OnSuccess, OnProgress, OnError);
 }
 
-void CloudStorage::UpdateSlotMetadata(const FString& SlotId
-	, const FString& FileName
-	, const TArray<FString>& Tags
-	, const FString& Label
-	, const FString& CustomAttribute
-	, const THandler<FAccelByteModelsSlot>& OnSuccess
-	, FHttpRequestProgressDelegate OnProgress
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr CloudStorage::UpdateSlotMetadata(FString const& SlotId
+	, FString const& FileName
+	, TArray<FString> const& Tags
+	, FString const& Label
+	, FString const& CustomAttribute
+	, THandler<FAccelByteModelsSlot> const& OnSuccess
+	, FHttpRequestProgressDelegate const& OnProgress
+	, FErrorHandler const& OnError)
 {
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
-		TEXT("Use UpdateSlotMetadata(const FString&, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError) instead."));
+		TEXT("Use UpdateSlotMetadata(FString const&, const TArray<FString>& Tags, FString const& Label, FString const& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError) instead."));
 
-	UpdateSlotMetadata(SlotId, Tags, Label, CustomAttribute, OnSuccess, OnProgress, OnError);
+	return UpdateSlotMetadata(SlotId, Tags, Label, CustomAttribute, OnSuccess, OnProgress, OnError);
 }
 
-void CloudStorage::UpdateSlotMetadata(const FString& SlotId
-	, const TArray<FString>& Tags
-	, const FString& Label
-	, const FString& CustomAttribute
-	, const THandler<FAccelByteModelsSlot>& OnSuccess
-	, FHttpRequestProgressDelegate OnProgress
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr CloudStorage::UpdateSlotMetadata(FString const& SlotId
+	, TArray<FString> const& Tags
+	, FString const& Label
+	, FString const& CustomAttribute
+	, THandler<FAccelByteModelsSlot> const& OnSuccess
+	, FHttpRequestProgressDelegate const& OnProgress
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -217,12 +218,12 @@ void CloudStorage::UpdateSlotMetadata(const FString& SlotId
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 	
-	HttpClient.Request(TEXT("PUT"), Url, {}, Content, Headers, OnSuccess, OnProgress, OnError);
+	return HttpClient.Request(TEXT("PUT"), Url, {}, Content, Headers, OnSuccess, OnProgress, OnError);
 }
 
-void CloudStorage::DeleteSlot(FString SlotID
-	, const FVoidHandler & OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr CloudStorage::DeleteSlot(FString const& SlotID
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -240,12 +241,12 @@ void CloudStorage::DeleteSlot(FString SlotID
 		{TEXT("Accept"), TEXT("*/*")}
 	};
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 
-TArray<uint8> CloudStorage::FormDataBuilder(TArray<uint8> BinaryData
-	, FString BoundaryGuid
-	, FString FileName)
+TArray<uint8> CloudStorage::FormDataBuilder(TArray<uint8> const& BinaryData
+	, FString const& BoundaryGuid
+	, FString const& FileName)
 {
 	FString FormBoundaryHeader = "\r\n--" + BoundaryGuid + "\r\n";
 	FString FormContentDisposition = "Content-Disposition: form-data; name=\"file\";  filename=\"" + FileName + "\"\r\n";
@@ -262,8 +263,8 @@ TArray<uint8> CloudStorage::FormDataBuilder(TArray<uint8> BinaryData
 	return Data;
 }
 
-TArray<uint8> CloudStorage::CustomAttributeFormDataBuilder(const FString& CustomAttribute
-	, FString BoundaryGuid
+TArray<uint8> CloudStorage::CustomAttributeFormDataBuilder(FString const& CustomAttribute
+	, FString const& BoundaryGuid
 	, bool CloseFooter)
 {
 	FString FormBoundaryHeader = "\r\n--" + BoundaryGuid + "\r\n";
@@ -279,5 +280,5 @@ TArray<uint8> CloudStorage::CustomAttributeFormDataBuilder(const FString& Custom
 	return Data;
 }
 
-}
-}
+} // Namespace Api
+} // Namespace AccelByte

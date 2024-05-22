@@ -32,8 +32,10 @@ public:
 	 * @param CurrencyCode The currency code.
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsWalletInfo&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetWalletInfoByCurrencyCode(FString const& CurrencyCode
+	FAccelByteTaskWPtr GetWalletInfoByCurrencyCode(FString const& CurrencyCode
 		, THandler<FAccelByteModelsWalletInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -43,8 +45,10 @@ public:
 	 * @param CurrencyCode The currency code.
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsWalletResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetWalletInfoByCurrencyCodeV2(FString const& CurrencyCode
+	FAccelByteTaskWPtr GetWalletInfoByCurrencyCodeV2(FString const& CurrencyCode
 		, THandler<FAccelByteModelsWalletInfoResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -56,8 +60,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset Offset of the list that has been sliced based on Limit parameter (optional, default = 0).
 	 * @param Limit The limit of item on page (optional, default = 20).
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ListWalletTransactionsByCurrencyCode(FString const& CurrencyCode
+	FAccelByteTaskWPtr ListWalletTransactionsByCurrencyCode(FString const& CurrencyCode
 		, THandler<FAccelByteModelsWalletTransactionPaging> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Offset = 0

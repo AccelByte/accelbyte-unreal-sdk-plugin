@@ -22,15 +22,15 @@ namespace GameServerApi
 {
 
 DECLARE_DELEGATE(FConnectSuccess);
-DECLARE_DELEGATE_OneParam(FConnectError, const FString& /* Message */)
-DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
+DECLARE_DELEGATE_OneParam(FConnectError, FString const& /* Message */);
+DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, FString const& /* Reason */, bool /* WasClean */);
 	
-DECLARE_DELEGATE_OneParam(FOnServerClaimedNotification, const FAccelByteModelsServerClaimedNotification& /*Notification*/);
-DECLARE_DELEGATE_OneParam(FOnV2BackfillProposalNotification, const FAccelByteModelsV2MatchmakingBackfillProposalNotif& /*Notification*/);
-DECLARE_DELEGATE_OneParam(FOnV2SessionMemberChangedNotification, const FAccelByteModelsV2GameSession& /*Notification*/);
-DECLARE_DELEGATE_OneParam(FOnV2SessionEndedNotification, const FAccelByteModelsSessionEndedNotification& /*Notification*/);
-DECLARE_DELEGATE_OneParam(FOnV2SessionSecretUpdateNotification, const FAccelByteModelsSessionSecretUpdateNotification& /*Notification*/);
-DECLARE_DELEGATE_OneParam(FOnV2BackfillTicketExpiredNotification, const FAccelByteModelsV2MatchmakingBackfillTicketExpireNotif& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnServerClaimedNotification, FAccelByteModelsServerClaimedNotification const& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2BackfillProposalNotification, FAccelByteModelsV2MatchmakingBackfillProposalNotif const& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2SessionMemberChangedNotification, FAccelByteModelsV2GameSession const& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2SessionEndedNotification, FAccelByteModelsSessionEndedNotification const& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2SessionSecretUpdateNotification, FAccelByteModelsSessionSecretUpdateNotification const& /*Notification*/);
+DECLARE_DELEGATE_OneParam(FOnV2BackfillTicketExpiredNotification, FAccelByteModelsV2MatchmakingBackfillTicketExpireNotif const& /*Notification*/);
 
 /**
  * @brief DS Hub API for communication from dedicated server to backend.
@@ -52,7 +52,7 @@ public:
 	/**
 	 * @brief Connect to the DSHub websocket. Must be logged in with server client credentials to continue.
 	 */
-	void Connect(const FString& InBoundServerName);
+	void Connect(FString const& InBoundServerName);
 
 	/**
 	 * @brief Disconnect from DSHub if already connected.
@@ -71,63 +71,63 @@ public:
 	 *
 	 * @param OnConnectSuccess delegate to set.
 	 */
-	void SetOnConnectSuccess(const FConnectSuccess& OnConnectSuccess);
+	void SetOnConnectSuccess(FConnectSuccess const& OnConnectSuccess);
 
 	/**
 	 * @brief set a delegate to be triggered when error connecting to DSHub.
 	 *
 	 * @param OnConnectError delegate to set.
 	 */
-	void SetOnConnectError(const FConnectError& OnConnectError);
+	void SetOnConnectError(FConnectError const& OnConnectError);
 
 	/**
 	 * @brief set a delegate to be triggered when DSHub connection is closed.
 	 *
 	 * @param OnConnectionClosed delegate to set.
 	 */
-	void SetOnConnectionClosed(const FConnectionClosed& OnConnectionClosed);
+	void SetOnConnectionClosed(FConnectionClosed const& OnConnectionClosed);
 
 	/**
 	 * @brief Bind a delegate to listen to server claim notifications from DS hub
 	 *
 	 * @param InDelegate delegate to set.
 	 */
-	void SetOnServerClaimedNotificationDelegate(const FOnServerClaimedNotification& InDelegate);
+	void SetOnServerClaimedNotificationDelegate(FOnServerClaimedNotification const& InDelegate);
 
 	/**
 	 * @brief Bind a delegate to listen to backfill proposal notifications from DS hub
 	 *
 	 * @param InDelegate delegate to set
 	 */
-	void SetOnV2BackfillProposalNotificationDelegate(const FOnV2BackfillProposalNotification& InDelegate);
+	void SetOnV2BackfillProposalNotificationDelegate(FOnV2BackfillProposalNotification const& InDelegate);
 
 	/**
 	 * @brief Bind a delegate to listen to game session members changed notifications from DS hub
 	 *
 	 * @param InDelegate delegate to set
 	 */
-	void SetOnV2SessionMemberChangedNotificationDelegate(const FOnV2SessionMemberChangedNotification& InDelegate);
+	void SetOnV2SessionMemberChangedNotificationDelegate(FOnV2SessionMemberChangedNotification const& InDelegate);
 
 	/**
 	 * @brief Bind a delegate to listen to game session ended notifications from DS hub
 	 *
 	 * @param InDelegate delegate to set
 	 */
-	void SetOnV2SessionEndedNotificationDelegate(const FOnV2SessionEndedNotification& InDelegate);
+	void SetOnV2SessionEndedNotificationDelegate(FOnV2SessionEndedNotification const& InDelegate);
 
 	/**
 	 * @brief Bind a delegate to listen to session secret update from DS hub
 	 *
 	 * @param InDelegate delegate to set
 	 */
-	void SetOnV2SessionSecretUpdateNotification(const FOnV2SessionSecretUpdateNotification& InDelegate);
+	void SetOnV2SessionSecretUpdateNotification(FOnV2SessionSecretUpdateNotification const& InDelegate);
 
 	/**
 	 * @brief Bind a delegate to listen to backfill ticket expired notifications from DS hub
 	 *
 	 * @param InDelegate delegate to set
 	 */
-	void SetOnV2BackfillTicketExpiredNotificationDelegate(const FOnV2BackfillTicketExpiredNotification& InDelegate);
+	void SetOnV2BackfillTicketExpiredNotificationDelegate(FOnV2BackfillTicketExpiredNotification const& InDelegate);
 
 	/**
 	 *	Unbind notification delegates
@@ -213,17 +213,17 @@ private:
 	/**
 	 * Delegate handler for when our DSHub websocket fails to connect
 	 */
-	void OnConnectionError(const FString& Error);
+	void OnConnectionError(FString const& Error);
 
 	/**
 	 * Delegate handler for when we receive a message from the DSHub
 	 */
-	void OnMessage(const FString& Message);
+	void OnMessage(FString const& Message);
 
 	/**
 	 * Delegate fired when our websocket closes
 	 */
-	void OnClosed(int32 StatusCode, const FString& Reason, bool bWasClean);
+	void OnClosed(int32 StatusCode, FString const& Reason, bool bWasClean);
 
 };
 

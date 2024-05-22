@@ -37,8 +37,10 @@ public:
 	 * @param Language The language of the Season.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSeasonInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetCurrentSeason(FString const& Language
+	FAccelByteTaskWPtr GetCurrentSeason(FString const& Language
 		, THandler<FAccelByteModelsSeasonInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -48,8 +50,10 @@ public:
 	 * @param SeasonId The Id of the Season.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserSeason(FString const& SeasonId
+	FAccelByteTaskWPtr GetUserSeason(FString const& SeasonId
 		, THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -58,8 +62,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetCurrentUserSeason(THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess
+	FAccelByteTaskWPtr GetCurrentUserSeason(THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
 	/**
@@ -68,8 +74,10 @@ public:
 	 * @param RewardRequest Detail information for the Reward Request.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSeasonClaimRewardResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ClaimRewards(FAccelByteModelsSeasonClaimRewardRequest const& RewardRequest
+	FAccelByteTaskWPtr ClaimRewards(FAccelByteModelsSeasonClaimRewardRequest const& RewardRequest
 		, THandler<FAccelByteModelsSeasonClaimRewardResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -78,8 +86,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSeasonClaimRewardResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkClaimRewards(THandler<FAccelByteModelsSeasonClaimRewardResponse> const& OnSuccess
+	FAccelByteTaskWPtr BulkClaimRewards(THandler<FAccelByteModelsSeasonClaimRewardResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 private:
@@ -89,7 +99,7 @@ private:
 	 * @param JsonObject Input of JsonObject to be converted
 	 * @return TMap<FString, TArray<FString>> TMap as Passes Rewards (Key as Pass Code, Value as Array of Reward Codes)
 	 */
-	static TMap<FString, TArray<FString>> FJsonObjectToPassRewards(TSharedPtr<FJsonObject> JsonObject);
+	static TMap<FString, TArray<FString>> FJsonObjectToPassRewards(TSharedPtr<FJsonObject> const& JsonObject);
 
 	SeasonPass() = delete;
 	SeasonPass(SeasonPass const&) = delete;

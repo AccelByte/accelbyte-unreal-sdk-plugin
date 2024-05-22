@@ -27,10 +27,10 @@ FString GameStandardEvent::GetTelemetryKey()
 	return TelemetryKey;
 }
 
-void GameStandardEvent::SendGameStandardEventData(const TSharedRef<FAccelByteModelsCachedGameStandardEventPayload>& Payload, 
-													FVoidHandler const& OnSuccess, 
-													FErrorHandler const& OnError, 
-													FDateTime const& ClientTimestamp)
+void GameStandardEvent::SendGameStandardEventData(TSharedRef<FAccelByteModelsCachedGameStandardEventPayload> const& Payload
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FDateTime const& ClientTimestamp)
 {
 
 	UEnum* EnumPtr = StaticEnum<EAccelByteGameStandardEventName>();

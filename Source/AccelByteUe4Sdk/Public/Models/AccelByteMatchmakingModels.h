@@ -55,7 +55,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResult
 	FString Game_mode{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-	bool Joinable{};
+	bool Joinable{false};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Match_id{};
@@ -143,7 +143,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingGetTicketDetailsResponse
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | GetTicketDetailsResponse")
-	bool MatchFound{};
+	bool MatchFound{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | GetTicketDetailsResponse")
 	FString SessionId{};
@@ -182,6 +182,19 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchFoundNotif
 	TArray<FAccelByteModelsV2Ticket> Tickets{};
 };
 
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2TicketInformation
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | TicketInformation")
+	TArray<FString> CrossPlatforms{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | TicketInformation")
+	bool CrossPlayEnabled{ false };
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2StartMatchmakingNotif
 {
@@ -201,6 +214,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2StartMatchmakingNotif
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | StartMatchmakingNotif")
 	FString MatchPool{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | StartMatchmakingNotif")
+	FAccelByteModelsV2TicketInformation TicketInformation{};
 };
 
 USTRUCT(BlueprintType)

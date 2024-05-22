@@ -43,17 +43,19 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * 
-	 * @deprecated This method will be removed in the future, so please use GetTokenWithAuthorizationCodeV3(const FString& ClientId
-	 *		, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri
-	 *		, THandler<FOauth2Token>& OnSuccess, const FOAuthErrorHandler& OnError, const FString& IamUrl)
+	 * @deprecated This method will be removed in the future, so please use GetTokenWithAuthorizationCodeV3(FString const& ClientId
+	 *		, FString const& ClientSecret, FString const& AuthorizationCode, FString const& RedirectUri
+	 *		, THandler<FOauth2Token>& OnSuccess, FOAuthErrorHandler const& OnError, FString const& IamUrl)
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithAuthorizationCode(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& AuthorizationCode
-		, const FString& RedirectUri
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithAuthorizationCode(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& AuthorizationCode
+		, FString const& RedirectUri
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher.
@@ -68,17 +70,19 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * 
-	 * @deprecated This method will be removed in the future, so please use GetTokenWithAuthorizationCodeV3(const FString& ClientId
-	 *		, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri
-	 *		, THandler<FOauth2Token>& OnSuccess, const FOAuthErrorHandler& OnError, const FString& IamUrl)
+	 * @deprecated This method will be removed in the future, so please use GetTokenWithAuthorizationCodeV3(FString const& ClientId
+	 *		, FString const& ClientSecret, FString const& AuthorizationCode, FString const& RedirectUri
+	 *		, THandler<FOauth2Token>& OnSuccess, FOAuthErrorHandler const& OnError, FString const& IamUrl)
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithAuthorizationCode(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& AuthorizationCode
-		, const FString& RedirectUri
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithAuthorizationCode(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& AuthorizationCode
+		, FString const& RedirectUri
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user using a registered Email account.
@@ -92,17 +96,19 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * 
-	 * @deprecated This method will be removed in the future, so please use GetTokenWithPasswordCredentialsV3(const FString& ClientId
-	 *		, const FString& ClientSecret, const FString& Username, const FString& Password, THandler<FOauth2Token>& OnSuccess
-	 *		, const FOAuthErrorHandler& OnError, const FString& IamUrl)
+	 * @deprecated This method will be removed in the future, so please use GetTokenWithPasswordCredentialsV3(FString const& ClientId
+	 *		, FString const& ClientSecret, FString const& Username, FString const& Password, THandler<FOauth2Token>& OnSuccess
+	 *		, FOAuthErrorHandler const& OnError, FString const& IamUrl)
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithPasswordCredentials(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Username
-		, const FString& Password
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithPasswordCredentials(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Username
+		, FString const& Password
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user using a registered Email Account with 2FA enabled.
@@ -116,17 +122,19 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * 
-	 * @deprecated This method will be removed in the future, so please use GetTokenWithPasswordCredentialsV3(const FString& ClientId
-	 *		, const FString& ClientSecret, const FString& Username, const FString& Password, THandler<FOauth2Token>& OnSuccess
-	 *		, const FOAuthErrorHandler& OnError, const FString& IamUrl)
+	 * @deprecated This method will be removed in the future, so please use GetTokenWithPasswordCredentialsV3(FString const& ClientId
+	 *		, FString const& ClientSecret, FString const& Username, FString const& Password, THandler<FOauth2Token>& OnSuccess
+	 *		, FOAuthErrorHandler const& OnError, FString const& IamUrl)
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithPasswordCredentials(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Username
-		, const FString& Password
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithPasswordCredentials(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Username
+		, FString const& Password
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token from specified OAuth/IAM client.
@@ -137,12 +145,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithClientCredentials(const FString& ClientId
-		, const FString& ClientSecret
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithClientCredentials(FString const& ClientId
+		, FString const& ClientSecret
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token using the user's device information and its unique Id.
@@ -154,12 +164,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithDeviceId(const FString& ClientId
-		, const FString& ClientSecret
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT("")
+	static FAccelByteTaskWPtr GetTokenWithDeviceId(FString const& ClientId
+		, FString const& ClientSecret
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT("")
 		, bool bCreateHeadless = true);
 
 	/**
@@ -172,12 +184,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithDeviceId(const FString& ClientId
-		, const FString& ClientSecret
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT("")
+	static FAccelByteTaskWPtr GetTokenWithDeviceId(FString const& ClientId
+		, FString const& ClientSecret
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT("")
 		, bool bCreateHeadless = true);
 	
 	/**
@@ -194,14 +208,16 @@ public:
 	 *			then the value from FRegistry is used instead.
 	 *
 	 * @note When 2FA is enabled please use the method with FOAuthErrorHandler to get more details about the OAuth errors.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithOtherPlatformToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& PlatformId
-		, const FString& PlatformToken
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithOtherPlatformToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& PlatformId
+		, FString const& PlatformToken
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -216,15 +232,17 @@ public:
 	 * @param bCreateHeadless (optional) A boolean flag to specify new account creation if needed, default value is true 
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithOtherPlatformToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& PlatformId
-		, const FString& PlatformToken
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
+	static FAccelByteTaskWPtr GetTokenWithOtherPlatformToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& PlatformId
+		, FString const& PlatformToken
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
 		, bool bCreateHeadless = true
-		, const FString& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid.
@@ -236,13 +254,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithRefreshToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& RefreshToken
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithRefreshToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& RefreshToken
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid with 2FA enabled.
@@ -254,13 +274,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithRefreshToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& RefreshToken
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithRefreshToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& RefreshToken
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Refresh the platform token that is stored in the IAM backend.
@@ -275,14 +297,16 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void RefreshPlatformToken(const FString& ClientID
-		, const FString& ClientSecret
-		, const FString& PlatformID
-		, const FString& PlatformToken
-		, const THandler<FPlatformTokenRefreshResponse>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr RefreshPlatformToken(FString const& ClientID
+		, FString const& ClientSecret
+		, FString const& PlatformID
+		, FString const& PlatformToken
+		, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
      * @brief Revoke specified access token to make it invalid.
@@ -293,14 +317,16 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 *
-	 * @deprecated This method is using wrong auth type, so please use RevokeToken(const FString& ClientId
-	 *		, const FString& ClientSecret, const FString& AccessToken, const FVoidHandler& OnSuccess
-	 *		, const FOAuthErrorHandler& OnError, const FString& IamUrl)
-     */
-    static void RevokeToken(const FString& AccessToken
-    	, const FVoidHandler& OnSuccess
-    	, const FErrorHandler& OnError
-    	, const FString& IamUrl = TEXT(""));
+	 * @deprecated This method is using wrong auth type, so please use RevokeToken(FString const& ClientId
+	 *		, FString const& ClientSecret, FString const& AccessToken, FVoidHandler const& OnSuccess
+	 *		, FOAuthErrorHandler const& OnError, FString const& IamUrl)
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+    static FAccelByteTaskWPtr RevokeToken(FString const& AccessToken
+    	, FVoidHandler const& OnSuccess
+    	, FErrorHandler const& OnError
+    	, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Revoke specified access token to make it invalid.
@@ -312,13 +338,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void RevokeToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& AccessToken
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr RevokeToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& AccessToken
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Revoke specified access token to make it invalid.
@@ -330,13 +358,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void RevokeToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& AccessToken
-		, const FVoidHandler& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr RevokeToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& AccessToken
+		, FVoidHandler const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher.
@@ -351,14 +381,16 @@ public:
 	 *			then the value from FRegistry is used instead.
 	 *
 	 * @note When 2FA is enabled please use the method with FOAuthErrorHandler to get more details about the OAuth errors.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithAuthorizationCodeV3(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& AuthorizationCode
-		, const FString& RedirectUri
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV3(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& AuthorizationCode
+		, FString const& RedirectUri
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher with 2FA enabled.
@@ -371,14 +403,16 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithAuthorizationCodeV3(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& AuthorizationCode
-		, const FString& RedirectUri
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV3(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& AuthorizationCode
+		, FString const& RedirectUri
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user using a registered Email account.
@@ -394,15 +428,17 @@ public:
 	 *			then the value from FRegistry is used instead.
 	 *			
 	 * @note When 2FA is enabled please use the method with FOAuthErrorHandler to get more details about the OAuth errors.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithPasswordCredentialsV3(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Username
-		, const FString& Password
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FErrorHandler& OnError
+	static FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV3(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Username
+		, FString const& Password
+		, THandler<FOauth2Token> const& OnSuccess
+		, FErrorHandler const& OnError
 		, bool bRememberMe = false
-		, const FString& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user using a registered Email account with 2FA enabled.
@@ -416,15 +452,17 @@ public:
 	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithPasswordCredentialsV3(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Username
-		, const FString& Password
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
+	static FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV3(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Username
+		, FString const& Password
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
 		, bool bRememberMe = false
-		, const FString& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -439,16 +477,18 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithSimultaneousPlatformToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& NativePlatformName
-		, const FString& NativePlatformToken
-		, const FString& SecondaryPlatformName
-		, const FString& SecondaryPlatformToken
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithSimultaneousPlatformToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& NativePlatformName
+		, FString const& NativePlatformToken
+		, FString const& SecondaryPlatformName
+		, FString const& SecondaryPlatformToken
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Verify and Remember new device when user enabled 2FA.
@@ -463,16 +503,18 @@ public:
 	 * @param bRememberDevice This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void VerifyAndRememberNewDevice(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& MfaToken
+	static FAccelByteTaskWPtr VerifyAndRememberNewDevice(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& MfaToken
 		, EAccelByteLoginAuthFactorType AuthFactorType
-		, const FString& Code 
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
+		, FString const& Code 
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
 		, bool bRememberDevice = false
-		, const FString& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Log user in with create headless account after 3rd platform authenticated
@@ -485,13 +527,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void CreateHeadlessAccountAndResponseToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& LinkingToken
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr CreateHeadlessAccountAndResponseToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& LinkingToken
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Log user in with authenticate a user account and perform platform link. It validates user's email and password.
@@ -505,15 +549,17 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void AuthenticationWithPlatformLink(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Username
-		, const FString& Password
-		, const FString& LinkingToken
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr AuthenticationWithPlatformLink(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Username
+		, FString const& Password
+		, FString const& LinkingToken
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Verify OAuth2 token verification API.
@@ -525,13 +571,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void VerifyToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Token
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr VerifyToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Token
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Generate one time linking code. 
@@ -542,12 +590,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GenerateOneTimeCode(const FString& AccessToken
-		, const FString& PlatformId
-		, const THandler<FGeneratedOneTimeCode>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GenerateOneTimeCode(FString const& AccessToken
+		, FString const& PlatformId
+		, THandler<FGeneratedOneTimeCode> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 	
 	/**
 	 * @brief Generate publisher user's game token. Required a code from request game token. 
@@ -559,13 +609,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GenerateGameToken(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Code
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GenerateGameToken(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Code
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief This function generate a code that can be exchanged into publisher namespace token (i.e. by web portal)
@@ -575,13 +627,15 @@ public:
 	 * @param PublisherClientID The targeted game's publisher ClientID.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GenerateCodeForPublisherTokenExchange(const FString& AccessToken,
-		const FString& PublisherNamespace,
-		const FString& PublisherClientID,
-		const THandler<FCodeForTokenExchangeResponse>& OnSuccess,
-		const FErrorHandler& OnError,
-		const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GenerateCodeForPublisherTokenExchange(FString const& AccessToken
+		, FString const& PublisherNamespace
+		, FString const& PublisherClientID
+		, THandler<FCodeForTokenExchangeResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief This function is used for retrieving third party platform token for user that login using third party,
@@ -594,12 +648,14 @@ public:
 	 * @param Authorization Authorization.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FThirdPartyPlatformTokenData.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void RetrieveUserThirdPartyPlatformToken(const FString& UserId
-		, const FString& PlatformId
-		, const FString& Authorization
-		, const THandler<FThirdPartyPlatformTokenData>& OnSuccess
-		, const FOAuthErrorHandler& OnError);
+	static FAccelByteTaskWPtr RetrieveUserThirdPartyPlatformToken(FString const& UserId
+		, FString const& PlatformId
+		, FString const& Authorization
+		, THandler<FThirdPartyPlatformTokenData> const& OnSuccess
+		, FOAuthErrorHandler const& OnError);
 
 #pragma region OAuthV4
 	/**
@@ -614,15 +670,17 @@ public:
 	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithPasswordCredentialsV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Username
-		, const FString& Password
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
+	static FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Username
+		, FString const& Password
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
 		, bool bRememberMe = false
-		, const FString& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token using the user's device information and its unique Id.
@@ -634,12 +692,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithDeviceIdV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT("")
+	static FAccelByteTaskWPtr GetTokenWithDeviceIdV4(FString const& ClientId
+		, FString const& ClientSecret
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT("")
 		, bool bCreateHeadless = true);
 
 	/**
@@ -653,14 +713,16 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithAuthorizationCodeV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& AuthorizationCode
-		, const FString& RedirectUri
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& AuthorizationCode
+		, FString const& RedirectUri
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -675,15 +737,17 @@ public:
 	 * @param bCreateHeadless (optional) A boolean flag to specify new account creation if needed, default value is true
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithOtherPlatformTokenV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& PlatformId
-		, const FString& PlatformToken
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
+	static FAccelByteTaskWPtr GetTokenWithOtherPlatformTokenV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& PlatformId
+		, FString const& PlatformToken
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
 		, bool bCreateHeadless = true
-		, const FString& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Verify and Remember new device when user enabled 2FA.
@@ -698,16 +762,18 @@ public:
 	 * @param bRememberDevice This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void VerifyAndRememberNewDeviceV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& MfaToken
+	static FAccelByteTaskWPtr VerifyAndRememberNewDeviceV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& MfaToken
 		, EAccelByteLoginAuthFactorType AuthFactorType
-		, const FString& Code
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
+		, FString const& Code
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
 		, bool bRememberDevice = false
-		, const FString& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Generate publisher user's game token. Required a code from request game token.
@@ -719,13 +785,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GenerateGameTokenV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Code
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GenerateGameTokenV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Code
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Log user in with authenticate a user account and perform platform link. It validates user's email and password.
@@ -739,15 +807,17 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void AuthenticationWithPlatformLinkV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& Username
-		, const FString& Password
-		, const FString& LinkingToken
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr AuthenticationWithPlatformLinkV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& Username
+		, FString const& Password
+		, FString const& LinkingToken
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Log user in with create headless account after 3rd platform authenticated
@@ -760,13 +830,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void CreateHeadlessAccountAndResponseTokenV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& LinkingToken
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr CreateHeadlessAccountAndResponseTokenV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& LinkingToken
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -781,16 +853,18 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithSimultaneousPlatformTokenV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& NativePlatformName
-		, const FString& NativePlatformToken
-		, const FString& SecondaryPlatformName
-		, const FString& SecondaryPlatformToken
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithSimultaneousPlatformTokenV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& NativePlatformName
+		, FString const& NativePlatformToken
+		, FString const& SecondaryPlatformName
+		, FString const& SecondaryPlatformToken
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid with 2FA enabled.
@@ -802,13 +876,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithRefreshTokenV4(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& RefreshToken
-		, const THandler<FOauth2TokenV4>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithRefreshTokenV4(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& RefreshToken
+		, THandler<FOauth2TokenV4> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 	/**
 	 * @brief Get access token from exchange login ticket.
@@ -820,13 +896,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static void GetTokenWithLoginTicket(const FString& ClientId
-		, const FString& ClientSecret
-		, const FString& LoginTicket
-		, const THandler<FOauth2Token>& OnSuccess
-		, const FOAuthErrorHandler& OnError
-		, const FString& IamUrl = TEXT(""));
+	static FAccelByteTaskWPtr GetTokenWithLoginTicket(FString const& ClientId
+		, FString const& ClientSecret
+		, FString const& LoginTicket
+		, THandler<FOauth2Token> const& OnSuccess
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 #pragma endregion
 
 private:
@@ -834,9 +912,9 @@ private:
 	Oauth2(Oauth2 const&) = delete;
 	Oauth2(Oauth2&&) = delete;
 
-	static FHttpRequestPtr ConstructTokenRequest(const FString& Url
-		, const FString& ClientId
-		, const FString& ClientSecret);
+	static FHttpRequestPtr ConstructTokenRequest(FString const& Url
+		, FString const& ClientId
+		, FString const& ClientSecret);
 
 	static FString ConstructAdditionalData();
 };

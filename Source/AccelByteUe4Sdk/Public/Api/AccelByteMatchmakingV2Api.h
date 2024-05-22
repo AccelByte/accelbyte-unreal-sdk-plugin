@@ -31,11 +31,13 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Optionals optional variables we can set for matchmaking process.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateMatchTicket(const FString& MatchPool
-		, const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals = {});
+	FAccelByteTaskWPtr CreateMatchTicket(FString const& MatchPool
+		, THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FAccelByteModelsV2MatchTicketOptionalParams const& Optionals = {});
 
 	/**
 	 * @brief Create a matchmaking ticket, this will start matchmaking process.
@@ -44,11 +46,13 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Optionals optional variables we can set for matchmaking process.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateMatchTicket(const FString& MatchPool
-		, const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess
-		, const FCreateMatchmakingTicketErrorHandler& OnError
-		, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals = {});
+	FAccelByteTaskWPtr CreateMatchTicket(FString const& MatchPool
+		, THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse> const& OnSuccess
+		, FCreateMatchmakingTicketErrorHandler const& OnError
+		, FAccelByteModelsV2MatchTicketOptionalParams const& Optionals = {});
 
 	/**
 	 * @brief Get the match ticket details, will get the status of match ticket if it's already matched
@@ -57,10 +61,12 @@ public:
 	 * @param TicketId ID of the matchmaking ticket.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetMatchTicketDetails(const FString& TicketId
-		, const THandler<FAccelByteModelsV2MatchmakingGetTicketDetailsResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetMatchTicketDetails(FString const& TicketId
+		, THandler<FAccelByteModelsV2MatchmakingGetTicketDetailsResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete the match ticket. Will cancel the matchmaking process on success.
@@ -68,10 +74,12 @@ public:
 	 * @param TicketId ID of the matchmaking ticket.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteMatchTicket(const FString& TicketId
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteMatchTicket(FString const& TicketId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get matchmaking matchpool's metrics.
@@ -79,10 +87,12 @@ public:
 	 * @param MatchPool Name of the matchpool.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetMatchmakingMetrics(const FString& MatchPool
-		, const THandler<FAccelByteModelsV2MatchmakingMetrics>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetMatchmakingMetrics(FString const& MatchPool
+		, THandler<FAccelByteModelsV2MatchmakingMetrics> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get my match tickets
@@ -93,12 +103,14 @@ public:
 	 * @param MatchPool Name of the match pool we want to query, leave empty will query all match pool.
 	 * @param Limit Pagination item limit, default is 20.
 	 * @param Offset Pagination item offset, default is 0.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetMyMatchTickets(const THandler<FAccelByteModelsV2MatchmakingTicketStatuses>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& MatchPool = TEXT("")
-		, const int32& Limit = 20
-		, const int32& Offset = 0);
+	FAccelByteTaskWPtr GetMyMatchTickets(THandler<FAccelByteModelsV2MatchmakingTicketStatuses> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& MatchPool = TEXT("")
+		, int32 Limit = 20
+		, int32 Offset = 0);
 	
 private:
 	MatchmakingV2() = delete;
@@ -107,5 +119,5 @@ private:
 	
 };
 
-}
-}
+} // Namespace Api
+} // Namespace AccelByte

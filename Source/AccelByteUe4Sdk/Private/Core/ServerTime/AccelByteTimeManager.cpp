@@ -61,7 +61,7 @@ void FAccelByteTimeManager::Reset()
 	LAST_UPDATED_SERVER_TIME = FDateTime::MinValue();
 }
 
-void FAccelByteTimeManager::GetServerTime(THandler<FTime> const& OnSuccess
+FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& OnSuccess
 	, FErrorHandler const& OnError
 	, bool bForceSync)
 {
@@ -118,13 +118,14 @@ void FAccelByteTimeManager::GetServerTime(THandler<FTime> const& OnSuccess
 				OnSuccess.ExecuteIfBound(ServerTime);
 			});
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(SuccessDelegate, OnError), FPlatformTime::Seconds());
+		return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(SuccessDelegate, OnError), FPlatformTime::Seconds());
 	}
 	else
 	{
 		FTime ServerTime{};
 		ServerTime.CurrentTime = SERVER_TIME_CURRENT;
 		OnSuccess.ExecuteIfBound(ServerTime);
+		return nullptr;
 	}
 }
 

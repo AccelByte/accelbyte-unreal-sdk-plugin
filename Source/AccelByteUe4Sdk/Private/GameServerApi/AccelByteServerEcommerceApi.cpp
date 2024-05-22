@@ -23,17 +23,17 @@ ServerEcommerce::ServerEcommerce(ServerCredentials const& InCredentialsRef
 ServerEcommerce::~ServerEcommerce()
 {}
 
-void ServerEcommerce::QueryUserEntitlements(const FString& UserId
+FAccelByteTaskWPtr ServerEcommerce::QueryUserEntitlements(FString const& UserId
 	, bool bActiveOnly
-	, const FString& EntitlementName
-	, const TArray<FString>& ItemIds
-	, const int32& Offset
-	, const int32& Limit
-	, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess
-	, const FErrorHandler& OnError
+	, FString const& EntitlementName
+	, TArray<FString> const& ItemIds
+	, int32 Offset
+	, int32 Limit
+	, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
 	, EAccelByteEntitlementClass EntitlementClass
 	, EAccelByteAppType AppType
-	, const TArray<FString>& Features)
+	, TArray<FString> const& Features)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -41,7 +41,7 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	FString Verb = TEXT("GET");
@@ -94,12 +94,12 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId
 		QueryParams.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(AppType));
 	}
 	
-	HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid
-	, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::GetUserEntitlementById(FString const& Entitlementid
+	, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -108,13 +108,13 @@ void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *Entitlementid);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::GetUserEntitlementById(const FString& UserId
-	, const FString& EntitlementId
-	, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::GetUserEntitlementById(FString const& UserId
+	, FString const& EntitlementId
+	, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -122,7 +122,7 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s")
@@ -131,13 +131,13 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId
 		, *UserId
 		, *EntitlementId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::GrantUserEntitlements(const FString& UserId
-	, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant
-	, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::GrantUserEntitlements(FString const& UserId
+	, TArray<FAccelByteModelsEntitlementGrant> const& EntitlementGrant
+	, THandler<TArray<FAccelByteModelsStackableEntitlementInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -145,12 +145,12 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 	if (UserId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserId cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
@@ -166,7 +166,7 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId
 			// Handle the specific case when Source is NONE
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest),
 				TEXT("Invalid request. The 'Source' field must be set to a valid item source (e.g., EAccelByteEntitlementSource::PURCHASE, EAccelByteEntitlementSource::REWARD, etc.). Please set a valid 'Source' value to fulfill the request."));
-			return;
+			return nullptr;
 		}
 		TSharedPtr<FJsonObject> JsonObj = FJsonObjectConverter::UStructToJsonObject(Entitlement);
 		FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObj, FAccelByteUtilities::FieldRemovalFlagAll);
@@ -177,14 +177,14 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Contents);
 	FJsonSerializer::Serialize(JsonArray, Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }
 
-void ServerEcommerce::CreditUserWallet(const FString& UserId
-	, const FString& CurrencyCode
-	, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest
-	, const THandler<FAccelByteModelsWalletInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::CreditUserWallet(FString const& UserId
+	, FString const& CurrencyCode
+	, FAccelByteModelsCreditUserWalletRequest const& CreditUserWalletRequest
+	, THandler<FAccelByteModelsWalletInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), "This does not support for multiplatform wallet, use CreditUserWalletV2 instead.");
@@ -195,14 +195,14 @@ void ServerEcommerce::CreditUserWallet(const FString& UserId
 		, *UserId
 		, *CurrencyCode);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, CreditUserWalletRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, CreditUserWalletRequest, OnSuccess, OnError);
 }
 
-void ServerEcommerce::CreditUserWalletV2(const FString& UserId
-	, const FString& CurrencyCode
-	, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest
-	, const THandler<FAccelByteModelsWalletCreditResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::CreditUserWalletV2(FString const& UserId
+	, FString const& CurrencyCode
+	, FAccelByteModelsCreditUserWalletRequest const& CreditUserWalletRequest
+	, THandler<FAccelByteModelsWalletCreditResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -210,7 +210,7 @@ void ServerEcommerce::CreditUserWalletV2(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit")
@@ -219,13 +219,13 @@ void ServerEcommerce::CreditUserWalletV2(const FString& UserId
 		, *UserId
 		, *CurrencyCode);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, CreditUserWalletRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, CreditUserWalletRequest, OnSuccess, OnError);
 }
 
-void ServerEcommerce::RevokeUserEntitlements(const FString& UserId
-	, const TArray<FString>& EntitlementIds
-	, const THandler<FAccelByteModelsBulkRevokeEntitlements>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::RevokeUserEntitlements(FString const& UserId
+	, TArray<FString> const& EntitlementIds
+	, THandler<FAccelByteModelsBulkRevokeEntitlements> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -233,7 +233,7 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds")
@@ -245,13 +245,13 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId
 		{TEXT("entitlementIds"), FString::Join(EntitlementIds, TEXT(","))}
 	};
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::RevokeUserEntitlement(const FString& UserId
-	, const FString& EntitlementId
-	, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::RevokeUserEntitlement(FString const& UserId
+	, FString const& EntitlementId
+	, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -259,7 +259,7 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke")
@@ -268,14 +268,14 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId
 		, *UserId
 		, *EntitlementId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId
-	, const FString& EntitlementId
+FAccelByteTaskWPtr ServerEcommerce::ConsumeUserEntitlement(FString const& UserId
+	, FString const& EntitlementId
 	, int32 UseCount
-	, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-	, const FErrorHandler& OnError
+	, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+	, FErrorHandler const& OnError
 	, TArray<FString> Options
 	, FString const& RequestId)
 {
@@ -285,7 +285,7 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement")
@@ -305,13 +305,13 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerEcommerce::DisableUserEntitlement(const FString& UserId
-	, const FString& EntitlementId
-	, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::DisableUserEntitlement(FString const& UserId
+	, FString const& EntitlementId
+	, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -319,7 +319,7 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable")
@@ -328,13 +328,13 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId
 		, *UserId
 		, *EntitlementId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::EnableUserEntitlement(const FString& UserId
-	, const FString& EntitlementId
-	, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::EnableUserEntitlement(FString const& UserId
+	, FString const& EntitlementId
+	, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -342,7 +342,7 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable")
@@ -351,13 +351,13 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId
 		, *UserId
 		, *EntitlementId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::GetUserEntitlementHistory(const FString& UserId
-	, const FString& EntitlementId
-	, const THandler<TArray<FAccelByteModelsUserEntitlementHistory>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::GetUserEntitlementHistory(FString const& UserId
+	, FString const& EntitlementId
+	, THandler<TArray<FAccelByteModelsUserEntitlementHistory>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -365,14 +365,14 @@ void ServerEcommerce::GetUserEntitlementHistory(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if (!ValidateAccelByteId(EntitlementId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetEntitlementIdInvalidMessage(EntitlementId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/history")
@@ -381,14 +381,14 @@ void ServerEcommerce::GetUserEntitlementHistory(const FString& UserId
 		, *UserId
 		, *EntitlementId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::DebitUserWallet(const FString& UserId
-	, const FString& WalletId
-	, const FAccelByteModelsDebitUserWalletRequest& DebitUserWalletRequest
-	, const THandler<FAccelByteModelsWalletInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::DebitUserWallet(FString const& UserId
+	, FString const& WalletId
+	, FAccelByteModelsDebitUserWalletRequest const& DebitUserWalletRequest
+	, THandler<FAccelByteModelsWalletInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), "This end point will be deprecated, old wallet id means one currency, but now it only means one wallet, so we wanna use currency and source instead it.");
@@ -399,14 +399,14 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId
 		, *UserId
 		, *WalletId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DebitUserWalletRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DebitUserWalletRequest, OnSuccess, OnError);
 }
 
-void ServerEcommerce::DebitUserWalletV2(const FString& UserId
-	, const FString& CurrencyCode
-	, const FAccelByteModelsDebitUserWalletRequestV2& DebitUserWalletRequest
-	, const THandler<FAccelByteModelsWalletInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::DebitUserWalletV2(FString const& UserId
+	, FString const& CurrencyCode
+	, FAccelByteModelsDebitUserWalletRequestV2 const& DebitUserWalletRequest
+	, THandler<FAccelByteModelsWalletInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -414,25 +414,25 @@ void ServerEcommerce::DebitUserWalletV2(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if(CurrencyCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("CurrencyCode parameter cannot be empty!")));
-		return;
+		return nullptr;
 	}
 	
 	if(DebitUserWalletRequest.Amount < 1)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Debit amount must be a minimum of 1, request debit amount is %lld"), DebitUserWalletRequest.Amount));
-		return;
+		return nullptr;
 	}
 
 	if(DebitUserWalletRequest.BalanceOrigin == EAccelBytePlatformBalanceOrigin::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Debit BalanceOrigin field cannot be NONE"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/currencies/%s/debit")
@@ -441,14 +441,14 @@ void ServerEcommerce::DebitUserWalletV2(const FString& UserId
 		, *UserId
 		, *CurrencyCode);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DebitUserWalletRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DebitUserWalletRequest, OnSuccess, OnError);
 }
 
-void ServerEcommerce::PaymentWithUserWallet(const FString& UserId
-	, const FString& CurrencyCode
-	, const FAccelByteModelsPaymentUserWalletRequest& PaymentRequest
-	, const THandler<FAccelByteModelsPlatformWallet>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::PaymentWithUserWallet(FString const& UserId
+	, FString const& CurrencyCode
+	, FAccelByteModelsPaymentUserWalletRequest const& PaymentRequest
+	, THandler<FAccelByteModelsPlatformWallet> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -456,25 +456,25 @@ void ServerEcommerce::PaymentWithUserWallet(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if(CurrencyCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("CurrencyCode parameter cannot be empty!")));
-		return;
+		return nullptr;
 	}
 	
 	if(PaymentRequest.Amount < 1)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Debit amount must be a minimum of 1, request debit amount is %lld"), PaymentRequest.Amount));
-		return;
+		return nullptr;
 	}
 
 	if(PaymentRequest.WalletPlatform == EAccelByteWalletPlatform::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Payment WalletPlatform field cannot be NONE"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/payment")
@@ -483,13 +483,13 @@ void ServerEcommerce::PaymentWithUserWallet(const FString& UserId
 		, *UserId
 		, *CurrencyCode);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, PaymentRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, PaymentRequest, OnSuccess, OnError);
 }
 
-void ServerEcommerce::FulfillUserItem(const FString& UserId
-	, const FAccelByteModelsFulfillmentRequest& FulfillmentRequest
-	, const THandler<FAccelByteModelsFulfillmentResult>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerEcommerce::FulfillUserItem(FString const& UserId
+	, FAccelByteModelsFulfillmentRequest const& FulfillmentRequest
+	, THandler<FAccelByteModelsFulfillmentResult> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -497,7 +497,7 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if (FulfillmentRequest.Source == EAccelByteItemSource::NONE)
@@ -507,7 +507,7 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId
 							   "Please set a valid 'Source' value to fulfill the request.");
 		// Handle the specific case when Source is NONE
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest),Message);
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment")
@@ -555,10 +555,10 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus
+FAccelByteTaskWPtr ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus
 	, THandler<TArray<FAccelByteModelsBulkGetItemsBySkus>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -578,10 +578,10 @@ void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus
 		}
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::ListStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
+FAccelByteTaskWPtr ServerEcommerce::ListStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -590,10 +590,10 @@ void ServerEcommerce::ListStores(THandler<TArray<FAccelByteModelsPlatformStore>>
 		, *ServerSettingsRef.PlatformServerUrl
 		, *ServerCredentialsRef->GetClientNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2& ItemCriteria
+FAccelByteTaskWPtr ServerEcommerce::QueryItemsByCriteria(FAccelByteModelsItemCriteriaV2 const& ItemCriteria
 	, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -644,10 +644,10 @@ void ServerEcommerce::QueryItemsByCriteria(const FAccelByteModelsItemCriteriaV2&
 		QueryParams.Add(TTuple<FString, FString>{TEXT("availableDate"), AvailableDate });
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV3& ItemCriteria
+FAccelByteTaskWPtr ServerEcommerce::QueryItemsByCriteriaV2(FAccelByteModelsItemCriteriaV3 const& ItemCriteria
 	, THandler<FAccelByteModelsItemPagingSlicedResultV2> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -699,10 +699,11 @@ void ServerEcommerce::QueryItemsByCriteriaV2(const FAccelByteModelsItemCriteriaV
 		QueryParams.Add(TTuple<FString, FString>{ TEXT("availableDate"), AvailableDate });
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerEcommerce::FulfillRewards(const FString& UserId, const FAccelByteModelsFulfillRewards& FulfillRewardsRequest
+FAccelByteTaskWPtr ServerEcommerce::FulfillRewards(FString const& UserId
+	, FAccelByteModelsFulfillRewards const& FulfillRewardsRequest
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -712,7 +713,7 @@ void ServerEcommerce::FulfillRewards(const FString& UserId, const FAccelByteMode
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment/rewards")
@@ -720,7 +721,7 @@ void ServerEcommerce::FulfillRewards(const FString& UserId, const FAccelByteMode
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FulfillRewardsRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FulfillRewardsRequest, OnSuccess, OnError);
 }
 
 } // Namespace GameServerApi

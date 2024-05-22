@@ -99,7 +99,7 @@ FString Achievement::ConvertGlobalAchievementContributosSortByToString(EAccelByt
 	}
 }
 
-void Achievement::QueryAchievements(const FString& Language
+FAccelByteTaskWPtr Achievement::QueryAchievements(const FString& Language
 	, const EAccelByteAchievementListSortBy& SortBy
 	, const THandler<FAccelByteModelsPaginatedPublicAchievement>& OnSuccess
 	, const FErrorHandler& OnError
@@ -123,10 +123,10 @@ void Achievement::QueryAchievements(const FString& Language
 		{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : *TagQuery}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Achievement::GetAchievement(const FString& AchievementCode
+FAccelByteTaskWPtr Achievement::GetAchievement(const FString& AchievementCode
 	, const THandler<FAccelByteModelsMultiLanguageAchievement>& OnSuccess
 	, const FErrorHandler& OnError)
 {
@@ -135,7 +135,7 @@ void Achievement::GetAchievement(const FString& AchievementCode
 	if (AchievementCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("Url is invalid. Achievement Code is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements/%s")
@@ -143,10 +143,10 @@ void Achievement::GetAchievement(const FString& AchievementCode
 		, *CredentialsRef->GetNamespace()
 		, *AchievementCode);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy
+FAccelByteTaskWPtr Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy
 	, const THandler<FAccelByteModelsPaginatedUserAchievement>& OnSuccess
 	, const FErrorHandler& OnError
 	, const int32& Offset
@@ -164,7 +164,7 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 		SortBy == EAccelByteAchievementListSortBy::UPDATED_AT_DESC)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("SortBy %s is not supported."), *FAccelByteUtilities::GetUEnumValueAsString(SortBy)));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
@@ -180,10 +180,10 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 		{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : *TagQuery}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Achievement::QueryUserAchievements(EAccelByteGlobalAchievementListSortBy const& SortBy
+FAccelByteTaskWPtr Achievement::QueryUserAchievements(EAccelByteGlobalAchievementListSortBy const& SortBy
 	, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 const& Offset
@@ -206,45 +206,44 @@ void Achievement::QueryUserAchievements(EAccelByteGlobalAchievementListSortBy co
 		{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : *TagQuery}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-	void Achievement::QueryUserAchievementsByUserId(FString const& UserId,
-		EAccelByteAchievementListSortBy const& SortBy,
-		THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess,
-		FErrorHandler const& OnError,
-		int32 const& Offset,
-		int32 const& Limit,
-		bool PreferUnlocked,
-		FString const& TagQuery)
+FAccelByteTaskWPtr Achievement::QueryUserAchievementsByUserId(FString const& UserId,
+	EAccelByteAchievementListSortBy const& SortBy,
+	THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess,
+	FErrorHandler const& OnError,
+	int32 const& Offset,
+	int32 const& Limit,
+	bool PreferUnlocked,
+	FString const& TagQuery)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
 	{
-		FReport::Log(FString(__FUNCTION__));
-
-		if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
-			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
-			, OnError))
-		{
-			return;
-		}
-
-		const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
-			, *SettingsRef.AchievementServerUrl
-			, *CredentialsRef->GetNamespace()
-			, *UserId);
-
-		const TMultiMap<FString, FString> QueryParams = {
-			{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
-			{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
-			{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
-			{TEXT("preferUnlocked"), PreferUnlocked ? TEXT("true") : TEXT("false")},
-			{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : *TagQuery}
-		};
-
-		HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+		return nullptr;
 	}
 
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements")
+		, *SettingsRef.AchievementServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *UserId);
 
-void Achievement::UnlockAchievement(const FString& AchievementCode
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("sortBy"), SortBy == EAccelByteAchievementListSortBy::NONE ? TEXT(""): ConvertAchievementSortByToString(SortBy)},
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
+		{TEXT("preferUnlocked"), PreferUnlocked ? TEXT("true") : TEXT("false")},
+		{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : *TagQuery}
+	};
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Achievement::UnlockAchievement(const FString& AchievementCode
 	, const FVoidHandler& OnSuccess
 	, const FErrorHandler& OnError)
 {
@@ -253,7 +252,7 @@ void Achievement::UnlockAchievement(const FString& AchievementCode
 	if (AchievementCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("Url is invalid. Achievement Code is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/%s/unlock")
@@ -262,10 +261,10 @@ void Achievement::UnlockAchievement(const FString& AchievementCode
 		, *CredentialsRef->GetUserId()
 		, *AchievementCode);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Achievement::QueryGlobalAchievements(FString const& AchievementCode
+FAccelByteTaskWPtr Achievement::QueryGlobalAchievements(FString const& AchievementCode
 	, EAccelByteGlobalAchievementStatus const& AchievementStatus
 	, EAccelByteGlobalAchievementListSortBy const& SortBy
 	, THandler<FAccelByteModelsPaginatedUserGlobalAchievement> const& OnSuccess
@@ -289,10 +288,10 @@ void Achievement::QueryGlobalAchievements(FString const& AchievementCode
 		{TEXT("tags"), TagQuery.IsEmpty() ? TEXT("") : TagQuery}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Achievement::QueryGlobalAchievementContributors(FString const& AchievementCode
+FAccelByteTaskWPtr Achievement::QueryGlobalAchievementContributors(FString const& AchievementCode
 	, EAccelByteGlobalAchievementContributorsSortBy const& SortBy
 	, THandler<FAccelByteModelsPaginatedGlobalAchievementContributors> const& OnSuccess
 	, FErrorHandler const& OnError
@@ -304,7 +303,7 @@ void Achievement::QueryGlobalAchievementContributors(FString const& AchievementC
 	if (AchievementCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, AchievementCode is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/global/achievements/%s/contributors")
@@ -318,10 +317,10 @@ void Achievement::QueryGlobalAchievementContributors(FString const& AchievementC
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Achievement::QueryGlobalAchievementUserContributed(FString const& AchievementCode
+FAccelByteTaskWPtr Achievement::QueryGlobalAchievementUserContributed(FString const& AchievementCode
 	, EAccelByteGlobalAchievementContributorsSortBy const& SortBy
 	, THandler<FAccelByteModelsPaginatedGlobalAchievementUserContributed> const& OnSuccess
 	, FErrorHandler const& OnError
@@ -342,10 +341,10 @@ void Achievement::QueryGlobalAchievementUserContributed(FString const& Achieveme
 		{TEXT("achievementCode"), AchievementCode.IsEmpty() ? TEXT("") : AchievementCode}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Achievement::ClaimGlobalAchievements(FString const& AchievementCode
+FAccelByteTaskWPtr Achievement::ClaimGlobalAchievements(FString const& AchievementCode
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -354,7 +353,7 @@ void Achievement::ClaimGlobalAchievements(FString const& AchievementCode
 	if (AchievementCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, AchievementCode is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/global/achievements/%s/claim")
@@ -363,10 +362,10 @@ void Achievement::ClaimGlobalAchievements(FString const& AchievementCode
 		, *CredentialsRef->GetUserId()
 		, *AchievementCode);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 	
-void Achievement::GetTags(FString const& Name
+FAccelByteTaskWPtr Achievement::GetTags(FString const& Name
 	, EAccelByteAchievementListSortBy const& SortBy
 	, THandler<FAccelByteModelsPaginatedPublicTag> const& OnSuccess
 	, FErrorHandler const& OnError
@@ -384,7 +383,7 @@ void Achievement::GetTags(FString const& Name
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 	
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 } // Namespace Api

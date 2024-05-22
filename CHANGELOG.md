@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [25.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.5.0%0D25.4.1) (2024-05-22)
+
+
+### Features
+
+* add roles to the player session attribute ([67aea78](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/67aea78e17294124c13337614164e5e81dc59a8d))
+* changes to support unreal 5.4 ([ebd9de5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ebd9de55e58c5f4b89778ca3237ccc0bf532bdd9))
+* **chat:** add new endpoint to get a chat configuration ([538feaa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/538feaa4a39fe9d4ace8a3ff95533b52d81edfa6))
+* discount code redemption and order preview API ([bdd0fec](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bdd0fec9543694884f27152ac7e770b6e4d0fe31))
+* Enable rate limit via AB config injection ([2d0d941](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2d0d9418b5fb9e6dfb4543a6e76bb4e54be1b10f))
+* **MMv2:** MM start notification for cross play ([3f2484b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3f2484b035e8c9906dc9f3f770600623fe6e5116))
+* **User:** add a new SDK function to GetUserPublicInfoByUserId while deprecate the old function (User::GetUserByUserId) ([2afbf93](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2afbf9325f56303f56d600867c2e88c7a036c9dc))
+
+
+### Bug Fixes
+
+* **chat:** fix chat disconnect on normal disclosure state ([d83868d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d83868d67b1d73a88afd85596b10feafb7c79531))
+* **entitlement:** fix remove empty field from JSON on SyncMobilePlatformPurchaseGooglePlay ([664d5a0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/664d5a0c83df8d0b020072b4917a3b2e39851a2a))
+* rename DiscountCodeInfo field ([57fa1b5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/57fa1b5ee151dfeea19e6a0feae023bb7f991019))
+* **User:** change revoke token success handler ([c997e95](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c997e95c4bcabbd80649b28a44c71209c0801769))
+
+
+### Refactors
+
+* Credentials in ApiBase changed to SharedRef ([74102a3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/74102a39d8c585724856284536fff46b371b2eeb))
+
 ### [25.4.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.4.1%0D25.4.0) (2024-05-16)
 
 

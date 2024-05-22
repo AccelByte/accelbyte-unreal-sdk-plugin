@@ -27,9 +27,9 @@ ServerChallenge::~ServerChallenge()
 {
 }
 
-void ServerChallenge::EvaluateChallengeProgress(const FAccelByteModelsChallengeServerEvaluateProgressRequest& Request
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerChallenge::EvaluateChallengeProgress(FAccelByteModelsChallengeServerEvaluateProgressRequest const& Request
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -37,7 +37,7 @@ void ServerChallenge::EvaluateChallengeProgress(const FAccelByteModelsChallengeS
 		, *ServerSettingsRef.ChallengeServerUrl
 		, *ServerCredentialsRef->GetClientNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 
 }

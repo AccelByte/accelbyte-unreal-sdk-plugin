@@ -34,8 +34,10 @@ public:
 	 * @param OnSuccess		Success delegate.
 	 * @param OnError		Error delegate
 	 * @param bForceSync	Flag to forcefully sync the Server Time with the Backend services.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	virtual void GetServerTime(THandler<FTime> const& OnSuccess
+	virtual FAccelByteTaskWPtr GetServerTime(THandler<FTime> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bForceSync = false);
 

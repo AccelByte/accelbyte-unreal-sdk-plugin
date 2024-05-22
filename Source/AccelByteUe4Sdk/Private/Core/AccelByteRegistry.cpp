@@ -4,6 +4,7 @@
 
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
@@ -84,6 +85,7 @@ ServerCredentials& FRegistry::ServerCredentials { FRegistry::ServerCredentialsRe
 FAccelByteTimeManager FRegistry::TimeManager{ FRegistry::HttpRetryScheduler };
 FAccelByteNetworkConditioner FRegistry::NetworkConditioner;
 FAccelByteNotificationSender FRegistry::NotificationSender{*MessagingSystem.Get()};
+FHttpClient FRegistry::HttpClient{ Credentials, Settings, HttpRetryScheduler };
 #pragma endregion
 
 #pragma region Game Client Access

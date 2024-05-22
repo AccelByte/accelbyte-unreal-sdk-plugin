@@ -599,6 +599,38 @@ public:
 		, FErrorHandler const& OnError
 		, FString const& ContentType = TEXT("application/octet-stream"));
 
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+	/**
+	 * @brief Download  acontent from specified URL with several callback functions including OnProgress, OnDownloaded, and OnError.
+	 *
+	 * @param Url Specified URL to download the content.
+	 * @param OnProgress Callback function for on progress delegate.
+	 * @param OnDownloaded Callback function for successful download delegate.
+	 * @param OnError Callback function for error delegate.
+	 */
+	static void DownloadFrom(FString const& Url
+		, FHttpRequestProgressDelegate64 const& OnProgress
+		, const THandler<TArray<uint8>>& OnDownloaded
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Upload a content using specified URL with several callback functions including OnProgress, OnSuccess, and OnError.
+	 *
+	 * @param Url Specified URL to upload the content.
+	 * @param DataUpload Content to upload.
+	 * @param OnProgress Callback function for on progress delegate.
+	 * @param OnSuccess Callback function for successful upload delegate.
+	 * @param OnError Callback function for error delegate.
+	 * @param ContentType Specified content-type header which determine the type of uploaded content (default: application/octet-stream)
+	 */
+	static void UploadTo(FString const& Url
+		, TArray<uint8> const& DataUpload
+		, FHttpRequestProgressDelegate64 const& OnProgress
+		, AccelByte::FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& ContentType = TEXT("application/octet-stream"));
+#endif
+
 	/**
 	 * @brief Check whether specified URL is a valid URL format or not.
 	 *

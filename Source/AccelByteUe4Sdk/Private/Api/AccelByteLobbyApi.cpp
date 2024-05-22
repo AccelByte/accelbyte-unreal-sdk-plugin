@@ -457,7 +457,7 @@ namespace Api
 
 #undef FORM_STRING_ENUM_PAIR
 
-void Lobby::Connect(const FString& Token)
+void Lobby::Connect(FString const& Token)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -557,8 +557,8 @@ Helper macro for ErrorHandler, SuccessHandler and IdResponseMap variable name. M
 //-------------------------------------------------------------------------------------------------
 // Chat
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendPrivateMessage(const FString& UserId
-	, const FString& Message)
+FString Lobby::SendPrivateMessage(FString const& UserId
+	, FString const& Message)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -567,7 +567,7 @@ FString Lobby::SendPrivateMessage(const FString& UserId
 		, FString::Printf(TEXT("to: %s\npayload: %s\n"), *UserId, *Message));
 }
 
-FString Lobby::SendPartyMessage(const FString& Message)
+FString Lobby::SendPartyMessage(FString const& Message)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -585,7 +585,7 @@ FString Lobby::SendJoinDefaultChannelChatRequest()
 		, {});
 }
 
-FString Lobby::SendChannelMessage(const FString& Message)
+FString Lobby::SendChannelMessage(FString const& Message)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -616,8 +616,8 @@ FString Lobby::SendInfoPartyRequest()
 		, {})
 }
 
-FString Lobby::SendInfoPartyRequest(const FPartyInfoResponse& OnInfoPartyResponse
-	, const FErrorHandler& OnError)
+FString Lobby::SendInfoPartyRequest(FPartyInfoResponse const& OnInfoPartyResponse
+	, FErrorHandler const& OnError)
 {
 	SetInfoPartyResponseDelegate(OnInfoPartyResponse, OnError);
 	return SendInfoPartyRequest();
@@ -641,7 +641,7 @@ FString Lobby::SendLeavePartyRequest()
 		, {})
 }
 
-FString Lobby::SendInviteToPartyRequest(const FString& UserId)
+FString Lobby::SendInviteToPartyRequest(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyInvite
@@ -649,8 +649,8 @@ FString Lobby::SendInviteToPartyRequest(const FString& UserId)
 		, FString::Printf(TEXT("friendID: %s"), *UserId))
 }
 
-FString Lobby::SendAcceptInvitationRequest(const FString& PartyId
-	, const FString& InvitationToken)
+FString Lobby::SendAcceptInvitationRequest(FString const& PartyId
+	, FString const& InvitationToken)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -659,8 +659,8 @@ FString Lobby::SendAcceptInvitationRequest(const FString& PartyId
 		, FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken))
 }
 
-FString Api::Lobby::SendRejectInvitationRequest(const FString& PartyId
-	, const FString& InvitationToken)
+FString Api::Lobby::SendRejectInvitationRequest(FString const& PartyId
+	, FString const& InvitationToken)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -669,7 +669,7 @@ FString Api::Lobby::SendRejectInvitationRequest(const FString& PartyId
 		, FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken))
 }
 
-FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
+FString Lobby::SendKickPartyMemberRequest(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -704,7 +704,7 @@ FString Lobby::SendPartyDeleteCodeRequest()
 		, {})
 }
 
-FString Lobby::SendPartyJoinViaCodeRequest(const FString& partyCode)
+FString Lobby::SendPartyJoinViaCodeRequest(FString const& partyCode)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -713,7 +713,7 @@ FString Lobby::SendPartyJoinViaCodeRequest(const FString& partyCode)
 		, FString::Printf(TEXT("partyCode: %s\n"), *partyCode))
 }
 
-FString Lobby::SendPartyPromoteLeaderRequest(const FString& UserId)
+FString Lobby::SendPartyPromoteLeaderRequest(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -722,8 +722,8 @@ FString Lobby::SendPartyPromoteLeaderRequest(const FString& UserId)
 		, FString::Printf(TEXT("newLeaderUserId: %s\n"), *UserId))
 }
 
-FString Lobby::SendNotificationToPartyMember(const FString& Topic
-	, const FString& Payload) 
+FString Lobby::SendNotificationToPartyMember(FString const& Topic
+	, FString const& Payload) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -732,15 +732,15 @@ FString Lobby::SendNotificationToPartyMember(const FString& Topic
 		, FString::Printf(TEXT("topic: %s\npayload: %s"), *Topic, *Payload));
 }
 
-void Lobby::SetPartySizeLimit(const FString& PartyId
-	, const int32 Limit
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::SetPartySizeLimit(FString const& PartyId
+	, int32 Limit
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if(Limit <= 0)
 	{
 		FReport::Log("Party size limit should be above 0");
-		return;
+		return nullptr;
 	}
 	
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
@@ -755,14 +755,14 @@ void Lobby::SetPartySizeLimit(const FString& PartyId
 	FAccelByteModelsPartySetLimitRequest Content;
 	Content.Limit = Limit;
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
 //-------------------------------------------------------------------------------------------------
 // Presence
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendSetPresenceStatus(const EAvailability Availability
-	, const FString& Activity)
+FString Lobby::SendSetPresenceStatus(EAvailability Availability
+	, FString const& Activity)
 {
 	FReport::Log(FString(__FUNCTION__));
 	if (Activity.Contains("\n"))
@@ -810,13 +810,13 @@ void Lobby::GetAllAsyncNotification()
 //-------------------------------------------------------------------------------------------------
 // Matchmaking
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendStartMatchmaking(FString GameMode
-	, FString ServerName
-	, FString ClientVersion
-	, TArray<TPair<FString, float>> Latencies
-	, TMap<FString, FString> PartyAttributes
-	, TArray<FString> TempPartyUserIds
-	, TArray<FString> ExtraAttributes)
+FString Lobby::SendStartMatchmaking(FString const& GameMode
+	, FString const& ServerName
+	, FString const& ClientVersion
+	, TArray<TPair<FString, float>> const& Latencies
+	, TMap<FString, FString> const& PartyAttributes
+	, TArray<FString> const& TempPartyUserIds
+	, TArray<FString> const& ExtraAttributes)
 {
 	FMatchmakingOptionalParams Params;
 	Params.ServerName = ServerName;
@@ -829,13 +829,13 @@ FString Lobby::SendStartMatchmaking(FString GameMode
 	return SendStartMatchmaking(GameMode, Params);
 }
 
-FString Lobby::SendStartMatchmaking(FString GameMode
-	, TArray<FString> TempPartyUserIds
-	, FString ServerName
-	, FString ClientVersion
-	, TArray<TPair<FString, float>> Latencies
-	, TMap<FString, FString> PartyAttributes
-	, TArray<FString> ExtraAttributes)
+FString Lobby::SendStartMatchmaking(FString const& GameMode
+	, TArray<FString> const& TempPartyUserIds
+	, FString const& ServerName
+	, FString const& ClientVersion
+	, TArray<TPair<FString, float>> const& Latencies
+	, TMap<FString, FString> const& PartyAttributes
+	, TArray<FString> const& ExtraAttributes)
 {
 	return SendStartMatchmaking(GameMode
 		, ServerName
@@ -846,13 +846,13 @@ FString Lobby::SendStartMatchmaking(FString GameMode
 		, ExtraAttributes);
 }
 
-FString Lobby::SendStartMatchmaking(FString GameMode
-	, TMap<FString, FString> PartyAttributes
-	, FString ServerName
-	, FString ClientVersion
-	, TArray<TPair<FString, float>> Latencies
-	, TArray<FString> TempPartyUserIds
-	, TArray<FString> ExtraAttributes)
+FString Lobby::SendStartMatchmaking(FString const& GameMode
+	, TMap<FString, FString> const& PartyAttributes
+	, FString const& ServerName
+	, FString const& ClientVersion
+	, TArray<TPair<FString, float>> const& Latencies
+	, TArray<FString> const& TempPartyUserIds
+	, TArray<FString> const& ExtraAttributes)
 {
 	return SendStartMatchmaking(GameMode
 		, ServerName
@@ -863,13 +863,13 @@ FString Lobby::SendStartMatchmaking(FString GameMode
 		, ExtraAttributes);
 }
 
-FString Lobby::SendStartMatchmaking(FString GameMode
-	, TMap<FString, FString> PartyAttributes
-	, TArray<FString> TempPartyUserIds
-	, FString ServerName
-	, FString ClientVersion
-	, TArray<TPair<FString, float>> Latencies
-	, TArray<FString> ExtraAttributes)
+FString Lobby::SendStartMatchmaking(FString const& GameMode
+	, TMap<FString, FString> const& PartyAttributes
+	, TArray<FString> const& TempPartyUserIds
+	, FString const& ServerName
+	, FString const& ClientVersion
+	, TArray<TPair<FString, float>> const& Latencies
+	, TArray<FString> const& ExtraAttributes)
 {
 	return SendStartMatchmaking(GameMode
 		, ServerName
@@ -880,7 +880,7 @@ FString Lobby::SendStartMatchmaking(FString GameMode
 		, ExtraAttributes);
 }
 
-FString Lobby::GetServerLatenciesJsonStr(TArray<TPair<FString, float>> SelectedLatencies)
+FString Lobby::GetServerLatenciesJsonStr(TArray<TPair<FString, float>> const& SelectedLatencies)
 {
 	FString ServerLatencies = TEXT("{");
 	for (int i = 0; i < SelectedLatencies.Num(); i++)
@@ -895,8 +895,8 @@ FString Lobby::GetServerLatenciesJsonStr(TArray<TPair<FString, float>> SelectedL
 	return FString::Printf(TEXT("latencies: %s\n"), *ServerLatencies);	
 }
 
-FString Lobby::SendStartMatchmaking(const FString& GameMode
-	, const FMatchmakingOptionalParams& OptionalParams)
+FString Lobby::SendStartMatchmaking(FString const& GameMode
+	, FMatchmakingOptionalParams const& OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FString Contents = FString::Printf(TEXT("gameMode: %s\n"), *GameMode);
@@ -956,16 +956,16 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode
 		}
 	}
 
-	if(OptionalParams.SubGameModes.Num() > 0)
+	if (OptionalParams.SubGameModes.Num() > 0)
 	{
 		// if there is party attribute already, prepend a comma
-		if(PartyAttribute.Num() > 0)
+		if (PartyAttribute.Num() > 0)
 		{
 			partyAttributeSerialized.Append(", ");
 		}
 
 		FString SubGameModeValue {"["};
-		for(int i = 0; i < OptionalParams.SubGameModes.Num(); i++)
+		for (int i = 0; i < OptionalParams.SubGameModes.Num(); i++)
 		{
 			if(i > 0)
 				SubGameModeValue.Append(", ");
@@ -977,7 +977,7 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode
 		partyAttributeSerialized.Append(FString::Printf(TEXT("\"sub_game_mode\": %s"), *SubGameModeValue));
 	}
 
-	if(!partyAttributeSerialized.IsEmpty())
+	if (!partyAttributeSerialized.IsEmpty())
 	{
 		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}\n"), *partyAttributeSerialized));
 	}
@@ -1015,7 +1015,7 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode
 }
 
 
-FString Lobby::SendCancelMatchmaking(FString GameMode
+FString Lobby::SendCancelMatchmaking(FString const& GameMode
 	, bool IsTempParty)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1025,7 +1025,7 @@ FString Lobby::SendCancelMatchmaking(FString GameMode
 		, FString::Printf(TEXT("gameMode: %s\nisTempParty: %s"), *GameMode, (IsTempParty ? TEXT("true") : TEXT("false"))))
 }
 	
-FString Lobby::SendReadyConsentRequest(FString MatchId)
+FString Lobby::SendReadyConsentRequest(FString const& MatchId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1034,7 +1034,7 @@ FString Lobby::SendReadyConsentRequest(FString MatchId)
 		, FString::Printf(TEXT("matchId: %s\n"), *MatchId));
 }
 
-FString Lobby::SendRejectConsentRequest(FString MatchId)
+FString Lobby::SendRejectConsentRequest(FString const& MatchId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1059,7 +1059,7 @@ FString Lobby::RequestDS(FString const& SessionID
 //-------------------------------------------------------------------------------------------------
 // Friends
 //-------------------------------------------------------------------------------------------------
-void Lobby::RequestFriend(FString UserId)
+void Lobby::RequestFriend(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1068,7 +1068,7 @@ void Lobby::RequestFriend(FString UserId)
 		, FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
-void Lobby::RequestFriendByPublicId(FString PublicId)
+void Lobby::RequestFriendByPublicId(FString const& PublicId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1077,7 +1077,7 @@ void Lobby::RequestFriendByPublicId(FString PublicId)
 		, FString::Printf(TEXT("friendPublicId: %s"), *PublicId));
 }
 
-void Lobby::Unfriend(FString UserId)
+void Lobby::Unfriend(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1104,7 +1104,7 @@ void Lobby::ListOutgoingFriendsWithTime()
 		, {});
 }
 
-void Lobby::CancelFriendRequest(FString UserId)
+void Lobby::CancelFriendRequest(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1131,7 +1131,7 @@ void Lobby::ListIncomingFriendsWithTime()
 		, {});
 }
 
-void Lobby::AcceptFriend(FString UserId)
+void Lobby::AcceptFriend(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1140,7 +1140,7 @@ void Lobby::AcceptFriend(FString UserId)
 		, FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
-void Lobby::RejectFriend(FString UserId)
+void Lobby::RejectFriend(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1158,7 +1158,7 @@ void Lobby::LoadFriendsList()
 		, {});
 }
 
-void Lobby::GetFriendshipStatus(FString UserId)
+void Lobby::GetFriendshipStatus(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1167,16 +1167,16 @@ void Lobby::GetFriendshipStatus(FString UserId)
 		, FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
-void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds
-	, FVoidHandler OnSuccess
-	, FErrorHandler OnError)
+FAccelByteTaskWPtr Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest const& UserIds
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (UserIds.FriendIds.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("FriendsId can't be empty for BulkFriendRequest"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk")
@@ -1184,44 +1184,46 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserIds, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserIds, OnSuccess, OnError);
 }
 
-void Lobby::SyncThirdPartyFriends(const FAccelByteModelsSyncThirdPartyFriendsRequest& Request
-	, const THandler<TArray<FAccelByteModelsSyncThirdPartyFriendsResponse>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::SyncThirdPartyFriends(FAccelByteModelsSyncThirdPartyFriendsRequest const& Request
+	, THandler<TArray<FAccelByteModelsSyncThirdPartyFriendsResponse>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if(Request.FriendSyncDetails.Num() < 1)
+	if (Request.FriendSyncDetails.Num() < 1)
 	{
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request parameter must have at least 1 element!"));
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request parameter must have at least 1 element!"));
-		return;
+		return nullptr;
 	}
 
-	const bool bContainEmptyPlatformId = Request.FriendSyncDetails.ContainsByPredicate([](const FAccelByteModelsSyncThirdPartyFriendInfo& Item)
-	{
-		return Item.PlatformId.IsEmpty();
-	});
+	const bool bContainEmptyPlatformId = Request.FriendSyncDetails.ContainsByPredicate(
+		[](FAccelByteModelsSyncThirdPartyFriendInfo const& Item)
+		{
+			return Item.PlatformId.IsEmpty();
+		});
 	
-	if(bContainEmptyPlatformId)
+	if (bContainEmptyPlatformId)
 	{
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request details cannot contains empty platform ID!"));
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request details cannot contains empty platform ID!"));
-		return;
+		return nullptr;
 	}
 
-	const bool bContainNotLoggedInAndEmptyPlatformToken = Request.FriendSyncDetails.ContainsByPredicate([](const FAccelByteModelsSyncThirdPartyFriendInfo& Item)
-	{
-		return Item.PlatformToken.IsEmpty() && !Item.IsLogin;
-	});
+	const bool bContainNotLoggedInAndEmptyPlatformToken = Request.FriendSyncDetails.ContainsByPredicate(
+		[](FAccelByteModelsSyncThirdPartyFriendInfo const& Item)
+		{
+			return Item.PlatformToken.IsEmpty() && !Item.IsLogin;
+		});
 
-	if(bContainNotLoggedInAndEmptyPlatformToken)
+	if (bContainNotLoggedInAndEmptyPlatformToken)
 	{
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request details cannot contains empty platform Token when IsLogin is false!"));
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request details cannot contains empty platform Token when IsLogin is false!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/friends/sync/namespaces/%s/me")
@@ -1231,12 +1233,12 @@ void Lobby::SyncThirdPartyFriends(const FAccelByteModelsSyncThirdPartyFriendsReq
 	FString JSONString;
 	FAccelByteUtilities::TArrayUStructToJsonString(Request.FriendSyncDetails, JSONString);
 
-	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JSONString, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JSONString, OnSuccess, OnError);
 }
 
-void Lobby::SyncThirdPartyBlockList(const FAccelByteModelsSyncThirdPartyBlockListRequest& Request
-	, const THandler<TArray<FAccelByteModelsSyncThirdPartyBlockListResponse>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::SyncThirdPartyBlockList(FAccelByteModelsSyncThirdPartyBlockListRequest const& Request
+	, THandler<TArray<FAccelByteModelsSyncThirdPartyBlockListResponse>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1244,18 +1246,20 @@ void Lobby::SyncThirdPartyBlockList(const FAccelByteModelsSyncThirdPartyBlockLis
 	{
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request parameter must have at least 1 element!"));
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request parameter must have at least 1 element!"));
-		return;
+		return nullptr;
 	}
 
-	const bool bContainEmptyPlatformId = Request.BlockListSyncDetails.ContainsByPredicate([](const FAccelByteModelsSyncThirdPartyBlockListInfo& Item) {
-		return Item.PlatformId.IsEmpty();
-	});
+	const bool bContainEmptyPlatformId = Request.BlockListSyncDetails.ContainsByPredicate(
+		[](FAccelByteModelsSyncThirdPartyBlockListInfo const& Item) 
+		{
+			return Item.PlatformId.IsEmpty();
+		});
 	
 	if (bContainEmptyPlatformId)
 	{
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Request details cannot contains empty platform ID!"));
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Request details cannot contains empty platform ID!"));
-		return;
+		return nullptr;
 	}
 
 	FString LobbyServerHttp = SettingsRef.LobbyServerUrl.Replace(TEXT("wss://"), TEXT("https://"), ESearchCase::IgnoreCase);
@@ -1271,13 +1275,13 @@ void Lobby::SyncThirdPartyBlockList(const FAccelByteModelsSyncThirdPartyBlockLis
 	FString JSONString{};
 	FAccelByteUtilities::TArrayUStructToJsonString(Request.BlockListSyncDetails, JSONString);
 
-	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JSONString, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JSONString, OnSuccess, OnError);
 }
 
-void Lobby::QueryFriendList(THandler<FAccelByteModelsQueryFriendListResponse> const& OnSuccess
+FAccelByteTaskWPtr Lobby::QueryFriendList(THandler<FAccelByteModelsQueryFriendListResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, int32 const& Offset
-	, int32 const& Limit)
+	, int32 Offset
+	, int32 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1290,13 +1294,13 @@ void Lobby::QueryFriendList(THandler<FAccelByteModelsQueryFriendListResponse> co
 		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Lobby::QueryIncomingFriendRequest(THandler<FAccelByteModelsIncomingFriendRequests> const& OnSuccess
+FAccelByteTaskWPtr Lobby::QueryIncomingFriendRequest(THandler<FAccelByteModelsIncomingFriendRequests> const& OnSuccess
 	, FErrorHandler const& OnError
-	, int32 const& Offset
-	, int32 const& Limit)
+	, int32 Offset
+	, int32 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1309,13 +1313,13 @@ void Lobby::QueryIncomingFriendRequest(THandler<FAccelByteModelsIncomingFriendRe
 		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Lobby::QueryOutgoingFriendRequest(THandler<FAccelByteModelsOutgoingFriendRequests> const& OnSuccess
+FAccelByteTaskWPtr Lobby::QueryOutgoingFriendRequest(THandler<FAccelByteModelsOutgoingFriendRequests> const& OnSuccess
 	, FErrorHandler const& OnError
-	, int32 const& Offset
-	, int32 const& Limit)
+	, int32 Offset
+	, int32 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1328,10 +1332,12 @@ void Lobby::QueryOutgoingFriendRequest(THandler<FAccelByteModelsOutgoingFriendRe
 		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Lobby::SendFriendRequest(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Lobby::SendFriendRequest(FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1339,7 +1345,7 @@ void Lobby::SendFriendRequest(const FString& UserId, FVoidHandler const& OnSucce
 			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 			, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request")
@@ -1349,11 +1355,12 @@ void Lobby::SendFriendRequest(const FString& UserId, FVoidHandler const& OnSucce
 	FAccelByteModelsFriendRequestByUserId Payload;
 	Payload.FriendId = UserId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
 }
 
-void Lobby::SendFriendRequestByPublicId(const FString& PublicId, FVoidHandler const& OnSuccess,
-	FErrorHandler const& OnError)
+FAccelByteTaskWPtr Lobby::SendFriendRequestByPublicId(FString const& PublicId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1364,10 +1371,12 @@ void Lobby::SendFriendRequestByPublicId(const FString& PublicId, FVoidHandler co
 	FAccelByteModelsFriendRequestByPublicId Payload;
 	Payload.FriendPublicId = PublicId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
 }
 
-void Lobby::CancelFriendRequest(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Lobby::CancelFriendRequest(FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1375,7 +1384,7 @@ void Lobby::CancelFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 			, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/cancel")
@@ -1385,10 +1394,12 @@ void Lobby::CancelFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 	FAccelByteModelsCancelFriendRequest Payload;
 	Payload.FriendId = UserId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
 }
 
-void Lobby::AcceptFriendRequest(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Lobby::AcceptFriendRequest(FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1396,7 +1407,7 @@ void Lobby::AcceptFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 			, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/accept")
@@ -1406,10 +1417,12 @@ void Lobby::AcceptFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 	FAccelByteModelsAcceptFriendRequest Payload;
 	Payload.FriendId = UserId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
 }
 
-void Lobby::RejectFriendRequest(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Lobby::RejectFriendRequest(FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1417,7 +1430,7 @@ void Lobby::RejectFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 			, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/reject")
@@ -1427,10 +1440,10 @@ void Lobby::RejectFriendRequest(const FString& UserId, FVoidHandler const& OnSuc
 	FAccelByteModelsRejectFriendRequest Payload;
 	Payload.FriendId = UserId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
 }
 
-void Lobby::GetFriendshipStatus(const FString& UserId
+FAccelByteTaskWPtr Lobby::GetFriendshipStatus(FString const& UserId
 	, THandler<FAccelByteModelsFriendshipStatusResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -1440,7 +1453,7 @@ void Lobby::GetFriendshipStatus(const FString& UserId
 			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 			, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/status/%s")
@@ -1448,10 +1461,12 @@ void Lobby::GetFriendshipStatus(const FString& UserId
 		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Lobby::Unfriend(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Lobby::Unfriend(FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1459,7 +1474,7 @@ void Lobby::Unfriend(const FString& UserId, FVoidHandler const& OnSuccess, FErro
 			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 			, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/unfriend")
@@ -1469,10 +1484,12 @@ void Lobby::Unfriend(const FString& UserId, FVoidHandler const& OnSuccess, FErro
 	FAccelByteModelsUnfriendRequest Payload;
 	Payload.FriendId = UserId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
 }
 
-void Lobby::BlockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Lobby::BlockPlayer(FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1480,7 +1497,7 @@ void Lobby::BlockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, FE
 			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 			, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/block")
@@ -1490,10 +1507,12 @@ void Lobby::BlockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, FE
 	FAccelByteModelsBlockUserRequest Payload;
 	Payload.BlockedUserId = UserId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
 }
 
-void Lobby::UnblockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Lobby::UnblockPlayer(FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1501,7 +1520,7 @@ void Lobby::UnblockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, 
 			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 			, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/unblock")
@@ -1511,12 +1530,12 @@ void Lobby::UnblockPlayer(const FString& UserId, FVoidHandler const& OnSuccess, 
 	FAccelByteModelsUnlockUserRequest Payload;
 	Payload.UserId = UserId;
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Payload, OnSuccess, OnError);
 }
 
-void Lobby::GetPartyData(const FString& PartyId
-						, const THandler<FAccelByteModelsPartyData>& OnSuccess
-						, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::GetPartyData(FString const& PartyId
+	, THandler<FAccelByteModelsPartyData> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1525,12 +1544,12 @@ void Lobby::GetPartyData(const FString& PartyId
 		, *CredentialsRef->GetNamespace()
 		, *PartyId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds
-	, const THandler<FAccelByteModelsBulkUserStatusNotif>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr Lobby::BulkGetUserPresence(TArray<FString> const& UserIds
+	, THandler<FAccelByteModelsBulkUserStatusNotif> const& OnSuccess
+	, FErrorHandler const& OnError
 	, bool CountOnly)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1538,7 +1557,7 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds
 	if (UserIds.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	TArray<FString> ProcessedUserIds{};
@@ -1563,17 +1582,20 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds
 		, *SettingsRef.BaseUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnSuccess, NotProcessedUserIds](const FAccelByteModelsBulkUserStatusNotif& Result)
-		{
-			FAccelByteModelsBulkUserStatusNotif FinalResult = Result;
-			FinalResult.NotProcessed = NotProcessedUserIds;
-			OnSuccess.ExecuteIfBound(FinalResult);
-		}), OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams
+		, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda(
+			[OnSuccess, NotProcessedUserIds](FAccelByteModelsBulkUserStatusNotif const& Result)
+			{
+				FAccelByteModelsBulkUserStatusNotif FinalResult = Result;
+				FinalResult.NotProcessed = NotProcessedUserIds;
+				OnSuccess.ExecuteIfBound(FinalResult);
+			})
+		, OnError);
 }
 
-void Lobby::GetPartyStorage(const FString& PartyId
-	, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::GetPartyStorage(FString const& PartyId
+	, THandler<FAccelByteModelsPartyDataNotif> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1582,28 +1604,28 @@ void Lobby::GetPartyStorage(const FString& PartyId
 		, *CredentialsRef->GetNamespace()
 		, *PartyId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Lobby::GetListOfBlockedUsers(const FString& UserId
-	, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::GetListOfBlockedUsers(FString const& UserId
+	, THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
-		TEXT("Please use GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)"));
+		TEXT("Please use GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, FErrorHandler const& OnError)"));
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked")
 		, *SettingsRef.BaseUrl
 		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::GetListOfBlockedUsers(THandler<FAccelByteModelsListBlockedUserResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1611,29 +1633,28 @@ void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUser
 		, *SettingsRef.BaseUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
-
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Lobby::GetListOfBlockers(const FString& UserId
-	, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::GetListOfBlockers(FString const& UserId
+	, THandler<FAccelByteModelsListBlockerResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
-		TEXT("please use GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)"));
+		TEXT("please use GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, FErrorHandler const& OnError)"));
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by")
 		, *SettingsRef.BaseUrl
 		, *CredentialsRef->GetNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Lobby::GetListOfBlockers(THandler<FAccelByteModelsListBlockerResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1641,14 +1662,14 @@ void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse
 		, *SettingsRef.BaseUrl
 		, *CredentialsRef->GetNamespace());
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Lobby::SendNotificationToUser(const FString& SendToUserId
-	, const FAccelByteModelsFreeFormNotificationRequest& Message
+FAccelByteTaskWPtr Lobby::SendNotificationToUser(FString const& SendToUserId
+	, FAccelByteModelsFreeFormNotificationRequest const& Message
 	, bool bAsync
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1661,13 +1682,13 @@ void Lobby::SendNotificationToUser(const FString& SendToUserId
 		{TEXT("async"), bAsync ? TEXT("true") : TEXT("false")}
 	};
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Message, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Message, OnSuccess, OnError);
 }
 
-void Lobby::WritePartyStorage(const FString& PartyId
-	, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier
-	, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr Lobby::WritePartyStorage(FString const& PartyId
+	, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> const& PayloadModifier
+	, THandler<FAccelByteModelsPartyDataNotif> const& OnSuccess
+	, FErrorHandler const& OnError
 	, uint32 RetryAttempt)
 {
 	TSharedPtr<PartyStorageWrapper> Wrapper = MakeShared<PartyStorageWrapper>();
@@ -1676,13 +1697,13 @@ void Lobby::WritePartyStorage(const FString& PartyId
 	Wrapper->OnError = OnError;
 	Wrapper->RemainingAttempt = RetryAttempt;
 	Wrapper->PayloadModifier = PayloadModifier;
-	WritePartyStorageRecursive(Wrapper);
+	return WritePartyStorageRecursive(Wrapper);
 }
 
 //-------------------------------------------------------------------------------------------------
 // Block
 //-------------------------------------------------------------------------------------------------
-void Lobby::BlockPlayer(const FString& UserId)
+void Lobby::BlockPlayer(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1691,7 +1712,7 @@ void Lobby::BlockPlayer(const FString& UserId)
 		, FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *CredentialsRef->GetUserId(), *UserId, *CredentialsRef->GetNamespace()));
 }
 
-void Lobby::UnblockPlayer(const FString& UserId)
+void Lobby::UnblockPlayer(FString const& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1703,8 +1724,8 @@ void Lobby::UnblockPlayer(const FString& UserId)
 //-------------------------------------------------------------------------------------------------
 // Signaling
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendSignalingMessage(const FString& UserId
-	, const FString& Message)
+FString Lobby::SendSignalingMessage(FString const& UserId
+	, FString const& Message)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1716,8 +1737,8 @@ FString Lobby::SendSignalingMessage(const FString& UserId
 //-------------------------------------------------------------------------------------------------
 // Session Attributes
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SetSessionAttribute(const FString& Key
-	, const FString& Value)
+FString Lobby::SetSessionAttribute(FString const& Key
+	, FString const& Value)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1726,7 +1747,7 @@ FString Lobby::SetSessionAttribute(const FString& Key
 		, FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *CredentialsRef->GetNamespace(), *Key, *Value));
 }
 
-FString Lobby::GetSessionAttribute(const FString& Key)
+FString Lobby::GetSessionAttribute(FString const& Key)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1748,7 +1769,7 @@ FString Lobby::GetAllSessionAttribute()
 // Refresh Token
 //-------------------------------------------------------------------------------------------------
 
-FString Lobby::RefreshToken(const FString& AccessToken)
+FString Lobby::RefreshToken(FString const& AccessToken)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1760,7 +1781,7 @@ FString Lobby::RefreshToken(const FString& AccessToken)
 //-------------------------------------------------------------------------------------------------
 // Metrics
 //-------------------------------------------------------------------------------------------------
-void AccelByte::Api::Lobby::ChangeUserRegion(const FString& Region)
+void AccelByte::Api::Lobby::ChangeUserRegion(FString const& Region)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1769,7 +1790,7 @@ void AccelByte::Api::Lobby::ChangeUserRegion(const FString& Region)
 		, FString::Printf(TEXT("region: %s"), *Region));
 }
 
-void AccelByte::Api::Lobby::OnTokenReceived(const FString& Token)
+void AccelByte::Api::Lobby::OnTokenReceived(FString const& Token)
 {
 	if (Token == AccelByte::ErrorTokenRequestFailed)
 	{
@@ -1780,12 +1801,12 @@ void AccelByte::Api::Lobby::OnTokenReceived(const FString& Token)
 	Connect(Token);
 }
 
-void Lobby::GetNotifications(const THandler<FAccelByteModelsGetUserNotificationsResponse>& OnSuccess
-	, const FErrorHandler& OnError
-	, const FDateTime& StartTime
-	, const FDateTime& EndTime
-	, const int32& Offset
-	, const int32& Limit)
+FAccelByteTaskWPtr Lobby::GetNotifications(THandler<FAccelByteModelsGetUserNotificationsResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FDateTime const& StartTime
+	, FDateTime const& EndTime
+	, int32 Offset
+	, int32 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1814,7 +1835,7 @@ void Lobby::GetNotifications(const THandler<FAccelByteModelsGetUserNotifications
 		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void Lobby::UnbindEvent()
@@ -2050,7 +2071,7 @@ void Lobby::UnbindV2MatchmakingEvents()
 	V2MatchmakingStartNotif.Unbind();
 }
 
-void Lobby::OnNotificationSenderMessageReceived(const FString& Payload)
+void Lobby::OnNotificationSenderMessageReceived(FString const& Payload)
 {
 	UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("Received message from notification sender, message %s"), *Payload);
 	OnMessage(Payload, true);
@@ -2061,7 +2082,7 @@ void Lobby::OnConnected()
 	UE_LOG(LogAccelByteLobby, Log, TEXT("Connected"));
 
 	AuthTokenSetDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet, FOnMessagingSystemReceivedMessage::CreateLambda(
-		[this](const FString& Message)
+		[this](FString const& Message)
 		{
 			FOauth2Token Token;
 			FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
@@ -2076,14 +2097,14 @@ void Lobby::OnConnected()
 	MessagingSystem.SendMessage(EAccelByteMessagingTopic::LobbyConnected);
 }
 
-void Lobby::OnConnectionError(const FString& Error)
+void Lobby::OnConnectionError(FString const& Error)
 {
 	UE_LOG(LogAccelByteLobby, Warning, TEXT("Error connecting: %s"), *Error);
 	ConnectError.ExecuteIfBound(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed), ErrorMessages::Default.at(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed)) + TEXT(" Reason: ") + Error);
 }
 
 void Lobby::OnClosed(int32 StatusCode
-	, const FString& Reason
+	, FString const& Reason
 	, bool WasClean)
 {
 	// disconnect only if status code > 4000 and we don't receive a login ban,
@@ -2116,9 +2137,9 @@ void Lobby::OnClosed(int32 StatusCode
 	}
 }
 	
-FString Lobby::SendRawRequest(const FString& MessageType
-	, const FString& MessageIDPrefix
-	, const FString& CustomPayload)
+FString Lobby::SendRawRequest(FString const& MessageType
+	, FString const& MessageIDPrefix
+	, FString const& CustomPayload)
 {
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
@@ -2135,12 +2156,12 @@ FString Lobby::SendRawRequest(const FString& MessageType
 	return TEXT("");
 }
 
-FString Lobby::GenerateMessageID(const FString& Prefix) const
+FString Lobby::GenerateMessageID(FString const& Prefix) const
 {
 	return FString::Printf(TEXT("%s-%d"), *Prefix, FMath::RandRange(1000, 9999));
 }
  
-void Lobby::CreateWebSocket(const FString& Token)
+void Lobby::CreateWebSocket(FString const& Token)
 {
 	if(WebSocket.IsValid())
 	{
@@ -2183,7 +2204,7 @@ void Lobby::CreateWebSocket(const FString& Token)
 	WebSocket->OnConnectionClosed().AddRaw(this, &Lobby::OnClosed);
 }
 
-FString Lobby::LobbyMessageToJson(const FString& Message)
+FString Lobby::LobbyMessageToJson(FString const& Message)
 {
 	bool bFirst = true;
 	FString JsonString = TEXT("{");
@@ -2284,13 +2305,13 @@ FString Lobby::LobbyMessageToJson(const FString& Message)
 * @see HandleNotif
 */
 template <typename DataStruct, typename ResponseCallbackType, typename ErrorCallbackType>
-void HandleResponse(const FString& MessageType
-	, ResponseCallbackType ResponseCallback
-	, ErrorCallbackType ErrorCallback
-	, const FString& ParsedJsonString
-	, const FString& ReceivedMessageType
+void HandleResponse(FString const& MessageType
+	, ResponseCallbackType const& ResponseCallback
+	, ErrorCallbackType const& ErrorCallback
+	, FString const& ParsedJsonString
+	, FString const& ReceivedMessageType
 	, int lobbyResponseCode
-	, const TMap<FString, FString>& LobbyErrorMessages)
+	, TMap<FString, FString> const& LobbyErrorMessages)
 {
 	ensure(ReceivedMessageType.Equals(MessageType));
 	DataStruct Result;
@@ -2378,10 +2399,10 @@ void HandleResponse(const FString& MessageType
 //@brief convenient switch case for RESPONSE context; will cache the (MessageId,SuccessDelegate) pair
 #define CASE_RESPONSE_MESSAGE_ID(MessageType, Model) CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MessageType, Model, DELEGATE_TYPE(MessageType))
 
-void Lobby::HandleMessageResponse(const FString& ReceivedMessageType
-	, const FString& ParsedJsonString
-	, const TSharedPtr<FJsonObject>& ParsedJsonObj
-	, const TSharedPtr<FLobbyMessageMetaData>& MessageMeta = nullptr)
+void Lobby::HandleMessageResponse(FString const& ReceivedMessageType
+	, FString const& ParsedJsonString
+	, TSharedPtr<FJsonObject> const& ParsedJsonObj
+	, TSharedPtr<FLobbyMessageMetaData> const& MessageMeta = nullptr)
 {
 	int lobbyResponseCode{0};
 	FString ReceivedMessageId{};
@@ -2393,8 +2414,8 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType
 	}
 	else
 	{
-		lobbyResponseCode = ParsedJsonObj->GetIntegerField("code");
-		ReceivedMessageId = ParsedJsonObj->GetStringField("id");
+		lobbyResponseCode = ParsedJsonObj->GetIntegerField(TEXT("code"));
+		ReceivedMessageId = ParsedJsonObj->GetStringField(TEXT("id"));
 	}
 
 	Response ResponseEnum = Response::Invalid_Response;
@@ -2504,10 +2525,10 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType
 * @see HandleResponse
 */
 template <typename DataStruct, typename ResponseCallbackType>
-void HandleNotif(const FString& MessageType
-	, ResponseCallbackType ResponseCallback
-	, const FString& ParsedJsonString
-	, const FString& ReceivedMessageType)
+void HandleNotif(FString const& MessageType
+	, ResponseCallbackType const& ResponseCallback
+	, FString const& ParsedJsonString
+	, FString const& ReceivedMessageType)
 {
 	ensure(ReceivedMessageType.Equals(MessageType));
 	DataStruct Result;
@@ -2530,7 +2551,7 @@ void HandleNotif(const FString& MessageType
 		} \
 		
 template <typename PayloadType>
-bool MessageNotifJsonDeserialize(const FString& Payload, PayloadType& OutResult)
+bool MessageNotifJsonDeserialize(FString const& Payload, PayloadType& OutResult)
 {
 	if(FAccelByteJsonConverter::JsonObjectStringToUStruct(Payload, &OutResult))
 	{
@@ -2544,8 +2565,8 @@ bool MessageNotifJsonDeserialize(const FString& Payload, PayloadType& OutResult)
 }
 
 template <typename PayloadType, typename CallbackType>
-void DispatchV2JsonNotif(const FString& Payload
-	, CallbackType ResponseCallback)
+void DispatchV2JsonNotif(FString const& Payload
+	, CallbackType const& ResponseCallback)
 {
 	FString PayloadJsonString;
 	if(!FBase64::Decode(Payload, PayloadJsonString))
@@ -2563,7 +2584,7 @@ void DispatchV2JsonNotif(const FString& Payload
 	}
 }
 
-void Lobby::HandleV2SessionNotif(const FString& ParsedJsonString, bool bSkipConditioner)
+void Lobby::HandleV2SessionNotif(FString const& ParsedJsonString, bool bSkipConditioner)
 {
 	FAccelByteModelsSessionNotificationMessage Notif;
 	if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Notif) == false)
@@ -2741,9 +2762,9 @@ void Lobby::InitializeV2MatchmakingNotifTopics()
 	};
 }
 
-void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
-	, const FString& ParsedJsonString
-	, const TSharedPtr<FJsonObject>& ParsedJsonObj
+void Lobby::HandleMessageNotif(FString const& ReceivedMessageType
+	, FString const& ParsedJsonString
+	, TSharedPtr<FJsonObject> const& ParsedJsonObj
 	, bool bSkipConditioner)
 {
 	Notif NotifEnum = Notif::Invalid_Notif;
@@ -2970,7 +2991,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 				
 				FAccelByteModelsLobbyBaseResponse ErrorRequestResponse;
 				ErrorRequestResponse.Code = ParsedJsonObj->GetStringField(TEXT("code"));
-				ErrorRequestResponse.Id = ParsedJsonObj->GetStringField("id");
+				ErrorRequestResponse.Id = ParsedJsonObj->GetStringField(TEXT("id"));
 				ErrorRequestResponse.Type = ErrorNotifRequestType;
 
 				TSharedPtr<FJsonObject> ErrorRequestJsonObject = FJsonObjectConverter::UStructToJsonObject(ErrorRequestResponse);
@@ -2999,8 +3020,8 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType
 }
 #undef CASE_NOTIF
 
-bool Lobby::ExtractLobbyMessageMetaData(const FString& InLobbyMessage
-	, TSharedRef<FLobbyMessageMetaData>& OutLobbyMessageMetaData)
+bool Lobby::ExtractLobbyMessageMetaData(FString const& InLobbyMessage
+	, TSharedRef<FLobbyMessageMetaData> const& OutLobbyMessageMetaData)
 {
 	TArray<FString> MessageLines;
 	InLobbyMessage.ParseIntoArrayLines(MessageLines);
@@ -3009,7 +3030,7 @@ bool Lobby::ExtractLobbyMessageMetaData(const FString& InLobbyMessage
 	const FString TypeKey {"type: "};
 	const FString IdKey {"id: "};
 	
-	for(const FString& Line : MessageLines)
+	for(FString const& Line : MessageLines)
 	{
 		if(Line.StartsWith(CodeKey))
 		{
@@ -3062,7 +3083,7 @@ void Lobby::SendBufferedNotifications()
 	}
 }
 
-bool Lobby::TryBufferNotification(const FString& ParsedJsonString)
+bool Lobby::TryBufferNotification(FString const& ParsedJsonString)
 {
 	FAccelByteModelsUserNotification ReceivedNotification;
 	if (!FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &ReceivedNotification))
@@ -3104,14 +3125,14 @@ void Lobby::OnGetMissingNotificationSuccess(const FAccelByteModelsGetUserNotific
 	SendBufferedNotifications();
 }
 
-void Lobby::OnGetMissingNotificationError(int32 ErrorCode, const FString& ErrorMessage)
+void Lobby::OnGetMissingNotificationError(int32 ErrorCode, FString const& ErrorMessage)
 {
 	// In case of failed retrieving notification via REST API just send anything we have in the buffer
 	UE_LOG(LogAccelByteLobby, Warning, TEXT("Missing notification(s) not found"));
 	SendBufferedNotifications();
 }
 
-void Lobby::OnMessage(const FString& Message, bool bSkipConditioner /* = false */)
+void Lobby::OnMessage(FString const& Message, bool bSkipConditioner /* = false */)
 {
 	UE_LOG(LogAccelByteLobby, Verbose, TEXT("Raw Lobby Response\n%s"), *Message);
 
@@ -3197,11 +3218,11 @@ void Lobby::OnMessage(const FString& Message, bool bSkipConditioner /* = false *
 	}
 }
 
-void Lobby::RequestWritePartyStorage(const FString& PartyId
-	, const FAccelByteModelsPartyDataUpdateRequest& Data
-	, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess
-	, const FErrorHandler& OnError
-	, FSimpleDelegate OnConflicted)
+FAccelByteTaskWPtr Lobby::RequestWritePartyStorage(FString const& PartyId
+	, FAccelByteModelsPartyDataUpdateRequest const& Data
+	, THandler<FAccelByteModelsPartyDataNotif> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FSimpleDelegate const& OnConflicted)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -3234,18 +3255,18 @@ void Lobby::RequestWritePartyStorage(const FString& PartyId
 			}
 		});
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, ErrorHandler);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, ErrorHandler);
 }
 
-void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper)
+FAccelByteTaskWPtr Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> const& DataWrapper)
 {
 	if (DataWrapper->RemainingAttempt <= 0)
 	{
 		DataWrapper->OnError.ExecuteIfBound(412, TEXT("Exhaust all retry attempt to modify party storage.."));
-		return;
+		return nullptr;
 	}
 
-	GetPartyStorage(DataWrapper->PartyId
+	return GetPartyStorage(DataWrapper->PartyId
 		, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
 			[this, DataWrapper](FAccelByteModelsPartyDataNotif Result)
 			{
@@ -3292,16 +3313,16 @@ void Lobby::SetRetryParameters(int32 NewTotalTimeout
 	Lobby::MaxBackoffDelay = NewMaxDelay;
 }
 
-void Lobby::FetchLobbyErrorMessages()
+FAccelByteTaskWPtr Lobby::FetchLobbyErrorMessages()
 {
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/messages"), *SettingsRef.BaseUrl);
 
 	TMap<FString, FString> Headers;
 	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
-	HttpClient.Request(TEXT("GET"), Url, {}, TEXT(""), Headers
+	return HttpClient.Request(TEXT("GET"), Url, {}, TEXT(""), Headers
 		, THandler<TArray<FLobbyMessages>>::CreateLambda(
-			[&](const TArray<FLobbyMessages>& Result)
+			[&](TArray<FLobbyMessages> const& Result)
 			{
 				for(const FLobbyMessages& LobbyMessages : Result)
 				{
@@ -3311,7 +3332,7 @@ void Lobby::FetchLobbyErrorMessages()
 				UE_LOG(LogAccelByteLobby, Log, TEXT("fetching lobby error messages DONE! %d lobby messages has been cached"), LobbyErrorMessages.Num());
 			})
 		, FErrorHandler::CreateLambda(
-			[](const int32 code, const FString& message)
+			[](int32 code, FString const& message)
 			{
 				UE_LOG(LogAccelByteLobby, Warning, TEXT("Error fetching lobby error messages! code %d, message %s"), code, *message);
 			}));
@@ -3319,13 +3340,13 @@ void Lobby::FetchLobbyErrorMessages()
 
 void Lobby::ClearLobbyErrorMessages()
 {
-	if(LobbyErrorMessages.Num() > 0)
+	if (LobbyErrorMessages.Num() > 0)
 	{
 		LobbyErrorMessages.Empty();
 	}
 }
 
-void Lobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGeneratorRef)
+void Lobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> const& TokenGeneratorRef)
 {
 	if (IsConnected())
 	{
@@ -3401,7 +3422,7 @@ Lobby::~Lobby()
 
 TMap<FString, FString> Lobby::LobbyErrorMessages{};
 
-void Lobby::OnReceivedQosLatencies(const FString& Payload)
+void Lobby::OnReceivedQosLatencies(FString const& Payload)
 {
 	if (!IsConnected())
 	{

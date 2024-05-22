@@ -36,10 +36,12 @@ public:
 	 * @param Request Structure containing the IDs of the users to evaluate challenge progress for
 	 * @param OnSuccess Delegate executed when request succeeds
 	 * @param OnError Delegate executed when request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void EvaluateChallengeProgress(const FAccelByteModelsChallengeServerEvaluateProgressRequest& Request
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr EvaluateChallengeProgress(FAccelByteModelsChallengeServerEvaluateProgressRequest const& Request
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	ServerChallenge() = delete;

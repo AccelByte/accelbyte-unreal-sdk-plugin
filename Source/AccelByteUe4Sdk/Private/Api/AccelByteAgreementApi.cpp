@@ -22,15 +22,15 @@ Agreement::Agreement(Credentials const& InCredentialsRef
 Agreement::~Agreement()
 {}
 
-void Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementPolicyType
+FAccelByteTaskWPtr Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementPolicyType
 	, bool DefaultOnEmpty
 	, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
-	GetLegalPolicies(*CredentialsRef->GetNamespace(), AgreementPolicyType, DefaultOnEmpty, OnSuccess, OnError);
+	return GetLegalPolicies(*CredentialsRef->GetNamespace(), AgreementPolicyType, DefaultOnEmpty, OnSuccess, OnError);
 }
 
-void Agreement::GetLegalPolicies(FString const& Namespace
+FAccelByteTaskWPtr Agreement::GetLegalPolicies(FString const& Namespace
 	, EAccelByteAgreementPolicyType const& AgreementPolicyType
 	, bool DefaultOnEmpty
 	, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
@@ -46,10 +46,10 @@ void Agreement::GetLegalPolicies(FString const& Namespace
 		, *AgreementPolicyTypeString
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementPolicyType
+FAccelByteTaskWPtr Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementPolicyType
 	, TArray<FString> const& Tags
 	, bool DefaultOnEmpty
 	, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
@@ -68,10 +68,10 @@ void Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementP
 		, *TagsString
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
+FAccelByteTaskWPtr Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
 	, EAccelByteAgreementPolicyType const& AgreementPolicyType
 	, bool DefaultOnEmpty
 	, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
@@ -87,10 +87,10 @@ void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
 		, *AgreementPolicyTypeString
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
-	HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
 
-void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
+FAccelByteTaskWPtr Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
 	, EAccelByteAgreementPolicyType const& AgreementPolicyType
 	, TArray<FString> const& Tags
 	, bool DefaultOnEmpty
@@ -110,10 +110,10 @@ void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode
 		, *TagsString
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
-	HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
 
-void Agreement::BulkAcceptPolicyVersions(TArray<FAccelByteModelsAcceptAgreementRequest> const& AgreementRequests
+FAccelByteTaskWPtr Agreement::BulkAcceptPolicyVersions(TArray<FAccelByteModelsAcceptAgreementRequest> const& AgreementRequests
 	, THandler<FAccelByteModelsAcceptAgreementResponse> const& OnSuccess
 	, FErrorHandler const& OnError) 
 {
@@ -125,10 +125,10 @@ void Agreement::BulkAcceptPolicyVersions(TArray<FAccelByteModelsAcceptAgreementR
 	FString Content;
 	FAccelByteUtilities::TArrayUStructToJsonString(AgreementRequests, Content);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Agreement::AcceptPolicyVersion(FString const& LocalizedPolicyVersionId
+FAccelByteTaskWPtr Agreement::AcceptPolicyVersion(FString const& LocalizedPolicyVersionId
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError) 
 {
@@ -138,10 +138,10 @@ void Agreement::AcceptPolicyVersion(FString const& LocalizedPolicyVersionId
 		, *SettingsRef.AgreementServerUrl
 		, *LocalizedPolicyVersionId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Agreement::QueryLegalEligibilities(FString const& Namespace
+FAccelByteTaskWPtr Agreement::QueryLegalEligibilities(FString const& Namespace
 	, THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -151,10 +151,10 @@ void Agreement::QueryLegalEligibilities(FString const& Namespace
 		, *SettingsRef.AgreementServerUrl
 		, *Namespace);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Agreement::GetLegalDocument(FString const& Url
+FAccelByteTaskWPtr Agreement::GetLegalDocument(FString const& Url
 	, THandler<FString> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -164,7 +164,7 @@ void Agreement::GetLegalDocument(FString const& Url
 		{TEXT("Accept"), TEXT("*/*")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
 
 FString Agreement::ConvertAgreementPolicyType(EAccelByteAgreementPolicyType const& AgreementPolicyType)

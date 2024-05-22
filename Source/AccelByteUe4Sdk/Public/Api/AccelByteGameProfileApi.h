@@ -36,8 +36,10 @@ public:
 	 * @param UserIds Specify user id(s) those will be requested. One UserId is required.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsPublicGameProfile.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BatchGetPublicGameProfiles(TArray<FString> UserIds
+	FAccelByteTaskWPtr BatchGetPublicGameProfiles(TArray<FString> const& UserIds
 		, THandler<TArray<FAccelByteModelsPublicGameProfile>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -46,8 +48,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array FAccelByteModelsGameProfile.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>> const& OnSuccess
+	FAccelByteTaskWPtr GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -56,8 +60,10 @@ public:
 	 * @param GameProfileRequest Game profile that will be created.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsGameProfile that created.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateGameProfile(FAccelByteModelsGameProfileRequest const& GameProfileRequest
+	FAccelByteTaskWPtr CreateGameProfile(FAccelByteModelsGameProfileRequest const& GameProfileRequest
 		, THandler<FAccelByteModelsGameProfile> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -67,8 +73,12 @@ public:
 	 * @param ProfileId Specified game profile ID.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsGameProfile that requested.
 	 * @param OnError This will be called when the operation failed.
-	*/
-	void GetGameProfile(FString const& ProfileId, THandler<FAccelByteModelsGameProfile> const& OnSuccess, FErrorHandler const& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetGameProfile(FString const& ProfileId
+		, THandler<FAccelByteModelsGameProfile> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update a specific game profile.
@@ -77,8 +87,10 @@ public:
 	 * @param GameProfileRequest Game profile that will be updated.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsGameProfile that updated.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGameProfile(FString const& ProfileId
+	FAccelByteTaskWPtr UpdateGameProfile(FString const& ProfileId
 		, FAccelByteModelsGameProfileRequest const& GameProfileRequest
 		, THandler<FAccelByteModelsGameProfile> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -89,8 +101,10 @@ public:
 	 * @param ProfileId Specified game profile ID.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteGameProfile(FString const& ProfileId
+	FAccelByteTaskWPtr DeleteGameProfile(FString const& ProfileId
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -101,8 +115,10 @@ public:
 	 * @param AttributeName Specified attribute name.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an attribute name and value as string.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGameProfileAttribute(FString const& ProfileId
+	FAccelByteTaskWPtr GetGameProfileAttribute(FString const& ProfileId
 		, FString const& AttributeName
 		, THandler<FAccelByteModelsGameProfileAttribute> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -114,8 +130,10 @@ public:
 	 * @param Attribute Consist of attribute name and value that will be updated.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsGameProfile with an updated attribute.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGameProfileAttribute(FString const& ProfileId
+	FAccelByteTaskWPtr UpdateGameProfileAttribute(FString const& ProfileId
 		, FAccelByteModelsGameProfileAttribute const& Attribute
 		, THandler<FAccelByteModelsGameProfile> const& OnSuccess
 		, FErrorHandler const& OnError);

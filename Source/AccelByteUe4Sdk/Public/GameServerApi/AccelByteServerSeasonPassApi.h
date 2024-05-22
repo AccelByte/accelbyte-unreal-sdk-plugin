@@ -37,13 +37,15 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Source Granted exp source, default value SWEAT
 	 * @param Tags Grant reason, default value Empty 
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GrantExpToUser(const FString& UserId
+	FAccelByteTaskWPtr GrantExpToUser(FString const& UserId
 		, int32 Exp
-		, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess
-		, const FErrorHandler& OnError
+		, THandler<FAccelByteModelsUserSeasonInfoWithoutReward> const& OnSuccess
+		, FErrorHandler const& OnError
 		, EAccelByteSeasonPassSource Source = EAccelByteSeasonPassSource::SWEAT
-		, const TArray<FString>& Tags = {});
+		, TArray<FString> const& Tags = {});
 
 	/**
 	 * @brief Grant tier to user by UserId. It will auto enroll if there's no user season but active published season exist,
@@ -54,14 +56,16 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfo.
 	 * @param OnError This will be called when the operation failed.
 	 * @param Source Granted tier source, default value SWEAT
-	 * @param Tags Grant reason, default value Empty 
+	 * @param Tags Grant reason, default value Empty
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GrantTierToUser(const FString& UserId
+	FAccelByteTaskWPtr GrantTierToUser(FString const& UserId
 		, int32 Count
-		, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess
-		, const FErrorHandler& OnError
+		, THandler<FAccelByteModelsUserSeasonInfoWithoutReward> const& OnSuccess
+		, FErrorHandler const& OnError
 		, EAccelByteSeasonPassSource Source = EAccelByteSeasonPassSource::SWEAT
-		, const TArray<FString>& Tags = {});
+		, TArray<FString> const& Tags = {});
 	
 	/**
 	 * @brief Get current user season progression, season only located in non-publisher namespace.
@@ -69,10 +73,12 @@ public:
 	 * @param UserId The User ID to check user season progression
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfoWithoutReward.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetCurrentUserSeasonProgression(const FString& UserId
-		, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetCurrentUserSeasonProgression(FString const& UserId
+		, THandler<FAccelByteModelsUserSeasonInfoWithoutReward> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get user season data by SeasonId, season only located in non-publisher namespace.
@@ -81,11 +87,13 @@ public:
 	 * @param SeasonId The Id of the Season.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserSeasonData(const FString& UserId
+	FAccelByteTaskWPtr GetUserSeasonData(FString const& UserId
 		, FString const& SeasonId
-		, const THandler<FAccelByteModelsUserSeasonInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+		, THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get current user season history
@@ -93,10 +101,12 @@ public:
 	 * @param UserId The User ID to check user season progression
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonExpHistory.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetCurrentUserSeasonHistory(const FString& UserId
-		, const THandler<FAccelByteModelsUserSeasonExpHistory>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetCurrentUserSeasonHistory(FString const& UserId
+		, THandler<FAccelByteModelsUserSeasonExpHistory> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get user exp acquisition history's tag list
@@ -104,10 +114,12 @@ public:
 	 * @param UserId The User ID to check user season progression
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonExpHistory.
 	 * @param OnError This will be called when the operation failed.
-	 */			
-	void QueryUserSeasonExp(const FString& UserId
-		, const THandler<FAccelByteModelsQueryUserSeasonExp>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr QueryUserSeasonExp(FString const& UserId
+		, THandler<FAccelByteModelsQueryUserSeasonExp> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Bulk get current user session progression 
@@ -115,15 +127,18 @@ public:
 	 * @param UserIds The User IDs to check user season progression
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUserSeasonInfo>.
 	 * @param OnError This will be called when the operation failed.
-	 */			
-	void BulkGetUserSessionProgression(const TArray<FString>& UserIds
-		, const THandler<TArray<FAccelByteModelsUserSeasonInfo>>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkGetUserSessionProgression(TArray<FString> const& UserIds
+		, THandler<TArray<FAccelByteModelsUserSeasonInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	ServerSeasonPass() = delete;
 	ServerSeasonPass(const ServerSeasonPass&) = delete;
 	ServerSeasonPass(ServerSeasonPass&&) = delete;
 };
-}
-}
+
+} // Namespace GameServerApi
+} // Namespace AccelByte

@@ -35,12 +35,14 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the result. Default value is 0.
 	 * @param Limit The limit of the result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryGameBinaryRecords(FString const& Query,
-		THandler<FAccelByteModelsPaginatedGameBinaryRecords> const& OnSuccess,
-		FErrorHandler const& OnError,
-		int32 Offset = 0,
-		int32 Limit = 20);
+	FAccelByteTaskWPtr QueryGameBinaryRecords(FString const& Query
+		, THandler<FAccelByteModelsPaginatedGameBinaryRecords> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Offset = 0
+		, int32 Limit = 20);
 
 	/**
 	 * @brief Create game binary records.
@@ -50,15 +52,17 @@ public:
 	 * @param SetBy Metadata value.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, then it will not send the TTL (Time to live) meta data.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE,
+	 *		then it will not send the TTL (Time to live) meta data.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateGameBinaryRecord(
-		FString const& Key,
-		EAccelByteFileType FileType,
-		ESetByMetadataRecord SetBy,
-		THandler<FAccelByteModelsBinaryInfo> const& OnSuccess,
-		FErrorHandler const& OnError,
-		FTTLConfig const& TTLConfig = FTTLConfig{});
+	FAccelByteTaskWPtr CreateGameBinaryRecord(FString const& Key
+		, EAccelByteFileType FileType
+		, ESetByMetadataRecord SetBy
+		, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FTTLConfig const& TTLConfig = FTTLConfig{});
 
 	/**
 	 * @brief Get a game binary record by its key.
@@ -66,10 +70,12 @@ public:
 	 * @param Key Key of the binary record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGameBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGameBinaryRecord(FString const& Key,
-		THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess,
-		FErrorHandler const& OnError);
+	FAccelByteTaskWPtr GetGameBinaryRecord(FString const& Key
+		, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update a game binary record file by its key.
@@ -79,12 +85,14 @@ public:
 	 * @param FileLocation Location of the uploaded binary file.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGameBinaryRecord(FString const& Key,
-		EAccelByteFileType ContentType,
-		FString const& FileLocation,
-		THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess,
-		FErrorHandler const& OnError);
+	FAccelByteTaskWPtr UpdateGameBinaryRecord(FString const& Key
+		, EAccelByteFileType ContentType
+		, FString const& FileLocation
+		, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Delete a game binary record.
@@ -92,10 +100,12 @@ public:
 	 * @param Key Key of the binary record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteGameBinaryRecord(FString const& Key,
-		FVoidHandler const& OnSuccess,
-		FErrorHandler const& OnError);
+	FAccelByteTaskWPtr DeleteGameBinaryRecord(FString const& Key
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update a game binary record metadata by its key.
@@ -104,13 +114,16 @@ public:
 	 * @param SetBy Metadata value.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
-	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, then it will not send the TTL (Time to live) meta data.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE,
+	 *		then it will not send the TTL (Time to live) meta data.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGameBinaryRecordMetadata(FString const& Key,
-		ESetByMetadataRecord SetBy,
-		THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess,
-		FErrorHandler const& OnError,
-		FTTLConfig const& TTLConfig = FTTLConfig{});
+	FAccelByteTaskWPtr UpdateGameBinaryRecordMetadata(FString const& Key
+		, ESetByMetadataRecord SetBy
+		, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FTTLConfig const& TTLConfig = FTTLConfig{});
 
 	/**
 	 * @brief Request presigned URL to upload the binary record to s3.
@@ -119,12 +132,13 @@ public:
 	 * @param FileType File type of the binary (supported file types are jpeg, jpg, png, bmp, gif, mp3, webp, and bin).
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RequestGameBinaryRecordPresignedUrl(FString const& Key,
-		EAccelByteFileType FileType,
-		THandler<FAccelByteModelsBinaryInfo> const& OnSuccess,
-		FErrorHandler const& OnError);
-
+	FAccelByteTaskWPtr RequestGameBinaryRecordPresignedUrl(FString const& Key
+		, EAccelByteFileType FileType
+		, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 #pragma endregion
 

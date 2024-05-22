@@ -25,7 +25,7 @@ StoreDisplay::StoreDisplay(Credentials const& InCredentialsRef
 	
 StoreDisplay::~StoreDisplay(){}
 
-void StoreDisplay::GetAllViews(FString const& StoreId
+FAccelByteTaskWPtr StoreDisplay::GetAllViews(FString const& StoreId
 	, FString const& Language
 	, THandler<TArray<FAccelByteModelsViewInfo>> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -43,10 +43,10 @@ void StoreDisplay::GetAllViews(FString const& StoreId
 		{ TEXT("language"), Language },
 	};
 
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
-void StoreDisplay::ListActiveSectionContents(FString const& StoreId
+FAccelByteTaskWPtr StoreDisplay::ListActiveSectionContents(FString const& StoreId
 	, FString const& ViewId
 	, FString const& Region
 	, FString const& Language
@@ -70,7 +70,7 @@ void StoreDisplay::ListActiveSectionContents(FString const& StoreId
 		{ TEXT("autoCalcEstimatedPrice"), AutoCalcEstimatedPrice ? TEXT("true") : TEXT("false")}
 	};
 
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
 
 } // Namespace Api

@@ -32,12 +32,14 @@ public:
 	 * @param Language Display language.null If not set, the language from the access token will be used.
 	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsFulfillmentResult.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RedeemCode(FString const& Code
+	FAccelByteTaskWPtr RedeemCode(FString const& Code
 		, FString const& Region
 		, FString const& Language
-		, THandler<FAccelByteModelsFulfillmentResult> OnSuccess
-		, FErrorHandler OnError);
+		, THandler<FAccelByteModelsFulfillmentResult> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	Fulfillment() = delete;

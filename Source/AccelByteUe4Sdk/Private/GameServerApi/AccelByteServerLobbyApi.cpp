@@ -23,9 +23,9 @@ ServerLobby::ServerLobby(ServerCredentials const& InCredentialsRef
 ServerLobby::~ServerLobby()
 {}
 
-void ServerLobby::GetPartyDataByUserId(const FString & UserId
-	, const THandler<FAccelByteModelsDataPartyResponse> OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr ServerLobby::GetPartyDataByUserId(FString const& UserId
+	, THandler<FAccelByteModelsDataPartyResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -33,7 +33,7 @@ void ServerLobby::GetPartyDataByUserId(const FString & UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/users/%s/party")
@@ -41,13 +41,13 @@ void ServerLobby::GetPartyDataByUserId(const FString & UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerLobby::WritePartyStorage(const FString& PartyId
+FAccelByteTaskWPtr ServerLobby::WritePartyStorage(FString const& PartyId
 	, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier
-	, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess
-	, const FErrorHandler& OnError
+	, THandler<FAccelByteModelsPartyDataNotif> const& OnSuccess
+	, FErrorHandler const& OnError
 	, uint32 RetryAttempt)
 {
 	TSharedPtr<PartyStorageWrapper> Wrapper = MakeShared<PartyStorageWrapper>();
@@ -57,11 +57,12 @@ void ServerLobby::WritePartyStorage(const FString& PartyId
 	Wrapper->RemainingAttempt = RetryAttempt;
 	Wrapper->PayloadModifier = PayloadModifier;
 	WritePartyStorageRecursive(Wrapper);
+	return nullptr;
 }
 
-void ServerLobby::GetPartyStorage(const FString & PartyId
-	, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess
-	, const FErrorHandler & OnError)
+FAccelByteTaskWPtr ServerLobby::GetPartyStorage(FString const& PartyId
+	, THandler<FAccelByteModelsPartyDataNotif> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -70,13 +71,13 @@ void ServerLobby::GetPartyStorage(const FString & PartyId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *PartyId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerLobby::RequestWritePartyStorage(const FString &PartyId
-	, const FAccelByteModelsPartyDataUpdateRequest& PartyDataRequest
-	, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr ServerLobby::RequestWritePartyStorage(FString const& PartyId
+	, FAccelByteModelsPartyDataUpdateRequest const& PartyDataRequest
+	, THandler<FAccelByteModelsPartyDataNotif> const& OnSuccess
+	, FErrorHandler const& OnError
 	, FSimpleDelegate OnConflicted)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -105,7 +106,7 @@ void ServerLobby::RequestWritePartyStorage(const FString &PartyId
 			}
 		});
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, OnSuccess, OnError);
 }
 
 void ServerLobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper)
@@ -115,7 +116,6 @@ void ServerLobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> Dat
 		DataWrapper->OnError.ExecuteIfBound(412, TEXT("Exhaust all retry attempt to modify party storage.."));
 		return;
 	}
-
 
 	GetPartyStorage(DataWrapper->PartyId
 		, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
@@ -141,9 +141,9 @@ void ServerLobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> Dat
 		);
 }
 
-void ServerLobby::GetSessionAttributeAll(const FString& UserId
-	, const THandler<FAccelByteModelsGetSessionAttributeAllResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerLobby::GetSessionAttributeAll(FString const& UserId
+	, THandler<FAccelByteModelsGetSessionAttributeAllResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -151,7 +151,7 @@ void ServerLobby::GetSessionAttributeAll(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes")
@@ -159,13 +159,13 @@ void ServerLobby::GetSessionAttributeAll(const FString& UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerLobby::GetSessionAttribute(const FString& UserId
-	, const FString& Key
-	, const THandler<FAccelByteModelsGetSessionAttributeResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerLobby::GetSessionAttribute(FString const& UserId
+	, FString const& Key
+	, THandler<FAccelByteModelsGetSessionAttributeResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -173,13 +173,13 @@ void ServerLobby::GetSessionAttribute(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(404, TEXT("Url is invalid. Key is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes/%s")
@@ -188,13 +188,13 @@ void ServerLobby::GetSessionAttribute(const FString& UserId
 		, *UserId
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerLobby::SetSessionAttribute(const FString& UserId
-	, const TMap<FString, FString>& Attributes
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerLobby::SetSessionAttribute(FString const& UserId
+	, TMap<FString, FString> const& Attributes
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -202,13 +202,13 @@ void ServerLobby::SetSessionAttribute(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if (Attributes.Num() == 0)
 	{
 		OnError.ExecuteIfBound(404, TEXT("Url is invalid. Attributes is empty."));
-		return;
+		return nullptr;
 	}
 
 	FAccelByteModelsSetSessionAttributeRequest Body;
@@ -219,29 +219,29 @@ void ServerLobby::SetSessionAttribute(const FString& UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Body, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Body, OnSuccess, OnError);
 }
 
-void ServerLobby::SetSessionAttribute(const FString& UserId
-	, const FString& Key
-	, const FString& Value
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerLobby::SetSessionAttribute(FString const& UserId
+	, FString const& Key
+	, FString const& Value
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	TMap<FString, FString> Attributes = { { Key, Value } };
-	SetSessionAttribute(UserId, Attributes, OnSuccess, OnError);
+	return SetSessionAttribute(UserId, Attributes, OnSuccess, OnError);
 }
 
-void ServerLobby::GetListOfBlockedUsers(const FString& UserId
-	, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerLobby::GetListOfBlockedUsers(FString const& UserId
+	, THandler<FAccelByteModelsListBlockedUserResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -249,7 +249,7 @@ void ServerLobby::GetListOfBlockedUsers(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked")
@@ -257,12 +257,12 @@ void ServerLobby::GetListOfBlockedUsers(const FString& UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerLobby::GetListOfBlockers(const FString& UserId
-	, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerLobby::GetListOfBlockers(FString const& UserId
+	, THandler<FAccelByteModelsListBlockerResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -270,7 +270,7 @@ void ServerLobby::GetListOfBlockers(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by")
@@ -278,7 +278,7 @@ void ServerLobby::GetListOfBlockers(const FString& UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 } // namespace GameServerApi

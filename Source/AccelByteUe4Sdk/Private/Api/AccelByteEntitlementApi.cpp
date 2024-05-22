@@ -27,11 +27,11 @@ Entitlement::Entitlement(Credentials const& InCredentialsRef
 
 Entitlement::~Entitlement(){}
 
-void Entitlement::GetCurrentUserEntitlementHistory(THandler<FAccelByteModelsUserEntitlementHistoryPagingResult> const& OnSuccess
+FAccelByteTaskWPtr Entitlement::GetCurrentUserEntitlementHistory(THandler<FAccelByteModelsUserEntitlementHistoryPagingResult> const& OnSuccess
 	, FErrorHandler const& OnError
 	, EAccelByteEntitlementClass const& EntitlementClass
-	, FDateTime StartDate
-	, FDateTime EndDate
+	, FDateTime const& StartDate
+	, FDateTime const& EndDate
 	, int32 Limit
 	, int32 Offset) 
 {
@@ -62,20 +62,20 @@ void Entitlement::GetCurrentUserEntitlementHistory(THandler<FAccelByteModelsUser
 	}
 
 	const TMultiMap<FString, FString> QueryParams{
-	{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ? FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass) : TEXT("") },
-	{ TEXT("startDate"), StartDate > 0 ? TempStartDate : TEXT("")},
-	{ TEXT("endDate"), EndDate > 0 ? TempEndDate : TEXT("") },
-	{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
-	{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
+		{ TEXT("entitlementClazz"), EntitlementClass != EAccelByteEntitlementClass::NONE ? FAccelByteUtilities::GetUEnumValueAsString(EntitlementClass) : TEXT("") },
+		{ TEXT("startDate"), StartDate > 0 ? TempStartDate : TEXT("")},
+		{ TEXT("endDate"), EndDate > 0 ? TempEndDate : TEXT("") },
+		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
+		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
-void Entitlement::QueryUserEntitlements(FString const& EntitlementName
+FAccelByteTaskWPtr Entitlement::QueryUserEntitlements(FString const& EntitlementName
 	, FString const& ItemId
-	, int32 const& Offset
-	, int32 const& Limit
+	, int32 Offset
+	, int32 Limit
 	, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess
 	, FErrorHandler const& OnError
 	, EAccelByteEntitlementClass EntitlementClass
@@ -85,15 +85,16 @@ void Entitlement::QueryUserEntitlements(FString const& EntitlementName
 	FReport::Log(FString(__FUNCTION__));
 
 	TArray<FString> ItemIdsArray = { ItemId };
-	QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType, Features);
+	return QueryUserEntitlements(EntitlementName, ItemIdsArray, Offset, Limit, OnSuccess, OnError, EntitlementClass, AppType, Features);
 }
 
-void Entitlement::QueryUserEntitlements(FString const& EntitlementName
+FAccelByteTaskWPtr Entitlement::QueryUserEntitlements(FString const& EntitlementName
 	, TArray<FString> const& ItemIds
-	, int32 const& Offset
-	, int32 const& Limit
+	, int32 Offset
+	, int32 Limit
 	, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess
-	, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass
+	, FErrorHandler const& OnError
+	, EAccelByteEntitlementClass EntitlementClass
 	, EAccelByteAppType AppType
 	, TArray<FString> const& Features)
 {
@@ -147,10 +148,10 @@ void Entitlement::QueryUserEntitlements(FString const& EntitlementName
 		QueryParams.Add(TEXT("appType"), FAccelByteUtilities::GetUEnumValueAsString(AppType));
 	}
 	
-	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Entitlement::GetUserEntitlementById(FString const& Entitlementid
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementById(FString const& Entitlementid
 	, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -161,10 +162,10 @@ void Entitlement::GetUserEntitlementById(FString const& Entitlementid
 		, *CredentialsRef->GetUserId()
 		, *Entitlementid);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Entitlement::GetUserEntitlementOwnershipByAppId(FString const& AppId
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementOwnershipByAppId(FString const& AppId
 	, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 	, FErrorHandler const& OnError
 	, bool bUsePublisherNamespace)
@@ -180,10 +181,10 @@ void Entitlement::GetUserEntitlementOwnershipByAppId(FString const& AppId
 		{"appId", AppId}
 	};
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Entitlement::GetUserEntitlementOwnershipBySku(FString const& Sku
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementOwnershipBySku(FString const& Sku
 	, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 	, FErrorHandler const& OnError
 	, bool bUsePublisherNamespace)
@@ -199,10 +200,10 @@ void Entitlement::GetUserEntitlementOwnershipBySku(FString const& Sku
 		{"sku", Sku}
 	};
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Entitlement::GetUserEntitlementOwnershipByItemId(FString const& ItemId
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementOwnershipByItemId(FString const& ItemId
 	, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 	, FErrorHandler const& OnError
 	, bool bUsePublisherNamespace)
@@ -217,13 +218,13 @@ void Entitlement::GetUserEntitlementOwnershipByItemId(FString const& ItemId
 		{"itemId", ItemId}
 	};
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Entitlement::GetUserEntitlementOwnershipAny(TArray<FString> const ItemIds
-	, TArray<FString> const AppIds
-	, TArray<FString> const Skus
-	, THandler<FAccelByteModelsEntitlementOwnership> const OnSuccess
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementOwnershipAny(TArray<FString> const& ItemIds
+	, TArray<FString> const& AppIds
+	, TArray<FString> const& Skus
+	, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 	, FErrorHandler const& OnError
 	, bool bUsePublisherNamespace)
 {
@@ -267,19 +268,20 @@ void Entitlement::GetUserEntitlementOwnershipAny(TArray<FString> const ItemIds
 			}
 		}
 		
-		HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+		return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 	}
+	return nullptr;
 }
 
-void Entitlement::GetUserEntitlementOwnershipViaToken(const FString& PublicKey
-	, const TArray<FString>& ItemIds
-	, const TArray<FString>& AppIds
-	, const TArray<FString>& Skus
-	, const THandler<FAccelByteModelsEntitlementOwnershipDetails>& OnSuccess
-	, const FErrorHandler& OnError
-	, const bool VerifySignature
-	, const bool VerifyExpiration
-	, const FString& VerifySub
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementOwnershipViaToken(FString const& PublicKey
+	, TArray<FString> const& ItemIds
+	, TArray<FString> const& AppIds
+	, TArray<FString> const& Skus
+	, THandler<FAccelByteModelsEntitlementOwnershipDetails> const& OnSuccess
+	, FErrorHandler const& OnError
+	, bool VerifySignature
+	, bool VerifyExpiration
+	, FString const& VerifySub
 	, bool bUsePublisherNamespace)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -328,15 +330,16 @@ void Entitlement::GetUserEntitlementOwnershipViaToken(const FString& PublicKey
 				}
 			});
 		
-		GetUserEntitlementOwnershipTokenOnly(ItemIds, AppIds, Skus, ProcessOnSuccess, OnError, bUsePublisherNamespace);
+		return GetUserEntitlementOwnershipTokenOnly(ItemIds, AppIds, Skus, ProcessOnSuccess, OnError, bUsePublisherNamespace);
 	}
+	return nullptr;
 }
 	
-void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& ItemIds
-	, const TArray<FString>& AppIds
-	, const TArray<FString>& Skus
-	, const THandler<FAccelByteModelsOwnershipToken>& OnSuccess
-	, const FErrorHandler& OnError
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementOwnershipTokenOnly(TArray<FString> const& ItemIds
+	, TArray<FString> const& AppIds
+	, TArray<FString> const& Skus
+	, THandler<FAccelByteModelsOwnershipToken> const& OnSuccess
+	, FErrorHandler const& OnError
 	, bool bUsePublisherNamespace)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -379,15 +382,16 @@ void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& It
 			}
 		}
 		
-		HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+		return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 	}
+	return nullptr;
 }
 
-void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId
-	, int32 const& UseCount
+FAccelByteTaskWPtr Entitlement::ConsumeUserEntitlement(FString const& EntitlementId
+	, int32 UseCount
 	, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess
 	, FErrorHandler const& OnError
-	, TArray<FString> Options
+	, TArray<FString> const& Options
 	, FString const& RequestId )
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -409,12 +413,11 @@ void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 	
-
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::CreateDistributionReceiver(FString const& ExtUserId
-	, FAccelByteModelsAttributes const Attributes
+FAccelByteTaskWPtr Entitlement::CreateDistributionReceiver(FString const& ExtUserId
+	, FAccelByteModelsAttributes const& Attributes
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -422,9 +425,10 @@ void Entitlement::CreateDistributionReceiver(FString const& ExtUserId
 	FReport::LogDeprecated(FString(__FUNCTION__), "Platform Service version 3.4.0 and above doesn't support this anymore");
 
 	OnError.ExecuteIfBound(410, TEXT("This feature is already removed."));
+	return nullptr;
 }
 
-void Entitlement::DeleteDistributionReceiver(FString const& ExtUserId
+FAccelByteTaskWPtr Entitlement::DeleteDistributionReceiver(FString const& ExtUserId
 	, FString const& UserId
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -433,9 +437,10 @@ void Entitlement::DeleteDistributionReceiver(FString const& ExtUserId
 	FReport::LogDeprecated(FString(__FUNCTION__), "Platform Service version 3.4.0 and above doesn't support this anymore");
 
 	OnError.ExecuteIfBound(410, TEXT("This feature is already removed."));
+	return nullptr;
 }
 
-void Entitlement::GetDistributionReceiver(FString const& PublisherNamespace
+FAccelByteTaskWPtr Entitlement::GetDistributionReceiver(FString const& PublisherNamespace
 	, FString const& PublisherUserId
 	, THandler<TArray<FAccelByteModelsDistributionReceiver>> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -444,10 +449,11 @@ void Entitlement::GetDistributionReceiver(FString const& PublisherNamespace
 	FReport::LogDeprecated(FString(__FUNCTION__), "Platform Service version 3.4.0 and above doesn't support this anymore");
 
 	OnError.ExecuteIfBound(410, TEXT("This feature is already removed."));
+	return nullptr;
 }
 
-void Entitlement::UpdateDistributionReceiver(FString const& ExtUserId
-	, FAccelByteModelsAttributes const Attributes
+FAccelByteTaskWPtr Entitlement::UpdateDistributionReceiver(FString const& ExtUserId
+	, FAccelByteModelsAttributes const& Attributes
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -455,27 +461,28 @@ void Entitlement::UpdateDistributionReceiver(FString const& ExtUserId
 	FReport::LogDeprecated(FString(__FUNCTION__), "Platform Service version 3.4.0 and above doesn't support this anymore");
 
 	OnError.ExecuteIfBound(410, TEXT("This feature is already removed."));
+	return nullptr;
 }
 
-void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType
+FAccelByteTaskWPtr Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FAccelByteModelsPlayStationDLCSync PSSyncModel{};
-	SyncPlatformPurchase(PlatformType, PSSyncModel, OnSuccess, OnError);
+	return SyncPlatformPurchase(PlatformType, PSSyncModel, OnSuccess, OnError);
 }
 
-void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType
+FAccelByteTaskWPtr Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType
 	, FAccelByteModelsPlayStationDLCSync const& PSSyncModel
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FAccelByteModelsEntitlementSyncBase SyncBase;
 	SyncBase.ServiceLabel = PSSyncModel.ServiceLabel;
-	SyncPlatformPurchase(SyncBase, PlatformType, OnSuccess, OnError);
+	return SyncPlatformPurchase(SyncBase, PlatformType, OnSuccess, OnError);
 }
 
-void Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase EntitlementSyncBase
+FAccelByteTaskWPtr Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase const& EntitlementSyncBase
 	, EAccelBytePlatformSync PlatformType
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -495,7 +502,7 @@ void Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase Entit
 		if (PlatformUserId.IsEmpty())
 		{
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
-			return;
+			return nullptr;
 		}
 
 		SyncRequestJson->SetStringField(TEXT("steamId"), PlatformUserId);
@@ -539,21 +546,20 @@ void Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase Entit
 			bSyncForSingleProduct = false;
 			break;
 		}
-
 		break;
 	case EAccelBytePlatformSync::EPIC_GAMES:
 		PlatformText = TEXT("epicgames");
 		if (PlatformUserId.IsEmpty())
 		{
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
-			return;
+			return nullptr;
 		}
 		bSyncForSingleProduct = false;
 		SyncRequestJson->SetStringField(TEXT("epicGamesJwtToken"), EntitlementSyncBase.EpicGamesJwtToken);
 		break;
 	default:
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform Sync Type is not found"));
-		return;
+		return nullptr;
 	}
 
 	// If we are trying to sync for a single product, add product information here to request
@@ -575,12 +581,13 @@ void Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlementSyncBase Entit
 	if (!FJsonSerializer::Serialize(SyncRequestJson, Writer))
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to convert request JSON object to string"));
+		return nullptr;
 	}
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ContentString, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ContentString, OnSuccess, OnError);
 }
 
-void Entitlement::SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest
+FAccelByteTaskWPtr Entitlement::SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -594,13 +601,17 @@ void Entitlement::SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncM
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId()
 		, *PlatformText);
-	FString Content = TEXT("");
-	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
+	
+	FString Content;
+	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(SyncRequest);
+	FAccelByteUtilities::RemoveEmptyFieldsFromJson(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest
+FAccelByteTaskWPtr Entitlement::SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest
 	, THandler<FAccelByteModelsPlatformSyncMobileGoogleResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -613,13 +624,17 @@ void Entitlement::SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformS
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId()
 		, *PlatformText);
-	FString Content = TEXT("");
-	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
+
+	FString Content;
+	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(SyncRequest);
+	FAccelByteUtilities::RemoveEmptyFieldsFromJson(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest
+FAccelByteTaskWPtr Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -635,10 +650,10 @@ void Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMo
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync
+FAccelByteTaskWPtr Entitlement::SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -654,10 +669,10 @@ void Entitlement::SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess
+FAccelByteTaskWPtr Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -667,7 +682,7 @@ void Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess
 	if (platformUserId.IsEmpty()) 
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
-		return;
+		return nullptr;
 	}
 
 	FString Content = TEXT("");
@@ -683,10 +698,10 @@ void Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncModel
+FAccelByteTaskWPtr Entitlement::SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncModel
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -700,10 +715,10 @@ void Entitlement::SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncMod
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel
+FAccelByteTaskWPtr Entitlement::SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -726,10 +741,10 @@ void Entitlement::SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlemen
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
  
 	// Api Request 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncEpicGameDurableItems(FString const& EpicGamesJwtToken
+FAccelByteTaskWPtr Entitlement::SyncEpicGameDurableItems(FString const& EpicGamesJwtToken
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -749,10 +764,10 @@ void Entitlement::SyncEpicGameDurableItems(FString const& EpicGamesJwtToken
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
  
 	// Api Request 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items
+FAccelByteTaskWPtr Entitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items
 	, THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -777,10 +792,10 @@ void Entitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer); 
 	
 	// Api Request 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Ids
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Ids
 	, THandler<TArray<FAccelByteModelsEntitlementOwnershipItemIds>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -807,10 +822,10 @@ void Entitlement::GetUserEntitlementOwnershipByItemIds(TArray<FString> const& Id
 	FString Content = TEXT("");
 	
 	// Api Request 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncWithDLCEntitlementInPSNStore(const FAccelByteModelsPlayStationDLCSync& PSNModel
+FAccelByteTaskWPtr Entitlement::SyncWithDLCEntitlementInPSNStore(FAccelByteModelsPlayStationDLCSync const& PSNModel
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -828,10 +843,10 @@ void Entitlement::SyncWithDLCEntitlementInPSNStore(const FAccelByteModelsPlaySta
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStationIAPSync& PlaystationModel
+FAccelByteTaskWPtr Entitlement::SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStationIAPSync& PlaystationModel
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -852,11 +867,11 @@ void Entitlement::SyncWithEntitlementInPSNStore(const FAccelByteModelsPlayStatio
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SellUserEntitlement(FString const& EntitlementId
-	, int32 const& UseCount
+FAccelByteTaskWPtr Entitlement::SellUserEntitlement(FString const& EntitlementId
+	, int32 UseCount
 	, FString const& RequestId
 	, THandler<FAccelByteModelsSellItemEntitlementInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -866,7 +881,7 @@ void Entitlement::SellUserEntitlement(FString const& EntitlementId
 	if (EntitlementId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, EntitlementId is empty."));
-		return;
+		return nullptr;
 	}
 	
 	FAccelByteModelsSellUserEntitlementRequest SellUserEntitlementRequest;
@@ -885,10 +900,10 @@ void Entitlement::SellUserEntitlement(FString const& EntitlementId
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 	
-void Entitlement::SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteModelsSyncOculusConsumableEntitlementInfo>> const& OnSuccess
+FAccelByteTaskWPtr Entitlement::SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteModelsSyncOculusConsumableEntitlementInfo>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));  
@@ -896,10 +911,10 @@ void Entitlement::SyncOculusConsumableEntitlements(THandler<TArray<FAccelByteMod
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
 }
 	
-void Entitlement::SyncOculusDLC(FVoidHandler const& OnSuccess
+FAccelByteTaskWPtr Entitlement::SyncOculusDLC(FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));  
@@ -907,10 +922,10 @@ void Entitlement::SyncOculusDLC(FVoidHandler const& OnSuccess
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId());
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
 }
 
-void Entitlement::SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDLCSync const& PlaystationModel
+FAccelByteTaskWPtr Entitlement::SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDLCSync const& PlaystationModel
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -927,10 +942,10 @@ void Entitlement::SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDL
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Entitlement::SyncEntitlementPSNMultipleService(const FAccelByteModelsMultipleServicePSNIAPSync& PlaystationModel
+FAccelByteTaskWPtr Entitlement::SyncEntitlementPSNMultipleService(FAccelByteModelsMultipleServicePSNIAPSync const& PlaystationModel
 	, THandler<TArray<FAccelByteModelsMultipleServicePlayStationInfo>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -947,8 +962,8 @@ void Entitlement::SyncEntitlementPSNMultipleService(const FAccelByteModelsMultip
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 	
 } // Namespace Api
-}
+} // Namespace AccelByte

@@ -23,7 +23,7 @@ ServerBinaryCloudSave::ServerBinaryCloudSave(ServerCredentials const& InCredenti
 ServerBinaryCloudSave::~ServerBinaryCloudSave()
 {}
 
-void ServerBinaryCloudSave::QueryGameBinaryRecords(FString const& Query
+FAccelByteTaskWPtr ServerBinaryCloudSave::QueryGameBinaryRecords(FString const& Query
 	, THandler<FAccelByteModelsPaginatedGameBinaryRecords> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 Offset
@@ -34,7 +34,7 @@ void ServerBinaryCloudSave::QueryGameBinaryRecords(FString const& Query
 	if (Query.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Query cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries")
@@ -47,10 +47,10 @@ void ServerBinaryCloudSave::QueryGameBinaryRecords(FString const& Query
 		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")},
 	};
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& Key
+FAccelByteTaskWPtr ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& Key
 	, EAccelByteFileType FileType
 	, ESetByMetadataRecord SetBy
 	, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
@@ -62,13 +62,13 @@ void ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (SetBy == ESetByMetadataRecord::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Set_By cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (FileType == EAccelByteFileType::NONE)
@@ -77,7 +77,7 @@ void ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& Key
 							   "(e.g., EAccelByteFileType::JPG, EAccelByteFileType::PNG, etc.). "
 							   "Please set a valid 'FileType' value to fulfill the request.");
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), Message);
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries")
@@ -97,10 +97,10 @@ void ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& Key
 	}
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }	
 
-void ServerBinaryCloudSave::GetGameBinaryRecord(FString const& Key
+FAccelByteTaskWPtr ServerBinaryCloudSave::GetGameBinaryRecord(FString const& Key
 	, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -109,7 +109,7 @@ void ServerBinaryCloudSave::GetGameBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
@@ -117,10 +117,10 @@ void ServerBinaryCloudSave::GetGameBinaryRecord(FString const& Key
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& Key
+FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& Key
 	, EAccelByteFileType ContentType
 	, FString const& FileLocation
 	, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
@@ -131,19 +131,19 @@ void ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (ContentType == EAccelByteFileType::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("File_Type cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (FileLocation.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("File Location cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
@@ -156,10 +156,10 @@ void ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& Key
 	JsonObj.SetStringField("file_location", FileLocation);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& Key
+FAccelByteTaskWPtr ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& Key
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -168,7 +168,7 @@ void ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
@@ -176,10 +176,10 @@ void ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& Key
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
 	
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString const& Key
+FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString const& Key
 	, ESetByMetadataRecord SetBy
 	, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
 	, FErrorHandler const& OnError
@@ -190,13 +190,13 @@ void ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString const& Key
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (SetBy == ESetByMetadataRecord::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Set_By cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s/metadata")
@@ -215,10 +215,10 @@ void ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString const& Key
 	}
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 	
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FString const& Key
+FAccelByteTaskWPtr ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FString const& Key
 	, EAccelByteFileType FileType
 	, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -228,7 +228,7 @@ void ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FString const& K
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (FileType == EAccelByteFileType::NONE)
@@ -237,7 +237,7 @@ void ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FString const& K
 							   "(e.g., EAccelByteFileType::JPG, EAccelByteFileType::PNG, etc.). "
 							   "Please set a valid 'FileType' value to fulfill the request.");
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), Message);
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s/presigned")
@@ -249,7 +249,7 @@ void ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FString const& K
 	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 	
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 	
 #pragma endregion

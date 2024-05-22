@@ -688,6 +688,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PlayerAttributes
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributes")
 	TArray<FAccelByteModelsV2PlayerAttributesPlatform> Platforms{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributes")
+	TArray<FString> Roles{};
 };
 
 USTRUCT(BlueprintType)
@@ -706,6 +709,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2StorePlayerAttributesRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesRequest")
 	TArray<FAccelByteModelsV2PlayerAttributesPlatform> Platforms{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PlayerAttributesRequest")
+	TArray<FString> Roles{};
 };
 
 USTRUCT(BlueprintType)

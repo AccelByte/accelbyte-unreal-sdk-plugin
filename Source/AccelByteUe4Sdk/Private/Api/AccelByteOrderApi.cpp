@@ -24,9 +24,9 @@ Order::Order(Credentials const& InCredentialsRef
 Order::~Order()
 {}
 
-void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate
-	, const THandler<FAccelByteModelsOrderInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Order::CreateNewOrder(FAccelByteModelsOrderCreate const& OrderCreate
+	, THandler<FAccelByteModelsOrderInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -38,15 +38,16 @@ void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate
 	FString Content;
 	const TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(OrderCreate);
 	FAccelByteUtilities::RemoveEmptyStrings(JsonObject);
+	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObject);
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Order::CancelOrder(const FString& OrderNo
-	, const THandler<FAccelByteModelsOrderInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Order::CancelOrder(FString const& OrderNo
+	, THandler<FAccelByteModelsOrderInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -56,12 +57,12 @@ void Order::CancelOrder(const FString& OrderNo
 		, *CredentialsRef->GetUserId()
 		, *OrderNo);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Order::GetUserOrder(const FString& OrderNo
-	, const THandler<FAccelByteModelsOrderInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Order::GetUserOrder(FString const& OrderNo
+	, THandler<FAccelByteModelsOrderInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -71,13 +72,13 @@ void Order::GetUserOrder(const FString& OrderNo
 		, *CredentialsRef->GetUserId()
 		, *OrderNo);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Order::GetUserOrders(int32 Page
+FAccelByteTaskWPtr Order::GetUserOrders(int32 Page
 	, int32 Size
-	, const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+	, THandler<FAccelByteModelsPagedOrderInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -91,12 +92,12 @@ void Order::GetUserOrders(int32 Page
 		{TEXT("size"), FString::FromInt(Size)}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Order::QueryUserOrders(const FAccelByteModelsUserOrdersRequest& UserOrderRequest
-    , const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess
-	, const FErrorHandler& OnError) 
+FAccelByteTaskWPtr Order::QueryUserOrders(FAccelByteModelsUserOrdersRequest const& UserOrderRequest
+    , THandler<FAccelByteModelsPagedOrderInfo> const& OnSuccess
+	, FErrorHandler const& OnError) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -114,12 +115,12 @@ void Order::QueryUserOrders(const FAccelByteModelsUserOrdersRequest& UserOrderRe
 		{TEXT("limit"), FString::FromInt(UserOrderRequest.Limit)}
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Order::GetUserOrderHistory(const FString& OrderNo
-	, const THandler<TArray<FAccelByteModelsOrderHistoryInfo>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Order::GetUserOrderHistory(FString const& OrderNo
+	, THandler<TArray<FAccelByteModelsOrderHistoryInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -129,8 +130,21 @@ void Order::GetUserOrderHistory(const FString& OrderNo
 		, *CredentialsRef->GetUserId()
 		, *OrderNo);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Order::PreviewUserOrder(FAccelByteModelsUserPreviewOrderRequest const& PreviewOrderRequest,
+	THandler<FAccelByteModelsUserPreviewOrderResponse> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/discount/preview")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, PreviewOrderRequest, OnSuccess, OnError);
+}
+	
 } // Namespace Api
 } // Namespace AccelByte

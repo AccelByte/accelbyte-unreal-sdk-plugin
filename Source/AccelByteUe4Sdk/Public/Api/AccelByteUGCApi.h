@@ -43,8 +43,10 @@ public:
 	 * @param UGCRequest Detail information for the content request.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateContent(FString const& ChannelId
+	FAccelByteTaskWPtr CreateContent(FString const& ChannelId
 		, FAccelByteModelsUGCRequest const& UGCRequest
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -62,8 +64,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
 	 * @param ContentType The specific type of the content's created, default value is "application/octet-stream".
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateContent(FString const& ChannelId
+	FAccelByteTaskWPtr CreateContent(FString const& ChannelId
 		, FString const& Name
 		, FString const& Type
 		, FString const& SubType
@@ -72,7 +76,7 @@ public:
 		, FString const& FileExtension
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString ContentType = TEXT("application/octet-stream"));
+		, FString const& ContentType = TEXT("application/octet-stream"));
 
 	/**
 	 * @brief Modify existing content to update some information with FString preview.
@@ -82,8 +86,10 @@ public:
 	 * @param ModifyRequest Detail information for the content request that will be modified.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ModifyContent(FString const& ChannelId
+	FAccelByteTaskWPtr ModifyContent(FString const& ChannelId
 		, FString const& ContentId
 		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
@@ -101,12 +107,14 @@ public:
 	 *
 	 * @deprecated This method will be removed in the future, so please use
 	 * 	void ModifyContent(FString const& ChannelId
-		, FString const& ContentId
-		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
-		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
-		, FErrorHandler const& OnError);
+	 *	, FString const& ContentId
+	 *	, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
+	 *	, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
+	 *	, FErrorHandler const& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ModifyContent(FString const& ChannelId
+	FAccelByteTaskWPtr ModifyContent(FString const& ChannelId
 		, FString const& ContentId
 		, FAccelByteModelsUGCRequest const& UGCRequest
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
@@ -135,8 +143,10 @@ public:
 		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ModifyContent(FString const& ChannelId
+	FAccelByteTaskWPtr ModifyContent(FString const& ChannelId
 		, FString const& ContentId
 		, FString const& Name
 		, FString const& Type
@@ -146,7 +156,7 @@ public:
 		, FString const& FileExtension
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString ContentType = TEXT("application/octet-stream")
+		, FString const& ContentType = TEXT("application/octet-stream")
 		, bool bUpdateContent = false);
 	
 	/**
@@ -156,8 +166,10 @@ public:
 	 * @param ContentId The id of the content that will be deleted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteContent(FString const& ChannelId
+	FAccelByteTaskWPtr DeleteContent(FString const& ChannelId
 		, FString const& ContentId
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -168,8 +180,10 @@ public:
 	 * @param ContentId The id of the content that will be fetched.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetContentByContentId(FString const& ContentId
+	FAccelByteTaskWPtr GetContentByContentId(FString const& ContentId
 		, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -179,8 +193,10 @@ public:
 	* @param ContentId The id of the content that will be fetched.
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponse.
 	* @param OnError This will be called when the operation failed.
-	*/
-	void PublicGetContentByContentId(FString const& ContentId
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicGetContentByContentId(FString const& ContentId
 		, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -190,8 +206,10 @@ public:
 	 * @param ShareCode The share code of the content that will be fetched.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetContentByShareCode(FString const& ShareCode
+	FAccelByteTaskWPtr GetContentByShareCode(FString const& ShareCode
 		, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -201,8 +219,10 @@ public:
 	* @param ShareCode The share code of the content that will be fetched.
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponse.
 	* @param OnError This will be called when the operation failed.
-	*/
-	void PublicGetContentByShareCode(FString const& ShareCode
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicGetContentByShareCode(FString const& ShareCode
 		, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -212,8 +232,10 @@ public:
 	 * @param ContentId The id of the Preview's content that will be fetched.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCPreview.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetContentPreview(FString const& ContentId
+	FAccelByteTaskWPtr GetContentPreview(FString const& ContentId
 		, THandler<FAccelByteModelsUGCPreview> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -223,8 +245,10 @@ public:
 	 * @param ContentId The id of the Preview's content that will be fetched.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<uint8>.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetContentPreview(FString const& ContentId
+	FAccelByteTaskWPtr GetContentPreview(FString const& ContentId
 		, THandler<TArray<uint8>> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -235,8 +259,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit The limit of the tags results. Default value is 1000.
 	 * @param Offset The offset of the tags results. Default value is 0.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSuccess
+	FAccelByteTaskWPtr GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
 		, int32 Offset = 0);
@@ -248,8 +274,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit The limit of the types and subtypes results. Default value is 1000.
 	 * @param Offset The offset of the types and subtypes results. Default value is 0.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuccess
+	FAccelByteTaskWPtr GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
 		, int32 Offset = 0);
@@ -260,8 +288,10 @@ public:
 	 * @param ChannelName The name of the channel.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCChannelResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateChannel(FString const& ChannelName
+	FAccelByteTaskWPtr CreateChannel(FString const& ChannelName
 		, THandler<FAccelByteModelsUGCChannelResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -272,8 +302,10 @@ public:
 	 * @param ChannelName The name of the channel.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCChannelResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateChannel(FString const& ChannelId
+	FAccelByteTaskWPtr UpdateChannel(FString const& ChannelId
 		, FString const& ChannelName
 		, THandler<FAccelByteModelsUGCChannelResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -286,8 +318,10 @@ public:
 	 * @param Limit The limit of the channel results. Default value is 1000.
 	 * @param Offset The offset of the channel results. Default value is 0.
 	 * @param ChannelName The name of the channel you want to query.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
+	FAccelByteTaskWPtr GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
 		, int32 Offset = 0
@@ -302,8 +336,10 @@ public:
 	 * @param Limit The limit of the channel results. Default value is 1000.
 	 * @param Offset The offset of the channel results. Default value is 0.
 	 * @param ChannelName The name of the channel you want to query.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetChannels(FString const& UserId
+	FAccelByteTaskWPtr GetChannels(FString const& UserId
 		, THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
@@ -316,8 +352,10 @@ public:
 	 * @param ChannelId The id of the channel that will be deleted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteChannel(FString const& ChannelId
+	FAccelByteTaskWPtr DeleteChannel(FString const& ChannelId
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -337,14 +375,16 @@ public:
 	 * @param OrderBy Sorting order: asc, desc. default=desc
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SearchContents(const FString& Name
-		, const FString& Creator
-		, const FString& Type
-		, const FString& Subtype
-		, const TArray<FString>& Tags
+	FAccelByteTaskWPtr SearchContents(FString const& Name
+		, FString const& Creator
+		, FString const& Type
+		, FString const& Subtype
+		, TArray<FString> const& Tags
 		, bool IsOfficial
-		, const FString& UserId
+		, FString const& UserId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE
@@ -360,37 +400,41 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+	FAccelByteTaskWPtr SearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
 		, int32 Offset = 0);
 
 	/**
-	* @brief Search specific contents based on the given filter. Can be used without logged in.
-	*
-	* @param Name Content Name.
-	* @param Creator Creator Name.
-	* @param Type Content Type.
-	* @param Subtype Content Subtype.
-	* @param Tags Content Tags.
-	* @param IsOfficial Filter only official contents
-	* @param UserId User Id 
-	* @param OnSuccess This will be called when the operation succeeded.
-	* @param OnError This will be called when the operation failed.
-	* @param SortBy Sorting criteria, name,download,like,date. default=date.
-	* @param OrderBy Sorting order: asc, desc. default=desc
-	* @param Limit Number of content per page. Default value : 1000
-	* @param Offset The offset number to retrieve. Default value : 0
-	*/
-	void PublicSearchContents(const FString& Name
-		, const FString& Creator
-		, const FString& Type
-		, const FString& Subtype
-		, const TArray<FString>& Tags
+	 * @brief Search specific contents based on the given filter. Can be used without logged in.
+	 *
+	 * @param Name Content Name.
+	 * @param Creator Creator Name.
+	 * @param Type Content Type.
+	 * @param Subtype Content Subtype.
+	 * @param Tags Content Tags.
+	 * @param IsOfficial Filter only official contents
+	 * @param UserId User Id 
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param SortBy Sorting criteria, name,download,like,date. default=date.
+	 * @param OrderBy Sorting order: asc, desc. default=desc
+	 * @param Limit Number of content per page. Default value : 1000
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicSearchContents(FString const& Name
+		, FString const& Creator
+		, FString const& Type
+		, FString const& Subtype
+		, TArray<FString> const& Tags
 		, bool IsOfficial
-		, const FString& UserId
+		, FString const& UserId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE
@@ -399,15 +443,17 @@ public:
 		, int32 Offset = 0);
 
 	/**
-	* @brief Search specific contents based on the given filter. Can be used without logged in.
-	*
-	* @param Request Filter request to specify the search result.
-	* @param OnSuccess This will be called when the operation succeeded.
-	* @param OnError This will be called when the operation failed.
-	* @param Limit Number of content per page. Default value : 20
-	* @param Offset The offset number to retrieve. Default value : 0
-	*/
-	void PublicSearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
+	 * @brief Search specific contents based on the given filter. Can be used without logged in.
+	 *
+	 * @param Request Filter request to specify the search result.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit Number of content per page. Default value : 20
+	 * @param Offset The offset number to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicSearchContents(FAccelByteModelsUGCSearchContentsRequest const& Request
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -420,8 +466,10 @@ public:
 	 * @param bLikeStatus New like Status value.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateLikeStatusToContent(const FString& ContentId
+	FAccelByteTaskWPtr UpdateLikeStatusToContent(FString const& ContentId
 		, bool bLikeStatus
 		, THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -434,8 +482,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Number of user per page, Default value : 1000.
 	 * @param Offset The offset number to retrieve, Default value : 0.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetListFollowers(const FString& UserId
+	FAccelByteTaskWPtr GetListFollowers(FString const& UserId
 		, THandler<FAccelByteModelsUGCGetListFollowersPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
@@ -448,8 +498,10 @@ public:
 	 * @param bFollowStatus The new follow status value.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateFollowStatusToUser(const FString& UserId
+	FAccelByteTaskWPtr UpdateFollowStatusToUser(FString const& UserId
 		, bool bFollowStatus
 		, THandler<FAccelByteModelsUGCUpdateFollowStatusToUserResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -471,15 +523,17 @@ public:
 	 * @param OrderBy Sorting order: asc, desc. default=desc
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SearchContentsSpecificToChannel(const FString& ChannelId
-		, const FString& Name
-		, const FString& Creator
-		, const FString& Type
-		, const FString& Subtype
-		, const TArray<FString>& Tags
+	FAccelByteTaskWPtr SearchContentsSpecificToChannel(FString const& ChannelId
+		, FString const& Name
+		, FString const& Creator
+		, FString const& Type
+		, FString const& Subtype
+		, TArray<FString> const& Tags
 		, bool IsOfficial
-		, const FString& UserId
+		, FString const& UserId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteUgcSortBy SortBy = EAccelByteUgcSortBy::DATE
@@ -496,8 +550,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SearchContentsSpecificToChannel(FString const& ChannelId
+	FAccelByteTaskWPtr SearchContentsSpecificToChannel(FString const& ChannelId
 		, FAccelByteModelsUGCSearchContentsRequest const& Request
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponse> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -510,8 +566,10 @@ public:
 	 * @param ContentIds Content Ids Array  
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void GetContentBulk(const TArray<FString>& ContentIds
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetContentBulk(TArray<FString> const& ContentIds
 		, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -521,8 +579,10 @@ public:
 	* @param ContentIds Content Ids Array  
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
-	*/	
-	void PublicGetContentBulk(const TArray<FString>& ContentIds
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicGetContentBulk(TArray<FString> const& ContentIds
 		, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -534,8 +594,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
-	 */	
-	void GetUserContent(const FString& UserId
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserContent(FString const& UserId
 		, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
@@ -549,8 +611,10 @@ public:
 	* @param OnError This will be called when the operation failed.
 	* @param Limit Number of content per page. Default value : 1000
 	* @param Offset The offset number to retrieve. Default value : 0
-	*/	
-	void PublicGetUserContent(const FString& UserId
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicGetUserContent(FString const& UserId
 		, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
@@ -566,9 +630,11 @@ public:
 	 *	Maximum description length: 1024.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void UploadContentScreenshot(const FString& ContentId
-		, const FString& UserId
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr UploadContentScreenshot(FString const& ContentId
+		, FString const& UserId
 		, FAccelByteModelsUGCScreenshotsRequest ScreenshotsRequest
 		, THandler<FAccelByteModelsUGCUpdateContentScreenshotResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -580,8 +646,10 @@ public:
 	 * @param OnError This will be called when the operation failed. 
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
-	 */	
-	void GetFollowedContent(THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetFollowedContent(THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
 		, int32 Offset = 0);
@@ -593,8 +661,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
-	 */	
-	void GetFollowedUsers(THandler<FAccelByteModelsUGCFollowedUsersResponse> const& OnSuccess
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetFollowedUsers(THandler<FAccelByteModelsUGCFollowedUsersResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
 		, int32 Offset = 0);
@@ -616,14 +686,16 @@ public:
 	 * 
 	 * @deprecated This method will be removed in the future, so please use
 	 * 	void GetLikedContent(const TArray<FString>& Tags
-		, ...
-		, EAccelByteLikedContentSortBy SortBy = EAccelByteLikedContentSortBy::DATE
-		, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC);
+	 *	, ...
+	 *	, EAccelByteLikedContentSortBy SortBy = EAccelByteLikedContentSortBy::DATE
+	 *	, EAccelByteUgcOrderBy OrderBy = EAccelByteUgcOrderBy::DESC);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetLikedContent(const TArray<FString>& Tags
-		, const FString& Name
-		, const FString& Type
-		, const FString& Subtype
+	FAccelByteTaskWPtr GetLikedContent(TArray<FString> const& Tags
+		, FString const& Name
+		, FString const& Type
+		, FString const& Subtype
 		, bool IsOfficial
 		, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -645,12 +717,14 @@ public:
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria, name,download,like,date. default=date.
-	 * @param OrderBy Sorting order: asc, desc. default=desc	
-	 */	
-	void GetLikedContent(const TArray<FString>& Tags
-		, const FString& Name
-		, const FString& Type
-		, const FString& Subtype
+	 * @param OrderBy Sorting order: asc, desc. default=desc
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetLikedContent(TArray<FString> const& Tags
+		, FString const& Name
+		, FString const& Type
+		, FString const& Subtype
 		, bool IsOfficial
 		, THandler<FAccelByteModelsUGCContentPageResponse> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -665,8 +739,10 @@ public:
 	 * @param UserId User Id 
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void GetCreator(const FString& UserId
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetCreator(FString const& UserId
 		, THandler<FAccelByteModelsUGCGetListFollowersResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -678,8 +754,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
-	 */	
-	void GetGroups(const FString& UserId
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetGroups(FString const& UserId
 		, THandler<FAccelByteModelsUGCGetGroupsResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 1000
@@ -691,8 +769,10 @@ public:
 	 * @param ShareCodes Content ShareCodes Array  
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void BulkGetContentByShareCode(const TArray<FString>& ShareCodes
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkGetContentByShareCode(TArray<FString> const& ShareCodes
 		, THandler<TArray<FAccelByteModelsUGCContentResponse>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -709,8 +789,10 @@ public:
 	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SearchContentsSpecificToChannelV2(FString const& ChannelId
+	FAccelByteTaskWPtr SearchContentsSpecificToChannelV2(FString const& ChannelId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -726,8 +808,10 @@ public:
 	* @param Limit Number of content per page. Default value : 20
 	* @param Offset The offset number to retrieve. Default value : 0
 	* @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
-	*/
-	void PublicSearchContentsSpecificToChannelV2(FString const& ChannelId
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicSearchContentsSpecificToChannelV2(FString const& ChannelId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -743,8 +827,10 @@ public:
 	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria: name, download, like, created time with asc or desc. default = created time and desc.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
+	FAccelByteTaskWPtr SearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -760,8 +846,10 @@ public:
 	* @param Limit Number of content per page. Default value : 20
 	* @param Offset The offset number to retrieve. Default value : 0
 	* @param SortBy Sorting criteria: name, download, like, created time with asc or desc. default = created time and desc.
-	*/
-	void PublicSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Filter
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -774,19 +862,23 @@ public:
 	 * @param ContentIds Content Ids Array
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUGCContentResponseV2>.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetContentBulkByIdsV2(TArray<FString> const& ContentIds
+	FAccelByteTaskWPtr GetContentBulkByIdsV2(TArray<FString> const& ContentIds
 		, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Get contents by content Ids. Can be used without logged in.
-	*
-	* @param ContentIds Content Ids Array
-	* @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUGCContentResponseV2>.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void PublicGetContentBulkByIdsV2(TArray<FString> const& ContentIds
+	 * @brief Get contents by content Ids. Can be used without logged in.
+	 *
+	 * @param ContentIds Content Ids Array
+	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsUGCContentResponseV2>.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicGetContentBulkByIdsV2(TArray<FString> const& ContentIds
 		, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -796,19 +888,23 @@ public:
 	 * @param ShareCode The share code of the content that will be fetched.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetContentByShareCodeV2(FString const& ShareCode
+	FAccelByteTaskWPtr GetContentByShareCodeV2(FString const& ShareCode
 		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Get a content information by its share code. Can be used without logged in.
-	*
-	* @param ShareCode The share code of the content that will be fetched.
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void PublicGetContentByShareCodeV2(FString const& ShareCode
+	 * @brief Get a content information by its share code. Can be used without logged in.
+	 *
+	 * @param ShareCode The share code of the content that will be fetched.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicGetContentByShareCodeV2(FString const& ShareCode
 		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -818,19 +914,23 @@ public:
 	 * @param ContentId The id of the content that will be fetched.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetContentByContentIdV2(FString const& ContentId
+	FAccelByteTaskWPtr GetContentByContentIdV2(FString const& ContentId
 		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Get a content information by its content id. Can be used without logged in.
-	*
-	* @param ContentId The id of the content that will be fetched.
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void PublicGetContentByContentIdV2(FString const& ContentId
+	 * @brief Get a content information by its content id. Can be used without logged in.
+	 *
+	 * @param ContentId The id of the content that will be fetched.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponseV2.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicGetContentByContentIdV2(FString const& ContentId
 		, THandler<FAccelByteModelsUGCContentResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -841,8 +941,10 @@ public:
 	 * @param CreateRequest Detail information for the content request.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCCreateUGCResponseV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateContentV2(FString const& ChannelId
+	FAccelByteTaskWPtr CreateContentV2(FString const& ChannelId
 		, FAccelByteModelsCreateUGCRequestV2 const& CreateRequest
 		, THandler<FAccelByteModelsUGCCreateUGCResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -854,8 +956,10 @@ public:
 	 * @param ContentId The id of the content that will be deleted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteContentV2(FString const& ChannelId
+	FAccelByteTaskWPtr DeleteContentV2(FString const& ChannelId
 		, FString const& ContentId
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -868,8 +972,10 @@ public:
 	 * @param ModifyRequest Detail information for the content request that will be modified.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCModifyUGCResponseV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ModifyContentV2(FString const& ChannelId
+	FAccelByteTaskWPtr ModifyContentV2(FString const& ChannelId
 		, FString const& ContentId
 		, FAccelByteModelsModifyUGCRequestV2 const& ModifyRequest
 		, THandler<FAccelByteModelsUGCModifyUGCResponseV2> const& OnSuccess
@@ -883,8 +989,10 @@ public:
 	 * @param UploadRequest Detail information for the upload request.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCUploadContentURLResponseV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GenerateUploadContentURLV2(FString const& ChannelId
+	FAccelByteTaskWPtr GenerateUploadContentURLV2(FString const& ChannelId
 		, FString const& ContentId
 		, FAccelByteModelsUploadContentURLRequestV2 const& UploadRequest
 		, THandler<FAccelByteModelsUGCUploadContentURLResponseV2> const& OnSuccess
@@ -899,8 +1007,10 @@ public:
 	 * @param S3Key Detail information about the file location in S3.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCUpdateContentFileLocationResponseV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateContentFileLocationV2(FString const& ChannelId
+	FAccelByteTaskWPtr UpdateContentFileLocationV2(FString const& ChannelId
 		, FString const& ContentId
 		, FString const& FileExtension
 		, FString const& S3Key
@@ -915,8 +1025,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserContentsV2(FString const& UserId
+	FAccelByteTaskWPtr GetUserContentsV2(FString const& UserId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -931,8 +1043,10 @@ public:
 	* @param OnError This will be called when the operation failed.
 	* @param Limit Number of content per page. Default value : 20
 	* @param Offset The offset number to retrieve. Default value : 0
-	*/
-	void PublicGetUserContentsV2(FString const& UserId
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PublicGetUserContentsV2(FString const& UserId
 		, THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -948,8 +1062,10 @@ public:
 	 *	Maximum description length: 1024.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCUpdateScreenshotsV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateContentScreenshotV2(FString const& ContentId
+	FAccelByteTaskWPtr UpdateContentScreenshotV2(FString const& ContentId
 		, FAccelByteModelsUGCUpdateScreenshotsV2 const& ScreenshotsRequest
 		, THandler<FAccelByteModelsUGCUpdateScreenshotsV2> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -959,12 +1075,14 @@ public:
 	 *
 	 * @param ContentId Content Id.
 	 * @param ScreenshotsRequest Screenshots Request.
-	 *	Supported file extensions: pjp, jpg, jpeg, jfif, bmp, png.
-	 *	Maximum description length: 1024.
+	 *		Supported file extensions: pjp, jpg, jpeg, jfif, bmp, png.
+	 *		Maximum description length: 1024.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCUpdateContentScreenshotResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UploadContentScreenshotV2(FString const& ContentId
+	FAccelByteTaskWPtr UploadContentScreenshotV2(FString const& ContentId
 		, FAccelByteModelsUGCUploadScreenshotsRequestV2 const& ScreenshotsRequest
 		, THandler<FAccelByteModelsUGCUpdateContentScreenshotResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -976,8 +1094,10 @@ public:
 	 * @param ScreenshotId Screenshot Id
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteContentScreenshotV2(FString const& ContentId
+	FAccelByteTaskWPtr DeleteContentScreenshotV2(FString const& ContentId
 		, FString const& ScreenshotId
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -990,8 +1110,10 @@ public:
 	 * @param ModifyRequest Detail information for the content request that will be modified.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ModifyContentByShareCode(FString const& ChannelId
+	FAccelByteTaskWPtr ModifyContentByShareCode(FString const& ChannelId
 		, FString const& ShareCode
 		, FAccelByteModelsUGCUpdateRequest const& ModifyRequest
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
@@ -1005,8 +1127,10 @@ public:
 	 * @param ModifyContentShareCodeRequest Detail information for the content request that will be modified.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ModifyContentShareCode(FString const& ChannelId
+	FAccelByteTaskWPtr ModifyContentShareCode(FString const& ChannelId
 		, FString const& ContentId
 		, FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest
 		, THandler<FAccelByteModelsUGCResponse> const& OnSuccess
@@ -1019,8 +1143,10 @@ public:
 	 * @param ShareCode The share code of the content that will be fetched.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteContentByShareCode(FString const& ChannelId
+	FAccelByteTaskWPtr DeleteContentByShareCode(FString const& ChannelId
 		, FString const& ShareCode
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -1031,8 +1157,10 @@ public:
 	 * @param ShareCodes Content ShareCodes Array  
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 */	
-	void BulkGetContentByShareCodeV2(const TArray<FString>& ShareCodes
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkGetContentByShareCodeV2(TArray<FString> const& ShareCodes
 		, THandler<TArray<FAccelByteModelsUGCContentResponseV2>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -1044,8 +1172,10 @@ public:
 	 * @param ModifyContentShareCodeRequest Detail information for the content request that will be modified.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCCreateUGCResponseV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ModifyContentShareCodeV2(FString const& ChannelId
+	FAccelByteTaskWPtr ModifyContentShareCodeV2(FString const& ChannelId
 		, FString const& ContentId
 		, FAccelByteModelsUGCModifyContentShareCodeRequest const& ModifyContentShareCodeRequest
 		, THandler<FAccelByteModelsUGCCreateUGCResponseV2> const& OnSuccess
@@ -1061,8 +1191,10 @@ public:
 	 * @param ContentId The id of the content.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCAddDownloadContentCountResponseV2.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void AddDownloadContentCountV2(FString const& ContentId
+	FAccelByteTaskWPtr AddDownloadContentCountV2(FString const& ContentId
 		, THandler<FAccelByteModelsUGCAddDownloadContentCountResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -1076,8 +1208,10 @@ public:
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetListContentDownloaderV2(FString const& ContentId
+	FAccelByteTaskWPtr GetListContentDownloaderV2(FString const& ContentId
 		, THandler<FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, FString const& UserId = TEXT("")
@@ -1098,8 +1232,10 @@ public:
 	 * @param Limit Number of content per page. Default value : 1000
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria: created time with asc or desc. default = created time and desc.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetListContentLikerV2(FString const& ContentId
+	FAccelByteTaskWPtr GetListContentLikerV2(FString const& ContentId
 		, THandler<FAccelByteModelsUGCGetPaginatedContentLikerResponseV2> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -1113,8 +1249,10 @@ public:
 	 * @param bLikeStatus New like Status value.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateLikeStatusToContentV2(FString const& ContentId
+	FAccelByteTaskWPtr UpdateLikeStatusToContentV2(FString const& ContentId
 		, bool bLikeStatus
 		, THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -1132,8 +1270,10 @@ public:
 	 * @param Limit Number of content per page. Default value : 20
 	 * @param Offset The offset number to retrieve. Default value : 0
 	 * @param SortBy Sorting criteria: created time with asc or desc and updated time with asc or desc. default = none.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetStagingContents(EStagingContentRequestStatus Status
+	FAccelByteTaskWPtr GetStagingContents(EStagingContentRequestStatus Status
 		, THandler<FAccelByteModelsUGCPaginatedListStagingContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -1146,8 +1286,10 @@ public:
 	 * @param ContentId Target content id to retrieved
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsStagingContentResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetStagingContentById(FString const& ContentId
+	FAccelByteTaskWPtr GetStagingContentById(FString const& ContentId
 		, THandler<FAccelByteModelsUGCStagingContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -1158,8 +1300,10 @@ public:
 	 * @param UpdateRequest Query or params in struct to request an update
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsStagingContentResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateStagingContent(FString const& ContentId
+	FAccelByteTaskWPtr UpdateStagingContent(FString const& ContentId
 		, FAccelByteModelsUGCUpdateContentFileLocationRequestV2 UpdateRequest
 		, THandler<FAccelByteModelsUGCStagingContentResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -1170,8 +1314,10 @@ public:
 	 * @param ContentId Target content id to update the content
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteStagingContent(FString const& ContentId
+	FAccelByteTaskWPtr DeleteStagingContent(FString const& ContentId
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -1182,13 +1328,13 @@ private:
 	UGC(UGC const&) = delete;
 	UGC(UGC&&) = delete;
 
-	void InternalSearchContents(const FString& Name
-		, const FString& Creator
-		, const FString& Type
-		, const FString& Subtype
-		, const TArray<FString>& Tags
+	void InternalSearchContents(FString const& Name
+		, FString const& Creator
+		, FString const& Type
+		, FString const& Subtype
+		, TArray<FString> const& Tags
 		, bool IsOfficial
-		, const FString& UserId
+		, FString const& UserId
 		, EAccelByteUgcSortBy SortBy
 		, EAccelByteUgcOrderBy OrderBy
 		, int32 Limit

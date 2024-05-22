@@ -420,6 +420,21 @@ struct ACCELBYTEUE4SDK_API FSimpleUserData
 	FString UniqueDisplayName{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUserPublicInfoResponseV4
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserPublicInfoResponseV4")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserPublicInfoResponseV4")
+	FString DisplayName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserPublicInfoResponseV4")
+	FString UniqueDisplayName{};
+};
+
 // backward compatibility with previous AccelByte SDK codes
 // remove this if you are using FUserData from Unreal PhysicsCore
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26

@@ -24,31 +24,29 @@ CloudSave::CloudSave(Credentials const& InCredentialsRef
 CloudSave::~CloudSave()
 {}
 
-void CloudSave::SaveUserRecord(const FString& Key
+FAccelByteTaskWPtr CloudSave::SaveUserRecord(FString const& Key
 	, bool bSetPublic
-	, const FJsonObject& RecordRequest
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+	, FJsonObject const& RecordRequest
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
-	FReport::Log(FString(__FUNCTION__));
-
-	if (Key.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
-	}
-
 	const FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(ESetByMetadataRecord::CLIENT, bSetPublic, RecordRequest);
-	SaveUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
+	return SaveUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
 }
 
-void CloudSave::SaveUserRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::SaveUserRecord(FString const& Key
 	, FJsonObject RecordRequest
 	, bool IsPublic
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s")
 		, *SettingsRef.CloudSaveServerUrl
@@ -62,10 +60,10 @@ void CloudSave::SaveUserRecord(FString const& Key
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void CloudSave::GetUserRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::GetUserRecord(FString const& Key
 	, THandler<FAccelByteModelsUserRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -84,10 +82,10 @@ void CloudSave::GetUserRecord(FString const& Key
 			OnSuccess.ExecuteIfBound(UserRecord);
 		});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
-void CloudSave::GetPublicUserRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::GetPublicUserRecord(FString const& Key
 	, FString const& UserId
 	, THandler<FAccelByteModelsUserRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -98,7 +96,7 @@ void CloudSave::GetPublicUserRecord(FString const& Key
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s/public")
@@ -114,11 +112,11 @@ void CloudSave::GetPublicUserRecord(FString const& Key
 			OnSuccess.ExecuteIfBound(UserRecord);
 		});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
-void CloudSave::BulkGetPublicUserRecord(FString const& Key
-	, const TArray<FString>& UserIds
+FAccelByteTaskWPtr CloudSave::BulkGetPublicUserRecord(FString const& Key
+	, TArray<FString> const& UserIds
 	, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -127,13 +125,13 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key
 	if (UserIds.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (UserIds.Num() > UserIdsRequestLimit)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("UserIds cannot exceed %d!"), UserIdsRequestLimit));
-		return;
+		return nullptr;
 	}
 
 	const FListBulkUserInfoRequest UserList{ UserIds };
@@ -147,7 +145,7 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key
 		[OnSuccess](FJsonObject const& JSONObject)
 		{
 			FListAccelByteModelsUserRecord UserRecords;
-			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField("data");
+			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField(TEXT("data"));
 
 			for (int32 i = 0; i < JSONArray.Num(); ++i)
 			{
@@ -161,10 +159,10 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key
 			OnSuccess.ExecuteIfBound(UserRecords);
 		});
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserList, OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserList, OnSuccessHttpClient, OnError);
 }
 
-void CloudSave::BulkGetUserRecords(const TArray<FString>& Keys
+FAccelByteTaskWPtr CloudSave::BulkGetUserRecords(TArray<FString> const& Keys
 	, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -173,13 +171,13 @@ void CloudSave::BulkGetUserRecords(const TArray<FString>& Keys
 	if (Keys.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Keys cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Keys.Num() > MAX_BULK_KEY_COUNT)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), MAX_BULK_KEY_COUNT));
-		return;
+		return nullptr;
 	}
 
 	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
@@ -192,7 +190,7 @@ void CloudSave::BulkGetUserRecords(const TArray<FString>& Keys
 		[OnSuccess](FJsonObject const& JSONObject)
 		{
 			FListAccelByteModelsUserRecord UserRecords;
-			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField("data");
+			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField(TEXT("data"));
 
 			for (int32 i = 0; i < JSONArray.Num(); ++i)
 			{
@@ -206,34 +204,32 @@ void CloudSave::BulkGetUserRecords(const TArray<FString>& Keys
 			OnSuccess.ExecuteIfBound(UserRecords);
 		});
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
 }
 
-void CloudSave::ReplaceUserRecord(const FString& Key
+FAccelByteTaskWPtr CloudSave::ReplaceUserRecord(FString const& Key
 	, bool bSetPublic
-	, const FJsonObject& RecordRequest
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+	, FJsonObject const& RecordRequest
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
-	FReport::Log(FString(__FUNCTION__));
-	
-	if (Key.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
-	}
-
 	const FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(ESetByMetadataRecord::CLIENT, bSetPublic, RecordRequest);
-	ReplaceUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
+	return ReplaceUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
 }
 	
-void CloudSave::ReplaceUserRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::ReplaceUserRecord(FString const& Key
 	, FJsonObject RecordRequest
 	, bool IsPublic
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s")
 		, *SettingsRef.CloudSaveServerUrl
@@ -247,12 +243,12 @@ void CloudSave::ReplaceUserRecord(FString const& Key
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
 #pragma region ReplaceUserConcurrentRecord (Without Response)
 
-void CloudSave::ReplaceUserRecord(int TryAttempt
+FAccelByteTaskWPtr CloudSave::ReplaceUserRecord(int TryAttempt
 	, FString const& Key
 	, FAccelByteModelsConcurrentReplaceRequest const& Data
 	, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
@@ -264,7 +260,7 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public")
@@ -310,10 +306,10 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 			}
 		});
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnErrorHttpClient);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnErrorHttpClient);
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key
+FAccelByteTaskWPtr CloudSave::ReplaceUserRecordCheckLatest(FString const& Key
 	, FDateTime const LastUpdated
 	, FJsonObjectWrapper RecordRequest
 	, FVoidHandler const& OnSuccess
@@ -325,10 +321,10 @@ void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key
 		RecordRequest
 	};
 
-	ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
+	return ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
+FAccelByteTaskWPtr CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 	, FString const& Key
 	, FJsonObjectWrapper RecordRequest
 	, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
@@ -340,10 +336,10 @@ void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 		OnError.ExecuteIfBound(
 			static_cast<int32>(ErrorCodes::PlayerRecordPreconditionFailedException),
 			"Exhaust all retry attempt to modify game record. Please try again.");
-		return;
+		return nullptr;
 	}
 
-	GetUserRecord(Key
+	return GetUserRecord(Key
 		, THandler<FAccelByteModelsUserRecord>::CreateLambda(
 			[this, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsUserRecord LatestData)
 			{
@@ -391,7 +387,7 @@ void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 
 #pragma region ReplaceUserConcurrentRecord (With Response)
 
-void CloudSave::ReplaceUserRecord(int TryAttempt
+FAccelByteTaskWPtr CloudSave::ReplaceUserRecord(int TryAttempt
 	, FString const& Key
 	, FAccelByteModelsConcurrentReplaceRequest const& Data
 	, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
@@ -403,7 +399,7 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 	if (Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public")
@@ -449,10 +445,10 @@ void CloudSave::ReplaceUserRecord(int TryAttempt
 			}
 		});
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnErrorHttpClient);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, QueryParams, Content, OnSuccess, OnErrorHttpClient);
 }	
 
-void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key
+FAccelByteTaskWPtr CloudSave::ReplaceUserRecordCheckLatest(FString const& Key
 	, FDateTime const LastUpdated
 	, FJsonObjectWrapper RecordRequest
 	, THandler<FAccelByteModelsReplaceUserRecordResponse> const& OnSuccess
@@ -464,10 +460,10 @@ void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key
 		RecordRequest
 	};
 
-	ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
+	return ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
+FAccelByteTaskWPtr CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 	, FString const& Key
 	, FJsonObjectWrapper RecordRequest
 	, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
@@ -479,10 +475,10 @@ void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 		OnError.ExecuteIfBound(
 			static_cast<int32>(ErrorCodes::PlayerRecordPreconditionFailedException),
 			"Exhaust all retry attempt to modify game record. Please try again.");
-		return;
+		return nullptr;
 	}
 
-	GetUserRecord(Key
+	return GetUserRecord(Key
 		, THandler<FAccelByteModelsUserRecord>::CreateLambda(
 			[this, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsUserRecord LatestData)
 			{
@@ -527,7 +523,7 @@ void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 
 #pragma endregion ReplaceUserConcurrentRecord (With Response)		
 
-void CloudSave::DeleteUserRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::DeleteUserRecord(FString const& Key
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -539,10 +535,10 @@ void CloudSave::DeleteUserRecord(FString const& Key
 		, *CredentialsRef->GetUserId()
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void CloudSave::SaveGameRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::SaveGameRecord(FString const& Key
 	, FJsonObject RecordRequest
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -559,10 +555,10 @@ void CloudSave::SaveGameRecord(FString const& Key
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void CloudSave::GetGameRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::GetGameRecord(FString const& Key
 	, THandler<FAccelByteModelsGameRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -580,10 +576,10 @@ void CloudSave::GetGameRecord(FString const& Key
 			OnSuccess.ExecuteIfBound(GameRecord);
 		});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
-void CloudSave::ReplaceGameRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::ReplaceGameRecord(FString const& Key
 	, FJsonObject RecordRequest
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -600,10 +596,10 @@ void CloudSave::ReplaceGameRecord(FString const& Key
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceGameRecord(int TryAttempt
+FAccelByteTaskWPtr CloudSave::ReplaceGameRecord(int TryAttempt
 	, FString const& Key
 	, FAccelByteModelsConcurrentReplaceRequest const& Data
 	, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
@@ -651,10 +647,10 @@ void CloudSave::ReplaceGameRecord(int TryAttempt
 			}
 		});
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnErrorHttpClient);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnErrorHttpClient);
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key
+FAccelByteTaskWPtr CloudSave::ReplaceGameRecordCheckLatest(FString const& Key
 	, FDateTime const LastUpdated
 	, FJsonObjectWrapper RecordRequest
 	, FVoidHandler const& OnSuccess
@@ -666,10 +662,10 @@ void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key
 		RecordRequest
 	};
 
-	ReplaceGameRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
+	return ReplaceGameRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt
+FAccelByteTaskWPtr CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt
 	, FString const& Key
 	, FJsonObjectWrapper RecordRequest
 	, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier
@@ -679,10 +675,10 @@ void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt
 	if (TryAttempt <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::GameRecordPreconditionFailedException), "Exhaust all retry attempt to modify game record. Please try again.");
-		return;
+		return nullptr;
 	}
 
-	GetGameRecord(Key
+	return GetGameRecord(Key
 		, THandler<FAccelByteModelsGameRecord>::CreateLambda(
 			[this, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsGameRecord LatestData)
 			{
@@ -725,7 +721,7 @@ void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt
 			}));
 }
 
-void CloudSave::DeleteGameRecord(FString const& Key
+FAccelByteTaskWPtr CloudSave::DeleteGameRecord(FString const& Key
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -736,10 +732,10 @@ void CloudSave::DeleteGameRecord(FString const& Key
 		, *CredentialsRef->GetNamespace()
 		, *Key);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void CloudSave::BulkGetGameRecords(TArray<FString> const& Keys
+FAccelByteTaskWPtr CloudSave::BulkGetGameRecords(TArray<FString> const& Keys
 	, THandler<FAccelByteModelsListGameRecords> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -748,13 +744,13 @@ void CloudSave::BulkGetGameRecords(TArray<FString> const& Keys
 	if (Keys.Num() <= 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Keys cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	if (Keys.Num() > MAX_BULK_KEY_COUNT)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Keys cannot exceed %d!"), MAX_BULK_KEY_COUNT));
-		return;
+		return nullptr;
 	}
 
 	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
@@ -767,7 +763,7 @@ void CloudSave::BulkGetGameRecords(TArray<FString> const& Keys
 		[OnSuccess](FJsonObject const& JSONObject)
 		{
 			FAccelByteModelsListGameRecords GameRecords;
-			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField("data");
+			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField(TEXT("data"));
 
 			for (int32 i = 0; i < JSONArray.Num(); ++i)
 			{
@@ -781,10 +777,10 @@ void CloudSave::BulkGetGameRecords(TArray<FString> const& Keys
 			OnSuccess.ExecuteIfBound(GameRecords);
 		});
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
 }
 
-void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
+FAccelByteTaskWPtr CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 	, THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, int32 const& Offset
@@ -796,7 +792,7 @@ void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/public")
@@ -816,19 +812,19 @@ void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 			TArray<FAccelByteModelsGetPublicUserRecordKeys> Data{};
 
 			const TArray<TSharedPtr<FJsonValue>>* JsonData;
-			JsonObject.TryGetArrayField("data", JsonData);
+			JsonObject.TryGetArrayField(TEXT("data"), JsonData);
 			for (const TSharedPtr<FJsonValue>& JsonValue : *JsonData)
 			{
 				FAccelByteModelsGetPublicUserRecordKeys RecordKeys{};
 				auto jsonObj = JsonValue->AsObject();
-				jsonObj->TryGetStringField("key", RecordKeys.Key);
-				jsonObj->TryGetStringField("user_id", RecordKeys.UserId);
+				jsonObj->TryGetStringField(TEXT("key"), RecordKeys.Key);
+				jsonObj->TryGetStringField(TEXT("user_id"), RecordKeys.UserId);
 				Data.Add(RecordKeys);
 			}
 			PlayerRecordKeys.Data = Data;
 
 			TSharedPtr<FJsonObject> const* pagingJsonObject;
-			JsonObject.TryGetObjectField("paging", pagingJsonObject);
+			JsonObject.TryGetObjectField(TEXT("paging"), pagingJsonObject);
 			pagingJsonObject->Get()->TryGetStringField(TEXT("previous"), PlayerRecordKeys.Paging.Previous);
 			pagingJsonObject->Get()->TryGetStringField(TEXT("next"), PlayerRecordKeys.Paging.Next);
 			pagingJsonObject->Get()->TryGetStringField(TEXT("first"), PlayerRecordKeys.Paging.First);
@@ -837,10 +833,10 @@ void CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 			OnSuccess.ExecuteIfBound(PlayerRecordKeys);
 		});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
 }
 
-void CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
+FAccelByteTaskWPtr CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 	, TArray<FString> const& Keys
 	, THandler<FListAccelByteModelsUserRecord> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -851,19 +847,19 @@ void CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	if (Keys.Num() <= 0)
 	{
 		OnSuccess.ExecuteIfBound(FListAccelByteModelsUserRecord{});
-		return;
+		return nullptr;
 	}
 
 	if (Keys.Num() > MAX_BULK_KEY_COUNT)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Bulk Get Other Player Public Records Failed, Keys cannot exceed %d!"), MAX_BULK_KEY_COUNT));
-		return;
+		return nullptr;
 	}
 
 	const FAccelByteModelsBulkGetRecordsByKeysRequest KeyList{ Keys };
@@ -877,7 +873,7 @@ void CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 		[OnSuccess](FJsonObject const& JSONObject)
 		{
 			FListAccelByteModelsUserRecord UserRecords;
-			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField("data");
+			TArray<TSharedPtr<FJsonValue> > JSONArray = JSONObject.GetArrayField(TEXT("data"));
 
 			for (const auto& JSONArrayValue : JSONArray)
 			{
@@ -890,7 +886,7 @@ void CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 			OnSuccess.ExecuteIfBound(UserRecords);
 		});
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, KeyList, OnSuccessHttpClient, OnError);
 }
 
 FJsonObject CloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy
@@ -936,21 +932,21 @@ FJsonObjectWrapper CloudSave::ConvertJsonObjToJsonObjWrapper(const TSharedPtr<FJ
 FAccelByteModelsUserRecord CloudSave::ConvertJsonToUserRecord(FJsonObject const& JSONObject)
 {
 	FAccelByteModelsUserRecord UserRecord;
-	JSONObject.TryGetStringField("key", UserRecord.Key);
-	JSONObject.TryGetStringField("namespace", UserRecord.Namespace);
-	JSONObject.TryGetStringField("user_id", UserRecord.UserId);
-	JSONObject.TryGetBoolField("is_public", UserRecord.IsPublic);
+	JSONObject.TryGetStringField(TEXT("key"), UserRecord.Key);
+	JSONObject.TryGetStringField(TEXT("namespace"), UserRecord.Namespace);
+	JSONObject.TryGetStringField(TEXT("user_id"), UserRecord.UserId);
+	JSONObject.TryGetBoolField(TEXT("is_public"), UserRecord.IsPublic);
 	FString CreatedAt;
-	JSONObject.TryGetStringField("created_at", CreatedAt);
+	JSONObject.TryGetStringField(TEXT("created_at"), CreatedAt);
 	FDateTime::ParseIso8601(*CreatedAt, UserRecord.CreatedAt);
 	FString UpdatedAt;
-	JSONObject.TryGetStringField("updated_at", UpdatedAt);
+	JSONObject.TryGetStringField(TEXT("updated_at"), UpdatedAt);
 	FDateTime::ParseIso8601(*UpdatedAt, UserRecord.UpdatedAt);
 	FString SetByString;
-	JSONObject.TryGetStringField("set_by", SetByString);
+	JSONObject.TryGetStringField(TEXT("set_by"), SetByString);
 	UserRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 	TSharedPtr<FJsonObject> const* Value;
-	JSONObject.TryGetObjectField("value", Value);
+	JSONObject.TryGetObjectField(TEXT("value"), Value);
 	UserRecord.Value = ConvertJsonObjToJsonObjWrapper(Value);
 
 	return UserRecord;
@@ -959,19 +955,19 @@ FAccelByteModelsUserRecord CloudSave::ConvertJsonToUserRecord(FJsonObject const&
 FAccelByteModelsGameRecord CloudSave::ConvertJsonToGameRecord(FJsonObject const& JSONObject)
 {
 	FAccelByteModelsGameRecord GameRecord;
-	JSONObject.TryGetStringField("key", GameRecord.Key);
-	JSONObject.TryGetStringField("namespace", GameRecord.Namespace);
+	JSONObject.TryGetStringField(TEXT("key"), GameRecord.Key);
+	JSONObject.TryGetStringField(TEXT("namespace"), GameRecord.Namespace);
 	FString CreatedAt;
-	JSONObject.TryGetStringField("created_at", CreatedAt);
+	JSONObject.TryGetStringField(TEXT("created_at"), CreatedAt);
 	FDateTime::ParseIso8601(*CreatedAt, GameRecord.CreatedAt);
 	FString UpdatedAt;
-	JSONObject.TryGetStringField("updated_at", UpdatedAt);
+	JSONObject.TryGetStringField(TEXT("updated_at"), UpdatedAt);
 	FDateTime::ParseIso8601(*UpdatedAt, GameRecord.UpdatedAt);
 	FString SetByString;
-	JSONObject.TryGetStringField("set_by", SetByString);
+	JSONObject.TryGetStringField(TEXT("set_by"), SetByString);
 	GameRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 	TSharedPtr<FJsonObject> const* Value;
-	JSONObject.TryGetObjectField("value", Value);
+	JSONObject.TryGetObjectField(TEXT("value"), Value);
 	GameRecord.Value = ConvertJsonObjToJsonObjWrapper(Value);
 
 	return GameRecord;

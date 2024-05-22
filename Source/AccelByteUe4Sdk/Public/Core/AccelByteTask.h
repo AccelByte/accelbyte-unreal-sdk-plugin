@@ -166,6 +166,7 @@ class FAccelByteTask;
 
 typedef TSharedPtr<FAccelByteTask, ESPMode::ThreadSafe> FAccelByteTaskPtr;
 typedef TSharedRef<FAccelByteTask, ESPMode::ThreadSafe> FAccelByteTaskRef;
+typedef TWeakPtr<FAccelByteTask, ESPMode::ThreadSafe>	FAccelByteTaskWPtr;
 
 /**
  * Base class for AccelByte Task that can be used in one of the schedulers

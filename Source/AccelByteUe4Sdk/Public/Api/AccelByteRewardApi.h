@@ -31,8 +31,10 @@ public:
 	 * @param RewardCode The RewardCode.
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsRewardInfoByCode&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetRewardByRewardCode(FString const& RewardCode
+	FAccelByteTaskWPtr GetRewardByRewardCode(FString const& RewardCode
 		, THandler<FAccelByteModelsRewardInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -42,8 +44,10 @@ public:
 	 * @param RewardId The RewardId.
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsRewardInfoByCode&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetRewardByRewardId(FString const& RewardId
+	FAccelByteTaskWPtr GetRewardByRewardId(FString const& RewardId
 		, THandler<FAccelByteModelsRewardInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -56,8 +60,10 @@ public:
 	 * @param SortBy SortBy namespace, namespace:asc, namespace:desc, rewardcode, rewardcode:asc, rewardcode:desc
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsQueryReward&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryRewards(FString const& EventTopic
+	FAccelByteTaskWPtr QueryRewards(FString const& EventTopic
 		, int32 Offset
 		, int32 Limit
 		, EAccelByteRewardListSortBy const& SortBy
@@ -69,7 +75,7 @@ private:
 	Reward(Reward const&) = delete;
 	Reward(Reward&&) = delete;
 
-	static FString ConvertRewardSortByToString(EAccelByteRewardListSortBy const& SortBy);
+	static FString ConvertRewardSortByToString(EAccelByteRewardListSortBy SortBy);
 };
 	
 } // Namespace Api

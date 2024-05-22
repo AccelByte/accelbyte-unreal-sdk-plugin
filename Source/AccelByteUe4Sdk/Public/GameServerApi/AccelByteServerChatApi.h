@@ -47,12 +47,14 @@ public:
 	 * @param TopicName - Friendly name of the chat topic (alias).
 	 * @param OnSuccess - Callback for successful chat topic creation.
 	 * @param OnError - Callback for failed chat topic creation
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateChannelChat(const TSet<FString> MemberUserIds
-		, const TSet<FString> AdminUserIds
-		, const FString& TopicName
-		, const THandler<FAccelByteModelsChatActionCreateTopicServerResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateChannelChat(TSet<FString> const& MemberUserIds
+		, TSet<FString> const& AdminUserIds
+		, FString const& TopicName
+		, THandler<FAccelByteModelsChatActionCreateTopicServerResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete a chat topic
@@ -60,10 +62,12 @@ public:
 	 * @param TopicId - Topic Id to be deleted.
 	 * @param OnSuccess - Callback for successful chat topic deletion.
 	 * @param OnError - Callback for failed chat topic deletion.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteChannelChat(const FString& TopicId
-		, const THandler<FAccelByteModelsChatActionTopicResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteChannelChat(FString const& TopicId
+		, THandler<FAccelByteModelsChatActionTopicResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Add a user to chat topic
@@ -72,11 +76,13 @@ public:
 	 * @param UserId - User Id to be added to Topic.
 	 * @param OnSuccess - Callback for successful user  addition.
 	 * @param OnError - Callback for failed chat user addition.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void AddUserToChannelChat(const FString& TopicId
-		, const FString& UserId
-		, const THandler<FAccelByteModelsChatActionUserTopicResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr AddUserToChannelChat(FString const& TopicId
+		, FString const& UserId
+		, THandler<FAccelByteModelsChatActionUserTopicResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Remove a user from chat topic
@@ -85,11 +91,13 @@ public:
 	 * @param UserId - User Id to be removed from Topic.
 	 * @param OnSuccess - Callback for successful user removal.
 	 * @param OnError - Callback for failed chat user removal.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RemoveUserFromChannelChat(const FString& TopicId
-		, const FString& UserId
-		, const THandler<FAccelByteModelsChatActionUserTopicResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr RemoveUserFromChannelChat(FString const& TopicId
+		, FString const& UserId
+		, THandler<FAccelByteModelsChatActionUserTopicResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 

@@ -30,12 +30,12 @@ ServerSeasonPass::~ServerSeasonPass()
 {
 }
 
-void ServerSeasonPass::GrantExpToUser(const FString& UserId
+FAccelByteTaskWPtr ServerSeasonPass::GrantExpToUser(FString const& UserId
 	, int32 Exp
-	, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess
-	, const FErrorHandler& OnError
+	, THandler<FAccelByteModelsUserSeasonInfoWithoutReward> const& OnSuccess
+	, FErrorHandler const& OnError
 	, EAccelByteSeasonPassSource Source
-	, const TArray<FString>& Tags)
+	, TArray<FString> const& Tags)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -43,7 +43,7 @@ void ServerSeasonPass::GrantExpToUser(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/exp")
@@ -65,15 +65,15 @@ void ServerSeasonPass::GrantExpToUser(const FString& UserId
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerSeasonPass::GrantTierToUser(const FString& UserId
+FAccelByteTaskWPtr ServerSeasonPass::GrantTierToUser(FString const& UserId
 	, int32 Count
-	, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess
-	, const FErrorHandler& OnError
+	, THandler<FAccelByteModelsUserSeasonInfoWithoutReward> const& OnSuccess
+	, FErrorHandler const& OnError
 	, EAccelByteSeasonPassSource Source
-	, const TArray<FString>& Tags)
+	, TArray<FString> const& Tags)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -81,7 +81,7 @@ void ServerSeasonPass::GrantTierToUser(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/tiers")
@@ -103,12 +103,12 @@ void ServerSeasonPass::GrantTierToUser(const FString& UserId
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerSeasonPass::GetCurrentUserSeasonProgression(const FString& UserId
-	, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerSeasonPass::GetCurrentUserSeasonProgression(FString const& UserId
+	, THandler<FAccelByteModelsUserSeasonInfoWithoutReward> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -116,7 +116,7 @@ void ServerSeasonPass::GetCurrentUserSeasonProgression(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 	
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression")
@@ -124,13 +124,13 @@ void ServerSeasonPass::GetCurrentUserSeasonProgression(const FString& UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSeasonPass::GetUserSeasonData(const FString& UserId
+FAccelByteTaskWPtr ServerSeasonPass::GetUserSeasonData(FString const& UserId
 	, FString const& SeasonId
-	, const THandler<FAccelByteModelsUserSeasonInfo>& OnSuccess
-	, const FErrorHandler& OnError)
+	, THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -138,7 +138,7 @@ void ServerSeasonPass::GetUserSeasonData(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/%s/data")
@@ -147,12 +147,12 @@ void ServerSeasonPass::GetUserSeasonData(const FString& UserId
 		, *UserId
 		, *SeasonId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSeasonPass::GetCurrentUserSeasonHistory(const FString& UserId
-	, const THandler<FAccelByteModelsUserSeasonExpHistory>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerSeasonPass::GetCurrentUserSeasonHistory(FString const& UserId
+	, THandler<FAccelByteModelsUserSeasonExpHistory> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -160,7 +160,7 @@ void ServerSeasonPass::GetCurrentUserSeasonHistory(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/exp/history")
@@ -175,43 +175,43 @@ void ServerSeasonPass::GetCurrentUserSeasonHistory(const FString& UserId
 			TArray<FAccelByteModelsUserSeasonData> Data{};
 
 			const TArray<TSharedPtr<FJsonValue>>* JsonData;
-			JsonObject.TryGetArrayField("data", JsonData);
+			JsonObject.TryGetArrayField(TEXT("data"), JsonData);
 			for (const TSharedPtr<FJsonValue>& JsonValue : *JsonData)
 			{
 				FAccelByteModelsUserSeasonData UserSeasonData{};
 				auto jsonObj = JsonValue->AsObject();
-				jsonObj->TryGetStringField("id", UserSeasonData.Id);
-				jsonObj->TryGetStringField("namespace", UserSeasonData.Namespace);
-				jsonObj->TryGetStringField("seasonId", UserSeasonData.SeasonId);
-				jsonObj->TryGetStringField("userId", UserSeasonData.UserId);
-				jsonObj->TryGetNumberField("grantExp", UserSeasonData.GrantExp);
+				jsonObj->TryGetStringField(TEXT("id"), UserSeasonData.Id);
+				jsonObj->TryGetStringField(TEXT("namespace"), UserSeasonData.Namespace);
+				jsonObj->TryGetStringField(TEXT("seasonId"), UserSeasonData.SeasonId);
+				jsonObj->TryGetStringField(TEXT("userId"), UserSeasonData.UserId);
+				jsonObj->TryGetNumberField(TEXT("grantExp"), UserSeasonData.GrantExp);
 				FString Source;
-				jsonObj->TryGetStringField("source", Source);
+				jsonObj->TryGetStringField(TEXT("source"), Source);
 				UserSeasonData.Source = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteSeasonPassSource>(Source);
-				jsonObj->TryGetStringArrayField("tags", UserSeasonData.Tags);
+				jsonObj->TryGetStringArrayField(TEXT("tags"), UserSeasonData.Tags);
 				FString CreatedAt;
-				jsonObj->TryGetStringField("createdAt", CreatedAt);
+				jsonObj->TryGetStringField(TEXT("createdAt"), CreatedAt);
 				FDateTime::ParseIso8601(*CreatedAt, UserSeasonData.CreatedAt);
 				Data.Add(UserSeasonData);
 			}
 			SessionExpHistory.Data = Data;
 
 			TSharedPtr<FJsonObject> const* pagingJsonObject;
-			JsonObject.TryGetObjectField("paging", pagingJsonObject);
+			JsonObject.TryGetObjectField(TEXT("paging"), pagingJsonObject);
 			pagingJsonObject->Get()->TryGetStringField(TEXT("previous"), SessionExpHistory.Paging.Previous);
 			pagingJsonObject->Get()->TryGetStringField(TEXT("next"), SessionExpHistory.Paging.Next);
 
-			JsonObject.TryGetNumberField("total", SessionExpHistory.Total);
+			JsonObject.TryGetNumberField(TEXT("total"), SessionExpHistory.Total);
 
 			OnSuccess.ExecuteIfBound(SessionExpHistory);
 		});
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
-void ServerSeasonPass::QueryUserSeasonExp(const FString& UserId
-	, const THandler<FAccelByteModelsQueryUserSeasonExp>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerSeasonPass::QueryUserSeasonExp(FString const& UserId
+	, THandler<FAccelByteModelsQueryUserSeasonExp> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -219,7 +219,7 @@ void ServerSeasonPass::QueryUserSeasonExp(const FString& UserId
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/exp/history/tags")
@@ -227,12 +227,12 @@ void ServerSeasonPass::QueryUserSeasonExp(const FString& UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSeasonPass::BulkGetUserSessionProgression(const TArray<FString>& UserIds
-	, const THandler<TArray<FAccelByteModelsUserSeasonInfo>>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerSeasonPass::BulkGetUserSessionProgression(TArray<FString> const& UserIds
+	, THandler<TArray<FAccelByteModelsUserSeasonInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -252,8 +252,8 @@ void ServerSeasonPass::BulkGetUserSessionProgression(const TArray<FString>& User
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-}
-}
+} // Namespace GameServerApi
+} // Namespace AccelByte

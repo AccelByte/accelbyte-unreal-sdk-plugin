@@ -32,9 +32,11 @@ public:
 	 * 
 	 * @param OrderCreateRequest Requst parameter.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
-	 * @param OnError This will be called when the operation failed. 
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateNewOrder(FAccelByteModelsOrderCreate const& OrderCreateRequest
+	FAccelByteTaskWPtr CreateNewOrder(FAccelByteModelsOrderCreate const& OrderCreateRequest
 		, THandler<FAccelByteModelsOrderInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -44,8 +46,10 @@ public:
 	 * @param OrderNo Order number.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CancelOrder(FString const& OrderNo
+	FAccelByteTaskWPtr CancelOrder(FString const& OrderNo
 		, THandler<FAccelByteModelsOrderInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -54,9 +58,11 @@ public:
 	 * 
 	 * @param OrderNo Order number.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
-	 * @param OnError This will be called when the operation failed. 
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserOrder(FString const& OrderNo
+	FAccelByteTaskWPtr GetUserOrder(FString const& OrderNo
 		, THandler<FAccelByteModelsOrderInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -69,8 +75,10 @@ public:
 	 * @param Size Items per page.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserOrders(int32 Page
+	FAccelByteTaskWPtr GetUserOrders(int32 Page
 		, int32 Size
 		, THandler<FAccelByteModelsPagedOrderInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -81,10 +89,12 @@ public:
 	 * @param UserOrderRequest The request to query user orders, contains some parameters.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
 	 * @param OnError This will be called when the operation failed.
-     */
-	void QueryUserOrders(const FAccelByteModelsUserOrdersRequest& UserOrderRequest
-		, const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr QueryUserOrders(FAccelByteModelsUserOrdersRequest const& UserOrderRequest
+		, THandler<FAccelByteModelsPagedOrderInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief  Get the history of the created orders.
@@ -93,10 +103,27 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * The result is TArray<FAccelByteModelsOrderHistoryInfo>.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserOrderHistory(FString const& OrderNo
+	FAccelByteTaskWPtr GetUserOrderHistory(FString const& OrderNo
 		, THandler<TArray<FAccelByteModelsOrderHistoryInfo>> const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Preview order price with discount code(s).
+	 * 
+	 * @param PreviewOrderRequest Preview order request.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * The result is FAccelByteModelsUserPreviewOrderResponse.
+	 * @param OnError This will be called when the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr PreviewUserOrder(FAccelByteModelsUserPreviewOrderRequest const& PreviewOrderRequest
+		, THandler<FAccelByteModelsUserPreviewOrderResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
 private:
 	Order() = delete;
 	Order(Order const&) = delete;

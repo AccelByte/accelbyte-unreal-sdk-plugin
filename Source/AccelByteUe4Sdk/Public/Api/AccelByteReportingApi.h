@@ -31,10 +31,12 @@ public:
 	 * @param ReportData contain target report and evidence
 	 * @param OnSuccess This will be called when the operation succeeded. The response is a FAccelByteModelsReportingSubmitResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SubmitReport(const FAccelByteModelsReportingSubmitData ReportData
-		, const THandler<FAccelByteModelsReportingSubmitResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr SubmitReport(FAccelByteModelsReportingSubmitData const& ReportData
+		, THandler<FAccelByteModelsReportingSubmitResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Submit a chat report.
@@ -42,10 +44,12 @@ public:
 	 * @param ReportData contain target report and evidence
 	 * @param OnSuccess This will be called when the operation succeeded. The response is a FAccelByteModelsReportingSubmitResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SubmitChatReport(const FAccelByteModelsReportingSubmitDataChat& ReportData
-		, const THandler<FAccelByteModelsReportingSubmitResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr SubmitChatReport(FAccelByteModelsReportingSubmitDataChat const& ReportData
+		, THandler<FAccelByteModelsReportingSubmitResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 		
 	/**
 	 * @brief Get Reason under specified reason group.
@@ -56,12 +60,14 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The response is a FAccelByteModelsReasonsResponse.
 	 * @param OnError This will be called when the operation failed.
 	 * @param Title Query reason(s) by title.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetReasons(const FString& ReasonGroup
-		, int32 const& Offset
-		, int32 const& Limit
-		, const THandler<FAccelByteModelsReasonsResponse>& OnSuccess
-		, const FErrorHandler& OnError
+	FAccelByteTaskWPtr GetReasons(FString const& ReasonGroup
+		, int32 Offset
+		, int32 Limit
+		, THandler<FAccelByteModelsReasonsResponse> const& OnSuccess
+		, FErrorHandler const& OnError
 		, FString const& Title = TEXT(""));
 		
 	/**
@@ -71,11 +77,13 @@ public:
 	 * @param Limit Pagination limit.
 	 * @param OnSuccess This will be called when the operation succeeded. The response is a FAccelByteModelsReasonGroupsResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetReasonGroups(int32 const& Offset
-		, int32 const& Limit
-		, const THandler<FAccelByteModelsReasonGroupsResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetReasonGroups(int32 Offset
+		, int32 Limit
+		, THandler<FAccelByteModelsReasonGroupsResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 };
 

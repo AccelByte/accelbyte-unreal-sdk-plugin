@@ -24,7 +24,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API UserProfile : public FApiBase
 {
 public:
-	UserProfile(const Credentials& Credentials, const Settings& Settings, FHttpRetryScheduler& InHttpRef);
+	UserProfile(Credentials const& Credentials, Settings const& Settings, FHttpRetryScheduler& InHttpRef);
 	~UserProfile();
 
 	/**
@@ -32,9 +32,11 @@ public:
 	 * 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserProfile(THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get other user's public profile information. If it doesn't exist, that will be an error.
@@ -42,10 +44,12 @@ public:
 	 * @param UserId The id of the user.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsPublicUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPublicUserProfileInfo(FString UserId
-		, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetPublicUserProfileInfo(FString const& UserId
+		, THandler<FAccelByteModelsPublicUserProfileInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Batch get multiple user public profile information.
@@ -56,11 +60,13 @@ public:
 	 * 
 	 * @deprecated This method will be removed in the future, so please use BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
 	 *		, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
-	 *		, const FErrorHandler& OnError)
+	 *		, FErrorHandler const& OnError)
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BatchGetPublicUserProfileInfos(const FString& UserIds
-		, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr BatchGetPublicUserProfileInfos(FString const& UserIds
+		, THandler<TArray<FAccelByteModelsPublicUserProfileInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Bulk get multiple user public profile information.
@@ -68,19 +74,23 @@ public:
 	 * @param UserIds Multiple user ids.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetPublicUserProfileInfos(const TArray<FString>& UserIds
-		, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr BulkGetPublicUserProfileInfos(TArray<FString> const& UserIds
+		, THandler<TArray<FAccelByteModelsPublicUserProfileInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetCustomAttributes(const THandler<FJsonObject>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetCustomAttributes(THandler<FJsonObject> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.
@@ -88,10 +98,12 @@ public:
 	 * @param UserId The id of the user.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPublicCustomAttributes(const FString& UserId
-		, const THandler<FJsonObject>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetPublicCustomAttributes(FString const& UserId
+		, THandler<FJsonObject> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
@@ -99,10 +111,12 @@ public:
 	 * @param ProfileUpdateRequest Request object.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest
-		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateUserProfile(FAccelByteModelsUserProfileUpdateRequest const& ProfileUpdateRequest
+		, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update user's current custom attributes profile information. If it doesn't exist, that will be an error.
@@ -110,10 +124,12 @@ public:
 	 * @param CustomAttributesUpdateRequest Request object which consists custom attributes profile information.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateCustomAttributes(const FJsonObject& CustomAttributesUpdateRequest
-		, const THandler<FJsonObject>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateCustomAttributes(FJsonObject const& CustomAttributesUpdateRequest
+		, THandler<FJsonObject> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Create complete player profile. If it already exist, that will be an error.
@@ -121,10 +137,12 @@ public:
 	 * @param ProfileCreateRequest Request object.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest
-		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateUserProfile(FAccelByteModelsUserProfileCreateRequest const& ProfileCreateRequest
+		, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get User Profile Public Info By PublicId.
@@ -132,23 +150,27 @@ public:
 	 * @param PublicId The Public Id of user used to get user profile 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserProfilePublicInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserProfilePublicInfoByPublicId(const FString& PublicId
-		, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess
-		, const FCustomErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserProfilePublicInfoByPublicId(FString const& PublicId
+		, THandler<FAccelByteModelsPublicUserProfileInfo> const& OnSuccess
+		, FCustomErrorHandler const& OnError);
 
 	/**
 	 * @brief Create complete player profile. If it already exist, that will be an error.
 	 *
-	 *	@param UserId The id of the user.
+	 * @param UserId The id of the user.
 	 * @param ProfileCreateRequest Request object.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateUserProfile(const FString& UserId
-		, FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest
-		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateUserProfile(FString const& UserId
+		, FAccelByteModelsUserProfileCreateRequest const& ProfileCreateRequest
+		, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
@@ -157,11 +179,13 @@ public:
 	 * @param ProfileUpdateRequest Request object.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateUserProfile(const FString& UserId
-		, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest
-		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateUserProfile(FString const& UserId
+		, FAccelByteModelsUserProfileUpdateRequest const& ProfileUpdateRequest
+		, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
@@ -169,10 +193,12 @@ public:
 	 * @param UserId The id of the user.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserProfile(const FString& UserId
-		, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserProfile(FString const& UserId
+		, THandler<FAccelByteModelsUserProfileInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Generate an upload URL. It's valid for 10 minutes..
@@ -181,8 +207,10 @@ public:
 	 * @param FileType One of the these types: jpeg, jpg, png, bmp, gif, mp3, bin, webp.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GenerateUploadURL(const FString& Folder
+	FAccelByteTaskWPtr GenerateUploadURL(FString const& Folder
 		, EAccelByteFileType FileType
 		, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -195,8 +223,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 * @param Category Upload category. Supported categories: default, reporting. Default value : default.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GenerateUploadURLForUserContent(const FString& UserId
+	FAccelByteTaskWPtr GenerateUploadURLForUserContent(FString const& UserId
 		, EAccelByteFileType FileType
 		, THandler<FAccelByteModelsUserProfileUploadURLResult> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -207,9 +237,11 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPrivateCustomAttributes(const THandler<FJsonObjectWrapper>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetPrivateCustomAttributes(THandler<FJsonObjectWrapper> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Update user's own private custom attributes profile information. If it doesn't exist, that will be an error.
@@ -217,10 +249,12 @@ public:
 	 * @param PrivateCustomAttributesUpdateRequest Request object which consists private custom attributes profile information.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdatePrivateCustomAttributes(const FJsonObject& PrivateCustomAttributesUpdateRequest
-		, const THandler<FJsonObjectWrapper>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdatePrivateCustomAttributes(FJsonObject const& PrivateCustomAttributesUpdateRequest
+		, THandler<FJsonObjectWrapper> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	UserProfile() = delete;

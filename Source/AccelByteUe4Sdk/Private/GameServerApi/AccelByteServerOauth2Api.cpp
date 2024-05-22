@@ -15,10 +15,10 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId
-	, const FString& ClientSecret
-	, const THandler<FOauth2Token>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerOauth2::GetAccessTokenWithClientCredentialsGrant(FString const& ClientId
+	, FString const& ClientSecret
+	, THandler<FOauth2Token> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -32,29 +32,29 @@ void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& Clien
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
-void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerOauth2::LoginWithClientCredentials(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetAccessTokenWithClientCredentialsGrant(ServerCredentialsRef->GetOAuthClientId()
+	return GetAccessTokenWithClientCredentialsGrant(ServerCredentialsRef->GetOAuthClientId()
 		, ServerCredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](const FOauth2Token& Result)
+			[this, OnSuccess](FOauth2Token const& Result)
 			{
 				OnLoginSuccess(OnSuccess, Result);
 			})
 		, FErrorHandler::CreateLambda(
-			[OnError](int32 ErrorCode, const FString& ErrorMessage)
+			[OnError](int32 ErrorCode, FString const& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
 }
 
-void ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess
+FAccelByteTaskWPtr ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -66,7 +66,7 @@ void ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	HttpClient.Request(TEXT("GET"), Url, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("GET"), Url, FString(), Headers, OnSuccess, OnError);
 }
 
 void ServerOauth2::ForgetAllCredentials()
@@ -94,5 +94,5 @@ ServerOauth2::ServerOauth2(ServerCredentials& InCredentialsRef
 ServerOauth2::~ServerOauth2()
 {}
 
-} // Namespace Api
+} // Namespace GameServerApi
 } // Namespace AccelByte

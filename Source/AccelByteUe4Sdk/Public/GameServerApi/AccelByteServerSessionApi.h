@@ -30,8 +30,10 @@ public:
 	 * @param CreateRequest The game session create request body.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest
+	FAccelByteTaskWPtr CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -41,8 +43,10 @@ public:
 	 * @param GameSessionID The ID of the session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGameSessionDetails(FString const& GameSessionID
+	FAccelByteTaskWPtr GetGameSessionDetails(FString const& GameSessionID
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -53,8 +57,10 @@ public:
 	 * @param UpdateRequest The game session update request body.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGameSession(FString const& GameSessionID
+	FAccelByteTaskWPtr UpdateGameSession(FString const& GameSessionID
 		, FAccelByteModelsV2GameSessionUpdateRequest const& UpdateRequest
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -65,8 +71,10 @@ public:
 	 * @param GameSessionID The ID of the session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteGameSession(FString const& GameSessionID
+	FAccelByteTaskWPtr DeleteGameSession(FString const& GameSessionID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -77,8 +85,10 @@ public:
 	 * @param UserID The ID of the user to invite.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SendGameSessionInvite(FString const& GameSessionID
+	FAccelByteTaskWPtr SendGameSessionInvite(FString const& GameSessionID
 		, FString const& UserID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -92,10 +102,12 @@ public:
 	 * @param Status Status to set for this member
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateMemberStatus(FString const& GameSessionID
+	FAccelByteTaskWPtr UpdateMemberStatus(FString const& GameSessionID
 		, FString const& MemberID
-		, const EAccelByteV2SessionMemberStatus& Status
+		, EAccelByteV2SessionMemberStatus Status
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -107,8 +119,14 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 * @param Offset Pagination offset. Default 0.
 	 * @param Limit Pagination limit. Default 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,  THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess, FErrorHandler const& OnError, int64 Offset = 0, int64 Limit = 20);
+	FAccelByteTaskWPtr QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent
+		, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int64 Offset = 0
+		, int64 Limit = 20);
 
 	/**
 	 * @brief [DEPRECATED] Query for party information. Please use QueryPartySessions with paginated result.
@@ -118,8 +136,14 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 * @param Offset Pagination offset. Default 0.
 	 * @param Limit Pagination limit. Default 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,  THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess, FErrorHandler const& OnError, int64 Offset = 0, int64 Limit = 20);
+	FAccelByteTaskWPtr QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent
+		, THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int64 Offset = 0
+		, int64 Limit = 20);
 
 	/**
 	 * @brief Query for party information.
@@ -127,8 +151,12 @@ public:
 	 * @param PartyID ID of the party to get details from
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPartyDetails(FString const& PartyID, THandler<FAccelByteModelsV2PartySession> const& OnSuccess, FErrorHandler const& OnError);
+	FAccelByteTaskWPtr GetPartyDetails(FString const& PartyID
+		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Query for attributes for given users IDs.
@@ -136,8 +164,10 @@ public:
 	 * @param UserIds Array of IDs of the users that you want to query attributes for
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetPlayerAttributes(TArray<FString> const& UserIds
+	FAccelByteTaskWPtr BulkGetPlayerAttributes(TArray<FString> const& UserIds
 		, THandler<TArray<FAccelByteModelsV2PlayerAttributes>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -147,8 +177,10 @@ public:
 	 * @param UserId ID of the user that you want to query attributes for
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPlayerAttributes(FString const& UserId
+	FAccelByteTaskWPtr GetPlayerAttributes(FString const& UserId
 		, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -160,8 +192,10 @@ public:
 	 * @param OnError This will be called if the operation failed.
 	 * @param Offset Pagination offset. Default 0.
 	 * @param Limit Pagination limit. Default 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QueryGameSessions(FAccelByteModelsV2ServerQueryGameSessionsRequest RequestContent
+	FAccelByteTaskWPtr QueryGameSessions(FAccelByteModelsV2ServerQueryGameSessionsRequest const& RequestContent
 		, THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int64 Offset = 0, int64 Limit = 20);
@@ -173,8 +207,10 @@ public:
 	 * @param NewLeaderID The user ID of the new leader to promote.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void PromoteGameSessionLeader(FString const& GameSessionID
+	FAccelByteTaskWPtr PromoteGameSessionLeader(FString const& GameSessionID
 		, FString const& NewLeaderID
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -185,8 +221,10 @@ public:
 	 * @param GameSessionID ID of the game session that a new code should be generated for.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GenerateNewGameSessionCode(FString const& GameSessionID
+	FAccelByteTaskWPtr GenerateNewGameSessionCode(FString const& GameSessionID
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -196,8 +234,10 @@ public:
 	 * @param GameSessionID ID of the game session that a code should be revoked for.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RevokeGameSessionCode(FString const& GameSessionID
+	FAccelByteTaskWPtr RevokeGameSessionCode(FString const& GameSessionID
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -209,8 +249,10 @@ public:
 	 * @param bDSSessionReady flag indicating the DS session ready or not.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SendDSSessionReady(FString const& GameSessionID
+	FAccelByteTaskWPtr SendDSSessionReady(FString const& GameSessionID
 		, bool bDSSessionReady
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -222,11 +264,13 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Limit Number of recent players to request, maximum value is 200.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetRecentPlayers(const FString& UserId
+	FAccelByteTaskWPtr GetRecentPlayers(FString const& UserId
 		, THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
 		, FErrorHandler const& OnError
-		, const int32 Limit = 20);
+		, int32 Limit = 20);
 
 	/**
 	 * @brief Query user's recent player who were on the same team.
@@ -235,16 +279,19 @@ public:
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
 	 * @param Limit Number of recent players to request, maximum value is 200.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetRecentTeamPlayers(const FString& UserId
+	FAccelByteTaskWPtr GetRecentTeamPlayers(FString const& UserId
 		, THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
 		, FErrorHandler const& OnError
-		, const int32 Limit = 20);
+		, int32 Limit = 20);
 
 private:
 	ServerSession() = delete;
 	ServerSession(ServerSession const&) = delete;
 	ServerSession(ServerSession&&) = delete;
 };
-}
-}
+
+} // Namespace GameServerApi
+} // Namespace AccelByte

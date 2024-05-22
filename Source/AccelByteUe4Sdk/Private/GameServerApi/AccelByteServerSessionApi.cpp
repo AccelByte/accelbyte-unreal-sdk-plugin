@@ -25,7 +25,7 @@ ServerSession::ServerSession(ServerCredentials const& InCredentialsRef
 ServerSession::~ServerSession()
 {}
 
-void ServerSession::CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest
+FAccelByteTaskWPtr ServerSession::CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest
 	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -52,13 +52,13 @@ void ServerSession::CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest
 	if (!FJsonSerializer::Serialize(CreateRequestJsonObject.ToSharedRef(), Writer))
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to serialize create request body to JSON object"));
-		return;
+		return nullptr;
 	}
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerSession::GetGameSessionDetails(FString const& GameSessionID
+FAccelByteTaskWPtr ServerSession::GetGameSessionDetails(FString const& GameSessionID
 	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -69,10 +69,10 @@ void ServerSession::GetGameSessionDetails(FString const& GameSessionID
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *GameSessionID);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::UpdateGameSession(FString const& GameSessionID
+FAccelByteTaskWPtr ServerSession::UpdateGameSession(FString const& GameSessionID
 	, FAccelByteModelsV2GameSessionUpdateRequest const& UpdateRequest
 	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -101,10 +101,10 @@ void ServerSession::UpdateGameSession(FString const& GameSessionID
 	FString Content{};
 	Api::Session::SerializeAndRemoveEmptyValues(RequestToSend, Content, bIncludeTeams);
 
-	HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerSession::DeleteGameSession(FString const& GameSessionID
+FAccelByteTaskWPtr ServerSession::DeleteGameSession(FString const& GameSessionID
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -115,10 +115,10 @@ void ServerSession::DeleteGameSession(FString const& GameSessionID
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *GameSessionID);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::SendGameSessionInvite(FString const& GameSessionID
+FAccelByteTaskWPtr ServerSession::SendGameSessionInvite(FString const& GameSessionID
 	, FString const& UserID
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -135,15 +135,15 @@ void ServerSession::SendGameSessionInvite(FString const& GameSessionID
 	if (!FJsonObjectConverter::UStructToJsonObjectString(Invite, Content))
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to convert request JSON into a string"));
-		return;
+		return nullptr;
 	}
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void ServerSession::UpdateMemberStatus(FString const& GameSessionID
+FAccelByteTaskWPtr ServerSession::UpdateMemberStatus(FString const& GameSessionID
 	, FString const& MemberID
-	, EAccelByteV2SessionMemberStatus const& Status
+	, EAccelByteV2SessionMemberStatus Status
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -158,15 +158,14 @@ void ServerSession::UpdateMemberStatus(FString const& GameSessionID
 		, *MemberID
 		, *StatusString);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::QueryPartySessions(
-	FAccelByteModelsV2QueryPartiesRequest const& RequestContent,
-	THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess,
-	FErrorHandler const& OnError,
-	int64 Offset /* = 0 */,
-	int64 Limit /* = 20 */)
+FAccelByteTaskWPtr ServerSession::QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent
+	, THandler<FAccelByteModelsV2PaginatedPartyQueryResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int64 Offset /* = 0 */
+	, int64 Limit /* = 20 */)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -233,29 +232,30 @@ void ServerSession::QueryPartySessions(
 		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent,
-	THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess, FErrorHandler const& OnError, int64 Offset,
-	int64 Limit)
+FAccelByteTaskWPtr ServerSession::QueryPartySessions(FAccelByteModelsV2QueryPartiesRequest const& RequestContent
+	, THandler<FAccelByteModelsV2QueryPartiesResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int64 Offset
+	, int64 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
 		FString(__FUNCTION__),
 		TEXT("Use ServerSession::QueryPartySessions with paginated support to match backend model"));
 
-	QueryPartySessions(RequestContent,
+	return QueryPartySessions(RequestContent,
 		THandler<FAccelByteModelsV2PaginatedPartyQueryResult>::CreateLambda([OnSuccess](const FAccelByteModelsV2PaginatedPartyQueryResult QueryPartiesResponse)
 		{
 			OnSuccess.ExecuteIfBound(FAccelByteModelsV2QueryPartiesResponse {QueryPartiesResponse.Data});
 		}), OnError, Offset, Limit);
 }
 
-void ServerSession::GetPartyDetails(
-	FString const& PartyID,
-	THandler<FAccelByteModelsV2PartySession> const& OnSuccess,
-	FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerSession::GetPartyDetails(FString const& PartyID
+	, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -263,10 +263,12 @@ void ServerSession::GetPartyDetails(
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"),
 		*ServerSettingsRef.SessionServerUrl, *ServerCredentialsRef->GetClientNamespace(), *PartyID);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::BulkGetPlayerAttributes(TArray<FString> const& UserIds, THandler<TArray<FAccelByteModelsV2PlayerAttributes>> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerSession::BulkGetPlayerAttributes(TArray<FString> const& UserIds
+	, THandler<TArray<FAccelByteModelsV2PlayerAttributes>> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -278,10 +280,12 @@ void ServerSession::BulkGetPlayerAttributes(TArray<FString> const& UserIds, THan
 		{ TEXT("users"), FString::Join(UserIds, TEXT(",")) }
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::GetPlayerAttributes(FString const& UserId, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerSession::GetPlayerAttributes(FString const& UserId
+	, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -289,7 +293,7 @@ void ServerSession::GetPlayerAttributes(FString const& UserId, THandler<FAccelBy
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/attributes")
@@ -297,12 +301,14 @@ void ServerSession::GetPlayerAttributes(FString const& UserId, THandler<FAccelBy
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::QueryGameSessions(FAccelByteModelsV2ServerQueryGameSessionsRequest RequestContent,
-	THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess, FErrorHandler const& OnError,
-	int64 Offset, int64 Limit)
+FAccelByteTaskWPtr ServerSession::QueryGameSessions(FAccelByteModelsV2ServerQueryGameSessionsRequest const& RequestContent
+	, THandler<FAccelByteModelsV2PaginatedGameSessionQueryResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int64 Offset
+	, int64 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -368,11 +374,13 @@ void ServerSession::QueryGameSessions(FAccelByteModelsV2ServerQueryGameSessionsR
 		QueryParams.Add(TEXT("limit"), FString::FromInt(Limit));
 	}
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::PromoteGameSessionLeader(FString const& GameSessionID, FString const& NewLeaderID,
-	THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerSession::PromoteGameSessionLeader(FString const& GameSessionID
+	, FString const& NewLeaderID
+	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -384,10 +392,10 @@ void ServerSession::PromoteGameSessionLeader(FString const& GameSessionID, FStri
 		, *ServerCredentialsRef->GetNamespace()
 		, *GameSessionID);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
-void ServerSession::GenerateNewGameSessionCode(FString const& GameSessionID
+FAccelByteTaskWPtr ServerSession::GenerateNewGameSessionCode(FString const& GameSessionID
 	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -398,12 +406,12 @@ void ServerSession::GenerateNewGameSessionCode(FString const& GameSessionID
 		, *ServerCredentialsRef->GetNamespace()
 		, *GameSessionID);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::RevokeGameSessionCode(FString const& GameSessionID
-, FVoidHandler const& OnSuccess
-, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerSession::RevokeGameSessionCode(FString const& GameSessionID
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -412,10 +420,11 @@ void ServerSession::RevokeGameSessionCode(FString const& GameSessionID
 		, *ServerCredentialsRef->GetNamespace()
 		, *GameSessionID);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::SendDSSessionReady(FString const& GameSessionID, bool bDSSessionReady
+FAccelByteTaskWPtr ServerSession::SendDSSessionReady(FString const& GameSessionID
+	, bool bDSSessionReady
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -429,13 +438,13 @@ void ServerSession::SendDSSessionReady(FString const& GameSessionID, bool bDSSes
 	FAccelByteModelsV2DSSessionReadyRequest Request;
 	Request.Ready = bDSSessionReady;
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
 }
 
-void ServerSession::GetRecentPlayers(const FString& UserId,
-	THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess,
-	FErrorHandler const& OnError,
-	const int32 Limit /* = 20 */)
+FAccelByteTaskWPtr ServerSession::GetRecentPlayers(FString const& UserId
+	, THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit /* = 20 */)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -452,13 +461,13 @@ void ServerSession::GetRecentPlayers(const FString& UserId,
 	QueryParam.Emplace(TEXT("userId"), UserId);
 	QueryParam.Emplace(TEXT("limit"), FString::FromInt(Limit));
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
 }
 
-void ServerSession::GetRecentTeamPlayers(const FString& UserId,
-	THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess,
-	FErrorHandler const& OnError,
-	const int32 Limit)
+FAccelByteTaskWPtr ServerSession::GetRecentTeamPlayers(FString const& UserId
+	, THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -475,8 +484,8 @@ void ServerSession::GetRecentTeamPlayers(const FString& UserId,
 	QueryParam.Emplace(TEXT("userId"), UserId);
 	QueryParam.Emplace(TEXT("limit"), FString::FromInt(Limit));
 	
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
 }
 
-}
-}
+} // Namespace GameServerApi
+} // Namespace AccelByte

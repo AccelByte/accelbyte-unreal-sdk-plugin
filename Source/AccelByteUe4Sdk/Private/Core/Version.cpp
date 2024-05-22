@@ -299,8 +299,8 @@ FServiceCompatibilityMap FServiceCompatibilityMap::FromJson(FString const JsonSt
 
 		FString StrMinVersion;
 		FString StrMaxVersion;
-		if (!(*VersionRangePtrPtr)->TryGetStringField("minVersion", StrMinVersion) ||
-			!(*VersionRangePtrPtr)->TryGetStringField("maxVersion", StrMaxVersion))
+		if (!(*VersionRangePtrPtr)->TryGetStringField(TEXT("minVersion"), StrMinVersion) ||
+			!(*VersionRangePtrPtr)->TryGetStringField(TEXT("maxVersion"), StrMaxVersion))
 		{
 			continue;
 		}

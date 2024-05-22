@@ -27,6 +27,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsPagedOrderInfoResponse, FAcce
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayModelsOrderHistoryInfoResponse, FArrayModelsOrderHistoryInfo, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsPreviewOrderResponse, FAccelByteModelsUserPreviewOrderResponse, Response);
+
 #pragma endregion 
 
 UCLASS(Blueprintable, BlueprintType)
@@ -51,6 +53,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api")
 	void GetUserOrderHistory(FString const& OrderNo, FDArrayModelsOrderHistoryInfoResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api")
+	void PreviewUserOrder(const FAccelByteModelsUserPreviewOrderRequest& OrderPreviewRequest, const FDAccelByteModelsPreviewOrderResponse& OnSuccess, const FDErrorHandler& OnError);
 
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;

@@ -33,10 +33,10 @@ public:
 	 * @param ClientTimestamp Timestamp when the event is triggered, the default will be FDateTime::UtcNow()
 	 */
 	template<typename T>
-	void SendGameStandardEventData(const TSharedRef<T>& Payload, 
-									FVoidHandler const& OnSuccess, 
-									FErrorHandler const& OnError, 
-									FDateTime const& ClientTimestamp = FDateTime::UtcNow())
+	void SendGameStandardEventData(TSharedRef<T> const& Payload
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FDateTime const& ClientTimestamp = FDateTime::UtcNow())
 	{
 		if (!TIsDerivedFrom<T, FAccelByteModelsGameStandardEvent>::IsDerived)
 		{
@@ -50,10 +50,10 @@ public:
 		}
 	}
 
-	void SendGameStandardEventData(const TSharedRef<FAccelByteModelsCachedGameStandardEventPayload>& Payload, 
-									FVoidHandler const& OnSuccess, 
-									FErrorHandler const& OnError, 
-									FDateTime const& ClientTimestamp = FDateTime::UtcNow());
+	void SendGameStandardEventData(TSharedRef<FAccelByteModelsCachedGameStandardEventPayload> const& Payload
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FDateTime const& ClientTimestamp = FDateTime::UtcNow());
 
 private:
 	GameStandardEvent() = delete;

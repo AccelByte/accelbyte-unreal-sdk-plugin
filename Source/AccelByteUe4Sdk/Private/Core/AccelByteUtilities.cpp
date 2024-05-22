@@ -7,6 +7,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteIdValidator.h"
 #include "Models/AccelByteUserModels.h"
 #include "Misc/CommandLine.h"
@@ -202,7 +203,7 @@ EJwtResult FJwt::VerifyWith(FRsaPublicKey Key) const
 		return EJwtResult::MalformedPublicKey;
 	}
 
-	if (!HeaderJsonPtr->HasField("alg") || HeaderJsonPtr->GetStringField("alg") != TEXT("RS256"))
+	if (!HeaderJsonPtr->HasField(TEXT("alg")) || HeaderJsonPtr->GetStringField(TEXT("alg")) != TEXT("RS256"))
 	{
 		return EJwtResult::AlgorithmMismatch;
 	}
@@ -1131,17 +1132,12 @@ void FAccelByteNetUtilities::DownloadFrom(FString const& Url
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("FHttpRequestProgressDelegate is Deprecated - please use DownloadFrom with FHttpRequestProgressDelegate64 param instead."));
+#endif
 
-	FString Verb = TEXT("GET");
-	FString Accept = TEXT("application/octet-stream");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetVerb(Verb);
-	Request->OnRequestProgress() = OnProgress;
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnDownloaded, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpClient.Request(TEXT("GET"), Url, {}, TEXT(""), {{TEXT("Accept"), TEXT("application/octet-stream")}}, OnDownloaded, OnProgress, OnError);
 }
 
 void FAccelByteNetUtilities::UploadTo(FString const& Url
@@ -1152,30 +1148,52 @@ void FAccelByteNetUtilities::UploadTo(FString const& Url
 	, FString const& ContentType)
 {
 	FReport::Log(FString(__FUNCTION__));
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("FHttpRequestProgressDelegate is Deprecated - please use UploadTo with FHttpRequestProgressDelegate64 param instead."));
+#endif
 
-	FString Verb = TEXT("PUT");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetVerb(Verb);
-	Request->OnRequestProgress() = OnProgress;
-	Request->SetHeader(TEXT("Content-Type"), *ContentType);
-	Request->SetContent(DataUpload);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpClient.Request(TEXT("PUT"), Url, {}, DataUpload, { {TEXT("Content-Type"), ContentType} }, OnSuccess, OnProgress, OnError);
 	
 }
+
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+void FAccelByteNetUtilities::DownloadFrom(FString const& Url
+	, FHttpRequestProgressDelegate64 const& OnProgress
+	, THandler<TArray<uint8>> const& OnDownloaded
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FRegistry::HttpClient.Request(TEXT("GET"), Url, {}, TEXT(""), { {TEXT("Accept"), TEXT("application/octet-stream")} }, OnDownloaded, OnProgress, OnError);
+}
+
+void FAccelByteNetUtilities::UploadTo(FString const& Url
+	, TArray<uint8> const& DataUpload
+	, FHttpRequestProgressDelegate64 const& OnProgress
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& ContentType)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FRegistry::HttpClient.Request(TEXT("PUT"), Url, {}, DataUpload, { {TEXT("Content-Type"), ContentType} }, OnSuccess, OnProgress, OnError);
+
+}
+#endif
 
 #define REGEX_BASE_URL_WITH_DOMAIN "https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,128}\\.[a-zA-Z0-9()]{1,6}"
 #define REGEX_BASE_URL_WITHOUT_DOMAIN "(?:(https?:\\/\\/)?((?:[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost))"
 #define REGEX_OPTIONAL_PORT "(:(?:[1-9]{1}[0-9]{1,4}|[0-9]{1}))?"
-#define REGEX_PATH_AND_PARAM "(\\/?|((\\/)[^\\/\\\\]{1,512}(?:\\7[^\\/\\\\]{1,512})*(\\/?)))"
-#define REGEX_URL "^(" REGEX_BASE_URL_WITH_DOMAIN "|" REGEX_BASE_URL_WITHOUT_DOMAIN ")" REGEX_OPTIONAL_PORT REGEX_PATH_AND_PARAM "$"
+#define REGEX_PATH_AND_PARAM "(\\/?|((\\/)[^\\/\\\\]{1,512}(?:\\7[^\\/\\\\]{1,})*(\\/?)))"
+#define REGEX_CHAR_LIMIT ".{1,2048}+"
+#define REGEX_URL "^((" REGEX_BASE_URL_WITH_DOMAIN "|" REGEX_BASE_URL_WITHOUT_DOMAIN ")" REGEX_OPTIONAL_PORT REGEX_PATH_AND_PARAM ")(" REGEX_CHAR_LIMIT ")$"
 
 bool FAccelByteNetUtilities::IsValidUrl(FString const& Url)
 {
 	FRegexPattern UrlRegex(TEXT(REGEX_URL));
 	FRegexMatcher Matcher(UrlRegex, Url);
+
 	return Matcher.FindNext();
 }
 

@@ -33,18 +33,22 @@ public:
 	 * @param AchievementCode The achievement code which will be unlock.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UnlockAchievement(const FString& UserId
-		, const FString& AchievementCode
-		, const FVoidHandler OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UnlockAchievement(FString const& UserId
+		, FString const& AchievementCode
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Create events to sync to PSN, used to unlock trophies through game server
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkCreatePSNEvent(const FAccelByteModelsAchievementBulkCreatePSNEventRequest& Request
-		, const THandler<FAccelByteModelsAchievementBulkCreatePSNEventResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr BulkCreatePSNEvent(FAccelByteModelsAchievementBulkCreatePSNEventRequest const& Request
+		, THandler<FAccelByteModelsAchievementBulkCreatePSNEventResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	ServerAchievement() = delete;

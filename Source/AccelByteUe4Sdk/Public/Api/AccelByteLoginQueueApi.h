@@ -36,11 +36,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param Namespace Namespace of the game
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RefreshTicket(const FString& Ticket
-		, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& Namespace = TEXT(""));
+	FAccelByteTaskWPtr RefreshTicket(FString const& Ticket
+		, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& Namespace = TEXT(""));
 
 	/**
 	 * @brief Cancel Login Ticket.
@@ -49,11 +51,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param Namespace Namespace of the game
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CancelTicket(const FString& Ticket
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& Namespace = TEXT(""));
+	FAccelByteTaskWPtr CancelTicket(FString const& Ticket
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& Namespace = TEXT(""));
 
 private:
 	LoginQueue() = delete;

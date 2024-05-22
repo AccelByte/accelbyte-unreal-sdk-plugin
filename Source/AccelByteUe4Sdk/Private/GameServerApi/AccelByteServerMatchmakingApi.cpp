@@ -37,9 +37,9 @@ ServerMatchmaking::ServerMatchmaking(ServerCredentials const& InCredentialsRef
 		});
 }
 
-void ServerMatchmaking::QuerySessionStatus(const FString MatchId
-	, const  THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerMatchmaking::QuerySessionStatus(FString const& MatchId
+	, THandler<FAccelByteModelsMatchmakingResult> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -48,12 +48,12 @@ void ServerMatchmaking::QuerySessionStatus(const FString MatchId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *MatchId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmakingResult& MatchmakingResult
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerMatchmaking::EnqueueJoinableSession(FAccelByteModelsMatchmakingResult const& MatchmakingResult
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -61,12 +61,12 @@ void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmaking
 		, *ServerSettingsRef.MatchmakingServerUrl
 		, *ServerCredentialsRef->GetClientNamespace());
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, MatchmakingResult, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, MatchmakingResult, OnSuccess, OnError);
 }
 
-void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerMatchmaking::DequeueJoinableSession(FString const& MatchId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -76,15 +76,15 @@ void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId
 
 	const FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *MatchId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }
 
-void ServerMatchmaking::AddUserToSession(const FString& ChannelName
-	, const FString& MatchId
-	, const FString& UserId
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError
-	, const FString& PartyId)
+FAccelByteTaskWPtr ServerMatchmaking::AddUserToSession(FString const& ChannelName
+	, FString const& MatchId
+	, FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& PartyId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -100,15 +100,15 @@ void ServerMatchmaking::AddUserToSession(const FString& ChannelName
 		, *ChannelName
 		, *MatchId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Body, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Body, OnSuccess, OnError);
 }
 
-void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName
-	, const FString& MatchId
-	, const FString& UserId
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError
-	, const FAccelByteModelsMatchmakingResult& Body)
+FAccelByteTaskWPtr ServerMatchmaking::RemoveUserFromSession(FString const& ChannelName
+	, FString const& MatchId
+	, FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FAccelByteModelsMatchmakingResult const& Body)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -116,7 +116,7 @@ void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s/users/%s")
@@ -126,12 +126,12 @@ void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName
 		, *MatchId
 		, *UserId);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, Body, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, Body, OnSuccess, OnError);
 }
 
-void ServerMatchmaking::RebalanceMatchmakingBasedOnMMR(const FString& MatchId
-	, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr ServerMatchmaking::RebalanceMatchmakingBasedOnMMR(FString const& MatchId
+	, THandler<FAccelByteModelsMatchmakingResult> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -141,12 +141,12 @@ void ServerMatchmaking::RebalanceMatchmakingBasedOnMMR(const FString& MatchId
 
 	FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *MatchId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }
 
-void ServerMatchmaking::ActivateSessionStatusPolling(const FString& MatchId
-	, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
-	, const FErrorHandler& OnError
+void ServerMatchmaking::ActivateSessionStatusPolling(FString const& MatchId
+	, THandler<FAccelByteModelsMatchmakingResult> const& OnSuccess
+	, FErrorHandler const& OnError
 	, uint32 IntervalSec)
 {
 	if (!bStatusPollingActive)

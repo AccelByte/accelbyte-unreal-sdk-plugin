@@ -33,14 +33,17 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
 	 * @param bPopulateBundle Whether populate bundled items if it's a bundle, default value is false.
-	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true
+	 *		and item is flexible bundle, will auto calc price.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetItemById(FString const& ItemId
+	FAccelByteTaskWPtr GetItemById(FString const& ItemId
 		, FString const& Language
 		, FString const& Region
 		, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess
 		, FErrorHandler const& OnError
-		, const FString& StoreId = TEXT("")
+		, FString const& StoreId = TEXT("")
 		, bool bPopulateBundle = false
 		, bool AutoCalcEstimatedPrice = false);
 
@@ -52,8 +55,10 @@ public:
 	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPopulatedItemInfo&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	 void GetItemByAppId(FString const& AppId
+	FAccelByteTaskWPtr GetItemByAppId(FString const& AppId
 	 	, FString const& Language
 	 	, FString const& Region
 	 	, THandler<FAccelByteModelsItemInfo> const& OnSuccess
@@ -67,25 +72,30 @@ public:
 	 * @param Limit Page size.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
-	 * @param SortBy Make sure to always use more than one sort if the first sort is not an unique value for example, if you wish to sort by displayOrder,
-	 * make sure to include other sort such as name or createdAt after the first sort, eg: displayOrder:asc,name:asc
-	 * if it leave with empty array, it will be set to default value : name:asc,displayOrder:asc
-	 * @param StoreId The Store Id, default value is published store id
-	 * Note that It will only one available published store in each game namespace, if you assigned this with other, means you will be able to expose items on draft store.
-	 * Nonetheless it will only user who has SANDBOX role (set on AP) and has permission and ability to hit this end point with other StoreId value.
-	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
+	 * @param SortBy Make sure to always use more than one sort if the first sort is not an unique value for example, if you wish 
+	 *		to sort by displayOrder, make sure to include other sort such as name or createdAt after the first sort, 
+	 *		eg: displayOrder:asc,name:asc if it leave with empty array, it will be set to default value: name:asc,displayOrder:asc
+	 * @param StoreId The Store Id, default value is published store id.
+	 *		Note that It will only one available published store in each game namespace, if you assigned this with other, means you will
+	 *		be able to expose items on draft store. Nonetheless it will only user who has SANDBOX role (set on AP) and has permission 
+	 *		and ability to hit this end point with other StoreId value.
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true
+	 *		and item is flexible bundle, will auto calc price.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
-		, int32 const& Offset
-		, int32 const& Limit
+	FAccelByteTaskWPtr GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
+		, int32 Offset
+		, int32 Limit
 		, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
 		, FErrorHandler const& OnError
-		, TArray<EAccelByteItemListSortBy> SortBy = {}
+		, TArray<EAccelByteItemListSortBy> const& SortBy = {}
 		, FString const& StoreId = TEXT("")
 		, bool AutoCalcEstimatedPrice = false);
 
 	/**
-	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
+	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. 
+	 *		If item does not exist in the specified region, default region item will be returned.
 	 * 
 	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
 	 * @param Keyword Item's keyword in title or description or long description.
@@ -94,12 +104,15 @@ public:
 	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
-	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
-	*/
-	void SearchItem(FString const& Language
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true
+	 *		and item is flexible bundle, will auto calc price.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SearchItem(FString const& Language
 		, FString const& Keyword
-		, int32 const& Offset
-		, int32 const& Limit
+		, int32 Offset
+		, int32 Limit
 		, FString const& Region
 		, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -113,9 +126,12 @@ public:
 	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
-	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true
+	 *		and item is flexible bundle, will auto calc price.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetItemBySku(FString const& Sku
+	FAccelByteTaskWPtr GetItemBySku(FString const& Sku
 		, FString const& Language
 		, FString const& Region
 		, THandler<FAccelByteModelsItemInfo> const& OnSuccess
@@ -128,8 +144,10 @@ public:
 	 * @param ItemId The Item ID.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemDynamicData&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetItemDynamicData(FString const& ItemId
+	FAccelByteTaskWPtr GetItemDynamicData(FString const& ItemId
 		, THandler<FAccelByteModelsItemDynamicData> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -142,14 +160,17 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 * @param StoreId If it's leaved string empty, the value will be got from published store id on the namespace.
-	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true and item is flexible bundle, will auto calc price.
+	 * @param AutoCalcEstimatedPrice This will Auto Calculate Estimated Price. Default is false, if autoCalcEstimatedPrice is true
+	 *		and item is flexible bundle, will auto calc price.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetLocaleItems(const TArray<FString>& ItemIds
-		, const FString& Region
-		, const FString& Language
+	FAccelByteTaskWPtr BulkGetLocaleItems(const TArray<FString>& ItemIds
+		, FString const& Region
+		, FString const& Language
 		, THandler<TArray<FAccelByteModelsItemInfo>> const& OnSuccess
 		, FErrorHandler const& OnError
-		, const FString& StoreId = TEXT("")
+		, FString const& StoreId = TEXT("")
 		, bool AutoCalcEstimatedPrice = false);
 
 	/**
@@ -157,8 +178,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is array of FAccelByteModelsPlatformStore.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
+	FAccelByteTaskWPtr GetListAllStores(THandler<TArray<FAccelByteModelsPlatformStore>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -168,8 +191,12 @@ public:
 	 * @param Region Region Code, ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsEstimatedPrices>.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetEstimatedPrice(const TArray<FString>& ItemIds, const FString& Region, THandler<TArray<FAccelByteModelsEstimatedPrices>> const& OnSuccess
+	FAccelByteTaskWPtr GetEstimatedPrice(const TArray<FString>& ItemIds
+		, FString const& Region
+		, THandler<TArray<FAccelByteModelsEstimatedPrices>> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -178,17 +205,19 @@ public:
 	 * @param Platform The type of the platform.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetItemMappings(EAccelBytePlatformMapping Platform
-		, const THandler<FAccelByteModelsItemMappingsResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetItemMappings(EAccelBytePlatformMapping Platform
+		, THandler<FAccelByteModelsItemMappingsResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	Item() = delete;
 	Item(Item const&) = delete;
 	Item(Item&&) = delete;
 
-	static FString ConvertPlatformMappingToString(const EAccelBytePlatformMapping& Platform);
+	static FString ConvertPlatformMappingToString(EAccelBytePlatformMapping Platform);
 };
 
 } // Namespace Api

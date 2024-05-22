@@ -156,12 +156,29 @@ namespace AccelByte
 			}
 			break;
 		}
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+		case EHttpRequestStatus::Failed:
+		{
+			const EHttpFailureReason FailureReason = Request->GetFailureReason();
+			if (FailureReason == EHttpFailureReason::ConnectionError)
+			{
+				CheckRetry(NextState);
+			}
+			else
+			{
+				Cancel();
+				NextState = TaskState;
+			}
+			break;
+		}
+#else
 		case EHttpRequestStatus::Failed_ConnectionError: //network error
 			CheckRetry(NextState);
 			break;
 		case EHttpRequestStatus::Failed: //request cancelled
 			Cancel();
 			NextState = TaskState;
+#endif
 		default:
 			break;
 		}
@@ -314,7 +331,9 @@ namespace AccelByte
 	bool FHttpRetryTask::IsFinished()
 	{
 		return Request->GetStatus() == EHttpRequestStatus::Failed ||
+#if !(ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4)
 			Request->GetStatus() == EHttpRequestStatus::Failed_ConnectionError ||
+#endif
 			Request->GetStatus() == EHttpRequestStatus::Succeeded;
 	}
 

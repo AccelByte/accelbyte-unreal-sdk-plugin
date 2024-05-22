@@ -35,8 +35,10 @@ public:
 	 * @param bIsPublic Whether to save the binary as a public or private record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveUserBinaryRecord(FString const& Key
+	FAccelByteTaskWPtr SaveUserBinaryRecord(FString const& Key
 		, FString const& FileType
 		, bool bIsPublic
 		, FVoidHandler const& OnSuccess
@@ -51,8 +53,10 @@ public:
 	 * @param bIsPublic Whether to save the binary as a public or private record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SaveUserBinaryRecord(FString const& Key
+	FAccelByteTaskWPtr SaveUserBinaryRecord(FString const& Key
 		, EAccelByteFileType FileType
 		, bool bIsPublic
 		, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
@@ -63,8 +67,10 @@ public:
 	 * @param Key Key of the binary record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetCurrentUserBinaryRecord(FString const& Key
+	FAccelByteTaskWPtr GetCurrentUserBinaryRecord(FString const& Key
 		, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -75,8 +81,10 @@ public:
 	 * @param UserId UserId of the binary record owner.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetPublicUserBinaryRecord(FString const& Key
+	FAccelByteTaskWPtr GetPublicUserBinaryRecord(FString const& Key
 		, FString const& UserId
 		, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -87,8 +95,10 @@ public:
 	 * @param Keys List of keys of the binary records.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsListUserBinaryRecords&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetCurrentUserBinaryRecords(const TArray<FString>& Keys
+	FAccelByteTaskWPtr BulkGetCurrentUserBinaryRecords(const TArray<FString>& Keys
 		, THandler<FAccelByteModelsListUserBinaryRecords> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -99,8 +109,10 @@ public:
 	 * @param UserId UserId of the binary record owner.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsListUserBinaryRecords&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetPublicUserBinaryRecords(const TArray<FString>& Keys
+	FAccelByteTaskWPtr BulkGetPublicUserBinaryRecords(const TArray<FString>& Keys
 		, FString const& UserId
 		, THandler<FAccelByteModelsListUserBinaryRecords> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -112,8 +124,10 @@ public:
 	 * @param UserIds UserId list of the binary record owner(s).
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsListUserBinaryRecords&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetPublicUserBinaryRecords(FString const& Key
+	FAccelByteTaskWPtr BulkGetPublicUserBinaryRecords(FString const& Key
 		, const TArray<FString>& UserIds
 		, THandler<FAccelByteModelsListUserBinaryRecords> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -126,8 +140,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the result. Default value is 0.
 	 * @param Limit The limit of the result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkQueryCurrentUserBinaryRecords(FString const& Query
+	FAccelByteTaskWPtr BulkQueryCurrentUserBinaryRecords(FString const& Query
 		, THandler<FAccelByteModelsPaginatedUserBinaryRecords> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0
@@ -141,8 +157,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the result. Default value is 0.
 	 * @param Limit The limit of the result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkQueryPublicUserBinaryRecords(FString const& UserId
+	FAccelByteTaskWPtr BulkQueryPublicUserBinaryRecords(FString const& UserId
 		, THandler<FAccelByteModelsPaginatedUserBinaryRecords> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0
@@ -156,8 +174,10 @@ public:
 	 * @param FileLocation Location of the uploaded binary file.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateUserBinaryRecordFile(FString const& Key
+	FAccelByteTaskWPtr UpdateUserBinaryRecordFile(FString const& Key
 		, FString const& FileType
 		, FString const& FileLocation
 		, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
@@ -171,8 +191,10 @@ public:
 	 * @param FileLocation Location of the uploaded binary file.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateUserBinaryRecordFile(FString const& Key
+	FAccelByteTaskWPtr UpdateUserBinaryRecordFile(FString const& Key
 		, EAccelByteFileType ContentType
 		, FString const& FileLocation
 		, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
@@ -185,8 +207,10 @@ public:
 	 * @param IsPublic Whether to update the binary into a public or private record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateUserBinaryRecordMetadata(FString const& Key
+	FAccelByteTaskWPtr UpdateUserBinaryRecordMetadata(FString const& Key
 		, bool bIsPublic
 		, THandler<FAccelByteModelsUserBinaryRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -197,8 +221,10 @@ public:
 	 * @param Key Key of the binary record.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteUserBinaryRecord(FString const& Key
+	FAccelByteTaskWPtr DeleteUserBinaryRecord(FString const& Key
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -209,8 +235,10 @@ public:
 	 * @param FileType File type of the binary (supported file types are jpeg, jpg, png, bmp, gif, mp3, webp, and bin).
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RequestUserBinaryRecordPresignedUrl(FString const& Key
+	FAccelByteTaskWPtr RequestUserBinaryRecordPresignedUrl(FString const& Key
 		, FString const& FileType
 		, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -222,8 +250,10 @@ public:
 	 * @param FileType File type of the binary (supported file types are jpeg, jpg, png, bmp, gif, mp3, webp, and bin).
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RequestUserBinaryRecordPresignedUrl(FString const& Key
+	FAccelByteTaskWPtr RequestUserBinaryRecordPresignedUrl(FString const& Key
 		, EAccelByteFileType FileType
 		, THandler<FAccelByteModelsBinaryInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
@@ -234,8 +264,10 @@ public:
 	 * @param Key Key of the binary record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGameBinaryRecord&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGameBinaryRecord(FString const& Key
+	FAccelByteTaskWPtr GetGameBinaryRecord(FString const& Key
 		, THandler<FAccelByteModelsGameBinaryRecord> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -245,8 +277,10 @@ public:
 	 * @param Keys List of keys of the binary record.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsListGameBinaryRecords&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkGetGameBinaryRecords(TArray<FString> const& Keys
+	FAccelByteTaskWPtr BulkGetGameBinaryRecords(TArray<FString> const& Keys
 		, THandler<FAccelByteModelsListGameBinaryRecords> const& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -258,8 +292,10 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param Offset The offset of the result. Default value is 0.
 	 * @param Limit The limit of the result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BulkQueryGameBinaryRecords(FString const& Query
+	FAccelByteTaskWPtr BulkQueryGameBinaryRecords(FString const& Query
 		, THandler<FAccelByteModelsPaginatedGameBinaryRecords> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0

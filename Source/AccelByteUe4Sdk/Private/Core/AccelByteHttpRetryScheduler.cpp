@@ -6,6 +6,8 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryTask.h"
+#include "Core/AccelByteUtilities.h"
+
 #include <algorithm>
 
 DEFINE_LOG_CATEGORY(LogAccelByteHttpRetry);
@@ -32,18 +34,21 @@ typedef FHttpRetryScheduler::FBearerAuthRejectedRefresh FBearerAuthRejectedRefre
 
 FHttpRetryScheduler::FHttpRetryScheduler()
 	: TaskQueue()
-{
-	GConfig->GetInt(TEXT("HTTP"), TEXT("RateLimit"), RateLimit, GEngineIni);
-	if (RateLimit <= 0)
-	{
-		RateLimit = DefaultRateLimit;
-	}
-}
+{}
 
 FHttpRetryScheduler::~FHttpRetryScheduler()
 {
 	TaskQueue.Empty();
 	RequestsBucket.Empty();
+}
+
+void FHttpRetryScheduler::InitializeRateLimit()
+{
+	FAccelByteUtilities::LoadABConfigFallback(TEXT("HTTP"), TEXT("RateLimit"), RateLimit);
+	if (RateLimit <= 0)
+	{
+		RateLimit = DefaultRateLimit;
+	}
 }
 
 FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
@@ -136,7 +141,7 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 	}
 	TaskQueue.Enqueue(Task);
 
-	return Task.ToSharedRef();
+	return Task;
 }
 
 void FHttpRetryScheduler::SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected)
@@ -282,6 +287,8 @@ bool FHttpRetryScheduler::PollRetry(double Time)
 
 void FHttpRetryScheduler::Startup()
 {
+	InitializeRateLimit();
+	
 	PollRetryHandle = FTickerAlias::GetCoreTicker().AddTicker(
         FTickerDelegate::CreateLambda([this](float DeltaTime)
         {

@@ -33,11 +33,12 @@ public:
 	 * @param MatchmakingResult The session's data (get this data from QuerySessionStatus)
 	 * @param OnSuccess This will be called when the operation succeeded. Will return model FAccelByteModelsMatchmakingResult.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void EnqueueJoinableSession(const FAccelByteModelsMatchmakingResult& MatchmakingResult
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
-
+	FAccelByteTaskWPtr EnqueueJoinableSession(FAccelByteModelsMatchmakingResult const& MatchmakingResult
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Dequeue Game Server from Joinable Session Queue. This will make this server not joinable to other parties while already in a session.
@@ -47,10 +48,12 @@ public:
 	 * @param MatchId The match/session ID.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DequeueJoinableSession(const FString& MatchId
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DequeueJoinableSession(FString const& MatchId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Add a user to session data.
@@ -61,13 +64,15 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param PartyId optional, the party ID of the user to be added. if not listed user will be added to a new party.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void AddUserToSession(const FString& ChannelName
-		, const FString& MatchId
-		, const FString& UserId
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError
-		, const FString& PartyId = TEXT(""));
+	FAccelByteTaskWPtr AddUserToSession(FString const& ChannelName
+		, FString const& MatchId
+		, FString const& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& PartyId = TEXT(""));
 
 	/**
 	 * @brief Remove a user from session data.
@@ -78,13 +83,15 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param Body optional, the session's data
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RemoveUserFromSession(const FString& ChannelName
-		, const FString& MatchId
-		, const FString& UserId
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError
-		, const FAccelByteModelsMatchmakingResult& Body = FAccelByteModelsMatchmakingResult());
+	FAccelByteTaskWPtr RemoveUserFromSession(FString const& ChannelName
+		, FString const& MatchId
+		, FString const& UserId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FAccelByteModelsMatchmakingResult const& Body = FAccelByteModelsMatchmakingResult());
 
 	/**
 	 * @brief Get the session's data status
@@ -92,10 +99,12 @@ public:
 	 * @param MatchId the match/session ID
 	 * @param OnSuccess This will be called when the operation succeeded. Will return model FAccelByteModelsMatchmakingResult.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void QuerySessionStatus(const FString MatchId
-		, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr QuerySessionStatus(FString const& MatchId
+		, THandler<FAccelByteModelsMatchmakingResult> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Rebalance matchmaking based on MMR
@@ -103,10 +112,12 @@ public:
 	 * @param MatchId The match/session ID.
 	 * @param OnSuccess This will be called when the operation succeeded. Will return model FAccelByteModelsMatchmakingResult.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RebalanceMatchmakingBasedOnMMR(const FString& MatchId
-		, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr RebalanceMatchmakingBasedOnMMR(FString const& MatchId
+		, THandler<FAccelByteModelsMatchmakingResult> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Activate session data polling in a certain time interval.
@@ -116,9 +127,9 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IntervalSec the interval of every session data get call in second.
 	 */
-	void ActivateSessionStatusPolling(const FString& MatchId
-		, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess
-		, const FErrorHandler& OnError
+	void ActivateSessionStatusPolling(FString const& MatchId
+		, THandler<FAccelByteModelsMatchmakingResult> const& OnSuccess
+		, FErrorHandler const& OnError
 		, uint32 IntervalSec = 5);
 
 	/**

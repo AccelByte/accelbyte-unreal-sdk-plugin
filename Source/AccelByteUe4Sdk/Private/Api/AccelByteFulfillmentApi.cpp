@@ -22,11 +22,11 @@ Fulfillment::Fulfillment(Credentials const& InCredentialsRef
 Fulfillment::~Fulfillment()
 {}
 
-void Fulfillment::RedeemCode(FString const& Code
+FAccelByteTaskWPtr Fulfillment::RedeemCode(FString const& Code
 	, FString const& Region
 	, FString const& Language
-	, THandler<FAccelByteModelsFulfillmentResult> OnSuccess
-	, FErrorHandler OnError)
+	, THandler<FAccelByteModelsFulfillmentResult> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -46,8 +46,8 @@ void Fulfillment::RedeemCode(FString const& Code
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
 
 } // Namespace Api
-}
+} // Namespace AccelByte

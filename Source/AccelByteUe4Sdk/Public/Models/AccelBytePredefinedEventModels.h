@@ -145,6 +145,7 @@ enum class EAccelBytePredefinedEventName : uint8
 	ChatV2_GroupChat_ModeratorBannedUser,
 	ChatV2_GroupChat_ModeratorUnbannedUser,
 	ChatV2_GroupChat_ModeratorDeletedGroupChat,
+	Chat_GetConfig,
 	Group_Created,
 	Group_Updated,
 	Group_CustomAttributesUpdated,
@@ -2106,6 +2107,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatV2GroupChatModeratorDeleteGroupCh
 	virtual const FString GetPreDefinedEventName() override
 	{
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::ChatV2_GroupChat_ModeratorDeletedGroupChat);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatGetConfigPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString UserId{};
+	
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Chat_GetConfig);
 	}
 };
 #pragma endregion Social

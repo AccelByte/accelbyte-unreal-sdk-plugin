@@ -35,13 +35,15 @@ public:
 	 * @param Status Determines how the returned challenge list should be filtered, defaults to EAccelByteModelsChallengeStatus::NONE
 	 * @param Offset Number of challenges to skip when returning the challenge list, defaults to 0
 	 * @param Limit Number of challenges that should be included in the challenge list, defaults to 20
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetChallenges(const THandler<FAccelByteModelsGetChallengesResponse>& OnSuccess
-		, const FErrorHandler& OnError
-		, const EAccelByteModelsChallengeSortBy& SortBy=EAccelByteModelsChallengeSortBy::UPDATED_AT_DESC
-		, const EAccelByteModelsChallengeStatus& Status=EAccelByteModelsChallengeStatus::NONE
-		, uint64 Offset=0
-		, uint64 Limit=20);
+	FAccelByteTaskWPtr GetChallenges(THandler<FAccelByteModelsGetChallengesResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, EAccelByteModelsChallengeSortBy SortBy = EAccelByteModelsChallengeSortBy::UPDATED_AT_DESC
+		, EAccelByteModelsChallengeStatus Status = EAccelByteModelsChallengeStatus::NONE
+		, uint64 Offset = 0
+		, uint64 Limit = 20);
 
 	/**
 	 * @brief Send a request to get all scheduled goals for a specific challenge
@@ -52,13 +54,15 @@ public:
 	 * @param Tags Array of tag strings used to filter resulting goals list
 	 * @param Offset Number of scheduled goals to skip when returning goals list, defaults to 0
 	 * @param Limit Number of scheduled goals that should be included in the goals list, defaults to 20
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetScheduledChallengeGoals(const FString& ChallengeCode
-		, const THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse>& OnSuccess
-		, const FErrorHandler& OnError
-		, const TArray<FString>& Tags={}
-		, uint64 Offset=0
-		, uint64 Limit=20);
+	FAccelByteTaskWPtr GetScheduledChallengeGoals(FString const& ChallengeCode
+		, THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, TArray<FString> Tags = {}
+		, uint64 Offset = 0
+		, uint64 Limit = 20);
 
 	/**
 	 * @brief Send a request to get current progress for a specific challenge
@@ -69,13 +73,15 @@ public:
 	 * @param OnError Delegate executed when request fails
 	 * @param Offset Number of goals to skip when returning goal progress list, defaults to 0
 	 * @param Limit Number of goals to include when returning goal progress list, defaults to 20
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetChallengeProgress(const FString& ChallengeCode
-		, const FString& GoalCode
-		, const THandler<FAccelByteModelsChallengeProgressResponse>& OnSuccess
-		, const FErrorHandler& OnError
-		, uint64 Offset=0
-		, uint64 Limit=20);
+	FAccelByteTaskWPtr GetChallengeProgress(FString const& ChallengeCode
+		, FString const& GoalCode
+		, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint64 Offset = 0
+		, uint64 Limit = 20);
 
 	/**
 	 * @brief Send a request to get status of all challenge rewards
@@ -86,13 +92,15 @@ public:
 	 * @param SortBy Determines the order in which the rewards in the response are returned
 	 * @param Offset Number of rewards to skip when returning reward list, defaults to 0
 	 * @param Limit Number of rewards to include when returning reward list, defaults to 20
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetRewards(const THandler<FAccelByteModelsChallengeGetRewardStatusResponse>& OnSuccess
-		, const FErrorHandler& OnError
-		, const EAccelByteModelsChallengeRewardStatus& Status=EAccelByteModelsChallengeRewardStatus::NONE
-		, const EAccelByteModelsChallengeSortBy& SortBy=EAccelByteModelsChallengeSortBy::UPDATED_AT_DESC
-		, uint64 Offset=0
-		, uint64 Limit=20);
+	FAccelByteTaskWPtr GetRewards(THandler<FAccelByteModelsChallengeGetRewardStatusResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, EAccelByteModelsChallengeRewardStatus Status = EAccelByteModelsChallengeRewardStatus::NONE
+		, EAccelByteModelsChallengeSortBy SortBy = EAccelByteModelsChallengeSortBy::UPDATED_AT_DESC
+		, uint64 Offset = 0
+		, uint64 Limit = 20);
 
 	/**
 	 * @brief Send a request to claim a single reward
@@ -100,18 +108,23 @@ public:
 	 * @param Request Structure containing IDs of rewards to claim
 	 * @param OnSuccess Delegate executed when request succeeds
 	 * @param OnError Delegate executed when request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ClaimReward(const FAccelByteModelsChallengeRewardClaimRequest& Request
-		, const THandler<TArray<FAccelByteModelsChallengeReward>>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr ClaimReward(FAccelByteModelsChallengeRewardClaimRequest const& Request
+		, THandler<TArray<FAccelByteModelsChallengeReward>> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Send a request to attempt to evaluate current progress toward all active challenges
 	 *
 	 * @param OnSuccess Delegate executed when request succeeds
 	 * @param OnError Delegate executed when request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void EvaluateChallengeProgress(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr EvaluateChallengeProgress(FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	Challenge() = delete;

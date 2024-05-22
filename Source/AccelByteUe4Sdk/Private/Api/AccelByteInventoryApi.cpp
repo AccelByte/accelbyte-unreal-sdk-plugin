@@ -23,7 +23,7 @@ Inventory::Inventory(Credentials const& InCredentialsRef
 
 Inventory::~Inventory(){}
 
-FString Inventory::ConvertInventoryConfigurationSortByToString(EAccelByteInventoryConfigurationSortBy const& SortBy)
+FString Inventory::ConvertInventoryConfigurationSortByToString(EAccelByteInventoryConfigurationSortBy SortBy)
 {
 	switch (SortBy)
 	{
@@ -50,7 +50,7 @@ FString Inventory::ConvertInventoryConfigurationSortByToString(EAccelByteInvento
 	}
 }
 
-FString Inventory::ConvertUserInventoriesSortByToString(EAccelByteUserInventoriesSortBy const& SortBy)
+FString Inventory::ConvertUserInventoriesSortByToString(EAccelByteUserInventoriesSortBy SortBy)
 {
 	switch (SortBy)
 	{
@@ -71,7 +71,7 @@ FString Inventory::ConvertUserInventoriesSortByToString(EAccelByteUserInventorie
 	}
 }
 
-FString Inventory::ConvertItemTypeSortByToString(EAccelByteInventoryUtilitiesSortBy const& SortBy)
+FString Inventory::ConvertItemTypeSortByToString(EAccelByteInventoryUtilitiesSortBy SortBy)
 {
 	switch (SortBy)
 	{
@@ -92,7 +92,7 @@ FString Inventory::ConvertItemTypeSortByToString(EAccelByteInventoryUtilitiesSor
 	}
 }
 
-FString Inventory::ConvertUserItemsSortByToString(EAccelByteUserItemsSortBy const& SortBy)
+FString Inventory::ConvertUserItemsSortByToString(EAccelByteUserItemsSortBy SortBy)
 {
 	switch (SortBy)
 	{
@@ -119,9 +119,9 @@ FString Inventory::ConvertUserItemsSortByToString(EAccelByteUserItemsSortBy cons
 	}
 }
 
-void Inventory::GetInventoryConfigurations(THandler<FAccelByteModelsInventoryConfigurationsPagingResponse> const& OnSuccess
+FAccelByteTaskWPtr Inventory::GetInventoryConfigurations(THandler<FAccelByteModelsInventoryConfigurationsPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, EAccelByteInventoryConfigurationSortBy const& SortBy
+	, EAccelByteInventoryConfigurationSortBy SortBy
 	, int32 Limit
 	, int32 Offset
 	, FString const& InventoryConfigurationCode)
@@ -139,12 +139,12 @@ void Inventory::GetInventoryConfigurations(THandler<FAccelByteModelsInventoryCon
 		{ TEXT("code"), InventoryConfigurationCode.IsEmpty() ? TEXT("") : InventoryConfigurationCode }
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
-void Inventory::GetInventoryTags(THandler<FAccelByteModelsInventoryTagPagingResponse> const& OnSuccess
+FAccelByteTaskWPtr Inventory::GetInventoryTags(THandler<FAccelByteModelsInventoryTagPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, EAccelByteInventoryUtilitiesSortBy const& SortBy
+	, EAccelByteInventoryUtilitiesSortBy SortBy
 	, int32 Limit
 	, int32 Offset)
 {
@@ -160,12 +160,12 @@ void Inventory::GetInventoryTags(THandler<FAccelByteModelsInventoryTagPagingResp
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") }
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
-void Inventory::GetUserInventories(THandler<FAccelByteModelsUserInventoriesPagingResponse> const& OnSuccess
+FAccelByteTaskWPtr Inventory::GetUserInventories(THandler<FAccelByteModelsUserInventoriesPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, EAccelByteUserInventoriesSortBy const& SortBy
+	, EAccelByteUserInventoriesSortBy SortBy
 	, int32 Limit
 	, int32 Offset
 	, FString const& InventoryConfigurationCode)
@@ -183,12 +183,12 @@ void Inventory::GetUserInventories(THandler<FAccelByteModelsUserInventoriesPagin
 		{ TEXT("inventoryConfigurationCode"), InventoryConfigurationCode.IsEmpty() ? TEXT("") : InventoryConfigurationCode }
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
-void Inventory::GetItemTypes(THandler<FAccelByteModelsItemTypePagingResponse> const& OnSuccess
+FAccelByteTaskWPtr Inventory::GetItemTypes(THandler<FAccelByteModelsItemTypePagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, EAccelByteInventoryUtilitiesSortBy const& SortBy
+	, EAccelByteInventoryUtilitiesSortBy SortBy
 	, int32 Limit
 	, int32 Offset)
 {
@@ -204,13 +204,13 @@ void Inventory::GetItemTypes(THandler<FAccelByteModelsItemTypePagingResponse> co
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") }
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
-void Inventory::GetUserInventoryAllItems(FString const& InventoryId
+FAccelByteTaskWPtr Inventory::GetUserInventoryAllItems(FString const& InventoryId
 	, THandler<FAccelByteModelsUserItemsPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, EAccelByteUserItemsSortBy const& SortBy
+	, EAccelByteUserItemsSortBy SortBy
 	, int32 Limit
 	, int32 Offset
 	, FString const& SourceItemId
@@ -222,7 +222,7 @@ void Inventory::GetUserInventoryAllItems(FString const& InventoryId
 	if (InventoryId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, InventoryId is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
@@ -239,10 +239,10 @@ void Inventory::GetUserInventoryAllItems(FString const& InventoryId
 		{ TEXT("qtyGte"), Quantity > 0 ? FString::FromInt(Quantity) : TEXT("") }
 	};
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
 
-void Inventory::GetUserInventoryItem(FString const& InventoryId
+FAccelByteTaskWPtr Inventory::GetUserInventoryItem(FString const& InventoryId
 	, FString const& SlotId
 	, FString const& SourceItemId
 	, THandler<FAccelByteModelsUserItemResponse> const& OnSuccess
@@ -253,17 +253,17 @@ void Inventory::GetUserInventoryItem(FString const& InventoryId
 	if (InventoryId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, InventoryId is empty."));
-		return;
+		return nullptr;
 	}
 	if (SlotId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, SlotId is empty."));
-		return;
+		return nullptr;
 	}
 	if (SourceItemId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, SourceItemId is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/slots/%s/sourceItems/%s")
@@ -273,10 +273,10 @@ void Inventory::GetUserInventoryItem(FString const& InventoryId
 		, *SlotId
 		, *SourceItemId);
 
-	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-void Inventory::BulkUpdateInventoryItems(FString const& InventoryId
+FAccelByteTaskWPtr Inventory::BulkUpdateInventoryItems(FString const& InventoryId
 	, TArray<FAccelByteModelsUpdateUserInventoryItemRequest> const& UpdatedItemsRequest
 	, THandler<TArray<FAccelByteModelsUpdateUserInventoryItemResponse>> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -286,17 +286,17 @@ void Inventory::BulkUpdateInventoryItems(FString const& InventoryId
 	if (InventoryId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, InventoryId is empty."));
-		return;
+		return nullptr;
 	}
 	if (UpdatedItemsRequest.Num() == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, UpdatedItemsRequest cannot be 0."));
-		return;
+		return nullptr;
 	}
 	if (UpdatedItemsRequest.Num() > InventoryItemsLimit)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("UpdatedItemsRequest cannot exceed %d!"), InventoryItemsLimit));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
@@ -307,10 +307,10 @@ void Inventory::BulkUpdateInventoryItems(FString const& InventoryId
 	FString Content = TEXT("");
 	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsUpdateUserInventoryItemRequest>(UpdatedItemsRequest, Content);
 
-	HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Inventory::BulkDeleteInventoryItems(FString const& InventoryId
+FAccelByteTaskWPtr Inventory::BulkDeleteInventoryItems(FString const& InventoryId
 	, TArray<FAccelByteModelsDeleteUserInventoryItemsRequest> const& DeletedItemsRequest
 	, THandler<TArray<FAccelByteModelsDeleteUserInventoryItemResponse>> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -320,17 +320,17 @@ void Inventory::BulkDeleteInventoryItems(FString const& InventoryId
 	if (InventoryId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, InventoryId is empty."));
-		return;
+		return nullptr;
 	}
 	if (DeletedItemsRequest.Num() == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, DeletedItemsRequest cannot be 0."));
-		return;
+		return nullptr;
 	}
 	if (DeletedItemsRequest.Num() > InventoryItemsLimit)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Items cannot exceed %d!"), InventoryItemsLimit));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
@@ -341,10 +341,10 @@ void Inventory::BulkDeleteInventoryItems(FString const& InventoryId
 	FString Content = TEXT("");
 	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsDeleteUserInventoryItemsRequest>(DeletedItemsRequest, Content);
 
-	HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, Content, OnSuccess, OnError);
 }
 
-void Inventory::MoveItemsBetweenInventories(FString const& TargetInventoryId
+FAccelByteTaskWPtr Inventory::MoveItemsBetweenInventories(FString const& TargetInventoryId
 	, FAccelByteModelsMoveUserItemsBetweenInventoriesRequest const& MoveItemsRequest
 	, THandler<FAccelByteModelsMoveUserItemsBetweenInventoriesResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -354,22 +354,22 @@ void Inventory::MoveItemsBetweenInventories(FString const& TargetInventoryId
 	if (TargetInventoryId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, TargetInventoryId is empty."));
-		return;
+		return nullptr;
 	}
 	if (MoveItemsRequest.Items.Num() == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, MoveItemsRequest.Items cannot be 0."));
-		return;
+		return nullptr;
 	}
 	if (MoveItemsRequest.Items.Num() > InventoryItemsLimit)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("MoveItemsRequest.Items cannot exceed %d!"), InventoryItemsLimit));
-		return;
+		return nullptr;
 	}
 	if (MoveItemsRequest.SrcInventoryId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, MoveItemsRequest.SrcInventoryId is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items/movement")
@@ -377,10 +377,10 @@ void Inventory::MoveItemsBetweenInventories(FString const& TargetInventoryId
 		, *CredentialsRef->GetNamespace()
 		, *TargetInventoryId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, MoveItemsRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, MoveItemsRequest, OnSuccess, OnError);
 }
 
-void Inventory::ConsumeUserInventoryItem(FString const& InventoryId
+FAccelByteTaskWPtr Inventory::ConsumeUserInventoryItem(FString const& InventoryId
 	, FAccelByteModelsConsumeUserItemsRequest const& ConsumedItemsRequest
 	, THandler<FAccelByteModelsUserItemResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -390,17 +390,17 @@ void Inventory::ConsumeUserInventoryItem(FString const& InventoryId
 	if (InventoryId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, TargetInventoryId is empty."));
-		return;
+		return nullptr;
 	}
 	if (ConsumedItemsRequest.Qty == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ConsumedItemsRequest.Qty cannot be 0."));
-		return;
+		return nullptr;
 	}
 	if (ConsumedItemsRequest.SourceItemId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ConsumedItemsRequest.SourceItemId is empty."));
-		return;
+		return nullptr;
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/consume")
@@ -408,8 +408,8 @@ void Inventory::ConsumeUserInventoryItem(FString const& InventoryId
 		, *CredentialsRef->GetNamespace()
 		, *InventoryId);
 
-	HttpClient.ApiRequest(TEXT("POST"), Url, {}, ConsumedItemsRequest, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, ConsumedItemsRequest, OnSuccess, OnError);
 }
 
-}
-}
+} // Namespace Api
+} // Namespace AccelByte

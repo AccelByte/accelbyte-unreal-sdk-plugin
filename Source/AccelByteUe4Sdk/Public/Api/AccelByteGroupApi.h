@@ -31,7 +31,7 @@ public:
 
 #pragma region Group V1
 
-	#pragma region Group (multi-member actions)
+#pragma region Group (multi-member actions)
 	/**
 	 * @brief AKA "SearchGroups"; get list of groups.
 	 * - Required valid user authentication.
@@ -45,10 +45,12 @@ public:
 	 * - Result is const FGetGroupConfigListResponse&.
 	 * - Result is simply a FAccelByteModelsGroupInformationResponse + pagination info.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGroupList(const FAccelByteModelsGetGroupListRequest& RequestContent
-		, const THandler<FAccelByteModelsGetGroupListResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGroupList(FAccelByteModelsGetGroupListRequest const& RequestContent
+		, THandler<FAccelByteModelsGetGroupListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Creates a new group.
@@ -62,10 +64,10 @@ public:
 	 *       used to save custom rule, and groupPredefinedRules that has similar usage with configuration,
 	 *       but this rule only works in specific group.
 	 *   - allowedAction: available action in group service. It consist of joinGroup and inviteGroup.
-		 - ruleAttribute: attribute of the player that needs to be checked.
-		 - ruleCriteria: criteria of the value. The value will be in enum of EQUAL, MINIMUM, MAXIMUM.
-		 - ruleValue: value that needs to be checked.
-		 - customAttributes: additional custom group attributes (optional).
+	 *	 - ruleAttribute: attribute of the player that needs to be checked.
+	 *	 - ruleCriteria: criteria of the value. The value will be in enum of EQUAL, MINIMUM, MAXIMUM.
+	 *	 - ruleValue: value that needs to be checked.
+	 *	 - customAttributes: additional custom group attributes (optional).
 	 *
 	 * Action code:: 73304
 	 * 
@@ -73,10 +75,12 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateGroup(const FAccelByteModelsCreateGroupRequest& RequestContent
-		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateGroup(FAccelByteModelsCreateGroupRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Get single single group info (by groupId).
@@ -89,10 +93,12 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGroup(const FString& GroupId
-		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGroup(FString const& GroupId
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update existing group.
@@ -111,12 +117,14 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGroup(const FString& GroupId
-		, const bool bCompletelyReplace
-		, const FAccelByteModelsGroupUpdatable& RequestContent
-		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateGroup(FString const& GroupId
+		, bool bCompletelyReplace
+		, FAccelByteModelsGroupUpdatable const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete existing group.
@@ -129,10 +137,12 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteGroup(const FString& GroupId
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteGroup(FString const& GroupId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Replaces current group custom attributes entirely.
@@ -148,11 +158,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGroupCustomAttributes(const FString& GroupId
-		, const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent
-		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateGroupCustomAttributes(FString const& GroupId
+		, FAccelByteModelsUpdateGroupCustomAttributesRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update custom (arbitrary) group rule.
@@ -167,11 +179,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGroupCustomRule(const FString& GroupId
-		, const FAccelByteModelsUpdateCustomRulesRequest& RequestContent
-		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateGroupCustomRule(FString const& GroupId
+		, FAccelByteModelsUpdateCustomRulesRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Update predefined group rule.
@@ -189,12 +203,14 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateGroupPredefinedRule(const FString& GroupId
-		, const EAccelByteAllowedAction& AllowedAction
-		, const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent
-		, const THandler<FAccelByteModelsGroupInformation>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateGroupPredefinedRule(FString const& GroupId
+		, EAccelByteAllowedAction AllowedAction
+		, FAccelByteModelsUpdateGroupPredefinedRuleRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Delete predefined group rule, based on the allowed action.
@@ -211,16 +227,17 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Void Result
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteGroupPredefinedRule(
-		const FString& GroupId,
-		const EAccelByteAllowedAction& AllowedAction,
-		const FVoidHandler& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteGroupPredefinedRule(FString const& GroupId
+		, EAccelByteAllowedAction AllowedAction
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
-	#pragma endregion /Group (multi-member actions)
+#pragma endregion Group (multi-member actions)
 
-	#pragma region Group Member (individuals)
+#pragma region Group Member (individuals)
 	/**
 	 * @brief Accepts an invitation from a 3rd-party group's group member to group up.
 	 * - Required valid user authentication.
@@ -234,10 +251,12 @@ public:
 	 * @param GroupId of the group that invited you, that you are accepting the invite to.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void AcceptGroupInvitation(const FString& GroupId
-		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr AcceptGroupInvitation(FString const& GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Rejects an invitation from a 3rd-party group's group member to group up.
@@ -250,10 +269,12 @@ public:
 	 * @param GroupId of the group that invited you, that you are rejecting the invite from.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RejectGroupInvitation(const FString& GroupId
-		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr RejectGroupInvitation(FString const& GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Join into specific group and become a group member.
@@ -273,10 +294,12 @@ public:
 	 * @param GroupId of the group you want to join.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void JoinGroup(const FString& GroupId
-		, const THandler<FAccelByteModelsJoinGroupResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr JoinGroup(FString const& GroupId
+		, THandler<FAccelByteModelsJoinGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Cancel the Join group request.
@@ -287,10 +310,12 @@ public:
 	 * @param GroupId of the !Open group type you asked to join, but now want to cancel.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CancelJoinGroupRequest(const FString& GroupId
-        , const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
-        , const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CancelJoinGroupRequest(FString const& GroupId
+        , THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+        , FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get list of group members (by GroupId).
@@ -302,11 +327,13 @@ public:
 	 * @param RequestContent
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGroupMembersListByGroupId(const FString& GroupId
-		, const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent
-		, const THandler<FAccelByteModelsGetGroupMemberListResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGroupMembersListByGroupId(FString const& GroupId
+		, FAccelByteModelsGetGroupMembersListByGroupIdRequest const& RequestContent
+		, THandler<FAccelByteModelsGetGroupMemberListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Leave the group you're currently in.
@@ -321,9 +348,11 @@ public:
 	 * 
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void LeaveGroup(const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr LeaveGroup(THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Get list of group members by group id.
@@ -341,10 +370,12 @@ public:
 	 * @param UserId of the selected user; you want want to get this user's list of group members.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserGroupInfoByUserId(const FString& UserId
-		, const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserGroupInfoByUserId(FString const& UserId
+		, THandler<FAccelByteModelsGetUserGroupInfoResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Invite the other user to your group.
@@ -358,10 +389,12 @@ public:
 	 * @param UserId of the user you want to invite to your group.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void InviteUserToGroup(const FString UserId
-		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr InviteUserToGroup(FString const& UserId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Accept [other] user's group join request.
@@ -379,10 +412,12 @@ public:
 	 * @param OnSuccess Called upon successful op.
 	 * - Returns { GroupId, UserId }
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void AcceptGroupJoinRequest(const FString UserId
-		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr AcceptGroupJoinRequest(FString const& UserId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Reject [other] user's group join request.
@@ -400,10 +435,12 @@ public:
 	 * @param OnSuccess Called upon successful op.
 	 * - Returns { GroupId, UserId }
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RejectGroupJoinRequest(const FString UserId
-		, const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr RejectGroupJoinRequest(FString const& UserId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Kick a group member out of the group.
@@ -417,13 +454,15 @@ public:
 	 * @param OnSuccess Called upon successful op.
 	 * - Returns { GroupId, KickedUserId }
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void KickGroupMember(const FString UserId
-		, const THandler<FAccelByteModelsKickGroupMemberResponse>& OnSuccess
-		, const FErrorHandler& OnError);
-	#pragma endregion /Group Member (individuals)
+	FAccelByteTaskWPtr KickGroupMember(FString const& UserId
+		, THandler<FAccelByteModelsKickGroupMemberResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+#pragma endregion Group Member (individuals)
 
-	#pragma region Group Roles (permissions)
+#pragma region Group Roles (permissions)
 	/**
 	 * @brief Get list of [group] member roles.
 	 * - Required Member Role Permission: "GROUP:ROLE [READ]".
@@ -433,10 +472,12 @@ public:
 	 * @param RequestContent { Limit=1, Offset=0 }
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetMemberRoles(const FAccelByteModelsLimitOffsetRequest& RequestContent
-		, const THandler<FAccelByteModelsGetMemberRolesListResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetMemberRoles(FAccelByteModelsLimitOffsetRequest const& RequestContent
+		, THandler<FAccelByteModelsGetMemberRolesListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Assign a role to a group member.
@@ -449,11 +490,13 @@ public:
 	 * @param RequestContent { UserId } of the user you want to assign the role to.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void AssignMemberRole(const FString& MemberRoleId
-		, const FAccelByteModelsUserIdWrapper& RequestContent
-		, const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr AssignMemberRole(FString const& MemberRoleId
+		, FAccelByteModelsUserIdWrapper const& RequestContent
+		, THandler<FAccelByteModelsGetUserGroupInfoResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Remove a role from a group member.
@@ -466,14 +509,16 @@ public:
 	 * @param RequestContent { UserId } of the user you want to delete the role from.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteMemberRole(const FString& MemberRoleId
-		, const FAccelByteModelsUserIdWrapper& RequestContent
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
-	#pragma endregion /Group Roles (permissions)
+	FAccelByteTaskWPtr DeleteMemberRole(FString const& MemberRoleId
+		, FAccelByteModelsUserIdWrapper const& RequestContent
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+#pragma endregion Group Roles (permissions)
 
-	#pragma region Member Requests
+#pragma region Member Requests
 	/**
 	 * @brief Get list of join requests in a specific group.
 	 * - Required valid user authentication.
@@ -486,11 +531,13 @@ public:
 	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
 	 * @param OnSuccess Paginated.
 	 * @param OnError 
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGroupJoinRequests(const FString& GroupId
-		, const FAccelByteModelsLimitOffsetRequest& RequestContent
-		, const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGroupJoinRequests(FString const& GroupId
+		, FAccelByteModelsLimitOffsetRequest const& RequestContent
+		, THandler<FAccelByteModelsGetMemberRequestsListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get group invitation request list for the user calling this endpoint.
@@ -502,17 +549,19 @@ public:
 	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
 	 * @param OnSuccess Paginated.
 	 * @param OnError 
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGroupInvitationRequests(const FAccelByteModelsLimitOffsetRequest& RequestContent
-		, const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess
-		, const FErrorHandler& OnError);
-	#pragma endregion /Member Requests
+	FAccelByteTaskWPtr GetGroupInvitationRequests(FAccelByteModelsLimitOffsetRequest const& RequestContent
+		, THandler<FAccelByteModelsGetMemberRequestsListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+#pragma endregion Member Requests
 
 #pragma endregion Group V1
 	
 #pragma region Group V2
 
-	#pragma region Group V2 (multi-member actions)
+#pragma region Group V2 (multi-member actions)
 
 	/**
 	 * @brief Creates a new group.
@@ -522,11 +571,12 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateV2Group(
-		const FAccelByteModelsCreateGroupRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateV2Group(FAccelByteModelsCreateGroupRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Gets a collection of group information.
@@ -536,11 +586,12 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGetGroupListResponse&. Support paging.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGroupsByGroupIds(
-			const TArray<FString> GroupIds,
-			const THandler<FAccelByteModelsGetGroupListResponse>& OnSuccess,
-			const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGroupsByGroupIds(TArray<FString> const& GroupIds
+		, THandler<FAccelByteModelsGetGroupListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update existing group.
@@ -556,12 +607,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateV2Group(
-		const FString& GroupId,
-		const FAccelByteModelsUpdateGroupRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateV2Group(FString const& GroupId
+		, FAccelByteModelsUpdateGroupRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete existing group.
@@ -572,11 +624,12 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteV2Group(
-		const FString& GroupId,
-		const FVoidHandler& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteV2Group(FString const& GroupId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replaces current group custom attributes entirely.
@@ -590,12 +643,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateV2GroupCustomAttributes(
-		const FString& GroupId,
-		const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateV2GroupCustomAttributes(FString const& GroupId
+		, FAccelByteModelsUpdateGroupCustomAttributesRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update custom (arbitrary) group rule.
@@ -608,12 +662,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateV2GroupCustomRule(
-		const FString& GroupId,
-		const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateV2GroupCustomRule(FString const& GroupId
+		, FAccelByteModelsUpdateCustomRulesRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update predefined group rule.
@@ -629,13 +684,14 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void UpdateV2GroupPredefinedRule(
-		const FString& GroupId,
-		const EAccelByteAllowedAction& AllowedAction,
-		const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent,
-		const THandler<FAccelByteModelsGroupInformation>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr UpdateV2GroupPredefinedRule(FString const& GroupId
+		, EAccelByteAllowedAction AllowedAction
+		, FAccelByteModelsUpdateGroupPredefinedRuleRequest const& RequestContent
+		, THandler<FAccelByteModelsGroupInformation> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete predefined group rule, based on the allowed action.
@@ -650,12 +706,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Void Result
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteV2GroupPredefinedRule(
-			const FString& GroupId,
-			const EAccelByteAllowedAction& AllowedAction,
-			const FVoidHandler& OnSuccess,
-			const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteV2GroupPredefinedRule(FString const& GroupId
+			, EAccelByteAllowedAction AllowedAction
+			, FVoidHandler const& OnSuccess
+			, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Gets user group status information.
@@ -667,12 +724,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is FAccelByteModelsGetUserGroupInfoResponse&.
 	 * @param OnError This will be called when the operation fail.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserGroupStatusInfo(
-		const FString& UserId,
-		const FString& GroupId,
-		const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
-		const FErrorHandler OnError);
+	FAccelByteTaskWPtr GetUserGroupStatusInfo(FString const& UserId
+		, FString const& GroupId
+		, THandler<FAccelByteModelsGetUserGroupInfoResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get Group Invite Request List for specific group. Group members needs to have permission and also belong to the group to access this endpoint
@@ -684,12 +742,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is FAccelByteModelsGetMemberRequestsListResponse.
 	 * @param OnError This will be called when the operation fail.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGroupInviteRequestList(
-		const FString& GroupId,
-		const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGroupInviteRequestList(FString const& GroupId
+		, FAccelByteModelsLimitOffsetRequest const& RequestContent
+		, THandler<FAccelByteModelsGetMemberRequestsListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get Group Join Request List for specific group. Group members needs to have permission and also belong to the group to access this endpoint
@@ -701,12 +760,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is FAccelByteModelsGetMemberRequestsListResponse
 	 * @param OnError This will be called when the operation fail.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetGroupJoinRequestList(
-			const FString& GroupId,
-			const FAccelByteModelsLimitOffsetRequest& RequestContent,
-			const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
-			const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetGroupJoinRequestList(FString const& GroupId
+			, FAccelByteModelsLimitOffsetRequest const& RequestContent
+			, THandler<FAccelByteModelsGetMemberRequestsListResponse> const& OnSuccess
+			, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Cancel invitation to specific user
@@ -718,88 +778,93 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * - Result is FAccelByteModelsMemberRequestGroupResponse
 	 * @param OnError This will be called when the operation fail.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CancelGroupMemberInvitation(
-			const FString& UserId,
-			const FString& GroupId,
-			const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-			const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CancelGroupMemberInvitation(FString const& UserId
+			, FString const& GroupId
+			, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+			, FErrorHandler const& OnError);
 
-	#pragma endregion Group V2 (multi-member actions)
+#pragma endregion Group V2 (multi-member actions)
 
-	#pragma region Group V2 Member (individuals)
-
-	/**
-	* @brief Accepts an invitation from a 3rd-party group's group member to group up.
-	* - Required valid user authentication.
-	* - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
-	* - Checks if the user who access this endpoint already joined the specific group.
-	* - Deletes all requests (invite / join request) for the user who accesses this endpoint.
-	* - Existing members will receive notification of the newly-accepted member.
-	*
-	* @param GroupId of the group that invited you, that you are accepting the invite to.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void AcceptV2GroupInvitation(
-		const FString& GroupId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+#pragma region Group V2 Member (individuals)
 
 	/**
-	* @brief Rejects an invitation from a 3rd-party group's group member to group up.
-	* - Required valid user authentication.
-	* - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
-	* - Checks if the user who access this endpoint already joined the specific group.
-	* 
-	* @param GroupId of the group that invited you, that you are rejecting the invite from.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void RejectV2GroupInvitation(
-		const FString& GroupId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Accepts an invitation from a 3rd-party group's group member to group up.
+	 * - Required valid user authentication.
+	 * - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
+	 * - Checks if the user who access this endpoint already joined the specific group.
+	 * - Deletes all requests (invite / join request) for the user who accesses this endpoint.
+	 * - Existing members will receive notification of the newly-accepted member.
+	 *
+	 * @param GroupId of the group that invited you, that you are accepting the invite to.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr AcceptV2GroupInvitation(FString const& GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Join into specific group and become a group member.
-	* - Required valid user authentication.
-	* - Checks the the the group type based on the groupID.
-	* - Checks if the user who access this endpoint already joined the specific group.
-	* - Returns status field, for whether the user JOINED or REQUESTED to join the specific group.
-	* 
-	* - More Info:
-	*   - User cannot join to the group with PRIVATE type.
-	*   - Joining PUBLIC group type will create join request and need approval.
-	*       from the privileged group member to accept the request to become the member.
-	*   - Joining OPEN group type will make this user become member of that group immediately.
-	* 
-	* @param GroupId of the group you want to join.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void JoinV2Group(
-		const FString& GroupId,
-		const THandler<FAccelByteModelsJoinGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Rejects an invitation from a 3rd-party group's group member to group up.
+	 * - Required valid user authentication.
+	 * - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
+	 * - Checks if the user who access this endpoint already joined the specific group.
+	 * 
+	 * @param GroupId of the group that invited you, that you are rejecting the invite from.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr RejectV2GroupInvitation(FString const& GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Leave the group you're currently in.
-	* - Required valid user authentication.
-	* - Admin is not allowed to leave the group.
-	* - Will also give response if user does not belong to any group.
-	* - Admin is not allowed to leave the group.
-	*   - If an Admin wants to leave the group, see DeleteGroup.
-	* - Still gives response if the user does not belong to any group.
-	* 
-	* @param GroupId of the group you want to leave.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void LeaveV2Group(
-		const FString& GroupId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Join into specific group and become a group member.
+	 * - Required valid user authentication.
+	 * - Checks the the the group type based on the groupID.
+	 * - Checks if the user who access this endpoint already joined the specific group.
+	 * - Returns status field, for whether the user JOINED or REQUESTED to join the specific group.
+	 * 
+	 * - More Info:
+	 *   - User cannot join to the group with PRIVATE type.
+	 *   - Joining PUBLIC group type will create join request and need approval.
+	 *       from the privileged group member to accept the request to become the member.
+	 *   - Joining OPEN group type will make this user become member of that group immediately.
+	 * 
+	 * @param GroupId of the group you want to join.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr JoinV2Group(FString const& GroupId
+		, THandler<FAccelByteModelsJoinGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Leave the group you're currently in.
+	 * - Required valid user authentication.
+	 * - Admin is not allowed to leave the group.
+	 * - Will also give response if user does not belong to any group.
+	 * - Admin is not allowed to leave the group.
+	 *   - If an Admin wants to leave the group, see DeleteGroup.
+	 * - Still gives response if the user does not belong to any group.
+	 * 
+	 * @param GroupId of the group you want to leave.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr LeaveV2Group(FString const& GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Invite the other user to your group.
@@ -812,73 +877,77 @@ public:
 	 * @param GroupId of the group.
 	 * @param OnSuccess Called upon successful op.
 	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void InviteUserToV2Group(
-		const FString& UserId,
-		const FString& GroupId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr InviteUserToV2Group(FString const& UserId
+		, FString const& GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Accept [other] user's group join request.
-	* - Required valid user auth.
-	* - Required Member Role Permission: "GROUP:JOIN [CREATE]".
-	* - If specific user was not asked to join this specific group,
-	*     response will return error that they "need a join request".
-	* - Will also check if specific user *already* joined the specific group.
-	* - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
-	*     - Rather than an OPEN group (where players can just join without permission).
-	* 
-	* @param UserId of the user who wants to join your group.
-	* @param GroupId of the group.
-	* @param OnSuccess Called upon successful op.
-	* - Returns { GroupId, UserId }
-	* @param OnError Called upon failed op.
-	*/
-	void AcceptV2GroupJoinRequest(
-		const FString& UserId,
-		const FString& GroupId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Accept [other] user's group join request.
+	 * - Required valid user auth.
+	 * - Required Member Role Permission: "GROUP:JOIN [CREATE]".
+	 * - If specific user was not asked to join this specific group,
+	 *     response will return error that they "need a join request".
+	 * - Will also check if specific user *already* joined the specific group.
+	 * - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
+	 *     - Rather than an OPEN group (where players can just join without permission).
+	 * 
+	 * @param UserId of the user who wants to join your group.
+	 * @param GroupId of the group.
+	 * @param OnSuccess Called upon successful op.
+	 * - Returns { GroupId, UserId }
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr AcceptV2GroupJoinRequest(FString const& UserId
+		, FString const& GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Reject [other] user's group join request.
-	* - Required valid user auth.
-	* - Required Member Role Permission: "GROUP:JOIN [CREATE]".
-	* - If specific user was not asked to join this specific group,
-	*     response will return error that they "need a join request".
-	* - Will also check if specific user *already* joined the specific group.
-	* - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
-	*     - Rrather than an OPEN group players can just join.
-	* 
-	* @param UserId of the user you do NOT want to join your group.
-	* @param GroupId of the group.
-	* @param OnSuccess Called upon successful op.
-	* - Returns { GroupId, UserId }
-	* @param OnError Called upon failed op.
-	*/
-	void RejectV2GroupJoinRequest(
-		const FString& UserId,
-		const FString& GroupId,
-		const THandler<FAccelByteModelsMemberRequestGroupResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Reject [other] user's group join request.
+	 * - Required valid user auth.
+	 * - Required Member Role Permission: "GROUP:JOIN [CREATE]".
+	 * - If specific user was not asked to join this specific group,
+	 *     response will return error that they "need a join request".
+	 * - Will also check if specific user *already* joined the specific group.
+	 * - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
+	 *     - Rrather than an OPEN group players can just join.
+	 * 
+	 * @param UserId of the user you do NOT want to join your group.
+	 * @param GroupId of the group.
+	 * @param OnSuccess Called upon successful op.
+	 * - Returns { GroupId, UserId }
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr RejectV2GroupJoinRequest(FString const& UserId
+		, FString const& GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
-	* @brief Kick a group member out of the group.
-	* - Required valid user auth.
-	* - Required Member Role Permission: "GROUP:KICK [CREATE]".
-	* - Validates the kicker's: member, group info and role perms.
-	* 
-	* @param UserId of the user you want to kick from your group.
-	* @param OnSuccess Called upon successful op.
-	* - Returns { GroupId, KickedUserId }
-	* @param OnError Called upon failed op.
-	*/
-	void KickV2GroupMember(
-		const FString& UserId,
-		const FString& GroupId,
-		const THandler<FAccelByteModelsKickGroupMemberResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Kick a group member out of the group.
+	 * - Required valid user auth.
+	 * - Required Member Role Permission: "GROUP:KICK [CREATE]".
+	 * - Validates the kicker's: member, group info and role perms.
+	 * 
+	 * @param UserId of the user you want to kick from your group.
+	 * @param OnSuccess Called upon successful op.
+	 * - Returns { GroupId, KickedUserId }
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr KickV2GroupMember(FString const& UserId
+		, FString const& GroupId
+		, THandler<FAccelByteModelsKickGroupMemberResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get user group joined information. If user does not belong to any group, it will return warning to give information about it
@@ -887,11 +956,12 @@ public:
 	 * @param RequestContent { Limit=1, Offset=0 } for pagination.
 	 * @param OnSuccess This will be called when the operation is succeeded.
 	 * @param OnError This will be called when the operation is fail.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetMyJoinedGroupInfo(
-		const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const THandler<FAccelByteModelsGetGroupMemberListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetMyJoinedGroupInfo(FAccelByteModelsLimitOffsetRequest const& RequestContent
+		, THandler<FAccelByteModelsGetGroupMemberListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get My Join Request To The Groups. It will check any join request group for this user
@@ -901,50 +971,54 @@ public:
 	 * @param OnSuccess This will be called when the operation is succeeded.
 	 * - Result is FAccelByteModelsGetGroupMemberListResponse
 	 * @param OnError This will be called when the operation is fail.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetMyJoinGroupRequest(const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const THandler<FAccelByteModelsGetMemberRequestsListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetMyJoinGroupRequest(FAccelByteModelsLimitOffsetRequest const& RequestContent
+		, THandler<FAccelByteModelsGetMemberRequestsListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
-	#pragma endregion Group V2 Member (individuals)
+#pragma endregion Group V2 Member (individuals)
 
-	#pragma region Group V2 Roles (Permission)
-
-	/**
-	* @brief Assign a role to a group member.
-	* - AKA AddMemberRole.
-	* - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
-	*
-	* @param MemberRoleId of the role you want to assign.
-	* @param GroupId of the member.
-	* @param RequestContent { UserId } of the user and group you want to assign the role to.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void AssignV2MemberRole(
-		const FString& MemberRoleId,
-		const FString& GroupId,
-		const FAccelByteModelsUserIdWrapper& RequestContent,
-		const THandler<FAccelByteModelsGetUserGroupInfoResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+#pragma region Group V2 Roles (Permission)
 
 	/**
-	* @brief Remove a role from a group member.
-	* - AKA RevokeMemberRole, RemoveMemberRole.
-	* - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
-	* 
-	* @param MemberRoleId of the role you want to delete.
-	* @param GroupId of the member.
-	* @param RequestContent { UserId } of the user you want to delete the role from.
-	* @param OnSuccess Called upon successful op.
-	* @param OnError Called upon failed op.
-	*/
-	void DeleteV2MemberRole(
-		const FString& MemberRoleId,
-		const FString& GroupId,
-		const FAccelByteModelsUserIdWrapper& RequestContent,
-		const FVoidHandler& OnSuccess,
-		const FErrorHandler& OnError);
+	 * @brief Assign a role to a group member.
+	 * - AKA AddMemberRole.
+	 * - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
+	 *
+	 * @param MemberRoleId of the role you want to assign.
+	 * @param GroupId of the member.
+	 * @param RequestContent { UserId } of the user and group you want to assign the role to.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr AssignV2MemberRole(FString const& MemberRoleId
+		, FString const& GroupId
+		, FAccelByteModelsUserIdWrapper const& RequestContent
+		, THandler<FAccelByteModelsGetUserGroupInfoResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Remove a role from a group member.
+	 * - AKA RevokeMemberRole, RemoveMemberRole.
+	 * - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
+	 * 
+	 * @param MemberRoleId of the role you want to delete.
+	 * @param GroupId of the member.
+	 * @param RequestContent { UserId } of the user you want to delete the role from.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr DeleteV2MemberRole(FString const& MemberRoleId
+		, FString const& GroupId
+		, FAccelByteModelsUserIdWrapper const& RequestContent
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get list of member roles
@@ -952,13 +1026,14 @@ public:
 	 * @param OnSuccess This will be called when the operation is succeeded.
 	 * - Result is FAccelByteModelsGetMemberRolesListResponse
 	 * @param OnError This will be called when the operation is fail.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetAllMemberRoles(
-		const FAccelByteModelsLimitOffsetRequest& RequestContent,
-		const THandler<FAccelByteModelsGetMemberRolesListResponse>& OnSuccess,
-		const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetAllMemberRoles(FAccelByteModelsLimitOffsetRequest const& RequestContent
+		, THandler<FAccelByteModelsGetMemberRolesListResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
-	#pragma endregion Group V2 Roles (Permission)
+#pragma endregion Group V2 Roles (Permission)
 
 #pragma endregion Group V2
 

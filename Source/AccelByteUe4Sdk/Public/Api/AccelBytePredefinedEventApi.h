@@ -36,10 +36,10 @@ public:
 	 * @param ClientTimestamp Timestamp when the event is triggered, the default will be FDateTime::UtcNow()
 	 */
 	template<typename T>
-	void SendPredefinedEventData(const TSharedRef<T>& Payload, 
-									FVoidHandler const& OnSuccess, 
-									FErrorHandler const& OnError, 
-									FDateTime const& ClientTimestamp = FDateTime::UtcNow())
+	void SendPredefinedEventData(TSharedRef<T> const& Payload
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FDateTime const& ClientTimestamp = FDateTime::UtcNow())
 	{
 		if (!SettingsRef.bSendPredefinedEvent)
 		{
@@ -59,10 +59,10 @@ public:
 		}
 	}
 
-	void SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedPredefinedEventPayload>& Payload, 
-									FVoidHandler const& OnSuccess, 
-									FErrorHandler const& OnError, 
-									FDateTime const& ClientTimestamp = FDateTime::UtcNow());
+	void SendPredefinedEventData(TSharedRef<FAccelByteModelsCachedPredefinedEventPayload> const& Payload
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError
+		, FDateTime const& ClientTimestamp = FDateTime::UtcNow());
 
 private:
 	PredefinedEvent() = delete;

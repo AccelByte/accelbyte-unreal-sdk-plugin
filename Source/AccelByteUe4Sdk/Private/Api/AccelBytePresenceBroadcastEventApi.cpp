@@ -34,7 +34,10 @@ bool PresenceBroadcastEvent::IsGamePlatformSent()
 	return bIsGamePlatformSent;
 }
 
-void PresenceBroadcastEvent::SetGameState(EAccelByteGameState State, FVoidHandler OnSuccess, FErrorHandler OnError, const FString& Description)
+void PresenceBroadcastEvent::SetGameState(EAccelByteGameState State
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& Description)
 {
 	GameState = State;
 	PresencePayload.Game_state = FAccelByteUtilities::GetUEnumValueAsString(GameState);
@@ -42,7 +45,7 @@ void PresenceBroadcastEvent::SetGameState(EAccelByteGameState State, FVoidHandle
 	SendPresenceBroadcastEvent(PresencePayload, OnSuccess, OnError);
 }
 
-void PresenceBroadcastEvent::SetHeartbeatInterval(FTimespan Interval)
+void PresenceBroadcastEvent::SetHeartbeatInterval(FTimespan const& Interval)
 {
 	if (Interval >= MinimumBroadcastInterval)
 	{
@@ -55,17 +58,18 @@ void PresenceBroadcastEvent::SetHeartbeatInterval(FTimespan Interval)
 	}
 }
 
-void PresenceBroadcastEvent::SetOnSendPresenceHeartbeatError(const FErrorHandler& OnError)
+void PresenceBroadcastEvent::SetOnSendPresenceHeartbeatError(FErrorHandler const& OnError)
 {
 	OnSendPresenceHeartbeatError = OnError;
 }
 
-void PresenceBroadcastEvent::SetOnSendPresenceHeartbeatSuccess(const FVoidHandler& OnSendSuccess)
+void PresenceBroadcastEvent::SetOnSendPresenceHeartbeatSuccess(FVoidHandler const& OnSendSuccess)
 {
 	OnSendPresenceHeartbeatSuccess = OnSendSuccess;
 }
 
-void PresenceBroadcastEvent::SendPlatform(FVoidHandler OnSuccess, FErrorHandler OnError)
+void PresenceBroadcastEvent::SendPlatform(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FAccelBytePresenceBroadcastEventPayload PlatformInfo;
 	PlatformInfo.Flight_id = GetFlightId();
@@ -74,7 +78,8 @@ void PresenceBroadcastEvent::SendPlatform(FVoidHandler OnSuccess, FErrorHandler 
 	SendPresenceBroadcastEvent(PlatformInfo, OnSuccess, OnError);
 }
 
-void PresenceBroadcastEvent::AddPresenceData(const FString& Key, const FString& Value)
+void PresenceBroadcastEvent::AddPresenceData(FString const& Key
+	, FString const& Value)
 {
 	if (!AdditionalPayload.IsValid())
 	{
@@ -84,7 +89,7 @@ void PresenceBroadcastEvent::AddPresenceData(const FString& Key, const FString& 
 	PresencePayload.Additional_data.JsonObject = AdditionalPayload;
 }
 
-void PresenceBroadcastEvent::RemovePresenceData(const FString& Key)
+void PresenceBroadcastEvent::RemovePresenceData(FString const& Key)
 {
 	if (!AdditionalPayload.IsValid())
 	{
@@ -175,7 +180,9 @@ void PresenceBroadcastEvent::OnLoginSuccess(FOauth2Token const& Response)
 	}
 }
 
-void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadcastEventPayload const& Events, FVoidHandler OnSuccess, FErrorHandler OnError)
+void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadcastEventPayload const& Events
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if (bIsShuttingDown)
 	{

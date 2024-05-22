@@ -15,7 +15,7 @@ namespace Api
 
 Miscellaneous::Miscellaneous(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
+	, FHttpRetryScheduler & InHttpRef)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, TimeManager(InHttpRef)
 {}
@@ -23,11 +23,12 @@ Miscellaneous::Miscellaneous(Credentials const& InCredentialsRef
 Miscellaneous::~Miscellaneous()
 {}
 
-void Miscellaneous::GetServerCurrentTime(const THandler<FTime>& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr Miscellaneous::GetServerCurrentTime(THandler<FTime> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	TimeManager.GetServerTime(OnSuccess, OnError);
+	return TimeManager.GetServerTime(OnSuccess, OnError);
 }
 
 } // Namespace Api

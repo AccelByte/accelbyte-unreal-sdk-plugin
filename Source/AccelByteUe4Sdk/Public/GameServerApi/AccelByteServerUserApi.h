@@ -38,13 +38,15 @@ public:
 	 * @param Offset The offset of the users data result. Default value is 0.
 	 * @param bIsSearchByUniqueDisplayName Search by unique display name. This is only fulfill if the backend unique_display_name config was true.
 	 * @param Limit The limit of the users data result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SearchUserOtherPlatformDisplayName(const FString& DisplayName
+	FAccelByteTaskWPtr SearchUserOtherPlatformDisplayName(FString const& DisplayName
 		, EAccelBytePlatformType PlatformType
-		, const THandler<FPagedUserOtherPlatformInfo>& OnSuccess
-		, const FErrorHandler& OnError
-		, const int32& Limit = 20
-		, const int32& Offset = 0
+		, THandler<FPagedUserOtherPlatformInfo> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
 		, bool bIsSearchByUniqueDisplayName = false);
 
 	/**
@@ -54,11 +56,13 @@ public:
 	 * @param PlatformType The platform type want to use to search user
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserOtherPlatformInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SearchUserOtherPlatformUserId(const FString& PlatformUserId
+	FAccelByteTaskWPtr SearchUserOtherPlatformUserId(FString const& PlatformUserId
 		, EAccelBytePlatformType PlatformType
-		, const THandler<FUserOtherPlatformInfo>& OnSuccess
-		, const FErrorHandler& OnError);
+		, THandler<FUserOtherPlatformInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief This function will ban a user with specific type of ban. Ban types and reason can be queried.
@@ -66,11 +70,13 @@ public:
 	 * @param BanUser Information of user that will be banned.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FBanUserInfo.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void BanSingleUser(const FString& UserId
-		, const FBanUserRequest& BanUser
-		, const THandler<FBanUserResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr BanSingleUser(FString const& UserId
+		, FBanUserRequest const& BanUser
+		, THandler<FBanUserResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief This function will get user's bans with specific time duration.
@@ -79,12 +85,14 @@ public:
 	 * @param After Only user bans created after the date returned. The date is in ISO-8601
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FGetUserBansResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserBans(const FString& UserId
-		, const FDateTime& Before
-		, const FDateTime& After
-		, const THandler<FGetUserBansResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserBans(FString const& UserId
+		, FDateTime const& Before
+		, FDateTime const& After
+		, THandler<FGetUserBansResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief This function will get user's ban with specific time duration.
@@ -92,10 +100,12 @@ public:
 	 * @param UserId Id of user that ban's data will be get.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FGetUserBansResponse.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetUserBanInfo(const FString& UserId
-		, const THandler<FGetUserBansResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetUserBanInfo(FString const& UserId
+		, THandler<FGetUserBansResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief This function to List user by user id.
@@ -103,10 +113,12 @@ public:
 	 * @param Request struct request containing user ids.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is THandler<FListUserDataResponse>&.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void ListUserByUserId(const FListUserDataRequest Request
-		, const THandler<FListUserDataResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr ListUserByUserId(FListUserDataRequest const& Request
+		, THandler<FListUserDataResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 private:
 	ServerUser() = delete;
@@ -114,5 +126,5 @@ private:
 	ServerUser(ServerUser&&) = delete;
 };
 
-}
-}
+} // Namespace GameServerApi
+} // Namespace AccelByte

@@ -33,8 +33,10 @@ public:
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsCurrencyList&.
 	 * @param OnError This will be called when the operation failed.
 	 * @param CurrencyType The Currency type.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetCurrencyList(FString const& Namespace
+	FAccelByteTaskWPtr GetCurrencyList(FString const& Namespace
 		, THandler<TArray<FAccelByteModelsCurrencyList>> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteCurrencyType CurrencyType = EAccelByteCurrencyType::NONE);

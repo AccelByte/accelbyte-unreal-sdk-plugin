@@ -19,24 +19,24 @@ MatchmakingV2::~MatchmakingV2()
 {
 }
 
-void MatchmakingV2::CreateMatchTicket(const FString& MatchPool
-	, const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess
-	, const FErrorHandler& OnError
-	, const FAccelByteModelsV2MatchTicketOptionalParams& Optionals)
+FAccelByteTaskWPtr MatchmakingV2::CreateMatchTicket(FString const& MatchPool
+	, THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FAccelByteModelsV2MatchTicketOptionalParams const& Optionals)
 {
 	const auto OnCreateTicketError = FCreateMatchmakingTicketErrorHandler::CreateLambda(
-		[OnError](const int32 ErrorCode, const FString& ErrorMessage, const FErrorCreateMatchmakingTicketV2& ErrorDetails)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	});
+		[OnError](int32 ErrorCode, FString const& ErrorMessage, FErrorCreateMatchmakingTicketV2 const& ErrorDetails)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		});
 
-	CreateMatchTicket(MatchPool, OnSuccess, OnCreateTicketError, Optionals);
+	return CreateMatchTicket(MatchPool, OnSuccess, OnCreateTicketError, Optionals);
 }
 
-void MatchmakingV2::CreateMatchTicket(const FString& MatchPool,
-	const THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse>& OnSuccess,
-	const FCreateMatchmakingTicketErrorHandler& OnError,
-	const FAccelByteModelsV2MatchTicketOptionalParams& Optionals)
+FAccelByteTaskWPtr MatchmakingV2::CreateMatchTicket(FString const& MatchPool
+	, THandler<FAccelByteModelsV2MatchmakingCreateTicketResponse> const& OnSuccess
+	, FCreateMatchmakingTicketErrorHandler const& OnError
+	, FAccelByteModelsV2MatchTicketOptionalParams const& Optionals)
 {
 	if (MatchPool.IsEmpty())
 	{
@@ -44,7 +44,7 @@ void MatchmakingV2::CreateMatchTicket(const FString& MatchPool,
 		CreateTicketError.ErrorCode = static_cast<int32>(ErrorCodes::InvalidRequest);
 		CreateTicketError.ErrorMessage = TEXT("MatchPool cannot be empty!");
 		OnError.ExecuteIfBound(CreateTicketError.ErrorCode, CreateTicketError.ErrorMessage, CreateTicketError);
-		return;
+		return nullptr;
 	}
 
 	const FString Verb = TEXT("POST");
@@ -62,17 +62,17 @@ void MatchmakingV2::CreateMatchTicket(const FString& MatchPool,
 		Request.Latencies.Emplace(Latency.Key, FGenericPlatformMath::FloorToInt(Latency.Value));
 	}
 
-	HttpClient.ApiRequest(Verb, Url, {},  Request, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, {},  Request, OnSuccess, OnError);
 }
 
-void MatchmakingV2::GetMatchTicketDetails(const FString& TicketId
-	, const THandler<FAccelByteModelsV2MatchmakingGetTicketDetailsResponse>& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr MatchmakingV2::GetMatchTicketDetails(FString const& TicketId
+	, THandler<FAccelByteModelsV2MatchmakingGetTicketDetailsResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if (TicketId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("TicketId cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Verb = TEXT("GET");
@@ -81,17 +81,17 @@ void MatchmakingV2::GetMatchTicketDetails(const FString& TicketId
 		, *CredentialsRef->GetNamespace()
 		, *TicketId);
 
-	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
 
-void MatchmakingV2::DeleteMatchTicket(const FString& TicketId
-	, const FVoidHandler& OnSuccess
-	, const FErrorHandler& OnError)
+FAccelByteTaskWPtr MatchmakingV2::DeleteMatchTicket(FString const& TicketId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if (TicketId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("TicketId cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Verb = TEXT("DELETE");
@@ -100,16 +100,17 @@ void MatchmakingV2::DeleteMatchTicket(const FString& TicketId
 		*CredentialsRef->GetNamespace(),
 		*TicketId);
 
-	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
 
-void MatchmakingV2::GetMatchmakingMetrics(const FString& MatchPool,
-	const THandler<FAccelByteModelsV2MatchmakingMetrics>& OnSuccess, const FErrorHandler& OnError)
+FAccelByteTaskWPtr MatchmakingV2::GetMatchmakingMetrics(FString const& MatchPool
+	, THandler<FAccelByteModelsV2MatchmakingMetrics> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	if (MatchPool.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("MatchPool cannot be empty!"));
-		return;
+		return nullptr;
 	}
 
 	const FString Verb = TEXT("GET");
@@ -118,11 +119,14 @@ void MatchmakingV2::GetMatchmakingMetrics(const FString& MatchPool,
 		, *CredentialsRef->GetNamespace()
 		, *MatchPool);
 
-	HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
 
-void MatchmakingV2::GetMyMatchTickets(const THandler<FAccelByteModelsV2MatchmakingTicketStatuses>& OnSuccess,
-	const FErrorHandler& OnError, const FString& MatchPool, const int32& Limit, const int32& Offset)
+FAccelByteTaskWPtr MatchmakingV2::GetMyMatchTickets(THandler<FAccelByteModelsV2MatchmakingTicketStatuses> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& MatchPool
+	, int32 Limit
+	, int32 Offset)
 {
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/me")
@@ -137,7 +141,8 @@ void MatchmakingV2::GetMyMatchTickets(const THandler<FAccelByteModelsV2Matchmaki
 	QueryParams.Emplace(TEXT("offset"), FString::FromInt(Offset));
 	QueryParams.Emplace(TEXT("limit"), FString::FromInt(Limit));
 	
-	HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
+	return HttpClient.ApiRequest(Verb, Url, QueryParams, OnSuccess, OnError);
 }
-}
-}
+
+} // Namespace Api
+} // Namespace AccelByte

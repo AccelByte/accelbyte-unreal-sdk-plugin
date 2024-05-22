@@ -69,3 +69,14 @@ void UAccelByteBlueprintsOrder::GetUserOrderHistory(const FString& OrderNo, cons
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
+
+void UAccelByteBlueprintsOrder::PreviewUserOrder(const FAccelByteModelsUserPreviewOrderRequest& OrderPreviewRequest, const FPreviewUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::Order.PreviewUserOrder(OrderPreviewRequest, THandler<FAccelByteModelsUserPreviewOrderResponse>::CreateLambda([OnSuccess](const FAccelByteModelsUserPreviewOrderResponse& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}

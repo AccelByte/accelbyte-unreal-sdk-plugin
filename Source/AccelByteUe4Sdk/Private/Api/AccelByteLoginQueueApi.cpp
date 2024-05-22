@@ -34,7 +34,10 @@ LoginQueue::LoginQueue(Credentials& InCredentialsRef
 LoginQueue::~LoginQueue()
 {}
 
-void LoginQueue::RefreshTicket(const FString& Ticket, const THandler<FAccelByteModelsLoginQueueTicketInfo>& OnSuccess, const FErrorHandler& OnError, const FString& Namespace)
+FAccelByteTaskWPtr LoginQueue::RefreshTicket(FString const& Ticket
+	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& Namespace)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -45,15 +48,21 @@ void LoginQueue::RefreshTicket(const FString& Ticket, const THandler<FAccelByteM
 	TMap<FString, FString> Headers{};
 	Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *Ticket));
 
-	HttpClient.Request(TEXT("GET"), Url, {}, FString(), Headers, THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda([Ticket, OnSuccess](const FAccelByteModelsLoginQueueTicketInfo& Response) 
-		{
-			FAccelByteModelsLoginQueueTicketInfo NewTicketInfo = Response;
-			NewTicketInfo.Ticket = Ticket;
-			OnSuccess.ExecuteIfBound(NewTicketInfo);
-		}), OnError);
+	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), Headers
+		, THandler<FAccelByteModelsLoginQueueTicketInfo>::CreateLambda(
+			[Ticket, OnSuccess](FAccelByteModelsLoginQueueTicketInfo const& Response) 
+			{
+				FAccelByteModelsLoginQueueTicketInfo NewTicketInfo = Response;
+				NewTicketInfo.Ticket = Ticket;
+				OnSuccess.ExecuteIfBound(NewTicketInfo);
+			})
+		, OnError);
 }
 
-void LoginQueue::CancelTicket(const FString& Ticket, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& Namespace)
+FAccelByteTaskWPtr LoginQueue::CancelTicket(FString const& Ticket
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& Namespace)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -66,7 +75,7 @@ void LoginQueue::CancelTicket(const FString& Ticket, const FVoidHandler& OnSucce
 	Headers.Add(TEXT("Accept"), TEXT("application/json"));
 	Headers.Add(TEXT("Content-Type"), TEXT(""));
 
-	HttpClient.Request(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.Request(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
 }
 	
 } // Namespace Api

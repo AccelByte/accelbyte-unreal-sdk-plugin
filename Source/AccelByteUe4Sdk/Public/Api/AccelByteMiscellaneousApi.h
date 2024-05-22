@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Miscellaneous : public FApiBase
 {
 public:
-	Miscellaneous(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& InHttpRef);
+	Miscellaneous(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Miscellaneous();
 
 	/**
@@ -29,9 +29,11 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FTime.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetServerCurrentTime(const THandler<FTime>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetServerCurrentTime(THandler<FTime> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	Miscellaneous() = delete;

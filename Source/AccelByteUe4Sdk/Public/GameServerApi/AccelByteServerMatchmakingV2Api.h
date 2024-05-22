@@ -33,12 +33,14 @@ public:
 	 * @param bStopBackfilling Whether or not to signal to the matchmaking service that you no longer want backfill
 	 * @param OnSuccess Delegate fired when the accept request has gone through
 	 * @param OnError Delegate fired when the accept request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void AcceptBackfillProposal(const FString& BackfillTicketId
-		, const FString& ProposalId
+	FAccelByteTaskWPtr AcceptBackfillProposal(FString const& BackfillTicketId
+		, FString const& ProposalId
 		, bool bStopBackfilling
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Accept a proposal from the matchmaking V2 service to backfill a session.
@@ -48,12 +50,14 @@ public:
 	 * @param bStopBackfilling Whether or not to signal to the matchmaking service that you no longer want backfill
 	 * @param OnSuccess Delegate fired when the accept request has gone through
 	 * @param OnError Delegate fired when the accept request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void AcceptBackfillProposal(const FString& BackfillTicketId
-		, const FString& ProposalId
+	FAccelByteTaskWPtr AcceptBackfillProposal(FString const& BackfillTicketId
+		, FString const& ProposalId
 		, bool bStopBackfilling
-		, const THandler<FAccelByteModelsV2GameSession>& OnSuccess
-		, const FErrorHandler& OnError);
+		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Reject a proposal from the matchmaking V2 service to backfill a session.
@@ -63,12 +67,14 @@ public:
 	 * @param bStopBackfilling Whether or not to signal to the matchmaking service that you no longer want backfill
 	 * @param OnSuccess Delegate fired when the reject request has gone through
 	 * @param OnError Delegate fired when the reject request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void RejectBackfillProposal(const FString& BackfillTicketId
-		, const FString& ProposalId
+	FAccelByteTaskWPtr RejectBackfillProposal(FString const& BackfillTicketId
+		, FString const& ProposalId
 		, bool bStopBackfilling
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Create a ticket to enable backfill on this session.
@@ -77,11 +83,13 @@ public:
 	 * @param SessionId ID of the session that backfill will apply to
 	 * @param OnSuccess Delegate fired when the reject request has gone through
 	 * @param OnError Delegate fired when the reject request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void CreateBackfillTicket(const FString& MatchPool
-		, const FString& SessionId
-		, const THandler<FAccelByteModelsV2MatchmakingCreateBackfillTicketResponse>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr CreateBackfillTicket(FString const& MatchPool
+		, FString const& SessionId
+		, THandler<FAccelByteModelsV2MatchmakingCreateBackfillTicketResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Remove a backfill ticket from the queue, effectively disabling backfill.
@@ -89,10 +97,12 @@ public:
 	 * @param BackfillTicketId ID of the backfill ticket that we wish to remove
 	 * @param OnSuccess Delegate fired when the reject request has gone through
 	 * @param OnError Delegate fired when the reject request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void DeleteBackfillTicket(const FString& BackfillTicketId
-		, const FVoidHandler& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr DeleteBackfillTicket(FString const& BackfillTicketId
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	ServerMatchmakingV2() = delete;

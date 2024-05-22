@@ -31,18 +31,22 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsTurnServerList.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetTurnServers(const THandler<FAccelByteModelsTurnServerList>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetTurnServers(const THandler<FAccelByteModelsTurnServerList>& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get closest TURN server(s).
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsTurnServer.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer>& OnSuccess
-		, const FErrorHandler& OnError);
+	FAccelByteTaskWPtr GetClosestTurnServer(THandler<FAccelByteModelsTurnServer> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get credential to authenticate with the turn server.
@@ -52,12 +56,14 @@ public:
 	 * @param Port
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsTurnServerCredential.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetTurnCredential(const FString &Region
-		, const FString &Ip
+	FAccelByteTaskWPtr GetTurnCredential(FString const& Region
+		, FString const& Ip
 		, int Port
-		, const THandler<FAccelByteModelsTurnServerCredential>& OnSuccess
-		, const FErrorHandler& OnError);
+		, THandler<FAccelByteModelsTurnServerCredential> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Send info about P2P connection type and selected turn server region to BE. This called by client.
@@ -66,10 +72,13 @@ public:
 	 * @param P2PConnectionType P2P connection type enum (host, relay, srflx, or prflx)
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void SendMetric(const FString &SelectedTurnServerRegion, const EP2PConnectionType &P2PConnectionType,
-		const FVoidHandler &OnSuccess,
-		const FErrorHandler &OnError);
+	FAccelByteTaskWPtr SendMetric(FString const& SelectedTurnServerRegion
+		, EP2PConnectionType P2PConnectionType
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 private:
 	FAccelByteModelsTurnServer ClosestServer;

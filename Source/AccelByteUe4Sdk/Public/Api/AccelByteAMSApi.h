@@ -9,11 +9,12 @@
 
 namespace AccelByte
 {
-	class Credentials;
-	class Settings;
+class Credentials;
+class Settings;
 
 namespace Api
 {
+
 class ACCELBYTEUE4SDK_API AMS : public FApiBase
 {
 public:
@@ -25,8 +26,10 @@ public:
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	void GetAccount(THandler<FAccelByteModelsAMSGetAccountResponse> const& OnSuccess
+	FAccelByteTaskWPtr GetAccount(THandler<FAccelByteModelsAMSGetAccountResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 private:
@@ -34,5 +37,6 @@ private:
 	AMS(AMS const&) = delete;
 	AMS(AMS&&) = delete;
 };
+
 }
 }
