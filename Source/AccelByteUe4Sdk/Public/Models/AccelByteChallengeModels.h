@@ -310,6 +310,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeGoalProgressRequirement
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
 	float CurrentValue{0.0f};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
+	FString Matcher{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
+	FString ParameterName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
+	FString ParameterType{}; 
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
+	FString StatCycleId{};
 };
 
 UENUM(BlueprintType)

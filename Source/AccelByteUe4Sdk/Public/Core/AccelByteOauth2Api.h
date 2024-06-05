@@ -42,6 +42,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @deprecated This method will be removed in the future, so please use GetTokenWithAuthorizationCodeV3(FString const& ClientId
 	 *		, FString const& ClientSecret, FString const& AuthorizationCode, FString const& RedirectUri
@@ -55,7 +56,8 @@ public:
 		, FString const& RedirectUri
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher.
@@ -69,6 +71,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @deprecated This method will be removed in the future, so please use GetTokenWithAuthorizationCodeV3(FString const& ClientId
 	 *		, FString const& ClientSecret, FString const& AuthorizationCode, FString const& RedirectUri
@@ -82,7 +85,8 @@ public:
 		, FString const& RedirectUri
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token from the user using a registered Email account.
@@ -95,6 +99,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @deprecated This method will be removed in the future, so please use GetTokenWithPasswordCredentialsV3(FString const& ClientId
 	 *		, FString const& ClientSecret, FString const& Username, FString const& Password, THandler<FOauth2Token>& OnSuccess
@@ -108,7 +113,8 @@ public:
 		, FString const& Password
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token from the user using a registered Email Account with 2FA enabled.
@@ -121,6 +127,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @deprecated This method will be removed in the future, so please use GetTokenWithPasswordCredentialsV3(FString const& ClientId
 	 *		, FString const& ClientSecret, FString const& Username, FString const& Password, THandler<FOauth2Token>& OnSuccess
@@ -134,7 +141,8 @@ public:
 		, FString const& Password
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token from specified OAuth/IAM client.
@@ -145,6 +153,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -152,7 +161,8 @@ public:
 		, FString const& ClientSecret
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token using the user's device information and its unique Id.
@@ -164,6 +174,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -172,7 +183,8 @@ public:
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, bool bCreateHeadless = true);
+		, bool bCreateHeadless = true
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	* @brief Get access token using the user's device information and its unique Id.
@@ -184,6 +196,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -192,7 +205,8 @@ public:
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, bool bCreateHeadless = true);
+		, bool bCreateHeadless = true
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -206,6 +220,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 *
 	 * @note When 2FA is enabled please use the method with FOAuthErrorHandler to get more details about the OAuth errors.
 	 * 
@@ -217,7 +232,8 @@ public:
 		, FString const& PlatformToken
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -232,6 +248,7 @@ public:
 	 * @param bCreateHeadless (optional) A boolean flag to specify new account creation if needed, default value is true 
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -242,7 +259,8 @@ public:
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, bool bCreateHeadless = true
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid.
@@ -254,6 +272,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -262,7 +281,8 @@ public:
 		, FString const& RefreshToken
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid with 2FA enabled.
@@ -274,6 +294,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -282,7 +303,8 @@ public:
 		, FString const& RefreshToken
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Refresh the platform token that is stored in the IAM backend.
@@ -297,6 +319,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -306,7 +329,8 @@ public:
 		, FString const& PlatformToken
 		, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
      * @brief Revoke specified access token to make it invalid.
@@ -316,6 +340,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 *
 	 * @deprecated This method is using wrong auth type, so please use RevokeToken(FString const& ClientId
 	 *		, FString const& ClientSecret, FString const& AccessToken, FVoidHandler const& OnSuccess
@@ -326,7 +351,8 @@ public:
     static FAccelByteTaskWPtr RevokeToken(FString const& AccessToken
     	, FVoidHandler const& OnSuccess
     	, FErrorHandler const& OnError
-    	, FString const& IamUrl = TEXT(""));
+    	, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Revoke specified access token to make it invalid.
@@ -338,6 +364,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -346,7 +373,8 @@ public:
 		, FString const& AccessToken
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Revoke specified access token to make it invalid.
@@ -358,6 +386,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -366,7 +395,8 @@ public:
 		, FString const& AccessToken
 		, FVoidHandler const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher.
@@ -379,6 +409,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 *
 	 * @note When 2FA is enabled please use the method with FOAuthErrorHandler to get more details about the OAuth errors.
 	 * 
@@ -390,7 +421,8 @@ public:
 		, FString const& RedirectUri
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher with 2FA enabled.
@@ -403,6 +435,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -412,7 +445,8 @@ public:
 		, FString const& RedirectUri
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token from the user using a registered Email account.
@@ -426,6 +460,7 @@ public:
 	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 *			
 	 * @note When 2FA is enabled please use the method with FOAuthErrorHandler to get more details about the OAuth errors.
 	 * 
@@ -438,7 +473,8 @@ public:
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bRememberMe = false
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token from the user using a registered Email account with 2FA enabled.
@@ -452,6 +488,7 @@ public:
 	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -462,7 +499,8 @@ public:
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, bool bRememberMe = false
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -477,6 +515,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -488,7 +527,8 @@ public:
 		, FString const& SecondaryPlatformToken
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Verify and Remember new device when user enabled 2FA.
@@ -503,6 +543,7 @@ public:
 	 * @param bRememberDevice This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -514,7 +555,8 @@ public:
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, bool bRememberDevice = false
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Log user in with create headless account after 3rd platform authenticated
@@ -527,6 +569,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -535,7 +578,8 @@ public:
 		, FString const& LinkingToken
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Log user in with authenticate a user account and perform platform link. It validates user's email and password.
@@ -549,6 +593,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -559,7 +604,8 @@ public:
 		, FString const& LinkingToken
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Verify OAuth2 token verification API.
@@ -571,6 +617,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -579,7 +626,8 @@ public:
 		, FString const& Token
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Generate one time linking code. 
@@ -590,6 +638,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -597,7 +646,8 @@ public:
 		, FString const& PlatformId
 		, THandler<FGeneratedOneTimeCode> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 	
 	/**
 	 * @brief Generate publisher user's game token. Required a code from request game token. 
@@ -609,6 +659,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -617,7 +668,8 @@ public:
 		, FString const& Code
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief This function generate a code that can be exchanged into publisher namespace token (i.e. by web portal)
@@ -627,6 +679,7 @@ public:
 	 * @param PublisherClientID The targeted game's publisher ClientID.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -635,7 +688,8 @@ public:
 		, FString const& PublisherClientID
 		, THandler<FCodeForTokenExchangeResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief This function is used for retrieving third party platform token for user that login using third party,
@@ -670,6 +724,7 @@ public:
 	 * @param bRememberMe This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -680,7 +735,8 @@ public:
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, bool bRememberMe = false
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token using the user's device information and its unique Id.
@@ -692,6 +748,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -700,7 +757,8 @@ public:
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, bool bCreateHeadless = true);
+		, bool bCreateHeadless = true
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher with 2FA enabled.
@@ -713,6 +771,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -722,7 +781,8 @@ public:
 		, FString const& RedirectUri
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -737,6 +797,7 @@ public:
 	 * @param bCreateHeadless (optional) A boolean flag to specify new account creation if needed, default value is true
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -747,7 +808,8 @@ public:
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, bool bCreateHeadless = true
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Verify and Remember new device when user enabled 2FA.
@@ -762,6 +824,7 @@ public:
 	 * @param bRememberDevice This will use for refresh token expiration extension, default value is false.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -773,7 +836,8 @@ public:
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, bool bRememberDevice = false
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Generate publisher user's game token. Required a code from request game token.
@@ -785,6 +849,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -793,7 +858,8 @@ public:
 		, FString const& Code
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Log user in with authenticate a user account and perform platform link. It validates user's email and password.
@@ -807,6 +873,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -817,7 +884,8 @@ public:
 		, FString const& LinkingToken
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Log user in with create headless account after 3rd platform authenticated
@@ -830,6 +898,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -838,7 +907,8 @@ public:
 		, FString const& LinkingToken
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -853,6 +923,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -864,7 +935,8 @@ public:
 		, FString const& SecondaryPlatformToken
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid with 2FA enabled.
@@ -876,6 +948,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -884,7 +957,8 @@ public:
 		, FString const& RefreshToken
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 
 	/**
 	 * @brief Get access token from exchange login ticket.
@@ -896,6 +970,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
+	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -904,7 +979,8 @@ public:
 		, FString const& LoginTicket
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, FString const& IamUrl = TEXT(""));
+		, FString const& IamUrl = TEXT("")
+		, TMap<FString, FString> AdditionalHeaders = {});
 #pragma endregion
 
 private:
@@ -914,7 +990,8 @@ private:
 
 	static FHttpRequestPtr ConstructTokenRequest(FString const& Url
 		, FString const& ClientId
-		, FString const& ClientSecret);
+		, FString const& ClientSecret
+		, TMap<FString, FString> const& AdditionalHeaders);
 
 	static FString ConstructAdditionalData();
 };

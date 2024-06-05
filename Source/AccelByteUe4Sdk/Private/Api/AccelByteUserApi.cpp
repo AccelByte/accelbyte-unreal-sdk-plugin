@@ -1273,6 +1273,8 @@ FAccelByteTaskWPtr User::Logout(FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Logout by directly revoking token is deprecated, please use LogoutV3."));
 
 	return Oauth2::RevokeToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
@@ -1287,6 +1289,26 @@ FAccelByteTaskWPtr User::Logout(FVoidHandler const& OnSuccess
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
+}
+
+FAccelByteTaskWPtr User::LogoutV3(FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	const FString Url = FString::Printf(TEXT("%s/v3/logout") , *SettingsRef.IamServerUrl);
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")},
+		{TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken())}
+	};
+
+	return HttpClient.Request(TEXT("POST"), Url, FString(), Headers, FVoidHandler::CreateLambda(
+			[OnSuccess, this]()
+			{
+				UserCredentialsRef->OnLogoutSuccess().Broadcast();
+				UserCredentialsRef->ForgetAll();
+				OnSuccess.ExecuteIfBound();
+			}), OnError);
 }
 
 void User::ForgetAllCredentials()
@@ -2322,6 +2344,30 @@ FAccelByteTaskWPtr User::GetInputValidations(FString const& LanguageCode
 	};
 
 	return HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::ValidateUserInput(FUserInputValidationRequest const& UserInputValidationRequest
+	, THandler<FUserInputValidationResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/input/validation")
+		, *SettingsRef.IamServerUrl
+		, *SettingsRef.Namespace);
+
+	const TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/json")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	FString Content;
+	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(UserInputValidationRequest);
+	FAccelByteUtilities::RemoveEmptyFieldsFromJson(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
+
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
 }
 	
 FAccelByteTaskWPtr User::Enable2FaBackupCode(THandler<FUser2FaBackupCode> const& OnSuccess

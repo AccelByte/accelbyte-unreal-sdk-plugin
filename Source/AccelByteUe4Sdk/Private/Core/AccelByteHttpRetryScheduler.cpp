@@ -321,6 +321,13 @@ void FHttpRetryScheduler::Shutdown()
 	// flush http requests
 	if (!TaskQueue.IsEmpty())
 	{
+		// Don't flush if we're on the game thread, and we're not exiting, as it causes stutters.
+		if (IsInGameThread() && !IsEngineExitRequested())
+		{
+			TaskQueue.Empty();
+			return;
+		}
+
 		double MaxFlushTimeSeconds = -1.0;
 		GConfig->GetDouble(TEXT("HTTP"), TEXT("MaxFlushTimeSeconds"), MaxFlushTimeSeconds, GEngineIni);
 

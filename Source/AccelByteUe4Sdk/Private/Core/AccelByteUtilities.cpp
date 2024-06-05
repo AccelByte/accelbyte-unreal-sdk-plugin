@@ -296,9 +296,9 @@ bool FAccelByteUtilities::IsRunningDevMode()
 {
 #if UE_BUILD_SHIPPING
 	return false;
-#endif
-
+#else
 	return true;
+#endif
 }
 
 FString FAccelByteUtilities::AccelByteStorageFile()

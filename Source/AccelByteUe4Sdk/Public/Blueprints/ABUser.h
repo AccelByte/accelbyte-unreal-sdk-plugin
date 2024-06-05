@@ -30,6 +30,8 @@ DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDAccountLinkConflictErrorJsonResponse, int
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDLoginQueueInfoResponse, FAccelByteModelsLoginQueueTicketInfo, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserInputValidationResponse, FUserInputValidationResponse, Response);
+
 UCLASS(Blueprintable, BlueprintType)
 class UABUser final : public UObject
 {
@@ -212,6 +214,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequest& Request,FDAccountUserPlatformInfosResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	void ValidateUserInput(FUserInputValidationRequest const& UserInputValidationRequest, FDUserInputValidationResponse OnSuccess, FDErrorHandler OnError);
 
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;

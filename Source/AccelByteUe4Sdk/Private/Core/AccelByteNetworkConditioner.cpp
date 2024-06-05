@@ -96,7 +96,7 @@ namespace AccelByte
 	{
 #if !UE_EDITOR && !UE_BUILD_DEVELOPMENT
 		return false;
-#endif
+#else
 		if(!bEnabled)
 		{
 			return false;
@@ -119,6 +119,7 @@ namespace AccelByte
 		}
 		
 		return bShouldFail;
+#endif
 	}
 
 	void FAccelByteNetworkConditioner::SetRandomSeed(const int32 Seed)

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [25.5.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.5.1%0D25.5.0) (2024-06-05)
+
+
+### Features
+
+* add new request header to identify DS based on its ID during Server Authentication ([4e4bc56](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4e4bc567bc216264aa88e208c0e68ad8fb34feb3))
+* **NewProfanityFilter:** add new endpoint for validate user input ([a2db017](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a2db01776c7ecaf9a3ede253eb6d17f603b081f8))
+* **user:** add logout api and deprecate revoke api ([fb3a7b5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fb3a7b5cec7b30242b62f17ea119107d0202abe3))
+
+
+### Bug Fixes
+
+* add missing Flight ID and additional information to the request headers for Login APIs ([160723f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/160723f1464e937c17819eb833b58ca87a1d75ec))
+* **challenge:** update goal progress requirement model ([daa76d8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/daa76d8c5d765b1eea80648d1f52848027b0399d))
+* fix unreachable code on shipping build ([a22c943](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a22c94358782bb26b28024e2f7776f0377bbc5be))
+* skip http flush if shutdown called in game thread and engine exit is not requested ([4788c38](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4788c3887c4006811016498ae4ca41feb1bdff86))
+
 ## [25.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.5.0%0D25.4.1) (2024-05-22)
 
 

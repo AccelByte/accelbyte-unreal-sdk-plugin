@@ -965,7 +965,16 @@ struct FValidation
 	FString SpecialCharacterLocation{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-	TArray<FString> SpecialCharacters{}; 	
+	TArray<FString> SpecialCharacters{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+	FString ProfanityFilter{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+	bool AllowSpecialCharacters{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+	TArray<FString> BlockedWord{};
 };
 
 USTRUCT(BlueprintType)
@@ -990,6 +999,33 @@ struct FInputValidation
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
 	int32 Version{};
+};
+
+USTRUCT(BlueprintType)
+struct FUserInputValidationRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserInputValidationRequest")
+	FString DisplayName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserInputValidationRequest")
+	FString UniqueDisplayName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserInputValidationRequest")
+	FString Username{};
+};
+
+USTRUCT(BlueprintType)
+struct FUserInputValidationResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserInputValidationRequest")
+	FString Message{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserInputValidationRequest")
+	bool Valid{};
 };
 
 

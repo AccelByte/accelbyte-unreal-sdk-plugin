@@ -2018,18 +2018,24 @@ void Lobby::UnbindChatResponseEvents()
 
 void Lobby::UnbindBlockNotifEvents()
 {
+	FReport::Log(FString(__FUNCTION__));
+
 	BlockPlayerNotif.Unbind();
 	UnblockPlayerNotif.Unbind();
 }
 	
 void Lobby::UnbindBlockResponseEvents()
 {
+	FReport::Log(FString(__FUNCTION__));
+
 	OnBlockPlayerError.Unbind();
 	OnUnblockPlayerError.Unbind();
 }
 
 void Lobby::UnbindSessionAttributeEvents()
 {
+	FReport::Log(FString(__FUNCTION__));
+
 	OnGetSessionAttributeError.Unbind();
 	OnSetSessionAttributeError.Unbind();
 	OnGetAllSessionAttributeError.Unbind();
@@ -2037,6 +2043,8 @@ void Lobby::UnbindSessionAttributeEvents()
 
 void Lobby::UnbindV2PartyEvents()
 {
+	FReport::Log(FString(__FUNCTION__));
+
 	V2PartyInvitedNotif.Unbind();
 	V2PartyInviteTimeoutNotif.Unbind();
 	V2PartyJoinedNotif.Unbind();
@@ -2048,6 +2056,8 @@ void Lobby::UnbindV2PartyEvents()
 
 void Lobby::UnbindV2GameSessionEvents()
 {
+	FReport::Log(FString(__FUNCTION__));
+
 	V2GameSessionInvitedNotif.Unbind();
 	V2GameSessionInviteTimeoutNotif.Unbind();
 	V2GameSessionJoinedNotif.Unbind();
@@ -2061,11 +2071,15 @@ void Lobby::UnbindV2GameSessionEvents()
 
 void Lobby::UnbindV2SessionGeneralEvents()
 {
+	FReport::Log(FString(__FUNCTION__));
+
 	V2SessionStorageChangedNotif.Unbind();
 }
 
 void Lobby::UnbindV2MatchmakingEvents()
 {
+	FReport::Log(FString(__FUNCTION__));
+
 	V2MatchmakingMatchFoundNotif.Unbind();
 	V2MatchmakingExpiredNotif.Unbind();
 	V2MatchmakingStartNotif.Unbind();

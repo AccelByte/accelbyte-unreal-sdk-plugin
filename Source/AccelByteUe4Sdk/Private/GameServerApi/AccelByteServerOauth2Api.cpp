@@ -7,6 +7,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerCredentials.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "JsonUtilities.h"
 #include "Misc/Base64.h"
 
@@ -40,7 +41,14 @@ FAccelByteTaskWPtr ServerOauth2::LoginWithClientCredentials(FVoidHandler const& 
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	return GetAccessTokenWithClientCredentialsGrant(ServerCredentialsRef->GetOAuthClientId()
+	FString DSID = ServerSettingsRef.DSId;
+
+	if (DSID.IsEmpty())
+	{
+		DSID = FPlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"));
+	}
+
+	return AccelByte::Api::Oauth2::GetTokenWithClientCredentials(ServerCredentialsRef->GetOAuthClientId()
 		, ServerCredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess](FOauth2Token const& Result)
@@ -51,7 +59,9 @@ FAccelByteTaskWPtr ServerOauth2::LoginWithClientCredentials(FVoidHandler const& 
 			[OnError](int32 ErrorCode, FString const& ErrorMessage)
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-			}));
+			})
+		, TEXT("")
+		, TMap<FString, FString>{ { TEXT("x-ab-dsid"), DSID } });
 }
 
 FAccelByteTaskWPtr ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess

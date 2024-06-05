@@ -984,4 +984,21 @@ void UABUser::GetUserOtherPlatformBasicPublicInfo(const FPlatformAccountInfoRequ
 			}));
 }
 
+void UABUser::ValidateUserInput(FUserInputValidationRequest const& UserInputValidationRequest
+	, FDUserInputValidationResponse OnSuccess
+	, FDErrorHandler OnError)
+{
+	ApiClientPtr->User.ValidateUserInput(UserInputValidationRequest
+		, THandler<FUserInputValidationResponse>::CreateLambda(
+			[OnSuccess](FUserInputValidationResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
 #pragma endregion

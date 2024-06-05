@@ -621,7 +621,7 @@ public:
 
 
 	/**
-	 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
+	 * @brief [DEPRECATED] Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
@@ -629,6 +629,17 @@ public:
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr Logout(FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr LogoutV3(FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -1259,6 +1270,21 @@ public:
 		, THandler<FInputValidation> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bDefaultOnEmpty = true);
+
+	/**
+	 * @brief This function will validate user's input
+	 * This endpoint will check the input validation with profanity filter service
+	 * Call this endpoint GetInputValidations To check the profanity filter enablement
+	 *
+	 * @param  UserInputValidationRequest List of user input validation request
+	 * @param  OnSuccess This will be called when the operation succeeded. The result is FUserInputValidationResponse.
+	 * @param  OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr ValidateUserInput(FUserInputValidationRequest const& UserInputValidationRequest
+		, THandler<FUserInputValidationResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief This function will enable 2FA with backupCode.
