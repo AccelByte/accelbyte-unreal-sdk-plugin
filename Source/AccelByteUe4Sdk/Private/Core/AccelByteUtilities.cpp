@@ -397,6 +397,8 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 		return "live";
 	case EAccelBytePlatformType::Google:
 		return "google";
+	case EAccelBytePlatformType::GooglePlayGames:
+		return "googleplaygames";
 	case EAccelBytePlatformType::Apple:
 		return "apple";	
 	case EAccelBytePlatformType::Facebook:

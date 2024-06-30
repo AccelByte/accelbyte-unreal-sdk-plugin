@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [25.5.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.5.2%0D25.5.1) (2024-06-30)
+
+
+### Features
+
+* **IAM:** support google login ([c1bb77a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c1bb77af1ac1311f3a8902674be5d78a7cddab5e))
+
+
+### Bug Fixes
+
+* missing IAM service URL in ServerOAuth API ([ddfcff5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ddfcff557ef72a98a3f96f431349cab7a449a847))
+
 ### [25.5.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.5.1%0D25.5.0) (2024-06-05)
 
 

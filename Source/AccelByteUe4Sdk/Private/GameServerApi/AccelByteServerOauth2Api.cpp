@@ -60,7 +60,7 @@ FAccelByteTaskWPtr ServerOauth2::LoginWithClientCredentials(FVoidHandler const& 
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			})
-		, TEXT("")
+		, FRegistry::ServerSettings.IamServerUrl
 		, TMap<FString, FString>{ { TEXT("x-ab-dsid"), DSID } });
 }
 

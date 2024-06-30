@@ -29,6 +29,7 @@ enum class EAccelBytePlatformType : uint8
 	PSPC,
 	Live,
 	Google,
+	GooglePlayGames,
 	Apple,
 	Facebook,
 	Android,
