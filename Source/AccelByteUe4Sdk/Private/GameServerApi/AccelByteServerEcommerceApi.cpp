@@ -724,5 +724,24 @@ FAccelByteTaskWPtr ServerEcommerce::FulfillRewards(FString const& UserId
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FulfillRewardsRequest, OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr ServerEcommerce::BulkGetItemsById(TArray<FString> const& ItemIds
+	, const bool bActiveOnly
+	, THandler<TArray<FAccelByteModelsItemInfoV2>> const& OnSuccess
+	, FErrorHandler const& OnError
+	, const FString& StoreId)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/byIds"), *ServerSettingsRef.PlatformServerUrl, *ServerCredentialsRef->GetNamespace());
+
+	const TMultiMap<FString, FString> QueryParams = {
+	{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
+	{ TEXT("activeOnly"), bActiveOnly ? TEXT("true") : TEXT("false") },
+	{ TEXT("storeId"), StoreId }
+	};
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 } // Namespace GameServerApi
 } // Namespace AccelByte

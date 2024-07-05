@@ -92,33 +92,6 @@ FString Inventory::ConvertItemTypeSortByToString(EAccelByteInventoryUtilitiesSor
 	}
 }
 
-FString Inventory::ConvertUserItemsSortByToString(EAccelByteUserItemsSortBy SortBy)
-{
-	switch (SortBy)
-	{
-	case EAccelByteUserItemsSortBy::CREATED_AT:
-		return TEXT("createdAt");
-	case EAccelByteUserItemsSortBy::CREATED_AT_ASC:
-		return TEXT("createdAt:asc");
-	case EAccelByteUserItemsSortBy::CREATED_AT_DESC:
-		return TEXT("createdAt:desc");
-	case EAccelByteUserItemsSortBy::UPDATED_AT:
-		return TEXT("updatedAt");
-	case EAccelByteUserItemsSortBy::UPDATED_AT_ASC:
-		return TEXT("updatedAt:asc");
-	case EAccelByteUserItemsSortBy::UPDATED_AT_DESC:
-		return TEXT("updatedAt:desc");
-	case EAccelByteUserItemsSortBy::QUANTITY:
-		return TEXT("qty");
-	case EAccelByteUserItemsSortBy::QUANTITY_ASC:
-		return TEXT("qty:asc");
-	case EAccelByteUserItemsSortBy::QUANTITY_DESC:
-		return TEXT("qty:desc");
-	default:
-		return TEXT("");
-	}
-}
-
 FAccelByteTaskWPtr Inventory::GetInventoryConfigurations(THandler<FAccelByteModelsInventoryConfigurationsPagingResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, EAccelByteInventoryConfigurationSortBy SortBy
@@ -214,8 +187,7 @@ FAccelByteTaskWPtr Inventory::GetUserInventoryAllItems(FString const& InventoryI
 	, int32 Limit
 	, int32 Offset
 	, FString const& SourceItemId
-	, FString const& Tags
-	, int32 Quantity)
+	, FString const& Tags)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -231,12 +203,11 @@ FAccelByteTaskWPtr Inventory::GetUserInventoryAllItems(FString const& InventoryI
 		, *InventoryId);
 
 	const TMultiMap<FString, FString> QueryParams{
-		{ TEXT("sortBy"), ConvertUserItemsSortByToString(SortBy) },
+		{ TEXT("sortBy"), FAccelByteInventoryUtilities::ConvertUserItemsSortByToString(SortBy) },
 		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("sourceItemId"), SourceItemId.IsEmpty() ? TEXT("") : SourceItemId },
-		{ TEXT("tags"), Tags.IsEmpty() ? TEXT("") : Tags },
-		{ TEXT("qtyGte"), Quantity > 0 ? FString::FromInt(Quantity) : TEXT("") }
+		{ TEXT("tags"), Tags.IsEmpty() ? TEXT("") : Tags }
 	};
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);

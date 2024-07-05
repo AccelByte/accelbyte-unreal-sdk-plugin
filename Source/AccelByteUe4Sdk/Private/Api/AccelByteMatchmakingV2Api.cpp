@@ -47,6 +47,19 @@ FAccelByteTaskWPtr MatchmakingV2::CreateMatchTicket(FString const& MatchPool
 		return nullptr;
 	}
 
+	if(Optionals.Storage.JsonObject.IsValid())
+	{
+		const TMap<FString, TSharedPtr<FJsonValue>> StorageFields = Optionals.Storage.JsonObject->Values;
+		if(StorageFields.Num() > 5)
+		{
+			FErrorCreateMatchmakingTicketV2 CreateTicketError;
+			CreateTicketError.ErrorCode = static_cast<int32>(ErrorCodes::InvalidRequest);
+			CreateTicketError.ErrorMessage = TEXT("Storage fields cannot contain more than 5 values!");
+			OnError.ExecuteIfBound(CreateTicketError.ErrorCode, CreateTicketError.ErrorMessage, CreateTicketError);
+			return nullptr;
+		}
+	}
+
 	const FString Verb = TEXT("POST");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets")
 		, *SettingsRef.MatchmakingV2ServerUrl
@@ -56,6 +69,7 @@ FAccelByteTaskWPtr MatchmakingV2::CreateMatchTicket(FString const& MatchPool
 	Request.MatchPool = MatchPool;
 	Request.SessionId = Optionals.SessionId;
 	Request.Attributes = Optionals.Attributes;
+	Request.Storage = Optionals.Storage;
 
 	for(const TPair<FString, float>& Latency : Optionals.Latencies)
 	{

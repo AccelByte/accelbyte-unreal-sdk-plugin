@@ -28,8 +28,9 @@ enum class EAccelByteStatisticUpdateStrategy : uint8
 {
 	OVERRIDE = 0,
 	INCREMENT,
+	MIN,
 	MAX,
-	MIN
+	STATS_UPDATE_PADDING UMETA(Hidden) //Do not use this enum. MAX is a reserved keyword by UENUM and the last enum will be removed. This padding is a workaround to prevent MAX missing from the enum list.
 };
 
 UENUM(BlueprintType)

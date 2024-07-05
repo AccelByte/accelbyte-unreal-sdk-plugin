@@ -128,8 +128,7 @@ void UABInventory::GetUserInventoryAllItems(
 	int32 Limit, 
 	int32 Offset, 
 	FString const& SourceItemId, 
-	FString const& Tags,
-	int32 Quantity)
+	FString const& Tags)
 {
 	ApiClientPtr->Inventory.GetUserInventoryAllItems(
 		InventoryId,
@@ -149,8 +148,7 @@ void UABInventory::GetUserInventoryAllItems(
 		Offset,
 		Limit,
 		SourceItemId,
-		Tags,
-		Quantity
+		Tags
 	);
 }
 

@@ -2851,6 +2851,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemCriteriaV3
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInventoryConfig
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	int32 SlotUsed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FJsonObjectWrapper ServerCustomAttributes{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FJsonObjectWrapper CustomAttributes{};
+};
+
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfoV2
 {
 	GENERATED_BODY()
@@ -2893,6 +2907,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfoV2
 	bool Purchasable{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	bool bSectionExclusive{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	bool Flexible{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	EAccelByteItemType ItemType{EAccelByteItemType::NONE};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
@@ -2942,7 +2958,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfoV2
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	bool Sellable{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	FAccelByteModelsItemSaleConfig SaleConfig{}; 
+	FAccelByteModelsItemSaleConfig SaleConfig{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FAccelByteModelsItemInventoryConfig InventoryConfig{};
 };
 
 USTRUCT(BlueprintType)
@@ -3272,6 +3290,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserPreviewOrderResponse
 	int32 FinalPrice{0};
 };
 
+// if updated, need to also update EAccelBytePlatformMappingInternal also
 UENUM(BlueprintType)
 enum class EAccelBytePlatformMapping : uint8
 {
@@ -3283,7 +3302,24 @@ enum class EAccelBytePlatformMapping : uint8
 	XBOX,
 	EPIC_GAMES,
 	OCULUS,
-	TWITCH
+	TWITCH,
+	STADIA,
+};
+
+// if updated, need to also update EAccelBytePlatformMapping
+UENUM(BlueprintType)
+enum class EAccelBytePlatformMappingInternal : uint8
+{
+	NONE = 0,
+	APPLE,
+	GOOGLE,
+	PLAYSTATION,
+	STEAM,
+	XBOX,
+	EPICGAMES,
+	OCULUS,
+	TWITCH,
+	STADIA,
 };
 
 USTRUCT(BlueprintType)
@@ -3311,4 +3347,32 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemMappingsResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMappingsResponse")
 	TArray<FAccelByteModelsItemMapping> Data;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemMappingInternal
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMapping")
+	EAccelBytePlatformMappingInternal Platform {EAccelBytePlatformMappingInternal::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMapping")
+	FString ItemIdentityType{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMapping")
+	FString ItemIdentity{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMapping")
+	FString PlatformProductId{};
+};
+
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsItemMappingsResponseInternal
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMappingsResponse")
+	TArray<FAccelByteModelsItemMappingInternal> Data;
 };

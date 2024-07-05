@@ -15,8 +15,7 @@ namespace AccelByte
 		const FVoidHandler& InOnBearerAuthRejectDelegate,
 		FBearerAuthRejectedRefresh& InBearerAuthRejectedRefresh,
 		TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> HandlerDelegates)
-		: FAccelByteTask{}
-		, Request{ InRequest }
+		: Request{ InRequest }
 		, CompleteDelegate{ InCompleteDelegate }
 		, RequestTime{ InRequestTime }
 		, PauseTime{}

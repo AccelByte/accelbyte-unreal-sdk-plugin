@@ -225,6 +225,21 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Cancel outgoing game session invitation.
+	 *
+	 * @param GameSessionID The ID of the game session.
+	 * @param UserID The user ID of invitee.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr CancelGameSessionInvitation(FString const& GameSessionID
+		, FString const& UserID
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Create a new party with the calling user as the sole member.
 	 *
 	 * @param CreateRequest The party creation request with attributes, join type, and members.
@@ -278,6 +293,21 @@ public:
 	FAccelByteTaskWPtr PromotePartyLeader(FString const& PartyID
 		, FString const& NewLeaderID
 		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Cancel outgoing party invitation.
+	 *
+	 * @param PartyID The ID of the party.
+	 * @param UserID The user ID of invitee.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr CancelPartyInvitation(FString const& PartyID
+		, FString const& UserID
+		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**

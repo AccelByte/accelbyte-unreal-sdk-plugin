@@ -38,6 +38,17 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Get List of TURN Server(s).
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsTurnServerList.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetTurnServersV2(const THandler<FAccelByteModelsTurnServerList>& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get closest TURN server(s).
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsTurnServer.
@@ -46,6 +57,30 @@ public:
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr GetClosestTurnServer(THandler<FAccelByteModelsTurnServer> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get closest TURN server(s).
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsTurnServer.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetClosestTurnServerV2(THandler<FAccelByteModelsTurnServer> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get turn server metrics by specific region.
+	 *
+	 * @param Region Specified region to get the server metrics
+	 * @param OnSuccess This will be called when the operation succeeded. The result is the latency of specified region.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetTurnServerLatencyByRegion(const FString& Region
+		, THandler<int32> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -72,13 +107,29 @@ public:
 	 * @param P2PConnectionType P2P connection type enum (host, relay, srflx, or prflx)
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param Latency It will send to turn server metrics if specified
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr SendMetric(FString const& SelectedTurnServerRegion
 		, EP2PConnectionType P2PConnectionType
 		, FVoidHandler const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, int32 Latency = INDEX_NONE);
+
+	/**
+	 * @brief Sets QosServers, using this cache for future calls.
+	 *
+	 * @param OnPingRegionsSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetTurnServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess
+		, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get cached latencies data
+	 */
+	static const TArray<TPair<FString, float>>& GetCachedLatencies();
 	
 private:
 	FAccelByteModelsTurnServer ClosestServer;
@@ -90,6 +141,13 @@ private:
 	TurnManager(TurnManager&&) = delete;
 
 	FString GetTurnManagerServerUrl() const;
+
+	void PingRegionsSetLatencies(const FAccelByteModelsTurnServerList& TurnServerList
+		, const THandler<TArray<TPair<FString, float>>>& OnSuccess
+		, const FErrorHandler& OnError) const;
+
+	static FAccelByteModelsTurnServerList TurnServers;
+	static TArray<TPair<FString, float>> Latencies;
 };
 
 } // Namespace Api

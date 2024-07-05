@@ -529,6 +529,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FV2PartyKickedNotif, FAccelByteModelsV2PartyUserKickedEvent);
 
+	/**
+	 * @brief Delegate for party invite canceled event. Will be triggered when any outgoing invitation canceled. Inviter and Invitee will receive it.
+	 */
+	DECLARE_MULTICAST_DELEGATE_OneParam(FV2PartyInviteCanceledNotif, FAccelByteModelsV2PartyInviteCanceledEvent);
+
 	/*
 	 * @brief Delegate for party updated event.
 	 */
@@ -574,6 +579,11 @@ public:
 	 * @brief Delegate for game session ended event. Will be triggered when DS unregistered.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2GameSessionEndedNotif, FAccelByteModelsV2GameSessionEndedEvent);
+
+	/**
+	 * @brief Delegate for game session invite canceled event. Will be triggered when any outgoing invitation canceled. Inviter and Invitee will receive it.
+	 */
+	DECLARE_MULTICAST_DELEGATE_OneParam(FV2GameSessionInviteCanceledNotif, FAccelByteModelsV2GameSessionInviteCanceledEvent);
 
 	/**
 	 * @brief Delegate for session storage changed event.
@@ -1524,7 +1534,7 @@ public:
 
 	/**
 	 * @brief Set a trigger function when receiving a notification message
-	 * @param OnNotificationMessage return models called FAccelByteModelsNotificationMessage
+	 * @param OnNotificationBroadcasterMessage return models called FAccelByteModelsNotificationMessage
 	 */
 	FDelegateHandle AddMessageNotifBroadcasterDelegate(FNotifBroadcaster const& OnNotificationBroadcasterMessage)
 	{
@@ -1667,6 +1677,32 @@ public:
 	void SetV2GameSessionEndedNotifDelegate(FV2GameSessionEndedNotif const& OnGameSessionEndededNotif)
 	{
 		V2GameSessionEndedNotif = OnGameSessionEndededNotif;
+	}
+
+	FDelegateHandle AddV2GameSessionInviteCanceledNotifDelegate(THandler<FAccelByteModelsV2GameSessionInviteCanceledEvent> const& OnGameSessionInviteCanceled)
+	{
+		return V2GameSessionInviteCanceledNotif.AddLambda([OnGameSessionInviteCanceled](const FAccelByteModelsV2GameSessionInviteCanceledEvent& Notif)
+		{
+			OnGameSessionInviteCanceled.ExecuteIfBound(Notif);
+		});
+	}
+
+	bool RemoveV2GameSessionInviteCanceledNotifDelegate(FDelegateHandle const& DelegateHandle)
+	{
+		return V2GameSessionInviteCanceledNotif.Remove(DelegateHandle);
+	}
+
+	FDelegateHandle AddV2PartyInviteCanceledNotifDelegate(THandler<FAccelByteModelsV2PartyInviteCanceledEvent> const& OnPartyInviteCanceled)
+	{
+		return V2PartyInviteCanceledNotif.AddLambda([OnPartyInviteCanceled](const FAccelByteModelsV2PartyInviteCanceledEvent& Notif)
+		{
+			OnPartyInviteCanceled.ExecuteIfBound(Notif);
+		});
+	}
+
+	bool RemoveV2PartyInviteCanceledNotifDelegate(FDelegateHandle const& DelegateHandle)
+	{
+		return V2PartyInviteCanceledNotif.Remove(DelegateHandle);
 	}
 
 	/**
@@ -2981,6 +3017,7 @@ private:
 	FV2PartyRejectedNotif V2PartyRejectedNotif;
 	FV2PartyKickedNotif V2PartyKickedNotif;
 	FV2PartyUpdatedNotif V2PartyUpdatedNotif;
+	FV2PartyInviteCanceledNotif V2PartyInviteCanceledNotif;
 
 	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
 	FV2GameSessionInviteTimeoutNotif V2GameSessionInviteTimeoutNotif;
@@ -2990,6 +3027,7 @@ private:
 	FV2GameSessionKickedNotif V2GameSessionKickedNotif;
 	FV2GameSessionRejectedNotif V2GameSessionRejectedNotif;
 	FV2GameSessionEndedNotif V2GameSessionEndedNotif;
+	FV2GameSessionInviteCanceledNotif V2GameSessionInviteCanceledNotif;
 
 	FV2SessionStorageChangedNotif V2SessionStorageChangedNotif;
 	FV2SessionJoinedSecretNotif V2SessionJoinedSecretNotif; 

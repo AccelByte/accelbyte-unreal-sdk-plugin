@@ -11,6 +11,8 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteWebSocketErrorTypes.h"
+#include "Logging/AccelByteServiceLogger.h"
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteWebsocket, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteWebsocket);
@@ -251,6 +253,7 @@ void AccelByteWebSocket::SendPing() const
 
 void AccelByteWebSocket::Send(const FString& Message) const
 {
+	ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_REQUEST(Message);
 	WebSocket->Send(Message);
 }
 
@@ -290,8 +293,8 @@ void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool 
 
 void AccelByteWebSocket::OnMessageReceived(const FString& Message)
 {
-	FReport::Log(FString(__FUNCTION__));
-	
+	ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_RESPONSE(Message);
+	FReport::Log(FString(__FUNCTION__));	
 	OnMessageQueue.Enqueue(Message);
 }
 

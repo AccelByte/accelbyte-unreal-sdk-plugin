@@ -210,6 +210,9 @@ public:
 	static FString GetAchievementServerUrl();
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetInventoryServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetUGCServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -286,6 +289,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetAchievementServerUrl(const FString& AchievementServerUrl);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetInventoryServerUrl(const FString& InventoryServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetUGCServerUrl(const FString& UGCServerUrl);

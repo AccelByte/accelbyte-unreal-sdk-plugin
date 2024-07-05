@@ -36,7 +36,8 @@ enum class EAccelByteV2SessionMemberStatus : uint8
 	KICKED,
 	TIMEOUT,
 	DISCONNECTED,
-	TERMINATED
+	TERMINATED,
+	CANCELLED
 };
 
 UENUM(BlueprintType)
@@ -314,6 +315,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionBaseRequest
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateStorage
+{
+	GENERATED_BODY();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest | Storage")
+	FJsonObjectWrapper Leader;
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest : public FAccelByteModelsV2GameSessionBaseRequest
 {
 	GENERATED_BODY();
@@ -323,6 +333,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionCreateRequest : public F
 
 	// Optional, Enable auto join, the invited user will be joined directly from the backend
 	TOptional<bool> AutoJoin{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
+	FAccelByteModelsV2GameSessionCreateStorage Storage;
 };
 
 USTRUCT(BlueprintType)
@@ -806,6 +819,36 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionEndedEvent
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionEndedEvent")
 	bool TextChat{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionInviteCanceledEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionInviteCanceledEvent")
+	TArray<FAccelByteModelsV2SessionUser> Members{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionInviteCanceledEvent")
+	FString SessionID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionInviteCanceledEvent")
+	TArray<FString> CancelledUserIDs{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyInviteCanceledEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionInviteCanceledEvent")
+	TArray<FAccelByteModelsV2SessionUser> Members{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionInviteCanceledEvent")
+	FString PartyID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2GameSessionInviteCanceledEvent")
+	TArray<FString> CancelledUserIDs{};
 };
 
 USTRUCT(BlueprintType)

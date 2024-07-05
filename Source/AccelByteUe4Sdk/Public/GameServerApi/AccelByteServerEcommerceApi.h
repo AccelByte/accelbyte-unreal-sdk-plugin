@@ -363,6 +363,23 @@ public:
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Bulk get items by ID. 
+	 *
+	 * @param ItemIds Array of item IDs.
+	 * @param bActiveOnly Active items only.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation fails.
+	 * @param StoreId The store ID (optional) if empty it will get from published store.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkGetItemsById(TArray<FString> const& ItemIds
+		, const bool bActiveOnly
+		, THandler<TArray<FAccelByteModelsItemInfoV2>> const& OnSuccess
+		, FErrorHandler const& OnError
+		, const FString& StoreId = TEXT(""));
+
 
 private:
 	ServerEcommerce() = delete;

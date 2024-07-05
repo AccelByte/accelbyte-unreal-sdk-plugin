@@ -126,8 +126,7 @@ public:
 		, int32 Limit = 20
 		, int32 Offset = 0
 		, FString const& SourceItemId = TEXT("")
-		, FString const& Tags = TEXT("")
-		, int32 Quantity = 1);
+		, FString const& Tags = TEXT(""));
 
 	/**
 	 * @brief Get a specific item from specific user inventory.
@@ -218,7 +217,6 @@ private:
 	static FString ConvertInventoryConfigurationSortByToString(EAccelByteInventoryConfigurationSortBy SortBy);
 	static FString ConvertUserInventoriesSortByToString(EAccelByteUserInventoriesSortBy SortBy);
 	static FString ConvertItemTypeSortByToString(EAccelByteInventoryUtilitiesSortBy SortBy);
-	static FString ConvertUserItemsSortByToString(EAccelByteUserItemsSortBy SortBy);
 
 };
 

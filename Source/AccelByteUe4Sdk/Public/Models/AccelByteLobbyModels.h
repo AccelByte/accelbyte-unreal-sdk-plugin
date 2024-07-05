@@ -55,7 +55,9 @@ enum class EV2SessionNotifTopic : uint8
 	OnGameSessionUpdated,
 	OnSessionStorageChanged,
 	OnSessionJoinedSecret,
-	OnSessionEnded
+	OnSessionEnded,
+	OnGameSessionInviteCancelled,
+	OnPartyCancelled
 };
 
 // Emulate namespace with long class names

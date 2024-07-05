@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [26.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.0.0%0D25.5.2) (2024-07-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Inventory:** this changes remove Quantity param on GetUserInventoryAllItems, and remove some enums on EAccelByteUserItemsSortBy
+* **Challenge:** enum EAccelByteModelsChallengeGoalRequirementPredicateParameterType remove USER_ACCOUNT, added USERACCOUNT
+
+### Features
+
+* add IAP config error code ([bd8dbd0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bd8dbd035339ec83154f6531c13e22e84ca88c92))
+* add Reason and PartyID fields in MatchmakingCanceledNotif ([6481a79](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6481a792d37bdbcb0b384abc7bab69a465152ae0))
+* add storage field in create game session request ([c003026](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c0030263e3ce2ca3f122d74ee94b5c4590834b3b))
+* add storage in create matchmaking ticket and ticket information model ([6c9bf06](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6c9bf0660929e3b91cda7699e7823539e6c0ba37))
+* Added v1 of service logging (for Visual Debugger) ([04fa963](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/04fa963f887549f3f6a9f5f6b4b1ac508b396359))
+* Added v1 of service logging (for Visual Debugger) ([02193c0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/02193c0c10ccbf67072ad9a2701a4c86e65313a3))
+* admin inventory endpoints ([a174e95](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a174e951c674b5188c02aac2e7ff57316844b964))
+* **Challenge:** Implement server challenge get and claim rewards endpoints ([f7d3a97](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f7d3a97963e433d7e8912b6052730db23ac26d5e))
+* **ecommerce:** add server bulk get items by id ([e7b137e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e7b137e2e0d16026aa9d3cab2aaca9291f03155d))
+* **Inventory:** remove quantity on GetUserInventoryAllItems ([596cbd5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/596cbd55b8312e2f8bb0186e0243824cacccc6ba))
+* **sessionv2:** add cancel game session or party invite ([fccbdb1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fccbdb1839c5827bea81c906b3a5af5028d27841))
+* **TurnServerLatency:** add new endpoint to get turn server list and add function to get turn server latencies ([2938df9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2938df9e39e704cc4fe3b4ecec48063b9c3ed8dc))
+
+
+### Bug Fixes
+
+* buffered notifications dispatched when access token is not valid ([4843000](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/484300068fc9cf4989d3f2de1209869ca65bd9cf))
+* **Challenge:** add NOT_STARTED enum to the EAccelByteModelsChallengeGoalProgressStatus to ensure JSON deserialization ([a108b07](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a108b0773f0a70563db210cbcd8af6a9fd127f9a))
+* GetItemMapping with platform NONE will query all platform ([9785e4f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9785e4f579b58980500776358aeff5b009f40a16))
+* **HttpRetryTask:** add member's default value & not use the constructor initializer list ([fc639d5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fc639d5d08b89b228466e01d0b611b0335443a1d))
+* IAP item mapping EPICGames and add STADIA ([1330d69](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1330d69dc51e4cfe087cc0a7ed356f5db04320a6))
+* incorrect include filename ([47b3e9c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/47b3e9cc31c087924fad6dd2f7fb9ea6af02a446))
+* prevent breaking changes in GetItemMappings by intercepting and translating EAccelBytePlatformMapping ([55afd10](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/55afd104484a65c0bb4a8bb769925b099edde785))
+* remove deprecate log on ReadChat function ([d18b2b6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d18b2b66f3b93d9e1b882e35cef1e1ebe85ec927))
+* **UEnum:** reorder EAccelByteStatisticUpdateStrategy enum value and add additional entry to allow other enums appear completely in blueprint ([2441964](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2441964ea347d11eb4dd371a4bfa86ffe1c1a701))
+
 ### [25.5.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/25.5.2%0D25.5.1) (2024-06-30)
 
 

@@ -2598,6 +2598,25 @@ void DispatchV2JsonNotif(FString const& Payload
 	}
 }
 
+template <typename PayloadType, typename CallbackType>
+void DispatchMulticastV2JsonNotif(FString const& Payload, CallbackType const& ResponseCallback)
+{
+	FString PayloadJsonString;
+	if(!FBase64::Decode(Payload, PayloadJsonString))
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Unable to decode payload from notification\n%s"), *Payload);
+		return;
+	}
+
+	UE_LOG(LogAccelByteLobby, Log, TEXT("MPv2 notif json:\n%s"), *PayloadJsonString);
+	
+	PayloadType Result;
+	if (MessageNotifJsonDeserialize(PayloadJsonString, Result))
+	{
+		ResponseCallback.Broadcast(Result);
+	}
+}
+
 void Lobby::HandleV2SessionNotif(FString const& ParsedJsonString, bool bSkipConditioner)
 {
 	FAccelByteModelsSessionNotificationMessage Notif;
@@ -2690,6 +2709,11 @@ void Lobby::HandleV2SessionNotif(FString const& ParsedJsonString, bool bSkipCond
 		DispatchV2JsonNotif<FAccelByteModelsV2PartySession>(Notif.Payload, V2PartyUpdatedNotif);
 		break;
 	}
+	case EV2SessionNotifTopic::OnPartyCancelled:
+	{
+		DispatchMulticastV2JsonNotif<FAccelByteModelsV2PartyInviteCanceledEvent>(Notif.Payload, V2PartyInviteCanceledNotif);
+		break;
+	}
 	case EV2SessionNotifTopic::OnGameSessionUpdated:
 	{
 		DispatchV2JsonNotif<FAccelByteModelsV2GameSession>(Notif.Payload, V2GameSessionUpdatedNotif);
@@ -2708,6 +2732,11 @@ void Lobby::HandleV2SessionNotif(FString const& ParsedJsonString, bool bSkipCond
 	case EV2SessionNotifTopic::OnSessionJoinedSecret:
 	{
 		DispatchV2JsonNotif<FAccelByteModelsV2SessionJoinedSecret>(Notif.Payload, V2SessionJoinedSecretNotif);
+		break;
+	}
+	case EV2SessionNotifTopic::OnGameSessionInviteCancelled:
+	{
+		DispatchMulticastV2JsonNotif<FAccelByteModelsV2GameSessionInviteCanceledEvent>(Notif.Payload, V2GameSessionInviteCanceledNotif);
 		break;
 	}
 	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
@@ -3067,6 +3096,11 @@ bool Lobby::ExtractLobbyMessageMetaData(FString const& InLobbyMessage
 
 void Lobby::SendBufferedNotifications()
 {
+	if (CredentialsRef->GetAccessToken().IsEmpty())
+	{
+		return;
+	}
+
 	TArray<FAccelByteModelsUserNotification> BufferedNotifications = NotificationBuffer.GetSortedBuffer();
 	NotificationBuffer.Clear();
 

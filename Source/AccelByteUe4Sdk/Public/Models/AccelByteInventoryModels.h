@@ -60,12 +60,49 @@ enum class EAccelByteUserItemsSortBy : uint8
 	UPDATED_AT,
 	UPDATED_AT_ASC,
 	UPDATED_AT_DESC,
-	QUANTITY,
-	QUANTITY_ASC,
-	QUANTITY_DESC
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteInventoriesSortBy : uint8
+{
+	NONE = 0,
+	CREATED_AT,
+	CREATED_AT_ASC,
+	CREATED_AT_DESC,
+	UPDATED_AT,
+	UPDATED_AT_ASC,
+	UPDATED_AT_DESC,
+	CONFIGURATION_CODE, // Inventory Configuration Code
+	CONFIGURATION_CODE_ASC, // Inventory Configuration Code Ascending
+	CONFIGURATION_CODE_DESC // Inventory Configuration Code Descending
 };
 
 #pragma endregion
+
+class ACCELBYTEUE4SDK_API FAccelByteInventoryUtilities
+{
+public:
+	static FString ConvertUserItemsSortByToString(EAccelByteUserItemsSortBy SortBy)
+	{
+		switch (SortBy)
+		{
+		case EAccelByteUserItemsSortBy::CREATED_AT:
+			return TEXT("createdAt");
+		case EAccelByteUserItemsSortBy::CREATED_AT_ASC:
+			return TEXT("createdAt:asc");
+		case EAccelByteUserItemsSortBy::CREATED_AT_DESC:
+			return TEXT("createdAt:desc");
+		case EAccelByteUserItemsSortBy::UPDATED_AT:
+			return TEXT("updatedAt");
+		case EAccelByteUserItemsSortBy::UPDATED_AT_ASC:
+			return TEXT("updatedAt:asc");
+		case EAccelByteUserItemsSortBy::UPDATED_AT_DESC:
+			return TEXT("updatedAt:desc");
+		default:
+			return TEXT("");
+		}
+	}
+};
 
 #pragma region V1 Struct Models
 USTRUCT(BlueprintType)
@@ -444,6 +481,90 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsConsumeUserItemsRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Consume User Item")
 	FString SourceItemId{}; 
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCreateInventoryRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Create Inventory")
+	FString InventoryConfigurationCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Create Inventory")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateInventoryRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Update Inventory")
+	int32 IncMaxSlots{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDeleteInventoryRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Delete Inventory")
+	FString Message{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateInventoryItemRequest : public FAccelByteModelsUpdateUserInventoryItemRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Delete Inventory")
+	FJsonObjectWrapper ServerCustomAttributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Delete Inventory")
+	FString Type{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSaveInventoryItemByInventoryIdRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	FJsonObjectWrapper customAttributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	int32 Qty{ 0 }; // Quantity
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	FJsonObjectWrapper serverCustomAttributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	FString SlotId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	int32 SlotUsed{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	FString Source{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	FString SourceItemId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	TArray<FString> Tags{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Item For Specific Inventory")
+	FString Type{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSaveInventoryItemRequest : public FAccelByteModelsSaveInventoryItemByInventoryIdRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Inventory Item")
+	FString InventoryConfigurationCode{};
 };
 
 #pragma endregion

@@ -71,6 +71,8 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	AchievementServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("AchievementServerUrl"), BaseUrl, TEXT("achievement"));
 
+	InventoryServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("InventoryServerUrl"), BaseUrl, TEXT("inventory"));
+
 	UGCServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("UGCServerUrl"), BaseUrl, TEXT("ugc"));
 
 	MatchmakingServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("MatchmakingServerUrl"), BaseUrl, TEXT("matchmaking"));
@@ -93,6 +95,8 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 	DSHubServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("DSHubServerUrl"), DSHubBaseUrl, TEXT("dshub/"));
 
 	MatchmakingV2ServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("MatchmakingV2ServerUrl"), BaseUrl, TEXT("match2"));
+
+	ChallengeServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("ChallengeServerUrl"), BaseUrl, TEXT("challenge"));
 
 	FString QosPingTimeoutString;
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString, DefaultServerSection);
@@ -291,6 +295,11 @@ FString UAccelByteBlueprintsServerSettings::GetAchievementServerUrl()
 	return FRegistry::ServerSettings.AchievementServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetInventoryServerUrl()
+{
+	return FRegistry::ServerSettings.InventoryServerUrl;
+}
+
 FString UAccelByteBlueprintsServerSettings::GetUGCServerUrl()
 {
 	return FRegistry::ServerSettings.UGCServerUrl;
@@ -419,6 +428,11 @@ void UAccelByteBlueprintsServerSettings::SetGameTelemetryServerUrl(const FString
 void UAccelByteBlueprintsServerSettings::SetAchievementServerUrl(const FString& AchievementServerUrl)
 {
 	FRegistry::ServerSettings.AchievementServerUrl = AchievementServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetInventoryServerUrl(const FString& InventoryServerUrl)
+{
+	FRegistry::ServerSettings.InventoryServerUrl = InventoryServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetUGCServerUrl(const FString& UGCServerUrl)

@@ -10,6 +10,7 @@
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteBaseCredentials.h"
 #include "Core/AccelByteBaseSettings.h"
+#include "Logging/AccelByteServiceLogger.h"
 
 namespace AccelByte
 {
@@ -799,6 +800,9 @@ namespace AccelByte
 			{
 				Request->SetHeader(Kvp.Key, Kvp.Value); // Override existing headers
 			}
+
+			// AccelByteTracing track http request 
+			ACCELBYTE_SERVICE_LOGGING_HTTP_REQUEST(Request);
 
 			return HttpRef.ProcessRequest(Request
 				, CreateHttpResultHandler(

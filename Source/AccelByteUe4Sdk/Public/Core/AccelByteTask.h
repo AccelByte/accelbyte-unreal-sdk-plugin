@@ -238,17 +238,13 @@ public:
 	}
 
 protected:
-	double TaskTime;
-	EAccelByteTaskState TaskState;
-	bool bIsFinished;
-	FAccelByteCancellationTokenRef Token;
+	double TaskTime = 0.0;
+	EAccelByteTaskState TaskState = EAccelByteTaskState::Pending;
+	bool bIsFinished = false;
+	FAccelByteCancellationTokenRef Token = MakeShared<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe>();
 };
 
 FORCEINLINE FAccelByteTask::FAccelByteTask()
-	: TaskTime{ 0.0f }
-	, TaskState{ EAccelByteTaskState::Pending }
-	, bIsFinished{ false }
-	, Token{ MakeShared<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe>() }
 {
 
 }

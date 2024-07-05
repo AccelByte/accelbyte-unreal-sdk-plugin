@@ -96,8 +96,7 @@ public:
 		int32 Limit = 20,
 		int32 Offset = 0,
 		FString const& SourceItemId = TEXT(""),
-		FString const& Tags = TEXT(""),
-		int32 Quantity = 1
+		FString const& Tags = TEXT("")
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Inventory | Api")

@@ -35,6 +35,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchTicketOptionalParams
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
 	FJsonObjectWrapper Attributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
+	FJsonObjectWrapper Storage{};
 	
 	// Cannot expose this field as UPROPERTY as TPair is not a blueprint type
 	TArray<TPair<FString, float>> Latencies{};
@@ -122,6 +125,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCreateTicketRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketRequest")
 	FString SessionId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketRequest")
+	FJsonObjectWrapper Storage{};
 };
 
 USTRUCT(BlueprintType)
@@ -193,6 +199,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2TicketInformation
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | TicketInformation")
 	bool CrossPlayEnabled{ false };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | TicketInformation")
+	FJsonObjectWrapper Storage{};
 };
 
 USTRUCT(BlueprintType)
@@ -247,6 +256,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCanceledNotif
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCanceledNotif")
 	TArray<FString> UserIDs{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCanceledNotif")
+	FString PartyID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCanceledNotif")
+	FString Reason{};
 };
 
 USTRUCT(BlueprintType)

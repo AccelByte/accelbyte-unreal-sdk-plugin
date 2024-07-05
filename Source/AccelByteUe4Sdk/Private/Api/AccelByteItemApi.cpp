@@ -355,19 +355,35 @@ FAccelByteTaskWPtr Item::GetItemMappings(EAccelBytePlatformMapping Platform
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (Platform == EAccelBytePlatformMapping::NONE)
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform type can't be NONE"));
-		return nullptr;
-	}
-
 	const FString Url = FString::Printf(
 		TEXT("%s/public/namespaces/%s/iap/item/mapping"), *SettingsRef.PlatformServerUrl,
 		*CredentialsRef->GetNamespace());
 
-	const TMultiMap<FString, FString> QueryParams{{TEXT("platform"), ConvertPlatformMappingToString(Platform)}};
+	TMultiMap<FString, FString> QueryParams;
+	if(Platform != EAccelBytePlatformMapping::NONE)
+	{
+		QueryParams.Add(TEXT("platform"),ConvertPlatformMappingToString(Platform));
+	}
 
-	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+	THandler<FAccelByteModelsItemMappingsResponseInternal> OnSuccessInternal = THandler<FAccelByteModelsItemMappingsResponseInternal>::CreateLambda(
+		[&](const FAccelByteModelsItemMappingsResponseInternal& Result)
+		{
+			FAccelByteModelsItemMappingsResponse CorrectedResult;
+			for (const auto& ResultItem : Result.Data)
+			{
+				FAccelByteModelsItemMapping Item;
+				Item.ItemIdentity = ResultItem.ItemIdentity;
+				Item.ItemIdentityType = ResultItem.ItemIdentityType;
+				Item.PlatformProductId = ResultItem.PlatformProductId;
+				Item.Platform = static_cast<EAccelBytePlatformMapping>(ResultItem.Platform);
+
+				CorrectedResult.Data.Add(Item);
+			}
+			
+			OnSuccess.ExecuteIfBound(CorrectedResult);
+		});
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessInternal, OnError);
 }
 
 FString Item::ConvertPlatformMappingToString(EAccelBytePlatformMapping Platform)
@@ -390,6 +406,8 @@ FString Item::ConvertPlatformMappingToString(EAccelBytePlatformMapping Platform)
 		return TEXT("OCULUS");
 	case EAccelBytePlatformMapping::TWITCH:
 		return TEXT("TWITCH");
+	case EAccelBytePlatformMapping::STADIA:
+		return TEXT("STADIA");
 	default:
 		return TEXT("");
 	}

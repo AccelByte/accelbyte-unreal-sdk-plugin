@@ -166,11 +166,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatTopicQueryData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | TopicQueryData")
 	TArray<FString> Members {};
 
-	//! Number of unread chats by logged in user. Excluding chat sent by the querier
+	//! [DEPRECATED] Number of unread chats by logged in user. Excluding chat sent by the querier
 	//! e.g. In PERSONAL topic, between A and B. if A sent 2 chats, then A queries, it will return 0 unreadChats
 	//! if B queries, then it will return 2 unread chats
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | TopicQueryData")
-	int UnreadChats{0};
+	int UnreadChats{0}; // This variable has been deprecated because the backend also flags it as such.
 };
 
 //!@brief Response structure of action query topic 

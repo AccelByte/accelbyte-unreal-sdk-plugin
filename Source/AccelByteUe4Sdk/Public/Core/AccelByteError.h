@@ -16,6 +16,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteHttpCache.h"
 #include "Core/AccelByteTypeConverter.h"
+#include "Logging/AccelByteServiceLogger.h"
 #include "AccelByteError.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE(FDHandler);
@@ -211,6 +212,7 @@ namespace AccelByte
 		ItemNotFoundException = 30341,
 		ItemAppIdNotFoundException = 30342,
 		ItemSkuNotFoundException = 30343,
+		ItemConfigNotFoundInNamespace= 39341,
 		//
 		//Entitlement Error Code List
 		//
@@ -539,6 +541,7 @@ namespace AccelByte
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
+				ACCELBYTE_SERVICE_LOGGING_HTTP_RESPONSE(Request, Response, bFinished);
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
 					if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
@@ -579,6 +582,7 @@ namespace AccelByte
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
+				ACCELBYTE_SERVICE_LOGGING_HTTP_RESPONSE(Request, Response, bFinished);
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
 					if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
@@ -620,6 +624,7 @@ namespace AccelByte
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
+				ACCELBYTE_SERVICE_LOGGING_HTTP_RESPONSE(Request, Response, bFinished);
 				FErrorOAuthInfo ErrorOauthInfo;
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
@@ -662,6 +667,8 @@ namespace AccelByte
 			[OnSuccess, OnError, Scheduler]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 		{
+			ACCELBYTE_SERVICE_LOGGING_HTTP_RESPONSE(Request, Response, bFinished);
+
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
 				if (!HandleHttpResultOk(Response, TArray<uint8>(), OnSuccess))
@@ -699,6 +706,8 @@ namespace AccelByte
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 			{
+				ACCELBYTE_SERVICE_LOGGING_HTTP_RESPONSE(Request, Response, bFinished);
+
 				FErrorCreateMatchmakingTicketV2 ErrorCreateMatchmakingV2Info;
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{

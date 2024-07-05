@@ -114,7 +114,7 @@ enum class EAccelByteModelsChallengeGoalRequirementPredicateParameterType : uint
 	STATISTIC = 0,
 	ENTITLEMENT,
 	ACHIEVEMENT,
-	USER_ACCOUNT,
+	USERACCOUNT,
 };
 
 USTRUCT(BlueprintType)
@@ -246,6 +246,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeReward
 	FString Id{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
+	FString ChallengeCode{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
 	FString GoalCode{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
@@ -295,6 +298,57 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeRewardClaimRequest
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeRewardClaimUserRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
+	TArray<FString> RewardIDs{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
+	FString UserID{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeError
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Error")
+	FJsonObjectWrapper Attributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Error")
+	int32 ErrorCode{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Error")
+	FString ErrorMessage{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Error")
+	FString Message{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Error")
+	FString Name{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeRewardClaimUserResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
+	FAccelByteModelsChallengeError ErrorDetail{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
+	bool IsSuccess{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
+	FAccelByteModelsChallengeReward Rewards{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
+	FString UserID{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeGoalProgressRequirement
 {
 	GENERATED_BODY()
@@ -330,6 +384,7 @@ enum class EAccelByteModelsChallengeGoalProgressStatus : uint8
 	ACTIVE = 0,
 	COMPLETED,
 	RETIRED,
+	NOT_STARTED
 };
 
 USTRUCT(BlueprintType)

@@ -302,6 +302,27 @@ FAccelByteTaskWPtr Session::PromoteGameSessionLeader(FString const& GameSessionI
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Session::CancelGameSessionInvitation(FString const& GameSessionID, FString const& UserID,
+	FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/users/%s/cancel")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *GameSessionID
+		, *UserID);
+	
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Session::CreateParty(FAccelByteModelsV2PartyCreateRequest const& CreateRequest
 	, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -374,6 +395,27 @@ FAccelByteTaskWPtr Session::PromotePartyLeader(FString const& PartyID
 		, *PartyID);
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Session::CancelPartyInvitation(FString const& PartyID, FString const& UserID
+	, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/%s/cancel")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *PartyID
+		, *UserID);
+	
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr Session::SendPartyInvite(FString const& PartyID
