@@ -36,7 +36,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAcceptAgreementRequest
 
 	/** @brief Flag that the Agreement is accepted */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | AcceptAgreementRequest")
-	bool IsAccepted{};
+	bool IsAccepted{false};
+};
+
+/** @brief Data Model for Changing request of specific Agreement */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChangeAgreementRequest : public FAccelByteModelsAcceptAgreementRequest
+{
+	GENERATED_BODY()
+
+	/** @brief Flag that the Agreement is needed for marketing */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | ChangeAgreementRequest")
+	bool IsNeedToSendEventMarketing{false};
 };
 
 /** @brief Data Model for Accept Agreement Response */

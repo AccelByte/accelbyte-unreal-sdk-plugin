@@ -108,6 +108,12 @@ public:
 		FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
+	void ChangePolicyPreferences(
+		TArray<FAccelByteModelsChangeAgreementRequest> const& ChangeAgreementRequests,
+		FDHandler const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void QueryLegalEligibilities(
 		FString const& Namespace,
 		FDArrayModelsRetrieveUserEligibilitiesResponse const& OnSuccess,

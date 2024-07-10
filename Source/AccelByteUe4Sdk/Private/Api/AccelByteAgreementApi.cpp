@@ -141,6 +141,42 @@ FAccelByteTaskWPtr Agreement::AcceptPolicyVersion(FString const& LocalizedPolicy
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Agreement::ChangePolicyPreferences(TArray<FAccelByteModelsChangeAgreementRequest> const& ChangeAgreementRequests
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChangeAgreementRequests.Num() == 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Cannot change preference for current consent. Request is empty."));
+		return nullptr;
+	}
+
+	// Validate each request to make sure they are not failing later.
+	for (const FAccelByteModelsAcceptAgreementRequest& ChangeAgreement : ChangeAgreementRequests)
+	{
+		if (ChangeAgreement.PolicyVersionId.IsEmpty())
+		{
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Cannot change preference for current consent. Policy version id is empty."));
+			return nullptr;
+		}
+		if (ChangeAgreement.LocalizedPolicyVersionId.IsEmpty())
+		{
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Cannot change preference for current consent. Localized policy id is empty."));
+			return nullptr;
+		}
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/public/agreements/localized-policy-versions/preferences")
+		, *SettingsRef.AgreementServerUrl);
+
+	FString Content;
+	FAccelByteUtilities::TArrayUStructToJsonString(ChangeAgreementRequests, Content);
+
+	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Content, OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Agreement::QueryLegalEligibilities(FString const& Namespace
 	, THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>> const& OnSuccess
 	, FErrorHandler const& OnError)

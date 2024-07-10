@@ -60,7 +60,7 @@ public:
 	FAccelByteTaskWPtr GetScheduledChallengeGoals(FString const& ChallengeCode
 		, THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, TArray<FString> Tags = {}
+		, const TArray<FString>& Tags = {}
 		, uint64 Offset = 0
 		, uint64 Limit = 20);
 
@@ -73,6 +73,7 @@ public:
 	 * @param OnError Delegate executed when request fails
 	 * @param Offset Number of goals to skip when returning goal progress list, defaults to 0
 	 * @param Limit Number of goals to include when returning goal progress list, defaults to 20
+	 * @param Tags Array of tag strings used to filter resulting challenge progress list
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -81,7 +82,8 @@ public:
 		, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, uint64 Offset = 0
-		, uint64 Limit = 20);
+		, uint64 Limit = 20
+		, TArray<FString> const& Tags = {});
 
 	/**
 	 * @brief Send a request to get status of all challenge rewards
@@ -131,6 +133,7 @@ private:
 	Challenge(Challenge const&) = delete;
 	Challenge(Challenge&&) = delete;
 
+	static FString CreateTagsString(const TArray<FString>& Tags);
 };
 	
 } // Namespace Api

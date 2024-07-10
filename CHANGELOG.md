@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [26.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.0.1%0D26.0.0) (2024-07-10)
+
+
+### Features
+
+* **Agreement:** add change policy preferences ([fb82474](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fb82474e01884078698a43f4759f3e8be8ca3bdd))
+
+
+### Bug Fixes
+
+* **challenge:** update data model and add request validation ([780a246](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/780a2468fb7752453562587dbd129a7d6a06a7e2))
+
 ## [26.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.0.0%0D25.5.2) (2024-07-05)
 
 

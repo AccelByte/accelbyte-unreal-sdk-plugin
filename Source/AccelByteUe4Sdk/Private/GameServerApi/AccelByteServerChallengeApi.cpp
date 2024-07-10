@@ -59,10 +59,14 @@ FAccelByteTaskWPtr ServerChallenge::GetUserRewards(const FString& UserId
 
 	TMap<FString, FString> QueryParams
 	{
-		{ TEXT("sortBy"), FAccelByteUtilities::ConvertChallengeSortByToString(SortBy) },
 		{ TEXT("offset"), FString::FromInt(Offset) },
 		{ TEXT("limit"), FString::FromInt(Limit) },
 	};
+
+	if (SortBy != EAccelByteModelsChallengeSortBy::NONE)
+	{
+		QueryParams.Add(TEXT("sortBy"), FAccelByteUtilities::ConvertChallengeSortByToString(SortBy));
+	}
 
 	if (Status != EAccelByteModelsChallengeRewardStatus::NONE)
 	{

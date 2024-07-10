@@ -29,12 +29,20 @@ FAccelByteTaskWPtr Challenge::GetChallenges(THandler<FAccelByteModelsGetChalleng
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const TMap<FString, FString> QueryParams = {
-		{ TEXT("sortBy"), FAccelByteUtilities::ConvertChallengeSortByToString(SortBy) },
-		{ TEXT("status"), (Status != EAccelByteModelsChallengeStatus::NONE) ? FAccelByteUtilities::GetUEnumValueAsString(Status) : FString() },
+	TMap<FString, FString> QueryParams = {
 		{ TEXT("offset"), FString::FromInt(Offset) },
 		{ TEXT("limit"), FString::FromInt(Limit) },
 	};
+
+	if (SortBy != EAccelByteModelsChallengeSortBy::NONE)
+	{
+		QueryParams.Emplace(TEXT("sortBy"), FAccelByteUtilities::ConvertChallengeSortByToString(SortBy));
+	}
+
+	if (Status != EAccelByteModelsChallengeStatus::NONE)
+	{
+		QueryParams.Emplace(TEXT("status"), FAccelByteUtilities::GetUEnumValueAsString(Status));
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/challenges")
 		, *SettingsRef.ChallengeServerUrl
@@ -46,27 +54,28 @@ FAccelByteTaskWPtr Challenge::GetChallenges(THandler<FAccelByteModelsGetChalleng
 FAccelByteTaskWPtr Challenge::GetScheduledChallengeGoals(FString const& ChallengeCode
 	, THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, TArray<FString> Tags
+	, const TArray<FString>& Tags
 	, uint64 Offset
 	, uint64 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString TagsString{};
-	for (int64 Index = 0; Index < Tags.Num(); Index++)
+	if (ChallengeCode.IsEmpty())
 	{
-		TagsString.Append(Tags[Index]);
-		if (Index != Tags.Num() - 1)
-		{
-			TagsString.AppendChar(',');
-		}
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("ChallengeCode cannot be empty."));
+		return nullptr;
 	}
 
-	const TMap<FString, FString> QueryParams{
-		{ TEXT("tags"), FGenericPlatformHttp::UrlEncode(TagsString) },
+	TMap<FString, FString> QueryParams{
 		{ TEXT("offset"), FString::FromInt(Offset) },
 		{ TEXT("limit"), FString::FromInt(Limit) },
 	};
+
+	if (Tags.Num() > 0)
+	{
+		FString TagsString = CreateTagsString(Tags);
+		QueryParams.Emplace(TEXT("tags"), TagsString);
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/challenges/%s/goals")
 		, *SettingsRef.ChallengeServerUrl
@@ -81,15 +90,32 @@ FAccelByteTaskWPtr Challenge::GetChallengeProgress(FString const& ChallengeCode
 	, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, uint64 Offset
-	, uint64 Limit)
+	, uint64 Limit
+	, TArray<FString> const& Tags)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const TMap<FString, FString> QueryParams{
-		{ TEXT("goalCode"), GoalCode },
+	if (ChallengeCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("ChallengeCode cannot be empty."));
+		return nullptr;
+	}
+
+	TMap<FString, FString> QueryParams{
 		{ TEXT("offset"), FString::FromInt(Offset) },
 		{ TEXT("limit"), FString::FromInt(Limit) },
 	};
+
+	if (!GoalCode.IsEmpty())
+	{
+		QueryParams.Emplace(TEXT("goalCode"), GoalCode);
+	}
+
+	if (Tags.Num() > 0)
+	{
+		FString TagsString = CreateTagsString(Tags);
+		QueryParams.Emplace(TEXT("tags"), TagsString);
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/progress/%s")
 		, *SettingsRef.ChallengeServerUrl
@@ -109,14 +135,18 @@ FAccelByteTaskWPtr Challenge::GetRewards(THandler<FAccelByteModelsChallengeGetRe
 	FReport::Log(FString(__FUNCTION__));
 
 	TMap<FString, FString> QueryParams{
-		{ TEXT("sortBy"), FAccelByteUtilities::ConvertChallengeSortByToString(SortBy) },
 		{ TEXT("offset"), FString::FromInt(Offset) },
 		{ TEXT("limit"), FString::FromInt(Limit) },
 	};
 
+	if (SortBy != EAccelByteModelsChallengeSortBy::NONE)
+	{
+		QueryParams.Emplace(TEXT("sortBy"), FAccelByteUtilities::ConvertChallengeSortByToString(SortBy));
+	}
+
 	if (Status != EAccelByteModelsChallengeRewardStatus::NONE)
 	{
-		QueryParams.Add(TEXT("status"), FAccelByteUtilities::GetUEnumValueAsString(Status));
+		QueryParams.Emplace(TEXT("status"), FAccelByteUtilities::GetUEnumValueAsString(Status));
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/rewards")
@@ -131,6 +161,12 @@ FAccelByteTaskWPtr Challenge::ClaimReward(FAccelByteModelsChallengeRewardClaimRe
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	
+	if(Request.RewardIDs.Num() < 1)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("RewardIDs cannot be empty."));
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/rewards/claim")
 		, *SettingsRef.ChallengeServerUrl
@@ -151,6 +187,21 @@ FAccelByteTaskWPtr Challenge::EvaluateChallengeProgress(FVoidHandler const& OnSu
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FString Challenge::CreateTagsString(const TArray<FString>& Tags)
+{
+	FString TagsString;
+
+	for (int64 Index = 0; Index < Tags.Num(); Index++)
+	{
+		TagsString.Append(Tags[Index]);
+		if (Index != Tags.Num() - 1)
+		{
+			TagsString.AppendChar(',');
+		}
+	}
+
+	return TagsString;
+}
 
 } // Namespace Api
 } // Namespace AccelByte

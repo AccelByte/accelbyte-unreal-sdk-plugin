@@ -150,6 +150,19 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Accept or changes preference to specific legal policy versions.
+	 *
+	 * @param ChangeAgreementRequests Request for localized policy version id to change.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr ChangePolicyPreferences(TArray<FAccelByteModelsChangeAgreementRequest> const& ChangeAgreementRequests
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Query all player's legal eligibilities on a namespace, use to check is player already commited to legal or not.
 	 *
 	 * @param Namespace Filter the eligibilities by namespace.

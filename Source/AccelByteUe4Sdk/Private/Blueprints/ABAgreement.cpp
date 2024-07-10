@@ -190,6 +190,28 @@ void UABAgreement::AcceptPolicyVersion(
 	);
 }
 
+void UABAgreement::ChangePolicyPreferences(
+	TArray<FAccelByteModelsChangeAgreementRequest> const& ChangeAgreementRequests,
+	FDHandler const& OnSuccess,
+	FDErrorHandler const& OnError)
+{
+	ApiClientPtr->Agreement.ChangePolicyPreferences(
+		ChangeAgreementRequests,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
+}
+
 void UABAgreement::QueryLegalEligibilities(
 	FString const& Namespace,
 	FDArrayModelsRetrieveUserEligibilitiesResponse const& OnSuccess,
