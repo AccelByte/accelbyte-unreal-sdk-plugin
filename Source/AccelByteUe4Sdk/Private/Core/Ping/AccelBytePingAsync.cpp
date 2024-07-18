@@ -97,16 +97,15 @@ bool FAccelByteUdpPingThread::CreateAddress()
 	}
 
 	IpAddress = SocketSubsystem->CreateInternetAddr();
+	if (!IpAddress.IsValid() || Config.Address.IsEmpty())
+	{
+		return false;
+	}
 
 	bool bIpStringValid{};
 	IpAddress->SetIp(*Config.Address, bIpStringValid);
 
 	if (!bIpStringValid)
-	{
-		return false;
-	}
-
-	if (!IpAddress->IsValid())
 	{
 		return false;
 	}

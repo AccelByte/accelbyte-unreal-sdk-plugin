@@ -15,6 +15,7 @@ namespace Api
 {
 FAccelByteModelsQosServerList Qos::QosServers = {};
 TArray<TPair<FString, float>> Qos::Latencies = {};
+TMap<FString, TSharedPtr<FInternetAddr>> Qos::ResolvedAddresses = {};
 FDelegateHandleAlias Qos::PollLatenciesHandle;
 FDelegateHandleAlias Qos::PollServerLatenciesHandle;
 
@@ -122,14 +123,19 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 	TSharedRef<TArray<TPair<FString, float>>> SuccessLatencies = MakeShared<TArray<TPair<FString, float>>>();
 	TSharedRef<TArray<FString>> FailedLatencies = MakeShared<TArray<FString>>();
 
-	int32 Count = QosServerList.Servers.Num();
+	TArray<FAccelByteModelsQosServer> Servers = QosServerList.Servers;
 	
+	Servers.RemoveAllSwap([](const FAccelByteModelsQosServer& Server) 
+		{
+			return !ResolvedAddresses.Contains(Server.Ip) || Server.ResolvedIp.IsEmpty();
+		});
+	const int32 Count = Servers.Num();
+
 	if (Count > 0)
 	{
 		// For each server, ping them and record add to Latency TArray.
-		for (int count = 0; count < QosServerList.Servers.Num(); count++)
+		for (auto& Server : Servers)
 		{
-			auto Server = QosServerList.Servers[count];
 			FString Region = Server.Region;
 
 			// Ping -> Get the latencies on pong.
@@ -306,11 +312,9 @@ bool Qos::CheckQosUpdate(float DeltaTime)
 
 bool Qos::ResolveQosServerAddress(FAccelByteModelsQosServer& OutServer)
 {
-	if (!SettingsRef.bServerUseAMS)
+	if (OutServer.Ip.IsEmpty())
 	{
-		// Armada does not use domain names in place of raw IPs, so just route the resolved IP to the reported Qos IP
-		OutServer.ResolvedIp = OutServer.Ip;
-		return true;
+		return false;
 	}
 
 	ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
@@ -318,19 +322,47 @@ bool Qos::ResolveQosServerAddress(FAccelByteModelsQosServer& OutServer)
 	{
 		return false;
 	}
-
-	FAddressInfoResult AddressInfo = SocketSubsystem->GetAddressInfo(*OutServer.Ip // 'Ip' field is actually the domain name in AMS
-		, nullptr
-		, EAddressInfoFlags::Default
-		, NAME_None);
-
-	if (AddressInfo.Results.Num() < 1)
+	
+	if (!ResolvedAddresses.Contains(OutServer.Ip))
 	{
-		return false;
-	}
+		TSharedPtr<FInternetAddr> ServerAddress = SocketSubsystem->CreateInternetAddr();
+		if (!ServerAddress.IsValid())
+		{
+			return false;
+		}
 
-	// Retrieve the IP string from the address result and return success
-	OutServer.ResolvedIp = AddressInfo.Results[0].Address->ToString(false);
+		bool bIsAddressValid = false;
+		ServerAddress->SetIp(*OutServer.Ip, bIsAddressValid);
+		if (!bIsAddressValid)
+		{
+			FAddressInfoResult AddressInfo = SocketSubsystem->GetAddressInfo(*OutServer.Ip // 'Ip' field is actually the domain name in AMS
+				, nullptr
+				, EAddressInfoFlags::Default
+				, NAME_None);
+
+			if (AddressInfo.Results.Num() < 1)
+			{
+				return false;
+			}
+
+			// Retrieve the IP string from the address result and return success
+			FString ResolvedIp = AddressInfo.Results[0].Address->ToString(false);
+			if (ResolvedIp.IsEmpty())
+			{
+				return false;
+			}
+
+			ServerAddress->SetIp(*ResolvedIp, bIsAddressValid);
+			if (!bIsAddressValid)
+			{
+				return false;
+			}
+		}
+		ServerAddress->SetPort(OutServer.Port);
+		ResolvedAddresses.Emplace(OutServer.Ip, ServerAddress);
+	}
+	OutServer.ResolvedIp = ResolvedAddresses[OutServer.Ip]->ToString(false);
+	
 	return true;
 }
 } // Namespace Api

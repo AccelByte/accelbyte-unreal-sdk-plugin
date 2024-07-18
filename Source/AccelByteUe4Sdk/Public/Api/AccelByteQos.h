@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IPAddress.h"
 #include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteError.h"
@@ -78,6 +79,7 @@ private:
 
 	static FAccelByteModelsQosServerList QosServers;
 	static TArray<TPair<FString, float>> Latencies;
+	static TMap<FString, TSharedPtr<FInternetAddr>> ResolvedAddresses;
 	
 	/**
 	 * @brief Get Latencies from cached regions, every x seconds.

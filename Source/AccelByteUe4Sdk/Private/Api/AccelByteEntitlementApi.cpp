@@ -648,7 +648,10 @@ FAccelByteTaskWPtr Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModels
 		, *CredentialsRef->GetUserId()
 		, *PlatformText);
 	FString Content = TEXT("");
-	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
+	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(SyncRequest);
+	FAccelByteUtilities::RemoveEmptyFieldsFromJson(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 	
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }

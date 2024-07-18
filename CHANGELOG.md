@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [26.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.0.2%0D26.0.1) (2024-07-18)
+
+
+### Bug Fixes
+
+* access violation issue in refresh token delegate ([3eddc6b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3eddc6bc154834a92226dbaab9ec419359888673))
+* **entitlement:** fix remove empty field from request JSON on SyncMobilePlatformPurchaseApple ([6d2786a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6d2786a64dc520cef9ec7cffc4fefd8c6469cf43))
+* **qos:** add empty address guard, check whether ip already valid before resolve it ([68b352c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/68b352cf9e231b3dd8e16c6e2999198555f2304f))
+
 ### [26.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.0.1%0D26.0.0) (2024-07-10)
 
 

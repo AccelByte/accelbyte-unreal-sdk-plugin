@@ -20,6 +20,7 @@ namespace AccelByte
 
 	BaseCredentials::~BaseCredentials()
 	{
+		TokenRefreshedEvent.Clear();
 	}
 
 	void BaseCredentials::ForgetAll()

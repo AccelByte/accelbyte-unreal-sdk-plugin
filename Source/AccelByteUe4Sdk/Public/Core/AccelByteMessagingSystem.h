@@ -18,7 +18,8 @@ namespace AccelByte
 DECLARE_DELEGATE_OneParam(FOnMessagingSystemReceivedMessage, const FString& /* Payload */)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMessagingSystemReceivedMessageMulti, const FString& /* Payload */)
 
-class ACCELBYTEUE4SDK_API FAccelByteMessagingSystem
+class ACCELBYTEUE4SDK_API FAccelByteMessagingSystem 
+	: public TSharedFromThis<FAccelByteMessagingSystem>
 {
 public:
 	FAccelByteMessagingSystem();

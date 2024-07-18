@@ -22,7 +22,8 @@ namespace AccelByte
 
 Credentials::Credentials(FAccelByteMessagingSystem& MessagingRef)
 	: AuthToken()
-	, MessagingSystem(MessagingRef)
+	, MessagingSystem(MessagingRef.AsWeak())
+	, RefreshTokenTask(nullptr)
 {
 }
 
@@ -30,6 +31,12 @@ Credentials::~Credentials()
 {
 	LoginSuccessDelegate.Clear();
 	LogoutSuccessDelegate.Clear();
+
+	auto RefreshTokenTaskPtr = RefreshTokenTask.Pin();
+	if (RefreshTokenTaskPtr.IsValid())
+	{
+		RefreshTokenTaskPtr->Cancel();
+	}
 }
 
 const FString Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
@@ -122,7 +129,12 @@ void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTi
 	BackoffCount = 0;
 	SessionState = ESessionState::Valid;
 
-	MessagingSystem.SendMessage<FOauth2Token>(EAccelByteMessagingTopic::AuthTokenSet, NewAuthToken);
+	auto MessagingSystemPtr = MessagingSystem.Pin();
+
+	if (MessagingSystemPtr.IsValid())
+	{
+		MessagingSystemPtr->SendMessage<FOauth2Token>(EAccelByteMessagingTopic::AuthTokenSet, NewAuthToken);
+	}
 }
 
 void Credentials::SetUserEmailAddress(const FString& EmailAddress)
@@ -264,7 +276,7 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	case ESessionState::Valid:
 		if (RefreshTime <= CurrentTime)
 		{
-			Oauth2::GetTokenWithRefreshToken(ClientId
+			RefreshTokenTask = Oauth2::GetTokenWithRefreshToken(ClientId
 				, ClientSecret
 				, AuthToken.Refresh_token
 				, THandler<FOauth2Token>::CreateLambda([this](const FOauth2Token& Result)
@@ -275,7 +287,6 @@ void Credentials::PollRefreshToken(double CurrentTime)
 						RefreshTokenAdditionalActions.Broadcast(true);
 						RefreshTokenAdditionalActions.Clear();
 					}
-					
 					TokenRefreshedEvent.Broadcast(true);
 				})
 				, FErrorHandler::CreateLambda([this](int32 ErrorCode, const FString& ErrorMessage)
