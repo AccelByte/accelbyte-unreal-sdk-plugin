@@ -232,3 +232,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLoginQueueTicketInfo
 
 	~FAccelByteModelsLoginQueueTicketInfo() {};
 };
+
+// This struct is not a blueprint type and it won't be serialized or deserialized.
+// This might reduce the usage of optional parameter if backend service introduces another optional form parameters to the PlatformToken generation endpoint.
+struct ACCELBYTEUE4SDK_API FAccelByteLoginWithOtherPlatformOptionalParameters
+{
+	FString ServiceLabelForPSN = "";
+};

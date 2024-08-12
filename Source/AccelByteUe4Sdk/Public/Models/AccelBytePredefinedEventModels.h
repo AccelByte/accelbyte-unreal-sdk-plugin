@@ -146,6 +146,8 @@ enum class EAccelBytePredefinedEventName : uint8
 	ChatV2_GroupChat_ModeratorUnbannedUser,
 	ChatV2_GroupChat_ModeratorDeletedGroupChat,
 	Chat_GetConfig,
+	Chat_GetUserConfig,
+	Chat_SetUserConfig,
 	Group_Created,
 	Group_Updated,
 	Group_CustomAttributesUpdated,
@@ -2123,6 +2125,41 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatGetConfigPayload : public FAccelB
 		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Chat_GetConfig);
 	}
 };
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatGetUserConfigPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString UserId{};
+	
+	UPROPERTY()
+	bool ProfanityDisabled{false};
+	
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Chat_GetUserConfig);
+	}
+};
+
+USTRUCT()
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatSetUserConfigPayload : public FAccelByteModelsPredefinedEvent
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString UserId{};
+
+	UPROPERTY()
+	bool ProfanityDisabled{false};
+	
+	virtual const FString GetPreDefinedEventName() override
+	{
+		return FAccelByteUtilities::GetUEnumValueAsString(EAccelBytePredefinedEventName::Chat_SetUserConfig);
+	}
+};
+
 #pragma endregion Social
 
 #pragma region Engagement

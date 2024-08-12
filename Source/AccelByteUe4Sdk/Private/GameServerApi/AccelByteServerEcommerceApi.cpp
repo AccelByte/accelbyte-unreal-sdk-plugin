@@ -219,7 +219,19 @@ FAccelByteTaskWPtr ServerEcommerce::CreditUserWalletV2(FString const& UserId
 		, *UserId
 		, *CurrencyCode);
 
-	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, CreditUserWalletRequest, OnSuccess, OnError);
+	const TDelegate<void(const FAccelByteModelsWalletCreditResponse&)> OnSuccessHttpClient =
+		THandler<FAccelByteModelsWalletCreditResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsWalletCreditResponse const& Response)
+			{
+				FAccelByteModelsWalletCreditResponse Result = Response;
+				for (int i = 0; i < Result.timeLimitedBalances.Num(); i++)
+				{
+					Result.timeLimitedBalances[i].DuplicateExpiredAtValue();
+				}
+				OnSuccess.ExecuteIfBound(Result);
+			});
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, CreditUserWalletRequest, OnSuccessHttpClient, OnError);
 }
 
 FAccelByteTaskWPtr ServerEcommerce::RevokeUserEntitlements(FString const& UserId
@@ -483,7 +495,19 @@ FAccelByteTaskWPtr ServerEcommerce::PaymentWithUserWallet(FString const& UserId
 		, *UserId
 		, *CurrencyCode);
 
-	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, PaymentRequest, OnSuccess, OnError);
+	const TDelegate<void(const FAccelByteModelsPlatformWallet&)> OnSuccessHttpClient =
+		THandler<FAccelByteModelsPlatformWallet>::CreateLambda(
+			[OnSuccess](FAccelByteModelsPlatformWallet const& Response)
+			{
+				FAccelByteModelsPlatformWallet Result = Response;
+				for (int i = 0; i < Result.WalletInfos.Num(); i++)
+				{
+					Result.WalletInfos[i].DuplicateTimeLimitedBalancesExpirationInfo();
+				}
+				OnSuccess.ExecuteIfBound(Result);
+			});
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, PaymentRequest, OnSuccessHttpClient, OnError);
 }
 
 FAccelByteTaskWPtr ServerEcommerce::FulfillUserItem(FString const& UserId

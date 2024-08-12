@@ -318,7 +318,8 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformT
 	, FString const& PlatformToken
 	, FVoidHandler const& OnSuccess
 	, FOAuthErrorHandler const& OnError
-	, bool bCreateHeadless)
+	, bool bCreateHeadless
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -326,14 +327,16 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformT
 		, PlatformToken
 		, OnSuccess
 		, OnError
-		, bCreateHeadless);
+		, bCreateHeadless
+		, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::LoginWithOtherPlatformId(FString const& PlatformId
 	, FString const& PlatformToken
 	, FVoidHandler const& OnSuccess
 	, FOAuthErrorHandler const& OnError
-	, bool bCreateHeadless)
+	, bool bCreateHeadless
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -369,23 +372,27 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformId(FString const& PlatformId
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, bCreateHeadless
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {} //AdditionalHeaders
+		, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType
 	, FString const& PlatformToken
 	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
-	, bool bCreateHeadless)
+	, bool bCreateHeadless
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
 {
-	return LoginWithOtherPlatformIdV4(FAccelByteUtilities::GetPlatformString(PlatformType), PlatformToken, OnSuccess, OnError, bCreateHeadless);
+	return LoginWithOtherPlatformIdV4(FAccelByteUtilities::GetPlatformString(PlatformType), PlatformToken, OnSuccess, OnError, bCreateHeadless, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::LoginWithOtherPlatformIdV4(FString const& PlatformId
 	, FString const& PlatformToken
 	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
-	, bool bCreateHeadless)
+	, bool bCreateHeadless
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -431,7 +438,9 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformIdV4(FString const& PlatformId
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, bCreateHeadless
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {} //AdditionalHeaders 
+		, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
@@ -1540,8 +1549,51 @@ FAccelByteTaskWPtr User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformTyp
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if(OtherPlatformUserId.Num() > MaximumQueryLimit)
+	{
+		FReport::LogDeprecated(__FUNCTION__, TEXT("The API to get more than 100 users information will be deprecated in AGS 3.79, please use BulkGetUserByOtherPlatformUserIdsV4 instead"));	// Log deprecation as warning
+		const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType);
+		const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users")
+			, *SettingsRef.IamServerUrl
+			, *CredentialsRef->GetNamespace()
+			, *PlatformString);
+
+		TMultiMap<FString, FString> QueryParams;
+		if (bRawPuid)
+		{
+			QueryParams.Add(TEXT("rawPUID"), TEXT("true"));
+		}
+
+		const FBulkPlatformUserIdRequest UserIdRequests{ OtherPlatformUserId };
+
+		return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, UserIdRequests, OnSuccess, OnError);
+	}
+
+	return BulkGetUserByOtherPlatformUserIdsV4(PlatformType, OtherPlatformUserId, OnSuccess, OnError, bRawPuid);
+}
+
+FAccelByteTaskWPtr User::BulkGetUserByOtherPlatformUserIdsV4(EAccelBytePlatformType PlatformType
+, TArray<FString> const& OtherPlatformUserId
+, THandler<FBulkPlatformUserIdResponse> const& OnSuccess
+, FErrorHandler const& OnError
+, bool bRawPuid)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	TArray<FString> UserIdToSend;
+
+	if(OtherPlatformUserId.Num() > MaximumQueryLimit)
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("BulkGetUserByOtherPlatformUserIdsV4 contains more than 100 OtherPlatformUserId, only first 100 will be sent"));
+		UserIdToSend.Append(&OtherPlatformUserId[0], MaximumQueryLimit);
+	}
+	else
+	{
+		UserIdToSend = OtherPlatformUserId;
+	}
+
 	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType);
-	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users")
+	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/platforms/%s/users")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef->GetNamespace()
 		, *PlatformString);
@@ -1552,7 +1604,7 @@ FAccelByteTaskWPtr User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformTyp
 		QueryParams.Add(TEXT("rawPUID"), TEXT("true"));
 	}
 
-	const FBulkPlatformUserIdRequest UserIdRequests{ OtherPlatformUserId };
+	const FBulkPlatformUserIdRequest UserIdRequests{ UserIdToSend };
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, UserIdRequests, OnSuccess, OnError);
 }

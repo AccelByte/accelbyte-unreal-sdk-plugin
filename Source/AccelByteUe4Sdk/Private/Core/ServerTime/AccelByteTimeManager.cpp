@@ -3,6 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/ServerTime/AccelByteTimeManager.h"
+
+#include "Core/AccelByteHttpRetryTask.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
@@ -15,6 +17,7 @@ namespace AccelByte
 static FDateTime SERVER_TIME_CACHED{ FDateTime::MinValue() };
 static FDateTime SERVER_TIME_CURRENT{ FDateTime::MinValue() };
 static FDateTime LAST_UPDATED_SERVER_TIME{ FDateTime::MinValue() };
+static FThreadSafeCounter ReferenceCount{0};
 
 FAccelByteTimeManager::FAccelByteTimeManager()
 	: bUseSharedResources(false)
@@ -28,10 +31,12 @@ FAccelByteTimeManager::FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& Htt
 	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http,
 		[](AccelByte::FHttpRetryScheduler*) {}))
 {
+	ReferenceCount.Increment();
 }
 
 FAccelByteTimeManager::~FAccelByteTimeManager()
 {
+	ReferenceCount.Decrement();
 	if (!bUseSharedResources)
 	{
 		const bool bShouldExecuteImmediately = IsInGameThread() || !FTaskGraphInterface::IsRunning();
@@ -51,7 +56,20 @@ FAccelByteTimeManager::~FAccelByteTimeManager()
 					, ENamedThreads::GameThread);
 		}
 	}
-	Reset();
+
+	if (AccelByteGetServerTimeTaskWPtr.IsValid())
+	{
+		auto TaskPtr = AccelByteGetServerTimeTaskWPtr.Pin();
+		if (TaskPtr.IsValid())
+		{
+			TaskPtr->Cancel();
+		}
+	}
+
+	if (ReferenceCount.GetValue() == 0)
+	{
+		Reset();
+	}
 }
 
 void FAccelByteTimeManager::Reset()
@@ -109,16 +127,22 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 		Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 
 		auto SuccessDelegate = THandler<FTime>::CreateLambda([OnSuccess, this](FTime const& ServerTime)
+		{
+			auto TaskPtr = AccelByteGetServerTimeTaskWPtr.Pin();
+			if (TaskPtr.IsValid())
 			{
+				auto RetryTaskPtr = StaticCastSharedPtr<FHttpRetryTask>(TaskPtr);
+				if (RetryTaskPtr.IsValid())
 				{
 					FScopeLock ScopeLock(&ServerTimeLock);
-					LAST_UPDATED_SERVER_TIME = FDateTime::UtcNow();
+					LAST_UPDATED_SERVER_TIME = RetryTaskPtr->GetResponseTime();
 					SERVER_TIME_CACHED = ServerTime.CurrentTime;
 				}
-				OnSuccess.ExecuteIfBound(ServerTime);
-			});
+			}
+			OnSuccess.ExecuteIfBound(ServerTime);
+		});
 
-		return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(SuccessDelegate, OnError), FPlatformTime::Seconds());
+		return AccelByteGetServerTimeTaskWPtr = FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(SuccessDelegate, OnError), FPlatformTime::Seconds());
 	}
 	else
 	{

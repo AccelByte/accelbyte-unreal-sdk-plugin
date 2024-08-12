@@ -119,6 +119,19 @@ public:
 	FAccelByteTaskWPtr ListUserByUserId(FListUserDataRequest const& Request
 		, THandler<FListUserDataResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief This function will get multiple user(s) information. 
+	 *
+	 * @param UserIds List UserId(s) to get. SHOULD NOT EXCEED 100
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FListBulkUserInfo.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkGetUserInfo(TArray<FString> const& UserIds
+		, THandler<FListBulkUserInfo> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 private:
 	ServerUser() = delete;

@@ -25,6 +25,8 @@ namespace AccelByte
 		, OnBearerAuthRejectDelegate{ InOnBearerAuthRejectDelegate }
 		, BearerAuthRejectedRefresh{ InBearerAuthRejectedRefresh }
 	{
+		Request->OnProcessRequestComplete().BindRaw(this, &FHttpRetryTask::OnProcessRequestComplete);
+		
 		TaskTime = RequestTime;
 		InitializeDefaultDelegates();
 		for (auto& Handler : HandlerDelegates)
@@ -357,5 +359,9 @@ namespace AccelByte
 		return TaskTime >= RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeout;
 	}
 
-
+	void FHttpRetryTask::OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse,
+		bool bConnectedSuccessfully)
+	{
+		SetResponseTime(FDateTime::UtcNow());
+	}
 }

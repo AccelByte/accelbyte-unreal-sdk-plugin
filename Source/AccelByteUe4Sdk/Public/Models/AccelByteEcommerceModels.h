@@ -264,7 +264,8 @@ enum class EAccelBytePredicateType : uint8
 {
 	EntitlementPredicate,
 	SeasonPassPredicate,
-	SeasonTierPredicate
+	SeasonTierPredicate,
+	StatisticCodePredicate
 };
 
 UENUM(BlueprintType)
@@ -542,6 +543,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelItemPredicate
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FString Value{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	FString Code{};
 };
 
 
@@ -2102,7 +2106,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTimeLimitedBalance
 	FString BalanceSource{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | TimeLimitedBalance")
-	FDateTime ExpiredAt{0};
+	FDateTime ExpiredAt{0}; //WARNING: this field is obsolete and will be deprecated at November 2024
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | TimeLimitedBalance")
+	FDateTime ExpireAt{0};
+
+	// Avoid breaking change by duplicate the value to the old member name
+	void DuplicateExpiredAtValue()
+	{
+		ExpiredAt = ExpireAt;
+	}
 	
 }; 
 
@@ -2149,6 +2162,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 	 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	EAccelByteItemStatus Status{ EAccelByteItemStatus::NONE };
+
+	void DuplicateTimeLimitedBalancesExpirationInfo()
+	{
+		for (int i = 0; i < TimeLimitedBalances.Num(); i++)
+		{
+			TimeLimitedBalances[i].DuplicateExpiredAtValue();
+		}
+	}
 };
 
 USTRUCT(BlueprintType)

@@ -44,6 +44,23 @@ void UABPresence::BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request
 		Request.bCountOnly);
 }
 
+void UABPresence::BulkGetUserPresenceV2(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse,
+	FDErrorHandler OnError)
+{
+	ApiClientPtr->Lobby.BulkGetUserPresenceV2(
+		Request.UserIds,
+		THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnResponse](FAccelByteModelsBulkUserStatusNotif const& Response)
+			{
+				OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+		Request.bCountOnly);
+}
+
 void UABPresence::SetPresenceStatus(FAccelBytePresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError)
 {
 	ApiClientPtr->Lobby.SetUserPresenceResponseDelegate(

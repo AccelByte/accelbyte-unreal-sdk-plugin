@@ -184,6 +184,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true
+	 * @param OptionalParams Will be passed to the backend.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -191,7 +192,8 @@ public:
 		, FString const& PlatformToken
 		, FVoidHandler const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, bool bCreateHeadless = true);
+		, bool bCreateHeadless = true
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Log in with another platform Id account e.g. Steam, Google, Twitch, etc especially to support OIDC (with 2FA enable)
@@ -201,6 +203,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true
+	 * @param OptionalParams Will be passed to the backend.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -208,7 +211,8 @@ public:
 		, FString const& PlatformToken
 		, FVoidHandler const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, bool bCreateHeadless = true);
+		, bool bCreateHeadless = true
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc. with 2FA enable
@@ -218,6 +222,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true
+	 * @param OptionalParams Will be passed to the backend.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -225,7 +230,8 @@ public:
 		, FString const& PlatformToken
 		, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, bool bCreateHeadless = true);
+		, bool bCreateHeadless = true
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Log in with another platform Id account e.g. Steam, Google, Twitch, etc especially to support OIDC (with 2FA enable)
@@ -235,14 +241,16 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bCreateHeadless If directly create new account when not linked yet, default value is true
-	 * 
+	 * @param OptionalParams Will be passed to the backend.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr LoginWithOtherPlatformIdV4(FString const& PlatformId
 		, FString const& PlatformToken
 		, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
-		, bool bCreateHeadless = true);
+		, bool bCreateHeadless = true
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -1216,6 +1224,26 @@ public:
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
+		, TArray<FString> const& OtherPlatformUserId
+		, THandler<FBulkPlatformUserIdResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, bool bRawPuid = false);
+
+	/**
+	 * @brief This function will get user(s) by other platform user id(s) it linked to. maximum users to be queried is 100 userIds
+	 * if more than 100 userIds is queried, only first 100 will be returned.
+	 * Note : For Nintendo Login you have to add Environment ID Suffix behind platform id with PlatformID:EnvironmentID as format
+	 * e.g csg123jskansdk:dd1
+	 *
+	 * @param PlatformType Other platform type.
+	 * @param OtherPlatformUserId Targeted user's ID(s).
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FBulkPlatformUserIdResponse.
+	 * @param OnError This will be called when the operation failed.
+	 * @param bRawPuid Show unencrypted platform user id in result (disabled by default).
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkGetUserByOtherPlatformUserIdsV4(EAccelBytePlatformType PlatformType
 		, TArray<FString> const& OtherPlatformUserId
 		, THandler<FBulkPlatformUserIdResponse> const& OnSuccess
 		, FErrorHandler const& OnError

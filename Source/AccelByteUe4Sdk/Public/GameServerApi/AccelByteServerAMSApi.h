@@ -91,6 +91,17 @@ public:
 	 */
 	void SetOnAMSDrainReceivedDelegate(FOnAMSDrainReceived OnAMSDrain);
 
+	/**
+	 * @brief set DS session timeout to the new number given.
+	 * 
+	 * @param NewTimeout new number for DS session timeout
+	 */
+	void SetDSTimeout(int32 NewTimeout);
+
+	/**
+	 * @brief reset DS session timeout to the one that already set in the fleet settings.
+	 */
+	void ResetDSTimeout();
 
 private:
 

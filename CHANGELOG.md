@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [26.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.1.0%0D26.0.2) (2024-08-12)
+
+
+### Features
+
+* add BulkGetUserByOtherPlatformUserIdsV4 ([387ce95](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/387ce958583d79d9911c80ae966080935195a885))
+* **AMS:** add capability to set and reset session timeout from dedicated server ([704bf47](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/704bf478545796ef2fe5ae39fac2bb2d08674bdb))
+* **chatv2:** add API to get and set user chat configuration ([620eefb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/620eefbf32211e4a0eda53f20be28f604da89399))
+* **ecommerce:** add StatisticCodePredicate as PredicateType enum, add `code` field on ItemPredicate model ([93dc2bc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/93dc2bcccc230301660640bfbc4418460b0558d8))
+* ServerUserAPI to Get Bulk User Information ([f1bd1be](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f1bd1befc0e324be2bdf846e45733b002171656f))
+* **serviceLabel:** add additional optional parameter to allow serviceLabel for authentication ([b189676](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b189676a07b5f666f66328950ded13365a85ac06))
+* **user:** new endpoints for BulkGetUserPresenceV2 and BulkGetPublicUserProfileInfosV2 ([c4e62f4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c4e62f4b6beeffdc9b12809db8561148cc6537c0))
+
+
+### Bug Fixes
+
+* **analytics:** update client time stamp using server utc time ([c8e1c56](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c8e1c56ff2b4c53761b1aadc35b11b68c5ccba2d))
+* change AsWeak() usage to AsShared() for UE 4.27 ([f6c9a55](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f6c9a55ee191227272c38644aa789eee4bd81fdd))
+* **ServerTime:** call get server time after game instance created and fetch the response time from http retry task. ([f03ec06](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f03ec062326596d576e2c66b68d98eb13e4ac41a))
+* **SyncEntitlement:** sync platform purchase with simultaneous platform ([580672f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/580672f34fc00c0d35422f5c111fb3f62dbccb36))
+* **telemetry:** change `deviceType` to use PascalCase ([86c0bc7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/86c0bc715e97aae5cdfc7b7f9e4ead43a0815c84))
+* **Wallet:** duplicate the correct expiration information model field from ExpireAt into ExpiredAt ([5a8b2a7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5a8b2a7d84b5255e9e9be586b6ecdd6590597bcb))
+
 ### [26.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.0.2%0D26.0.1) (2024-07-18)
 
 

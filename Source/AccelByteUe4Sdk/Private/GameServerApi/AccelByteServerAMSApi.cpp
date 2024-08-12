@@ -240,5 +240,33 @@ bool ServerAMS::PeriodicHeartbeat(float DeltaTime)
 	return true;
 }
 
+void ServerAMS::SetDSTimeout(int32 NewTimeout)
+{
+	if (!IsConnected())
+	{
+		UE_LOG(LogAccelByteAMS, Warning, TEXT("DS is not connected to AMS yet!"));
+		return;
+	}
+
+	FString SessionTimeoutMessage = FString::Format(TEXT("{\"resetSessionTimeout\":{\"newTimeout\":\"{0}\"}}"), { NewTimeout });
+
+	UE_LOG(LogAccelByteAMS, Log, TEXT("Send set session timeout message to AMS\n%s"), *SessionTimeoutMessage);
+	WebSocket->Send(SessionTimeoutMessage);
+}
+
+void ServerAMS::ResetDSTimeout()
+{
+	if (!IsConnected())
+	{
+		UE_LOG(LogAccelByteAMS, Warning, TEXT("DS is not connected to AMS yet!"));
+		return;
+	}
+
+	FString SessionTimeoutMessage = TEXT("{\"resetSessionTimeout\":{}}");
+
+	UE_LOG(LogAccelByteAMS, Log, TEXT("Send reset session timeout message to AMS\n%s"), *SessionTimeoutMessage);
+	WebSocket->Send(SessionTimeoutMessage);
+}
+
 }
 }

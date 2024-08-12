@@ -65,6 +65,7 @@ public:
 	const FString& GetPlatformUserId() const;
 	const FString& GetSimultaneousPlatformId() const;
 	const FString& GetSimultaneousPlatformUserId() const;
+	FString GetSimultaneousPlatformUserIdByPlatformName(const FString& PlatformName) const;
 	const FString& GetUserDisplayName() const;
 	virtual const FString& GetNamespace() const override;
 	const FString& GetUserEmailAddress() const;

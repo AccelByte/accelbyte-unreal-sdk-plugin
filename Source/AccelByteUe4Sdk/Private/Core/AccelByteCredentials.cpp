@@ -22,7 +22,11 @@ namespace AccelByte
 
 Credentials::Credentials(FAccelByteMessagingSystem& MessagingRef)
 	: AuthToken()
+#if ENGINE_MAJOR_VERSION < 5
+	, MessagingSystem(MessagingRef.AsShared())
+#else
 	, MessagingSystem(MessagingRef.AsWeak())
+#endif
 	, RefreshTokenTask(nullptr)
 {
 }
@@ -183,6 +187,16 @@ const FString& Credentials::GetSimultaneousPlatformId() const
 const FString& Credentials::GetSimultaneousPlatformUserId() const
 {
 	return AuthToken.Simultaneous_platform_user_id;
+}
+
+FString Credentials::GetSimultaneousPlatformUserIdByPlatformName(const FString& PlatformName) const
+{
+	FString OutPlatformUserId = TEXT("");
+	if (AuthToken.Simultaneous_platform_id.Contains(PlatformName))
+	{
+		OutPlatformUserId = AuthToken.Simultaneous_platform_user_id;
+	}
+	return OutPlatformUserId;
 }
 
 bool Credentials::IsSessionValid() const

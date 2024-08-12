@@ -36,6 +36,9 @@ namespace AccelByte
 
 		FHttpRequestPtr GetHttpRequest() const { return Request; };
 
+		void SetResponseTime(FDateTime InResponseTime) { ResponseTime = InResponseTime; };
+		FDateTime GetResponseTime() const { return ResponseTime; };
+
 	private:
 		FHttpRequestPtr Request{};
 		const FHttpRequestCompleteDelegate CompleteDelegate{};
@@ -49,6 +52,7 @@ namespace AccelByte
 		FDelegateHandle BearerAuthRejectedRefreshHandle{};
 		bool bIsBeenRunFromPause{};
 		TMap<int32, FHttpRetryScheduler::FHttpResponseCodeHandler> ResponseCodeDelegates{};
+		FDateTime ResponseTime{0};
 
 		void InitializeDefaultDelegates();
 		void BearerAuthUpdated(const FString& AccessToken);
@@ -59,6 +63,8 @@ namespace AccelByte
 		bool IsFinished();
 		bool IsRefreshable();
 		bool IsTimedOut();
+
+		void OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse, bool bConnectedSuccessfully);
 	};
 
 	typedef TSharedPtr<FHttpRetryTask, ESPMode::ThreadSafe> FAccelByteHttpRetryTaskPtr;

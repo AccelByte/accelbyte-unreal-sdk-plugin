@@ -21,6 +21,8 @@ using AccelByte::FErrorHandler;
 
 static constexpr int32 UserIdsURLLimit = 40;
 
+static constexpr int32 MaximumQueryLimit = 100;
+
 enum class EAccelBytePlatformType : uint8;
 enum class EAccelByteDevModeDeviceIdMethod : uint8;
 enum class EJwtResult
@@ -445,6 +447,16 @@ public:
 	static const FString GenerateTOTP(const FString& SecretKey, int CodeLength = 6, int TimeStep = 30);
 	static bool ValidateTOTP(const FString& ServerSecretKey, const FString& TOTP, const FString& UserId);
 	static bool IsValidEmail(const FString& Email);
+
+	static FDateTime GetCurrentServerTime();
+
+	/**
+	 * Split an array into multiple arrays with a maximum element number.
+	 * @param InArray Array to split.
+	 * @param Num Number of maximum elements per array.
+	 * @param OutArrays Result with array split with maximum element number.
+	 */
+	static bool SplitArraysToNum(const TArray<FString>& InArray, const int32 Num, TArray<TArray<FString>>& OutArrays);
 
 private:
 	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);

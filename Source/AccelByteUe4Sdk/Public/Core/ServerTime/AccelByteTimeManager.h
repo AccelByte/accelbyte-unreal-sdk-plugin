@@ -77,5 +77,7 @@ private:
 
 	/** Critical sections for thread safe operation of ServerTime */
 	mutable FCriticalSection ServerTimeLock;
+
+	FAccelByteTaskWPtr AccelByteGetServerTimeTaskWPtr;
 };
 }

@@ -499,6 +499,12 @@ FAccelByteTaskWPtr Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlement
 	{
 	case EAccelBytePlatformSync::STEAM:
 		PlatformText = TEXT("steam");
+
+		if (!CredentialsRef->GetSimultaneousPlatformUserIdByPlatformName(PlatformText).IsEmpty())
+		{
+			PlatformUserId = CredentialsRef->GetSimultaneousPlatformUserIdByPlatformName(PlatformText);
+		}
+
 		if (PlatformUserId.IsEmpty())
 		{
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
@@ -549,6 +555,12 @@ FAccelByteTaskWPtr Entitlement::SyncPlatformPurchase(FAccelByteModelsEntitlement
 		break;
 	case EAccelBytePlatformSync::EPIC_GAMES:
 		PlatformText = TEXT("epicgames");
+		
+		if (!CredentialsRef->GetSimultaneousPlatformUserIdByPlatformName(PlatformText).IsEmpty())
+		{
+			PlatformUserId = CredentialsRef->GetSimultaneousPlatformUserIdByPlatformName(PlatformText);
+		}
+		
 		if (PlatformUserId.IsEmpty())
 		{
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
@@ -681,6 +693,12 @@ FAccelByteTaskWPtr Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess
 	FReport::Log(FString(__FUNCTION__));
 
 	FString platformUserId = CredentialsRef->GetPlatformUserId();
+
+	const FString PlatformSteamName = TEXT("steam");
+	if (!CredentialsRef->GetSimultaneousPlatformUserIdByPlatformName(PlatformSteamName).IsEmpty())
+	{
+		platformUserId = CredentialsRef->GetSimultaneousPlatformUserIdByPlatformName(PlatformSteamName);
+	}
 
 	if (platformUserId.IsEmpty()) 
 	{

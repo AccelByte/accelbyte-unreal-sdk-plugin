@@ -1593,6 +1593,61 @@ FAccelByteTaskWPtr Lobby::BulkGetUserPresence(TArray<FString> const& UserIds
 		, OnError);
 }
 
+FAccelByteTaskWPtr Lobby::BulkGetUserPresenceV2(TArray<FString> const& UserIds,
+	THandler<FAccelByteModelsBulkUserStatusNotif> const& OnSuccess, FErrorHandler const& OnError, bool CountOnly)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (UserIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
+		return nullptr;
+	}
+
+	TArray<FString> ProcessedUserIds{};
+	TArray<FString> NotProcessedUserIds{};
+
+	if (UserIds.Num() > MaximumQueryLimit)
+	{
+		ProcessedUserIds.Append(UserIds.GetData(), MaximumQueryLimit);
+		NotProcessedUserIds.Append(UserIds.GetData() + MaximumQueryLimit, UserIds.Num() - MaximumQueryLimit);
+	}
+	else
+	{
+		ProcessedUserIds = UserIds;
+	}
+
+	TMultiMap<FString, FString> QueryParams = {
+		{TEXT("countOnly"), CountOnly ? TEXT("true") : TEXT("false")}
+	};
+
+	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/presence/namespaces/%s/users/presence")
+		, *SettingsRef.BaseUrl
+		, *CredentialsRef->GetNamespace());
+
+	TArray<TSharedPtr<FJsonValue>> UserIdsJsonValues;
+	for (auto UserId : ProcessedUserIds)
+	{
+		UserIdsJsonValues.Add(MakeShareable(new FJsonValueString(UserId)));
+	}
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+	JsonObject->SetArrayField("userIds", UserIdsJsonValues);
+
+	FString Content = TEXT("");
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Content
+		, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda(
+			[OnSuccess, NotProcessedUserIds](FAccelByteModelsBulkUserStatusNotif const& Result)
+			{
+				FAccelByteModelsBulkUserStatusNotif FinalResult = Result;
+				FinalResult.NotProcessed = NotProcessedUserIds;
+				OnSuccess.ExecuteIfBound(FinalResult);
+			})
+		, OnError);
+}
+
 FAccelByteTaskWPtr Lobby::GetPartyStorage(FString const& PartyId
 	, THandler<FAccelByteModelsPartyDataNotif> const& OnSuccess
 	, FErrorHandler const& OnError)

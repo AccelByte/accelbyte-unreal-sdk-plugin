@@ -58,6 +58,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence | Api")
 	void BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence | Api")
+	void BulkGetUserPresenceV2(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence | Api")
 	void SetPresenceStatus(FAccelBytePresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError);

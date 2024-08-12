@@ -1504,3 +1504,43 @@ bool FAccelByteUtilities::IsValidEmail(const FString& Email)
 	("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+");
 	return std::regex_match(TCHAR_TO_UTF8(*Email), pattern);
 }
+
+FDateTime FAccelByteUtilities::GetCurrentServerTime()
+{
+	return FRegistry::TimeManager.GetCurrentServerTime();
+}
+
+bool FAccelByteUtilities::SplitArraysToNum(const TArray<FString>& InArray
+	, const int32 Num
+	, TArray<TArray<FString>>& OutArrays)
+{
+	if (InArray.Num() <= 0)
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Array Input is empty"))
+		return false;
+	}
+
+	if (Num <= 0)
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Array can't be devided by 0 or less than 0"))
+		return false;
+	}
+
+	const int32 DivisionCount = InArray.Num() / Num;
+	const int32 LeftoverCount = InArray.Num() % Num;
+	for (int i = 0; i < DivisionCount; i++)
+	{
+		TArray<FString> SubArray;
+		SubArray.Append(&InArray[i * Num], Num);
+		OutArrays.Emplace(SubArray);
+	}
+
+	if (LeftoverCount)
+	{
+		TArray<FString> LeftoverIds;
+		LeftoverIds.Append(&InArray[Num * DivisionCount], LeftoverCount);
+		OutArrays.Emplace(LeftoverIds);
+	}
+	
+	return true;
+}

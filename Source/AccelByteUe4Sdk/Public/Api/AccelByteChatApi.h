@@ -150,6 +150,12 @@ public:
 	/** Delegate for handling get system message stats response. */
 	DECLARE_DELEGATE_OneParam(FGetSystemMessageStatsResponse, FAccelByteGetSystemMessageStatsResponse const&);
 
+	/** Delegate for handling get user chat configuration response. */
+	DECLARE_DELEGATE_OneParam(FGetUserChatConfigurationResponse, FAccelByteModelsGetUserChatConfigurationResponse const&);
+
+	/** Delegate for handling set user chat configuration response. */
+	DECLARE_DELEGATE_OneParam(FSetUserChatConfigurationResponse, FAccelByteSetUserChatConfigurationResponse const&);
+
 	//				NOTIFICATIONS
 	/**
 	 * @brief delegate for handling incoming chat notification.
@@ -1058,6 +1064,46 @@ private:
 
 #pragma endregion GROUP CHAT AS MODERATOR
 
+#pragma region USER CHAT CONFIGURATION
+
+public:
+	/**
+	 * @brief Get chat configuration for current user.
+	 *
+	 * @param OnSuccess - Callback for successful get user chat configuration.
+	 * @param OnError - Callback for failed get user chat configuration.
+	 */
+	void GetUserChatConfiguration(FGetUserChatConfigurationResponse const& OnSuccess
+		, FErrorHandler const& OnError = nullptr);
+
+	/**
+	 * @brief Set chat configuration for current user.
+	 *
+	 * @param Request - The chat configuration.
+	 * @param OnSuccess - Callback for successful set user chat configuration.
+	 * @param OnError - Callback for failed set user chat configuration.
+	 */
+	void SetUserChatConfiguration(const FAccelByteModelsSetUserChatConfigurationRequest& Request
+		, FSetUserChatConfigurationResponse const& OnSuccess
+		, FErrorHandler const& OnError = nullptr);
+
+private:
+	void SubscribeGetUserChatConfigurationResponseDelegate(FGetUserChatConfigurationResponse const& OnGetUserChatConfigurationResponse
+		, FErrorHandler const& OnError = nullptr)
+	{
+		GetUserChatConfigurationResponse = OnGetUserChatConfigurationResponse;
+		OnGetUserChatConfigurationError = OnError;
+	}
+
+	void SubscribeSetUserChatConfigurationResponseDelegate(FSetUserChatConfigurationResponse const& OnGetUserChatConfigurationResponse
+		, FErrorHandler const& OnError = nullptr)
+	{
+		SetUserChatConfigurationResponse = OnGetUserChatConfigurationResponse;
+		OnSetUserChatConfigurationError = OnError;
+	}
+
+#pragma endregion 
+	
 #pragma region NOTIFICATION SETTER
 public:
 
@@ -1178,6 +1224,8 @@ private:
 	TMap<FString, FUpdateSystemMessagesResponse> MessageIdUpdateSystemMessagesResponseMap;
 	TMap<FString, FQuerySystemMessageResponse> MessageIdQuerySystemMessageResponseMap;
 	TMap<FString, FGetSystemMessageStatsResponse> MessageIdGetSystemMessageStatsResponseMap;
+	TMap<FString, FGetUserChatConfigurationResponse> MessageIdGetUserChatConfigurationResponseMap;
+	TMap<FString, FSetUserChatConfigurationResponse> MessageIdSetUserChatConfigurationResponseMap;
 
 	FChatActionTopicResponse CreateTopicResponse;
 	FSendChatResponse SendChatResponse;
@@ -1201,6 +1249,8 @@ private:
 	FUpdateSystemMessagesResponse UpdateSystemMessagesResponse;
 	FQuerySystemMessageResponse QuerySystemMessageResponse;
 	FGetSystemMessageStatsResponse GetSystemMessageStatsResponse;
+	FGetUserChatConfigurationResponse GetUserChatConfigurationResponse;
+	FSetUserChatConfigurationResponse SetUserChatConfigurationResponse;
 
 	FErrorHandler OnCreateTopicError;
 	FErrorHandler OnSendChatError;
@@ -1224,6 +1274,8 @@ private:
 	FErrorHandler OnUpdateSystemMessagesError;
 	FErrorHandler OnQuerySystemMessageError;
 	FErrorHandler OnGetSystemMessageStatsError;
+	FErrorHandler OnGetUserChatConfigurationError;
+	FErrorHandler OnSetUserChatConfigurationError;
 
 	FChatNotif ChatNotif;
 	FReadChatNotif ReadChatNotif;

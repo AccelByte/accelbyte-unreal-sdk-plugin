@@ -99,6 +99,19 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicUserProfileInfo
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicUserProfileInfoV2
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	TArray<FAccelByteModelsPublicUserProfileInfo> UserProfileInfos;
+
+	/** @brief UserIds that not processed because of the request limit */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileInfo")
+	TArray<FString> NotProcessed{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileUpdateRequest
 {
 	GENERATED_BODY()

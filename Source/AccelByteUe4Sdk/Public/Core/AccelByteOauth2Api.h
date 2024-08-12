@@ -221,6 +221,7 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
+	 * @param OptionalParams Will be passed to the backend.
 	 *
 	 * @note When 2FA is enabled please use the method with FOAuthErrorHandler to get more details about the OAuth errors.
 	 * 
@@ -233,7 +234,8 @@ public:
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -249,6 +251,7 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
+	 * @param OptionalParams Will be passed to the backend.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -260,7 +263,8 @@ public:
 		, FOAuthErrorHandler const& OnError
 		, bool bCreateHeadless = true
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
 	
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid.
@@ -798,6 +802,7 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
+	 * @param OptionalParams Will be passed to the backend.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -809,7 +814,8 @@ public:
 		, FOAuthErrorHandler const& OnError
 		, bool bCreateHeadless = true
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Verify and Remember new device when user enabled 2FA.

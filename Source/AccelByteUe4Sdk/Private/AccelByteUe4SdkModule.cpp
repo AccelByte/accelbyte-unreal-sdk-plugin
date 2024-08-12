@@ -20,6 +20,7 @@
 #include "Api/AccelByteGameStandardEventApi.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "GameServerApi/AccelByteServerAMSApi.h"
+#include "Engine/GameInstance.h"
 
 #if WITH_EDITOR
 #include "ISettingsModule.h"
@@ -56,6 +57,8 @@ private:
 	void PostStartup();
 	FDelegateHandle PostStartupDelegateHandle{};
 
+	FDelegateHandle GameInstanceStartHandle{};
+
 	bool LoadClientSettings(ESettingsEnvironment const Environment);
 	bool LoadServerSettings(ESettingsEnvironment const Environment);
 	bool LoadSettingsFromConfigUObject();
@@ -65,6 +68,8 @@ private:
 	void GetVersionInfo(FString const& Url, TFunction<void(FVersionInfo)> Callback) const;
 	void CheckServicesCompatibility() const;
 	void SetDefaultHttpCustomHeader(FString const& Namespace);
+
+	void OnGameInstanceCreated(UGameInstance* GameInstance);
 };
 
 void FAccelByteUe4SdkModule::StartupModule()
@@ -102,23 +107,11 @@ void FAccelByteUe4SdkModule::StartupModule()
 #endif
 	AccelByte::FRegistry::ServerCredentialsRef->Startup();
 
-	if (IsRunningDedicatedServer())
-	{
-		if (!AccelByte::FRegistry::ServerSettings.LoadAMSSettings())
-		{
-			UE_LOG(LogAccelByte, Warning, TEXT("dsid not provided, not connecting to AMS"));
-		}
-		else
-		{
-			AccelByte::FRegistry::ServerAMS.Connect();
-		}
-	}
-
-	AccelByte::FRegistry::TimeManager.GetServerTime({}, {});
-
 #if UE_SERVER
 	FAccelByteSignalHandler::Initialize();
 #endif
+
+	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddRaw(this, &FAccelByteUe4SdkModule::OnGameInstanceCreated);
 
 	PostStartupDelegateHandle = FCoreDelegates::OnBeginFrame.AddRaw(this, &FAccelByteUe4SdkModule::PostStartup);
 }
@@ -156,6 +149,8 @@ void FAccelByteUe4SdkModule::ShutdownModule()
 	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();
 
 	UnregisterSettings();
+
+	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceStartHandle);
 }
 
 void FAccelByteUe4SdkModule::SetEnvironment(ESettingsEnvironment const Environment)
@@ -414,5 +409,26 @@ void FAccelByteUe4SdkModule::SetDefaultHttpCustomHeader(FString const& Namespace
 	AccelByte::FHttpRetryScheduler::SetHeaderGameClientVersion(ProjectVersion);
 }
 
+void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
+{
+	if (!GameInstance->IsValidLowLevel())
+	{
+		return;
+	}
+	
+	if (IsRunningDedicatedServer())
+	{
+		if (!AccelByte::FRegistry::ServerSettings.LoadAMSSettings())
+		{
+			UE_LOG(LogAccelByte, Warning, TEXT("dsid not provided, not connecting to AMS"));
+		}
+		else
+		{
+			AccelByte::FRegistry::ServerAMS.Connect();
+		}
+	}
+	
+	AccelByte::FRegistry::TimeManager.GetServerTime({}, {});
+}
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)

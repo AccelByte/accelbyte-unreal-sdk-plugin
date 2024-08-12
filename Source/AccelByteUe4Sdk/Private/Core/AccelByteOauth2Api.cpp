@@ -231,7 +231,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 	, THandler<FOauth2Token> const& OnSuccess
 	, FErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
     	
@@ -247,7 +248,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 			})
 		, true
 		, IamUrl
-		, AdditionalHeaders);
+		, AdditionalHeaders
+		, OptionalParams);
 }
 	
 FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientId
@@ -258,7 +260,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 	, FOAuthErrorHandler const& OnError
 	, bool bCreateHeadless
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -275,6 +278,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
 		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress(true)) },
 		{TEXT("additionalData"), ConstructAdditionalData()},
+		{TEXT("serviceLabel"), OptionalParams.ServiceLabelForPSN},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
@@ -851,7 +855,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformTokenV4(FString const& Clien
 	, FOAuthErrorHandler const& OnError
 	, bool bCreateHeadless
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -868,6 +873,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformTokenV4(FString const& Clien
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
 		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress(true)) },
 		{TEXT("additionalData"), ConstructAdditionalData()},
+		{TEXT("serviceLabel"), OptionalParams.ServiceLabelForPSN},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 

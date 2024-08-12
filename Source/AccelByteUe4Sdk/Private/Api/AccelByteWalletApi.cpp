@@ -44,6 +44,7 @@ FAccelByteTaskWPtr Wallet::GetWalletInfoByCurrencyCode(FString const& CurrencyCo
 				if (WalletInfoResponse.WalletInfos.Num() > 0)
 				{
 					WalletInfo = *WalletInfoResponse.WalletInfos.GetData();
+					WalletInfo.DuplicateTimeLimitedBalancesExpirationInfo();
 				}
 				else
 				{
@@ -73,7 +74,19 @@ FAccelByteTaskWPtr Wallet::GetWalletInfoByCurrencyCodeV2(FString const& Currency
 		, *CredentialsRef->GetUserId()
 		, *CurrencyCode);
 
-	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	const TDelegate<void(const FAccelByteModelsWalletInfoResponse&)> OnSuccessHttpClient =
+		THandler<FAccelByteModelsWalletInfoResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsWalletInfoResponse const& WalletInfoResponse)
+			{
+				FAccelByteModelsWalletInfoResponse Result = WalletInfoResponse;
+				for (int i = 0; i < Result.WalletInfos.Num(); i++)
+				{
+					Result.WalletInfos[i].DuplicateTimeLimitedBalancesExpirationInfo();
+				}
+				OnSuccess.ExecuteIfBound(Result);
+			});
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
 FAccelByteTaskWPtr Wallet::ListWalletTransactionsByCurrencyCode(FString const& CurrencyCode

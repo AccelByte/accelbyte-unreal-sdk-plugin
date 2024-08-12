@@ -1079,4 +1079,48 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatPublicConfigResponse
 	int64 SpamMuteDuration{};
 };
 
-#pragma endregion 
+#pragma endregion
+
+#pragma region USER CHAT CONFIGURATION
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteUserChatConfiguration
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UserChatConfig")
+	bool ProfanityDisabled{false};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGetUserChatConfigurationResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GetUserChatConfigResponse")
+	FDateTime Processed {0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | GetUserChatConfigResponse")
+	FAccelByteUserChatConfiguration Config{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSetUserChatConfigurationRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SetUserChatConfigResponse")
+	FAccelByteUserChatConfiguration Config{};
+};
+
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteSetUserChatConfigurationResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | SetUserChatConfigResponse")
+	FDateTime Processed {0};
+};
+
+#pragma endregion

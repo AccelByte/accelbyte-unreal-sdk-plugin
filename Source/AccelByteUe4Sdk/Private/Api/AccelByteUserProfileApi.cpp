@@ -105,6 +105,61 @@ FAccelByteTaskWPtr UserProfile::BulkGetPublicUserProfileInfos(TArray<FString> co
 	return HttpClient.Request(TEXT("GET"), Url, QueryParams, Headers, OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr UserProfile::BulkGetPublicUserProfileInfosV2(TArray<FString> const& UserIds,
+	THandler<FAccelByteModelsPublicUserProfileInfoV2> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public")
+		, *SettingsRef.BasicServerUrl
+		, *CredentialsRef->GetNamespace());
+	
+	if (UserIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
+		return nullptr;
+	}
+
+	TArray<FString> ProcessedUserIds{};
+	TArray<FString> NotProcessedUserIds{};
+
+	if (UserIds.Num() > MaximumQueryLimit)
+	{
+		ProcessedUserIds.Append(UserIds.GetData(), MaximumQueryLimit);
+		NotProcessedUserIds.Append(UserIds.GetData() + MaximumQueryLimit, UserIds.Num() - MaximumQueryLimit);
+	}
+	else
+	{
+		ProcessedUserIds = UserIds;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> UserIdsJsonValues;
+	for (auto UserId : ProcessedUserIds)
+	{
+		UserIdsJsonValues.Add(MakeShareable(new FJsonValueString(UserId)));
+	}
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+	JsonObject->SetArrayField("userIds", UserIdsJsonValues);
+
+	FString Content = TEXT("");
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/json")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers,
+		THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([OnSuccess, NotProcessedUserIds](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
+		{
+			FAccelByteModelsPublicUserProfileInfoV2 FinalResult;
+			FinalResult.UserProfileInfos = Result;
+			FinalResult.NotProcessed = NotProcessedUserIds;
+			OnSuccess.ExecuteIfBound(FinalResult);
+		}), OnError);
+}
+
 FAccelByteTaskWPtr UserProfile::GetCustomAttributes(THandler<FJsonObject> const& OnSuccess
 	, FErrorHandler const& OnError)
 {

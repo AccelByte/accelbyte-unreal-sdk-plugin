@@ -82,6 +82,19 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Bulk get multiple user public profile information.
+	 *
+	 * @param UserIds Multiple user ids.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkGetPublicUserProfileInfosV2(TArray<FString> const& UserIds
+		, THandler<FAccelByteModelsPublicUserProfileInfoV2> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.

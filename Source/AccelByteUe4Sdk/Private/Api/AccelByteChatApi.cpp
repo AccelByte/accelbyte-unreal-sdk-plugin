@@ -59,6 +59,9 @@ namespace Method
 	const FString BlockUser = TEXT("actionBlockUser");
 	const FString UnblockUser = TEXT("actionUnblockUser");
 
+	const FString GetUserChatConfiguration = TEXT("actionGetUserConfig");
+	const FString SetUserChatConfiguration = TEXT("actionSetUserConfig");
+
 	//Events
 	const FString ChatNotif = TEXT("eventNewChat");
 	const FString ReadChatNotif = TEXT("eventReadChat");
@@ -171,6 +174,9 @@ enum HandleType : uint8
 
 	BlockUserResponse,
 	UnblockUserResponse,
+
+	GetUserChatConfigurationResponse,
+	SetUserChatConfigurationResponse,
 			
 	//notif
 	ChatNotif,
@@ -389,6 +395,9 @@ namespace IncomingMessage
 		FORM_STRING_ENUM_PAIR_RESPONSE(BlockUser),
 		FORM_STRING_ENUM_PAIR_RESPONSE(UnblockUser),
 
+		FORM_STRING_ENUM_PAIR_RESPONSE(GetUserChatConfiguration),
+		FORM_STRING_ENUM_PAIR_RESPONSE(SetUserChatConfiguration),
+
 
 		FORM_STRING_ENUM_PAIR(ChatNotif),
 		FORM_STRING_ENUM_PAIR(ReadChatNotif),
@@ -593,6 +602,8 @@ namespace IncomingMessage
 		MessageIdUpdateSystemMessagesResponseMap.Empty();
 		MessageIdDeleteSystemMessagesResponseMap.Empty();
 		MessageIdQuerySystemMessageResponseMap.Empty();
+		MessageIdGetSystemMessageStatsResponseMap.Empty();
+		MessageIdGetUserChatConfigurationResponseMap.Empty();
 	}
 
 	void Chat::ClearResponseHandlers()
@@ -800,6 +811,8 @@ namespace IncomingMessage
 			CASE_RESPONSE_ID_EXPLICIT_MODEL(DeleteSystemMessages, FAccelByteModelsDeleteSystemMessagesResponse)
 			CASE_RESPONSE_ID_EXPLICIT_MODEL(QuerySystemMessage, FAccelByteModelsQuerySystemMessagesResponse)
 			CASE_RESPONSE_ID_EXPLICIT_MODEL(GetSystemMessageStats, FAccelByteGetSystemMessageStatsResponse)
+			CASE_RESPONSE_ID_EXPLICIT_MODEL(GetUserChatConfiguration, FAccelByteModelsGetUserChatConfigurationResponse)
+			CASE_RESPONSE_ID_EXPLICIT_MODEL(SetUserChatConfiguration, FAccelByteSetUserChatConfigurationResponse)
 
 			CASE_NOTIF_EXPLICIT_MODEL(ChatNotif, FAccelByteModelsChatNotif)
 			CASE_NOTIF_EXPLICIT_MODEL(ReadChatNotif, FAccelByteModelsReadChatNotif)
@@ -1243,6 +1256,30 @@ namespace IncomingMessage
 		SEND_CONTENT_CACHE_ID(RefreshToken);
 
 		return MessageId;
+	}
+
+	void Chat::GetUserChatConfiguration(FGetUserChatConfigurationResponse const& OnSuccess,
+		FErrorHandler const& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		const FJsonDomBuilder::FObject Params;
+		SubscribeGetUserChatConfigurationResponseDelegate(OnSuccess, OnError);
+		const FString MessageId = SendWebSocketContent(ChatToken::Method::GetUserChatConfiguration, Params);
+		ID_RESPONSE_MAP(GetUserChatConfiguration).Emplace(MessageId, MESSAGE_SUCCESS_HANDLER(GetUserChatConfiguration));
+	}
+
+	void Chat::SetUserChatConfiguration(const FAccelByteModelsSetUserChatConfigurationRequest& Request,
+		FSetUserChatConfigurationResponse const& OnSuccess, FErrorHandler const& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		const TSharedRef<FJsonObject> Params = MakeShared<FJsonObject>();
+		FJsonObjectConverter::UStructToJsonObject(FAccelByteModelsSetUserChatConfigurationRequest::StaticStruct(), &Request, Params, 0, 0);
+
+		SubscribeSetUserChatConfigurationResponseDelegate(OnSuccess, OnError);
+		const FString MessageId = SendWebSocketContent(ChatToken::Method::SetUserChatConfiguration, Params);
+		ID_RESPONSE_MAP(SetUserChatConfiguration).Emplace(MessageId, MESSAGE_SUCCESS_HANDLER(SetUserChatConfiguration));
 	}
 
 #undef REQUEST_MODEL

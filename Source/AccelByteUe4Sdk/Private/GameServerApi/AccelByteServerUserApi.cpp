@@ -164,6 +164,41 @@ FAccelByteTaskWPtr ServerUser::ListUserByUserId(FListUserDataRequest const& Requ
  
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
+
+FAccelByteTaskWPtr ServerUser::BulkGetUserInfo(TArray<FString> const& UserIds
+	, THandler<FListBulkUserInfo> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	TArray<FString> CopyUserIds = UserIds;
+	if (CopyUserIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
+		return nullptr;
+	}
+	if (CopyUserIds.Num() > 100)
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("The requested UserIds information list exceed max size 100. UserIds index 0-99 will be sent, and the rest will be truncated."));
+		CopyUserIds.SetNum(100, true);
+	}
+
+	const FListBulkUserInfoRequest UserList{ CopyUserIds };
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/bulk/basic")
+		, *ServerSettingsRef.IamServerUrl
+		, *ServerCredentialsRef->GetClientNamespace());
+
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(UserList, Content);
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/json")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
+}
 	
 } // Namespace GameServerApi
 } // Namespace AccelByte
