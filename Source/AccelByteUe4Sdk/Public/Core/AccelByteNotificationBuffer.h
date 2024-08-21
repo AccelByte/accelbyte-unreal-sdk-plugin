@@ -36,21 +36,21 @@ namespace AccelByte
 		 *
 		 * @return The FDateTime object representing the time last notification received.
 		 */
-		FDateTime GetLastNotificationReceivedTime();
+		FDateTime GetLastNotificationReceivedTime() const;
 
 		/**
 		 * @brief Get the sequence ID of the last valid notification.
 		 *
-		 * @return String representing last valid sequence ID.
+		 * @return integer representing last valid sequence ID.
 		 */
-		FString GetLastNotificationSequenceID();
+		int32 GetLastNotificationSequenceID() const;
 
 		/**
 		 * @brief Get the sequence number of the last valid notification.
 		 *
 		 * @return integer representing last valid sequence number.
 		 */
-		int32 GetLastNotificationSequenceNumber();
+		int32 GetLastNotificationSequenceNumber() const;
 
 		/**
 		 * @brief Clear all buffered notifications.
@@ -69,12 +69,12 @@ namespace AccelByte
 		 *
 		 * @return true if buffering.
 		 */
-		bool IsBuffering();
+		bool IsBuffering() const;
 
 	private:
 		bool bBuffering{false};
 
-		FString LastSequenceID{};
+		int32 LastSequenceID{0};
 		int32 LastSequenceNumber{0};
 		FDateTime LastSentAt{0};
 
@@ -82,10 +82,10 @@ namespace AccelByte
 		TArray<FAccelByteModelsUserNotification> Buffer;
 
 		void UpdateLastSequence(const FAccelByteModelsUserNotification& InNotification);
-		bool HasValidSequence(const FAccelByteModelsUserNotification& InNotification);
-		bool IsNotificationMissing(const FAccelByteModelsUserNotification& InNotification);
-		bool IsDuplicateNotification(const FAccelByteModelsUserNotification& InNotification);
-		bool IsExistInBuffer(const FString& InSequenceID, const int32& InSequenceNumber);
+		bool HasValidSequence(const FAccelByteModelsUserNotification& InNotification) const;
+		bool IsNotificationMissing(const FAccelByteModelsUserNotification& InNotification) const;
+		bool IsDuplicateNotification(const FAccelByteModelsUserNotification& InNotification) const;
+		bool IsExistInBuffer(const int32 InSequenceID, const int32 InSequenceNumber) const;
 		void AddToBuffer(const FAccelByteModelsUserNotification& InNotification);
 		void SortBuffer();
 	};

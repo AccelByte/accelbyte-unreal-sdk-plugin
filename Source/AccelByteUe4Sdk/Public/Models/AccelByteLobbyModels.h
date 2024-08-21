@@ -1524,7 +1524,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserNotification
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby | UserNotification")
 	FDateTime SentAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby | UserNotification")
-	FString SequenceID{};
+	int32 SequenceID{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby | UserNotification")
 	int32 SequenceNumber{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby | UserNotification")

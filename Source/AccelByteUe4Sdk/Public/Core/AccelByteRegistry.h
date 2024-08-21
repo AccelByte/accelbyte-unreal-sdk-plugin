@@ -103,7 +103,7 @@ public:
 	static FServerCredentialsRef ServerCredentialsRef;
 	static ServerCredentials& ServerCredentials;
 	static FAccelByteTimeManager TimeManager;
-	static TSharedPtr<FAccelByteMessagingSystem> MessagingSystem;
+	static FAccelByteMessagingSystemPtr MessagingSystem;
 	static FAccelByteNetworkConditioner NetworkConditioner;
 	static FAccelByteNotificationSender NotificationSender;
 	static FHttpClient HttpClient;

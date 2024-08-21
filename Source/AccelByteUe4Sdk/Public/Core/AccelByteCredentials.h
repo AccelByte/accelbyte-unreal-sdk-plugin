@@ -90,7 +90,7 @@ private:
 	FOnLogoutSuccessDelegate LogoutSuccessDelegate{};
 	FAccountUserData AccountUserData;
 	TMap<FString, FThirdPartyPlatformTokenData> ThirdPartyPlatformTokenData;
-	TWeakPtr<FAccelByteMessagingSystem> MessagingSystem;
+	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
 
 	FAccelByteTaskWPtr RefreshTokenTask;
 

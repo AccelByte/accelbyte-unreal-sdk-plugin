@@ -262,6 +262,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCanceledNotif
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCanceledNotif")
 	FString Reason{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingCanceledNotif")
+	FString TicketID{};
 };
 
 USTRUCT(BlueprintType)

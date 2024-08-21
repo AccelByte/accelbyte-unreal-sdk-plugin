@@ -23,9 +23,9 @@ namespace AccelByte
 Credentials::Credentials(FAccelByteMessagingSystem& MessagingRef)
 	: AuthToken()
 #if ENGINE_MAJOR_VERSION < 5
-	, MessagingSystem(MessagingRef.AsShared())
+	, MessagingSystemWPtr(MessagingRef.AsShared())
 #else
-	, MessagingSystem(MessagingRef.AsWeak())
+	, MessagingSystemWPtr(MessagingRef.AsWeak())
 #endif
 	, RefreshTokenTask(nullptr)
 {
@@ -133,7 +133,7 @@ void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTi
 	BackoffCount = 0;
 	SessionState = ESessionState::Valid;
 
-	auto MessagingSystemPtr = MessagingSystem.Pin();
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 
 	if (MessagingSystemPtr.IsValid())
 	{

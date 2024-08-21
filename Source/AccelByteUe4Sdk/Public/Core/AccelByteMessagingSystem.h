@@ -19,7 +19,7 @@ DECLARE_DELEGATE_OneParam(FOnMessagingSystemReceivedMessage, const FString& /* P
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMessagingSystemReceivedMessageMulti, const FString& /* Payload */)
 
 class ACCELBYTEUE4SDK_API FAccelByteMessagingSystem 
-	: public TSharedFromThis<FAccelByteMessagingSystem>
+	: public TSharedFromThis<FAccelByteMessagingSystem, ESPMode::ThreadSafe>
 {
 public:
 	FAccelByteMessagingSystem();
@@ -121,4 +121,8 @@ private:
 		return Payload;
 	}
 };
+
+typedef TSharedRef<FAccelByteMessagingSystem, ESPMode::ThreadSafe> FAccelByteMessagingSystemRef;
+typedef TSharedPtr<FAccelByteMessagingSystem, ESPMode::ThreadSafe> FAccelByteMessagingSystemPtr;
+typedef TWeakPtr<FAccelByteMessagingSystem, ESPMode::ThreadSafe> FAccelByteMessagingSystemWPtr;
 }

@@ -75,7 +75,7 @@ using namespace AccelByte;
 
 #pragma region Core
 FHttpRetryScheduler FRegistry::HttpRetryScheduler;
-TSharedPtr<FAccelByteMessagingSystem> FRegistry::MessagingSystem = MakeShared<FAccelByteMessagingSystem>();
+FAccelByteMessagingSystemPtr FRegistry::MessagingSystem = MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>();
 Settings FRegistry::Settings;
 FCredentialsRef FRegistry::CredentialsRef { MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*MessagingSystem.Get()) };
 Credentials& FRegistry::Credentials { FRegistry::CredentialsRef.Get() };

@@ -24,7 +24,11 @@ Qos::Qos(Credentials& InCredentialsRef
 	, FAccelByteMessagingSystem& InMessagingSystemRef)
 	: CredentialsRef{InCredentialsRef.AsShared()}
 	, SettingsRef{InSettingsRef}
-	, MessagingSystem{InMessagingSystemRef}
+#if ENGINE_MAJOR_VERSION < 5
+	, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
+#else
+	, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
+#endif
 	, bValidityFlagPtr(MakeShared<bool>(true))
 {
 		// Credentials is possibly destroyed before we are so we can't remove
@@ -40,7 +44,11 @@ Qos::Qos(Credentials& InCredentialsRef
 
 
 	OnLobbyConnectedHandle = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Qos::OnLobbyConnected);
-	LobbyConnectedDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::LobbyConnected, OnLobbyConnectedHandle);
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+	if (MessagingSystemPtr.IsValid())
+	{
+		LobbyConnectedDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::LobbyConnected, OnLobbyConnectedHandle);
+	}
 
 	QosUpdateCheckerTickerDelegate = FTickerDelegate::CreateRaw(this, &Qos::CheckQosUpdate);
 	QosUpdateCheckerHandle = FTickerAlias::GetCoreTicker().AddTicker(QosUpdateCheckerTickerDelegate, QosUpdateCheckerIntervalSecs);
@@ -48,7 +56,11 @@ Qos::Qos(Credentials& InCredentialsRef
 
 Qos::~Qos()
 {
-	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, LobbyConnectedDelegateHandle);
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+	if (MessagingSystemPtr.IsValid())
+	{
+		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, LobbyConnectedDelegateHandle);
+	}
 	OnLobbyConnectedHandle.Unbind();
 
 	// Indicate to the OnLoginSuccess lambda that we have been destroyed and `this` is no longer valid.
@@ -291,7 +303,11 @@ void Qos::SendQosLatenciesMessage()
 		RegionLatencies.Data.Add(RegionLatency);
 	}
 
-	MessagingSystem.SendMessage<FAccelByteModelsQosRegionLatencies>(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, RegionLatencies);
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+	if (MessagingSystemPtr.IsValid())
+	{
+		MessagingSystemPtr->SendMessage<FAccelByteModelsQosRegionLatencies>(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, RegionLatencies);
+	}
 }
 
 void Qos::OnLobbyConnected(const FString& Payload)

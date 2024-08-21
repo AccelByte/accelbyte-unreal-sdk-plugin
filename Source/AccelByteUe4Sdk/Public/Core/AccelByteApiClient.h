@@ -62,16 +62,18 @@ class ACCELBYTEUE4SDK_API FApiClient final
 {
 public:
 	FApiClient();
-	FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http, TSharedPtr<AccelByte::FAccelByteMessagingSystem> MessagingSystemRef = nullptr);
+	FApiClient(AccelByte::Credentials& Credentials
+		, AccelByte::FHttpRetryScheduler& Http
+		, TSharedPtr<AccelByte::FAccelByteMessagingSystem, ESPMode::ThreadSafe> InMessagingSystemPtr = nullptr);
 	~FApiClient();
 
 #pragma region Core
 	bool bUseSharedCredentials;
-	TSharedPtr<FAccelByteMessagingSystem> MessagingSystem{};
-	FAccelByteNotificationSender NotificationSender{*MessagingSystem.Get()};
+	FAccelByteMessagingSystemPtr MessagingSystem{};
 	FCredentialsRef CredentialsRef;
 	FHttpRetrySchedulerRef HttpRef{};
 	FAccelByteTimeManager TimeManager{ *HttpRef };
+	FAccelByteNotificationSender NotificationSender{ *MessagingSystem.Get() };
 	FAccelByteNetworkConditioner NetworkConditioner{};
 #pragma endregion
 

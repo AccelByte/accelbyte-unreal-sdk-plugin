@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [26.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.1.1%0D26.1.0) (2024-08-21)
+
+
+### Features
+
+* Add TicketID in matchmaking v2 canceled notification model ([f76cb17](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f76cb17b85337a8db5dfd7238b3a5bb139a51544))
+
+
+### Bug Fixes
+
+* access violation when accessing MessagingSystem that has been destroyed ([43c8c01](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/43c8c010319ec84b7df4ab6cf2b5e567808f3ca2))
+* lobby notification buffer SortBuffer method consider SequenceId instead of SentAt ([8b00b90](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8b00b90d42f9a6c394969d44bf09225168b06106))
+
 ## [26.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.1.0%0D26.0.2) (2024-08-12)
 
 

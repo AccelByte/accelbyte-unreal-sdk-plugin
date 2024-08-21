@@ -22,6 +22,7 @@ FAccelByteMessagingSystem::FAccelByteMessagingSystem()
 
 FAccelByteMessagingSystem::~FAccelByteMessagingSystem()
 {
+	UnsubscribeAll();
 	FTickerAlias::GetCoreTicker().RemoveTicker(PollHandle);
 }
 

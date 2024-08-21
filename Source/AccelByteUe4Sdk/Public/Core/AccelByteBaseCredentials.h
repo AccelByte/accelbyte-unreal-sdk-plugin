@@ -91,6 +91,7 @@ protected:
 };
 
 typedef TSharedRef<BaseCredentials, ESPMode::ThreadSafe> FBaseCredentialsRef;
-typedef TSharedPtr<BaseCredentials, ESPMode::ThreadSafe> FBaseCredentialsPtr;	
+typedef TSharedPtr<BaseCredentials, ESPMode::ThreadSafe> FBaseCredentialsPtr;
+typedef TWeakPtr<BaseCredentials, ESPMode::ThreadSafe> FBaseCredentialsWPtr;
 
 } // Namespace AccelByte

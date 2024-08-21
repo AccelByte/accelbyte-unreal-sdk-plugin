@@ -46,12 +46,12 @@ public:
 class ACCELBYTEUE4SDK_API FAccelByteNotificationSender
 {
 public:
-	explicit FAccelByteNotificationSender(FAccelByteMessagingSystem& MessagingSystem);
+	explicit FAccelByteNotificationSender(FAccelByteMessagingSystem& InMessagingSystemRef);
 
 	void SendLobbyNotification(const FString& Message) const;
 	
 private:
-	FAccelByteMessagingSystem& MessagingSystem;
+	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
 	
 };
 }

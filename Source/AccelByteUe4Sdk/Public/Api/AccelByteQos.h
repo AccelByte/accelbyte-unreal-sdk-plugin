@@ -72,9 +72,9 @@ public:
 	
 private:
 	// Constructor
-	TSharedRef<Credentials, ESPMode::ThreadSafe> CredentialsRef;
+	FCredentialsRef CredentialsRef;
 	const Settings& SettingsRef;
-	FAccelByteMessagingSystem& MessagingSystem;
+	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
 	TSharedPtr<bool> bValidityFlagPtr = nullptr;
 
 	static FAccelByteModelsQosServerList QosServers;

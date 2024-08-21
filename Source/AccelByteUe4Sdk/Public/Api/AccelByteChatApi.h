@@ -55,8 +55,8 @@ public:
 private:
 	const FString ChatSessionHeaderName = TEXT("X-Ab-ChatSessionID");
 
-	TSharedRef<Credentials, ESPMode::ThreadSafe> ChatCredentialsRef;
-	FAccelByteMessagingSystem& MessagingSystem;
+	FCredentialsRef ChatCredentialsRef;
+	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
 	FAccelByteNetworkConditioner& NetworkConditioner;
 
 	bool bBanNotifReceived = false;

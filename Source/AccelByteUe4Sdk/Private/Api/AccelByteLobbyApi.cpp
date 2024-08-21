@@ -495,10 +495,14 @@ void Lobby::Disconnect(bool ForceCleanup)
 	FReport::Log(FString(__FUNCTION__));
 
 	ChannelSlug = "";
-	
-	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
 
-	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::NotificationSenderLobby, NotificationSenderListenerDelegateHandle);
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+	if (MessagingSystemPtr.IsValid())
+	{
+		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::NotificationSenderLobby, NotificationSenderListenerDelegateHandle);
+	}
+
 	NotificationSenderListenerDelegate.Unbind();
 	
 	if(WebSocket.IsValid())
@@ -2150,20 +2154,26 @@ void Lobby::OnConnected()
 {
 	UE_LOG(LogAccelByteLobby, Log, TEXT("Connected"));
 
-	AuthTokenSetDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet, FOnMessagingSystemReceivedMessage::CreateLambda(
-		[this](FString const& Message)
-		{
-			FOauth2Token Token;
-			FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
-			RefreshToken(Token.Access_token);
-		}));
-
-	NotificationSenderListenerDelegate = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Lobby::OnNotificationSenderMessageReceived);
-	NotificationSenderListenerDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::NotificationSenderLobby, NotificationSenderListenerDelegate);
-		
 	ConnectSuccess.ExecuteIfBound();
 
-	MessagingSystem.SendMessage(EAccelByteMessagingTopic::LobbyConnected);
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+	if (MessagingSystemPtr.IsValid())
+	{
+		AuthTokenSetDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet
+			, FOnMessagingSystemReceivedMessage::CreateLambda(
+				[this](FString const& Message)
+				{
+					FOauth2Token Token;
+					FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
+					RefreshToken(Token.Access_token);
+				}));
+
+		NotificationSenderListenerDelegate = FOnMessagingSystemReceivedMessage::CreateRaw(this
+			, &Lobby::OnNotificationSenderMessageReceived);
+		NotificationSenderListenerDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::NotificationSenderLobby
+			, NotificationSenderListenerDelegate);
+		MessagingSystemPtr->SendMessage(EAccelByteMessagingTopic::LobbyConnected);
+	}
 }
 
 void Lobby::OnConnectionError(FString const& Error)
@@ -2185,9 +2195,12 @@ void Lobby::OnClosed(int32 StatusCode
 		Disconnect();
 	}
 	
-	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
-
-	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::NotificationSenderLobby, NotificationSenderListenerDelegateHandle);
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+	if (MessagingSystemPtr.IsValid())
+	{
+		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::NotificationSenderLobby, NotificationSenderListenerDelegateHandle);
+	}
 	NotificationSenderListenerDelegate.Unbind();
 
 	BanNotifReceived = false;
@@ -3474,8 +3487,13 @@ void Lobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> const& TokenG
 
 void Lobby::InitializeMessaging()
 {
-	OnReceivedQosLatenciesUpdatedDelegate = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Lobby::OnReceivedQosLatencies);
-	QosLatenciesUpdatedDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, OnReceivedQosLatenciesUpdatedDelegate);
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+	if (MessagingSystemPtr.IsValid())
+	{
+		OnReceivedQosLatenciesUpdatedDelegate = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Lobby::OnReceivedQosLatencies);
+		QosLatenciesUpdatedDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated
+			, OnReceivedQosLatenciesUpdatedDelegate);
+	}
 }
 
 Lobby::Lobby(Credentials & InCredentialsRef
@@ -3490,7 +3508,11 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, TSharedPtr<IWebSocket> InWebSocket)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, LobbyCredentialsRef{InCredentialsRef.AsShared()}
-	, MessagingSystem{InMessagingSystemRef}
+#if ENGINE_MAJOR_VERSION < 5
+	, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
+#else
+	, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
+#endif
 	, NetworkConditioner{InNetworkConditionerRef}
 	, PingDelay{InPingDelay}
 	, InitialBackoffDelay{InInitialBackoffDelay}
@@ -3508,7 +3530,11 @@ Lobby::Lobby(Credentials & InCredentialsRef
 
 Lobby::~Lobby()
 {
-	MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, QosLatenciesUpdatedDelegateHandle);
+	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+	if (MessagingSystemPtr.IsValid())
+	{
+		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, QosLatenciesUpdatedDelegateHandle);
+	}
 	OnReceivedQosLatenciesUpdatedDelegate.Unbind();
 
 	// only disconnect when engine is still valid

@@ -430,7 +430,11 @@ namespace IncomingMessage
 		, TSharedPtr<IWebSocket> WebSocket)
 		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 		, ChatCredentialsRef{InCredentialsRef.AsShared()}
-		, MessagingSystem{InMessagingSystemRef}
+#if ENGINE_MAJOR_VERSION < 5
+		, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
+#else
+		, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
+#endif
 		, NetworkConditioner{InNetworkConditionerRef}
 		, PingDelay{PingDelay}
 		, InitialBackoffDelay{InitialBackoffDelay}
@@ -489,7 +493,13 @@ namespace IncomingMessage
 	void Chat::Disconnect()
 	{
 		FReport::Log(FString(__FUNCTION__));
-		MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+
+		auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+		if (MessagingSystemPtr.IsValid())
+		{
+			MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+		}
+
 		if (WebSocket.IsValid())
 		{
 			WebSocket->Disconnect();
@@ -516,15 +526,18 @@ namespace IncomingMessage
 	void Chat::OnConnected()
 	{
 		UE_LOG(LogAccelByteChat, Log, TEXT("Connected"));
-			
-		AuthTokenSetDelegateHandle = MessagingSystem.SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet
-			, FOnMessagingSystemReceivedMessage::CreateLambda(
-				[this](FString const& Message)
-				{
-					FOauth2Token Token;
-					FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
-					RefreshToken(Token.Access_token, RefreshTokenResponse);
-				}));
+		auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+		if (MessagingSystemPtr.IsValid())
+		{
+			AuthTokenSetDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet
+				, FOnMessagingSystemReceivedMessage::CreateLambda(
+					[this](FString const& Message)
+					{
+						FOauth2Token Token;
+						FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
+						RefreshToken(Token.Access_token, RefreshTokenResponse);
+					}));
+		}
 			
 		ConnectSuccess.ExecuteIfBound();
 	}
@@ -553,7 +566,11 @@ namespace IncomingMessage
 			WebSocket->Reconnect();
 		}
 
-		MessagingSystem.UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+		auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+		if (MessagingSystemPtr.IsValid())
+		{
+			MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::AuthTokenSet, AuthTokenSetDelegateHandle);
+		}
 
 		bBanNotifReceived = false;
 		BanType = EBanType::EMPTY;

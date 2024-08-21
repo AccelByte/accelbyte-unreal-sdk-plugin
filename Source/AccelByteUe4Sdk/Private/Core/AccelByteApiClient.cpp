@@ -9,7 +9,7 @@ namespace AccelByte
 	
 FApiClient::FApiClient()
 	: bUseSharedCredentials(false)
-	, MessagingSystem(MakeShared<FAccelByteMessagingSystem>())
+	, MessagingSystem(MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>())
 	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*MessagingSystem.Get()))
 	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
 {
@@ -21,12 +21,13 @@ FApiClient::FApiClient()
 	PresenceBroadcastEvent.Startup();
 }
 
-FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http, TSharedPtr<AccelByte::FAccelByteMessagingSystem> MessagingRef)
+FApiClient::FApiClient(AccelByte::Credentials& Credentials
+	, AccelByte::FHttpRetryScheduler& Http
+	, FAccelByteMessagingSystemPtr InMessagingPtr)
 	: bUseSharedCredentials(true)
-	, MessagingSystem(MessagingRef == nullptr ? MakeShared<FAccelByteMessagingSystem>() : MessagingRef)
+	, MessagingSystem(InMessagingPtr.IsValid() ? InMessagingPtr: MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>())
 	, CredentialsRef(Credentials.AsShared())
-	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http,
-		[](AccelByte::FHttpRetryScheduler*) {}))
+	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http, [](AccelByte::FHttpRetryScheduler*) {}))
 {
 	GameTelemetry.Startup();
 	PredefinedEvent.Startup();
@@ -40,6 +41,7 @@ FApiClient::~FApiClient()
 	PredefinedEvent.Shutdown();
 	GameStandardEvent.Shutdown();
 	PresenceBroadcastEvent.Shutdown();
+	MessagingSystem.Reset();
 	
 	if (!bUseSharedCredentials)
 	{

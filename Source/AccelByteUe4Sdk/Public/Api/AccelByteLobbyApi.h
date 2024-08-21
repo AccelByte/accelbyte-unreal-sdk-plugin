@@ -76,8 +76,8 @@ public:
 		, TSharedPtr<IWebSocket> InWebSocket = nullptr);
 	~Lobby();
 private:
-	TSharedRef<Credentials, ESPMode::ThreadSafe> LobbyCredentialsRef;
-	FAccelByteMessagingSystem& MessagingSystem;
+	FCredentialsRef LobbyCredentialsRef;
+	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
 	FAccelByteNetworkConditioner& NetworkConditioner;
 
 	const FString LobbyPlatformIdHeaderName = "X-Ab-Platform";

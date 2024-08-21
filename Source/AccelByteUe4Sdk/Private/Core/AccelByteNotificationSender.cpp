@@ -68,13 +68,21 @@ namespace AccelByte
 		return LobbyMessage;
 	}
 
-	FAccelByteNotificationSender::FAccelByteNotificationSender(FAccelByteMessagingSystem& MessagingSystem)
-		: MessagingSystem(MessagingSystem)
+	FAccelByteNotificationSender::FAccelByteNotificationSender(FAccelByteMessagingSystem& InMessagingSystemRef)
+#if ENGINE_MAJOR_VERSION < 5
+		: MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
+#else
+		: MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
+#endif
 	{
 	}
 
 	void FAccelByteNotificationSender::SendLobbyNotification(const FString& Message) const
 	{
-		MessagingSystem.SendMessage(EAccelByteMessagingTopic::NotificationSenderLobby, Message);
+		auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+		if (MessagingSystemPtr.IsValid())
+		{
+			MessagingSystemPtr->SendMessage(EAccelByteMessagingTopic::NotificationSenderLobby, Message);
+		}
 	}
 }
