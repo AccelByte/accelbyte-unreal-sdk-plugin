@@ -16,6 +16,10 @@
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUpdateInventoryItemsResponses, TArray<FAccelByteModelsUpdateUserInventoryItemResponse>, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUpdateAllInventoriesResponse, TArray<FAccelByteModelsUserInventoryResponse>, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSaveInventoryItemsResponses, TArray<FAccelByteModelsBulkSaveInventoryItems>, Response);
+
 #pragma endregion
 
 UCLASS(Blueprintable, BlueprintType)
@@ -51,6 +55,13 @@ public:
 	void UpdateInventory(FString const& InventoryId
 		, FAccelByteModelsUpdateInventoryRequest const& UpdateInventoryRequest
 		, FDModelsUserInventoryResponse const& OnSuccess
+		, FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Inventory | Api")
+	void UpdateAllUserInventories(FString const& UserId
+		, FString const& InventoryConfigurationCode
+		, FAccelByteModelsUpdateInventoryRequest const& UpdateInventoryRequest
+		, FDModelsUpdateAllInventoriesResponse const& OnSuccess
 		, FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Inventory | Api")
@@ -112,6 +123,19 @@ public:
 	void SaveInventoryItem(FString const& UserId
 		, FAccelByteModelsSaveInventoryItemRequest const& SaveItemRequest
 		, FDModelsUserItemResponse const& OnSuccess
+		, FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Inventory | Api")
+	void BulkSaveInventoryItems(FString const& UserId
+		, TArray<FAccelByteModelsSaveInventoryItemRequest> const& SaveItemsRequests
+		, FDModelsSaveInventoryItemsResponses const& OnSuccess
+		, FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Inventory | Api")
+	void BulkSaveInventoryItemsByInventoryId(FString const& UserId
+		, FString const& InventoryId
+		, TArray<FAccelByteModelsSaveInventoryItemByInventoryIdRequest> const& SaveItemsRequests
+		, FDModelsSaveInventoryItemsResponses const& OnSuccess
 		, FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Inventory | Api")

@@ -11,6 +11,8 @@
 #include "Math/NumericLimits.h"
 #include "AccelByteSessionModels.generated.h"
 
+#pragma region Enum
+
 UENUM(BlueprintType)
 enum class EAccelByteV2SessionJoinability : uint8
 {
@@ -82,6 +84,10 @@ enum class EAccelByteV2SessionType : uint8
 	GameSession,
 	PartySession
 };
+
+#pragma endregion
+
+#pragma region Game Session Struct Models
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionUser
@@ -892,3 +898,197 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionJoinedSecret
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionJoinedSecret")
 	FString Secret{};
 };
+
+#pragma endregion
+
+#pragma region Game Session History Struct Models
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoryConfiguration
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	EAccelByteV2SessionConfigurationServerType Type{ EAccelByteV2SessionConfigurationServerType::EMPTY };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	EAccelByteV2SessionJoinability Joinability{ EAccelByteV2SessionJoinability::EMPTY };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	int64 MinPlayers{ TNumericLimits<int32>::Min() };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	int64 MaxPlayers{ TNumericLimits<int32>::Min() };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	int64 InactiveTimeout{ TNumericLimits<int32>::Min() };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	int64 InviteTimeout{ TNumericLimits<int32>::Min() };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	FString Deployment{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	FString ClientVersion{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	TArray<FString> RequestedRegions{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Game Session Histories Configuration")
+	bool Persistent{ false };
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBaseGameSessionHistoryMember
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Base Game Session History User")
+	FString ID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Base Game Session History User")
+	EAccelByteV2SessionMemberStatus Status{ EAccelByteV2SessionMemberStatus::EMPTY };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Base Game Session History User")
+	EAccelByteV2SessionMemberStatus StatusV2{ EAccelByteV2SessionMemberStatus::EMPTY };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Base Game Session History User")
+	FDateTime UpdatedAt{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Base Game Session History User")
+	FString PlatformID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Base Game Session History User")
+	FString PlatformUserID{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoryPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FJsonObjectWrapper Attributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString BackfillTicketID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString Code{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FAccelByteModelsGameSessionHistoryConfiguration Configuration{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString ConfigurationName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FDateTime CreatedAt{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString CreatedBy{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FAccelByteModelsV2GameSessionDSInformation DSInformation{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString GameMode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString ID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	bool IsFull{ false };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString LeaderID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString MatchPool{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	TArray<FAccelByteModelsBaseGameSessionHistoryMember> Members{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	int64 ProcessingTime{ TNumericLimits<int32>::Min() };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	TArray<FAccelByteModelsV2GameSessionTeam> Teams{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	TArray<FString> TicketIDs{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	FDateTime UpdatedAt{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	int64 Version{ TNumericLimits<int32>::Min() };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Payload")
+	bool IsActive{ false };
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoryDetail
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Detail")
+	FString EventName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Detail")
+	FAccelByteModelsGameSessionHistoryPayload Payload{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Detail")
+	FString RequesterClientID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Detail")
+	FString RequesterUserID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Detail")
+	FDateTime Timestamp{ 0 };
+
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoriesData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
+	FDateTime Created_at{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
+	TArray<FAccelByteModelsGameSessionHistoryDetail> Histories{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
+	FString SessionID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
+	FString Session_template{};
+
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoriesResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Paginated Session Histories Result")
+	TArray<FAccelByteModelsGameSessionHistoriesData> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Paginated Session Histories Result")
+	FAccelByteModelsPaging Paging{};
+};
+
+#pragma endregion

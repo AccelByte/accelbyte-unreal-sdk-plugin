@@ -1334,7 +1334,8 @@ FAccelByteTaskWPtr User::Register(FString const& Username
 	, FString const& DateOfBirth
 	, THandler<FRegisterResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, FString const& UniqueDisplayName)
+	, FString const& UniqueDisplayName
+	, FString const& Code)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1366,6 +1367,7 @@ FAccelByteTaskWPtr User::Register(FString const& Username
 	NewUserRequest.AuthType     = TEXT("EMAILPASSWD");
 	NewUserRequest.Country      = Country;
 	NewUserRequest.DateOfBirth  = DateOfBirth;
+	NewUserRequest.Code = Code;
 	if (!UniqueDisplayName.IsEmpty())
 	{
 		NewUserRequest.UniqueDisplayName = UniqueDisplayName;
@@ -1389,7 +1391,8 @@ FAccelByteTaskWPtr User::Registerv2(FString const& EmailAddress
 	, FString const& DateOfBirth
 	, THandler<FRegisterResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, FString const& UniqueDisplayName)
+	, FString const& UniqueDisplayName
+	, FString const& Code)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1425,6 +1428,7 @@ FAccelByteTaskWPtr User::Registerv2(FString const& EmailAddress
 	NewUserRequest.Country = Country;
 	NewUserRequest.DateOfBirth = DateOfBirth;
 	NewUserRequest.UniqueDisplayName = UniqueDisplayName;
+	NewUserRequest.Code = Code;
 
 	return Registerv3(NewUserRequest, OnSuccess, OnError);
 }
@@ -2439,7 +2443,8 @@ FAccelByteTaskWPtr User::Enable2FaBackupCode(THandler<FUser2FaBackupCode> const&
 }
 
 FAccelByteTaskWPtr User::Disable2FaBackupCode(FVoidHandler const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, FDisableMfaBackupCodeRequest const& Request)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2451,7 +2456,7 @@ FAccelByteTaskWPtr User::Disable2FaBackupCode(FVoidHandler const& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, Request, Headers, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr User::GenerateBackupCode(THandler<FUser2FaBackupCode> const& OnSuccess
@@ -2487,7 +2492,8 @@ FAccelByteTaskWPtr User::GetBackupCode(THandler<FUser2FaBackupCode> const& OnSuc
 }
 
 FAccelByteTaskWPtr User::Enable2FaAuthenticator(FVoidHandler const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, FString const& Code)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2495,15 +2501,16 @@ FAccelByteTaskWPtr User::Enable2FaAuthenticator(FVoidHandler const& OnSuccess
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef->GetNamespace());
 
-	TMap<FString, FString> Headers = {
-		{TEXT("Accept"), TEXT("application/json")}
+	const TMap<FString, FString> Data = {
+		{TEXT("code"), Code}
 	};
 
-	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Data, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr User::Disable2FaAuthenticator(FVoidHandler const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, FDisableMfaAuthenticatorRequest const& Request)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2515,7 +2522,7 @@ FAccelByteTaskWPtr User::Disable2FaAuthenticator(FVoidHandler const& OnSuccess
 		{TEXT("Accept"), TEXT("application/json")}
 	};
 
-	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), Headers, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, Request, Headers, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr User::GenerateSecretKeyFor2FaAuthenticator(THandler<FUser2FaSecretKey> const& OnSuccess
@@ -2855,6 +2862,9 @@ FAccelByteTaskWPtr User::GetAccountConfigurationValue(EAccountConfiguration Conf
 	case EAccountConfiguration::USERNAME_DISABLED:
 		Config = TEXT("usernameDisabled");
 		break;
+	case EAccountConfiguration::MANDATORY_EMAIL_VERIFICATION_ENABLED:
+		Config = TEXT("mandatoryEmailVerificationEnabled");
+		break;
 	}
 
 	const auto OnSuccessDelegate = THandler<FJsonObjectWrapper>::CreateLambda([OnSuccess, OnError, Config](const FJsonObjectWrapper& Result)
@@ -2883,11 +2893,159 @@ FAccelByteTaskWPtr User::GetAccountConfigurationValue(EAccountConfiguration Conf
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/config/%s")
 	   , *SettingsRef.IamServerUrl
-	   , *CredentialsRef->GetNamespace()
+	   , *SettingsRef.PublisherNamespace
 	   , *Config);
-   
-	return HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccessDelegate, OnError);
-}
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/json")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
 	
+	return HttpClient.Request(TEXT("GET"), Url, TEXT(""), Headers, OnSuccessDelegate, OnError);
+}
+
+FAccelByteTaskWPtr User::UpdatePassword(FUpdatePasswordRequest const& Request
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Request.OldPassword.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Old password can't be empty."));
+		return nullptr;
+	}
+
+	if (Request.NewPassword.IsEmpty())
+    {
+    	OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("New password can't be empty."));
+    	return nullptr;
+    }
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/password")
+		, *SettingsRef.IamServerUrl
+		, *SettingsRef.Namespace);
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::EnableMfaEmail(FString const& Code
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Code.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Code can't be empty to enable Mfa email."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/email/enable")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef->GetNamespace());
+
+	const TMap<FString, FString> Data = {
+		{TEXT("code"), Code}
+	};
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Data, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::DisableMfaEmail(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FDisableMfaEmailRequest const& Request)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/email/disable")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef->GetNamespace());
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::SendMfaCodeToEmail(const EAccelByteSendMfaEmailAction Action
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/email/code")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef->GetNamespace());
+
+	const FString Request = FString::Printf(TEXT("action=%s"), *FAccelByteUtilities::GetUEnumValueAsString<EAccelByteSendMfaEmailAction>(Action));
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::GetMfaStatus(THandler<FMfaStatusResponse> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/status")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef->GetNamespace());
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::VerifyMfaCode(EAccelByteLoginAuthFactorType const& Factor, FString const& Code,
+	THandler<FVerifyMfaResponse> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Factor == EAccelByteLoginAuthFactorType::None)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Factor type None is not supported."));
+		return nullptr;
+	}
+
+	if (Code.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Code can't be empty to verify MFA code."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/challenge/verify")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef->GetNamespace());
+
+	const TMap<FString, FString> Data = {
+		{TEXT("factor"), FAccelByteUtilities::GetAuthenticatorString(Factor)},
+		{TEXT("code"), Code}
+	};
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Data, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::SendVerificationCodeToNewUser(FSendVerificationCodeToNewUserRequest const& Request
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Request.EmailAddress.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Email address can't be empty."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/code/request")
+	   , *SettingsRef.IamServerUrl
+	   , *SettingsRef.PublisherNamespace);
+
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(Request, Content);
+	
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/json")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
+}
+
 } // Namespace Api
 } // Namespace AccelByte

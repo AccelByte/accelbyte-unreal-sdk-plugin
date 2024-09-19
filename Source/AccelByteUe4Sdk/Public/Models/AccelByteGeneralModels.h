@@ -68,6 +68,14 @@ enum class EAccelByteTTLConfigAction : uint8
 	DELETE_RECORD
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteGeneralSortBy : uint8
+{
+	NONE = 0,
+	ASC,
+	DESC
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 {

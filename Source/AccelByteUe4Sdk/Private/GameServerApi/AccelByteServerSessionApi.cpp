@@ -423,6 +423,35 @@ FAccelByteTaskWPtr ServerSession::RevokeGameSessionCode(FString const& GameSessi
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr ServerSession::KickUserFromGameSession(FString const& GameSessionID, FString const& UserID
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (GameSessionID.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("GameSessionID is empty!"));
+		return nullptr;
+	}
+
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserID is invalid"));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions/%s/members/%s/kick")
+		, *ServerSettingsRef.SessionServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *GameSessionID
+		, *UserID);
+
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr ServerSession::SendDSSessionReady(FString const& GameSessionID
 	, bool bDSSessionReady
 	, FVoidHandler const& OnSuccess

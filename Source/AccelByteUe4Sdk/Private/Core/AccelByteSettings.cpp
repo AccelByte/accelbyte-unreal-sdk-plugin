@@ -107,6 +107,8 @@ void Settings::LoadSettings(const FString& SectionPath)
 	ReportingServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ReportingServerUrl"), BaseUrl, TEXT("reporting"));
 
 	SessionServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SessionServerUrl"), BaseUrl, TEXT("session"));
+
+	SessionHistoryServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SessionHistoryServerUrl"), BaseUrl, TEXT("sessionhistory"));
 	
 	MatchmakingV2ServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("MatchmakingV2ServerUrl"), BaseUrl, TEXT("match2"));
 
@@ -136,6 +138,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&HeartBeatData);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
+	// if QosLatencyPollIntervalSecs not set in settings, set QoS latency poll to minimum value 
 	FString QosLatencyPollIntervalSecsString;
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("QosLatencyPollIntervalSecs"), QosLatencyPollIntervalSecsString, DefaultSection);
 	if (QosLatencyPollIntervalSecsString.IsNumeric())
@@ -144,7 +147,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 	}
 	else
 	{
-		QosLatencyPollIntervalSecs = 0;
+		QosLatencyPollIntervalSecs = MinNumSecsQosLatencyPolling;
 	}
 
 	FString QosServerLatencyPollIntervalSecsString;
@@ -157,6 +160,10 @@ void Settings::LoadSettings(const FString& SectionPath)
 	{
 		QosServerLatencyPollIntervalSecs = 0;
 	}
+
+	FString bDisableAutoGetQosLatenciesString;
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("DisableAutoGetQosLatencies"), bDisableAutoGetQosLatenciesString, DefaultSection);
+	bDisableAutoGetQosLatencies = bDisableAutoGetQosLatenciesString.IsEmpty() ? false : bDisableAutoGetQosLatenciesString.ToBool();
 
 	FString QosPingTimeoutString;
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("QosPingTimeout"), QosPingTimeoutString, DefaultSection);
@@ -390,6 +397,11 @@ FString UAccelByteBlueprintsSettings::GetSessionServerUrl()
 	return FRegistry::Settings.SessionServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetSessionHistoryServerUrl()
+{
+	return FRegistry::Settings.SessionHistoryServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetMatchmakingV2ServerUrl()
 {
 	return FRegistry::Settings.MatchmakingV2ServerUrl;
@@ -588,6 +600,11 @@ void UAccelByteBlueprintsSettings::SetReportingServerUrl(const FString& Reportin
 void UAccelByteBlueprintsSettings::SetSessionServerUrl(const FString& SessionServerUrl)
 {
 	FRegistry::Settings.SessionServerUrl = SessionServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetSessionHistoryServerUrl(const FString& SessionHistoryServerUrl)
+{
+	FRegistry::Settings.SessionHistoryServerUrl = SessionHistoryServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl)

@@ -458,6 +458,15 @@ public:
 	 */
 	static bool SplitArraysToNum(const TArray<FString>& InArray, const int32 Num, TArray<TArray<FString>>& OutArrays);
 
+	/**
+	 * @brief Convert an AccelByte general sort enum into a string value.
+	 *
+	 * @param SortBy The AccelByte enum value to be converted.
+	 *
+	 * @return The string representation of the given enum value.
+	 */
+	static FString ConvertAccelByteGeneralSortByToString(EAccelByteGeneralSortBy SortBy);
+
 private:
 	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);
 	static FString GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep);

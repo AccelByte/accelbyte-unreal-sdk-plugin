@@ -75,7 +75,6 @@ private:
 	FCredentialsRef CredentialsRef;
 	const Settings& SettingsRef;
 	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
-	TSharedPtr<bool> bValidityFlagPtr = nullptr;
 
 	static FAccelByteModelsQosServerList QosServers;
 	static TArray<TPair<FString, float>> Latencies;
@@ -95,14 +94,6 @@ private:
 
 	/** @brief Static cleanup handler for Tickers (Latencies Pollers) */
 	static void RemoveFromTicker(FDelegateHandleAlias& Handle);
-
-	/**
-	 * @brief The user was just authenticated:
-	 * - Check server latencies (ping) per-region
-	 * - Init Qos Scheduler, if enabled via Settings.
-	 * @param Response
-	 */
-	void OnLoginSuccess(const FOauth2Token& Response);
 
 	/**
 	 * @brief For each server, ping them and record add to Latency TArray.

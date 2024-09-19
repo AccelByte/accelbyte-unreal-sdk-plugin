@@ -657,6 +657,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsNotificationMessage
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	int32 SequenceNumber{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
+	FString Type{};
 };
 
 USTRUCT(BlueprintType)

@@ -191,6 +191,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPolicy
 	FString Description{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")
+	TArray<FString> Tags{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")
 	bool IsMandatory{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")

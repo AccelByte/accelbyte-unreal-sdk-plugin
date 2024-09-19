@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [26.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.2.0%0D26.1.1) (2024-09-19)
+
+
+### Features
+
+* Add TicketID in matchmaking v2 canceled notification model ([ed30b18](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ed30b1836e23107e8ef84149a5ab8016637e65e4))
+* **agreement:** add array of tags inside public policy model ([6e0deba](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6e0debac6e4ef482f7bf1a28d16aafc420a3b3eb))
+* **DSHub:** add X-Ab-Custom header when connecting DSHub ([2e0afad](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2e0afad1c0a25793749703390399c7cf1541dd35))
+* **inventory:** add bulk endpoints and add new fields to inventory item response ([cd6ce5f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cd6ce5f07684fe89859ca41d2521f51ceab27863))
+* **serviceLabel:** add additional optional parameter to allow serviceLabel for authentication ([43d739d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/43d739dc474bc931e68e723943b8e14570a15423))
+* **session history:** add a new endpoint to get game session history ([89f5bb7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/89f5bb715d55ea49f140c9200e9ff91545b7b8d3))
+* **session:** add API to kick user from a game session ([b8fbe03](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b8fbe03966443267d6417ca19d8629a88a45cf86))
+* **user:** add API for update password, get mfa status, and setup mfa ([dafb0a3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dafb0a33f075e370d8a76e211934247b96916983))
+* **user:** add support for user account creation with mandatory email verification ([476cbaa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/476cbaa2e59a17dbfcde1e45f38c90e47dca1543))
+
+
+### Bug Fixes
+
+* change game telemetry `flightId` case to PascalCase `FlightId` ([745b853](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/745b853f6a1147421d7b6f18a2eca4f17af58a9c))
+* **commerce:** change the default value of AutoAck on FAccelByteModelsPlatformSyncMobileGoogle to false ([cd11b20](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cd11b205193e50955a6a3fa4e2329d9f4d0b954e))
+* **lobby:** missing message type field ([605619e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/605619ea15d8f8ec46dd0967d5494283b384786c))
+* **settings:** fix load ams server settings ([f29fc4a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f29fc4ae987465734053daa07e88fe68b2a4139d))
+
+
+### Refactors
+
+* move QoS GetServerLatencies from after user logged in, to SDK Module OnGameInstanceCreated ([3be2e31](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3be2e31fcd43bbb2fc1c29aef00e337378428cbc))
+
 ### [26.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.1.1%0D26.1.0) (2024-08-21)
 
 

@@ -13,8 +13,10 @@
 UENUM(BlueprintType)
 enum class EAccelByteLoginAuthFactorType : uint8
 {
+	None,
 	Authenticator,
-	BackupCode
+	BackupCode,
+	Email
 };
 
 /** @brief Supported platforms by AccelByte IAM. */
@@ -81,7 +83,8 @@ UENUM(BlueprintType)
 enum class EAccountConfiguration : uint8
 {
 	UNIQUE_DISPLAY_NAME_ENABLED,
-	USERNAME_DISABLED
+	USERNAME_DISABLED,
+	MANDATORY_EMAIL_VERIFICATION_ENABLED
 };
 
 USTRUCT(BlueprintType)
@@ -128,6 +131,9 @@ struct ACCELBYTEUE4SDK_API FRegisterRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
 	FString UniqueDisplayName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+	FString Code{};
 };
 
 USTRUCT(BlueprintType)
@@ -1364,4 +1370,93 @@ struct ACCELBYTEUE4SDK_API FAccountUserPlatformInfosResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | AccountUserPlatformInfosResponse")
 	TArray<FAccountUserPlatformData> Data{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUpdatePasswordRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | UpdatePasswordRequest")
+	FString LanguageTag{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | UpdatePasswordRequest")
+	FString MfaToken{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | UpdatePasswordRequest")
+	FString NewPassword{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | UpdatePasswordRequest")
+	FString OldPassword{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FDisableMfaAuthenticatorRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | UpdatePasswordRequest")
+	FString MfaToken{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FDisableMfaBackupCodeRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | UpdatePasswordRequest")
+	FString MfaToken{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FDisableMfaEmailRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | UpdatePasswordRequest")
+	FString MfaToken{};
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteSendMfaEmailAction : uint8
+{
+	ChangePassword,
+	DisableMFAEmail
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FMfaStatusResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | MfaStatusResponse")
+	bool Enabled{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | MfaStatusResponse")
+	FString DefaultFactor{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | MfaStatusResponse")
+	TArray<FString> EnabledFactors{};	
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FVerifyMfaResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | UserManagement | Models | VerifyMfaResponse")
+	FString MfaToken{};
+};
+
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FSendVerificationCodeToNewUserRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeToNewUserRequest")
+	FString EmailAddress{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeToNewUserRequest")
+	FString LanguageTag{};
 };

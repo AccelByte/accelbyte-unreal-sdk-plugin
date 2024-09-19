@@ -1,4 +1,4 @@
-// Copyright (c) 2024 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2024 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -164,6 +164,36 @@ FAccelByteTaskWPtr ServerInventory::UpdateInventory(FString const& InventoryId
 		, *ServerSettingsRef.InventoryServerUrl
 		, *ServerCredentialsRef->GetNamespace()
 		, *InventoryId);
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateInventoryRequest, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerInventory::UpdateAllUserInventories(FString const& UserId
+	, FString const& InventoryConfigurationCode
+	, FAccelByteModelsUpdateInventoryRequest const& UpdateInventoryRequest
+	, THandler<TArray<FAccelByteModelsUserInventoryResponse>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	if (InventoryConfigurationCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, InventoryConfigurationCode is empty."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/inventoryConfigurations/%s/inventories")
+		, *ServerSettingsRef.InventoryServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserId
+		, *InventoryConfigurationCode);
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateInventoryRequest, OnSuccess, OnError);
 }
@@ -455,7 +485,82 @@ FAccelByteTaskWPtr ServerInventory::SaveInventoryItem(FString const& UserId
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, SaveItemRequest, OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr ServerInventory::SyncUserEntitlement(FString const& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr ServerInventory::BulkSaveInventoryItems(FString const& UserId
+	, TArray<FAccelByteModelsSaveInventoryItemRequest> const& SaveItemsRequests
+	, THandler<TArray<FAccelByteModelsBulkSaveInventoryItems>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	if (SaveItemsRequests.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, SaveItemsRequests is empty."));
+		return nullptr;
+	}
+	else if (SaveItemsRequests.Num() >= MaxSaveInventoryItems)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Maximum SaveItemsRequests is 10 for each call."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/items/bulk")
+		, *ServerSettingsRef.InventoryServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserId);
+
+	FString Content = TEXT("");
+	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsSaveInventoryItemRequest>(SaveItemsRequests, Content);
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerInventory::BulkSaveInventoryItemsByInventoryId(FString const& UserId
+	, FString const& InventoryId
+	, TArray<FAccelByteModelsSaveInventoryItemByInventoryIdRequest> const& SaveItemsRequests
+	, THandler<TArray<FAccelByteModelsBulkSaveInventoryItems>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return nullptr;
+	}
+	if (SaveItemsRequests.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, SaveItemsRequests is empty."));
+		return nullptr;
+	}
+	else if (SaveItemsRequests.Num() >= MaxSaveInventoryItems)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Maximum SaveItemsRequests is 10 for each call."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/inventories/%s/items/bulk")
+		, *ServerSettingsRef.InventoryServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserId
+		, *InventoryId);
+
+	FString Content = TEXT("");
+	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsSaveInventoryItemByInventoryIdRequest>(SaveItemsRequests, Content);
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerInventory::SyncUserEntitlement(FString const& UserId
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 

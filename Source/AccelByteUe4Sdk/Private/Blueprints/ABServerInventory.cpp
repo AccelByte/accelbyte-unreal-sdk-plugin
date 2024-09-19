@@ -89,6 +89,28 @@ void UABServerInventory::UpdateInventory(FString const& InventoryId
 			}));
 }
 
+void UABServerInventory::UpdateAllUserInventories(FString const& UserId
+	, FString const& InventoryConfigurationCode
+	, FAccelByteModelsUpdateInventoryRequest const& UpdateInventoryRequest
+	, FDModelsUpdateAllInventoriesResponse const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->ServerInventory.UpdateAllUserInventories(
+		UserId,
+		InventoryConfigurationCode,
+		UpdateInventoryRequest,
+		THandler<TArray<FAccelByteModelsUserInventoryResponse>>::CreateLambda(
+			[OnSuccess](TArray<FAccelByteModelsUserInventoryResponse> const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
 void UABServerInventory::DeleteInventory(FString const& InventoryId
 	, FAccelByteModelsDeleteInventoryRequest const& DeleteInventoryRequest
 	, FDHandler const& OnSuccess
@@ -258,6 +280,50 @@ void UABServerInventory::SaveInventoryItem(FString const& UserId
 		SaveItemRequest,
 		THandler<FAccelByteModelsUserItemResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserItemResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
+void UABServerInventory::BulkSaveInventoryItems(FString const& UserId
+	, TArray<FAccelByteModelsSaveInventoryItemRequest> const& SaveItemsRequests
+	, FDModelsSaveInventoryItemsResponses const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->ServerInventory.BulkSaveInventoryItems(
+		UserId,
+		SaveItemsRequests,
+		THandler<TArray<FAccelByteModelsBulkSaveInventoryItems>>::CreateLambda(
+			[OnSuccess](TArray<FAccelByteModelsBulkSaveInventoryItems> const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
+void UABServerInventory::BulkSaveInventoryItemsByInventoryId(FString const& UserId
+	, FString const& InventoryId
+	, TArray<FAccelByteModelsSaveInventoryItemByInventoryIdRequest> const& SaveItemsRequests
+	, FDModelsSaveInventoryItemsResponses const& OnSuccess
+	, FDErrorHandler const& OnError)
+{
+	ApiClientPtr->ServerInventory.BulkSaveInventoryItemsByInventoryId(
+		UserId,
+		InventoryId,
+		SaveItemsRequests,
+		THandler<TArray<FAccelByteModelsBulkSaveInventoryItems>>::CreateLambda(
+			[OnSuccess](TArray<FAccelByteModelsBulkSaveInventoryItems> const& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}

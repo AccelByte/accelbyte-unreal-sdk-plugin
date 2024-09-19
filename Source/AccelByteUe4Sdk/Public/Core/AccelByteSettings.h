@@ -27,6 +27,7 @@ public:
 	FString InventoryServerUrl{};
 	FString ReportingServerUrl{};
 	FString LoginQueueServerUrl{};
+	FString SessionHistoryServerUrl{};
 	FString AppId{};
 	FString CustomerName{};
 	FString SettingsEnvironment{};
@@ -37,6 +38,7 @@ public:
 	bool bEnablePresenceBroadcastEventHeartbeat;
 	bool bEnableHttpCache{false};
 	bool bServerUseAMS{false};//Affect QoS Manager BaseURL
+	bool bDisableAutoGetQosLatencies{false};
 	
 	/* @brief false will disable cache on game telemetry, except for what listed on critical event list */
 	bool bEnableGameTelemetryCache{ true };
@@ -151,6 +153,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString SessionServerUrl{};
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString SessionHistoryServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString MatchmakingV2ServerUrl{};
@@ -302,6 +307,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetSessionServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetSessionHistoryServerUrl();
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetMatchmakingV2ServerUrl();
@@ -419,6 +427,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetSessionServerUrl(const FString& SessionServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetSessionHistoryServerUrl(const FString& SessionHistoryServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetMatchmakingV2ServerUrl(const FString& MatchmakingV2ServerUrl);

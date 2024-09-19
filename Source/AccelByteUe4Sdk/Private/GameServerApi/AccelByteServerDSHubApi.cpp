@@ -145,6 +145,8 @@ void ServerDSHub::CreateWebSocket()
 
 	TMap<FString, FString> Headers;
 	Headers.Add(DSHubServerNameHeader, BoundServerName);
+	// if bServerUseAMS -> set header value false ; else -> set header value true
+	Headers.Add(DSHubCustomDSManagerHeader, ServerSettingsRef.bServerUseAMS ? TEXT("false") : TEXT("true"));
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 
 	FAccelByteUtilities::AppendModulesVersionToMap(Headers);

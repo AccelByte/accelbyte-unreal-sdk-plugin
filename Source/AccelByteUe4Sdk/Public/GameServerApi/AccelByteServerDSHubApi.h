@@ -144,6 +144,11 @@ private:
 	 * Header key for specifying the server name to connect to the DS hub socket with.
 	 */
 	const FString DSHubServerNameHeader = TEXT("X-Ab-ServerID");
+
+	/**
+	 * Header key for specifying if we are using AMS or custom DS manager
+	 */
+	const FString DSHubCustomDSManagerHeader = TEXT("X-Ab-Custom");
 	
 	/**
 	 * Server name that is associated with this DS hub connection. Set on connection.

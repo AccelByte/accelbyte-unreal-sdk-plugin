@@ -109,6 +109,11 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 		QosPingTimeout = .6;
 	}
 
+	FString ServerUseAMSString{};
+	// even though this is ServerSettings it's intended to read from previously available bServerUseAMS in AccelByteSettings
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("bServerUseAMS"), ServerUseAMSString, TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings"));
+	this->bServerUseAMS = ServerUseAMSString.IsEmpty() ? false : ServerUseAMSString.ToBool();
+
 	LoadAMSSettings();
 
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("StatsDUrl"), StatsDServerUrl, DefaultServerSection);
@@ -205,6 +210,7 @@ void ServerSettings::Reset(ESettingsEnvironment const Environment)
 
 bool AccelByte::ServerSettings::LoadAMSSettings()
 {
+	bool bIsLoadSuccess = true;
 	// Check if the key exist in the commandline of AccelByte format. For example "GameExecutable -abKey=Value" 
 	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(TEXT("watchdog_url"), AMSServerWatchdogUrl))
 	{
@@ -214,7 +220,10 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 			if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("watchdog_url"), AMSServerWatchdogUrl))
 			{
 				// If not exist, then fetch the setting from game default engine ini file
-				GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni);
+				if (!GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni))
+				{
+					bIsLoadSuccess = false;
+				}
 			}
 		}
 	}
@@ -223,16 +232,22 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 	{
 		if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("heartbeat"), AMSHeartbeatInterval))
 		{
-			GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni);
+			if (!GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni))
+			{
+				bIsLoadSuccess = false;
+			}
 		}
 	}
 
 	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(TEXT("dsid"), DSId))
 	{
-		FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("dsid"), DSId);
+		if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("dsid"), DSId))
+		{
+			bIsLoadSuccess = false;
+		}
 	}
 
-	return true;
+	return bIsLoadSuccess;
 }
 
 FString UAccelByteBlueprintsServerSettings::GetClientId()

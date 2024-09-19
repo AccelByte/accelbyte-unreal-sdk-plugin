@@ -1506,7 +1506,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileGoogle
 	FString PurchaseToken{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
-	bool AutoAck{}; //should be true for sync DURABLE item entitlement
+	bool AutoAck{false}; //should be true for sync DURABLE item entitlement
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
 	FString Region{}; //optional

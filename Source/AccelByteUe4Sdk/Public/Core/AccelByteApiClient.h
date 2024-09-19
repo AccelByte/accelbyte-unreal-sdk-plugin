@@ -54,6 +54,7 @@
 #include "Api/AccelByteLoginQueueApi.h"
 #include "Core/AccelByteMessagingSystem.h"
 #include "Api/AccelByteChallengeApi.h"
+#include "Api/AccelByteSessionHistoryApi.h"
 
 namespace AccelByte
 {
@@ -126,6 +127,7 @@ public:
 	Api::SessionBrowser SessionBrowser{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::TurnManager TurnManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Session Session{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	Api::SessionHistory SessionHistory{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::MatchmakingV2 MatchmakingV2{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::AMS Ams{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion

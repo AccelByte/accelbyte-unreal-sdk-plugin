@@ -242,6 +242,21 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Kick user from a game session.
+	 *
+	 * @param GameSessionID The ID of the game session which the user will be kicked from.
+	 * @param UserID The ID of the user to kick 
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr KickUserFromGameSession(FString const& GameSessionID
+		, FString const& UserID
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Inform session service that current DS session is ready receiving client travel.
 	 * This needed if session template used for this game session enable the dsManualSetReady flag.
 	 *

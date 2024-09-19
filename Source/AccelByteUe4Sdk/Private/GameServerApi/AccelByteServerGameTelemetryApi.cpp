@@ -149,7 +149,7 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 		JsonObject->SetStringField("EventName", Event.EventName);
 		JsonObject->SetObjectField("Payload", Event.Payload);
 		JsonObject->SetStringField("ClientTimestamp", FAccelByteUtilities::GetCurrentServerTime().ToIso8601());
-		JsonObject->SetStringField("flightId", FAccelByteUtilities::GetFlightId());
+		JsonObject->SetStringField("FlightId", FAccelByteUtilities::GetFlightId());
 		JsonObject->SetStringField("DeviceType", FAccelByteUtilities::GetPlatformName());
 
 		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));

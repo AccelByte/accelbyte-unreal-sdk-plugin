@@ -198,6 +198,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsServerInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
 	FString Session_id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
+	FString Protocol{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
+	bool Is_override_game_version{false};
 };
 
 USTRUCT(BlueprintType)

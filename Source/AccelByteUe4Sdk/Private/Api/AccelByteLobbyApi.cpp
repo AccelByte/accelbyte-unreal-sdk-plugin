@@ -2959,6 +2959,7 @@ void Lobby::HandleMessageNotif(FString const& ReceivedMessageType
 		case(Notif::MessageNotif):
 		{
 			FAccelByteModelsNotificationMessage NotificationMessage;
+			NotificationMessage.Type = ReceivedMessageType;
 			FString PayloadKey = "payload";
 			if (ParsedJsonObj->HasTypedField<EJson::Object>(PayloadKey))
 			{

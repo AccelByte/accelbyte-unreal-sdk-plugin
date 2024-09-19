@@ -442,6 +442,8 @@ FString FAccelByteUtilities::GetAuthenticatorString(EAccelByteLoginAuthFactorTyp
 		return "authenticator";
 	case EAccelByteLoginAuthFactorType::BackupCode:
 		return "backupCode";
+	case EAccelByteLoginAuthFactorType::Email:
+		return "email";
 	default:
 		return "unknown";
 	}
@@ -1543,4 +1545,17 @@ bool FAccelByteUtilities::SplitArraysToNum(const TArray<FString>& InArray
 	}
 	
 	return true;
+}
+
+FString FAccelByteUtilities::ConvertAccelByteGeneralSortByToString(EAccelByteGeneralSortBy SortBy)
+{
+	switch (SortBy)
+	{
+	case EAccelByteGeneralSortBy::ASC:
+		return TEXT("asc");
+	case EAccelByteGeneralSortBy::DESC:
+		return TEXT("desc");
+	default:
+		return TEXT("");
+	}
 }

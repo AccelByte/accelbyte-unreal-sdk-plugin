@@ -21,11 +21,12 @@ public:
 	FString DSId{};
 	FString AMSServerWatchdogUrl{};
 	FString StatsDServerUrl{};
-	int32 StatsDServerPort;
-	int32 StatsDMetricInterval;
-	int AMSHeartbeatInterval;
-	float DSHubReconnectTotalTimeout;
-	float AMSReconnectTotalTimeout;
+	int32 StatsDServerPort{0};
+	int32 StatsDMetricInterval{0};
+	int AMSHeartbeatInterval{0};
+	float DSHubReconnectTotalTimeout{0};
+	float AMSReconnectTotalTimeout{0};
+	bool bServerUseAMS{false};
 
 	virtual void Reset(ESettingsEnvironment const Environment) override;
 

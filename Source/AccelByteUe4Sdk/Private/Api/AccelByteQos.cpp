@@ -29,20 +29,7 @@ Qos::Qos(Credentials& InCredentialsRef
 #else
 	, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
 #endif
-	, bValidityFlagPtr(MakeShared<bool>(true))
 {
-		// Credentials is possibly destroyed before we are so we can't remove
-		// from the delegate in our destructor.  This weak pointer allows us to
-		// know whether `this` is valid.
-		TWeakPtr<bool> ValidityFlag = bValidityFlagPtr;
-		CredentialsRef->OnLoginSuccess().AddLambda([ValidityFlag, this](const FOauth2Token& Response)
-			{
-				if (!ValidityFlag.IsValid())
-					return;
-				OnLoginSuccess(Response);
-			});
-
-
 	OnLobbyConnectedHandle = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Qos::OnLobbyConnected);
 	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 	if (MessagingSystemPtr.IsValid())
@@ -63,15 +50,7 @@ Qos::~Qos()
 	}
 	OnLobbyConnectedHandle.Unbind();
 
-	// Indicate to the OnLoginSuccess lambda that we have been destroyed and `this` is no longer valid.
-	bValidityFlagPtr.Reset();
-
 	FTickerAlias::GetCoreTicker().RemoveTicker(QosUpdateCheckerHandle);
-}
-
-void Qos::OnLoginSuccess(const FOauth2Token& Response)
-{
-	GetServerLatencies(nullptr, nullptr);
 }
 
 void Qos::GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess

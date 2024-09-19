@@ -18,6 +18,7 @@
 #include "Api/AccelByteHeartBeatApi.h"
 #include "Api/AccelBytePredefinedEventApi.h"
 #include "Api/AccelByteGameStandardEventApi.h"
+#include "Api/AccelByteQos.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "GameServerApi/AccelByteServerAMSApi.h"
 #include "Engine/GameInstance.h"
@@ -425,6 +426,14 @@ void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
 		else
 		{
 			AccelByte::FRegistry::ServerAMS.Connect();
+		}
+	}
+	else
+	{
+		// only do QoS latency check if not disabled in settings
+		if(!AccelByte::FRegistry::Settings.bDisableAutoGetQosLatencies)
+		{
+			AccelByte::FRegistry::Qos.GetServerLatencies(nullptr, nullptr);
 		}
 	}
 	

@@ -277,6 +277,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserItemResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Item Data")
 	FString InventoryId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Item Data")
+	FJsonObjectWrapper ItemInfo{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Item Data")
 	FString Namespace{};
@@ -337,6 +340,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateUserInventoryItemErrorDetails
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Update User Inventorie Item Error Details")
 	FString ErrorMessage{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSaveInventoryItemsErrorDetails : public FAccelByteModelsUpdateUserInventoryItemErrorDetails
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Inventory Items Error Details")
+	FString SlotId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Save Inventory Items Error Details")
+	FString SourceItemId{};
 };
 
 USTRUCT(BlueprintType)
@@ -567,4 +582,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSaveInventoryItemRequest : public FAc
 	FString InventoryConfigurationCode{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkSaveInventoryItems
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Inventories Data")
+	FAccelByteModelsSaveInventoryItemsErrorDetails ErrorDetails{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Inventories Data")
+	FAccelByteModelsUserItemResponse Item{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Inventories Data")
+	bool Success{ false };
+};
 #pragma endregion
