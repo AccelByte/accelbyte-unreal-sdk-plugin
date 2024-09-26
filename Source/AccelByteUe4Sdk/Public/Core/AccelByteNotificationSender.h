@@ -4,6 +4,7 @@
 
 #pragma once
 #include "Core/AccelByteMessagingSystem.h"
+#include "Models/AccelByteLobbyModels.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteNotificationSender, Log, All);
 
@@ -21,7 +22,11 @@ public:
 	 * @return Lobby notification format string.
 	 * @see EV2MatchmakingNotifTopic
 	 */
-	static FString ComposeMMv2Notification(const FString& Topic, const FString& JsonStringContent, const bool bPayloadEncoded = false);
+	static FString ComposeMMv2Notification(const FString& Topic
+		, const FString& JsonStringContent
+		, const bool bPayloadEncoded = false
+		, const FLobbySequenceID& SequenceID = FLobbySequenceID(0)
+		, const FLobbySequenceNumber& SequenceNumber = FLobbySequenceNumber(0));
 
 	/**
 	 * Compose a lobby notification format string for a given session notification.
@@ -31,7 +36,11 @@ public:
 	 * @return Lobby notification format string.
 	 * @see EV2SessionNotifTopic
 	 */
-	static FString ComposeSessionNotification(const FString& Topic, const FString& JsonStringContent, const bool bPayloadEncoded = false);
+	static FString ComposeSessionNotification(const FString& Topic
+		, const FString& JsonStringContent
+		, const bool bPayloadEncoded = false
+		, const FLobbySequenceID& SequenceID = FLobbySequenceID(0)
+		, const FLobbySequenceNumber& SequenceNumber = FLobbySequenceNumber(0));
 
 	/**
 	 * Compose a lobby notification format string for a given parameters.
@@ -40,7 +49,11 @@ public:
 	 * @param ReconnectFromCode the reconnect from code.
 	 * @return
 	 */
-	static FString ComposeLobbyConnectedNotification(const FString& LobbySessionId, const FString& LoginType, const int32& ReconnectFromCode);
+	static FString ComposeLobbyConnectedNotification(const FString& LobbySessionId
+		, const FString& LoginType
+		, const int32& ReconnectFromCode
+		, const FLobbySequenceID& SequenceID = FLobbySequenceID(0)
+		, const FLobbySequenceNumber& SequenceNumber = FLobbySequenceNumber(0));
 };
 	
 class ACCELBYTEUE4SDK_API FAccelByteNotificationSender

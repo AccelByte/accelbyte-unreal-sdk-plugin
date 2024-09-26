@@ -1860,6 +1860,79 @@ void AccelByte::Api::Lobby::OnTokenReceived(FString const& Token)
 	Connect(Token);
 }
 
+bool Lobby::Tick(float DeltaTime)
+{
+	if(NotificationQueue.IsEmpty())
+	{
+		return true;
+	}
+
+	FHandleLobbyMessageData Message;
+	if(!NotificationQueue.Dequeue(Message))
+	{
+		if(NotificationQueue.IsLocked())
+    	{
+    		UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("Notification queue is locked, not broadcasting notification"));
+    	}
+		else
+		{
+			UE_LOG(LogAccelByteLobby, VeryVerbose, TEXT("Failed to dequeue notification, not broadcasting notification"));
+		}
+		return true;
+	}
+
+	switch (Message.Type)
+	{
+		case EHandleLobbyMessageDataType::Other:
+			{
+				HandleMessageNotif(Message.MessageType, Message.ParsedJsonString, Message.ParsedJsonObject, Message.bSkipConditioner);
+				break;
+			}
+		case EHandleLobbyMessageDataType::V2Matchmaking:
+			{
+				DispatchV2MatchmakingMessageByTopic(Message.Topic, Message.Payload);
+				break;
+			}
+		case EHandleLobbyMessageDataType::Session:
+			{
+				DispatchV2SessionMessageByTopic(Message.Topic, Message.Payload, Message.ParsedJsonString);
+				break;
+			}
+		default:
+			{
+				UE_LOG(LogAccelByteLobby, Warning, TEXT("Unknown lobby message type : %s"), *FAccelByteUtilities::GetUEnumValueAsString(Message.Type));
+				break;
+			};
+	}
+	
+	return true;
+}
+
+void Lobby::HandleLobbyMessageByType(FHandleLobbyMessageData const& MessageData)
+{
+	if (MessageData.MessageType.Equals(LobbyResponse::SessionNotif))
+	{
+		HandleV2SessionNotif(MessageData.ParsedJsonString, MessageData.bSkipConditioner);
+	}
+	else if (MessageData.MessageType.Contains(Suffix::Response))
+	{
+		HandleMessageResponse(MessageData.MessageType, MessageData.ParsedJsonString, MessageData.ParsedJsonObject, nullptr);
+	}
+	else if (MessageData.MessageType.Contains(Suffix::Notif))
+	{
+		HandleMessageNotif(MessageData.MessageType, MessageData.ParsedJsonString, MessageData.ParsedJsonObject, MessageData.bSkipConditioner);
+	}
+	else // undefined; not Response nor Notif
+	{
+		ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error cannot parse message. Neither a response nor a notif type. %s, Raw: %s"), *MessageData.MessageType, *MessageData.ParsedJsonString));
+	}
+}
+
+TSharedPtr<FAccelByteKey> Lobby::LockNotifications()
+{
+	return NotificationQueue.LockQueue();
+}
+
 FAccelByteTaskWPtr Lobby::GetNotifications(THandler<FAccelByteModelsGetUserNotificationsResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, FDateTime const& StartTime
@@ -2705,109 +2778,127 @@ void Lobby::HandleV2SessionNotif(FString const& ParsedJsonString, bool bSkipCond
 		return;
 	}
 
-	switch(FAccelByteUtilities::GetUEnumValueFromString<EV2SessionNotifTopic>(Notif.Topic))
+	FJsonObjectWrapper JsonWrapper;
+	if(JsonWrapper.JsonObjectFromString(ParsedJsonString) && JsonWrapper.JsonObject->HasField("SequenceID"))
 	{
-	case EV2SessionNotifTopic::OnPartyInvited:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2PartyInvitedEvent>(Notif.Payload, V2PartyInvitedNotif);
-		break;
+		FHandleLobbyMessageData Message;
+		Message.Topic = Notif.Topic;
+		Message.Payload = Notif.Payload;
+		Message.ParsedJsonString = ParsedJsonString;
+		Message.Type = EHandleLobbyMessageDataType::Session;
+		
+		NotificationQueue.Enqueue(Message);
+		return;
 	}
-	case EV2SessionNotifTopic::OnPartyInviteTimeout:
+
+	DispatchV2SessionMessageByTopic(Notif.Topic, Notif.Payload, ParsedJsonString);
+}
+
+void Lobby::DispatchV2SessionMessageByTopic(FString const& Topic, FString const& Payload, FString const& ParsedJsonString)
+{
+	switch(FAccelByteUtilities::GetUEnumValueFromString<EV2SessionNotifTopic>(Topic))
 	{
-		DispatchV2JsonNotif<FAccelByteModelsV2PartyInviteTimeoutEvent>(Notif.Payload, V2PartyInviteTimeoutNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnPartyMembersChanged:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2PartyMembersChangedEvent>(Notif.Payload, V2PartyMembersChangedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnPartyJoined:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2PartyUserJoinedEvent>(Notif.Payload, V2PartyJoinedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnPartyRejected:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2PartyUserRejectedEvent>(Notif.Payload, V2PartyRejectedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnPartyKicked:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2PartyUserKickedEvent>(Notif.Payload, V2PartyKickedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnSessionInvited:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserInvitedEvent>(Notif.Payload, V2GameSessionInvitedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnGameSessionInviteTimeout:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserInviteTimeoutEvent>(Notif.Payload, V2GameSessionInviteTimeoutNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnSessionJoined:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserJoinedEvent>(Notif.Payload, V2GameSessionJoinedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnSessionMembersChanged:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionMembersChangedEvent>(Notif.Payload, V2GameSessionMembersChangedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnSessionKicked:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserKickedEvent>(Notif.Payload, V2GameSessionKickedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnSessionRejected:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserRejectedEvent>(Notif.Payload, V2GameSessionRejectedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnDSStatusChanged:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2DSStatusChangedNotif>(Notif.Payload, V2DSStatusChangedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnPartyUpdated:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2PartySession>(Notif.Payload, V2PartyUpdatedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnPartyCancelled:
-	{
-		DispatchMulticastV2JsonNotif<FAccelByteModelsV2PartyInviteCanceledEvent>(Notif.Payload, V2PartyInviteCanceledNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnGameSessionUpdated:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2GameSession>(Notif.Payload, V2GameSessionUpdatedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnSessionStorageChanged:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2SessionStorageChangedEvent>(Notif.Payload, V2SessionStorageChangedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnSessionEnded:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2GameSessionEndedEvent>(Notif.Payload, V2GameSessionEndedNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnSessionJoinedSecret:
-	{
-		DispatchV2JsonNotif<FAccelByteModelsV2SessionJoinedSecret>(Notif.Payload, V2SessionJoinedSecretNotif);
-		break;
-	}
-	case EV2SessionNotifTopic::OnGameSessionInviteCancelled:
-	{
-		DispatchMulticastV2JsonNotif<FAccelByteModelsV2GameSessionInviteCanceledEvent>(Notif.Payload, V2GameSessionInviteCanceledNotif);
-		break;
-	}
-	default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
+		case EV2SessionNotifTopic::OnPartyInvited:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2PartyInvitedEvent>(Payload, V2PartyInvitedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnPartyInviteTimeout:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2PartyInviteTimeoutEvent>(Payload, V2PartyInviteTimeoutNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnPartyMembersChanged:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2PartyMembersChangedEvent>(Payload, V2PartyMembersChangedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnPartyJoined:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2PartyUserJoinedEvent>(Payload, V2PartyJoinedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnPartyRejected:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2PartyUserRejectedEvent>(Payload, V2PartyRejectedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnPartyKicked:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2PartyUserKickedEvent>(Payload, V2PartyKickedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnSessionInvited:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserInvitedEvent>(Payload, V2GameSessionInvitedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnGameSessionInviteTimeout:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserInviteTimeoutEvent>(Payload, V2GameSessionInviteTimeoutNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnSessionJoined:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserJoinedEvent>(Payload, V2GameSessionJoinedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnSessionMembersChanged:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2GameSessionMembersChangedEvent>(Payload, V2GameSessionMembersChangedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnSessionKicked:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserKickedEvent>(Payload, V2GameSessionKickedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnSessionRejected:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2GameSessionUserRejectedEvent>(Payload, V2GameSessionRejectedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnDSStatusChanged:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2DSStatusChangedNotif>(Payload, V2DSStatusChangedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnPartyUpdated:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2PartySession>(Payload, V2PartyUpdatedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnPartyCancelled:
+		{
+			DispatchMulticastV2JsonNotif<FAccelByteModelsV2PartyInviteCanceledEvent>(Payload, V2PartyInviteCanceledNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnGameSessionUpdated:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2GameSession>(Payload, V2GameSessionUpdatedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnSessionStorageChanged:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2SessionStorageChangedEvent>(Payload, V2SessionStorageChangedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnSessionEnded:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2GameSessionEndedEvent>(Payload, V2GameSessionEndedNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnSessionJoinedSecret:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2SessionJoinedSecret>(Payload, V2SessionJoinedSecretNotif);
+			break;
+		}
+		case EV2SessionNotifTopic::OnGameSessionInviteCancelled:
+		{
+			DispatchMulticastV2JsonNotif<FAccelByteModelsV2GameSessionInviteCanceledEvent>(Payload, V2GameSessionInviteCanceledNotif);
+			break;
+		}
+		default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
 	}
 }
 
@@ -2827,30 +2918,47 @@ void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& 
 	{
 		return;
 	}
+
+	FJsonObjectWrapper JsonWrapper;
+	if(JsonWrapper.JsonObjectFromString(NotifJsonString) && JsonWrapper.JsonObject->HasField("SequenceID"))
+	{
+		FHandleLobbyMessageData EnqueueMessage;
+		EnqueueMessage.Topic = Message.Topic;
+		EnqueueMessage.Payload = Message.Payload;
+		EnqueueMessage.Type = EHandleLobbyMessageDataType::V2Matchmaking;
+		
+		NotificationQueue.Enqueue(EnqueueMessage);
+		return;
+	}
 	
-	switch (FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotifTopic>(Message.Topic))
+	DispatchV2MatchmakingMessageByTopic(Message.Topic, Message.Payload);
+}
+
+void Lobby::DispatchV2MatchmakingMessageByTopic(FString const& Topic, FString const& Payload) const
+{
+	switch (FAccelByteUtilities::GetUEnumValueFromString<EV2MatchmakingNotifTopic>(Topic))
 	{
 		case EV2MatchmakingNotifTopic::OnMatchFound:
-		{
-			DispatchV2JsonNotif<FAccelByteModelsV2MatchFoundNotif>(Message.Payload, V2MatchmakingMatchFoundNotif);
-			break;
-		}
+			{
+				DispatchV2JsonNotif<FAccelByteModelsV2MatchFoundNotif>(Payload, V2MatchmakingMatchFoundNotif);
+				break;
+			}
 		case EV2MatchmakingNotifTopic::OnMatchmakingStarted:
-		{
-			DispatchV2JsonNotif<FAccelByteModelsV2StartMatchmakingNotif>(Message.Payload, V2MatchmakingStartNotif);
-			break;
-		}
+			{
+				DispatchV2JsonNotif<FAccelByteModelsV2StartMatchmakingNotif>(Payload, V2MatchmakingStartNotif);
+				break;
+			}
 		case EV2MatchmakingNotifTopic::OnMatchmakingTicketExpired:
-		{
-			DispatchV2JsonNotif<FAccelByteModelsV2MatchmakingExpiredNotif>(Message.Payload, V2MatchmakingExpiredNotif);
-			break;
-		}
+			{
+				DispatchV2JsonNotif<FAccelByteModelsV2MatchmakingExpiredNotif>(Payload, V2MatchmakingExpiredNotif);
+				break;
+			}
 		case EV2MatchmakingNotifTopic::OnMatchmakingTicketCanceled:
-		{
-			DispatchV2JsonNotif<FAccelByteModelsV2MatchmakingCanceledNotif>(Message.Payload, V2MatchmakingCanceledNotif);
-			break;
-		}
-		default: UE_LOG(LogAccelByteLobby, Warning, TEXT("Unknown matchmaking v2 notification topic : %s"), *Message.Topic);
+			{
+				DispatchV2JsonNotif<FAccelByteModelsV2MatchmakingCanceledNotif>(Payload, V2MatchmakingCanceledNotif);
+				break;
+			}
+		default: UE_LOG(LogAccelByteLobby, Warning, TEXT("Unknown matchmaking v2 notification topic : %s"), *Topic);
 	}
 }
 
@@ -3177,18 +3285,20 @@ void Lobby::SendBufferedNotifications()
 	for (const FAccelByteModelsUserNotification& Notification : BufferedNotifications)
 	{
 		FString LobbyMessage;
+		FLobbySequenceID SequenceID = FLobbySequenceID(Notification.SequenceID);
+		FLobbySequenceNumber SequenceNumber = FLobbySequenceNumber(Notification.SequenceNumber);
 
 		if (Notification.Type.Equals(LobbyResponse::ConnectedNotif))
 		{
-			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeLobbyConnectedNotification(Notification.LobbySessionID, Notification.LoginType, Notification.ReconnectFromCode);
+			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeLobbyConnectedNotification(Notification.LobbySessionID, Notification.LoginType, Notification.ReconnectFromCode, SequenceID, SequenceNumber);
 		}
 		else if (Notification.Type.Equals(LobbyResponse::MessageNotif))
 		{
-			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeMMv2Notification(Notification.Topic, Notification.Payload, true);
+			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeMMv2Notification(Notification.Topic, Notification.Payload, true, SequenceID, SequenceNumber);
 		}
 		else if (Notification.Type.Equals(LobbyResponse::SessionNotif))
 		{
-			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeSessionNotification(Notification.Topic, Notification.Payload, true);
+			LobbyMessage = FAccelByteNotificationSenderUtility::ComposeSessionNotification(Notification.Topic, Notification.Payload, true, SequenceID, SequenceNumber);
 		}
 
 		if (LobbyMessage.IsEmpty())
@@ -3309,30 +3419,24 @@ void Lobby::OnMessage(FString const& Message, bool bSkipConditioner /* = false *
 		return;
 	}
 
+	FHandleLobbyMessageData MessageData;
+	MessageData.bSkipConditioner = bSkipConditioner;
+	MessageData.MessageType = ReceivedMessageType;
+	MessageData.ParsedJsonString = ParsedJsonString;
+	MessageData.ParsedJsonObject = ParsedJsonObj;
+	MessageData.Type = EHandleLobbyMessageDataType::Other;
+
 	if (ReceivedMessageType.Equals(LobbyResponse::ConnectedNotif))
 	{
 		if (TryBufferNotification(ParsedJsonString))
 		{
 			return;
 		}
+
+		NotificationQueue.Enqueue(MessageData);
 	}
 
-	if (ReceivedMessageType.Equals(LobbyResponse::SessionNotif))
-	{
-		HandleV2SessionNotif(ParsedJsonString, bSkipConditioner);
-	}
-	else if (ReceivedMessageType.Contains(Suffix::Response))
-	{
-		HandleMessageResponse(ReceivedMessageType, ParsedJsonString, ParsedJsonObj);
-	}
-	else if (ReceivedMessageType.Contains(Suffix::Notif))
-	{
-		HandleMessageNotif(ReceivedMessageType, ParsedJsonString, ParsedJsonObj, bSkipConditioner);
-	}
-	else // undefined; not Response nor Notif
-	{
-		ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error cannot parse message. Neither a response nor a notif type. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
-	}
+	HandleLobbyMessageByType(MessageData);
 }
 
 FAccelByteTaskWPtr Lobby::RequestWritePartyStorage(FString const& PartyId
@@ -3527,6 +3631,8 @@ Lobby::Lobby(Credentials & InCredentialsRef
 {
 	InitializeV2MatchmakingNotifTopics();
 	InitializeMessaging();
+
+	LobbyTickerHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &Lobby::Tick), LobbyTickPeriod);
 }
 
 Lobby::~Lobby()
@@ -3537,6 +3643,8 @@ Lobby::~Lobby()
 		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, QosLatenciesUpdatedDelegateHandle);
 	}
 	OnReceivedQosLatenciesUpdatedDelegate.Unbind();
+
+	FTickerAlias::GetCoreTicker().RemoveTicker(LobbyTickerHandle);
 
 	// only disconnect when engine is still valid
 	if(UObjectInitialized())

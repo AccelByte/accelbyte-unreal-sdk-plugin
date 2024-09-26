@@ -21,3 +21,5 @@ using FDelegateHandleAlias = FDelegateHandle;
 
 static const FString LobbyMessageEnvelopeStartContent {"LbS"};
 static const FString LobbyMessageEnvelopeEndContent {"LbE"};
+
+static const FString HEADER_FEATURE_FLAG {TEXT("X-Ab-Feature-Flags")};

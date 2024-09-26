@@ -8,7 +8,11 @@
 
 namespace AccelByte
 {
-	FString FAccelByteNotificationSenderUtility::ComposeMMv2Notification(const FString& Topic, const FString& JsonStringContent, const bool bPayloadEncoded)
+	FString FAccelByteNotificationSenderUtility::ComposeMMv2Notification(const FString& Topic
+		, const FString& JsonStringContent
+		, const bool bPayloadEncoded /* = false */
+		, const FLobbySequenceID& SequenceID /* = 0 */
+		, const FLobbySequenceNumber& SequenceNumber /* = 0 */)
 	{
 		/* Full message example is like the following as of january 22nd 2024
 		 * ==========================================
@@ -23,15 +27,21 @@ namespace AccelByte
 		 * sequenceNumber: 2
 		 * =========================================
 		 * but we only need to fill in topic and payload field to be used as a MMv2 notification
+		 * 06 Sept 2024, added sequenceID and sequenceNumber so can be properly sorted by notification buffer
 		 */
 
 		const FString Payload = bPayloadEncoded ? JsonStringContent : FBase64::Encode(JsonStringContent);
-		FString LobbyMessage = FString::Printf(TEXT("%stype: messageNotif\ntopic: %s\npayload: %s%s"), *LobbyMessageEnvelopeStartContent, *Topic, *Payload, *LobbyMessageEnvelopeEndContent);
+		FString LobbyMessage = FString::Printf(TEXT("%stype: messageNotif\ntopic: %s\npayload: %s\nsequenceID: %d\nsequenceNumber: %d%s"),
+			*LobbyMessageEnvelopeStartContent, *Topic, *Payload, SequenceID.GetValue(), SequenceNumber.GetValue(), *LobbyMessageEnvelopeEndContent);
 		
 		return LobbyMessage;
 	}
 
-	FString FAccelByteNotificationSenderUtility::ComposeSessionNotification(const FString& Topic, const FString& JsonStringContent, const bool bPayloadEncoded)
+	FString FAccelByteNotificationSenderUtility::ComposeSessionNotification(const FString& Topic
+		, const FString& JsonStringContent
+		, const bool bPayloadEncoded /* = false */
+		, const FLobbySequenceID& SequenceID /* = 0 */
+		, const FLobbySequenceNumber& SequenceNumber /* = 0 */)
 	{
 		/* Full message example is like the following as of january 22nd 2024
 		 * ==========================================
@@ -41,15 +51,21 @@ namespace AccelByte
 		 * sentAt: 2024-01-22T09:19:43ZLbE"
 		 * =========================================
 		 * but we only need to fill in topic and payload field to be used as a session notification
+		 * 06 Sept 2024, added sequenceID and sequenceNumber so can be properly sorted by notification buffer
 		 */
 
 		const FString Payload = bPayloadEncoded ? JsonStringContent : FBase64::Encode(JsonStringContent);
-		FString LobbyMessage = FString::Printf(TEXT("%stype: messageSessionNotif\ntopic: %s\npayload: %s%s"), *LobbyMessageEnvelopeStartContent, *Topic, *Payload, *LobbyMessageEnvelopeEndContent);
+		FString LobbyMessage = FString::Printf(TEXT("%stype: messageSessionNotif\ntopic: %s\npayload: %s\nsequenceID: %d\nsequenceNumber: %d%s"),
+			*LobbyMessageEnvelopeStartContent, *Topic, *Payload, SequenceID.GetValue(), SequenceNumber.GetValue(), *LobbyMessageEnvelopeEndContent);
 
 		return LobbyMessage;
 	}
 
-	FString FAccelByteNotificationSenderUtility::ComposeLobbyConnectedNotification(const FString& LobbySessionId, const FString& LoginType, const int32& ReconnectFromCode)
+	FString FAccelByteNotificationSenderUtility::ComposeLobbyConnectedNotification(const FString& LobbySessionId
+		, const FString& LoginType
+		, const int32& ReconnectFromCode
+		, const FLobbySequenceID& SequenceID /* = 0 */
+		, const FLobbySequenceNumber& SequenceNumber /* = 0 */)
 	{
 		/* Full message example is like the following as of january 24th 2024
 		 * ==========================================
@@ -61,9 +77,11 @@ namespace AccelByte
 		 * sequenceNumber: 1
 		 * =========================================
 		 * but we only need to fill in loginType, reconnectFromCode and lobbySessionID to be used as a connected notification
+		 * 06 Sept 2024, added sequenceID and sequenceNumber so can be properly sorted by notification buffer
 		 */
 
-		FString LobbyMessage = FString::Printf(TEXT("%stype: connectNotif\nloginType: %s\nreconnectFromCode: %d\nlobbySessionID: %s%s"), *LobbyMessageEnvelopeStartContent, *LoginType, ReconnectFromCode, *LobbySessionId, *LobbyMessageEnvelopeEndContent);
+		FString LobbyMessage = FString::Printf(TEXT("%stype: connectNotif\nloginType: %s\nreconnectFromCode: %d\nlobbySessionID: %s\nsequenceID: %d\nsequenceNumber: %d%s"),
+			*LobbyMessageEnvelopeStartContent, *LoginType, ReconnectFromCode, *LobbySessionId, SequenceID.GetValue(), SequenceNumber.GetValue(), *LobbyMessageEnvelopeEndContent);
 
 		return LobbyMessage;
 	}

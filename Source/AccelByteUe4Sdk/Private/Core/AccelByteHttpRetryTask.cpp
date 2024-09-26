@@ -83,6 +83,54 @@ namespace AccelByte
 		return FAccelByteTask::Pause();
 	}
 
+	TMap<FString, FString> FHttpRetryTask::GetResponseHeader()
+	{
+		TMap<FString, FString> Result;
+
+		if(!Request.IsValid())
+		{
+			return Result;
+		}
+
+		const FHttpResponsePtr Response = Request->GetResponse();
+		if(!Response.IsValid())
+		{
+			return Result;
+		}
+
+		const FString HeaderContent = Response->GetHeader(HEADER_FEATURE_FLAG);
+
+		/***	Header feature flag value format Per 20 Sept 2024
+		 *		https://accelbyte.atlassian.net/wiki/spaces/JCP/pages/3410165897/Feature+Flags+HTTP+Response+Header+Specification
+		 *		consist of key=value pair
+		 *		Keys cannot contain uppercase characters. Keys and values are separated by "=" (without whitespace)
+		 *			- example key1=value1
+		 *		Multiple pairs are separated by comma followed by space ", "
+		 *			- example multi values: key1=value1, key2=value2
+		 *		The Value will be URL encoded to avoid mismatch the separator and other special characters
+		 *			- example key1=a,b,c, key2=http://localhost 
+		 *			- will become key1=a%2Cb%2Cc, key2=http%3A%2F%2Flocalhost
+		***/
+
+		TArray<FString> FeatureFlagArray;
+		if(HeaderContent.ParseIntoArray(FeatureFlagArray, TEXT(", "), true) == 0)
+		{
+			return Result;
+		}
+
+		for (const FString& FlagString : FeatureFlagArray)
+		{
+			TArray<FString> KeyVal;
+			if(FlagString.ParseIntoArray(KeyVal, TEXT("=")) >= 2)
+			{
+				FString DecodedVal = FPlatformHttp::UrlDecode(KeyVal[1]);
+				Result.Emplace(KeyVal[0], KeyVal[1]);
+			}
+		}
+
+		return Result;
+	}
+
 	void FHttpRetryTask::Tick(double CurrentTime)
 	{
 		FAccelByteTask::Tick(CurrentTime);

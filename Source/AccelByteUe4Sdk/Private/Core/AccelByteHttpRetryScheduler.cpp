@@ -337,7 +337,9 @@ void FHttpRetryScheduler::Shutdown()
 		}
 
 		// try flush once
-#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=3)
+		FHttpModule::Get().GetHttpManager().Shutdown();
+#elif (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
 		FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Shutdown);
 #else
 		FHttpModule::Get().GetHttpManager().Flush(true);

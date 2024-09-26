@@ -17,6 +17,7 @@
 #include "Core/AccelByteMessagingSystem.h"
 #include "Core/AccelByteNetworkConditioner.h"
 #include "Core/AccelByteNotificationBuffer.h"
+#include "Core/AccelByteLockableQueue.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 
@@ -52,6 +53,17 @@ struct FLobbyMessageMetaData
 	FString Code{};
 	FString Type{};
 	FString Id{};
+};
+
+struct FHandleLobbyMessageData
+{
+	EHandleLobbyMessageDataType Type {EHandleLobbyMessageDataType::None};
+	FString Topic; // for MM and Session
+	FString Payload; // for MM and Session
+	FString MessageType;
+	FString ParsedJsonString;
+	TSharedPtr<FJsonObject> ParsedJsonObject;
+	bool bSkipConditioner;
 };
 	
 enum Response : uint8;
@@ -93,6 +105,8 @@ private:
 	bool BanNotifReceived = false;
 	EBanType BanType = EBanType::EMPTY;
 	FDelegateHandle AuthTokenSetDelegateHandle;
+	
+	FDelegateHandleAlias LobbyTickerHandle;
 
 public:
 	
@@ -2796,6 +2810,12 @@ public:
 
 	static void ClearLobbyErrorMessages();
 
+	/**
+	 * @brief Lock notifications that has SequenceID. Next notification received won't be broadcasted until key is destroyed.
+	 * @return Key of the lock, while key exist next notifications won't be broadcasted.
+	 */
+	TSharedPtr<FAccelByteKey> LockNotifications();
+
 private:
 	Lobby(Lobby const&) = delete; // Copy constructor
 	Lobby(Lobby&&) = delete; // Move constructor
@@ -2833,6 +2853,10 @@ private:
 	void OnGetMissingNotificationError(int32 ErrorCode, FString const& ErrorMessage);
 
 	void OnTokenReceived(FString const& Token);
+
+	bool Tick(float DeltaTime);
+
+	void HandleLobbyMessageByType(FHandleLobbyMessageData const& MessageData);
 	
 #pragma region Notification Buffer
 private:
@@ -2852,8 +2876,10 @@ private:
 		, bool bSkipConditioner);
 	
 	void HandleV2SessionNotif(FString const& ParsedJsonString, bool bSkipConditioner);
-	
+	void DispatchV2SessionMessageByTopic(FString const& Topic, FString const& Payload, FString const& ParsedJsonString);
+
 	void HandleV2MatchmakingNotif(FAccelByteModelsNotificationMessage const& Message, bool bSkipConditioner);
+	void DispatchV2MatchmakingMessageByTopic(FString const& Topic, FString const& Payload) const;
 
 	void HandleOneTimeCodeLinkedNotif(FAccelByteModelsNotificationMessage const& Message);
 
@@ -2889,6 +2915,7 @@ private:
 	FConnectionClosed ConnectionClosed;
 	FConnectionClosed Reconnecting;
 	TSharedPtr<IAccelByteTokenGenerator> TokenGenerator;
+	FAccelByteLockableQueue<FHandleLobbyMessageData> NotificationQueue;
 
 	FDelegateHandle OnTokenReceivedDelegateHandle{};
 

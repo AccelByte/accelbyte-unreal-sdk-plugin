@@ -22,6 +22,15 @@ enum class EAvailability : uint8
 	Away = 4
 };
 
+UENUM(BlueprintType)
+enum class EHandleLobbyMessageDataType : uint8
+{
+	None,
+	V2Matchmaking,
+	Session,
+	Other,
+};
+
 /** @brief Matchmaking v2 notification topics enums. */
 UENUM(BlueprintType)
 enum class EV2MatchmakingNotifTopic : uint8
@@ -58,6 +67,140 @@ enum class EV2SessionNotifTopic : uint8
 	OnSessionEnded,
 	OnGameSessionInviteCancelled,
 	OnPartyCancelled
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FLobbySequence
+{
+	GENERATED_BODY()
+
+public:
+	FLobbySequence(){}
+
+protected:
+	FLobbySequence(const FLobbySequence& Other) : Value(Other.GetValue()){}
+
+	explicit FLobbySequence(const int32 Other) : Value(Other){}
+
+	explicit FLobbySequence(const FString& Other)
+	{
+		if(!Other.IsNumeric())
+			return;
+		
+		Value = FCString::Atoi(*Other);
+	}
+
+public:
+	int32 GetValue() const
+	{
+		return Value;
+	}
+
+	void SetValue(const int32 InValue)
+	{
+		Value = InValue;
+	}
+
+#pragma region Self Comparison
+	bool operator==(const FLobbySequence& Other) const
+	{
+		return Value == Other.GetValue();
+	}
+
+	bool operator!=(const FLobbySequence& Other) const
+	{
+		return Value != Other.GetValue();
+	}
+	
+	bool operator>(const FLobbySequence& Other) const
+	{
+		return Value > Other.GetValue();
+	}
+
+	bool operator>=(const FLobbySequence& Other) const
+	{
+		return Value >= Other.GetValue();
+	}
+
+	bool operator<(const FLobbySequence& Other) const
+	{
+		return Value < Other.GetValue();
+	}
+
+	bool operator<=(const FLobbySequence& Other) const
+	{
+		return Value <= Other.GetValue();
+	}
+#pragma endregion
+
+#pragma region Int Comparison
+	bool operator==(const int32 Other) const
+	{
+		return Value == Other;
+	}
+
+	bool operator!=(const int32 Other) const
+	{
+		return Value != Other;
+	}
+	
+	bool operator>(const int32 Other) const
+	{
+		return Value > Other;
+	}
+
+	bool operator>=(const int32 Other) const
+	{
+		return Value >= Other;
+	}
+
+	bool operator<(const int32 Other) const
+	{
+		return Value < Other;
+	}
+
+	bool operator<=(const int32 Other) const
+	{
+		return Value <= Other;
+	}
+#pragma endregion
+
+private:
+	int32 Value {0};
+	
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FLobbySequenceID : public FLobbySequence
+{
+	GENERATED_BODY()
+	
+	FLobbySequenceID(){}
+	
+	FLobbySequenceID(const FLobbySequenceID& Other) : FLobbySequence(Other) {}
+
+	explicit FLobbySequenceID(const FLobbySequence& Other) : FLobbySequence(Other) {}
+
+	explicit FLobbySequenceID(const int32 Other) : FLobbySequence(Other) {}
+
+	explicit FLobbySequenceID(const FString& Other) : FLobbySequence(Other)	{}
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FLobbySequenceNumber : public FLobbySequence
+{
+	GENERATED_BODY()
+
+public:
+	FLobbySequenceNumber(){}
+	
+	FLobbySequenceNumber(const FLobbySequenceNumber& Other) : FLobbySequence(Other) {}
+
+	explicit FLobbySequenceNumber(const FLobbySequence& Other) : FLobbySequence(Other) {}
+
+	explicit FLobbySequenceNumber(const int32 Other) : FLobbySequence(Other) {}
+
+	explicit FLobbySequenceNumber(const FString& Other) : FLobbySequence(Other) {}
 };
 
 // Emulate namespace with long class names
@@ -1714,6 +1857,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOneTimeCodeLinked
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | MessageNotif")
 	FString UserId{};
 };
+
+class FAccelByteKey
+{};
 
 namespace AccelByte
 {

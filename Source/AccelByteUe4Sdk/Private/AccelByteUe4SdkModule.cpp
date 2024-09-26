@@ -60,6 +60,8 @@ private:
 
 	FDelegateHandle GameInstanceStartHandle{};
 
+	FDelegateHandle OnPreExitHandle;
+
 	bool LoadClientSettings(ESettingsEnvironment const Environment);
 	bool LoadServerSettings(ESettingsEnvironment const Environment);
 	bool LoadSettingsFromConfigUObject();
@@ -71,6 +73,7 @@ private:
 	void SetDefaultHttpCustomHeader(FString const& Namespace);
 
 	void OnGameInstanceCreated(UGameInstance* GameInstance);
+	void OnPreExit();
 };
 
 void FAccelByteUe4SdkModule::StartupModule()
@@ -115,6 +118,11 @@ void FAccelByteUe4SdkModule::StartupModule()
 	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddRaw(this, &FAccelByteUe4SdkModule::OnGameInstanceCreated);
 
 	PostStartupDelegateHandle = FCoreDelegates::OnBeginFrame.AddRaw(this, &FAccelByteUe4SdkModule::PostStartup);
+
+	if (!OnPreExitHandle.IsValid())
+	{
+		OnPreExitHandle = FCoreDelegates::OnPreExit.AddRaw(this, &FAccelByteUe4SdkModule::OnPreExit);
+	}
 }
 
 void FAccelByteUe4SdkModule::PostStartup()
@@ -138,20 +146,15 @@ void FAccelByteUe4SdkModule::PostStartup()
 
 void FAccelByteUe4SdkModule::ShutdownModule()
 {
-	AccelByte::FRegistry::ServerCredentialsRef->Shutdown();
-#if !UE_SERVER
-	AccelByte::FRegistry::HeartBeat.Shutdown();
-#endif
-	AccelByte::FRegistry::GameTelemetry.Shutdown();
-	AccelByte::FRegistry::PredefinedEvent.Shutdown();
-	AccelByte::FRegistry::GameStandardEvent.Shutdown();
-	AccelByte::FRegistry::CredentialsRef->Shutdown();
-	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
-	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();
-
 	UnregisterSettings();
 
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceStartHandle);
+
+	if (OnPreExitHandle.IsValid())
+	{
+		FCoreDelegates::OnPreExit.Remove(OnPreExitHandle);
+		OnPreExitHandle.Reset();
+	}
 }
 
 void FAccelByteUe4SdkModule::SetEnvironment(ESettingsEnvironment const Environment)
@@ -438,6 +441,20 @@ void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
 	}
 	
 	AccelByte::FRegistry::TimeManager.GetServerTime({}, {});
+}
+
+void FAccelByteUe4SdkModule::OnPreExit()
+{
+	AccelByte::FRegistry::ServerCredentialsRef->Shutdown();
+#if !UE_SERVER
+	AccelByte::FRegistry::HeartBeat.Shutdown();
+#endif
+	AccelByte::FRegistry::GameTelemetry.Shutdown();
+	AccelByte::FRegistry::PredefinedEvent.Shutdown();
+	AccelByte::FRegistry::GameStandardEvent.Shutdown();
+	AccelByte::FRegistry::CredentialsRef->Shutdown();
+	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
+	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();
 }
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)

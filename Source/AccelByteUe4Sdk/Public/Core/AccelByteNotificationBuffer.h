@@ -43,14 +43,14 @@ namespace AccelByte
 		 *
 		 * @return integer representing last valid sequence ID.
 		 */
-		int32 GetLastNotificationSequenceID() const;
+		FLobbySequenceID GetLastNotificationSequenceID() const;
 
 		/**
 		 * @brief Get the sequence number of the last valid notification.
 		 *
 		 * @return integer representing last valid sequence number.
 		 */
-		int32 GetLastNotificationSequenceNumber() const;
+		FLobbySequenceNumber GetLastNotificationSequenceNumber() const;
 
 		/**
 		 * @brief Clear all buffered notifications.
@@ -74,8 +74,8 @@ namespace AccelByte
 	private:
 		bool bBuffering{false};
 
-		int32 LastSequenceID{0};
-		int32 LastSequenceNumber{0};
+		FLobbySequenceID LastSequenceID{0};
+		FLobbySequenceNumber LastSequenceNumber{0};
 		FDateTime LastSentAt{0};
 
 		mutable FCriticalSection BufferLock;
@@ -85,7 +85,7 @@ namespace AccelByte
 		bool HasValidSequence(const FAccelByteModelsUserNotification& InNotification) const;
 		bool IsNotificationMissing(const FAccelByteModelsUserNotification& InNotification) const;
 		bool IsDuplicateNotification(const FAccelByteModelsUserNotification& InNotification) const;
-		bool IsExistInBuffer(const int32 InSequenceID, const int32 InSequenceNumber) const;
+		bool IsExistInBuffer(const FLobbySequenceID& InSequenceID, const FLobbySequenceNumber& InSequenceNumber) const;
 		void AddToBuffer(const FAccelByteModelsUserNotification& InNotification);
 		void SortBuffer();
 	};

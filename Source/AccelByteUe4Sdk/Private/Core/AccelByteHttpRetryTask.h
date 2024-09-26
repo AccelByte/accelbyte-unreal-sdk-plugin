@@ -39,6 +39,8 @@ namespace AccelByte
 		void SetResponseTime(FDateTime InResponseTime) { ResponseTime = InResponseTime; };
 		FDateTime GetResponseTime() const { return ResponseTime; };
 
+		virtual TMap<FString, FString> GetResponseHeader();
+
 	private:
 		FHttpRequestPtr Request{};
 		const FHttpRequestCompleteDelegate CompleteDelegate{};

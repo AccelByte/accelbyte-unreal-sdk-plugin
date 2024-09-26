@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [26.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.2.1%0D26.2.0) (2024-09-26)
+
+
+### Features
+
+* add GetResponseHeader in HttpRetryTask ([d497c6e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d497c6ee136aad8b22a687bcc28297569958555e))
+* add lockable queue ([6f1841c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6f1841c823a51bde3ea4bca065fa744d364f0fe8))
+* add new fields in FAccelByteModelsV2MatchmakingGetTicketDetailsResponse ([52abe04](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/52abe04ca4b17c07745d9937775cf2c2d2c5d46c))
+* implement LockableQueue in lobby notification ([1ae12b3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1ae12b3bd861e65084658bc295ec3c8ce01a7bad))
+
+
+### Bug Fixes
+
+* change from flush into shutdown ([7e1f204](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7e1f204a3f1990882e755200a2cbe7ddef4a4ff9))
+* cleanup on pre exit ([40f2a86](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/40f2a86f9957fbbaf7f74eea3027188e72abce66))
+
+
+### Refactors
+
+* strong typed lobby sequenceID and Number ([2a1730d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2a1730dc9e8efbe80a98214198022cfc7c73b1d8))
+
 ## [26.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.2.0%0D26.1.1) (2024-09-19)
 
 

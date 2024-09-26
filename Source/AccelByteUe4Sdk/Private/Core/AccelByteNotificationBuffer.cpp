@@ -48,8 +48,8 @@ bool AccelByte::FAccelByteNotificationBuffer::AddMissingNotifications(const TArr
 	// Add missing notification if it doesn't exist in buffer and its not the last valid notification
 	for (const FAccelByteModelsUserNotification& Notification : Notifications)
 	{
-		if ( (Notification.SequenceID == LastSequenceID && Notification.SequenceNumber <= LastSequenceNumber)
-			|| IsExistInBuffer(Notification.SequenceID, Notification.SequenceNumber))
+		if ( (Notification.SequenceID == LastSequenceID.GetValue() && Notification.SequenceNumber <= LastSequenceNumber.GetValue())
+			|| IsExistInBuffer(FLobbySequenceID(Notification.SequenceID), FLobbySequenceNumber(Notification.SequenceNumber)))
 		{
 			continue;
 		}
@@ -67,12 +67,12 @@ FDateTime AccelByte::FAccelByteNotificationBuffer::GetLastNotificationReceivedTi
 	return LastSentAt;
 }
 
-int32 AccelByte::FAccelByteNotificationBuffer::GetLastNotificationSequenceID() const
+FLobbySequenceID AccelByte::FAccelByteNotificationBuffer::GetLastNotificationSequenceID() const
 {
 	return LastSequenceID;
 }
 
-int32 AccelByte::FAccelByteNotificationBuffer::GetLastNotificationSequenceNumber() const
+FLobbySequenceNumber AccelByte::FAccelByteNotificationBuffer::GetLastNotificationSequenceNumber() const
 {
 	return LastSequenceNumber;
 }
@@ -102,8 +102,8 @@ bool AccelByte::FAccelByteNotificationBuffer::IsBuffering() const
 
 void AccelByte::FAccelByteNotificationBuffer::UpdateLastSequence(const FAccelByteModelsUserNotification& InNotification)
 {
-	LastSequenceID = InNotification.SequenceID;
-	LastSequenceNumber = InNotification.SequenceNumber;
+	LastSequenceID = FLobbySequenceID(InNotification.SequenceID);
+	LastSequenceNumber = FLobbySequenceNumber(InNotification.SequenceNumber);
 	LastSentAt = InNotification.SentAt;
 }
 
@@ -133,14 +133,14 @@ bool AccelByte::FAccelByteNotificationBuffer::IsNotificationMissing(const FAccel
 
 	UE_LOG(LogAccelByteNotificationBuffer, Warning
 		, TEXT("Missing notification detected, last valid notification (LastSequenceID: %d, LastSequenceNumber: %d, LastSentAt: %s), incoming notification (SequenceID: %d, SequenceNumber: %d, SentAt: %s)")
-		, LastSequenceID, LastSequenceNumber, *LastSentAt.ToIso8601()
+		, LastSequenceID.GetValue(), LastSequenceNumber.GetValue(), *LastSentAt.ToIso8601()
 		, InNotification.SequenceID, InNotification.SequenceNumber, *InNotification.SentAt.ToIso8601())
 	return true;
 }
 
 bool AccelByte::FAccelByteNotificationBuffer::IsDuplicateNotification(const FAccelByteModelsUserNotification& InNotification) const
 {
-	if (LastSequenceID == InNotification.SequenceID && InNotification.SequenceNumber <= LastSequenceNumber)
+	if (LastSequenceID.GetValue() == InNotification.SequenceID && InNotification.SequenceNumber <= LastSequenceNumber.GetValue())
 	{
 		FString OutJsonString;
 		FJsonObjectConverter::UStructToJsonObjectString(InNotification, OutJsonString);
@@ -150,12 +150,12 @@ bool AccelByte::FAccelByteNotificationBuffer::IsDuplicateNotification(const FAcc
 	return false;
 }
 
-bool AccelByte::FAccelByteNotificationBuffer::IsExistInBuffer(const int32 InSequenceID, const int32 InSequenceNumber) const
+bool AccelByte::FAccelByteNotificationBuffer::IsExistInBuffer(const FLobbySequenceID& InSequenceID, const FLobbySequenceNumber& InSequenceNumber) const
 {
 	return Buffer.ContainsByPredicate(
 		[InSequenceID, InSequenceNumber](const FAccelByteModelsUserNotification& Notif)
 		{
-			return Notif.SequenceID == InSequenceID && Notif.SequenceNumber == InSequenceNumber;
+			return Notif.SequenceID == InSequenceID.GetValue() && Notif.SequenceNumber == InSequenceNumber.GetValue();
 		});
 }
 
