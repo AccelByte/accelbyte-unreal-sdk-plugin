@@ -7,8 +7,12 @@
 namespace AccelByte
 {
 
+FCriticalSection MultiRegistryMutex;
+
 FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key, bool bCreateIfNotFound)
 {
+	FScopeLock Lock(&MultiRegistryMutex);
+	
 	if (!ApiClientInstances.Contains(Key))
 	{
 		if (!bCreateIfNotFound)
@@ -35,6 +39,7 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key, bool b
 
 FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString &Key)
 {
+	FScopeLock Lock(&MultiRegistryMutex);
 	if (!ServerApiClientInstances.Contains(Key))
 	{
 		FServerApiClientPtr NewClient = nullptr;
@@ -56,6 +61,7 @@ FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString 
 
 bool FMultiRegistry::RegisterApiClient(FString const &Key, FApiClientPtr ApiClient)
 {
+	FScopeLock Lock(&MultiRegistryMutex);
 	bool bResult = false;
 
 	if (!Key.IsEmpty())
@@ -69,6 +75,7 @@ bool FMultiRegistry::RegisterApiClient(FString const &Key, FApiClientPtr ApiClie
 
 bool FMultiRegistry::RemoveApiClient(const FString &Key)
 {
+	FScopeLock Lock(&MultiRegistryMutex);
 	bool bResult = false;
 
     if (!Key.IsEmpty())
@@ -82,6 +89,7 @@ bool FMultiRegistry::RemoveApiClient(const FString &Key)
 
 bool FMultiRegistry::RemoveServerApiClient(const FString &Key)
 {
+	FScopeLock Lock(&MultiRegistryMutex);
 	bool bResult = false;
 	
 	if (!Key.IsEmpty())
@@ -95,6 +103,8 @@ bool FMultiRegistry::RemoveServerApiClient(const FString &Key)
 
 void FMultiRegistry::Shutdown()
 {
+	FScopeLock Lock(&MultiRegistryMutex);
+
 	TArray<FString> ApiClientKeys{};
 	ApiClientInstances.GenerateKeyArray(ApiClientKeys);
 	ApiClientKeys.Remove(TEXT("default"));
