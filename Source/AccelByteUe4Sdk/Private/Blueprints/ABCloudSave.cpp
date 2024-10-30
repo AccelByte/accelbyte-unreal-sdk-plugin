@@ -473,6 +473,27 @@ void UABCloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 	);
 }
 
+void UABCloudSave::BulkGetCurrentPlayerPublicRecordKeys(FDModelsPaginatedBulkGetPublicUserRecordKeysResponse const& OnSuccess
+	, FDErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit)
+{
+	ApiClientPtr->CloudSave.BulkGetCurrentPlayerPublicRecordKeys(
+		THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		), Offset, Limit
+	);
+}
+
 void UABCloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 	, TArray<FString> const& Keys
 	, FDModelsListUserRecords const& OnSuccess

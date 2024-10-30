@@ -284,6 +284,9 @@ const TMap<FString, FThirdPartyPlatformTokenData>& Credentials::GetThridPartyPla
 
 void Credentials::PollRefreshToken(double CurrentTime)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelBytePollRefreshToken"));
+#endif
 	switch (SessionState)
 	{
 	case ESessionState::Expired:

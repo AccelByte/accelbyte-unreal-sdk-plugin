@@ -57,7 +57,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAcceptAgreementResponse
 	GENERATED_BODY()
 	/** @brief Flag to indicate player can proceed to the game */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | AcceptAgreementResponse")
-	bool Proceed{};
+	bool Proceed{false};
 };
 
 /** @brief Data Model for Localized Policy agreement */
@@ -104,7 +104,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLocalizedPolicyVersionObject
 	FDateTime PublishedDate{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | LocalizedPolicyVersionObject")
-	bool IsDefaultSelection{};
+	bool IsDefaultSelection{false};
 };
 
 USTRUCT(BlueprintType)
@@ -137,13 +137,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPolicyVersionWithLocalizedVersionObje
 	TArray<FAccelByteModelsLocalizedPolicyVersionObject> LocalizedPolicyVersions{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PolicyVersionWithLocalizedVersionObject")
-	bool IsCommitted{};
+	bool IsCommitted{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PolicyVersionWithLocalizedVersionObject")
-	bool IsCrucial{};
+	bool IsCrucial{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PolicyVersionWithLocalizedVersionObject")
-	bool IsInEffect{};
+	bool IsInEffect{false};
 };
 
 USTRUCT(BlueprintType)
@@ -182,7 +182,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPolicy
 	TArray<FString> BaseUrls{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")
-	bool ShouldNotifyOnUpdate{};
+	bool ShouldNotifyOnUpdate{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")
 	TArray<FAccelByteModelsPolicyVersionWithLocalizedVersionObject> PolicyVersions{};
@@ -194,13 +194,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPolicy
 	TArray<FString> Tags{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")
-	bool IsMandatory{};
+	bool IsMandatory{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")
-	bool IsDefaultOpted{};
+	bool IsDefaultOpted{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")
-	bool IsDefaultSelection{};
+	bool IsDefaultSelection{false};
 };
 
 USTRUCT(BlueprintType)
@@ -239,8 +239,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRetrieveUserEligibilitiesResponse
 	FString PolicyId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
-	bool IsMandatory{};
+	bool IsMandatory{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
-	bool IsAccepted{};
+	bool IsAccepted{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+	bool IsHiddenPublic{false};
 };

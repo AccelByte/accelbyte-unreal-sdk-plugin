@@ -40,7 +40,7 @@ namespace AccelByte
 		 * @param OnDone This will be called when the operation done. The result is bool.
 		 * @param TableName optional. The name of the table. Default will insert an item to the default KeyValue table.
 		*/
-		virtual void SaveItemOverwiteEntireFile(const FString& Key, const FString& Item, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) = 0;
+		virtual void SaveItemOverwiteEntireFile(FString Key, FString Item, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) = 0;
 
 		/**
 		 * @brief Insert Item to the Key Value Table.

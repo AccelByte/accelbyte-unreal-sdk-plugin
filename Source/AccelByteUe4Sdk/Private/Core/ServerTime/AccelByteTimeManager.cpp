@@ -19,13 +19,6 @@ static FDateTime SERVER_TIME_CURRENT{ FDateTime::MinValue() };
 static FDateTime LAST_UPDATED_SERVER_TIME{ FDateTime::MinValue() };
 static FThreadSafeCounter ReferenceCount{0};
 
-FAccelByteTimeManager::FAccelByteTimeManager()
-	: bUseSharedResources(false)
-	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
-{
-	HttpRef->Startup();
-}
-
 FAccelByteTimeManager::FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& Http)
 	: bUseSharedResources(true)
 	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http,

@@ -156,6 +156,9 @@ public:
 	static constexpr uint8 FieldRemovalFlagNumbersZeroValues = 1 << 7;
 	static constexpr uint8 FieldRemovalFlagAll     = 0xFF & ~FieldRemovalFlagNumbersZeroValues;
 
+#if (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4)
+	static TMap<FName, FString> JsonKeyToActualValue;
+#endif
 	
 	static bool IsRunningDevMode();
 	
@@ -204,6 +207,15 @@ public:
 
 	static void RemoveEmptyStrings(TSharedPtr<FJsonObject> Json);
 
+#if (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4)
+
+	// Remove all matchin key value if it identical with the value
+	static void RemoveMatchingKeyValuePairs();
+
+	// Convert a Json object key with the actual expectation value
+	static void FixupAllJsonKeys(TSharedPtr<FJsonObject>& JsonObject, const TMap<FName, FString>& JsonKeyToExpectedValue);
+#endif
+	
 	/**
 	 * @brief Convert an UEnum value into a String enum value.
 	 *

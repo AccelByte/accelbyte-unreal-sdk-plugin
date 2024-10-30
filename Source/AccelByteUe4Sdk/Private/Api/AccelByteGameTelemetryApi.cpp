@@ -27,8 +27,6 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, bCacheEvent(bInCacheEvent)
 	, bRetryOnFailed(bInRetryOnFailed)
 {
-	GameTelemetryLoginSuccess = CredentialsRef->OnLoginSuccess().AddRaw(this, &GameTelemetry::OnLoginSuccess);
-	GameTelemetryLogoutSuccess = CredentialsRef->OnLogoutSuccess().AddRaw(this, &GameTelemetry::OnLogoutSuccess);
 	bCacheEvent = SettingsRef.bEnableGameTelemetryCache;
 }
 
@@ -41,9 +39,14 @@ void GameTelemetry::OnLoginSuccess(FOauth2Token const& Response)
 {
 	if (bCacheEvent)
 	{
-		AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [this]()
+		TWeakPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryWeak = AsShared();
+		AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [GameTelemetryWeak]()
 			{
-				LoadCachedEvents();
+				const auto GameTelemetryApi = GameTelemetryWeak.Pin();
+				if (GameTelemetryApi.IsValid())
+				{
+					GameTelemetryApi->LoadCachedEvents();
+				}
 			});
 	}
 }
@@ -114,15 +117,20 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 		JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>{ TelemetryPtr, OnSuccess, OnError });
 		if (bCacheEvent || CriticalEvents.Contains(TelemetryBody.EventName))
 		{
-			AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [TelemetryPtr, this]()
+			GameTelemetryWPtr GameTelemetryWeak = AsShared();
+			AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [TelemetryPtr, GameTelemetryWeak]()
 				{
-					AppendEventToCache(TelemetryPtr);
+					const auto GameTelemetryApi = GameTelemetryWeak.Pin();
+					if (GameTelemetryApi.IsValid())
+					{
+						GameTelemetryApi->AppendEventToCache(TelemetryPtr);
+					}
 				});
 		}
 		if (bTelemetryJobStarted == false)
 		{
 			bTelemetryJobStarted = true;
-			GameTelemetryTickDelegate = FTickerDelegate::CreateRaw(this, &GameTelemetry::PeriodicTelemetry);
+			GameTelemetryTickDelegate = FTickerDelegate::CreateThreadSafeSP(AsShared(), &GameTelemetry::PeriodicTelemetry);
 			GameTelemetryTickDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, static_cast<float>(TelemetryInterval.GetTotalSeconds()));
 		}
 	}
@@ -138,14 +146,16 @@ void GameTelemetry::Flush()
 
 void GameTelemetry::Startup()
 {
+	GameTelemetryLoginSuccess = CredentialsRef->OnLoginSuccess().AddThreadSafeSP(AsShared(), &GameTelemetry::OnLoginSuccess);
+	GameTelemetryLogoutSuccess = CredentialsRef->OnLogoutSuccess().AddThreadSafeSP(AsShared(), &GameTelemetry::OnLogoutSuccess);
 	ShuttingDown = false;
 }
 
 void GameTelemetry::Shutdown()
 {
-	ShuttingDown = true;
-	if(UObjectInitialized())
+	if(UObjectInitialized() && !ShuttingDown)
 	{
+		ShuttingDown = true;
 		if (GameTelemetryTickDelegateHandle.IsValid())
 		{
 			FTickerAlias::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
@@ -169,6 +179,9 @@ void GameTelemetry::Shutdown()
 
 bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelBytePeriodicTelemetry"));
+#endif
 	if (!JobQueue.IsEmpty())
 	{
 		FReport::Log(FString(__FUNCTION__));
@@ -186,14 +199,18 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 				OnErrorCallbacks.Add(DequeueResult.Get<2>());
 			}
 		}
-
+		TWeakPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryWeak = AsShared();
 		SendProtectedEvents(TelemetryBodies
 			, FVoidHandler::CreateLambda(
-				[this, OnSuccessCallbacks, TelemetryBodies]()
+				[GameTelemetryWeak, OnSuccessCallbacks, TelemetryBodies]()
 				{
-					AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [TelemetryBodies, this]()
+					AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [TelemetryBodies, GameTelemetryWeak]()
 						{
-							RemoveEventsFromCache(TelemetryBodies);
+							const auto GameTelemetryApi = GameTelemetryWeak.Pin();
+							if (GameTelemetryApi.IsValid())
+							{
+								GameTelemetryApi->RemoveEventsFromCache(TelemetryBodies);
+							}
 						});
 					for (auto& OnSuccessCallback : OnSuccessCallbacks)
 					{
@@ -201,18 +218,20 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 					}
 				})
 			, FErrorHandler::CreateLambda(
-				[this, OnSuccessCallbacks, OnErrorCallbacks, TelemetryBodies](int32 Code, FString Message)
+				[GameTelemetryWeak, OnSuccessCallbacks, OnErrorCallbacks, TelemetryBodies](int32 Code, FString Message)
 				{
-
-					if (bRetryOnFailed && Code != (int32)ErrorCodes::StatusUnprocessableEntity)
+					const auto GameTelemetryApi = GameTelemetryWeak.Pin();
+					if (GameTelemetryApi.IsValid() 
+						&& GameTelemetryApi->bRetryOnFailed 
+						&& Code != (int32)ErrorCodes::StatusUnprocessableEntity)
 					{
 						for (int i = 0; i < TelemetryBodies.Num(); i++)
 						{
-							JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>
-							{ 
-								TelemetryBodies[i], 
-								i < OnSuccessCallbacks.Num() ? OnSuccessCallbacks[i] : FVoidHandler{}, 
-								i < OnErrorCallbacks.Num() ? OnErrorCallbacks[i] : FErrorHandler{} 
+							GameTelemetryApi->JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>
+							{
+								TelemetryBodies[i],
+									i < OnSuccessCallbacks.Num() ? OnSuccessCallbacks[i] : FVoidHandler{},
+									i < OnErrorCallbacks.Num() ? OnErrorCallbacks[i] : FErrorHandler{}
 							});
 						}
 					}
@@ -282,33 +301,43 @@ void GameTelemetry::LoadCachedEvents()
 
 	bCacheUpdated = true;
 
+	TWeakPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryWeak = AsShared();
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(TelemetryKey
 		, THandler<TPair<FString, FString>>::CreateLambda(
-			[this](TPair<FString, FString> Pair)
+			[GameTelemetryWeak](TPair<FString, FString> Pair)
 			{
 				if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
 				{
 					return;
 				}
+				const auto GameTelemetryApi = GameTelemetryWeak.Pin();
 				TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventList;
-				if (EventsJsonToArray(Pair.Value, EventList))
+				if (GameTelemetryApi.IsValid()
+					&& GameTelemetryApi->EventsJsonToArray(Pair.Value, EventList))
 				{
-					SendProtectedEvents(EventList
+					GameTelemetryApi->SendProtectedEvents(EventList
 						, FVoidHandler::CreateLambda(
-							[this, EventList]()
+							[GameTelemetryWeak, EventList]()
 							{
-								AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [EventList, this]()
+								AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [EventList, GameTelemetryWeak]()
 									{
-										RemoveEventsFromCache(EventList);
+										const auto GameTelemetryApi = GameTelemetryWeak.Pin();
+										if (GameTelemetryApi.IsValid())
+										{
+											GameTelemetryApi->RemoveEventsFromCache(EventList);
+										}
 									});
 							})
-						, FErrorHandler::CreateLambda([this, EventList](int32 Code, FString Message)
+						, FErrorHandler::CreateLambda([GameTelemetryWeak, EventList](int32 Code, FString Message)
 							{
-								if (bRetryOnFailed && Code != (int32)ErrorCodes::StatusUnprocessableEntity)
+								const auto GameTelemetryApi = GameTelemetryWeak.Pin();
+								if (GameTelemetryApi.IsValid()
+									&& GameTelemetryApi->bRetryOnFailed 
+									&& Code != (int32)ErrorCodes::StatusUnprocessableEntity)
 								{
 									for (int i = 0; i < EventList.Num(); i++)
 									{
-										JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>
+										GameTelemetryApi->JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>
 										{ EventList[i], FVoidHandler{}, FErrorHandler{} });
 									}
 								}

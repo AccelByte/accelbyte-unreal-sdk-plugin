@@ -366,7 +366,7 @@ FAccelByteTaskWPtr Item::GetItemMappings(EAccelBytePlatformMapping Platform
 	}
 
 	THandler<FAccelByteModelsItemMappingsResponseInternal> OnSuccessInternal = THandler<FAccelByteModelsItemMappingsResponseInternal>::CreateLambda(
-		[&](const FAccelByteModelsItemMappingsResponseInternal& Result)
+		[OnSuccess](const FAccelByteModelsItemMappingsResponseInternal& Result)
 		{
 			FAccelByteModelsItemMappingsResponse CorrectedResult;
 			for (const auto& ResultItem : Result.Data)

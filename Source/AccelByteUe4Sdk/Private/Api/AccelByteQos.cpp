@@ -46,7 +46,7 @@ Qos::~Qos()
 	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 	if (MessagingSystemPtr.IsValid())
 	{
-		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated, LobbyConnectedDelegateHandle);
+		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::LobbyConnected, LobbyConnectedDelegateHandle);
 	}
 	OnLobbyConnectedHandle.Unbind();
 
@@ -111,6 +111,9 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 	, const THandler<TArray<TPair<FString, float>>>& OnSuccess
 	, const FErrorHandler& OnError)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteQosPing"));
+#endif
 	TSharedRef<TArray<TPair<FString, float>>> SuccessLatencies = MakeShared<TArray<TPair<FString, float>>>();
 	TSharedRef<TArray<FString>> FailedLatencies = MakeShared<TArray<FString>>();
 

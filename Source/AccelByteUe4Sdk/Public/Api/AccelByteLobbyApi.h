@@ -73,7 +73,7 @@ enum Notif : uint8;
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
  */
-class ACCELBYTEUE4SDK_API Lobby : public FApiBase
+class ACCELBYTEUE4SDK_API Lobby : public FApiBase, public IWebsocketConfigurableReconnectStrategy
 {
 public:
 	Lobby(Credentials& InCredentialsRef
@@ -84,8 +84,7 @@ public:
 		, float InPingDelay = 30.f
 		, float InInitialBackoffDelay = 1.f
 		, float InMaxBackoffDelay = 30.f
-		, float InTotalTimeout = 60.f
-		, TSharedPtr<IWebSocket> InWebSocket = nullptr);
+		, float InTotalTimeout = 60.f);
 	~Lobby();
 private:
 	FCredentialsRef LobbyCredentialsRef;
@@ -507,10 +506,9 @@ public:
 	*/
 	typedef TDelegate<void(FAccelByteModelsDisconnectNotif const&)> FDisconnectNotif;
 
-	/**
-	* @brief delegate for handling connection closed.
-	*/
-	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, FString const& /* Reason */, bool /* WasClean */);
+	typedef AccelByteWebSocket::FConnectionCloseDelegate FConnectionClosed;
+	typedef AccelByteWebSocket::FReconnectAttemptMulticastDelegate FReconnectAttempted;
+	typedef AccelByteWebSocket::FMassiveOutageMulticastDelegate FMassiveOutage;
 
 	/**
 	 * @brief Delegate for party members changed event.
@@ -552,6 +550,11 @@ public:
 	 * @brief Delegate for party updated event.
 	 */
 	DECLARE_DELEGATE_OneParam(FV2PartyUpdatedNotif, FAccelByteModelsV2PartySession);
+
+	/*
+	* @brief Delegate for party created event.
+	*/
+	DECLARE_MULTICAST_DELEGATE_OneParam(FV2PartyCreatedNotif, FAccelByteModelsV2PartyCreatedEvent);
 
 	/**
 	 * @brief Delegate for user invited to game session event.
@@ -1408,6 +1411,22 @@ public:
 	{
 		Reconnecting = OnReconnecting;
 	}
+
+	/**
+	 * @brief Get a multicast delegate that will be triggered when an attempt to reconnect websocket has been done.
+	 */
+	FReconnectAttempted& OnReconnectAttemptedMulticastDelegate()
+	{
+		return ReconnectAttempted;
+	}
+
+	/**
+	 * @brief Get a multicast delegate that will be triggered when connection is down & can't be reestablished. Longer than usual.
+	 */
+	FMassiveOutage& OnMassiveOutageMulticastDelegate()
+	{
+		return MassiveOutage;
+	}
 	
 	/**
 	 * @brief Set a trigger function when a party member leave from the party. This function is DEPRECATED
@@ -1704,6 +1723,20 @@ public:
 	bool RemoveV2GameSessionInviteCanceledNotifDelegate(FDelegateHandle const& DelegateHandle)
 	{
 		return V2GameSessionInviteCanceledNotif.Remove(DelegateHandle);
+	}
+
+
+	FDelegateHandle AddV2PartyCreatedNotifDelegate(THandler<FAccelByteModelsV2PartyCreatedEvent> const& OnPartyCreated)
+	{
+		return V2PartyCreatedNotif.AddLambda([OnPartyCreated](const FAccelByteModelsV2PartyCreatedEvent& Notif)
+		{
+			OnPartyCreated.ExecuteIfBound(Notif);
+		});
+	}
+
+	bool RemoveV2PartyCreatedNotifDelegate(FDelegateHandle const& DelegateHandle)
+	{
+		return V2PartyCreatedNotif.Remove(DelegateHandle);
 	}
 
 	FDelegateHandle AddV2PartyInviteCanceledNotifDelegate(THandler<FAccelByteModelsV2PartyInviteCanceledEvent> const& OnPartyInviteCanceled)
@@ -2763,17 +2796,6 @@ public:
 		, uint32 RetryAttempt = 1);
 
 	/**
-	 * @brief Change the delay parameters to maintain connection in the lobby before lobby connected.
-	 *
-	 * @param NewTotalTimeout new Time limit until stop to re-attempt.
-	 * @param NewBackoffDelay new Initial delay time.
-	 * @param NewMaxDelay new Maximum delay time.
-	 */
-	void SetRetryParameters(int32 NewTotalTimeout = 60000
-		, int32 NewBackoffDelay = 1000
-		, int32 NewMaxDelay = 30000);
-
-	/**
 	 * @brief Set token generator to be used when trying to connect to lobby using ownership token.
 	 *
 	 * @param TokenGenerator The token generator.
@@ -2831,6 +2853,10 @@ private:
 	void OnClosed(int32 StatusCode
 		, FString const& Reason
 		, bool WasClean);
+
+	void OnReconnectAttempt(FReconnectAttemptInfo const& ReconnectAttemptInfo);
+
+	void OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo);
 
     FString SendRawRequest(FString const& MessageType
     	, FString const& MessageIDPrefix
@@ -2896,12 +2922,7 @@ private:
 	static TMap<FString, FString> LobbyErrorMessages;
 	const float LobbyTickPeriod = 0.5;
 	const float PingDelay;
-	float InitialBackoffDelay;
-	float MaxBackoffDelay;
-	float TotalTimeout;
 	bool bWasWsConnectionError = false;
-	float BackoffDelay;
-	float RandomizedBackoffDelay;
 	float TimeSinceLastPing;
 	float TimeSinceLastReconnect;
 	float TimeSinceConnectionLost;
@@ -2914,6 +2935,8 @@ private:
 	FDisconnectNotif DisconnectNotif;
 	FConnectionClosed ConnectionClosed;
 	FConnectionClosed Reconnecting;
+	FReconnectAttempted ReconnectAttempted;
+	FMassiveOutage MassiveOutage;
 	TSharedPtr<IAccelByteTokenGenerator> TokenGenerator;
 	FAccelByteLockableQueue<FHandleLobbyMessageData> NotificationQueue;
 
@@ -3060,6 +3083,7 @@ private:
 	FV2PartyKickedNotif V2PartyKickedNotif;
 	FV2PartyUpdatedNotif V2PartyUpdatedNotif;
 	FV2PartyInviteCanceledNotif V2PartyInviteCanceledNotif;
+	FV2PartyCreatedNotif V2PartyCreatedNotif;
 
 	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
 	FV2GameSessionInviteTimeoutNotif V2GameSessionInviteTimeoutNotif;

@@ -53,6 +53,7 @@ enum class EV2SessionNotifTopic : uint8
 	OnPartyJoined,
 	OnPartyRejected,
 	OnPartyKicked,
+	OnPartyCreated,
 	OnSessionInvited,
 	OnGameSessionInviteTimeout,
 	OnSessionJoined,

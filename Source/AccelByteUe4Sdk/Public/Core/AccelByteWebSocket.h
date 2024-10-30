@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2021 - 2024 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -7,6 +7,8 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/IWebSocketFactory.h"
 #include "Core/AccelByteDefines.h"
+#include "Core/AccelByteWebSocketErrorTypes.h"
+#include "AccelByteWebSocketReconnection.h"
 #include "IWebSocket.h"
 
 namespace AccelByte
@@ -42,30 +44,43 @@ struct FConnectionClosedParams
 	bool WasClean;	
 };
 
+struct FReconnectAttemptInfo
+{
+	uint32 AttemptCount = 0;
+	FTimespan NextRetryAttemptIn{ 0 };
+};
+
+struct FMassiveOutageInfo
+{
+	FTimespan TotalTimeoutDuration{ 0 };
+};
+
 ENUM_CLASS_FLAGS(EWebSocketEvent);
 
 class ACCELBYTEUE4SDK_API AccelByteWebSocket
 {
 public:
+	// To be used by Lobby, Chat, and DSM. Using typedef is possible too.
+	DECLARE_DELEGATE_ThreeParams(FConnectionCloseDelegate, int32 /* StatusCode */, FString const& /* Reason */, bool /* WasClean */);
+
+	// To be used as multicast delegate (member of this WebSocket class)
 	DECLARE_MULTICAST_DELEGATE(FConnectDelegate)
 	DECLARE_MULTICAST_DELEGATE_OneParam(FMessageReceiveDelegate, const FString&)
 	DECLARE_MULTICAST_DELEGATE_OneParam(FConnectionErrorDelegate, const FString&)
-	DECLARE_MULTICAST_DELEGATE_ThreeParams(FConnectionCloseDelegate, const int32, const FString&, const bool)
+	DECLARE_MULTICAST_DELEGATE_ThreeParams(FConnectionCloseMulticastDelegate, const int32, const FString&, const bool)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FReconnectAttemptMulticastDelegate, const FReconnectAttemptInfo&)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FMassiveOutageMulticastDelegate, const FMassiveOutageInfo&)
 	
 	AccelByteWebSocket(
 		const Credentials& Credentials,
-		float PingDelay = 30.f,
-		float InitialBackoffDelay = 1.f,
-		float MaxBackoffDelay = 30.f,
-		float TotalTimeout = 60.f
+		IWebsocketConfigurableReconnectStrategy& ParentReconnectionStrategyRef,
+		float PingDelay = 30.f
 	);
 	
 	AccelByteWebSocket(
 		const ServerCredentials& Credentials,
-		float PingDelay = 30.f,
-		float InitialBackoffDelay = 1.f,
-		float MaxBackoffDelay = 30.f,
-		float TotalTimeout = 60.f
+		IWebsocketConfigurableReconnectStrategy& ParentReconnectionStrategyRef,
+		float PingDelay = 30.f
 	);
 
 	~AccelByteWebSocket();
@@ -73,7 +88,9 @@ public:
 	FConnectDelegate& OnConnected();
 	FMessageReceiveDelegate& OnMessageReceived();
 	FConnectionErrorDelegate& OnConnectionError();
-	FConnectionCloseDelegate& OnConnectionClosed();
+	FConnectionCloseMulticastDelegate& OnConnectionClosed();
+	FReconnectAttemptMulticastDelegate& OnReconnectAttempt();
+	FMassiveOutageMulticastDelegate& OnMassiveOutage();
 
 	void Reconnect();
 
@@ -86,10 +103,8 @@ public:
 		const Credentials& Credentials,
 		const TMap<FString, FString>& UpgradeHeaders,
 		const TSharedRef<IWebSocketFactory> WebSocketFactory,
-		float PingDelay = 30.f,
-		float InitialBackoffDelay = 1.f,
-		float MaxBackoffDelay = 30.f,
-		float TotalTimeout = 60.f
+		IWebsocketConfigurableReconnectStrategy& InParentReconnectionStrategyRef,
+		float PingDelay = 30.f
 	);
 
 	/**
@@ -101,10 +116,8 @@ public:
 		const ServerCredentials& Credentials,
 		const TMap<FString, FString>& UpgradeHeaders,
 		const TSharedRef<IWebSocketFactory> WebSocketFactory,
-		float PingDelay = 30.f,
-		float InitialBackoffDelay = 1.f,
-		float MaxBackoffDelay = 30.f,
-		float TotalTimeout = 60.f
+		IWebsocketConfigurableReconnectStrategy& InParentReconnectionStrategyRef,
+		float PingDelay = 30.f
 	);
 
 	void UpdateUpgradeHeaders(const FString& Key, const FString& Value);
@@ -114,29 +127,38 @@ public:
 	bool IsConnected() const;
 	void SendPing() const;
 	void Send(const FString& Message) const;
-	
+
 private:
 	bool bConnectTriggered {false};
 	TQueue<FString> OnMessageQueue;
 	TQueue<FConnectionClosedParams> OnConnectionClosedQueue;
 	TQueue<FString> OnConnectionErrorQueue;
+	TQueue<FReconnectAttemptInfo> OnReconnectingAttemptQueue;
+	TQueue<FMassiveOutageInfo> OnMassiveOutageQueue;
 	bool bConnectedBroadcasted {false};
-	
+
 	FConnectDelegate ConnectDelegate;
 	FMessageReceiveDelegate MessageReceiveDelegate;
 	FConnectionErrorDelegate ConnectionErrorDelegate;
-	FConnectionCloseDelegate ConnectionCloseDelegate;
+	FConnectionCloseMulticastDelegate ConnectionCloseDelegate;
+	FReconnectAttemptMulticastDelegate ReconnectAttemptDelegate;
+	FMassiveOutageMulticastDelegate MassiveOutageDelegate;
+
+#pragma region RECONNECTION_RELATED_MEMBERS
+	uint32 ReconnectingAttemptCount = 0;
+	int32 LatestWebsocketDisonnectionCode = 0;
+	FReconnectionStrategy& GetCurrentReconnectionStrategy();
+	uint32 MassiveOutageReminderCounter = 0; //MassiveOutage delegate shoulde be fired once every that duration recurring. i.e. each 5 minutes
+	IWebsocketConfigurableReconnectStrategy& ParentReconnectionStrategyRef;
+#pragma endregion RECONNECTION_RELATED_MEMBERS
 
 	const float TickPeriod {0.5f};
 	double TimeSinceLastPing {0.0f};
 	float TimeSinceLastReconnect {0.0f};
 	float TimeSinceConnectionLost {0.0f};
 	int BackoffDelay {0};
-	int InitialBackoffDelay {0};
 	int32 RandomizedBackoffDelay {0};
 	float PingDelay {0.0f};
-	double TotalTimeout {0.0f};
-	int MaxBackoffDelay {0};
 	bool bWasWsConnectionError {false};
 	bool bDisconnectOnNextTick {false};
 	TSharedPtr<IWebSocketFactory> WebSocketFactory;
@@ -154,13 +176,13 @@ private:
 	 * not delete this pointer!
 	 */
 	const ServerCredentials* ServerCreds = nullptr;
-	
+
 	FString Url;
 	FString Protocol;
 	TMap<FString, FString> UpgradeHeaders;
 
-	EWebSocketState WsState;
-	EWebSocketEvent WsEvents;
+	EWebSocketState WsState = EWebSocketState::Closed;
+	EWebSocketEvent WsEvents = EWebSocketEvent::None;
 
 	void SetupWebSocket();
 	bool Tick(float DeltaTime);

@@ -836,6 +836,59 @@ FAccelByteTaskWPtr CloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
 }
 
+FAccelByteTaskWPtr CloudSave::BulkGetCurrentPlayerPublicRecordKeys(THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Limit >= RESPONSE_MAX_LIMIT_COUNT)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("Maximum content per page cannot exceed %d!"), RESPONSE_MAX_LIMIT_COUNT));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/me/records")
+		, *SettingsRef.CloudSaveServerUrl
+		, *CredentialsRef->GetNamespace());
+
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("")}
+	};
+
+	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess](FJsonObject const& JsonObject)
+		{
+			FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse PlayerRecordKeys;
+			TArray<FAccelByteModelsGetPublicUserRecordKeys> Data{};
+
+			const TArray<TSharedPtr<FJsonValue>>* JsonData;
+			JsonObject.TryGetArrayField(TEXT("data"), JsonData);
+			for (const TSharedPtr<FJsonValue>& JsonValue : *JsonData)
+			{
+				FAccelByteModelsGetPublicUserRecordKeys RecordKeys{};
+				auto jsonObj = JsonValue->AsObject();
+				jsonObj->TryGetStringField(TEXT("key"), RecordKeys.Key);
+				jsonObj->TryGetStringField(TEXT("user_id"), RecordKeys.UserId);
+				Data.Add(RecordKeys);
+			}
+			PlayerRecordKeys.Data = Data;
+
+			TSharedPtr<FJsonObject> const* pagingJsonObject;
+			JsonObject.TryGetObjectField(TEXT("paging"), pagingJsonObject);
+			pagingJsonObject->Get()->TryGetStringField(TEXT("previous"), PlayerRecordKeys.Paging.Previous);
+			pagingJsonObject->Get()->TryGetStringField(TEXT("next"), PlayerRecordKeys.Paging.Next);
+			pagingJsonObject->Get()->TryGetStringField(TEXT("first"), PlayerRecordKeys.Paging.First);
+			pagingJsonObject->Get()->TryGetStringField(TEXT("last"), PlayerRecordKeys.Paging.Last);
+
+			OnSuccess.ExecuteIfBound(PlayerRecordKeys);
+		});
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccessHttpClient, OnError);
+}
+
 FAccelByteTaskWPtr CloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 	, TArray<FString> const& Keys
 	, THandler<FListAccelByteModelsUserRecord> const& OnSuccess

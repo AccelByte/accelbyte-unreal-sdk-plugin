@@ -8,6 +8,14 @@
 
 namespace AccelByte
 {
+	UENUM(EBlueprintType)
+	enum class EWebsocketClosureCodeForSpecificRetry : int32
+	{
+		None = 0,
+		ClosedAbnormally = 1006,
+		DisconnectServerShutdown = 4000
+	};
+
 	/// <summary>
 	/// https://www.rfc-editor.org/rfc/rfc6455#section-7.4.1
 	/// </summary>

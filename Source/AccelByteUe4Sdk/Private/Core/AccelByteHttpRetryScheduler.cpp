@@ -8,6 +8,7 @@
 #include "Core/AccelByteHttpRetryTask.h"
 #include "Core/AccelByteUtilities.h"
 
+#include "Dom/JsonObject.h"
 #include <algorithm>
 
 DEFINE_LOG_CATEGORY(LogAccelByteHttpRetry);
@@ -144,6 +145,30 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 	return Task;
 }
 
+FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
+	(FHttpRequestPtr Request
+	, TSharedPtr<FJsonObject> Content
+	, const FHttpRequestCompleteDelegate& CompleteDelegate
+	, double RequestTime
+	, bool bOmitBlankValues)
+{
+	if (Request->GetVerb().Equals(TEXT("GET"), ESearchCase::IgnoreCase) || !Content.IsValid())
+	{
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("JSON object is not valid!"));
+		return ProcessRequest(Request, CompleteDelegate, RequestTime);
+	}
+
+#if (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4)
+	FAccelByteUtilities::FixupAllJsonKeys(Content, FAccelByteUtilities::JsonKeyToActualValue);
+#endif
+
+	FString JSONString = ParseUStructToJsonString(Content, bOmitBlankValues);
+
+	Request->SetContentAsString(JSONString);
+
+	return ProcessRequest(Request, CompleteDelegate, RequestTime);
+}
+
 void FHttpRetryScheduler::SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected)
 {
 	if (BearerAuthRejectedDelegate.IsBound()) 
@@ -169,6 +194,35 @@ bool FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(EHttpResponseCod
 		bResult = true;
 	}
 	return bResult;
+}
+
+FString FHttpRetryScheduler::ParseUStructToJsonString(const TSharedPtr<FJsonObject>& JsonObject, bool bOmitBlankValues)
+{
+	FString JsonString;
+
+	if (!JsonObject.IsValid())
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("HttpClient Request UStructToJsonObject failed!"));
+
+		return JsonString;
+	}
+
+	// Omit blank JSON string values if opted into by the caller
+	if (bOmitBlankValues)
+	{
+		FAccelByteUtilities::RemoveEmptyStrings(JsonObject);
+	}
+
+	// Finally, write the JSON object to a string
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&JsonString);
+	if (!FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer))
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("HttpClient Request FJsonSerializer::Serialize failed!"));
+
+		return JsonString;
+	}
+
+	return JsonString;
 }
 
 void FHttpRetryScheduler::BearerAuthRejected()
@@ -221,6 +275,9 @@ void FHttpRetryScheduler::ResumeBearerAuthRequest(const FString& AccessToken)
 
 bool FHttpRetryScheduler::PollRetry(double Time)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelBytePollRetryScheduler"));
+#endif
 	if (TaskQueue.IsEmpty())
 	{
 		return false;

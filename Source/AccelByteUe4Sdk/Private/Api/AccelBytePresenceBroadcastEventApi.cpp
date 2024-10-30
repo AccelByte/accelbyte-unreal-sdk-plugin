@@ -150,6 +150,9 @@ FString PresenceBroadcastEvent::GetFlightId()
 
 bool PresenceBroadcastEvent::PeriodicHeartbeat(float DeltaTime)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelBytePresenceBroadcastEvent"));
+#endif
 	FReport::Log(FString(__FUNCTION__));
 	SendPresenceBroadcastEvent(PresencePayload, OnSendPresenceHeartbeatSuccess, OnSendPresenceHeartbeatError);
 	return true;

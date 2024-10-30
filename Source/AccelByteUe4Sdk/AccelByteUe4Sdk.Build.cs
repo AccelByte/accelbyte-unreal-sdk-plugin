@@ -15,10 +15,11 @@ public class AccelByteUe4Sdk : ModuleRules
 {
 	public AccelByteUe4Sdk(ReadOnlyTargetRules Target) : base(Target)
 	{
+		//Uncomment to activate profiler
+		//PublicDefinitions.Add("ACCELBYTE_ACTIVATE_PROFILER");
 		bLegacyPublicIncludePaths = false;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-
 #if UE_5_2_OR_LATER
 		IWYUSupport = IWYUSupport.Full;
 #else

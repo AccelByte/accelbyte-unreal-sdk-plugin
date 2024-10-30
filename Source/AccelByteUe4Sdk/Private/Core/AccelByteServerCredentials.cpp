@@ -122,6 +122,9 @@ void ServerCredentials::RemoveFromTicker(FDelegateHandleAlias& handle)
 }
 void ServerCredentials::PollRefreshToken(double CurrentTime)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteServerPollRefreshToken"));
+#endif
 	switch (SessionState)
 	{
 		case ESessionState::Expired:

@@ -25,6 +25,8 @@ ServerAMS::ServerAMS(
 	FHttpRetryScheduler& InHttpRef)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {
+	auto Strategy = FReconnectionStrategy::CreateLimitlessStrategy();
+	IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
 }
 
 ServerAMS::~ServerAMS()
@@ -95,6 +97,8 @@ void ServerAMS::UnbindDelegates()
 	OnConnectSuccessDelegate.Unbind();
 	OnConnectErrorDelegate.Unbind();
 	OnConnectionClosedDelegate.Unbind();
+	ReconnectAttempted.Clear();
+	MassiveOutage.Clear();
 }
 
 void ServerAMS::CreateWebSocket()
@@ -113,17 +117,21 @@ void ServerAMS::CreateWebSocket()
 	}
 
 	FAccelByteUtilities::AppendModulesVersionToMap(Headers);
+
 	WebSocket = AccelByteWebSocket::Create(*AMSWatchdogUrl,
 		TEXT("ws"),
 		ServerCredentialsRef.Get(),
 		Headers,
 		TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()),
-		PingDelay, InitialBackoffDelay, MaxBackoffDelay, ServerSettingsRef.AMSReconnectTotalTimeout);
+		*this /*Reconnection Strategy*/,
+		PingDelay);
 
 	WebSocket->OnConnected().AddRaw(this, &ServerAMS::OnConnected);
 	WebSocket->OnMessageReceived().AddRaw(this, &ServerAMS::OnMessage);
 	WebSocket->OnConnectionError().AddRaw(this, &ServerAMS::OnConnectionError);
 	WebSocket->OnConnectionClosed().AddRaw(this, &ServerAMS::OnClosed);
+	WebSocket->OnReconnectAttempt().AddRaw(this, &ServerAMS::OnReconnectAttempt);
+	WebSocket->OnMassiveOutage().AddRaw(this, &ServerAMS::OnMassiveOutage);
 
 	if (ServerSettingsRef.AMSHeartbeatInterval > 0)
 	{
@@ -188,6 +196,16 @@ void ServerAMS::OnClosed(int32 StatusCode, const FString& Reason, bool bWasClean
 	OnConnectionClosedDelegate.ExecuteIfBound(StatusCode, Reason, bWasClean);
 }
 
+void ServerAMS::OnReconnectAttempt(FReconnectAttemptInfo const& ReconnectAttemptInfo)
+{
+	ReconnectAttempted.Broadcast(ReconnectAttemptInfo);
+}
+
+void ServerAMS::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
+{
+	MassiveOutage.Broadcast(MassiveOutageInfo);
+}
+
 void ServerAMS::SetOnAMSDrainReceivedDelegate(FOnAMSDrainReceived OnAMSDrain)
 {
 
@@ -236,6 +254,9 @@ void ServerAMS::SendHeartbeat()
 
 bool ServerAMS::PeriodicHeartbeat(float DeltaTime)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteServerPeriodicHeartBeat"));
+#endif
 	SendHeartbeat();
 	return true;
 }

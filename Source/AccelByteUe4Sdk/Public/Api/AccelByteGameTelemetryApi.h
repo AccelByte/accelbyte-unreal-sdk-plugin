@@ -23,7 +23,7 @@ namespace Api
 /**
  * @brief Send telemetry data securely and the user should be logged in first.
  */
-class ACCELBYTEUE4SDK_API GameTelemetry : public FApiBase
+class ACCELBYTEUE4SDK_API GameTelemetry : public FApiBase, public TSharedFromThis<GameTelemetry, ESPMode::ThreadSafe>
 {
 public:
 	GameTelemetry(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, bool bInCacheEvent = true, bool bInRetryOnFailed = false);
@@ -141,6 +141,10 @@ private:
 
 	FString EventNamespace;
 };
+
+typedef TSharedRef<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryRef;
+typedef TSharedPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryPtr;
+typedef TWeakPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

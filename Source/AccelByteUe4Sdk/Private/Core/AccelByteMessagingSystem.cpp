@@ -132,6 +132,9 @@ bool FAccelByteMessagingSystem::SendMessage(const EAccelByteMessagingTopic Topic
 
 bool FAccelByteMessagingSystem::PollMessages(float DeltaTime)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteMessagingSystemPoll"));
+#endif
 	while (!Messages.IsEmpty())
 	{
 		TSharedPtr<FAccelByteModelsMessagingSystemMessage> Message;

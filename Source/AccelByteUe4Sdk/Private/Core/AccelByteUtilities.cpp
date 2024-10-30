@@ -380,6 +380,81 @@ void FAccelByteUtilities::RemoveEmptyStrings(TSharedPtr<FJsonObject> JsonPtr)
 	}
 }
 
+#if (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4)
+TMap<FName, FString> FAccelByteUtilities::JsonKeyToActualValue = {
+	{ TEXT("namespace"), TEXT("namespace") },
+	{ TEXT("tags"), TEXT("tags") }
+};
+
+void FAccelByteUtilities::RemoveMatchingKeyValuePairs()
+{
+	TArray<FName> KeysToRemove{};
+
+	for (const TPair<FName, FString>& Pair : JsonKeyToActualValue)
+	{
+		if (Pair.Key.ToString() == Pair.Value)
+		{
+			KeysToRemove.Add(Pair.Key);
+		}
+	}
+
+	for (const FName& Key : KeysToRemove)
+	{
+		JsonKeyToActualValue.Remove(Key);
+	}
+};
+
+void FAccelByteUtilities::FixupAllJsonKeys(TSharedPtr<FJsonObject>& JsonObject, const TMap<FName, FString>& JsonKeyToExpectedValue)
+{
+	if (JsonKeyToExpectedValue.IsEmpty())
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("JSON keys to match actual value is empty"));
+		return;
+	}
+	if (!JsonObject.IsValid())
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("JSON object is not valid"));
+		return;
+	}
+
+	for (TPair<FString, TSharedPtr<FJsonValue>>& Pair : JsonObject->Values)
+	{
+		if (Pair.Value->Type == EJson::Object)
+		{
+			TSharedPtr<FJsonObject> NestedObject = Pair.Value->AsObject();
+			if (NestedObject.IsValid())
+			{
+				FixupAllJsonKeys(NestedObject, JsonKeyToExpectedValue);
+			}
+		}
+		else if (Pair.Value->Type == EJson::Array)
+		{
+			TArray<TSharedPtr<FJsonValue>> ArrayValues = Pair.Value->AsArray();
+			for (const TSharedPtr<FJsonValue>& ArrayValue : ArrayValues)
+			{
+				if (ArrayValue->Type == EJson::Object)
+				{
+					TSharedPtr<FJsonObject> ArrayObject = ArrayValue->AsObject();
+					if (ArrayObject.IsValid())
+					{
+						FixupAllJsonKeys(ArrayObject, JsonKeyToExpectedValue);
+					}
+				}
+			}
+		}
+
+		if (const FString* FoundMatchingKeyName = JsonKeyToExpectedValue.Find(FName(Pair.Key)))
+		{
+			FString KeyName = *FoundMatchingKeyName;
+			if (!KeyName.Equals(Pair.Key))
+			{
+				Pair.Key = KeyName;
+			}
+		}
+	}
+}
+#endif
+
 FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 {
 	switch (Platform)
@@ -994,15 +1069,27 @@ bool FAccelByteUtilities::FindAccelByteKeyFromTokens(const FString& AccelByteKey
 		if (bFoundToken)
 		{
 			Value = Param;
-			return true;
+			break;
 		}
 		
 		if (Param.Contains(AccelByteKey, ESearchCase::IgnoreCase, ESearchDir::FromStart))
 		{
 			bFoundToken = true;
+			
+			// Check if there is an equals type here to pick the value out of it
+			if (Param.Contains("=", ESearchCase::IgnoreCase, ESearchDir::FromStart))
+			{
+				Value = Param;
+				TArray<FString> ValueParsed{};
+				Value.ParseIntoArray(ValueParsed, TEXT("=")); // Parse the value into an array to pick the value
+				Value = ValueParsed[1]; // Pick the right one for the value
+				Value = Value.Replace(TEXT("\""), TEXT(""), ESearchCase::Type::IgnoreCase); // Remove the double quotes
+				break; // If found the token then we just break the loop since we already found the Value from token
+			}
 		}
 	}
-	return false;
+
+	return bFoundToken;
 }
 
 bool FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(const FString& Key, int& Value)

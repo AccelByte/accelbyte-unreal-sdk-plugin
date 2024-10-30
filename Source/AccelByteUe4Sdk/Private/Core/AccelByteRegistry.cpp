@@ -88,6 +88,10 @@ FAccelByteNotificationSender FRegistry::NotificationSender{*MessagingSystem.Get(
 FHttpClient FRegistry::HttpClient{ Credentials, Settings, HttpRetryScheduler };
 #pragma endregion
 
+const Api::GameTelemetryPtr FRegistry::GameTelemetryPtr{ MakeShared<Api::GameTelemetry, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::PredefinedEventPtr FRegistry::PredefinedEventPtr{ MakeShared<Api::PredefinedEvent, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::GameStandardEventPtr FRegistry::GameStandardEventPtr{ MakeShared<Api::GameStandardEvent, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+
 #pragma region Game Client Access
 Api::User FRegistry::User{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::UserProfile FRegistry::UserProfile{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
@@ -140,9 +144,9 @@ Api::AMS FRegistry::AMS{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, F
 #pragma endregion
 
 #pragma region Game Client Analytics
-Api::GameTelemetry FRegistry::GameTelemetry{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::PredefinedEvent FRegistry::PredefinedEvent{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::GameStandardEvent FRegistry::GameStandardEvent{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::GameTelemetry& FRegistry::GameTelemetry{ *FRegistry::GameTelemetryPtr.Get() };
+Api::PredefinedEvent& FRegistry::PredefinedEvent{ *FRegistry::PredefinedEventPtr.Get()};
+Api::GameStandardEvent& FRegistry::GameStandardEvent{ *FRegistry::GameStandardEventPtr.Get()};
 #pragma endregion
 
 Api::HeartBeat FRegistry::HeartBeat{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };

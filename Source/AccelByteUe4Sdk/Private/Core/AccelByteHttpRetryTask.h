@@ -41,6 +41,8 @@ namespace AccelByte
 
 		virtual TMap<FString, FString> GetResponseHeader();
 
+		bool IsResponseFromCache() { return bIsResponseFromCache; };
+
 	private:
 		FHttpRequestPtr Request{};
 		const FHttpRequestCompleteDelegate CompleteDelegate{};
@@ -55,6 +57,7 @@ namespace AccelByte
 		bool bIsBeenRunFromPause{};
 		TMap<int32, FHttpRetryScheduler::FHttpResponseCodeHandler> ResponseCodeDelegates{};
 		FDateTime ResponseTime{0};
+		bool bIsResponseFromCache{false};
 
 		void InitializeDefaultDelegates();
 		void BearerAuthUpdated(const FString& AccessToken);

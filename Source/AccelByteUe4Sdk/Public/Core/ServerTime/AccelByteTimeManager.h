@@ -18,7 +18,6 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API FAccelByteTimeManager
 {
 public:
-	FAccelByteTimeManager();
 	FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& InHttpRef);
 	virtual ~FAccelByteTimeManager();
 

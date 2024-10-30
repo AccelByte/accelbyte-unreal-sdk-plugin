@@ -103,9 +103,9 @@ void FAccelByteUe4SdkModule::StartupModule()
 
 	AccelByte::FRegistry::HttpRetryScheduler.Startup();
 	AccelByte::FRegistry::CredentialsRef->Startup();
-	AccelByte::FRegistry::GameTelemetry.Startup();
-	AccelByte::FRegistry::PredefinedEvent.Startup();
-	AccelByte::FRegistry::GameStandardEvent.Startup();
+	AccelByte::FRegistry::GameTelemetryPtr->Startup();
+	AccelByte::FRegistry::PredefinedEventPtr->Startup();
+	AccelByte::FRegistry::GameStandardEventPtr->Startup();
 #if !UE_SERVER
 	AccelByte::FRegistry::HeartBeat.Startup();
 #endif
@@ -449,9 +449,9 @@ void FAccelByteUe4SdkModule::OnPreExit()
 #if !UE_SERVER
 	AccelByte::FRegistry::HeartBeat.Shutdown();
 #endif
-	AccelByte::FRegistry::GameTelemetry.Shutdown();
-	AccelByte::FRegistry::PredefinedEvent.Shutdown();
-	AccelByte::FRegistry::GameStandardEvent.Shutdown();
+	AccelByte::FRegistry::GameTelemetryPtr->Shutdown();
+	AccelByte::FRegistry::PredefinedEventPtr->Shutdown();
+	AccelByte::FRegistry::GameStandardEventPtr->Shutdown();
 	AccelByte::FRegistry::CredentialsRef->Shutdown();
 	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
 	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();

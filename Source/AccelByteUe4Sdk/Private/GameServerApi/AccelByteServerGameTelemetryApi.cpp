@@ -87,6 +87,9 @@ void ServerGameTelemetry::Flush()
 
 bool ServerGameTelemetry::PeriodicTelemetry(float DeltaTime)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteServerPeriodicTelemetry"));
+#endif
 	FReport::Log(FString(__FUNCTION__));
 
 	if (JobQueue.IsEmpty()) { return true; }

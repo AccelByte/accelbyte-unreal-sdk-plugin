@@ -98,6 +98,9 @@ namespace Api
 
 	bool HeartBeat::SendHeartBeatEvent(float DeltaTime)
 	{
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+		TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteHeartBeatEvent"));
+#endif
 		if (bShuttingDown)
 		{
 			return false;

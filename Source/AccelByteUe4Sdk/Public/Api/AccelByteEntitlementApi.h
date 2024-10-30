@@ -560,6 +560,21 @@ public:
 	FAccelByteTaskWPtr SyncEntitlementPSNMultipleService(FAccelByteModelsMultipleServicePSNIAPSync const& PlaystationModel
 		, THandler<TArray<FAccelByteModelsMultipleServicePlayStationInfo>> const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Query Platform's subscription items
+	 * 
+	 * @param PlatformType The platform type identifier for subscription query
+	 * @param Request Query parameters for the request
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr QueryUserSubcriptions(EAccelBytePlatformSync PlatformType
+		, FAccelByteModelsThirdPartyUserSubscriptionQueryRequest const& Request
+		, THandler<FAccelByteModelsThirdPartyUserSubscriptions> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 private:
 	Entitlement() = delete;

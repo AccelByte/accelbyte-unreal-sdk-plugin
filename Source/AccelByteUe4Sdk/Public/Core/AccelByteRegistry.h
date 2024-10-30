@@ -109,6 +109,10 @@ public:
 	static FHttpClient HttpClient;
 #pragma endregion
 
+	static const TSharedPtr<Api::GameTelemetry, ESPMode::ThreadSafe> GameTelemetryPtr;
+	static const TSharedPtr<Api::PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventPtr;
+	static const TSharedPtr<Api::GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventPtr;
+
 #pragma region Game Client Access
 	static Api::User User;
 	static Api::UserProfile UserProfile;
@@ -162,9 +166,9 @@ public:
 #pragma endregion
 
 #pragma region Game Client Analytics
-	static Api::GameTelemetry GameTelemetry;
-	static Api::PredefinedEvent PredefinedEvent;
-	static Api::GameStandardEvent GameStandardEvent;
+	static Api::GameTelemetry& GameTelemetry;
+	static Api::PredefinedEvent& PredefinedEvent;
+	static Api::GameStandardEvent& GameStandardEvent;
 #pragma endregion
 
 	static Api::HeartBeat HeartBeat;

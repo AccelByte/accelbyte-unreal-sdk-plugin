@@ -513,7 +513,6 @@ void Lobby::Disconnect(bool ForceCleanup)
 	UE_LOG(LogAccelByteLobby, Log, TEXT("Disconnected"));
 }
 
-
 bool Lobby::IsConnected() const
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -2291,6 +2290,16 @@ void Lobby::OnClosed(int32 StatusCode
 		Reconnecting.ExecuteIfBound(StatusCode, Reason, WasClean);
 	}
 }
+
+void Lobby::OnReconnectAttempt(FReconnectAttemptInfo const& ReconnectAttemptInfo)
+{
+	ReconnectAttempted.Broadcast(ReconnectAttemptInfo);
+}
+
+void Lobby::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
+{
+	MassiveOutage.Broadcast(MassiveOutageInfo);
+}
 	
 FString Lobby::SendRawRequest(FString const& MessageType
 	, FString const& MessageIDPrefix
@@ -2348,15 +2357,16 @@ void Lobby::CreateWebSocket(FString const& Token)
 		, CredentialsRef.Get()
 		, Headers
 		, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory())
+		, *this /*Reconnection Strategy*/
 		, PingDelay
-		, InitialBackoffDelay
-		, MaxBackoffDelay
-		, TotalTimeout);
+	);
 
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
 	WebSocket->OnMessageReceived().AddRaw(this, &Lobby::OnMessage, false);
 	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
 	WebSocket->OnConnectionClosed().AddRaw(this, &Lobby::OnClosed);
+	WebSocket->OnReconnectAttempt().AddRaw(this, &Lobby::OnReconnectAttempt);
+	WebSocket->OnMassiveOutage().AddRaw(this, &Lobby::OnMassiveOutage);
 }
 
 FString Lobby::LobbyMessageToJson(FString const& Message)
@@ -2779,7 +2789,7 @@ void Lobby::HandleV2SessionNotif(FString const& ParsedJsonString, bool bSkipCond
 	}
 
 	FJsonObjectWrapper JsonWrapper;
-	if(JsonWrapper.JsonObjectFromString(ParsedJsonString) && JsonWrapper.JsonObject->HasField("SequenceID"))
+	if(JsonWrapper.JsonObjectFromString(ParsedJsonString) && JsonWrapper.JsonObject->HasField(TEXT("SequenceID")))
 	{
 		FHandleLobbyMessageData Message;
 		Message.Topic = Notif.Topic;
@@ -2827,6 +2837,10 @@ void Lobby::DispatchV2SessionMessageByTopic(FString const& Topic, FString const&
 		{
 			DispatchV2JsonNotif<FAccelByteModelsV2PartyUserKickedEvent>(Payload, V2PartyKickedNotif);
 			break;
+		}
+		case EV2SessionNotifTopic::OnPartyCreated:
+		{
+			DispatchMulticastV2JsonNotif<FAccelByteModelsV2PartyCreatedEvent>(Payload, V2PartyCreatedNotif);
 		}
 		case EV2SessionNotifTopic::OnSessionInvited:
 		{
@@ -2920,7 +2934,7 @@ void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& 
 	}
 
 	FJsonObjectWrapper JsonWrapper;
-	if(JsonWrapper.JsonObjectFromString(NotifJsonString) && JsonWrapper.JsonObject->HasField("SequenceID"))
+	if(JsonWrapper.JsonObjectFromString(NotifJsonString) && JsonWrapper.JsonObject->HasField(TEXT("SequenceID")))
 	{
 		FHandleLobbyMessageData EnqueueMessage;
 		EnqueueMessage.Topic = Message.Topic;
@@ -3517,23 +3531,6 @@ FAccelByteTaskWPtr Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrap
 		);
 }
 
-void Lobby::SetRetryParameters(int32 NewTotalTimeout
-	, int32 NewBackoffDelay
-	, int32 NewMaxDelay)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	if (WebSocket.IsValid())
-	{
-		UE_LOG(LogAccelByteLobby, Log, TEXT("Can't change retry parameters! Lobby is already connected."));
-		return;
-	}
-
-	Lobby::TotalTimeout = NewTotalTimeout;
-	Lobby::InitialBackoffDelay = NewBackoffDelay;
-	Lobby::MaxBackoffDelay = NewMaxDelay;
-}
-
 FAccelByteTaskWPtr Lobby::FetchLobbyErrorMessages()
 {
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/messages"), *SettingsRef.BaseUrl);
@@ -3609,8 +3606,7 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, float InPingDelay
 	, float InInitialBackoffDelay
 	, float InMaxBackoffDelay
-	, float InTotalTimeout
-	, TSharedPtr<IWebSocket> InWebSocket)
+	, float InTotalTimeout)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 	, LobbyCredentialsRef{InCredentialsRef.AsShared()}
 #if ENGINE_MAJOR_VERSION < 5
@@ -3620,11 +3616,6 @@ Lobby::Lobby(Credentials & InCredentialsRef
 #endif
 	, NetworkConditioner{InNetworkConditionerRef}
 	, PingDelay{InPingDelay}
-	, InitialBackoffDelay{InInitialBackoffDelay}
-	, MaxBackoffDelay{InMaxBackoffDelay}
-	, TotalTimeout{InTotalTimeout}
-	, BackoffDelay{InInitialBackoffDelay}
-	, RandomizedBackoffDelay{InInitialBackoffDelay}
 	, TimeSinceLastPing{.0f}
 	, TimeSinceLastReconnect{.0f}
 	, TimeSinceConnectionLost{.0f}
@@ -3633,6 +3624,13 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	InitializeMessaging();
 
 	LobbyTickerHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &Lobby::Tick), LobbyTickPeriod);
+
+	auto Strategy = FReconnectionStrategy::CreateBalancedStrategy(
+		FReconnectionStrategy::FBalancedMaxRetryInterval(FTimespan::FromSeconds(InMaxBackoffDelay)),
+		FReconnectionStrategy::FTotalTimeoutDuration(FTimespan::FromSeconds(InTotalTimeout)),
+		FReconnectionStrategy::FInitialBackoffDelay(FTimespan::FromSeconds(InInitialBackoffDelay))
+	);
+	IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
 }
 
 Lobby::~Lobby()
@@ -3655,6 +3653,8 @@ Lobby::~Lobby()
 		ConnectError.Unbind();
 		ConnectionClosed.Unbind();
 		Reconnecting.Unbind();
+		ReconnectAttempted.Clear();
+		MassiveOutage.Clear();
 	}
 }
 

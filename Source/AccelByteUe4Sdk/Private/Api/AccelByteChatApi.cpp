@@ -423,11 +423,10 @@ namespace IncomingMessage
 		, FHttpRetryScheduler & InHttpRef
 		, FAccelByteMessagingSystem & InMessagingSystemRef
 		, FAccelByteNetworkConditioner & InNetworkConditionerRef
-		, float PingDelay
-		, float InitialBackoffDelay
-		, float MaxBackoffDelay
-		, float TotalTimeout
-		, TSharedPtr<IWebSocket> WebSocket)
+		, float InPingDelay
+		, float InInitialBackoffDelay
+		, float InMaxBackoffDelay
+		, float InTotalTimeout)
 		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 		, ChatCredentialsRef{InCredentialsRef.AsShared()}
 #if ENGINE_MAJOR_VERSION < 5
@@ -436,19 +435,24 @@ namespace IncomingMessage
 		, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
 #endif
 		, NetworkConditioner{InNetworkConditionerRef}
-		, PingDelay{PingDelay}
-		, InitialBackoffDelay{InitialBackoffDelay}
-		, MaxBackoffDelay{MaxBackoffDelay}
-		, TotalTimeout{TotalTimeout}
-		, BackoffDelay{InitialBackoffDelay}
-		, RandomizedBackoffDelay{InitialBackoffDelay}
-		, TimeSinceLastPing{0.0f}
-		, TimeSinceLastReconnect{0.0f}
-		, TimeSinceConnectionLost{0}
+		, PingDelay{InPingDelay}
 	{
+		auto Strategy = FReconnectionStrategy::CreateBalancedStrategy(
+			FReconnectionStrategy::FBalancedMaxRetryInterval(FTimespan::FromSeconds(InMaxBackoffDelay)),
+			FReconnectionStrategy::FTotalTimeoutDuration(FTimespan::FromSeconds(InTotalTimeout)),
+			FReconnectionStrategy::FInitialBackoffDelay(FTimespan::FromSeconds(InInitialBackoffDelay))
+		);
+		IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
 	}
 
-	Chat::~Chat() {}
+	Chat::~Chat()
+	{
+		if(UObjectInitialized())
+		{
+			ReconnectAttempted.Clear();
+			MassiveOutage.Clear();
+		}
+	}
 
 #pragma region CONNECTION
 	void Chat::CreateWebSocket()
@@ -464,12 +468,21 @@ namespace IncomingMessage
 		Headers.Add(TEXT("X-Ab-RpcEnvelopeEnd"), WsEnvelopeEnd);
 		FAccelByteUtilities::AppendModulesVersionToMap(Headers);
 
-		WebSocket = AccelByteWebSocket::Create(*SettingsRef.ChatServerWsUrl, TEXT("wss"), CredentialsRef.Get(), Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
+		WebSocket = AccelByteWebSocket::Create(
+			*SettingsRef.ChatServerWsUrl, 
+			TEXT("wss"), 
+			CredentialsRef.Get(), 
+			Headers, 
+			TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), 
+			*this /*Reconnect Strategy*/,
+			PingDelay);
 
 		WebSocket->OnConnected().AddRaw(this, &Chat::OnConnected);
 		WebSocket->OnMessageReceived().AddRaw(this, &Chat::OnMessage);
 		WebSocket->OnConnectionError().AddRaw(this, &Chat::OnConnectionError);
 		WebSocket->OnConnectionClosed().AddRaw(this, &Chat::OnClosed);
+		WebSocket->OnReconnectAttempt().AddRaw(this, &Chat::OnReconnectAttempt);
+		WebSocket->OnMassiveOutage().AddRaw(this, &Chat::OnMassiveOutage);
 	}
 
 	void Chat::Connect()
@@ -585,6 +598,16 @@ namespace IncomingMessage
 			ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 		}
 	}
+
+void Chat::OnReconnectAttempt(FReconnectAttemptInfo const& ReconnectAttemptInfo)
+{
+	ReconnectAttempted.Broadcast(ReconnectAttemptInfo);
+}
+
+void Chat::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
+{
+	MassiveOutage.Broadcast(MassiveOutageInfo);
+}
 #pragma endregion CONNECTION
 
 #pragma region DELEGATE HANDLERS
@@ -1462,7 +1485,7 @@ namespace IncomingMessage
 	}
 
 #pragma  endregion 
-		
+
 } // Namespace Api
 
 } // Namespace AccelByte

@@ -359,6 +359,9 @@ FAccelByteTaskWPtr ServerDSM::GetSessionTimeout(THandler<FAccelByteModelsServerT
 FAccelByteTaskWPtr ServerDSM::ServerHeartbeat(FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
+#ifdef ACCELBYTE_ACTIVATE_PROFILER
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteServerDSMHeartBeat"));
+#endif
 	FReport::Log(FString(__FUNCTION__));
 
 	if (ServerType == EServerType::NONE)

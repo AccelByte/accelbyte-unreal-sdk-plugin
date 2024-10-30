@@ -23,6 +23,7 @@ class ACCELBYTEUE4SDK_API CloudSave : public FApiBase
 {
 	
 #define MAX_BULK_KEY_COUNT 20
+#define RESPONSE_MAX_LIMIT_COUNT 100
 	
 public:
 	CloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -359,6 +360,21 @@ public:
 	 */
 	FAccelByteTaskWPtr BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 		, THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20);
+
+	/**
+	 * @brief Retrieve the public key record for current user in bulk.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse&.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset The offset of the cloudsave result. Default value is 0.
+	 * @param Limit The limit of the cloudsave result. Default value is 20.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkGetCurrentPlayerPublicRecordKeys(THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 const& Offset = 0
 		, int32 const& Limit = 20);

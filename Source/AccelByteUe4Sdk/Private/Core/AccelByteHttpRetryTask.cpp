@@ -256,6 +256,8 @@ namespace AccelByte
 		FReport::LogHttpResponse(Request, Response);
 		CompleteDelegate.ExecuteIfBound(Request, Response, true /*IsFinished()*/);
 
+		bIsResponseFromCache = true;
+
 		return FAccelByteTask::Finish();
 	}
 

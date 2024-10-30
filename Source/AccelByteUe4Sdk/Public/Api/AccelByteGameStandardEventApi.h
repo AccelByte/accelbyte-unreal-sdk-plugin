@@ -64,5 +64,9 @@ private:
 
 };
 
+typedef TSharedRef<GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventRef;
+typedef TSharedPtr<GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventPtr;
+typedef TWeakPtr<GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventWPtr;
+
 } // Namespace Api
 } // Namespace AccelByte

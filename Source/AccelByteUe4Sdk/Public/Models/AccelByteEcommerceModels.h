@@ -188,6 +188,10 @@ enum class EAccelBytePlatformSync : uint8
 	XBOX_LIVE,
 	PLAYSTATION, 
 	EPIC_GAMES,
+	APPLE,
+	GOOGLE,
+	OCULUS,
+	TWITCH,
 	OTHER
 };
 
@@ -431,6 +435,21 @@ enum class EAccelByteUserEntitlementOrigin : uint8
 	Oculus,
 	System,
 	Other
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteSubscriptionStatus : uint8
+{
+	ACTIVE, 
+	EXPIRED, 
+	IN_GRACE_PERIOD, 
+	BILLING_RETRY_PERIOD, 
+	REVOKED, 
+	PENDING, 
+	PAUSED, 
+	ON_HOLD, 
+	CANCELED, 
+	UNKNOWN
 };
 
 #pragma endregion EnumField
@@ -1467,22 +1486,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileApple
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
-	FString ProductId{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
 	FString TransactionId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
-	FString ReceiptData{};
+	FString ProductId{}; //WARNING: Obsolete & unused by V2 sync endpoint
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
-	bool ExcludeOldTransactions{};
+	FString ReceiptData{}; //WARNING: Obsolete & unused by V2 sync endpoint
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
-	FString Region{}; //optional
+	bool ExcludeOldTransactions{}; //WARNING: Obsolete & unused by V2 sync endpoint
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
-	FString Language{}; //optional
+	FString Region{}; //WARNING: Obsolete & unused by V2 sync endpoint
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
+	FString Language{}; //WARNING: Obsolete & unused by V2 sync endpoint
 };
 
 USTRUCT(BlueprintType)
@@ -1513,6 +1532,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileGoogle
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
 	FString Language{}; //optional
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	bool AutoConsume{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	bool SubscriptionPurchase{false};
 };
 
 USTRUCT(BlueprintType)
@@ -2622,13 +2647,24 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyList
 
 #pragma region RewardModelsField
 
+UENUM(BlueprintType)
+enum class EAccelBytePlatformRewardItemIdentityType : uint8
+{
+	ITEM_ID = 0,
+	ITEM_SKU
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsRewardItem
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardItem")
+	EAccelBytePlatformRewardItemIdentityType IdentityType{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardItem")
 	FString ItemId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardItem")
+	FString SKU{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardItem")
 	int32 Quantity{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardItem")
@@ -2877,7 +2913,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInventoryConfig
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-	int32 SlotUsed;
+	int32 SlotUsed{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 	FJsonObjectWrapper ServerCustomAttributes{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
@@ -3396,4 +3432,67 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemMappingsResponseInternal
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ItemMappingsResponse")
 	TArray<FAccelByteModelsItemMappingInternal> Data;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsThirdPartySubscriptionTransactionInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FString Id{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	EAccelBytePlatformSync Platform{EAccelBytePlatformSync::OTHER};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	bool Active{false};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	EAccelByteSubscriptionStatus Status{EAccelByteSubscriptionStatus::UNKNOWN};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FString OriginalTransactionId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FString SubscriptionGroupId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FString SubscriptionProductId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FDateTime StartAt{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FDateTime ExpiredAt{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FString PurchaseToken{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FString LastTransactionId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FDateTime CreatedAt{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SubscriptionTransactionInfo")
+	FDateTime UpdatedAt{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsThirdPartyUserSubscriptions
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UserSubscriptions")
+	TArray<FAccelByteModelsThirdPartySubscriptionTransactionInfo> Data{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UserSubscriptions")
+	FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsThirdPartyUserSubscriptionQueryRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UserSubscriptionsQuery")
+	FString GroupId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UserSubscriptionsQuery")
+	FString ProductId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UserSubscriptionsQuery")
+	bool ActiveOnly{true};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UserSubscriptionsQuery")
+	int32 Offset{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UserSubscriptionsQuery")
+	int32 Limit{20};
 };

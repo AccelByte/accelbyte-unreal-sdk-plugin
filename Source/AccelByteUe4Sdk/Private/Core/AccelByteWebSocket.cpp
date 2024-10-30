@@ -10,7 +10,6 @@
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteUtilities.h"
-#include "Core/AccelByteWebSocketErrorTypes.h"
 #include "Logging/AccelByteServiceLogger.h"
 
 
@@ -21,17 +20,12 @@ namespace AccelByte
 {	
 AccelByteWebSocket::AccelByteWebSocket(
 	const Credentials& Credentials,
-	float PingDelay,
-	float InitialBackoffDelay,
-	float MaxBackoffDelay,
-	float TotalTimeout)
-	: InitialBackoffDelay(InitialBackoffDelay)
+	IWebsocketConfigurableReconnectStrategy& InParentReconnectionStrategyRef,
+	float PingDelay
+)
+	: ParentReconnectionStrategyRef(InParentReconnectionStrategyRef)
 	, PingDelay(PingDelay)
-	, TotalTimeout(TotalTimeout)
-	, MaxBackoffDelay(MaxBackoffDelay)
 	, ClientCreds(&Credentials)
-	, WsState(EWebSocketState::Closed)
-	, WsEvents(EWebSocketEvent::None)
 {
 	TickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByteWebSocket::Tick);
 	TickerDelegateHandle.Reset();
@@ -39,17 +33,12 @@ AccelByteWebSocket::AccelByteWebSocket(
 
 AccelByteWebSocket::AccelByteWebSocket(
 	const ServerCredentials& Credentials,
-	float PingDelay /*= 30.f*/,
-	float InitialBackoffDelay /*= 1.f*/,
-	float MaxBackoffDelay /*= 30.f*/,
-	float TotalTimeout /*= 60.f */)
-	: InitialBackoffDelay(InitialBackoffDelay)
+	IWebsocketConfigurableReconnectStrategy& InParentReconnectionStrategyRef,
+	float PingDelay /*= 30.f*/
+	)
+	: ParentReconnectionStrategyRef(InParentReconnectionStrategyRef)
 	, PingDelay(PingDelay)
-	, TotalTimeout(TotalTimeout)
-	, MaxBackoffDelay(MaxBackoffDelay)
 	, ServerCreds(&Credentials)
-	, WsState(EWebSocketState::Closed)
-	, WsEvents(EWebSocketEvent::None)
 {
 	TickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByteWebSocket::Tick);
 	TickerDelegateHandle.Reset();
@@ -77,13 +66,15 @@ AccelByteWebSocket::~AccelByteWebSocket()
 void AccelByteWebSocket::SetupWebSocket()
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+
 	bWasWsConnectionError = false;
 
 	bConnectTriggered = false;
 	OnMessageQueue.Empty();
 	OnConnectionClosedQueue.Empty();
 	OnConnectionErrorQueue.Empty();
+	OnReconnectingAttemptQueue.Empty();
+	OnMassiveOutageQueue.Empty();
 
 	TeardownWebsocket();
 
@@ -127,9 +118,19 @@ AccelByteWebSocket::FConnectionErrorDelegate& AccelByteWebSocket::OnConnectionEr
 	return ConnectionErrorDelegate;
 }
 
-AccelByteWebSocket::FConnectionCloseDelegate& AccelByteWebSocket::OnConnectionClosed()
+AccelByteWebSocket::FConnectionCloseMulticastDelegate& AccelByteWebSocket::OnConnectionClosed()
 {
 	return ConnectionCloseDelegate;
+}
+
+AccelByteWebSocket::FReconnectAttemptMulticastDelegate& AccelByteWebSocket::OnReconnectAttempt()
+{
+	return ReconnectAttemptDelegate;
+}
+
+AccelByteWebSocket::FMassiveOutageMulticastDelegate& AccelByteWebSocket::OnMassiveOutage()
+{
+	return MassiveOutageDelegate;
 }
 
 TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> AccelByteWebSocket::Create(
@@ -138,14 +139,12 @@ TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> AccelByteWebSocket::Create(
 	const Credentials& Credentials,
 	const TMap<FString, FString>& UpgradeHeaders,
 	const TSharedRef<IWebSocketFactory> WebSocketFactory,
-	float PingDelay,
-	float InitialBackoffDelay,
-	float MaxBackoffDelay,
-	float TotalTimeout
+	IWebsocketConfigurableReconnectStrategy& InParentReconnectionStrategyRef,
+	float PingDelay
 )
 {
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	TSharedRef<AccelByteWebSocket, ESPMode::ThreadSafe> Ws = MakeShared<AccelByteWebSocket, ESPMode::ThreadSafe>(Credentials, PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
+	TSharedRef<AccelByteWebSocket, ESPMode::ThreadSafe> Ws = MakeShared<AccelByteWebSocket, ESPMode::ThreadSafe>(Credentials, InParentReconnectionStrategyRef, PingDelay);
 		
 	Ws->Url = Url;
 	Ws->Protocol = Protocol;
@@ -163,14 +162,12 @@ TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> AccelByteWebSocket::Create(
 	const ServerCredentials& Credentials,
 	const TMap<FString, FString>& UpgradeHeaders,
 	const TSharedRef<IWebSocketFactory> WebSocketFactory,
-	float PingDelay /*= 30.f*/,
-	float InitialBackoffDelay /*= 1.f*/,
-	float MaxBackoffDelay /*= 30.f*/,
-	float TotalTimeout /*= 60.f */
+	IWebsocketConfigurableReconnectStrategy& InParentReconnectionStrategyRef,
+	float PingDelay /*= 30.f*/
 )
 {
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	TSharedRef<AccelByteWebSocket, ESPMode::ThreadSafe> Ws = MakeShared<AccelByteWebSocket, ESPMode::ThreadSafe>(Credentials, PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
+	TSharedRef<AccelByteWebSocket, ESPMode::ThreadSafe> Ws = MakeShared<AccelByteWebSocket, ESPMode::ThreadSafe>(Credentials, InParentReconnectionStrategyRef, PingDelay);
 
 	Ws->Url = Url;
 	Ws->Protocol = Protocol;
@@ -223,7 +220,7 @@ void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	if(!ForceCleanup && (bConnectTriggered || !OnMessageQueue.IsEmpty() || !OnConnectionClosedQueue.IsEmpty() || !OnConnectionErrorQueue.IsEmpty()))
+	if(!ForceCleanup && (bConnectTriggered || !OnMessageQueue.IsEmpty() || !OnConnectionClosedQueue.IsEmpty() || !OnConnectionErrorQueue.IsEmpty() || !OnReconnectingAttemptQueue.IsEmpty() || !OnMassiveOutageQueue.IsEmpty()))
 	{
 		bDisconnectOnNextTick = true;
 	}
@@ -236,6 +233,8 @@ void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 			WebSocket->Close();
 		}
 	}	
+	LatestWebsocketDisonnectionCode = 0;
+	MassiveOutageReminderCounter = 0;
 }
 
 bool AccelByteWebSocket::IsConnected() const
@@ -263,12 +262,14 @@ void AccelByteWebSocket::OnConnectionConnected()
 	
 	WsEvents |= EWebSocketEvent::Connected;
 	bConnectTriggered = true;
+	LatestWebsocketDisonnectionCode = 0;
 }
 
 void AccelByteWebSocket::OnConnectionError(const FString& Error)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+	FReport::Log(FString::Printf(TEXT("AccelByteWebSocket::OnConnectionError = %s"), *Error));
+
 	WsEvents |= EWebSocketEvent::ConnectionError;
 	bWasWsConnectionError = true;
 	OnConnectionErrorQueue.Enqueue(Error);
@@ -277,6 +278,7 @@ void AccelByteWebSocket::OnConnectionError(const FString& Error)
 void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::Log(FString::Printf(TEXT("AccelByteWebSocket::OnClosed = %d"), StatusCode));
 
 	// Broadcast message DisconnectNotif
 	OnMessageReceived(Reason);
@@ -287,7 +289,9 @@ void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool 
 		// Add event websocket closed so state tick can reconnect lobby.
 		WsEvents |= EWebSocketEvent::Closed;
 	}
-		
+
+	LatestWebsocketDisonnectionCode = StatusCode;
+
 	OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 }
 
@@ -319,6 +323,8 @@ bool AccelByteWebSocket::Tick(float DeltaTime)
 
 bool AccelByteWebSocket::StateTick(float DeltaTime)
 {
+	auto& CurrentStrategy = GetCurrentReconnectionStrategy();
+
 	switch (WsState)
 	{
 	case EWebSocketState::Closed:
@@ -330,6 +336,9 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 		{
 			WsState = EWebSocketState::Connecting;
 		}
+		ReconnectingAttemptCount = 0;
+		MassiveOutageReminderCounter = 0;
+		LatestWebsocketDisonnectionCode = 0;
 		break;
 	case EWebSocketState::Connecting:
 		if ((WsEvents & EWebSocketEvent::ConnectionError) != EWebSocketEvent::None)
@@ -351,7 +360,6 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 		}
 		break;
 	case EWebSocketState::Connected:
-
 		if ((WsEvents & EWebSocketEvent::Close) != EWebSocketEvent::None)
 		{
 			WsState = EWebSocketState::Closing;
@@ -369,8 +377,8 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 	case EWebSocketState::WaitingReconnect:
 		TimeSinceLastReconnect = FPlatformTime::Seconds();
 		TimeSinceConnectionLost = FPlatformTime::Seconds();
-		BackoffDelay = InitialBackoffDelay;
-		RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-InitialBackoffDelay, InitialBackoffDelay) / 4);
+		BackoffDelay = CurrentStrategy.InitialBackoffDelay.GetTotalSeconds();
+		RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-BackoffDelay, BackoffDelay) / 4);
 		Connect();
 		WsState = EWebSocketState::Reconnecting;
 		break;
@@ -384,25 +392,46 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 		{
 			WsState = EWebSocketState::Closing;
 		}
-		else if ((FPlatformTime::Seconds() - TimeSinceConnectionLost) >= TotalTimeout)
+		// If the retry to reconnect has been exhausted & reach the limit
+		else if ((FPlatformTime::Seconds() - TimeSinceConnectionLost) >= CurrentStrategy.TotalTimeout.GetTotalSeconds())
 		{
 			TimeSinceLastReconnect = FPlatformTime::Seconds();
-			BackoffDelay = InitialBackoffDelay;
+			BackoffDelay = CurrentStrategy.InitialBackoffDelay.GetTotalSeconds();
 
-			const int32 StatusCode = static_cast<int32>(EWebsocketErrorTypes::DisconnectFromExternalReconnect);
+			const int32 StatusCode = static_cast<int32>(EWebsocketErrorTypes::DisconnectFromExternalReconnect); //4401
 			const FString Reason(TEXT("Reconnection total timeout limit reached"));
 			const bool WasClean = false;
 			OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 
 			WsState = EWebSocketState::Closed;
 		}
+		// If it's time to retry to reconnect again
 		else if ((FPlatformTime::Seconds() - TimeSinceLastReconnect) >= RandomizedBackoffDelay)
 		{
-			if (BackoffDelay < MaxBackoffDelay)
+			switch (CurrentStrategy.StrategyType)
 			{
-				BackoffDelay *= 2;
+			case EReconnectionStrategyType::AGGRESSIVE:
+				BackoffDelay = CurrentStrategy.AggressiveRetryInterval.GetTotalSeconds();
+				RandomizedBackoffDelay = BackoffDelay;
+				break;
+			case EReconnectionStrategyType::LIMITLESS:
+				BackoffDelay *= CurrentStrategy.GetBaseFactorBackoff();
+				BackoffDelay = FMath::Clamp(BackoffDelay, CurrentStrategy.CAP_MINIMUM_RETRY_INTERVAL_SECONDS, CurrentStrategy.CAP_LIMITLESS_RETRY_INTERVAL_SECONDS);
+				RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-BackoffDelay, BackoffDelay) / 4);
+				break;
+			case EReconnectionStrategyType::BALANCED:
+			default:
+				if (BackoffDelay < CurrentStrategy.BalancedMaxRetryInterval.GetTotalSeconds())
+				{
+					BackoffDelay *= CurrentStrategy.GetBaseFactorBackoff();
+
+					//Clamp the value
+					BackoffDelay = FMath::Clamp(BackoffDelay, CurrentStrategy.CAP_MINIMUM_RETRY_INTERVAL_SECONDS, (int32)CurrentStrategy.BalancedMaxRetryInterval.GetTotalSeconds());
+				}
+				RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-BackoffDelay, BackoffDelay) / 4);
+				break;
 			}
-			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-BackoffDelay, BackoffDelay) / 4);
+
 			if (bWasWsConnectionError)
 			{
 				// websocket state is error can't be reconnect, need to create a new instance
@@ -412,6 +441,22 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 			UE_LOG(LogAccelByteWebsocket, Log, TEXT("Connecting from Reconnecting state"));
 			Connect();
 			TimeSinceLastReconnect = FPlatformTime::Seconds();
+
+			ReconnectingAttemptCount += 1;
+			OnReconnectingAttemptQueue.Enqueue(FReconnectAttemptInfo({ReconnectingAttemptCount, FTimespan::FromSeconds(RandomizedBackoffDelay)}));
+		}
+
+		// Extra condition: massive outage reminder that recurring each X minutes. Default : 5 minute, but configurable by setting the reconnection strategy.
+		if ((FPlatformTime::Seconds() - TimeSinceConnectionLost) >= CurrentStrategy.GetMassiveOutageDuration().GetTotalSeconds())
+		{
+			float TotalOutageDuration = FPlatformTime::Seconds() - TimeSinceConnectionLost;
+			int32 RoundedTotalOutageSeconds = FMath::RoundToInt(TotalOutageDuration);
+			int32 FixedMassiveOutageInterval = FMath::RoundToInt(CurrentStrategy.GetMassiveOutageDuration().GetTotalSeconds());
+			if (uint32(RoundedTotalOutageSeconds / FixedMassiveOutageInterval) > MassiveOutageReminderCounter)
+			{
+				MassiveOutageReminderCounter += 1; // The Enqueue of reminder will occur again if we exceed the next windows of massive outage.
+				OnMassiveOutageQueue.Enqueue(FMassiveOutageInfo{ FTimespan::FromSeconds(TotalOutageDuration) });
+			}
 		}
 		break;
 	case EWebSocketState::Closing:
@@ -466,6 +511,22 @@ bool AccelByteWebSocket::MessageTick(float DeltaTime)
 		}
 	}
 
+	while (!OnReconnectingAttemptQueue.IsEmpty())
+	{
+		FReconnectAttemptInfo Params;
+		OnReconnectingAttemptQueue.Dequeue(Params);
+
+		ReconnectAttemptDelegate.Broadcast(Params);
+	}
+
+	while (!OnMassiveOutageQueue.IsEmpty())
+	{
+		FMassiveOutageInfo Params;
+		OnMassiveOutageQueue.Dequeue(Params);
+
+		MassiveOutageDelegate.Broadcast(Params);
+	}
+
 	return true;
 }
 
@@ -489,4 +550,35 @@ void AccelByteWebSocket::TeardownWebsocket()
 		WebSocket.Reset();
 	}
 }
+
+FReconnectionStrategy& AccelByteWebSocket::GetCurrentReconnectionStrategy()
+{
+	// When there is no closure code from a disconnection, return default strategy
+	if (LatestWebsocketDisonnectionCode == (int32)EWebsocketClosureCodeForSpecificRetry::None)
+	{
+		return ParentReconnectionStrategyRef.GetDefaultReconnectionStrategy();
+	}
+
+	// When there's a specific closure code
+	if (ParentReconnectionStrategyRef.GetReconnectionStrategyDictionary().Contains(LatestWebsocketDisonnectionCode))
+	{
+		auto& SpecificStrategy = ParentReconnectionStrategyRef.GetReconnectionStrategyDictionary()[LatestWebsocketDisonnectionCode];
+		switch (SpecificStrategy.StrategyType)
+		{
+		case EReconnectionStrategyType::AGGRESSIVE:
+			return SpecificStrategy;
+		case EReconnectionStrategyType::BALANCED:
+			return SpecificStrategy;
+		case EReconnectionStrategyType::LIMITLESS:
+			return SpecificStrategy;
+		default:
+			return ParentReconnectionStrategyRef.GetDefaultReconnectionStrategy();
+		}
+	}
+	else
+	{
+		return ParentReconnectionStrategyRef.GetDefaultReconnectionStrategy();
+	}
+}
+
 }

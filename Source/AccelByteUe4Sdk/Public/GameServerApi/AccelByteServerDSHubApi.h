@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteServerApiBase.h"
+#include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteDSHubModels.h"
 #include "Models/AccelByteMatchmakingModels.h"
 
@@ -23,7 +24,9 @@ namespace GameServerApi
 
 DECLARE_DELEGATE(FConnectSuccess);
 DECLARE_DELEGATE_OneParam(FConnectError, FString const& /* Message */);
-DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, FString const& /* Reason */, bool /* WasClean */);
+typedef AccelByteWebSocket::FConnectionCloseDelegate FConnectionClosed;
+typedef AccelByteWebSocket::FReconnectAttemptMulticastDelegate FReconnectAttempted;
+typedef AccelByteWebSocket::FMassiveOutageMulticastDelegate FMassiveOutage;
 	
 DECLARE_DELEGATE_OneParam(FOnServerClaimedNotification, FAccelByteModelsServerClaimedNotification const& /*Notification*/);
 DECLARE_DELEGATE_OneParam(FOnV2BackfillProposalNotification, FAccelByteModelsV2MatchmakingBackfillProposalNotif const& /*Notification*/);
@@ -36,7 +39,7 @@ DECLARE_DELEGATE_OneParam(FOnV2BackfillTicketExpiredNotification, FAccelByteMode
  * @brief DS Hub API for communication from dedicated server to backend.
  * Unlike other servers which use HTTP, DS hub server uses WebSocket (RFC 6455).
  */
-class ACCELBYTEUE4SDK_API ServerDSHub : public FServerApiBase
+class ACCELBYTEUE4SDK_API ServerDSHub : public FServerApiBase, public IWebsocketConfigurableReconnectStrategy
 {
 public:
 	ServerDSHub(ServerCredentials const& InCredentialsRef
@@ -134,6 +137,22 @@ public:
 	 */
 	void UnbindDelegates();
 
+	/**
+	 * @brief Get a multicast delegate that will be triggered when an attempt to reconnect websocket has been done.
+	 */
+	FReconnectAttempted& OnReconnectAttemptedMulticastDelegate()
+	{
+		return ReconnectAttempted;
+	}
+
+	/**
+	 * @brief Get a multicast delegate that will be triggered when connection is down & can't be reestablished. Longer than usual.
+	 */
+	FMassiveOutage& OnMassiveOutageMulticastDelegate()
+	{
+		return MassiveOutage;
+	}
+
 private:
 	float PingDelay{};
 	float InitialBackoffDelay{};
@@ -206,6 +225,16 @@ private:
 	FOnV2BackfillTicketExpiredNotification OnV2BackfillTicketExpiredNotification{};
 
 	/**
+	 * Delegate fired when try to reconnect repetitively to DS Hub websocket.
+	*/
+	FReconnectAttempted ReconnectAttempted;
+
+	/**
+	 * Delegate fired when websocket reconnect getting massive outage.
+	*/
+	FMassiveOutage MassiveOutage;
+
+	/**
 	 * Create an instance of our websocket to connect to the DSHub server.
 	 */
 	void CreateWebSocket();
@@ -229,6 +258,16 @@ private:
 	 * Delegate fired when our websocket closes
 	 */
 	void OnClosed(int32 StatusCode, FString const& Reason, bool bWasClean);
+
+	/**
+	 * Delegate fired when reconnect attempt
+	 */
+	void OnReconnectAttempt(FReconnectAttemptInfo const& ReconnectAttemptInfo);
+
+	/**
+	 * Delegate fired when reconnect getting massive outage
+	 */
+	void OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo);
 
 };
 

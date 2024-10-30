@@ -80,7 +80,7 @@ void DataStorageBinaryFile::DeleteItem(const FString & Key, const FVoidHandler O
 }
 
 //Specific for telemery optimization
-void DataStorageBinaryFile::SaveItemOverwiteEntireFile(const FString& Key, const FString& Item, const THandler<bool>& OnDone, const FString& FileName)
+void DataStorageBinaryFile::SaveItemOverwiteEntireFile(FString Key, FString Item, const THandler<bool>& OnDone, const FString& FileName)
 {
 	TArray<uint8> ContentByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(Item);
 

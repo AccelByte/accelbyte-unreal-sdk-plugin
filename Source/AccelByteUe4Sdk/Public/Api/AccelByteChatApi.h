@@ -37,7 +37,7 @@ enum HandleType : uint8;
  *			- public : user can join by knowing topic id
  *			- private: only admin can add or remove member
  */
-class ACCELBYTEUE4SDK_API Chat : public FApiBase
+class ACCELBYTEUE4SDK_API Chat : public FApiBase, public IWebsocketConfigurableReconnectStrategy
 {
 public:
 	Chat(Credentials & InCredentialsRef
@@ -45,11 +45,10 @@ public:
 		, FHttpRetryScheduler & InHttpRef
 		, FAccelByteMessagingSystem & InMessagingSystemRef
 		, FAccelByteNetworkConditioner & InNetworkConditionerRef
-		, float PingDelay = 30.f
-		, float InitialBackoffDelay = 1.f
-		, float MaxBackoffDelay = 30.f
-		, float TotalTimeout = 60.f
-		, TSharedPtr<IWebSocket> WebSocket = nullptr);
+		, float InPingDelay = 30.f
+		, float InInitialBackoffDelay = 1.f
+		, float InMaxBackoffDelay = 30.f
+		, float InTotalTimeout = 60.f);
 
 	~Chat();
 private:
@@ -74,7 +73,9 @@ public:
 	//				CONNECTIONS
 	DECLARE_DELEGATE(FChatConnectSuccess);
 	DECLARE_DELEGATE_OneParam(FChatDisconnectNotif, FAccelByteModelsChatDisconnectNotif const&);
-	DECLARE_DELEGATE_ThreeParams(FChatConnectionClosed, int32 /* StatusCode */, FString const& /* Reason */, bool /* WasClean */);
+	typedef AccelByteWebSocket::FConnectionCloseDelegate FChatConnectionClosed;
+	typedef AccelByteWebSocket::FReconnectAttemptMulticastDelegate FReconnectAttempted;
+	typedef AccelByteWebSocket::FMassiveOutageMulticastDelegate FMassiveOutage;
 
 	/**
 	* @brief delegate for handling response when refreshing chat token.
@@ -267,18 +268,26 @@ public:
 		ConnectionClosed = OnConnectionClosed;
 	}
 
+	/**
+	 * @brief Get a multicast delegate that will be triggered when an attempt to reconnect websocket has been done.
+	 */
+	FReconnectAttempted& OnReconnectAttemptedMulticastDelegate()
+	{
+		return ReconnectAttempted;
+	}
+
+	/**
+	 * @brief Get a multicast delegate that will be triggered when connection is down & can't be reestablished. Longer than usual.
+	 */
+	FMassiveOutage& OnMassiveOutageMulticastDelegate()
+	{
+		return MassiveOutage;
+	}
+
 private:
 
 	const float PingDelay;
-	float InitialBackoffDelay;
-	float MaxBackoffDelay;
-	float TotalTimeout;
 	bool bWasWsConnectionError = false;
-	float BackoffDelay;
-	float RandomizedBackoffDelay;
-	float TimeSinceLastPing;
-	float TimeSinceLastReconnect;
-	float TimeSinceConnectionLost;
 	TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> WebSocket;
 	FAccelByteModelsChatConnectNotif ChatSessionId;
 
@@ -293,12 +302,16 @@ private:
 	FChatConnectionClosed ConnectionClosed;
 	FChatConnectionClosed Reconnecting;
 	FDelegateHandle AuthTokenSetDelegateHandle;
+	FReconnectAttempted ReconnectAttempted;
+	FMassiveOutage MassiveOutage;
 
 	void OnConnected();
 	void OnConnectionError(FString const& Error);
 private:
 	void OnMessage(FString const& Message);
 	void OnClosed(int32 StatusCode, FString const& Reason, bool WasClean);
+	void OnReconnectAttempt(FReconnectAttemptInfo const& ReconnectAttemptInfo);
+	void OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo);
 	void CreateWebSocket();
 	
 	FString SendWebSocketContent(FString const& Method, TSharedRef<FJsonObject> const& Params);
@@ -1313,7 +1326,6 @@ public:
 		, FErrorHandler const& OnError);
 
 #pragma  endregion CHAT CONFIGURATION
-
 };
 
 } // Namespace Api

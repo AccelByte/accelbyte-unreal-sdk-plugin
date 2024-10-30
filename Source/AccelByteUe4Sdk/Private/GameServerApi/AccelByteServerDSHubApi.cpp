@@ -42,6 +42,8 @@ ServerDSHub::ServerDSHub(
 	, MaxBackoffDelay(InMaxBackoffDelay)
 	, TotalTimeout(InTotalTimeout)
 {
+	auto Strategy = FReconnectionStrategy::CreateLimitlessStrategy();
+	IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
 }
 
 ServerDSHub::~ServerDSHub()
@@ -134,6 +136,9 @@ void ServerDSHub::UnbindDelegates()
 	OnV2BackfillProposalNotification.Unbind();
 	OnV2SessionMemberChangedNotification.Unbind();
 	OnV2SessionEndedNotification.Unbind();
+	
+	ReconnectAttempted.Clear();
+	MassiveOutage.Clear();
 }
 
 void ServerDSHub::CreateWebSocket()
@@ -150,20 +155,21 @@ void ServerDSHub::CreateWebSocket()
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 
 	FAccelByteUtilities::AppendModulesVersionToMap(Headers);
+
 	WebSocket = AccelByteWebSocket::Create(*ServerSettingsRef.DSHubServerUrl,
 		TEXT("wss"),
 		ServerCredentialsRef.Get(),
 		Headers,
 		TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()),
-		PingDelay,
-		InitialBackoffDelay,
-		MaxBackoffDelay,
-		ServerSettingsRef.DSHubReconnectTotalTimeout);
+		*this /*Reconnection Strategy*/,
+		PingDelay);
 
 	WebSocket->OnConnected().AddRaw(this, &ServerDSHub::OnConnected);
 	WebSocket->OnMessageReceived().AddRaw(this, &ServerDSHub::OnMessage);
 	WebSocket->OnConnectionError().AddRaw(this, &ServerDSHub::OnConnectionError);
 	WebSocket->OnConnectionClosed().AddRaw(this, &ServerDSHub::OnClosed);
+	WebSocket->OnReconnectAttempt().AddRaw(this, &ServerDSHub::OnReconnectAttempt);
+	WebSocket->OnMassiveOutage().AddRaw(this, &ServerDSHub::OnMassiveOutage);
 }
 
 void ServerDSHub::OnConnected()
@@ -294,6 +300,16 @@ void ServerDSHub::OnClosed(int32 StatusCode, const FString& Reason, bool bWasCle
 	}
 
 	OnConnectionClosedDelegate.ExecuteIfBound(StatusCode, Reason, bWasClean);
+}
+
+void ServerDSHub::OnReconnectAttempt(FReconnectAttemptInfo const& ReconnectAttemptInfo)
+{
+	ReconnectAttempted.Broadcast(ReconnectAttemptInfo);
+}
+
+void ServerDSHub::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
+{
+	MassiveOutage.Broadcast(MassiveOutageInfo);
 }
 
 }

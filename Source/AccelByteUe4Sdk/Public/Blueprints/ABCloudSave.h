@@ -171,6 +171,12 @@ public:
 		, int32 const& Limit = 20);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
+	void BulkGetCurrentPlayerPublicRecordKeys(FDModelsPaginatedBulkGetPublicUserRecordKeysResponse const& OnSuccess
+		, FDErrorHandler const& OnError
+		, int32 const& Offset = 0
+		, int32 const& Limit = 20);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void BulkGetOtherPlayerPublicRecords(FString const& UserId
 		, TArray<FString> const& Keys
 		, FDModelsListUserRecords const& OnSuccess

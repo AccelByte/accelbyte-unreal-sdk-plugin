@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteWebSocket.h"
 #include "Core/AccelByteServerApiBase.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteAMS, Warning, All);
@@ -22,13 +23,15 @@ namespace GameServerApi
 /**
  * @brief API for communication from dedicated server to AMS.
  */
-class ACCELBYTEUE4SDK_API ServerAMS : public FServerApiBase
+class ACCELBYTEUE4SDK_API ServerAMS : public FServerApiBase, public IWebsocketConfigurableReconnectStrategy
 {
 public:
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE(FOnAMSDrainReceived);
 	DECLARE_DELEGATE_OneParam(FConnectError, const FString& /* Message */);
-	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
+	typedef AccelByteWebSocket::FConnectionCloseDelegate FConnectionClosed;
+	typedef AccelByteWebSocket::FReconnectAttemptMulticastDelegate FReconnectAttempted;
+	typedef AccelByteWebSocket::FMassiveOutageMulticastDelegate FMassiveOutage;
 
 	ServerAMS(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
@@ -103,6 +106,22 @@ public:
 	 */
 	void ResetDSTimeout();
 
+	/**
+	 * @brief Get a multicast delegate that will be triggered when an attempt to reconnect websocket has been done.
+	 */
+	FReconnectAttempted& OnReconnectAttemptedMulticastDelegate()
+	{
+		return ReconnectAttempted;
+	}
+
+	/**
+	 * @brief Get a multicast delegate that will be triggered when connection is down & can't be reestablished. Longer than usual.
+	 */
+	FMassiveOutage& OnMassiveOutageMulticastDelegate()
+	{
+		return MassiveOutage;
+	}
+
 private:
 
 	void CreateWebSocket();
@@ -115,6 +134,10 @@ private:
 
 	void OnClosed(int32 StatusCode, const FString& Reason, bool bWasClean);
 
+	void OnReconnectAttempt(FReconnectAttemptInfo const& ReconnectAttemptInfo);
+
+	void OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo);
+
 	void SendHeartbeat();
 
 	bool PeriodicHeartbeat(float DeltaTime);
@@ -126,6 +149,8 @@ private:
 	FConnectionClosed OnConnectionClosedDelegate;
 	FOnAMSDrainReceived OnAMSDrainReceivedDelegate;
 	FTickerDelegate AMSHeartbeatTickDelegate;
+	FReconnectAttempted ReconnectAttempted;
+	FMassiveOutage MassiveOutage;
 	
 	FDelegateHandleAlias AMSHeartbeatTickDelegateHandle;
 	

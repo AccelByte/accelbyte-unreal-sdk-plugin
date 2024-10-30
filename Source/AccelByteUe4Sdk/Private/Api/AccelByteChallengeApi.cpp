@@ -54,7 +54,7 @@ FAccelByteTaskWPtr Challenge::GetChallenges(THandler<FAccelByteModelsGetChalleng
 FAccelByteTaskWPtr Challenge::GetScheduledChallengeGoals(FString const& ChallengeCode
 	, THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse> const& OnSuccess
 	, FErrorHandler const& OnError
-	, const TArray<FString>& Tags
+	, TArray<FString> const& Tags
 	, uint64 Offset
 	, uint64 Limit)
 {
@@ -85,12 +85,74 @@ FAccelByteTaskWPtr Challenge::GetScheduledChallengeGoals(FString const& Challeng
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Challenge::GetPreviousChallengeProgresses(FString const& ChallengeCode
+	, int32 Index
+	, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& GoalCode
+	, uint64 Offset
+	, uint64 Limit
+	, TArray<FString> const& Tags)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChallengeCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("ChallengeCode cannot be empty."));
+		return nullptr;
+	}
+
+	if (Index < 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Index value must be a positive integer."));
+		return nullptr;
+	}
+
+	TMap<FString, FString> QueryParams{
+		{ TEXT("offset"), FString::FromInt(Offset) },
+		{ TEXT("limit"), FString::FromInt(Limit) },
+	};
+
+	if (Tags.Num() > 0)
+	{
+		FString TagsString = CreateTagsString(Tags);
+		QueryParams.Emplace(TEXT("tags"), TagsString);
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/progress/%s/index/%d")
+		, *SettingsRef.ChallengeServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *ChallengeCode
+		, Index);
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Challenge::GetChallengeProgress(FString const& ChallengeCode
 	, FString const& GoalCode
 	, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
 	, FErrorHandler const& OnError
 	, uint64 Offset
 	, uint64 Limit
+	, TArray<FString> const& Tags)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ChallengeCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("ChallengeCode cannot be empty."));
+		return nullptr;
+	}
+
+	return GetChallengeProgress(ChallengeCode, OnSuccess, OnError, Offset, Limit, GoalCode, Tags);
+}
+
+FAccelByteTaskWPtr Challenge::GetChallengeProgress(FString const& ChallengeCode
+	, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, uint64 Offset
+	, uint64 Limit
+	, FString const& GoalCode
 	, TArray<FString> const& Tags)
 {
 	FReport::Log(FString(__FUNCTION__));

@@ -5,12 +5,12 @@
 #pragma once
 
 #include <chrono>
-
 #include "Delegates/DelegateCombinations.h"
 #include "HttpManager.h"
 #include "Core/AccelByteTask.h"
 #include "Core/AccelByteHttpCache.h"
 #include "Core/AccelByteDefines.h"
+#include "Dom/JsonObject.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpRetry, Log, All);
 
@@ -48,6 +48,8 @@ public:
 
 	FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
 
+	FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr Request, TSharedPtr<FJsonObject> Content, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, bool bOmitBlankValues = false);
+
 	void SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected);
 	void BearerAuthRejected();
 	void PauseBearerAuthRequest();
@@ -68,6 +70,9 @@ public:
 	Core::FAccelByteHttpCache& GetHttpCache() { return HttpCache; }
 
 protected:
+
+	FString ParseUStructToJsonString(const TSharedPtr<FJsonObject>& JsonObject, bool bOmitBlankValues = false);
+
 	static TMap<EHttpResponseCodes::Type, FHttpResponseCodeHandler> ResponseCodeDelegates;
 	TMap<FString /*Endpoint*/, FRequestBucket> RequestsBucket;
 	mutable FCriticalSection RequestBucketLock;

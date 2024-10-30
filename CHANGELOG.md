@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [26.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.3.0%0D26.2.1) (2024-10-30)
+
+
+### Features
+
+* add a new flag called IsHiddenPublic ([1f882d3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1f882d3e4aa7cd92882bde3cb148eb78a660ffa9))
+* add Challenge::GetChallengeProgress with optional GoalCode ([3600ea3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3600ea39b299d9414d3ad3af56700798a5bea705))
+* add trace cpu profiler on some poller functions ([b82afca](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b82afcadb117a7d16b6bf4d10399b48943b72115))
+* **challenge:** Add 'get previous challenge progress' and challenge blueprint API ([5b7e58d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5b7e58d0403c32334a632f0acd67966cf525aba6))
+* **cloudsave:** add 'get current user public keys' ([fbaae54](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fbaae54b078a3cce1712ba2a5bd95d058c34ecda))
+* **entitlement:**  implement query user subscriptions ([98d5b79](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/98d5b795025496b9c98fe20a6519b47733ffc7bb))
+* **lobby:** add OnPartyCreated notification ([ac12add](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ac12addfcfb3554ce486d35013d283dd3c4e8cd5))
+* **reward:** add an extra reward item to complete both type (ItemID & SKU) ([9b3ddcb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9b3ddcb28caa22da34c292e021c3390af0936783))
+* **websocket:** ability to configure the retry reconnection through the ApiClient ([83ab035](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/83ab035c78b8ffb97d8cbea987d3fe7c9d7a8796))
+
+
+### Bug Fixes
+
+* **Analytics:** change gameTelemetry object passed on lambda as sharedPtr instead of object references ([430b783](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/430b783e566054f1c6f1f58d2678b61155074a1a))
+* **analytics:** remove TSharedFromThis on PredefinedEvent and GameStandardEvent because SharedPtr being null on 5.4 ([908f1d3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/908f1d3fbe34f38c4b58cebc1a4b8cc08f5c2a2b))
+* change messaging topic type to lobby in qos destructor ([2e02880](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2e028803a3e5b2c6977d7c3b7b55dc90a8dcd599))
+* **entitlement:** QueryEntitlement's entitlementName parameter encoded twice ([96c4df1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/96c4df17833ae38b26fab6cac46306aa9ad0094a))
+* **gameTelemetry:** change AddRaw to AddThreadSafeSP, make sure object accessible when needed ([8e97eed](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8e97eed3d9a23c045178280466614ed5d428a45e))
+* **gameTelemetry:** fix compile error on 4.27, change TWeakPtr<GameTelemetry> to TWeakPtr<GameTelemetry,ESPMode::ThreadSafe> ([b9ad81a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b9ad81aec8e0381e47576132d3c95a5647e52fad))
+* Item::GetItemMappings copy OnSuccess by value instead of ref ([9f26c6f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9f26c6f71607b85dda4fb7daed58aba2b4cd16b8))
+* linux compile error in UE 5.4 ([843fdd3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/843fdd336ef13271882546b4e4d48442408060ef))
+* remove accelbyte time manager constructor ([74b789c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/74b789caa5146f9872fc2e7b9b02c94ad94ce59f))
+* serialize json content with the expected value ([01abea5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/01abea565c6d2ae3ed733dcff062ec827e09161c))
+* supporting to fetch equals type of command line to get the value from there ([7cbd49e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7cbd49eaf2697ac8f36322b608e198c48751fbbc))
+* use TEXT macro to prevent deprecation warning on JsonObject operations ([ee38acb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ee38acb4252e0a61faecb77e955c781531cb8b7a))
+
 ### [26.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.2.1%0D26.2.0) (2024-09-26)
 
 

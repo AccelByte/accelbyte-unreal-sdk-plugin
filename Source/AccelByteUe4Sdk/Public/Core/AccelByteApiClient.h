@@ -78,6 +78,12 @@ public:
 	FAccelByteNetworkConditioner NetworkConditioner{};
 #pragma endregion
 
+private:
+	const TSharedPtr<Api::GameTelemetry, ESPMode::ThreadSafe> GameTelemetryPtr;
+	const TSharedPtr<Api::PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventPtr;
+	const TSharedPtr<Api::GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventPtr;
+
+public:
 #pragma region Access
 	Api::User User{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::UserProfile UserProfile{ *CredentialsRef, FRegistry::Settings, *HttpRef };
@@ -132,12 +138,35 @@ public:
 	Api::AMS Ams{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion
 
+
 #pragma region Analytics
-	Api::GameTelemetry GameTelemetry{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	/** 
+	 * @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	 * THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	 * It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->GameTelemetry with ApiClient->GetGameTelemetryApi().Pin()
+	 */
+	Api::GameTelemetry& GameTelemetry;
+
+	/**
+	 * @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	 * THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	 * It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->PredefinedEvent with ApiClient->GetPredefinedEventApi().Pin()
+	 */
+	Api::PredefinedEvent& PredefinedEvent;
+
+	/**
+	 * @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	 * THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	 * It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->GameStandardEvent with ApiClient->GetGameStandardEventApi().Pin()
+	 */
+	Api::GameStandardEvent& GameStandardEvent;
+
 	Api::PresenceBroadcastEvent PresenceBroadcastEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::PredefinedEvent PredefinedEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::GameStandardEvent GameStandardEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion
+
+	TWeakPtr<Api::GameTelemetry, ESPMode::ThreadSafe> GetGameTelemetryApi() const;
+	TWeakPtr<Api::PredefinedEvent, ESPMode::ThreadSafe> GetPredefinedEventApi() const;
+	TWeakPtr<Api::GameStandardEvent, ESPMode::ThreadSafe> GetGameStandardEventApi() const;
 
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)
@@ -160,5 +189,6 @@ public:
 
 typedef TSharedRef<FApiClient, ESPMode::ThreadSafe> FApiClientRef;
 typedef TSharedPtr<FApiClient, ESPMode::ThreadSafe> FApiClientPtr;
+typedef TWeakPtr<FApiClient, ESPMode::ThreadSafe> FApiClientWPtr;
 
 }

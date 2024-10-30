@@ -71,5 +71,9 @@ private:
 
 };
 
+typedef TSharedRef<PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventRef;
+typedef TSharedPtr<PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventPtr;
+typedef TWeakPtr<PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventWPtr;
+
 } // Namespace Api
 } // Namespace AccelByte

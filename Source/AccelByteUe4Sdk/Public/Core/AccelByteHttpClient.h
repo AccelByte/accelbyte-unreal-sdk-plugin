@@ -299,6 +299,34 @@ namespace AccelByte
 			return ProcessRequest(Request, Verb, Url, QueryParams, Headers, OnSuccess, OnError);
 		}
 
+		/**
+		 * @brief Basic HTTP request
+		 *
+		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
+		 * @param Url HTTP request URL.
+		 * @param QueryParams HTTP request based on JSON object.
+		 * @param JsonObject HTTP request content as JSON Object.
+		 * @param Headers HTTP request headers key-value (overrides implicit headers).
+		 * @param OnSuccess Callback when HTTP call is successful.
+		 * @param OnError Callback when HTTP call is error.
+		 *
+		 * @return FAccelByteTaskPtr.
+		 */
+		template<typename U, typename V>
+		FAccelByteTaskPtr Request(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TSharedPtr<FJsonObject> JsonObject
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError
+			, bool bOmitBlankValues = false)
+		{
+			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+
+			return ProcessRequest(Request, Verb, Url, QueryParams, JsonObject, Headers, OnSuccess, OnError, bOmitBlankValues);
+		}
+
 #if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
 		template<typename  U, typename V>
 		FAccelByteTaskPtr Request(FString const& Verb
@@ -566,10 +594,12 @@ namespace AccelByte
 			, V const& OnError
 			, bool bOmitBlankValues = false)
 		{
-			TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(UStruct);
-			FString JsonString = ParseUStructToJsonString(JsonObject, bOmitBlankValues);
-			
-			return ApiRequest(Verb, Url, QueryParams, JsonString, OnSuccess, OnError);
+			TMap<FString, FString> Headers = {
+				{TEXT("Content-Type"), TEXT("application/json")},
+				{TEXT("Accept"), TEXT("application/json")}
+			};
+
+			return ApiRequest(Verb, Url, QueryParams, UStruct, Headers, OnSuccess, OnError, bOmitBlankValues);
 		}
 
 		/**
@@ -598,9 +628,39 @@ namespace AccelByte
 			, bool bOmitBlankValues = false)
 		{
 			TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(UStruct);
-			FString JsonString = ParseUStructToJsonString(JsonObject, bOmitBlankValues);
 
-			return ApiRequest(Verb, Url, QueryParams, JsonString, Headers, OnSuccess, OnError);
+			return ApiRequestWithJsonObject(Verb, Url, QueryParams, JsonObject, Headers, OnSuccess, OnError, bOmitBlankValues);
+		}
+
+		/**
+		 * @brief API request with credentials access token (if available)
+		 *
+		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
+		 * @param Url HTTP request URL.
+		 * @param QueryParams HTTP request query string key-value.
+		 * @param JsonObject HTTP request content as JSON object.
+		 * @param OnSuccess Callback when HTTP call is successful.
+		 * @param OnError Callback when HTTP call is error.
+		 * @param bOmitBlankValues Flag that will remove blank string values from the JSON string sent to the server.
+		 * Defaults to false.
+		 *
+		 * @return FAccelByteTaskPtr.
+		 */
+		template<typename U, typename V>
+		FAccelByteTaskPtr ApiRequest(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TSharedPtr<FJsonObject> const& JsonObject
+			, U const& OnSuccess
+			, V const& OnError
+			, bool bOmitBlankValues = false)
+		{
+			TMap<FString, FString> Headers = {
+				{TEXT("Content-Type"), TEXT("application/json")},
+				{TEXT("Accept"), TEXT("application/json")}
+			};
+
+			return ApiRequestWithJsonObject(Verb, Url, QueryParams, JsonObject, Headers, OnSuccess, OnError, bOmitBlankValues);
 		}
 
 		/**
@@ -716,6 +776,51 @@ namespace AccelByte
 			return Request(Verb, ApiUrl, QueryParams, Json, Headers, OnSuccess, OnError);
 		}
 
+		/**
+		 * @brief API request with credentials access token (if available)
+		 *
+		 * @param Verb HTTP request methods, e.g. GET, POST, PUT, PATCH, DELETE.
+		 * @param Url HTTP request URL.
+		 * @param QueryParams HTTP request query string key-value.
+		 * @param JsonObject HTTP request content as JSON Object.
+		 * @param Headers HTTP request headers key-value (overrides implicit headers).
+		 * @param OnSuccess Callback when HTTP call is successful.
+		 * @param OnError Callback when HTTP call is error.
+		 *
+		 * @return FAccelByteTaskPtr.
+		 */
+		template<typename U, typename V>
+		FAccelByteTaskPtr ApiRequestWithJsonObject(FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TSharedPtr<FJsonObject> JsonObject
+			, TMap<FString, FString>& Headers
+			, U const& OnSuccess
+			, V const& OnError
+			, bool bOmitBlankValues = false)
+		{
+			FString ApiUrl = FormatApiUrl(Url);
+
+			if (!Headers.Contains(TEXT("Content-Type")))
+			{
+				Headers.Add(TEXT("Content-Type"), TEXT("application/json"));
+			}
+			if (!Headers.Contains(TEXT("Accept")))
+			{
+				Headers.Add(TEXT("Accept"), TEXT("application/json"));
+			}
+
+			if(!AddApiAuthorizationIfAvailable(Headers))
+			{
+				ExecuteError(OnError, TEXT("Authorization Bearer is empty"));
+				return nullptr;
+			}
+
+			AddFlightIdHeader(Headers);
+
+			return Request(Verb, ApiUrl, QueryParams, JsonObject, Headers, OnSuccess, OnError, bOmitBlankValues);
+		}
+
 	private:
 		FHttpRetryScheduler& HttpRef;
 		BaseCredentials const& CredentialsRef;
@@ -741,35 +846,6 @@ namespace AccelByte
 			OnError.ExecuteIfBound({TEXT("InvalidRequest"), ErrorText});
 		}
 
-		FString ParseUStructToJsonString(TSharedPtr<FJsonObject> JsonObject, bool bOmitBlankValues = false)
-		{
-			FString JsonString;
-			
-			if (!JsonObject.IsValid())
-			{
-				UE_LOG(LogTemp, Error, TEXT("HttpClient Request UStructToJsonObject failed!"));
-
-				return JsonString;
-			}
-
-			// Omit blank JSON string values if opted into by the caller
-			if (bOmitBlankValues)
-			{
-				FAccelByteUtilities::RemoveEmptyStrings(JsonObject);
-			}
-
-			// Finally, write the JSON object to a string
-			TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&JsonString);
-			if (!FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer))
-			{
-				UE_LOG(LogTemp, Error, TEXT("HttpClient Request FJsonSerializer::Serialize failed!"));
-
-				return JsonString;
-			}
-
-			return JsonString;
-		}
-
 		template<typename U, typename V>
 		FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr& Request
 			, FString const& Verb
@@ -778,6 +854,20 @@ namespace AccelByte
 			, TMap<FString, FString> const& Headers
 			, U const& OnSuccess
 			, V const& OnError)
+		{
+			return ProcessRequest(Request, Verb, Url, QueryParams, nullptr , Headers, OnSuccess, OnError);
+		}
+
+		template<typename U, typename V>
+		FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr& Request
+			, FString const& Verb
+			, FString const& Url
+			, FHttpFormData const& QueryParams
+			, TSharedPtr<FJsonObject> const& JSONObject
+			, TMap<FString, FString> const& Headers
+			, U const& OnSuccess
+			, V const& OnError
+			, bool bOmitBlankValues = false)
 		{
 			if (!IsValidUrl(Url))
 			{
@@ -805,12 +895,14 @@ namespace AccelByte
 			ACCELBYTE_SERVICE_LOGGING_HTTP_REQUEST(Request);
 
 			return HttpRef.ProcessRequest(Request
+				, JSONObject
 				, CreateHttpResultHandler(
 					OnSuccess,
 					OnError,
 					&HttpRef
 				)
-				, FPlatformTime::Seconds());
+				, FPlatformTime::Seconds()
+				, bOmitBlankValues);
 		}
 	};
 

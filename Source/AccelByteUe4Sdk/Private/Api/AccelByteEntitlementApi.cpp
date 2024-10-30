@@ -109,7 +109,7 @@ FAccelByteTaskWPtr Entitlement::QueryUserEntitlements(FString const& Entitlement
 
 	if (!EntitlementName.IsEmpty())
 	{
-		QueryParams.Add( TEXT("entitlementName"), FGenericPlatformHttp::UrlEncode(EntitlementName));
+		QueryParams.Add( TEXT("entitlementName"), EntitlementName);
 	}
 
 	for (const auto& ItemId : ItemIds)
@@ -654,7 +654,7 @@ FAccelByteTaskWPtr Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModels
 
 	FString PlatformText = TEXT("apple");
 	
-	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/receipt")
+	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/iap/%s/receipt")
 		, *SettingsRef.PlatformServerUrl
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId()
@@ -984,6 +984,59 @@ FAccelByteTaskWPtr Entitlement::SyncEntitlementPSNMultipleService(FAccelByteMode
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 	
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Entitlement::QueryUserSubcriptions(EAccelBytePlatformSync PlatformType, FAccelByteModelsThirdPartyUserSubscriptionQueryRequest const& Request, THandler<FAccelByteModelsThirdPartyUserSubscriptions> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	FString PlatformName = FAccelByteUtilities::GetUEnumValueAsString(PlatformType);
+
+	if (PlatformType == EAccelBytePlatformSync::XBOX_LIVE)
+	{
+		PlatformName = TEXT("XBOX");
+	}
+	else if (PlatformType == EAccelBytePlatformSync::EPIC_GAMES)
+	{
+		PlatformName = TEXT("EPICGAMES");
+	}
+
+	// Url 
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/subscriptions/platforms/%s")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId()
+		, *PlatformName);
+
+	// Params 
+	TMultiMap<FString, FString> QueryParams{};
+
+	QueryParams.Add(TEXT("activeOnly"), Request.ActiveOnly ? TEXT("true") : TEXT("false"));
+
+	if (!Request.GroupId.IsEmpty())
+	{
+		QueryParams.Add(TEXT("groupId"), FGenericPlatformHttp::UrlEncode(Request.GroupId));
+	}
+
+	if (!Request.ProductId.IsEmpty())
+	{
+		QueryParams.Add(TEXT("productId"), FGenericPlatformHttp::UrlEncode(Request.ProductId));
+	}
+
+	if (Request.Offset > 0)
+	{
+		QueryParams.Add(TEXT("offset"), FString::FromInt(Request.Offset));
+	}
+
+	if (Request.Limit > 0)
+	{
+		QueryParams.Add(TEXT("limit"), FString::FromInt(Request.Limit));
+	}
+
+	// Content 
+	FString Content = TEXT("");
+
+	// Api Request 
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, Content, OnSuccess, OnError);
 }
 	
 } // Namespace Api

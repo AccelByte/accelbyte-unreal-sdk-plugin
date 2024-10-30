@@ -518,6 +518,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyInviteTimeoutEvent
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyCreatedEvent 
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreatedNotification")
+	FString CreatedBy{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreatedNotification")
+	int32 InactiveTimeout{ 0 };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreatedNotification")
+	FString PartyID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreatedNotification")
+	bool TextChat{ false };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreatedNotification")
+	FString Code{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2ImpactedUserIds
 {
 	GENERATED_BODY()

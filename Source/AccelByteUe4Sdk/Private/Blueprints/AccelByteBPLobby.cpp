@@ -96,10 +96,12 @@ FString UABLobby::RefreshToken(
 
 void UABLobby::SetRetryParameters(FSetRetryParametersRequest const& Request) 
 {
-	ApiClientPtr->Lobby.SetRetryParameters(
-		Request.NewTotalTimeout,
-		Request.NewBackoffDelay,
-		Request.NewMaxDelay);
+	ApiClientPtr->Lobby.SetDefaultReconnectionStrategy( FReconnectionStrategy::CreateBalancedStrategy(
+			FReconnectionStrategy::FBalancedMaxRetryInterval(Request.NewTotalTimeout),
+			FReconnectionStrategy::FTotalTimeoutDuration(FTimespan::FromSeconds(Request.NewBackoffDelay)),
+			FReconnectionStrategy::FInitialBackoffDelay(FTimespan::FromSeconds(Request.NewMaxDelay))
+			)
+	);
 }
 
 void UABLobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator)

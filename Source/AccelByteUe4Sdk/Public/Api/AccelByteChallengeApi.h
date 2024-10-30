@@ -60,9 +60,35 @@ public:
 	FAccelByteTaskWPtr GetScheduledChallengeGoals(FString const& ChallengeCode
 		, THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, const TArray<FString>& Tags = {}
+		, TArray<FString> const& Tags = {}
 		, uint64 Offset = 0
 		, uint64 Limit = 20);
+
+	/**
+	 * @brief Send a request to get previous challenge progresses
+	 *
+	 * @param ChallengeCode String code for the challenge to check progress for
+	 * @param Index A positive integer indicating the index of the rotation. 
+	    The rotations are sorted by their start time in descending order. 
+		A value of 0 refers to the current or most recent active rotation. 
+		Incrementing the value allows you to reference previous rotations.
+	 * @param OnSuccess Delegate executed when request succeeds
+	 * @param OnError Delegate executed when request fails
+	 * @param GoalCode String code for the specific challenge goal to get progress for
+	 * @param Offset Number of goals to skip when returning goal progress list, defaults to 0
+	 * @param Limit Number of goals to include when returning goal progress list, defaults to 20
+	 * @param Tags Array of tag strings used to filter resulting challenge progress list
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetPreviousChallengeProgresses(FString const& ChallengeCode
+		, int32 Index
+		, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& GoalCode = TEXT("")
+		, uint64 Offset = 0
+		, uint64 Limit = 20
+		, TArray<FString> const& Tags = {});
 
 	/**
 	 * @brief Send a request to get current progress for a specific challenge
@@ -83,6 +109,27 @@ public:
 		, FErrorHandler const& OnError
 		, uint64 Offset = 0
 		, uint64 Limit = 20
+		, TArray<FString> const& Tags = {});
+
+	/**
+	 * @brief Send a request to get current progress for a specific challenge
+	 *
+	 * @param ChallengeCode String code for the challenge to check progress for
+	 * @param OnSuccess Delegate executed when request succeeds
+	 * @param OnError Delegate executed when request fails
+	 * @param Offset Number of goals to skip when returning goal progress list, defaults to 0
+	 * @param Limit Number of goals to include when returning goal progress list, defaults to 20
+	 * @param GoalCode String code for the specific challenge goal to get progress for
+	 * @param Tags Array of tag strings used to filter resulting challenge progress list
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetChallengeProgress(FString const& ChallengeCode
+		, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint64 Offset = 0
+		, uint64 Limit = 20
+		, FString const& GoalCode = TEXT("")
 		, TArray<FString> const& Tags = {});
 
 	/**

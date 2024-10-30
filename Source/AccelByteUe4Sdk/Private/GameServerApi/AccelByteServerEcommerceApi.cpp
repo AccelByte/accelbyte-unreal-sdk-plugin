@@ -540,7 +540,7 @@ FAccelByteTaskWPtr ServerEcommerce::FulfillUserItem(FString const& UserId
 		, *UserId);
 
 	FString Content;
-	const TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(FulfillmentRequest);
+	TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(FulfillmentRequest);
 	if (FulfillmentRequest.Origin == EAccelBytePlatformRewardOrigin::NONE)
 	{
 		JsonObject->RemoveField(TEXT("Origin"));
@@ -576,10 +576,8 @@ FAccelByteTaskWPtr ServerEcommerce::FulfillUserItem(FString const& UserId
 		}
 	}
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObject, FAccelByteUtilities::FieldRemovalFlagAll | FAccelByteUtilities::FieldRemovalFlagNumbersZeroValues);
-	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
-	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
-	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, JsonObject, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus
