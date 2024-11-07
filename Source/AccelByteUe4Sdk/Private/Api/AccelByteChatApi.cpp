@@ -449,6 +449,8 @@ namespace IncomingMessage
 	{
 		if(UObjectInitialized())
 		{
+			UnbindEvent();
+			Disconnect();
 			ReconnectAttempted.Clear();
 			MassiveOutage.Clear();
 		}
@@ -477,12 +479,12 @@ namespace IncomingMessage
 			*this /*Reconnect Strategy*/,
 			PingDelay);
 
-		WebSocket->OnConnected().AddRaw(this, &Chat::OnConnected);
-		WebSocket->OnMessageReceived().AddRaw(this, &Chat::OnMessage);
-		WebSocket->OnConnectionError().AddRaw(this, &Chat::OnConnectionError);
-		WebSocket->OnConnectionClosed().AddRaw(this, &Chat::OnClosed);
-		WebSocket->OnReconnectAttempt().AddRaw(this, &Chat::OnReconnectAttempt);
-		WebSocket->OnMassiveOutage().AddRaw(this, &Chat::OnMassiveOutage);
+		WebSocket->OnConnected().AddThreadSafeSP(AsShared(), &Chat::OnConnected);
+		WebSocket->OnMessageReceived().AddThreadSafeSP(AsShared(), &Chat::OnMessage);
+		WebSocket->OnConnectionError().AddThreadSafeSP(AsShared(), &Chat::OnConnectionError);
+		WebSocket->OnConnectionClosed().AddThreadSafeSP(AsShared(), &Chat::OnClosed);
+		WebSocket->OnReconnectAttempt().AddThreadSafeSP(AsShared(), &Chat::OnReconnectAttempt);
+		WebSocket->OnMassiveOutage().AddThreadSafeSP(AsShared(), &Chat::OnMassiveOutage);
 	}
 
 	void Chat::Connect()
@@ -542,13 +544,18 @@ namespace IncomingMessage
 		auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 		if (MessagingSystemPtr.IsValid())
 		{
+			ChatWPtr ChatWeak = AsShared();
 			AuthTokenSetDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet
 				, FOnMessagingSystemReceivedMessage::CreateLambda(
-					[this](FString const& Message)
+					[ChatWeak](FString const& Message)
 					{
-						FOauth2Token Token;
-						FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
-						RefreshToken(Token.Access_token, RefreshTokenResponse);
+						auto ChatApi = ChatWeak.Pin();
+						if (ChatApi.IsValid())
+						{
+							FOauth2Token Token;
+							FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
+							ChatApi->RefreshToken(Token.Access_token, ChatApi->RefreshTokenResponse);
+						}
 					}));
 		}
 			

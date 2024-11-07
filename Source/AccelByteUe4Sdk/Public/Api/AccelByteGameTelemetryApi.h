@@ -19,6 +19,7 @@ class Credentials;
 class Settings;
 namespace Api
 {
+typedef TSharedPtr< FAccelByteModelsTelemetryBody, ESPMode::ThreadSafe> TelemetryBodyPtr;
 
 /**
  * @brief Send telemetry data securely and the user should be logged in first.
@@ -85,7 +86,7 @@ public:
 	bool IsCacheUpdated() { return bCacheUpdated; }
 
 private:
-	void SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events
+	void SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 	
@@ -93,13 +94,13 @@ private:
 	
 	void LoadCachedEvents();
 	
-	void AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody> Telemetry);
+	void AppendEventToCache(TelemetryBodyPtr Telemetry);
 	
 	void OnLoginSuccess(FOauth2Token const& Response);
 
 	void OnLogoutSuccess();
 	
-	void RemoveEventsFromCache(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events);
+	void RemoveEventsFromCache(TArray<TelemetryBodyPtr> const& Events);
 	
 	bool JobArrayQueueAsJsonString(FString& OutJsonString);
 
@@ -107,7 +108,7 @@ private:
 	
 protected:
 	bool EventsJsonToArray(FString& InJsonString
-		, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray);
+		, TArray<TelemetryBodyPtr>& OutArray);
 	
 	virtual FString GetTelemetryKey();
 
@@ -123,9 +124,9 @@ private:
 	TSet<FString> CriticalEvents;
 	
 	bool bCacheUpdated = false;
-	TQueue<TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>> JobQueue{};
+	TQueue<TTuple<TelemetryBodyPtr, FVoidHandler, FErrorHandler>> JobQueue{};
 	FString EventPtrArrayAccumulation{};//Contains EventPtrArray that will be written to cache, update by EventPtrArrayAccumulation
-	TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventPtrArray;
+	TArray<TelemetryBodyPtr> EventPtrArray;
 	mutable FCriticalSection EventPtrArrayLock;
 
 	bool bTelemetryJobStarted = false;

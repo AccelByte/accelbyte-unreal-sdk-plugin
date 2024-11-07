@@ -109,6 +109,9 @@ public:
 	static FHttpClient HttpClient;
 #pragma endregion
 
+	static const TSharedPtr<Api::Lobby, ESPMode::ThreadSafe> LobbyPtr;
+	static const TSharedPtr<Api::Chat, ESPMode::ThreadSafe> ChatPtr;
+
 	static const TSharedPtr<Api::GameTelemetry, ESPMode::ThreadSafe> GameTelemetryPtr;
 	static const TSharedPtr<Api::PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventPtr;
 	static const TSharedPtr<Api::GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventPtr;
@@ -156,8 +159,8 @@ public:
 #pragma region Game Client Multiplayer
 	static Api::QosManager QosManager;
 	static Api::Qos Qos;
-	static Api::Lobby Lobby;
-	static Api::Chat Chat;
+	static Api::Lobby& Lobby;
+	static Api::Chat& Chat;
 	static Api::SessionBrowser SessionBrowser;
 	static Api::TurnManager TurnManager;
 	static Api::Session Session;

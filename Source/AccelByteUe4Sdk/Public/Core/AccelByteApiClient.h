@@ -65,7 +65,7 @@ public:
 	FApiClient();
 	FApiClient(AccelByte::Credentials& Credentials
 		, AccelByte::FHttpRetryScheduler& Http
-		, TSharedPtr<AccelByte::FAccelByteMessagingSystem, ESPMode::ThreadSafe> InMessagingSystemPtr = nullptr);
+		, AccelByte::FAccelByteMessagingSystemPtr InMessagingSystemPtr = nullptr);
 	~FApiClient();
 
 #pragma region Core
@@ -79,9 +79,11 @@ public:
 #pragma endregion
 
 private:
-	const TSharedPtr<Api::GameTelemetry, ESPMode::ThreadSafe> GameTelemetryPtr;
-	const TSharedPtr<Api::PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventPtr;
-	const TSharedPtr<Api::GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventPtr;
+	const AccelByte::Api::GameTelemetryPtr GameTelemetryPtr;
+	const AccelByte::Api::PredefinedEventPtr PredefinedEventPtr;
+	const AccelByte::Api::GameStandardEventPtr GameStandardEventPtr;
+	const AccelByte::Api::LobbyPtr LobbyPtr;
+	const AccelByte::Api::ChatPtr ChatPtr;
 
 public:
 #pragma region Access
@@ -128,8 +130,21 @@ public:
 #pragma region Multiplayer
 	Api::QosManager QosManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Qos Qos{ *CredentialsRef, FRegistry::Settings, *MessagingSystem.Get() };
-	Api::Lobby Lobby{ *CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner };
-	Api::Chat Chat{ *CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner};
+
+	/**
+	 * @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	 * THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	 * It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Lobby with ApiClient->GetLobbyApi().Pin()
+	 */
+	Api::Lobby& Lobby;
+
+	/**
+	 * @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	 * THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	 * It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Chat with ApiClient->GetChatApi().Pin()
+	 */
+	Api::Chat& Chat;
+
 	Api::SessionBrowser SessionBrowser{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::TurnManager TurnManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::Session Session{ *CredentialsRef, FRegistry::Settings, *HttpRef };
@@ -164,9 +179,12 @@ public:
 	Api::PresenceBroadcastEvent PresenceBroadcastEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion
 
-	TWeakPtr<Api::GameTelemetry, ESPMode::ThreadSafe> GetGameTelemetryApi() const;
-	TWeakPtr<Api::PredefinedEvent, ESPMode::ThreadSafe> GetPredefinedEventApi() const;
-	TWeakPtr<Api::GameStandardEvent, ESPMode::ThreadSafe> GetGameStandardEventApi() const;
+	Api::LobbyWPtr GetLobbyApi() const;
+	Api::ChatWPtr GetChatApi() const;
+
+	Api::GameTelemetryWPtr GetGameTelemetryApi() const;
+	Api::PredefinedEventWPtr GetPredefinedEventApi() const;
+	Api::GameStandardEventWPtr GetGameStandardEventApi() const;
 
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)

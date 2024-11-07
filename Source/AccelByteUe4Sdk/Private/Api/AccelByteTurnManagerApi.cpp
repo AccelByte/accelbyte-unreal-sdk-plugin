@@ -161,7 +161,7 @@ FAccelByteTaskWPtr TurnManager::GetTurnServerLatencyByRegion(const FString& Regi
 						FAccelBytePing::SendUdpPing(*TurnServer->Ip, TurnServer->Qos_port
 							, 10.0f
 							, FPingCompleteDelegate::CreateLambda(
-								[this, TurnServer, OnSuccess, &Region](FPingResult PingResult)
+								[OnSuccess](FPingResult PingResult)
 								{
 									const int32 Milliseconds = FMath::RoundToInt(PingResult.AverageRoundTrip * 1000);
 									OnSuccess.ExecuteIfBound(Milliseconds);

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [26.3.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.3.1%0D26.3.0) (2024-11-07)
+
+
+### Bug Fixes
+
+* **AMS:** make heartbeat as optional and change error message for AMS parameters ([5de3fec](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5de3fec5240ee63bac13b025f891973d3f2c3b46))
+* **challenge:** add missing enum member CUSTOM in EAccelByteModelsChallengeAssignmentRule ([2553488](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/255348832847d5dbd06244b4ab43ed1f176dd96b))
+* **gameTelemetry:** change TSharedPtr<FAccelByteModelsTelemetryBody> to TSharedPtr<FAccelByteModelsTelemetryBody, ESPMode::ThreadSafe> ([9cb2754](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9cb275462cdfba90e707cbf01de28a20f413e2a2))
+* **lobby, chat:** move to sharedPtr ([89ab8af](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/89ab8af1ce7a47be22753f24639ce5ffc693be7f))
+
 ## [26.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/26.3.0%0D26.2.1) (2024-10-30)
 
 

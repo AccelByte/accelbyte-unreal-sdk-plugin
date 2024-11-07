@@ -461,6 +461,8 @@ void Lobby::Connect(FString const& Token)
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	Startup();
+
 	if(TokenGenerator.IsValid() && Token.IsEmpty())
 	{
 		TokenGenerator->RequestToken();
@@ -2214,6 +2216,7 @@ void Lobby::UnbindV2MatchmakingEvents()
 	V2MatchmakingMatchFoundNotif.Unbind();
 	V2MatchmakingExpiredNotif.Unbind();
 	V2MatchmakingStartNotif.Unbind();
+	V2MatchmakingCanceledNotif.Unbind();
 }
 
 void Lobby::OnNotificationSenderMessageReceived(FString const& Payload)
@@ -2231,16 +2234,21 @@ void Lobby::OnConnected()
 	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 	if (MessagingSystemPtr.IsValid())
 	{
+		LobbyWPtr LobbyWeak = AsShared();
 		AuthTokenSetDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::AuthTokenSet
 			, FOnMessagingSystemReceivedMessage::CreateLambda(
-				[this](FString const& Message)
+				[LobbyWeak](FString const& Message)
 				{
-					FOauth2Token Token;
-					FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
-					RefreshToken(Token.Access_token);
+					auto LobbyApi = LobbyWeak.Pin();
+					if (LobbyApi.IsValid())
+					{
+						FOauth2Token Token;
+						FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
+						LobbyApi->RefreshToken(Token.Access_token);
+					}
 				}));
 
-		NotificationSenderListenerDelegate = FOnMessagingSystemReceivedMessage::CreateRaw(this
+		NotificationSenderListenerDelegate = FOnMessagingSystemReceivedMessage::CreateThreadSafeSP(AsShared()
 			, &Lobby::OnNotificationSenderMessageReceived);
 		NotificationSenderListenerDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::NotificationSenderLobby
 			, NotificationSenderListenerDelegate);
@@ -2361,12 +2369,12 @@ void Lobby::CreateWebSocket(FString const& Token)
 		, PingDelay
 	);
 
-	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
-	WebSocket->OnMessageReceived().AddRaw(this, &Lobby::OnMessage, false);
-	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
-	WebSocket->OnConnectionClosed().AddRaw(this, &Lobby::OnClosed);
-	WebSocket->OnReconnectAttempt().AddRaw(this, &Lobby::OnReconnectAttempt);
-	WebSocket->OnMassiveOutage().AddRaw(this, &Lobby::OnMassiveOutage);
+	WebSocket->OnConnected().AddThreadSafeSP(AsShared(), &Lobby::OnConnected);
+	WebSocket->OnMessageReceived().AddThreadSafeSP(AsShared(), &Lobby::OnMessage, false);
+	WebSocket->OnConnectionError().AddThreadSafeSP(AsShared(), &Lobby::OnConnectionError);
+	WebSocket->OnConnectionClosed().AddThreadSafeSP(AsShared(), &Lobby::OnClosed);
+	WebSocket->OnReconnectAttempt().AddThreadSafeSP(AsShared(), &Lobby::OnReconnectAttempt);
+	WebSocket->OnMassiveOutage().AddThreadSafeSP(AsShared(), &Lobby::OnMassiveOutage);
 }
 
 FString Lobby::LobbyMessageToJson(FString const& Message)
@@ -3183,16 +3191,21 @@ void Lobby::HandleMessageNotif(FString const& ReceivedMessageType
 							UnbanSchedules.Remove(Key);
 						}
 
+						LobbyWPtr LobbyWeak = AsShared();
 						TSharedRef<FAccelByteModelsUserBannedNotification> Data = MakeShared<FAccelByteModelsUserBannedNotification>(Result);
 						FUnbanScheduleRef NewSchedule = MakeShared<FUnbanSchedule>();
 						NewSchedule->DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
-							[this, Data, ScheduledTime](float DeltaTime)
+							[LobbyWeak, Data, ScheduledTime](float DeltaTime)
 							{
+								auto LobbyApi = LobbyWeak.Pin();
 								double CurrentTime = FPlatformTime::Seconds();
-								if (CurrentTime >= ScheduledTime)
+								if (!LobbyApi.IsValid() || CurrentTime >= ScheduledTime)
 								{
-									Data->Enable = false;
-									UserUnbannedNotification.ExecuteIfBound(*Data);
+									if (LobbyApi.IsValid())
+									{
+										Data->Enable = false;
+										LobbyApi->UserUnbannedNotification.ExecuteIfBound(*Data);
+									}
 									return false;
 								}
 								return true;
@@ -3349,8 +3362,8 @@ bool Lobby::TryBufferNotification(FString const& ParsedJsonString)
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Missing notification(s) detected, received: %s"), *ParsedJsonString);
 
 		// get missing notification from the time last valid (still in order) received notification up to the most recent received notification
-		GetNotifications(THandler<FAccelByteModelsGetUserNotificationsResponse>::CreateRaw(this, &Lobby::OnGetMissingNotificationSuccess)
-			,FErrorHandler::CreateRaw(this, &Lobby::OnGetMissingNotificationError));
+		GetNotifications(THandler<FAccelByteModelsGetUserNotificationsResponse>::CreateThreadSafeSP(AsShared(), &Lobby::OnGetMissingNotificationSuccess)
+			,FErrorHandler::CreateThreadSafeSP(AsShared(), &Lobby::OnGetMissingNotificationError));
 
 		return true;
 	}
@@ -3501,27 +3514,36 @@ FAccelByteTaskWPtr Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrap
 		return nullptr;
 	}
 
+	LobbyWPtr LobbyWeak = AsShared();
 	return GetPartyStorage(DataWrapper->PartyId
 		, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
-			[this, DataWrapper](FAccelByteModelsPartyDataNotif Result)
+			[LobbyWeak, DataWrapper](FAccelByteModelsPartyDataNotif Result)
 			{
-				Result.Custom_attribute = DataWrapper->PayloadModifier(Result.Custom_attribute);
+				auto LobbyApi = LobbyWeak.Pin();
+				if (LobbyApi.IsValid())
+				{
+					Result.Custom_attribute = DataWrapper->PayloadModifier(Result.Custom_attribute);
 
-				FAccelByteModelsPartyDataUpdateRequest PartyStorageBodyRequest;
+					FAccelByteModelsPartyDataUpdateRequest PartyStorageBodyRequest;
 
-				PartyStorageBodyRequest.UpdatedAt = FCString::Atoi64(*Result.UpdatedAt);
-				PartyStorageBodyRequest.Custom_attribute = Result.Custom_attribute;
+					PartyStorageBodyRequest.UpdatedAt = FCString::Atoi64(*Result.UpdatedAt);
+					PartyStorageBodyRequest.Custom_attribute = Result.Custom_attribute;
 
-				RequestWritePartyStorage(DataWrapper->PartyId
-					, PartyStorageBodyRequest
-					, DataWrapper->OnSuccess
-					, DataWrapper->OnError
-					, FSimpleDelegate::CreateLambda(
-						[this, DataWrapper]()
-						{
-							DataWrapper->RemainingAttempt--;
-							WritePartyStorageRecursive(DataWrapper);
-						}));
+					LobbyApi->RequestWritePartyStorage(DataWrapper->PartyId
+						, PartyStorageBodyRequest
+						, DataWrapper->OnSuccess
+						, DataWrapper->OnError
+						, FSimpleDelegate::CreateLambda(
+							[LobbyWeak, DataWrapper]()
+							{
+								DataWrapper->RemainingAttempt--;
+								auto LobbyApi = LobbyWeak.Pin();
+								if (LobbyApi.IsValid())
+								{
+									LobbyApi->WritePartyStorageRecursive(DataWrapper);
+								}
+							}));
+				}
 			})
 		, FErrorHandler::CreateLambda(
 			[DataWrapper](int32 ErrorCode, FString ErrorMessage)
@@ -3583,7 +3605,7 @@ void Lobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> const& TokenG
 	
 	if (TokenGeneratorRef.IsValid())
 	{
-		OnTokenReceivedDelegateHandle = TokenGenerator->OnTokenReceived().AddRaw(this, &Lobby::OnTokenReceived);
+		OnTokenReceivedDelegateHandle = TokenGenerator->OnTokenReceived().AddThreadSafeSP(AsShared(), &Lobby::OnTokenReceived);
 	}
 }
 
@@ -3592,7 +3614,7 @@ void Lobby::InitializeMessaging()
 	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 	if (MessagingSystemPtr.IsValid())
 	{
-		OnReceivedQosLatenciesUpdatedDelegate = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Lobby::OnReceivedQosLatencies);
+		OnReceivedQosLatenciesUpdatedDelegate = FOnMessagingSystemReceivedMessage::CreateThreadSafeSP(AsShared(), &Lobby::OnReceivedQosLatencies);
 		QosLatenciesUpdatedDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::QosRegionLatenciesUpdated
 			, OnReceivedQosLatenciesUpdatedDelegate);
 	}
@@ -3621,9 +3643,6 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, TimeSinceConnectionLost{.0f}
 {
 	InitializeV2MatchmakingNotifTopics();
-	InitializeMessaging();
-
-	LobbyTickerHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &Lobby::Tick), LobbyTickPeriod);
 
 	auto Strategy = FReconnectionStrategy::CreateBalancedStrategy(
 		FReconnectionStrategy::FBalancedMaxRetryInterval(FTimespan::FromSeconds(InMaxBackoffDelay)),
@@ -3678,6 +3697,16 @@ void Lobby::OnReceivedQosLatencies(FString const& Payload)
 	}
 
 	ChangeUserRegion(ClosestRegion);
+}
+
+void Lobby::Startup()
+{
+	if (!bIsStarted)
+	{
+		InitializeMessaging();
+		LobbyTickerHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateThreadSafeSP(AsShared(), &Lobby::Tick), LobbyTickPeriod);
+		bIsStarted = true;
+	}
 }
 
 } // Namespace Api

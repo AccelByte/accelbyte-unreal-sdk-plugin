@@ -88,6 +88,9 @@ FAccelByteNotificationSender FRegistry::NotificationSender{*MessagingSystem.Get(
 FHttpClient FRegistry::HttpClient{ Credentials, Settings, HttpRetryScheduler };
 #pragma endregion
 
+const Api::LobbyPtr FRegistry::LobbyPtr{ MakeShared<Api::Lobby, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler, *FRegistry::MessagingSystem.Get(), FRegistry::NetworkConditioner) };
+const Api::ChatPtr FRegistry::ChatPtr{ MakeShared<Api::Chat, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler,  *FRegistry::MessagingSystem.Get(), FRegistry::NetworkConditioner) };
+
 const Api::GameTelemetryPtr FRegistry::GameTelemetryPtr{ MakeShared<Api::GameTelemetry, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
 const Api::PredefinedEventPtr FRegistry::PredefinedEventPtr{ MakeShared<Api::PredefinedEvent, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
 const Api::GameStandardEventPtr FRegistry::GameStandardEventPtr{ MakeShared<Api::GameStandardEvent, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
@@ -134,8 +137,8 @@ Api::Challenge FRegistry::Challenge{ FRegistry::Credentials, FRegistry::Settings
 #pragma region Game Client Multiplayer
 Api::QosManager FRegistry::QosManager{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::Qos FRegistry::Qos{ FRegistry::CredentialsRef.Get(), FRegistry::Settings,  *FRegistry::MessagingSystem.Get() };
-Api::Lobby FRegistry::Lobby{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler, *FRegistry::MessagingSystem.Get(), FRegistry::NetworkConditioner};
-Api::Chat FRegistry::Chat{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler,  *FRegistry::MessagingSystem.Get(), FRegistry::NetworkConditioner};
+Api::Lobby& FRegistry::Lobby{ *FRegistry::LobbyPtr.Get() };
+Api::Chat& FRegistry::Chat{ *FRegistry::ChatPtr.Get() };
 Api::SessionBrowser FRegistry::SessionBrowser{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
 Api::TurnManager FRegistry::TurnManager{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, HttpRetryScheduler };
 Api::Session FRegistry::Session{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };

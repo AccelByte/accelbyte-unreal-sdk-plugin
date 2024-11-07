@@ -19,6 +19,7 @@
 #include "Api/AccelBytePredefinedEventApi.h"
 #include "Api/AccelByteGameStandardEventApi.h"
 #include "Api/AccelByteQos.h"
+#include "Api/AccelByteLobbyApi.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "GameServerApi/AccelByteServerAMSApi.h"
 #include "Engine/GameInstance.h"
@@ -106,6 +107,7 @@ void FAccelByteUe4SdkModule::StartupModule()
 	AccelByte::FRegistry::GameTelemetryPtr->Startup();
 	AccelByte::FRegistry::PredefinedEventPtr->Startup();
 	AccelByte::FRegistry::GameStandardEventPtr->Startup();
+	AccelByte::FRegistry::LobbyPtr->Startup();
 #if !UE_SERVER
 	AccelByte::FRegistry::HeartBeat.Startup();
 #endif
@@ -424,7 +426,7 @@ void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
 	{
 		if (!AccelByte::FRegistry::ServerSettings.LoadAMSSettings())
 		{
-			UE_LOG(LogAccelByte, Warning, TEXT("dsid not provided, not connecting to AMS"));
+			UE_LOG(LogAccelByte, Log, TEXT("Dedicated server is not connected to AMS."));
 		}
 		else
 		{

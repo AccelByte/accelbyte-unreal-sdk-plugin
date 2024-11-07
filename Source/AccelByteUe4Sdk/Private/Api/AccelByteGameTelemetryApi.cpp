@@ -39,7 +39,7 @@ void GameTelemetry::OnLoginSuccess(FOauth2Token const& Response)
 {
 	if (bCacheEvent)
 	{
-		TWeakPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryWeak = AsShared();
+		GameTelemetryWPtr GameTelemetryWeak = AsShared();
 		AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [GameTelemetryWeak]()
 			{
 				const auto GameTelemetryApi = GameTelemetryWeak.Pin();
@@ -109,12 +109,12 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody
 
 	if (ImmediateEvents.Contains(TelemetryBody.EventName))
 	{
-		SendProtectedEvents({ MakeShared<FAccelByteModelsTelemetryBody>(TelemetryBody) }, OnSuccess, OnError);
+		SendProtectedEvents({ MakeShared<FAccelByteModelsTelemetryBody, ESPMode::ThreadSafe>(TelemetryBody) }, OnSuccess, OnError);
 	}
 	else
 	{
-		TSharedPtr<FAccelByteModelsTelemetryBody> TelemetryPtr = MakeShared<FAccelByteModelsTelemetryBody>(TelemetryBody);
-		JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>{ TelemetryPtr, OnSuccess, OnError });
+		TelemetryBodyPtr TelemetryPtr = MakeShared<FAccelByteModelsTelemetryBody, ESPMode::ThreadSafe>(TelemetryBody);
+		JobQueue.Enqueue(TTuple<TelemetryBodyPtr, FVoidHandler, FErrorHandler>{ TelemetryPtr, OnSuccess, OnError });
 		if (bCacheEvent || CriticalEvents.Contains(TelemetryBody.EventName))
 		{
 			GameTelemetryWPtr GameTelemetryWeak = AsShared();
@@ -186,12 +186,12 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> TelemetryBodies;
+		TArray<TelemetryBodyPtr> TelemetryBodies;
 		TArray<FVoidHandler> OnSuccessCallbacks;
 		TArray<FErrorHandler> OnErrorCallbacks;
 		while (!JobQueue.IsEmpty())
 		{
-			TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler> DequeueResult;
+			TTuple<TelemetryBodyPtr, FVoidHandler, FErrorHandler> DequeueResult;
 			if (JobQueue.Dequeue(DequeueResult))
 			{
 				TelemetryBodies.Add(DequeueResult.Get<0>());
@@ -199,7 +199,7 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 				OnErrorCallbacks.Add(DequeueResult.Get<2>());
 			}
 		}
-		TWeakPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryWeak = AsShared();
+		GameTelemetryWPtr GameTelemetryWeak = AsShared();
 		SendProtectedEvents(TelemetryBodies
 			, FVoidHandler::CreateLambda(
 				[GameTelemetryWeak, OnSuccessCallbacks, TelemetryBodies]()
@@ -227,7 +227,7 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 					{
 						for (int i = 0; i < TelemetryBodies.Num(); i++)
 						{
-							GameTelemetryApi->JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>
+							GameTelemetryApi->JobQueue.Enqueue(TTuple<TelemetryBodyPtr, FVoidHandler, FErrorHandler>
 							{
 								TelemetryBodies[i],
 									i < OnSuccessCallbacks.Num() ? OnSuccessCallbacks[i] : FVoidHandler{},
@@ -247,7 +247,7 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 	return true;
 }
 
-void GameTelemetry::SendProtectedEvents(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events
+void GameTelemetry::SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
@@ -301,7 +301,7 @@ void GameTelemetry::LoadCachedEvents()
 
 	bCacheUpdated = true;
 
-	TWeakPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryWeak = AsShared();
+	GameTelemetryWPtr GameTelemetryWeak = AsShared();
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(TelemetryKey
 		, THandler<TPair<FString, FString>>::CreateLambda(
 			[GameTelemetryWeak](TPair<FString, FString> Pair)
@@ -311,7 +311,7 @@ void GameTelemetry::LoadCachedEvents()
 					return;
 				}
 				const auto GameTelemetryApi = GameTelemetryWeak.Pin();
-				TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> EventList;
+				TArray<TelemetryBodyPtr> EventList;
 				if (GameTelemetryApi.IsValid()
 					&& GameTelemetryApi->EventsJsonToArray(Pair.Value, EventList))
 				{
@@ -337,7 +337,7 @@ void GameTelemetry::LoadCachedEvents()
 								{
 									for (int i = 0; i < EventList.Num(); i++)
 									{
-										GameTelemetryApi->JobQueue.Enqueue(TTuple<TSharedPtr<FAccelByteModelsTelemetryBody>, FVoidHandler, FErrorHandler>
+										GameTelemetryApi->JobQueue.Enqueue(TTuple<TelemetryBodyPtr, FVoidHandler, FErrorHandler>
 										{ EventList[i], FVoidHandler{}, FErrorHandler{} });
 									}
 								}
@@ -349,7 +349,7 @@ void GameTelemetry::LoadCachedEvents()
 }
 
 //Should be called from async task
-void GameTelemetry::AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody> Telemetry)
+void GameTelemetry::AppendEventToCache(TelemetryBodyPtr Telemetry)
 {
 	FString TelemetryKey = GetTelemetryKey();
 	if (TelemetryKey.IsEmpty())
@@ -399,7 +399,7 @@ void GameTelemetry::AppendEventToCache(TSharedPtr<FAccelByteModelsTelemetryBody>
 }
 
 //Should be called from async task
-void GameTelemetry::RemoveEventsFromCache(TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> const& Events)
+void GameTelemetry::RemoveEventsFromCache(TArray<TelemetryBodyPtr> const& Events)
 {
 	FString TelemetryKey = GetTelemetryKey();
 	if (TelemetryKey.IsEmpty())
@@ -436,7 +436,7 @@ bool GameTelemetry::JobArrayQueueAsJsonString(FString& OutJsonString)
 {
 	TSharedRef<FJsonObject> TelemetryObj = MakeShared<FJsonObject>();
 	TArray<TSharedPtr<FJsonValue>> EventsObjArray;
-	TArray<TSharedPtr<FAccelByteModelsTelemetryBody>> TempEventPtrArray;
+	TArray<TelemetryBodyPtr> TempEventPtrArray;
 	{
 		FScopeLock ScopeLock(&EventPtrArrayLock);
 		TempEventPtrArray = EventPtrArray;
@@ -473,7 +473,7 @@ const FString GameTelemetry::GetEventNamespace()
 }
 
 bool GameTelemetry::EventsJsonToArray(FString& InJsonString
-	, TArray<TSharedPtr<FAccelByteModelsTelemetryBody>>& OutArray)
+	, TArray<TelemetryBodyPtr>& OutArray)
 {
 	TSharedPtr<FJsonObject> JsonObjectPtr{ MakeShared<FJsonObject>() };
 
@@ -505,7 +505,7 @@ bool GameTelemetry::EventsJsonToArray(FString& InJsonString
 		TelemetryBody.Payload = JsonObj->GetObjectField(TEXT("Payload"));
 		ClientTimestamp = JsonObj->GetIntegerField(TEXT("ClientTimestamp"));
 		TelemetryBody.ClientTimestamp = FDateTime::FromUnixTimestamp(ClientTimestamp);
-		OutArray.Add(MakeShared<FAccelByteModelsTelemetryBody>(TelemetryBody));
+		OutArray.Add(MakeShared<FAccelByteModelsTelemetryBody, ESPMode::ThreadSafe>(TelemetryBody));
 	}
 	return true;
 }

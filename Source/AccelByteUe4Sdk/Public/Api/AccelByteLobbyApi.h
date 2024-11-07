@@ -73,7 +73,10 @@ enum Notif : uint8;
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
  */
-class ACCELBYTEUE4SDK_API Lobby : public FApiBase, public IWebsocketConfigurableReconnectStrategy
+class ACCELBYTEUE4SDK_API Lobby 
+	: public FApiBase
+	, public IWebsocketConfigurableReconnectStrategy
+	, public TSharedFromThis<Lobby, ESPMode::ThreadSafe>
 {
 public:
 	Lobby(Credentials& InCredentialsRef
@@ -1559,7 +1562,7 @@ public:
 		}
 
 		NotificationMessageDelegateHandle = MessageNotifBroadcaster.AddLambda(
-			[this, OnNotificationMessage](FAccelByteModelsNotificationMessage const& Message)
+			[OnNotificationMessage](FAccelByteModelsNotificationMessage const& Message)
 			{
 				OnNotificationMessage.ExecuteIfBound(Message);
 			});
@@ -2838,6 +2841,10 @@ public:
 	 */
 	TSharedPtr<FAccelByteKey> LockNotifications();
 
+	/**
+	 * @brief Startup module
+	 */
+	void Startup();
 private:
 	Lobby(Lobby const&) = delete; // Copy constructor
 	Lobby(Lobby&&) = delete; // Move constructor
@@ -3239,10 +3246,18 @@ private:
 	FOnMessagingSystemReceivedMessage NotificationSenderListenerDelegate;
 	FDelegateHandle NotificationSenderListenerDelegateHandle;
 
+	bool bIsStarted = false;
+
 	void InitializeMessaging();
 
 	void OnReceivedQosLatencies(FString const& Payload);
+
 #pragma endregion
 };
+
+typedef TSharedRef<Lobby, ESPMode::ThreadSafe> LobbyRef;
+typedef TSharedPtr<Lobby, ESPMode::ThreadSafe> LobbyPtr;
+typedef TWeakPtr<Lobby, ESPMode::ThreadSafe> LobbyWPtr;
+
 } // Namespace Api
 } // Namespace AccelByte

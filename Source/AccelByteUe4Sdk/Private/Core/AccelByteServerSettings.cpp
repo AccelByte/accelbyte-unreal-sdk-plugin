@@ -5,6 +5,7 @@
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteUtilities.h"
+#include "Core/AccelByteReport.h"
 
 using namespace AccelByte;
 
@@ -222,6 +223,8 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 				// If not exist, then fetch the setting from game default engine ini file
 				if (!GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni))
 				{
+					UE_LOG(LogAccelByte, Log, TEXT("Watchdog URL has not been initialised"));
+
 					bIsLoadSuccess = false;
 				}
 			}
@@ -234,7 +237,8 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 		{
 			if (!GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni))
 			{
-				bIsLoadSuccess = false;
+				// Initializing the AMS heartbeat value is optional; the default value is 15.
+				AMSHeartbeatInterval = 15;
 			}
 		}
 	}
@@ -243,6 +247,8 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 	{
 		if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("dsid"), DSId))
 		{
+			UE_LOG(LogAccelByte, Log, TEXT("DSID has not been initialised"));
+
 			bIsLoadSuccess = false;
 		}
 	}

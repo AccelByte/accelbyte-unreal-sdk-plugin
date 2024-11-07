@@ -46,7 +46,8 @@ enum class EAccelByteModelsChallengeAssignmentRule : uint8
 	NONE = 0,
 	FIXED,
 	RANDOMIZED,
-	UNSCHEDULED
+	UNSCHEDULED,
+	CUSTOM,
 };
 
 UENUM(BlueprintType)

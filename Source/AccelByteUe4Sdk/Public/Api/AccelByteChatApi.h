@@ -37,7 +37,10 @@ enum HandleType : uint8;
  *			- public : user can join by knowing topic id
  *			- private: only admin can add or remove member
  */
-class ACCELBYTEUE4SDK_API Chat : public FApiBase, public IWebsocketConfigurableReconnectStrategy
+class ACCELBYTEUE4SDK_API Chat 
+	: public FApiBase
+	, public IWebsocketConfigurableReconnectStrategy
+	, public TSharedFromThis<Chat, ESPMode::ThreadSafe>
 {
 public:
 	Chat(Credentials & InCredentialsRef
@@ -1328,6 +1331,9 @@ public:
 #pragma  endregion CHAT CONFIGURATION
 };
 
-} // Namespace Api
+typedef TSharedRef<Chat, ESPMode::ThreadSafe> ChatRef;
+typedef TSharedPtr<Chat, ESPMode::ThreadSafe> ChatPtr;
+typedef TWeakPtr<Chat, ESPMode::ThreadSafe> ChatWPtr;
 
+} // Namespace Api
 } // Namespace AccelByte

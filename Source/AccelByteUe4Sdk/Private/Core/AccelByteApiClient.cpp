@@ -15,6 +15,10 @@ FApiClient::FApiClient()
 	, GameTelemetryPtr(MakeShared<AccelByte::Api::GameTelemetry, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
 	, PredefinedEventPtr( MakeShared<AccelByte::Api::PredefinedEvent, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
 	, GameStandardEventPtr(MakeShared<AccelByte::Api::GameStandardEvent, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
+	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+	, Lobby(*LobbyPtr.Get())
+	, Chat(*ChatPtr.Get())
 	, GameTelemetry(*GameTelemetryPtr.Get())
 	, PredefinedEvent(*PredefinedEventPtr.Get())
 	, GameStandardEvent(*GameStandardEventPtr.Get())
@@ -25,6 +29,7 @@ FApiClient::FApiClient()
 	PredefinedEventPtr->Startup();
 	GameStandardEventPtr->Startup();
 	PresenceBroadcastEvent.Startup();
+	LobbyPtr->Startup();
 }
 
 FApiClient::FApiClient(AccelByte::Credentials& Credentials
@@ -37,6 +42,10 @@ FApiClient::FApiClient(AccelByte::Credentials& Credentials
 	, GameTelemetryPtr(MakeShared<AccelByte::Api::GameTelemetry, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
 	, PredefinedEventPtr(MakeShared<AccelByte::Api::PredefinedEvent, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
 	, GameStandardEventPtr(MakeShared<AccelByte::Api::GameStandardEvent, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
+	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+	, Lobby(*LobbyPtr.Get())
+	, Chat(*ChatPtr.Get())
 	, GameTelemetry(*GameTelemetryPtr.Get())
 	, PredefinedEvent(*PredefinedEventPtr.Get())
 	, GameStandardEvent(*GameStandardEventPtr.Get())
@@ -45,6 +54,7 @@ FApiClient::FApiClient(AccelByte::Credentials& Credentials
 	PredefinedEventPtr->Startup();
 	GameStandardEventPtr->Startup();
 	PresenceBroadcastEvent.Startup();
+	LobbyPtr->Startup();
 }
 
 FApiClient::~FApiClient()
@@ -78,17 +88,27 @@ FApiClient::~FApiClient()
 	}
 }
 
-TWeakPtr<Api::GameTelemetry, ESPMode::ThreadSafe> FApiClient::GetGameTelemetryApi() const
+Api::LobbyWPtr FApiClient::GetLobbyApi() const
+{
+	return LobbyPtr;
+}
+
+Api::ChatWPtr FApiClient::GetChatApi() const
+{
+	return ChatPtr;
+}
+
+Api::GameTelemetryWPtr FApiClient::GetGameTelemetryApi() const
 {
 	return GameTelemetryPtr;
 }
 
-TWeakPtr<Api::PredefinedEvent, ESPMode::ThreadSafe> FApiClient::GetPredefinedEventApi() const
+Api::PredefinedEventWPtr FApiClient::GetPredefinedEventApi() const
 {
 	return PredefinedEventPtr;
 }
 
-TWeakPtr<Api::GameStandardEvent, ESPMode::ThreadSafe> FApiClient::GetGameStandardEventApi() const
+Api::GameStandardEventWPtr FApiClient::GetGameStandardEventApi() const
 {
 	return GameStandardEventPtr;
 }
