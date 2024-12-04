@@ -110,6 +110,26 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Get user's entitlements based on the Entitlement Ids.
+	 *
+	 * @param EntitlementIds The IDs of the entitlements to retrieve.
+	 * @param OnSuccess Callback invoked when the operation succeeds. The result is const TArray<FAccelByteModelsEntitlementInfo>.
+	 * @param OnError Callback invoked when the operation fails.
+	 * @param bAvailablePlatformOnly If true, only checks for available platform entitlements; defaults to true.
+	 *
+	 * @note
+	 * - This operation depends on the entitlement origin feature being enabled by the admin.
+	 * - If bAvailablePlatformOnly is true, the backend returns entitlements specific to the current user's IAM client platform.
+	 * - If bAvailablePlatformOnly is false, the backend returns all entitlements, regardless of platform availability.
+	 *
+	 * @return An AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserEntitlementByIds(TArray<FString> const& EntitlementIds
+		, THandler<TArray<FAccelByteModelsEntitlementInfo>> const& OnSuccess
+		, FErrorHandler const& OnError
+		, bool bAvailablePlatformOnly = true);
+
+	/**
 	 * @brief Get user's Entitlement ownership of the AppId.
 	 *
 	 * @param AppId The App ID.

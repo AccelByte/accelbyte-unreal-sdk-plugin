@@ -311,7 +311,9 @@ enum class EAccelByteEntitlementIAPOrderStatus : uint8
 	NONE = 0,
 	VERIFIED,
 	FULFILLED,
-	FAILED
+	FAILED,
+	PARTIAL_REVOKED,
+	REVOKED
 };
 
 UENUM(BlueprintType)
@@ -3163,6 +3165,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSyncOculusConsumableEntitlementInfo
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SyncOculusConsumableEntitlementInfo ")
 	FString TransactionId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | SyncOculusConsumableEntitlementInfo ")
 	FString OculusItemSku{};
 	

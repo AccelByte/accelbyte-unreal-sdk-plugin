@@ -165,6 +165,42 @@ FAccelByteTaskWPtr Entitlement::GetUserEntitlementById(FString const& Entitlemen
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Entitlement::GetUserEntitlementByIds(TArray<FString> const& EntitlementIds
+	, THandler<TArray<FAccelByteModelsEntitlementInfo>> const& OnSuccess
+	, FErrorHandler const& OnError
+	, bool bAvailablePlatformOnly)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (EntitlementIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("EntitlementIds cannot be empty!"));
+		return nullptr;
+	}
+
+	if (EntitlementIds.Num() > MaximumEntitlementIds)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), FString::Printf(TEXT("EntitlementIds cannot exceed %d!"), MaximumEntitlementIds));
+		return nullptr;
+	}
+
+	TMultiMap<FString, FString> QueryParams{};
+
+	for (const auto& EntitlementId : EntitlementIds)
+	{
+		QueryParams.AddUnique(TEXT("ids"), EntitlementId);
+	}
+
+	QueryParams.Add(TEXT("availablePlatformOnly"), bAvailablePlatformOnly ? TEXT("true") : TEXT("false"));
+
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/byIds")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Entitlement::GetUserEntitlementOwnershipByAppId(FString const& AppId
 	, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess
 	, FErrorHandler const& OnError

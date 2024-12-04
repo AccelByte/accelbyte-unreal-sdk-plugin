@@ -6,12 +6,13 @@
 
 namespace AccelByte
 {
+
 TMap <EAccelBytePlatformType, AccelBytePlatformWrapperPtr> FAccelBytePlatformHandler::PlatformWrappers = TMap<EAccelBytePlatformType, AccelBytePlatformWrapperPtr> {};
 FAccelBytePlatformPresenceChanged FAccelBytePlatformHandler::OnPlatformPresenceChanged;
 
 AccelBytePlatformWrapperWPtr FAccelBytePlatformHandler::GetPlatformWrapper(EAccelBytePlatformType PlatformType)
 {
-	if (auto PlatformWrapper = PlatformWrappers.Find(PlatformType))
+	if (const auto& PlatformWrapper = PlatformWrappers.Find(PlatformType))
 	{
 		return *PlatformWrapper;
 	}
@@ -56,4 +57,5 @@ void FAccelBytePlatformHandler::ClearPlatformPresenceChangedDelegates()
 {
 	OnPlatformPresenceChanged.Clear();
 }
+
 }

@@ -29,17 +29,7 @@ Qos::Qos(Credentials& InCredentialsRef
 #else
 	, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
 #endif
-{
-	OnLobbyConnectedHandle = FOnMessagingSystemReceivedMessage::CreateRaw(this, &Qos::OnLobbyConnected);
-	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
-	if (MessagingSystemPtr.IsValid())
-	{
-		LobbyConnectedDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::LobbyConnected, OnLobbyConnectedHandle);
-	}
-
-	QosUpdateCheckerTickerDelegate = FTickerDelegate::CreateRaw(this, &Qos::CheckQosUpdate);
-	QosUpdateCheckerHandle = FTickerAlias::GetCoreTicker().AddTicker(QosUpdateCheckerTickerDelegate, QosUpdateCheckerIntervalSecs);
-}
+{}
 
 Qos::~Qos()
 {
@@ -65,19 +55,27 @@ void Qos::GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSu
 void Qos::GetActiveServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
 	, const FErrorHandler& OnError)
 {
+	QosWPtr QosWeak = AsShared();
 	FRegistry::QosManager.GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
-	[this, OnSuccess, OnError](const FAccelByteModelsQosServerList Result)
+	[QosWeak, OnSuccess, OnError](const FAccelByteModelsQosServerList Result)
 	{
-		FAccelByteModelsQosServerList ResolvedServerList{Result};
-
-		for (FAccelByteModelsQosServer& Server : ResolvedServerList.Servers)
+		const auto QosApi = QosWeak.Pin();
+		if (QosApi.IsValid())
 		{
-			ResolveQosServerAddress(Server);
-		}
+			FAccelByteModelsQosServerList ResolvedServerList{ Result };
+			for (FAccelByteModelsQosServer& Server : ResolvedServerList.Servers)
+			{
+				QosApi->ResolveQosServerAddress(Server);
+			}
 
-		if(Result.Servers.Num() > 0)
-		{
-			PingRegionsSetLatencies(ResolvedServerList, OnSuccess, OnError);
+			if (Result.Servers.Num() > 0)
+			{
+				QosApi->PingRegionsSetLatencies(ResolvedServerList, OnSuccess, OnError);
+			}
+			else
+			{
+				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("No QoS server available!"));
+			}
 		}
 	}), OnError);
 }
@@ -86,23 +84,27 @@ void Qos::CallGetQosServers(const bool bPingRegionsOnSuccess
 	, const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess
 	, const FErrorHandler& OnError)
 {
+	QosWPtr QosWeak = AsShared();
 	FRegistry::QosManager.GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
-		[this, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError](const FAccelByteModelsQosServerList Result)
+		[QosWeak, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError](const FAccelByteModelsQosServerList Result)
 		{
-			Qos::QosServers = Result; // Cache for the session
+			const auto QosApi = QosWeak.Pin();
+			if (QosApi.IsValid())
+			{
+				Qos::QosServers = Result; // Cache for the session
+				for (FAccelByteModelsQosServer& Server : Qos::QosServers.Servers)
+				{
+					QosApi->ResolveQosServerAddress(Server);
+				}
 
-			for (FAccelByteModelsQosServer& Server : Qos::QosServers.Servers)
-			{
-				ResolveQosServerAddress(Server);
-			}
-
-			if (bPingRegionsOnSuccess)
-			{
-				PingRegionsSetLatencies(Qos::QosServers, OnPingRegionsSuccess, OnError);
-			} 
-			else
-			{
-				OnPingRegionsSuccess.ExecuteIfBound(Qos::Latencies); // Latencies == Nullable until PingRegionsSetLatencies called once+.
+				if (bPingRegionsOnSuccess)
+				{
+					QosApi->PingRegionsSetLatencies(Qos::QosServers, OnPingRegionsSuccess, OnError);
+				}
+				else
+				{
+					OnPingRegionsSuccess.ExecuteIfBound(Qos::Latencies); // Latencies == Nullable until PingRegionsSetLatencies called once+.
+				}
 			}
 		}), OnError);
 }
@@ -133,8 +135,9 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 			FString Region = Server.Region;
 
 			// Ping -> Get the latencies on pong.
+			QosWPtr QosWeak = AsShared();
 			FAccelBytePing::SendUdpPing(Server.ResolvedIp, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
-				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError, this](const FPingResult& PingResult)
+				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError, QosWeak](const FPingResult& PingResult)
 				{
 					if (PingResult.Status == FPingResultStatus::Success)
 					{
@@ -155,7 +158,11 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 						if (SuccessLatencies->Num() > 0)
 						{
 							OnSuccess.ExecuteIfBound(*SuccessLatencies);
-							bQosUpdated = true;
+							const auto QosApi = QosWeak.Pin();
+							if (QosApi.IsValid())
+							{
+								QosApi->bQosUpdated = true;
+							}
 						}
 						else
 						{
@@ -193,10 +200,15 @@ void Qos::InitGetLatenciesScheduler(float LatencyPollIntervalSecs)
 	// -----------------------------------
 	// Schedule a Latencies refresh poller
 	// Loop infinitely, every x seconds, until we tell the delegate to stop via RemoveFromTicker()
+	QosWPtr QosWeak = AsShared();
 	Qos::PollLatenciesHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
-		[this](float DeltaTime)
+		[QosWeak](float DeltaTime)
 		{
-			PingRegionsSetLatencies(Qos::QosServers, nullptr, nullptr);
+			const auto QosApi = QosWeak.Pin();
+			if (QosApi.IsValid())
+			{
+				QosApi->PingRegionsSetLatencies(Qos::QosServers, nullptr, nullptr);
+			}
 			return true;
 			
 		}), AdjustedSecondsPerTick);
@@ -224,12 +236,16 @@ void Qos::InitGetServerLatenciesScheduler(float QosServerPollIntervalSecs)
 	// -----------------------------------
 	// Schedule a Latencies refresh poller
 	// Loop infinitely, every x seconds, until we tell the delegate to stop via RemoveFromTicker()
+	QosWPtr QosWeak = AsShared();
 	Qos::PollServerLatenciesHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
-		[this](float DeltaTime)
+		[QosWeak](float DeltaTime)
 		{
 			constexpr bool bPingRegionsOnSuccess = false;
-			CallGetQosServers(bPingRegionsOnSuccess, nullptr, nullptr);
-			
+			const auto QosApi = QosWeak.Pin();
+			if (QosApi.IsValid())
+			{
+				QosApi->CallGetQosServers(bPingRegionsOnSuccess, nullptr, nullptr);
+			}
 			return true;
 		}), AdjustedSecondsPerTick);
 }
@@ -265,6 +281,23 @@ bool Qos::AreLatencyPollersActive()
 const TArray<TPair<FString, float>>& Qos::GetCachedLatencies()
 {
 	return Qos::Latencies;
+}
+
+void Qos::Startup()
+{
+	if (!bIsStarted)
+	{
+		OnLobbyConnectedHandle = FOnMessagingSystemReceivedMessage::CreateThreadSafeSP(AsShared(), &Qos::OnLobbyConnected);
+		auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
+		if (MessagingSystemPtr.IsValid())
+		{
+			LobbyConnectedDelegateHandle = MessagingSystemPtr->SubscribeToTopic(EAccelByteMessagingTopic::LobbyConnected, OnLobbyConnectedHandle);
+		}
+
+		QosUpdateCheckerTickerDelegate = FTickerDelegate::CreateThreadSafeSP(AsShared(), &Qos::CheckQosUpdate);
+		QosUpdateCheckerHandle = FTickerAlias::GetCoreTicker().AddTicker(QosUpdateCheckerTickerDelegate, QosUpdateCheckerIntervalSecs);
+		bIsStarted = true;
+	}
 }
 
 void Qos::SendQosLatenciesMessage()

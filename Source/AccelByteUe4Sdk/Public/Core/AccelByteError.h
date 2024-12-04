@@ -364,6 +364,10 @@ namespace AccelByte
 		PlayerPublicRecordNotFoundException = 18081,
 		PlayerPublicRecordValidationErrorException = 18102,
 		PlayerRecordPreconditionFailedException = 18103,
+		PlayerRecordInvalidRequestBody = 18125,
+		PlayerRecordUserListExceedMaxSize = 18126,
+		PlayerRecordRecordListExceedMaxSize = 18354,
+		PlayerRecordInvalidUserId = 18358,
 		//
 		//DSM Error Code List
 		//
@@ -403,6 +407,7 @@ namespace AccelByte
 		//
 		FriendRequesterMaxFriendsLimitReached = 11590,
 		FriendRequesteeMaxFriendsLimitReached = 11591,
+		FriendRequesterIsBlockedByRequestee = 11817,
 		//
 		//UGC Error Code List
 		//

@@ -1244,6 +1244,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FBulkPlatformUserIdResponse.
 	 * @param OnError This will be called when the operation failed.
 	 * @param bRawPuid Show unencrypted platform user id in result (disabled by default).
+	 * @param PidType The type of platform user id (some platforms have different user id type for a given user, such as org scoped id or app scoped id).
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -1251,7 +1252,8 @@ public:
 		, TArray<FString> const& OtherPlatformUserId
 		, THandler<FBulkPlatformUserIdResponse> const& OnSuccess
 		, FErrorHandler const& OnError
-		, bool bRawPuid = false);
+		, bool bRawPuid = false
+		, const EAccelBytePidType& PidType = EAccelBytePidType::NONE);
 
 	/**
 	 * @brief This function will get country information from user's IP.

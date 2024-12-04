@@ -91,7 +91,8 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& 
 	if (TTLConfig.Action != EAccelByteTTLConfigAction::NONE)
 	{
 		const auto TTLConfigJson = MakeShared<FJsonObject>();
-		TTLConfigJson->SetStringField("action", TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD ? "DELETE" : "NONE");
+		TTLConfigJson->SetStringField(TEXT("action"),
+			(TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD) ? TEXT("DELETE") : TEXT("NONE"));
 		TTLConfigJson->SetStringField("expires_at", TTLConfig.Expires_At.ToIso8601());
 		JsonObj.SetObjectField(TEXT("ttl_config"), TTLConfigJson);
 	}
@@ -116,8 +117,15 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::GetGameBinaryRecord(FString const& Key
 		, *ServerSettingsRef.CloudSaveServerUrl
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess, this](FJsonObject const& JSONObject)
+	{
+		const FAccelByteModelsGameBinaryRecord AdminGameRecord = ConvertJsonToGameBinaryRecord(JSONObject);
+		OnSuccess.ExecuteIfBound(AdminGameRecord);
+	});
 	
-	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccessHttpClient, OnError);
 }
 
 FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& Key
@@ -155,8 +163,15 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& 
 	JsonObj.SetStringField("content_type", FAccelByteUtilities::GetContentType(ContentType));
 	JsonObj.SetStringField("file_location", FileLocation);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess, this](FJsonObject const& JSONObject)
+	{
+		const FAccelByteModelsGameBinaryRecord AdminGameRecord = ConvertJsonToGameBinaryRecord(JSONObject);
+		OnSuccess.ExecuteIfBound(AdminGameRecord);
+	});
 	
-	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccessHttpClient, OnError);
 }
 
 FAccelByteTaskWPtr ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& Key
@@ -172,6 +187,25 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& 
 	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
+		, *ServerSettingsRef.CloudSaveServerUrl
+		, *ServerCredentialsRef->GetClientNamespace()
+		, *Key);
+	
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerBinaryCloudSave::DeleteGameBinaryRecordTTLConfig(FString const& Key,
+	FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Key.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Key cannot be empty!"));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s/ttl")
 		, *ServerSettingsRef.CloudSaveServerUrl
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *Key);
@@ -209,13 +243,21 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString
 	if (TTLConfig.Action != EAccelByteTTLConfigAction::NONE)
 	{
 		const auto TTLConfigJson = MakeShared<FJsonObject>();
-		TTLConfigJson->SetStringField("action", TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD ? "DELETE" : "NONE");
+		TTLConfigJson->SetStringField(TEXT("action"),
+			(TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD) ? TEXT("DELETE") : TEXT("NONE"));
 		TTLConfigJson->SetStringField("expires_at", TTLConfig.Expires_At.ToIso8601());
 		JsonObj.SetObjectField(TEXT("ttl_config"), TTLConfigJson);
 	}
 	auto Content = MakeShared<FJsonObject>(JsonObj);
+
+	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
+		[OnSuccess, this](FJsonObject const& JSONObject)
+	{
+		const FAccelByteModelsGameBinaryRecord AdminGameRecord = ConvertJsonToGameBinaryRecord(JSONObject);
+		OnSuccess.ExecuteIfBound(AdminGameRecord);
+	});
 	
-	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccessHttpClient, OnError);
 }
 
 FAccelByteTaskWPtr ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FString const& Key
@@ -251,7 +293,52 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FS
 	
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
 }
-	
+
+FAccelByteModelsGameBinaryRecord ServerBinaryCloudSave::ConvertJsonToGameBinaryRecord(FJsonObject const& JsonObject)
+{
+	FAccelByteModelsGameBinaryRecord GameBinaryRecord;
+	JsonObject.TryGetStringField(TEXT("key"), GameBinaryRecord.Key);
+	JsonObject.TryGetStringField(TEXT("namespace"), GameBinaryRecord.Namespace);
+	JsonObject.TryGetStringArrayField(TEXT("tags"), GameBinaryRecord.Tags);
+	FString CreatedAt;
+	JsonObject.TryGetStringField(TEXT("created_at"), CreatedAt);
+	FDateTime::ParseIso8601(*CreatedAt, GameBinaryRecord.Created_At);
+	FString UpdatedAt;
+	JsonObject.TryGetStringField(TEXT("updated_at"), UpdatedAt);
+	FDateTime::ParseIso8601(*UpdatedAt, GameBinaryRecord.Updated_At);
+	FString SetByString;
+	JsonObject.TryGetStringField(TEXT("set_by"), SetByString);
+	GameBinaryRecord.Set_By = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
+	TSharedPtr<FJsonObject> const* Ttl_Config = nullptr;
+	JsonObject.TryGetObjectField(TEXT("ttl_config"), Ttl_Config);
+	if (Ttl_Config)
+	{
+		FString Action;
+		Ttl_Config->ToSharedRef()->TryGetStringField(TEXT("action"), Action);
+		GameBinaryRecord.Ttl_Config.Action = (Action == TEXT("DELETE")) ? EAccelByteTTLConfigAction::DELETE_RECORD : EAccelByteTTLConfigAction::NONE;
+		FString ExpiresAt;
+		Ttl_Config->ToSharedRef()->TryGetStringField(TEXT("expires_at"), ExpiresAt);
+		FDateTime::ParseIso8601(*ExpiresAt, GameBinaryRecord.Ttl_Config.Expires_At);
+	}
+	TSharedPtr<FJsonObject> const* Binary_Info = nullptr;
+	JsonObject.TryGetObjectField(TEXT("binary_info"), Binary_Info);
+	if (Binary_Info)
+	{
+		Binary_Info->ToSharedRef()->TryGetStringField(TEXT("content_type"), GameBinaryRecord.Binary_Info.Content_Type);
+		FString BinaryCreatedAt;
+		Binary_Info->ToSharedRef()->TryGetStringField(TEXT("created_at"), BinaryCreatedAt);
+		FDateTime::ParseIso8601(*BinaryCreatedAt, GameBinaryRecord.Binary_Info.Created_At);
+		Binary_Info->ToSharedRef()->TryGetStringField(TEXT("file_location"), GameBinaryRecord.Binary_Info.File_Location);
+		FString BinaryUpdatedAt;
+		Binary_Info->ToSharedRef()->TryGetStringField(TEXT("updated_at"), BinaryUpdatedAt);
+		FDateTime::ParseIso8601(*BinaryUpdatedAt, GameBinaryRecord.Binary_Info.Updated_At);
+		Binary_Info->ToSharedRef()->TryGetStringField(TEXT("url"), GameBinaryRecord.Binary_Info.Url);
+		Binary_Info->ToSharedRef()->TryGetNumberField(TEXT("version"), GameBinaryRecord.Binary_Info.Version);
+	}
+
+	return GameBinaryRecord;
+}
+
 #pragma endregion
 	
 } // namespace GameServerApi

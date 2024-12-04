@@ -604,6 +604,21 @@ FAccelByteTaskWPtr Session::GetPlayerAttributes(THandler<FAccelByteModelsV2Playe
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Session::GetPartySessionStorage(FString const& PartySessionID
+	, THandler<FAccelByteModelsV2PartySessionStorage> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/storage")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *PartySessionID
+	);
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Session::StorePlayerAttributes(const FAccelByteModelsV2StorePlayerAttributesRequest& AttributesRequest
 	, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -618,6 +633,24 @@ FAccelByteTaskWPtr Session::StorePlayerAttributes(const FAccelByteModelsV2StoreP
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObject);
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, JsonObject.ToSharedRef(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Session::StorePersonalDataToReservedPartySessionStorage(FString const& PartySessionID
+	, FAccelByteModelsV2PartySessionStorageReservedData const& Data
+	, THandler<FAccelByteModelsV2PartySessionStorageReservedData> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/storage/users/%s/reserved")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *PartySessionID
+		, *CredentialsRef->GetUserId());
+
+	TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(Data);
+
+	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JsonObject.ToSharedRef(), OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr Session::DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandler const& OnError)

@@ -2685,6 +2685,69 @@ void Lobby::HandleMessageResponse(FString const& ReceivedMessageType
 	}
 }
 
+FString Lobby::GenerateUnbanScheduleKey(FAccelByteModelsUserBannedNotification const& Result)
+{
+	return FString::Printf(TEXT("%s-%s"), *Result.UserId, *FAccelByteUtilities::GetUEnumValueAsString(Result.Ban));
+}
+
+void Lobby::SetUnbanSchedule(FAccelByteModelsUserBannedNotification const& Result)
+{
+	const int64 UtcNow = FDateTime::UtcNow().ToUnixTimestamp();
+	FDateTime BanEndDate{0};
+	FDateTime::ParseIso8601(*Result.EndDate, BanEndDate);
+	float BanDuration = BanEndDate.ToUnixTimestamp() - UtcNow;
+	double ScheduledTime = FPlatformTime::Seconds() + BanDuration;
+
+	FString Key = GenerateUnbanScheduleKey(Result);
+
+	FScopeLock Lock(&UnbanScheduleLock);
+	FUnbanScheduleRef* Schedule = UnbanSchedules.Find(Key);
+	if (!Schedule || ScheduledTime < (*Schedule)->ScheduledTime)
+	{
+		if (Schedule)
+		{
+			FTickerAlias::GetCoreTicker().RemoveTicker((*Schedule)->DelegateHandle);
+			UnbanSchedules.Remove(Key);
+		}
+
+		LobbyWPtr LobbyWeak = AsShared();
+		TSharedRef<FAccelByteModelsUserBannedNotification> Data = MakeShared<FAccelByteModelsUserBannedNotification>(Result);
+		FUnbanScheduleRef NewSchedule = MakeShared<FUnbanSchedule>();
+		NewSchedule->DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
+			[LobbyWeak, Data, ScheduledTime](float DeltaTime)
+			{
+				auto LobbyApi = LobbyWeak.Pin();
+				double CurrentTime = FPlatformTime::Seconds();
+				if (!LobbyApi.IsValid() || CurrentTime >= ScheduledTime)
+				{
+					if (LobbyApi.IsValid())
+					{
+						Data->Enable = false;
+						LobbyApi->UserUnbannedNotification.ExecuteIfBound(*Data);
+					}
+					return false;
+				}
+				return true;
+			})
+			, 0.2f);
+		NewSchedule->ScheduledTime = ScheduledTime;
+		UnbanSchedules.Add(Key, NewSchedule);
+	}
+}
+
+void Lobby::RemoveUnbanSchedule(FAccelByteModelsUserBannedNotification const& Result)
+{
+	const FString Key = GenerateUnbanScheduleKey(Result);
+
+	FScopeLock Lock(&UnbanScheduleLock);
+	FUnbanScheduleRef* Schedule = UnbanSchedules.Find(Key);
+	if(Schedule != nullptr)
+	{
+		FTickerAlias::GetCoreTicker().RemoveTicker((*Schedule)->DelegateHandle);
+		UnbanSchedules.Remove(Key);
+	}
+}
+
 #undef MESSAGE_SUCCESS_HANDLER
 #undef MESSAGE_ERROR_HANDLER
 #undef CASE_RESPONSE
@@ -3161,7 +3224,7 @@ void Lobby::HandleMessageNotif(FString const& ReceivedMessageType
 		{
 			BanNotifReceived = true;
 			FAccelByteModelsUserBannedNotification Result;
-			//CredentialsRef->OnTokenRefreshed().Remove(TokenRefreshDelegateHandle);
+
 			if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result))
 			{
 				BanType = Result.Ban;
@@ -3174,50 +3237,13 @@ void Lobby::HandleMessageNotif(FString const& ReceivedMessageType
 				{
 					UserBannedNotification.ExecuteIfBound(Result);
 
-					const int64 UtcNow = FDateTime::UtcNow().ToUnixTimestamp();
-					FDateTime BanEndDate{0};
-					FDateTime::ParseIso8601(*Result.EndDate, BanEndDate);
-					float BanDuration = BanEndDate.ToUnixTimestamp() - UtcNow;
-					double ScheduledTime = FPlatformTime::Seconds() + BanDuration;
-
-					FString Key = FString::Printf(TEXT("%s-%s"), *Result.UserId, *FAccelByteUtilities::GetUEnumValueAsString(Result.Ban));
-
-					FUnbanScheduleRef* Schedule = UnbanSchedules.Find(Key);
-					if (!Schedule || ScheduledTime < (*Schedule)->ScheduledTime)
-					{
-						if (Schedule)
-						{
-							FTickerAlias::GetCoreTicker().RemoveTicker((*Schedule)->DelegateHandle);
-							UnbanSchedules.Remove(Key);
-						}
-
-						LobbyWPtr LobbyWeak = AsShared();
-						TSharedRef<FAccelByteModelsUserBannedNotification> Data = MakeShared<FAccelByteModelsUserBannedNotification>(Result);
-						FUnbanScheduleRef NewSchedule = MakeShared<FUnbanSchedule>();
-						NewSchedule->DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
-							[LobbyWeak, Data, ScheduledTime](float DeltaTime)
-							{
-								auto LobbyApi = LobbyWeak.Pin();
-								double CurrentTime = FPlatformTime::Seconds();
-								if (!LobbyApi.IsValid() || CurrentTime >= ScheduledTime)
-								{
-									if (LobbyApi.IsValid())
-									{
-										Data->Enable = false;
-										LobbyApi->UserUnbannedNotification.ExecuteIfBound(*Data);
-									}
-									return false;
-								}
-								return true;
-							})
-							, 0.2f);
-						NewSchedule->ScheduledTime = ScheduledTime;
-						UnbanSchedules.Add(Key, NewSchedule);
-					}
+					SetUnbanSchedule(Result);
 				}
 				else if (ReceivedMessageType.Equals(LobbyResponse::UserUnbannedNotification))
 				{
 					UserUnbannedNotification.ExecuteIfBound(Result);
+
+					RemoveUnbanSchedule(Result);
 				}
 			}
 			break;

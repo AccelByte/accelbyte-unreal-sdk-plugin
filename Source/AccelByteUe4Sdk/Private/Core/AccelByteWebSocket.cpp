@@ -228,9 +228,15 @@ void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 	{
 		bConnectedBroadcasted = false;
 
-		if (WebSocket.IsValid())
+		bool bStillConnected = (WebSocket.IsValid() && WebSocket->IsConnected());
+		if(bStillConnected)
 		{
 			WebSocket->Close();
+		}
+		else
+		{
+			TeardownTicker();
+			TeardownWebsocket();
 		}
 	}	
 	LatestWebsocketDisonnectionCode = 0;

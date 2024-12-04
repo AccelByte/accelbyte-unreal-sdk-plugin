@@ -1022,6 +1022,17 @@ FAccelByteModelsGameRecord CloudSave::ConvertJsonToGameRecord(FJsonObject const&
 	TSharedPtr<FJsonObject> const* Value;
 	JSONObject.TryGetObjectField(TEXT("value"), Value);
 	GameRecord.Value = ConvertJsonObjToJsonObjWrapper(Value);
+	TSharedPtr<FJsonObject> const* Ttl_Config = nullptr;
+	JSONObject.TryGetObjectField(TEXT("ttl_config"), Ttl_Config);
+	if (Ttl_Config)
+	{
+		FString Action;
+		Ttl_Config->ToSharedRef()->TryGetStringField(TEXT("action"), Action);
+		GameRecord.Ttl_Config.Action = (Action == TEXT("DELETE")) ? EAccelByteTTLConfigAction::DELETE_RECORD : EAccelByteTTLConfigAction::NONE;
+		FString ExpiresAt;
+		Ttl_Config->ToSharedRef()->TryGetStringField(TEXT("expires_at"), ExpiresAt);
+		FDateTime::ParseIso8601(*ExpiresAt, GameRecord.Ttl_Config.Expires_At);
+	}
 
 	return GameRecord;
 }

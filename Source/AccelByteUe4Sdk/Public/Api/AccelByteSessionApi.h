@@ -458,6 +458,19 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Get current user's party session storage.
+	 *
+	 * @param PartySessionID Current player's party ID.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetPartySessionStorage(FString const& PartySessionID
+		, THandler<FAccelByteModelsV2PartySessionStorage> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Update stored attributes for the current player.
 	 *
 	 * @param AttributesRequest Request model for updating attributes for this player.
@@ -468,6 +481,23 @@ public:
 	 */
 	FAccelByteTaskWPtr StorePlayerAttributes(FAccelByteModelsV2StorePlayerAttributesRequest const& AttributesRequest
 		, THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Store a data by current player to its party reserved personal storage.
+	 * WARNING: Overwrite operation! 
+	 * This function will be used by AccelByte OSS internally and won't be exposed as a function.
+	 *
+	 * @param PartySessionID Current player's party ID.
+	 * @param Data Player's data to be stored.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr StorePersonalDataToReservedPartySessionStorage(FString const& PartySessionID
+		, FAccelByteModelsV2PartySessionStorageReservedData const& Data
+		, THandler<FAccelByteModelsV2PartySessionStorageReservedData> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**

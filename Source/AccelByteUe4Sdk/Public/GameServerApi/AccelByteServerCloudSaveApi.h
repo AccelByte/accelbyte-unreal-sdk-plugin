@@ -145,6 +145,19 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Delete the ttl config of game record.
+	 *
+	 * @param Key Key of record.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr DeleteGameRecordTTLConfig(FString const& Key
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Save a user-level record with Metadata input value
 	 *
 	 * @param Key Key of record.
@@ -243,6 +256,42 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	* @brief Get a record (arbitrary JSON data) by its key in user-level.
+	*
+	* @param Key Key of record.
+	* @param UserIds UserId(s) of the record owner.
+	* Note:
+	*  - Maximum number of user IDs per request is 10.
+	*  - Maximum total size of the request payload is 5 MB.
+	* @param OnSuccess This will be called when the operation succeeded. The result is Array of FAccelByteModelsUserRecord.
+	* @param OnError This will be called when the operation failed.
+	* 
+	* @return AccelByteTask object to track and cancel the ongoing API operation.
+	*/
+	FAccelByteTaskWPtr BulkGetUserRecord(FString const& Key
+		, TArray<FString> const& UserIds
+		, THandler<TArray<FAccelByteModelsUserRecord>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	* @brief Get a record (arbitrary JSON data) by its key in user-level.
+	*
+	* @param Key Key of record.
+	* @param UserIds UserId(s) of the record owner.
+	* Note:
+	*  - Maximum number of user IDs per request is 10.
+	*  - Maximum total size of the request payload is 5 MB.
+	* @param OnSuccess This will be called when the operation succeeded. The result is Array of FAccelByteModelsUserRecord.
+	* @param OnError This will be called when the operation failed.
+	* 
+	* @return AccelByteTask object to track and cancel the ongoing API operation.
+	*/
+	FAccelByteTaskWPtr BulkGetUserRecordsByKeys(FString const& UserId
+		, TArray<FString> const& Keys
+		, THandler<FAccelByteModelsAdminGetUserRecords> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get a public record (arbitrary JSON data) by its key and userId in user-level.
 	 *
 	 * @param Key Key of record.
@@ -335,6 +384,24 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	* @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one. 
+	*
+	* @param Key Key of record.
+	* @param Request The request of the record.
+	* Note:
+	*  - Maximum number of user IDs per request is 10.
+	*  - Maximum total size of the request payload is 5 MB.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	* 
+	* @return AccelByteTask object to track and cancel the ongoing API operation.
+	*/
+	FAccelByteTaskWPtr BulkReplaceUserRecord(FString const& Key
+		, FAccelByteModelsBulkReplaceUserRecordRequest const& Request
+		, THandler<TArray<FAccelByteModelsBulkReplaceUserRecordResponse>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Delete a record under the given key in user-level.
 	 * @brief The end point of this method if bIsPublic is true (using suffix /public) will be deprecated in future   
 	 *
@@ -374,13 +441,18 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param Tags the tags of the record.
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, 
+	 *		then it will not send the TTL (Time to live) meta data.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr CreateAdminGameRecord(FString const& Key
 		, FJsonObject const& RecordRequest
 		, THandler<FAccelByteModelsAdminGameRecord> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, TArray<FString> const& Tags = TArray<FString>{}
+		, FTTLConfig const& TTLConfig = FTTLConfig{});
 
 	/**
 	 * @brief Get a record by its key in namespace-level.
@@ -417,13 +489,16 @@ public:
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * 
+	 * @param TTLConfig The configuration to control the action taken if the record has expired. If the action set to NONE, 
+	 *		then it will not send the TTL (Time to live) meta data.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr ReplaceAdminGameRecord(FString const& Key
 		, FJsonObject const& RecordRequest
 		, THandler<FAccelByteModelsAdminGameRecord> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, FTTLConfig const& TTLConfig = FTTLConfig{});
 
 	/**
 	 * @brief Delete game record in namespace-level
@@ -519,7 +594,25 @@ public:
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Delete the ttl config of the admin game record.
+	 *
+	 * @param Key Key of record
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr DeleteAdminGameRecordTTLConfig(FString const& Key
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
 #pragma endregion
+
+	/*
+	 * @brief Max user limit for one bulk request
+	 */
+	static constexpr int32 BulkMaxUserCount = 10;
 
 private:
 	ServerCloudSave() = delete;
@@ -533,8 +626,14 @@ private:
 	FJsonObject CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy
 		, bool SetPublic
 		, FJsonObject const& RecordRequest);
+
+	void AddTTLConfigToMetadata(FTTLConfig const& TTLConfig,
+		TSharedPtr<FJsonObject> const& MetadataJson);
 	
 	static FJsonObjectWrapper ConvertJsonObjToJsonObjWrapper(TSharedPtr<FJsonObject> const*& value);
+	static FAccelByteModelsUserRecord SerializeUserRecord(FJsonObject const& jsonObject);
+	static FAccelByteModelsGameRecord SerializeGameRecord(FJsonObject const& jsonObject);
+	static FAccelByteModelsAdminGameRecord ConvertJsonToAdminGameRecord(FJsonObject const& JsonObject);
 };
 
 } // namespace GameServerApi

@@ -2902,6 +2902,14 @@ private:
 		, FString const& ParsedJsonString
 		, TSharedPtr<FJsonObject> const& ParsedJsonObj
 		, TSharedPtr<FLobbyMessageMetaData> const& MessageMeta);
+
+	mutable FCriticalSection UnbanScheduleLock{};
+
+	FString GenerateUnbanScheduleKey(FAccelByteModelsUserBannedNotification const& Result);
+	
+	void SetUnbanSchedule(FAccelByteModelsUserBannedNotification const& Result);
+
+	void RemoveUnbanSchedule(FAccelByteModelsUserBannedNotification const& Result);
 	
 	void HandleMessageNotif(FString const& ReceivedMessageType
 		, FString const& ParsedJsonString

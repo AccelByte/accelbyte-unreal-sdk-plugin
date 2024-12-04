@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2022 -2024 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -364,6 +364,24 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySession : public FAccelByteMod
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartySession")
 	FString Code{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySessionStorageReservedData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartySessionStorageReservedData")
+	TArray<FString> PastSessionIDs{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySessionStorage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartySessionStorage")
+	TMap<FString /*UserID*/, FAccelByteModelsV2PartySessionStorageReservedData> Reserved{};
 };
 
 USTRUCT(BlueprintType)
@@ -1105,6 +1123,44 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoriesResult
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Paginated Session Histories Result")
 	FAccelByteModelsPaging Paging{};
+};
+
+#pragma endregion
+
+#pragma region Game Session Misc Models
+
+/*
+ * Not meant to be exposed to blueprint, this model utilized by OSS Session interface as an optional param when start matchmaking
+ * Member of FOnlineSessionSearchAccelByte.
+ */
+struct ACCELBYTEUE4SDK_API FAccelBtyeModelsGameSessionExcludedSession
+{
+	enum ExclusionType
+	{
+		NONE,
+		N_PAST_SESSION,
+		EXPLICIT_LIST,
+		ALL_MEMBER_CACHED_SESSION
+	};
+	
+	static FAccelBtyeModelsGameSessionExcludedSession CreateNoExclusion();
+	static FAccelBtyeModelsGameSessionExcludedSession CreateExclusionCount(uint32 ExcludedPastSessionCount);
+	static FAccelBtyeModelsGameSessionExcludedSession CreateExclusionList(const TSet<FString>& ExcludedGameSessionIDs);
+	static FAccelBtyeModelsGameSessionExcludedSession CreateExclusionEntireSessionMemberPastSession();
+
+	const ExclusionType& CurrentType;
+	const uint32& ExcludedPastSessionCount;
+	TArray<FString> GetExcludedGameSessionIDs() { return _ExcludedGameSessionIDs.Array(); }
+
+	FAccelBtyeModelsGameSessionExcludedSession() = delete;
+	FAccelBtyeModelsGameSessionExcludedSession& operator=(const FAccelBtyeModelsGameSessionExcludedSession& Copy);
+
+private:
+	FAccelBtyeModelsGameSessionExcludedSession(ExclusionType Type);
+
+	ExclusionType _CurrentType = ExclusionType::NONE;
+	uint32 _ExcludedPastSessionCount = 0; //ExclusionType::N_PAST_SESSION
+	TSet<FString> _ExcludedGameSessionIDs{}; //ExclusionType::EXPLICIT_LIST
 };
 
 #pragma endregion

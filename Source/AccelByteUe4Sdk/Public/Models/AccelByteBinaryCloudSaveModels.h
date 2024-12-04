@@ -91,6 +91,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameBinaryRecord
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Binary | Models | GameBinaryRecord")
 	FDateTime Updated_At{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Binary | Models | GameBinaryRecord")
+	FTTLConfig Ttl_Config{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Binary | Models | GameBinaryRecord")
+	TArray<FString> Tags{};
 };
 
 

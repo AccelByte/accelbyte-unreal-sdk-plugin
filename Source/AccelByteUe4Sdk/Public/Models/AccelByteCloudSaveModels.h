@@ -9,7 +9,7 @@
 #include "AccelByteCloudSaveModels.generated.h"
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCloudsaveBase
 {
 	GENERATED_BODY()
 
@@ -23,19 +23,37 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
 	FString UserId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
-	bool IsPublic{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
 	FDateTime CreatedAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
 	FDateTime UpdatedAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
-	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
+	FJsonObjectWrapper Value{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
-	FJsonObjectWrapper Value{}; 
+	TArray<FString> Tags{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAdminGetUserRecords
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | ListGameRecords")
+	TArray<FAccelByteModelsCloudsaveBase> Data{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord : public FAccelByteModelsCloudsaveBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	bool IsPublic{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
 };
 
 USTRUCT(BlueprintType)
@@ -60,6 +78,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecord
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GameRecord")
 	FJsonObjectWrapper Value{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GameRecord")
+	FTTLConfig Ttl_Config{};
 };
 
 USTRUCT(BlueprintType)
@@ -195,7 +216,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAdminGameRecord
 	FDateTime Updated_At{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminGameRecord")
-	FJsonObjectWrapper Value{}; 
+	FJsonObjectWrapper Value{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminGameRecord")
+	FTTLConfig Ttl_Config{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | AdminGameRecord")
+	TArray<FString> Tags{};
 };
 
 USTRUCT(BlueprintType)
@@ -253,4 +280,37 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsReplaceUserRecordResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | ReplaceUserRecordResponse")
 	FDateTime Updated_At{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkReplaceUserRecordRequestDetail
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudSave | Models | BulkReplaceUserRecordRequestDetail")
+	FString User_id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudSave | Models | BulkReplaceUserRecordRequestDetail")
+	FJsonObjectWrapper Value{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkReplaceUserRecordRequest 
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudSave | Models | BulkReplaceUserRecordRequest")
+	TArray<FAccelByteModelsBulkReplaceUserRecordRequestDetail> Data{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkReplaceUserRecordResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudSave | Models | BulkReplaceUserRecordResponse")
+	FJsonObjectWrapper Details{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudSave | Models | BulkReplaceUserRecordResponse")
+	bool Success{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudSave | Models | BulkReplaceUserRecordResponse")
+	FString User_id{};
 };

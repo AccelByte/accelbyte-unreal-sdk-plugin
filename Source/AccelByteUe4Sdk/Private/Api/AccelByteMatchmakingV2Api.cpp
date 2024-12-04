@@ -70,6 +70,7 @@ FAccelByteTaskWPtr MatchmakingV2::CreateMatchTicket(FString const& MatchPool
 	Request.SessionId = Optionals.SessionId;
 	Request.Attributes = Optionals.Attributes;
 	Request.Storage = Optionals.Storage;
+	Request.ExcludedSessions = Optionals.ExcludedGameSessionIDs;
 
 	for(const TPair<FString, float>& Latency : Optionals.Latencies)
 	{

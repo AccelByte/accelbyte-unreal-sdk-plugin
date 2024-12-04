@@ -1580,7 +1580,8 @@ FAccelByteTaskWPtr User::BulkGetUserByOtherPlatformUserIdsV4(EAccelBytePlatformT
 , TArray<FString> const& OtherPlatformUserId
 , THandler<FBulkPlatformUserIdResponse> const& OnSuccess
 , FErrorHandler const& OnError
-, bool bRawPuid)
+, bool bRawPuid
+, const EAccelBytePidType& PidType)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1608,7 +1609,13 @@ FAccelByteTaskWPtr User::BulkGetUserByOtherPlatformUserIdsV4(EAccelBytePlatformT
 		QueryParams.Add(TEXT("rawPUID"), TEXT("true"));
 	}
 
-	const FBulkPlatformUserIdRequest UserIdRequests{ UserIdToSend };
+	FBulkPlatformUserIdRequest UserIdRequests;
+	UserIdRequests.PlatformUserIDs = UserIdToSend;
+
+	if (PidType != EAccelBytePidType::NONE)
+	{
+		UserIdRequests.PidType = FAccelByteUtilities::GetUEnumValueAsString(PidType);
+	}
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, UserIdRequests, OnSuccess, OnError);
 }

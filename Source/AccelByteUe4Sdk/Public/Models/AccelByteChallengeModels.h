@@ -380,6 +380,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeReward
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
 	FString GoalCode{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
+	FString GoalProgressionId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Rewards")
 	EAccelByteModelsChallengeRewardStatus Status{EAccelByteModelsChallengeRewardStatus::NONE};

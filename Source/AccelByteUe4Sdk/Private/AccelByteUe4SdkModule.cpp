@@ -104,6 +104,7 @@ void FAccelByteUe4SdkModule::StartupModule()
 
 	AccelByte::FRegistry::HttpRetryScheduler.Startup();
 	AccelByte::FRegistry::CredentialsRef->Startup();
+	AccelByte::FRegistry::QosPtr->Startup();
 	AccelByte::FRegistry::GameTelemetryPtr->Startup();
 	AccelByte::FRegistry::PredefinedEventPtr->Startup();
 	AccelByte::FRegistry::GameStandardEventPtr->Startup();
@@ -424,13 +425,20 @@ void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
 	
 	if (IsRunningDedicatedServer())
 	{
-		if (!AccelByte::FRegistry::ServerSettings.LoadAMSSettings())
+		if (AccelByte::FRegistry::ServerSettings.bServerUseAMS)
 		{
-			UE_LOG(LogAccelByte, Log, TEXT("Dedicated server is not connected to AMS."));
+			if (!AccelByte::FRegistry::ServerSettings.LoadAMSSettings())
+			{
+				UE_LOG(LogAccelByte, Log, TEXT("Dedicated server could not connect to AMS. Some mandatory settings were not configured correctly."));
+			}
+			else
+			{
+				AccelByte::FRegistry::ServerAMS.Connect();
+			}
 		}
-		else
+		else 
 		{
-			AccelByte::FRegistry::ServerAMS.Connect();
+			UE_LOG(LogAccelByte, Log, TEXT("Dedicated server will NOT use AMS because the feature flag is not enabled. Please configure bServerUseAMS to use AMS."));
 		}
 	}
 	else

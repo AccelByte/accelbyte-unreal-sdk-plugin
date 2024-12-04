@@ -112,8 +112,10 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	FString ServerUseAMSString{};
 	// even though this is ServerSettings it's intended to read from previously available bServerUseAMS in AccelByteSettings
-	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("bServerUseAMS"), ServerUseAMSString, TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings"));
-	this->bServerUseAMS = ServerUseAMSString.IsEmpty() ? false : ServerUseAMSString.ToBool();
+	if (FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("bServerUseAMS"), ServerUseAMSString, TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings")))
+	{
+		this->bServerUseAMS = ServerUseAMSString.IsEmpty() ? true : ServerUseAMSString.ToBool();
+	}
 
 	LoadAMSSettings();
 
@@ -223,9 +225,7 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 				// If not exist, then fetch the setting from game default engine ini file
 				if (!GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni))
 				{
-					UE_LOG(LogAccelByte, Log, TEXT("Watchdog URL has not been initialised"));
-
-					bIsLoadSuccess = false;
+					UE_LOG(LogAccelByte, Log, TEXT("WatchdogUrl is not defined, default value will be assigned."));
 				}
 			}
 		}
@@ -237,7 +237,8 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 		{
 			if (!GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni))
 			{
-				// Initializing the AMS heartbeat value is optional; the default value is 15.
+				// Assigning default AMS heartbeat; the default value is 15 seconds.
+				UE_LOG(LogAccelByte, Log, TEXT("Heartbeat is not defined, default value will be assigned."));
 				AMSHeartbeatInterval = 15;
 			}
 		}
@@ -247,7 +248,7 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 	{
 		if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("dsid"), DSId))
 		{
-			UE_LOG(LogAccelByte, Log, TEXT("DSID has not been initialised"));
+			UE_LOG(LogAccelByte, Log, TEXT("DS Id is not defined, please add -dsid=${dsid} or -ABDsId ${dsid} in the command line arguments."));
 
 			bIsLoadSuccess = false;
 		}

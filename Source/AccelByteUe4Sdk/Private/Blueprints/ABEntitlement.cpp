@@ -84,6 +84,27 @@ void UABEntitlement::GetUserEntitlementById(
 			}));
 }
 
+void UABEntitlement::GetUserEntitlementByIds(
+	TArray<FString> const& EntitlementIds, 
+	FDAccelByteModelsEntitlementInfoResponses OnSuccess, 
+	FDErrorHandler OnError, 
+	bool bAvailablePlatformOnly)
+{
+	ApiClientPtr->Entitlement.GetUserEntitlementByIds(
+		EntitlementIds,
+		THandler<TArray<FAccelByteModelsEntitlementInfo>>::CreateLambda(
+			[OnSuccess](TArray<FAccelByteModelsEntitlementInfo> const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+		bAvailablePlatformOnly);
+}
+
 void UABEntitlement::GetUserEntitlementOwnershipByAppId(
 	FString const& AppId, 
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 

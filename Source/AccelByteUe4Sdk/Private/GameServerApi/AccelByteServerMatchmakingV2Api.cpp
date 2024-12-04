@@ -43,7 +43,8 @@ FAccelByteTaskWPtr ServerMatchmakingV2::AcceptBackfillProposal(FString const& Ba
 	, FString const& ProposalId
 	, bool bStopBackfilling
 	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, FAccelByteModelsV2MatchmakingBackfillAcceptanceOptionalParam const& OptionalParameter)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -67,6 +68,15 @@ FAccelByteTaskWPtr ServerMatchmakingV2::AcceptBackfillProposal(FString const& Ba
 	const TSharedRef<FJsonObject> RequestObject = MakeShared<FJsonObject>();
 	RequestObject->SetStringField(TEXT("proposalId"), ProposalId);
 	RequestObject->SetBoolField(TEXT("stop"), bStopBackfilling);
+	TArray<TSharedPtr<FJsonValue>> AcceptedTicketIdsArray{};
+	if (OptionalParameter.AcceptedTicketIDs.Num() > 0)
+	{
+		for (const FString& Item : OptionalParameter.AcceptedTicketIDs)
+		{
+			AcceptedTicketIdsArray.Add(MakeShareable(new FJsonValueString(Item)));
+		}
+		RequestObject->SetArrayField(TEXT("acceptedTicketIds"), AcceptedTicketIdsArray);
+	}
 
 	FString Content;
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);

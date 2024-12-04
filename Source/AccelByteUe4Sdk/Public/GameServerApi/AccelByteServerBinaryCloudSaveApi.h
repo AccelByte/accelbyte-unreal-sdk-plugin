@@ -108,6 +108,19 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Delete the ttl config of the game binary record.
+	 *
+	 * @param Key Key of the binary record.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr DeleteGameBinaryRecordTTLConfig(FString const& Key
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Update a game binary record metadata by its key.
 	 *
 	 * @param Key Key of the binary record.
@@ -146,6 +159,8 @@ private:
 	ServerBinaryCloudSave() = delete;
 	ServerBinaryCloudSave(ServerBinaryCloudSave const&) = delete;
 	ServerBinaryCloudSave(ServerBinaryCloudSave&&) = delete;
+
+	static FAccelByteModelsGameBinaryRecord ConvertJsonToGameBinaryRecord(FJsonObject const& JsonObject);
 };
 
 } // namespace GameServerApi

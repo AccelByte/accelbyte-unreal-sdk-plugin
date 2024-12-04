@@ -79,11 +79,12 @@ public:
 #pragma endregion
 
 private:
+	const AccelByte::Api::QosPtr QosPtr;
+	const AccelByte::Api::LobbyPtr LobbyPtr;
+	const AccelByte::Api::ChatPtr ChatPtr;
 	const AccelByte::Api::GameTelemetryPtr GameTelemetryPtr;
 	const AccelByte::Api::PredefinedEventPtr PredefinedEventPtr;
 	const AccelByte::Api::GameStandardEventPtr GameStandardEventPtr;
-	const AccelByte::Api::LobbyPtr LobbyPtr;
-	const AccelByte::Api::ChatPtr ChatPtr;
 
 public:
 #pragma region Access
@@ -128,8 +129,14 @@ public:
 #pragma endregion
 
 #pragma region Multiplayer
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Qos with ApiClient->GetQosApi().Pin()
+	*/
+	Api::Qos& Qos;
+
 	Api::QosManager QosManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Qos Qos{ *CredentialsRef, FRegistry::Settings, *MessagingSystem.Get() };
 
 	/**
 	 * @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
@@ -152,7 +159,6 @@ public:
 	Api::MatchmakingV2 MatchmakingV2{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 	Api::AMS Ams{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion
-
 
 #pragma region Analytics
 	/** 
@@ -179,6 +185,7 @@ public:
 	Api::PresenceBroadcastEvent PresenceBroadcastEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
 #pragma endregion
 
+	Api::QosWPtr GetQosApi() const;
 	Api::LobbyWPtr GetLobbyApi() const;
 	Api::ChatWPtr GetChatApi() const;
 

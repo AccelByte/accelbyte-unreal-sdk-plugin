@@ -50,6 +50,7 @@ public:
 	 * @param bStopBackfilling Whether or not to signal to the matchmaking service that you no longer want backfill
 	 * @param OnSuccess Delegate fired when the accept request has gone through
 	 * @param OnError Delegate fired when the accept request fails
+	 * @param OptionalParameter An extra field to modify the acceptance behavior.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -57,7 +58,9 @@ public:
 		, FString const& ProposalId
 		, bool bStopBackfilling
 		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, FAccelByteModelsV2MatchmakingBackfillAcceptanceOptionalParam const& OptionalParameter = {}
+	);
 	
 	/**
 	 * @brief Reject a proposal from the matchmaking V2 service to backfill a session.

@@ -27,6 +27,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsEntitlementPagingSlicedResult
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsEntitlementInfoResponse, FAccelByteModelsEntitlementInfo, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsEntitlementInfoResponses, TArray<FAccelByteModelsEntitlementInfo>, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsEntitlementOwnershipResponse, FAccelByteModelsEntitlementOwnership, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayModelsDistributionReceiverResponse, FArrayModelsDistributionReceiver, Response);
@@ -53,6 +55,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetUserEntitlementById(FString const& Entitlementid, FDAccelByteModelsEntitlementInfoResponse OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
+	void GetUserEntitlementByIds(TArray<FString> const& EntitlementIds, FDAccelByteModelsEntitlementInfoResponses OnSuccess, FDErrorHandler OnError, bool bAvailablePlatformOnly = true);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void GetUserEntitlementOwnershipByAppId(FString const& AppId, FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, FDErrorHandler OnError);

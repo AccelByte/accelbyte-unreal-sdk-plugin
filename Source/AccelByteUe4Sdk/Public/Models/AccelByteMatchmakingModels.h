@@ -41,6 +41,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchTicketOptionalParams
 	
 	// Cannot expose this field as UPROPERTY as TPair is not a blueprint type
 	TArray<TPair<FString, float>> Latencies{};
+
+	/* 
+	 * Configuration to exclude game sessions from matchmaking backfill.
+	 * Cannot expose this field as UPROPERTY because this field won't be serialized & it is not a blueprint type
+	 */
+	TArray<FString> ExcludedGameSessionIDs{};
 };
 
 USTRUCT(BlueprintType)
@@ -128,6 +134,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingCreateTicketRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketRequest")
 	FJsonObjectWrapper Storage{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | CreateTicketRequest")
+	TArray<FString> ExcludedSessions{};
 };
 
 USTRUCT(BlueprintType)
@@ -411,4 +420,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingBackfillTicketExpireNoti
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingBackfillProposalNotif")
 	FString TicketId{};
+};
+
+/*
+ * SDK/OSS usage, not meant to be serialized and consumed by backend
+ */ 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchmakingBackfillAcceptanceOptionalParam
+{
+	GENERATED_BODY()
+
+	/* 
+	 * Inform the backend to accept specified the ticket(s) from the proposed list, other ticket will be discarded / rejected.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | v2 | Models | MatchmakingBackfillAcceptanceOptionalParam")
+	TArray<FString> AcceptedTicketIDs{};
+
 };

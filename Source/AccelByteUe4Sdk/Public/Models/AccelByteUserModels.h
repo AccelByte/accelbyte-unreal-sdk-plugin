@@ -606,6 +606,13 @@ struct ACCELBYTEUE4SDK_API FPagedPlatformLinks
 	FAccelByteModelsPaging Paging{};
 };
 
+UENUM(BlueprintType)
+enum class EAccelBytePidType : uint8
+{
+	NONE,
+	OCULUS_APP_USER_ID
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FBulkPlatformUserIdRequest
 {
@@ -613,6 +620,9 @@ struct ACCELBYTEUE4SDK_API FBulkPlatformUserIdRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkPlatformUserIdRequest")
 	TArray<FString> PlatformUserIDs{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkPlatformUserIdRequest")
+	FString PidType{};
 };
 
 USTRUCT(BlueprintType)

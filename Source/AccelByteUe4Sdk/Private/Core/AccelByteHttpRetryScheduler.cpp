@@ -68,6 +68,12 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, HTTP Retry Scheduler is UNINITIALIZED"));
 		return Task;
 	}
+	if (FAccelByteNetUtilities::IsValidUrl(Request->GetURL()) == false)
+	{
+		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, Request URL is not valid"));
+		CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), false);
+		return Task;
+	}
 
 	FReport::LogHttpRequest(Request);
 

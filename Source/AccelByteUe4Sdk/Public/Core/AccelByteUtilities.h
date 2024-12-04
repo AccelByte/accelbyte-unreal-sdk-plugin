@@ -22,6 +22,7 @@ using AccelByte::FErrorHandler;
 static constexpr int32 UserIdsURLLimit = 40;
 
 static constexpr int32 MaximumQueryLimit = 100;
+static constexpr int32 MaximumEntitlementIds = 20;
 
 enum class EAccelBytePlatformType : uint8;
 enum class EAccelByteDevModeDeviceIdMethod : uint8;

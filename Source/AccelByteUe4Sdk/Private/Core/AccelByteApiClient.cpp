@@ -12,11 +12,13 @@ FApiClient::FApiClient()
 	, MessagingSystem(MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>())
 	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*MessagingSystem.Get()))
 	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
+	, QosPtr(MakeShared<Api::Qos, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *MessagingSystem.Get()))
+	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
 	, GameTelemetryPtr(MakeShared<AccelByte::Api::GameTelemetry, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
 	, PredefinedEventPtr( MakeShared<AccelByte::Api::PredefinedEvent, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
 	, GameStandardEventPtr(MakeShared<AccelByte::Api::GameStandardEvent, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
-	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
-	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+	, Qos(*QosPtr.Get())
 	, Lobby(*LobbyPtr.Get())
 	, Chat(*ChatPtr.Get())
 	, GameTelemetry(*GameTelemetryPtr.Get())
@@ -25,11 +27,12 @@ FApiClient::FApiClient()
 {
 	HttpRef->Startup();
 	CredentialsRef->Startup();
+	QosPtr->Startup();
+	LobbyPtr->Startup();
 	GameTelemetryPtr->Startup();
 	PredefinedEventPtr->Startup();
 	GameStandardEventPtr->Startup();
 	PresenceBroadcastEvent.Startup();
-	LobbyPtr->Startup();
 }
 
 FApiClient::FApiClient(AccelByte::Credentials& Credentials
@@ -39,22 +42,25 @@ FApiClient::FApiClient(AccelByte::Credentials& Credentials
 	, MessagingSystem(InMessagingPtr.IsValid() ? InMessagingPtr: MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>())
 	, CredentialsRef(Credentials.AsShared())
 	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http, [](AccelByte::FHttpRetryScheduler*) {}))
+	, QosPtr(MakeShared<Api::Qos, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *MessagingSystem.Get()))
+	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
 	, GameTelemetryPtr(MakeShared<AccelByte::Api::GameTelemetry, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
 	, PredefinedEventPtr(MakeShared<AccelByte::Api::PredefinedEvent, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
 	, GameStandardEventPtr(MakeShared<AccelByte::Api::GameStandardEvent, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef))
-	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
-	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+	, Qos(*QosPtr.Get())
 	, Lobby(*LobbyPtr.Get())
 	, Chat(*ChatPtr.Get())
 	, GameTelemetry(*GameTelemetryPtr.Get())
 	, PredefinedEvent(*PredefinedEventPtr.Get())
 	, GameStandardEvent(*GameStandardEventPtr.Get())
 {
+	QosPtr->Startup();
+	LobbyPtr->Startup();
 	GameTelemetryPtr->Startup();
 	PredefinedEventPtr->Startup();
 	GameStandardEventPtr->Startup();
 	PresenceBroadcastEvent.Startup();
-	LobbyPtr->Startup();
 }
 
 FApiClient::~FApiClient()
@@ -96,6 +102,11 @@ Api::LobbyWPtr FApiClient::GetLobbyApi() const
 Api::ChatWPtr FApiClient::GetChatApi() const
 {
 	return ChatPtr;
+}
+
+TWeakPtr<Api::Qos, ESPMode::ThreadSafe> FApiClient::GetQosApi() const
+{
+	return QosPtr;
 }
 
 Api::GameTelemetryWPtr FApiClient::GetGameTelemetryApi() const

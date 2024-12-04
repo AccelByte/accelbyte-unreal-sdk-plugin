@@ -154,3 +154,42 @@ void FAccelByteModelsV2GameSessionQuery::AddToQuery(const FString& ComparisonFie
 
 	JsonWrapper.JsonObject->SetObjectField(TEXT("query"), QueryObject);
 }
+
+FAccelBtyeModelsGameSessionExcludedSession::FAccelBtyeModelsGameSessionExcludedSession(ExclusionType Type)
+	: CurrentType(this->_CurrentType)
+	, ExcludedPastSessionCount(this->_ExcludedPastSessionCount)
+{
+	_CurrentType = Type;
+}
+
+FAccelBtyeModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession::CreateNoExclusion()
+{
+	return FAccelBtyeModelsGameSessionExcludedSession(ExclusionType::NONE);
+}
+
+FAccelBtyeModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession::CreateExclusionCount(uint32 ExcludedPastSessionCount) 
+{
+	auto Output = FAccelBtyeModelsGameSessionExcludedSession(ExclusionType::N_PAST_SESSION);
+	Output._ExcludedPastSessionCount = ExcludedPastSessionCount;
+	return Output;
+}
+
+FAccelBtyeModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession::CreateExclusionList(const TSet<FString>& ExcludedGameSessionIDs) 
+{
+	auto Output = FAccelBtyeModelsGameSessionExcludedSession(ExclusionType::EXPLICIT_LIST);
+	Output._ExcludedGameSessionIDs = ExcludedGameSessionIDs;
+	return Output;
+}
+
+FAccelBtyeModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession::CreateExclusionEntireSessionMemberPastSession()
+{
+	return FAccelBtyeModelsGameSessionExcludedSession(ExclusionType::ALL_MEMBER_CACHED_SESSION);
+}
+
+FAccelBtyeModelsGameSessionExcludedSession& FAccelBtyeModelsGameSessionExcludedSession::operator=(const FAccelBtyeModelsGameSessionExcludedSession& Copy)
+{
+	this->_CurrentType = Copy._CurrentType;
+	this->_ExcludedPastSessionCount = Copy._ExcludedPastSessionCount;
+	this->_ExcludedGameSessionIDs = Copy._ExcludedGameSessionIDs;
+	return *this;
+}

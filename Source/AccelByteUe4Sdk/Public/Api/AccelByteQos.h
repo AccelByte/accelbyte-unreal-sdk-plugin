@@ -22,7 +22,7 @@ namespace Api
 /**
  * @brief Qos to manage specific QoS (Latencies/Ping) Server(s).
  */
-class ACCELBYTEUE4SDK_API Qos
+class ACCELBYTEUE4SDK_API Qos : public TSharedFromThis<Qos, ESPMode::ThreadSafe>
 {
 public:
 	Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef, FAccelByteMessagingSystem& InMessagingSystemRef);
@@ -69,6 +69,11 @@ public:
 	 * @brief Get cached latencies data
 	 */
 	const TArray<TPair<FString, float>>& GetCachedLatencies();
+
+	/**
+	* @brief Startup module
+	*/
+	void Startup();
 	
 private:
 	// Constructor
@@ -79,6 +84,8 @@ private:
 	static FAccelByteModelsQosServerList QosServers;
 	static TArray<TPair<FString, float>> Latencies;
 	static TMap<FString, TSharedPtr<FInternetAddr>> ResolvedAddresses;
+
+	static constexpr float ResolveServerAddressDelay = 0.5;//in seconds
 	
 	/**
 	 * @brief Get Latencies from cached regions, every x seconds.
@@ -174,12 +181,18 @@ private:
 	FTickerDelegate QosUpdateCheckerTickerDelegate{};
 	FDelegateHandleAlias QosUpdateCheckerHandle{};
 
+	bool bIsStarted = false;
+
 	bool CheckQosUpdate(float DeltaTime);
 #pragma endregion
 
 	Qos(Qos const&) = delete;
 	Qos(Qos&&) = delete;
 };
+
+typedef TSharedRef<Qos, ESPMode::ThreadSafe> QosRef;
+typedef TSharedPtr<Qos, ESPMode::ThreadSafe> QosPtr;
+typedef TWeakPtr<Qos, ESPMode::ThreadSafe> QosWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

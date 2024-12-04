@@ -26,7 +26,7 @@ public:
 	int AMSHeartbeatInterval{0};
 	float DSHubReconnectTotalTimeout{0};
 	float AMSReconnectTotalTimeout{0};
-	bool bServerUseAMS{false};
+	bool bServerUseAMS{true};
 
 	virtual void Reset(ESettingsEnvironment const Environment) override;
 
