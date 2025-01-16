@@ -20,7 +20,7 @@ namespace Api
 /**
  * @brief Provide APIs to access Inventory service.
  */
-class ACCELBYTEUE4SDK_API Inventory : public FApiBase
+class ACCELBYTEUE4SDK_API Inventory : public FApiBase, public TSharedFromThis<Inventory, ESPMode::ThreadSafe>
 {
 public:
 	Inventory(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -219,6 +219,10 @@ private:
 	static FString ConvertItemTypeSortByToString(EAccelByteInventoryUtilitiesSortBy SortBy);
 
 };
+
+typedef TSharedRef<Inventory, ESPMode::ThreadSafe> InventoryRef;
+typedef TSharedPtr<Inventory, ESPMode::ThreadSafe> InventoryPtr;
+typedef TWeakPtr<Inventory, ESPMode::ThreadSafe> InventoryWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

@@ -14,15 +14,25 @@ void UABSignaling::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 
 FString UABSignaling::SendSignalingMessage(FSendSignalingMessageRequest const& Request) 
 {
-	return ApiClientPtr->Lobby.SendSignalingMessage(Request.UserID, Request.Message);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+
+		return LobbyPtr->SendSignalingMessage(Request.UserID, Request.Message);
+	}
+	return TEXT("");
 }
 
 void UABSignaling::SetSignalingP2PNotif(FDSignalingP2PNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetSignalingP2PDelegate(
-	Api::Lobby::FSignalingP2P::CreateLambda(
-		[OnNotif](const FString& UserID, const FString& Message)
-		{
-			OnNotif.ExecuteIfBound(UserID, Message);
-		}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetSignalingP2PDelegate(
+			Api::Lobby::FSignalingP2P::CreateLambda(
+				[OnNotif](const FString& UserID, const FString& Message)
+				{
+					OnNotif.ExecuteIfBound(UserID, Message);
+				}));
+	}
 }

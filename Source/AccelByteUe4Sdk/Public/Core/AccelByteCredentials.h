@@ -94,9 +94,12 @@ private:
 
 	FAccelByteTaskWPtr RefreshTokenTask;
 
+	FDelegateHandle BearerAuthRejectedHandle;
+
 	static const FString DefaultSection;
 
-	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& InHttpRef);
+	void OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr);
+	void OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPtr HttpWPtr);
 };
 
 typedef TSharedRef<Credentials, ESPMode::ThreadSafe> FCredentialsRef;

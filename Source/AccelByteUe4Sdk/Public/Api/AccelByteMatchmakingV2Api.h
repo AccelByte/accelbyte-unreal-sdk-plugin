@@ -18,7 +18,7 @@ namespace AccelByte
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API MatchmakingV2 : public FApiBase
+class ACCELBYTEUE4SDK_API MatchmakingV2 : public FApiBase, public TSharedFromThis<MatchmakingV2, ESPMode::ThreadSafe>
 {
 public:
 	MatchmakingV2(Credentials const& InCredentialsRef, Settings const& InSettingRef, FHttpRetryScheduler& InHttpRef);
@@ -118,6 +118,10 @@ private:
 	MatchmakingV2(MatchmakingV2&&) = delete;
 	
 };
+
+typedef TSharedRef<MatchmakingV2, ESPMode::ThreadSafe> MatchmakingV2Ref;
+typedef TSharedPtr<MatchmakingV2, ESPMode::ThreadSafe> MatchmakingV2Ptr;
+typedef TWeakPtr<MatchmakingV2, ESPMode::ThreadSafe> MatchmakingV2WPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

@@ -18,7 +18,7 @@ namespace Api
 /**
 * @brief Entitlement API for checking user's ownership. User can query a list of item that belongs to him/her.
 */
-class ACCELBYTEUE4SDK_API Entitlement : public FApiBase
+class ACCELBYTEUE4SDK_API Entitlement : public FApiBase, public TSharedFromThis<Entitlement, ESPMode::ThreadSafe>
 {
 public:
 	Entitlement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -601,6 +601,10 @@ private:
 	Entitlement(Entitlement const&) = delete;
 	Entitlement(Entitlement&&) = delete;
 };
+
+typedef TSharedRef<Entitlement, ESPMode::ThreadSafe> EntitlementRef;
+typedef TSharedPtr<Entitlement, ESPMode::ThreadSafe> EntitlementPtr;
+typedef TWeakPtr<Entitlement, ESPMode::ThreadSafe> EntitlementWPtr;
 
 } // Namespace Api
 }

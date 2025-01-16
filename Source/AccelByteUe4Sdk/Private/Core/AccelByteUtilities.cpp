@@ -408,12 +408,12 @@ void FAccelByteUtilities::FixupAllJsonKeys(TSharedPtr<FJsonObject>& JsonObject, 
 {
 	if (JsonKeyToExpectedValue.IsEmpty())
 	{
-		UE_LOG(LogTemp, Verbose, TEXT("JSON keys to match actual value is empty"));
+		UE_LOG(LogAccelByte, Verbose, TEXT("JSON keys to match actual value is empty"));
 		return;
 	}
 	if (!JsonObject.IsValid())
 	{
-		UE_LOG(LogTemp, Verbose, TEXT("JSON object is not valid"));
+		UE_LOG(LogAccelByte, Verbose, TEXT("JSON object is not valid"));
 		return;
 	}
 
@@ -765,6 +765,11 @@ EAccelByteDevModeDeviceIdMethod FAccelByteUtilities::GetCurrentDeviceIdOverrideM
 	}
 	
 	return GetUEnumValueFromString<EAccelByteDevModeDeviceIdMethod>(DeviceIdOverrideMethod);
+}
+
+FString FAccelByteUtilities::GenerateSessionTeamId()
+{
+	return FGuid::NewGuid().ToString(EGuidFormats::Digits);
 }
 
 FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)

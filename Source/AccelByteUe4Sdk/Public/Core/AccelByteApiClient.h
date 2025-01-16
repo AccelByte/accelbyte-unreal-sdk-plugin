@@ -63,6 +63,7 @@ class ACCELBYTEUE4SDK_API FApiClient final
 {
 public:
 	FApiClient();
+	FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr InTimeManager);
 	FApiClient(AccelByte::Credentials& Credentials
 		, AccelByte::FHttpRetryScheduler& Http
 		, AccelByte::FAccelByteMessagingSystemPtr InMessagingSystemPtr = nullptr);
@@ -73,59 +74,289 @@ public:
 	FAccelByteMessagingSystemPtr MessagingSystem{};
 	FCredentialsRef CredentialsRef;
 	FHttpRetrySchedulerRef HttpRef{};
-	FAccelByteTimeManager TimeManager{ *HttpRef };
 	FAccelByteNotificationSender NotificationSender{ *MessagingSystem.Get() };
 	FAccelByteNetworkConditioner NetworkConditioner{};
+	SettingsPtr Settings{};
 #pragma endregion
 
 private:
-	const AccelByte::Api::QosPtr QosPtr;
-	const AccelByte::Api::LobbyPtr LobbyPtr;
-	const AccelByte::Api::ChatPtr ChatPtr;
-	const AccelByte::Api::GameTelemetryPtr GameTelemetryPtr;
-	const AccelByte::Api::PredefinedEventPtr PredefinedEventPtr;
-	const AccelByte::Api::GameStandardEventPtr GameStandardEventPtr;
-
-public:
+	const FAccelByteTimeManagerPtr TimeManagerPtr;
 #pragma region Access
-	Api::User User{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::UserProfile UserProfile{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::GameProfile GameProfile{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Agreement Agreement{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::GDPR GDPR{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Reporting Reporting{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Miscellaneous Miscellaneous{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Configurations Configurations{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::LoginQueue LoginQueue{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	const AccelByte::Api::UserPtr UserPtr;
+	const AccelByte::Api::UserProfilePtr UserProfilePtr;
+	const AccelByte::Api::GameProfilePtr GameProfilePtr;
+	const AccelByte::Api::AgreementPtr AgreementPtr;
+	const AccelByte::Api::GDPRPtr GDPRPtr;
+	const AccelByte::Api::ReportingPtr ReportingPtr;
+	const AccelByte::Api::MiscellaneousPtr MiscellaneousPtr;
+	const AccelByte::Api::ConfigurationsPtr ConfigurationsPtr;
+	const AccelByte::Api::LoginQueuePtr LoginQueuePtr;
 #pragma endregion
 
 #pragma region Commerce
-	Api::Currency Currency{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Wallet Wallet{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Category Category{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Item Item{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Order Order{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Entitlement Entitlement{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Fulfillment Fulfillment{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::StoreDisplay StoreDisplay{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	const AccelByte::Api::CurrencyPtr CurrencyPtr;
+	const AccelByte::Api::WalletPtr WalletPtr;
+	const AccelByte::Api::CategoryPtr CategoryPtr;
+	const AccelByte::Api::ItemPtr ItemPtr;
+	const AccelByte::Api::OrderPtr OrderPtr;
+	const AccelByte::Api::EntitlementPtr EntitlementPtr;
+	const AccelByte::Api::FulfillmentPtr FulfillmentPtr;
+	const AccelByte::Api::StoreDisplayPtr StoreDisplayPtr;
 #pragma endregion
 
 #pragma region Storage
-	Api::CloudStorage CloudStorage{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::CloudSave CloudSave{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::BinaryCloudSave BinaryCloudSave{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::UGC UGC{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Inventory Inventory{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	const AccelByte::Api::CloudStoragePtr CloudStoragePtr;
+	const AccelByte::Api::CloudSavePtr CloudSavePtr;
+	const AccelByte::Api::BinaryCloudSavePtr BinaryCloudSavePtr;
+	const AccelByte::Api::UGCPtr UGCPtr;
+	const AccelByte::Api::InventoryPtr InventoryPtr;
 #pragma endregion
 
 #pragma region Engagement
-	Api::Statistic Statistic{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Achievement Achievement{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Leaderboard Leaderboard{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Reward Reward{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::SeasonPass SeasonPass{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Group Group{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Challenge Challenge{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	const AccelByte::Api::StatisticPtr StatisticPtr;
+	const AccelByte::Api::AchievementPtr AchievementPtr;
+	const AccelByte::Api::LeaderboardPtr LeaderboardPtr;
+	const AccelByte::Api::RewardPtr RewardPtr;
+	const AccelByte::Api::SeasonPassPtr SeasonPassPtr;
+	const AccelByte::Api::GroupPtr GroupPtr;
+	const AccelByte::Api::ChallengePtr ChallengePtr;
+#pragma endregion
+
+#pragma region Multiplayer
+	const AccelByte::Api::QosPtr QosPtr;
+	const AccelByte::Api::QosManagerPtr QosManagerPtr;
+	const AccelByte::Api::LobbyPtr LobbyPtr;
+	const AccelByte::Api::ChatPtr ChatPtr;
+	const AccelByte::Api::SessionBrowserPtr SessionBrowserPtr;
+	const AccelByte::Api::TurnManagerPtr TurnManagerPtr;
+	const AccelByte::Api::SessionPtr SessionPtr;
+	const AccelByte::Api::SessionHistoryPtr SessionHistoryPtr;
+	const AccelByte::Api::MatchmakingV2Ptr MatchmakingV2Ptr;
+	const AccelByte::Api::AMSPtr AmsPtr;
+#pragma endregion
+
+#pragma region Analytics
+	const AccelByte::Api::GameTelemetryPtr GameTelemetryPtr;
+	const AccelByte::Api::PredefinedEventPtr PredefinedEventPtr;
+	const AccelByte::Api::GameStandardEventPtr GameStandardEventPtr;
+	const AccelByte::Api::PresenceBroadcastEventPtr PresenceBroadcastEventPtr;
+#pragma endregion
+
+public:
+	/** 
+	 * @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	 * THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	 * It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->GameTelemetry with ApiClient->GetGameTelemetryApi().Pin()
+	 */
+	FAccelByteTimeManager& TimeManager;
+	
+#pragma region Access
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->User with ApiClient->GetUserApi().Pin()
+	*/
+	Api::User& User;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->UserProfile with ApiClient->GetUserProfileApi().Pin()
+	*/
+	Api::UserProfile& UserProfile;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->GameProfile with ApiClient->GetGameProfileApi().Pin()
+	*/
+	Api::GameProfile& GameProfile;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Agreement with ApiClient->GetAgreementApi().Pin()
+	*/
+	Api::Agreement& Agreement;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->GDPR with ApiClient->GetGDPRApi().Pin()
+	*/
+	Api::GDPR& GDPR;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Reporting with ApiClient->GetReportingApi().Pin()
+	*/
+	Api::Reporting& Reporting;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Miscellaneous with ApiClient->GetMiscellaneousApi().Pin()
+	*/
+	Api::Miscellaneous& Miscellaneous;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Configurations with ApiClient->GetConfigurationsApi().Pin()
+	*/
+	Api::Configurations& Configurations;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->LoginQueue with ApiClient->GetLoginQueueApi().Pin()
+	*/
+	Api::LoginQueue& LoginQueue;
+#pragma endregion
+
+#pragma region Commerce
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Currency with ApiClient->GetCurrencyApi().Pin()
+	*/
+	Api::Currency& Currency;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Wallet with ApiClient->GetWalletApi().Pin()
+	*/
+	Api::Wallet& Wallet;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Category with ApiClient->GetCategoryApi().Pin()
+	*/
+	Api::Category& Category;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Item with ApiClient->GetItemApi().Pin()
+	*/
+	Api::Item& Item;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Order with ApiClient->GetOrderApi().Pin()
+	*/
+	Api::Order& Order;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Entitlement with ApiClient->GetEntitlementApi().Pin()
+	*/
+	Api::Entitlement& Entitlement;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Fulfillment with ApiClient->GetFulfillmentApi().Pin()
+	*/
+	Api::Fulfillment& Fulfillment;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->StoreDisplay with ApiClient->GetStoreDisplayApi().Pin()
+	*/
+	Api::StoreDisplay& StoreDisplay;
+#pragma endregion
+
+#pragma region Storage
+	/**
+	* @brief DEPRECATED. CloudStorage is deprecated please use BinaryCloudSave instead.
+	*/
+	Api::CloudStorage& CloudStorage;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->CloudSave with ApiClient->GetCloudSaveApi().Pin()
+	*/
+	Api::CloudSave& CloudSave;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->BinaryCloudSave with ApiClient->GetBinaryCloudSaveApi().Pin()
+	*/
+	Api::BinaryCloudSave& BinaryCloudSave;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->UGC with ApiClient->GetUGCApi().Pin()
+	*/
+	Api::UGC& UGC;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Inventory with ApiClient->GetInventoryApi().Pin()
+	*/
+	Api::Inventory& Inventory;
+#pragma endregion
+
+#pragma region Engagement
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Statistic with ApiClient->GetStatisticApi().Pin()
+	*/
+	Api::Statistic& Statistic;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Achievement with ApiClient->GetAchievementApi().Pin()
+	*/
+	Api::Achievement& Achievement;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Leaderboard with ApiClient->GetLeaderboardApi().Pin()
+	*/
+	Api::Leaderboard& Leaderboard;
+	
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Reward with ApiClient->GetRewardApi().Pin()
+	*/
+	Api::Reward& Reward;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->SeasonPass with ApiClient->GetSeasonPassApi().Pin()
+	*/
+	Api::SeasonPass& SeasonPass;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Group with ApiClient->GetGroupApi().Pin()
+	*/
+	Api::Group& Group;
+
+	/** 
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Challenge with ApiClient->GetChallengeApi().Pin()
+	*/
+	Api::Challenge& Challenge;
 #pragma endregion
 
 #pragma region Multiplayer
@@ -136,7 +367,12 @@ public:
 	*/
 	Api::Qos& Qos;
 
-	Api::QosManager QosManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	/**
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->QosManager with ApiClient->GetQosManagerApi().Pin()
+	*/
+	Api::QosManager& QosManager;
 
 	/**
 	 * @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
@@ -152,12 +388,47 @@ public:
 	 */
 	Api::Chat& Chat;
 
-	Api::SessionBrowser SessionBrowser{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::TurnManager TurnManager{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::Session Session{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::SessionHistory SessionHistory{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::MatchmakingV2 MatchmakingV2{ *CredentialsRef, FRegistry::Settings, *HttpRef };
-	Api::AMS Ams{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	/**
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->SessionBrowser with ApiClient->GetSessionBrowserApi().Pin()
+	*/
+	Api::SessionBrowser& SessionBrowser;
+	
+	/**
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->TurnManager with ApiClient->GetTurnManagerApi().Pin()
+	*/
+	Api::TurnManager& TurnManager;
+	
+	/**
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Session with ApiClient->GetSessionApi().Pin()
+	*/
+	Api::Session& Session;
+	
+	/**
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->SessionHistory with ApiClient->GetSessionHistoryApi().Pin()
+	*/
+	Api::SessionHistory& SessionHistory;
+	
+	/**
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->MatchmakingV2 with ApiClient->GetMatchmakingV2Api().Pin()
+	*/
+	Api::MatchmakingV2& MatchmakingV2;
+	
+	/**
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->Ams with ApiClient->GetAmsApi().Pin()
+	*/
+	Api::AMS& Ams;
 #pragma endregion
 
 #pragma region Analytics
@@ -182,23 +453,82 @@ public:
 	 */
 	Api::GameStandardEvent& GameStandardEvent;
 
-	Api::PresenceBroadcastEvent PresenceBroadcastEvent{ *CredentialsRef, FRegistry::Settings, *HttpRef };
+	/**
+	* @brief For continuity, this temporary member is included to avoid any build breaks introduced via improvements to the AccelByte Unreal SDK.
+	* THIS MEMBER IS MARKED FOR DEPRECATION AND WILL BE REMOVED IN A FUTURE RELEASE.
+	* It is recommended that you update your code as soon as possible, and replace any usage of ApiClient->PresenceBroadcastEvent with ApiClient->GetPresenceBroadcastEventApi().Pin()
+	*/
+	Api::PresenceBroadcastEvent& PresenceBroadcastEvent;
 #pragma endregion
 
+#pragma region Access
+	Api::UserWPtr GetUserApi() const;
+	Api::UserProfileWPtr GetUserProfileApi() const;
+	Api::GameProfileWPtr GetGameProfileApi() const;
+	Api::AgreementWPtr GetAgreementApi() const;
+	Api::GDPRWPtr GetGDPRApi() const;
+	Api::ReportingWPtr GetReportingApi() const;
+	Api::MiscellaneousWPtr GetMiscellaneousApi() const;
+	Api::ConfigurationsWPtr GetConfigurationsApi() const;
+	Api::LoginQueueWPtr GetLoginQueueApi() const;
+#pragma endregion
+
+#pragma region Commerce
+	Api::CurrencyWPtr GetCurrencyApi() const;
+	Api::WalletWPtr GetWalletApi() const;
+	Api::CategoryWPtr GetCategoryApi() const;
+	Api::ItemWPtr GetItemApi() const;
+	Api::OrderWPtr GetOrderApi() const;
+	Api::EntitlementWPtr GetEntitlementApi() const;
+	Api::FulfillmentWPtr GetFulfillmentApi() const;
+	Api::StoreDisplayWPtr GetStoreDisplayApi() const;
+#pragma endregion
+
+#pragma region Storage
+	Api::CloudSaveWPtr GetCloudSaveApi() const;
+	Api::BinaryCloudSaveWPtr GetBinaryCloudSaveApi() const;
+	Api::UGCWPtr GetUGCApi() const;
+	Api::InventoryWPtr GetInventoryApi() const;
+#pragma endregion
+
+#pragma region Engagement
+	Api::StatisticWPtr GetStatisticApi() const;
+	Api::AchievementWPtr GetAchievementApi() const;
+	Api::LeaderboardWPtr GetLeaderboardApi() const;
+	Api::RewardWPtr GetRewardApi() const;
+	Api::SeasonPassWPtr GetSeasonPassApi() const;
+	Api::GroupWPtr GetGroupApi() const;
+	Api::ChallengeWPtr GetChallengeApi() const;
+#pragma endregion
+
+#pragma region Multiplayer
 	Api::QosWPtr GetQosApi() const;
+	Api::QosManagerWPtr GetQosManagerApi() const;
 	Api::LobbyWPtr GetLobbyApi() const;
 	Api::ChatWPtr GetChatApi() const;
+	Api::SessionBrowserWPtr GetSessionBrowserApi() const;
+	Api::TurnManagerWPtr GetTurnManagerApi() const;
+	Api::SessionWPtr GetSessionApi() const;
+	Api::SessionHistoryWPtr GetSessionHistoryApi() const;
+	Api::MatchmakingV2WPtr GetMatchmakingV2Api() const;
+	Api::AMSWPtr GetAmsApi() const;
+#pragma endregion
 
+#pragma region Analytics
 	Api::GameTelemetryWPtr GetGameTelemetryApi() const;
 	Api::PredefinedEventWPtr GetPredefinedEventApi() const;
 	Api::GameStandardEventWPtr GetGameStandardEventApi() const;
+	Api::PresenceBroadcastEventWPtr GetPresenceBroadcastEventApi() const;
+#pragma endregion
+
+	FAccelByteTimeManagerWPtr GetTimeManager() const;
 
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)
 	{
 		static_assert(std::is_base_of<FApiBase, T>::value, "API class must be subclass of FApiBase");
 
-		return T(*CredentialsRef, FRegistry::Settings, *HttpRef, Forward<U>(Args)...);
+		return T(*CredentialsRef, *Settings, *HttpRef, Forward<U>(Args)...);
 	}
 
 	template<typename T, typename... U>
@@ -207,7 +537,7 @@ public:
 		static_assert(std::is_base_of<FApiBase, T>::value, "API class must be subclass of FApiBase");
 
 		return MakeShared<T, ESPMode::ThreadSafe>(
-			*CredentialsRef, FRegistry::Settings,
+			*CredentialsRef, *Settings,
 			*HttpRef, Forward<U>(Args)...);
 	}
 };

@@ -17,7 +17,7 @@ namespace Api
 /**
  * @brief GDPR Api is used for managing the deletion of user data
  */
-class ACCELBYTEUE4SDK_API GDPR : public FApiBase
+class ACCELBYTEUE4SDK_API GDPR : public FApiBase, public TSharedFromThis<GDPR, ESPMode::ThreadSafe>
 {
 public:
 	GDPR(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -94,5 +94,9 @@ private:
 	GDPR(GDPR&&) = delete; 
 };
 	
+typedef TSharedRef<GDPR, ESPMode::ThreadSafe> GDPRRef;
+typedef TSharedPtr<GDPR, ESPMode::ThreadSafe> GDPRPtr;
+typedef TWeakPtr<GDPR, ESPMode::ThreadSafe> GDPRWPtr;
+
 }// Namespace Api
 }// Namespace AccelByte

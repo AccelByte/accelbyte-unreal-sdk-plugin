@@ -18,18 +18,26 @@ void UABMatchmaking::StartMatchmaking(
 	FDStartMatchmakingResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetStartMatchmakingResponseDelegate(
-		Api::Lobby::FMatchmakingResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsMatchmakingResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.SendStartMatchmaking(Request.gameMode);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetStartMatchmakingResponseDelegate(
+			Api::Lobby::FMatchmakingResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsMatchmakingResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->SendStartMatchmaking(Request.gameMode);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABMatchmaking::CancelMatchmaking(
@@ -37,18 +45,26 @@ void UABMatchmaking::CancelMatchmaking(
 	FDCancelMatchmakingResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetCancelMatchmakingResponseDelegate(
-		Api::Lobby::FMatchmakingResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsMatchmakingResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.SendCancelMatchmaking(Request.gameMode, Request.isTempParty);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetCancelMatchmakingResponseDelegate(
+			Api::Lobby::FMatchmakingResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsMatchmakingResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->SendCancelMatchmaking(Request.gameMode, Request.isTempParty);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABMatchmaking::SetReadyConsent(
@@ -56,18 +72,26 @@ void UABMatchmaking::SetReadyConsent(
 	FDSetReadyConsentResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetReadyConsentResponseDelegate(
-		Api::Lobby::FReadyConsentResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsReadyConsentRequest const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.SendReadyConsentRequest(Request.matchId);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetReadyConsentResponseDelegate(
+			Api::Lobby::FReadyConsentResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsReadyConsentRequest const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->SendReadyConsentRequest(Request.matchId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABMatchmaking::SetRejectConsent(
@@ -75,66 +99,94 @@ void UABMatchmaking::SetRejectConsent(
 	FDSetRejectConsentResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetRejectConsentResponseDelegate(
-		Api::Lobby::FRejectConsentResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsRejectConsentRequest const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.SendRejectConsentRequest(Request.matchId);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetRejectConsentResponseDelegate(
+			Api::Lobby::FRejectConsentResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsRejectConsentRequest const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->SendRejectConsentRequest(Request.matchId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABMatchmaking::SetOnMatchmaking(FDMatchmakingNotif OnNotif)
 {
-	ApiClientPtr->Lobby.SetMatchmakingNotifDelegate(
-		Api::Lobby::FMatchmakingNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsMatchmakingNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetMatchmakingNotifDelegate(
+			Api::Lobby::FMatchmakingNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsMatchmakingNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABMatchmaking::SetOnSetReadyConsent(FDSetReadyConsentNotif OnNotif)
 {
-	ApiClientPtr->Lobby.SetReadyConsentNotifDelegate(
-		Api::Lobby::FReadyConsentNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsReadyConsentNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetReadyConsentNotifDelegate(
+			Api::Lobby::FReadyConsentNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsReadyConsentNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABMatchmaking::SetOnSetRejectConsent(FDSetRejectConsentNotif OnNotif)
 {
-	ApiClientPtr->Lobby.SetRejectConsentNotifDelegate(
-		Api::Lobby::FRejectConsentNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsRejectConsentNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetRejectConsentNotifDelegate(
+			Api::Lobby::FRejectConsentNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsRejectConsentNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABMatchmaking::SetOnRematchmaking(FDRematchmakingNotif OnNotif)
 {
-	ApiClientPtr->Lobby.SetRematchmakingNotifDelegate(
-		Api::Lobby::FRematchmakingNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsRematchmakingNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetRematchmakingNotifDelegate(
+			Api::Lobby::FRematchmakingNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsRematchmakingNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABMatchmaking::SetOnDs(FDDsNotif OnNotif)
 {
-	ApiClientPtr->Lobby.SetDsNotifDelegate(
-		Api::Lobby::FDsNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsDsNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetDsNotifDelegate(
+			Api::Lobby::FDsNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsDsNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }

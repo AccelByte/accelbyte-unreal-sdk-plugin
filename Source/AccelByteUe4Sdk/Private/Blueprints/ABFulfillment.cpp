@@ -20,7 +20,10 @@ void UABFulfillment::RedeemCode(
 	FDAccelByteModelsFulfillmentResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Fulfillment.RedeemCode(
+	const auto FulfillmentPtr = ApiClientPtr->GetFulfillmentApi().Pin();
+	if (FulfillmentPtr.IsValid())
+	{
+		FulfillmentPtr->RedeemCode(
 		Code,
 		Region,
 		Language,
@@ -34,4 +37,9 @@ void UABFulfillment::RedeemCode(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

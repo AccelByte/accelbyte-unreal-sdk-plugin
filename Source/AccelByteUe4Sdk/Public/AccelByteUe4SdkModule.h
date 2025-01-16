@@ -5,9 +5,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiClient.h"
 #include "Modules/ModuleManager.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "Core/IAccelByteDataStorage.h"
 #include "Core/Platform/AccelBytePlatformHandler.h"
 
@@ -23,8 +26,9 @@ namespace AccelByte
 
 class IAccelByteUe4SdkModuleInterface : public IModuleInterface
 {
-public:
+	friend class FAccelByteModuleUtilities;
 
+public:
 	static IAccelByteUe4SdkModuleInterface& Get()
 	{
 		return FModuleManager::LoadModuleChecked<IAccelByteUe4SdkModuleInterface>("AccelByteUe4Sdk");
@@ -40,6 +44,8 @@ public:
 	virtual AccelByte::ServerSettings const& GetServerSettings() const = 0;
 	virtual ESettingsEnvironment const& GetSettingsEnvironment() const = 0;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() = 0;
-	virtual AccelByte::IAccelByteDataStorage * GetLocalDataStorage() = 0;
+	virtual AccelByte::IAccelByteDataStorage* GetLocalDataStorage() = 0;
 	virtual AccelByte::FAccelBytePlatformHandler& GetPlatformHandler() = 0;
+
+	virtual FAccelByteInstancePtr CreateAccelByteInstance() = 0;
 };

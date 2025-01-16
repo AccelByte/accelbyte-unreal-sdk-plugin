@@ -18,7 +18,10 @@ void UABUGC::CreateContentByStruct(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.CreateContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->CreateContent(
 		ChannelId,
 		UGCRequest,
 		THandler<FAccelByteModelsUGCResponse>::CreateLambda(
@@ -33,7 +36,11 @@ void UABUGC::CreateContentByStruct(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::CreateContent(
@@ -49,7 +56,10 @@ void UABUGC::CreateContent(
 	FString ContentType
 )
 {
-	ApiClientPtr->UGC.CreateContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->CreateContent(
 		ChannelId,
 		Name,
 		Type,
@@ -69,7 +79,11 @@ void UABUGC::CreateContent(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::ModifyContentByUpdateStruct(
@@ -79,7 +93,10 @@ void UABUGC::ModifyContentByUpdateStruct(
 	FDModelsUGCResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.ModifyContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->ModifyContent(
 		ChannelId,
 		ContentId,
 		UGCRequest,
@@ -95,7 +112,11 @@ void UABUGC::ModifyContentByUpdateStruct(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::ModifyContentByStruct(
@@ -106,7 +127,10 @@ void UABUGC::ModifyContentByStruct(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.ModifyContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->ModifyContent(
 		ChannelId,
 		ContentId,
 		UGCRequest,
@@ -122,7 +146,11 @@ void UABUGC::ModifyContentByStruct(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::ModifyContent(
@@ -139,7 +167,10 @@ void UABUGC::ModifyContent(
 	FString ContentType
 )
 {
-	ApiClientPtr->UGC.ModifyContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->ModifyContent(
 		ChannelId,
 		ContentId,
 		Name,
@@ -160,7 +191,11 @@ void UABUGC::ModifyContent(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::DeleteContent(
@@ -170,7 +205,10 @@ void UABUGC::DeleteContent(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.DeleteContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->DeleteContent(
 		ChannelId,
 		ContentId,
 		FVoidHandler::CreateLambda(
@@ -185,7 +223,11 @@ void UABUGC::DeleteContent(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetContentByContentId(
@@ -194,7 +236,10 @@ void UABUGC::GetContentByContentId(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.GetContentByContentId(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetContentByContentId(
 		ContentId,
 		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentResponse const& Response)
@@ -208,12 +253,19 @@ void UABUGC::GetContentByContentId(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicGetContentByContentId(FString const& ContentId, FDModelsUGCContentResponse const& OnSuccess, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.PublicGetContentByContentId(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicGetContentByContentId(
 		ContentId,
 		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentResponse const& Response)
@@ -227,7 +279,11 @@ void UABUGC::PublicGetContentByContentId(FString const& ContentId, FDModelsUGCCo
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetContentByShareCode(
@@ -236,7 +292,10 @@ void UABUGC::GetContentByShareCode(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.GetContentByShareCode(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetContentByShareCode(
 		ShareCode,
 		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentResponse const& Response)
@@ -250,12 +309,19 @@ void UABUGC::GetContentByShareCode(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicGetContentByShareCode(FString const& ShareCode, FDModelsUGCContentResponse const& OnSuccess, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.PublicGetContentByShareCode(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicGetContentByShareCode(
 		ShareCode,
 		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentResponse const& Response)
@@ -269,7 +335,11 @@ void UABUGC::PublicGetContentByShareCode(FString const& ShareCode, FDModelsUGCCo
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetContentPreviewAsStruct(
@@ -278,7 +348,10 @@ void UABUGC::GetContentPreviewAsStruct(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.GetContentPreview(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetContentPreview(
 		ContentId,
 		THandler<FAccelByteModelsUGCPreview>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCPreview const& Response)
@@ -292,7 +365,11 @@ void UABUGC::GetContentPreviewAsStruct(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetContentPreviewAsIntArray(
@@ -301,7 +378,10 @@ void UABUGC::GetContentPreviewAsIntArray(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.GetContentPreview(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetContentPreview(
 		ContentId,
 		THandler<TArray<uint8>>::CreateLambda(
 			[OnSuccess](TArray<uint8> const& Response)
@@ -315,12 +395,19 @@ void UABUGC::GetContentPreviewAsIntArray(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetContentBulk(TArray<FString> const& ContentIds, FDModelsUGCBulkContentResponse const& OnSuccess, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.GetContentBulk(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetContentBulk(
 		ContentIds,
 		THandler<TArray<FAccelByteModelsUGCContentResponse>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsUGCContentResponse> const& Response)
@@ -334,12 +421,19 @@ void UABUGC::GetContentBulk(TArray<FString> const& ContentIds, FDModelsUGCBulkCo
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicGetContentBulk(TArray<FString> const& ContentIds, FDModelsUGCBulkContentResponse const& OnSuccess, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.PublicGetContentBulk(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicGetContentBulk(
 		ContentIds,
 		THandler<TArray<FAccelByteModelsUGCContentResponse>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsUGCContentResponse> const& Response)
@@ -353,12 +447,19 @@ void UABUGC::PublicGetContentBulk(TArray<FString> const& ContentIds, FDModelsUGC
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetUserContent(FString const& UserId, FDModelsUGCContentPagingResponse const& OnSuccess, FDErrorHandler const& OnError, int32 Limit, int32 Offset)
 {
-	ApiClientPtr->UGC.GetUserContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetUserContent(
 		UserId,
 		THandler<FAccelByteModelsUGCContentPageResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentPageResponse const& Response)
@@ -372,12 +473,19 @@ void UABUGC::GetUserContent(FString const& UserId, FDModelsUGCContentPagingRespo
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicGetUserContent(FString const& UserId, FDModelsUGCContentPagingResponse const& OnSuccess, FDErrorHandler const& OnError, int32 Limit, int32 Offset)
 {
-	ApiClientPtr->UGC.PublicGetUserContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicGetUserContent(
 		UserId,
 		THandler<FAccelByteModelsUGCContentPageResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentPageResponse const& Response)
@@ -391,7 +499,11 @@ void UABUGC::PublicGetUserContent(FString const& UserId, FDModelsUGCContentPagin
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetTags(
@@ -401,7 +513,10 @@ void UABUGC::GetTags(
 	int32 Offset
 )
 {
-	ApiClientPtr->UGC.GetTags(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetTags(
 		THandler<FAccelByteModelsUGCTagsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCTagsPagingResponse const& Response)
 			{
@@ -414,7 +529,11 @@ void UABUGC::GetTags(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetTypes(
@@ -424,7 +543,10 @@ void UABUGC::GetTypes(
 	int32 Offset
 )
 {
-	ApiClientPtr->UGC.GetTypes(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetTypes(
 		THandler<FAccelByteModelsUGCTypesPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCTypesPagingResponse const& Response)
 			{
@@ -439,7 +561,11 @@ void UABUGC::GetTypes(
 		),
 		Limit,
 		Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::CreateChannel(
@@ -448,7 +574,10 @@ void UABUGC::CreateChannel(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.CreateChannel(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->CreateChannel(
 		ChannelName,
 		THandler<FAccelByteModelsUGCChannelResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCChannelResponse const& Response)
@@ -462,7 +591,11 @@ void UABUGC::CreateChannel(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetChannels(
@@ -473,7 +606,10 @@ void UABUGC::GetChannels(
 	FString const& ChannelName
 )
 {
-	ApiClientPtr->UGC.GetChannels(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetChannels(
 		THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCChannelsPagingResponse const& Response)
 			{
@@ -486,7 +622,11 @@ void UABUGC::GetChannels(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		), Limit, Offset, ChannelName
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetChannelsByUserId(const FString& UserId,
@@ -495,7 +635,10 @@ void UABUGC::GetChannelsByUserId(const FString& UserId,
 	int32 Limit, 
 	int32 Offset)
 {
-	ApiClientPtr->UGC.GetChannels(UserId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetChannels(UserId,
 		THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCChannelsPagingResponse const& Response)
 			{
@@ -508,7 +651,11 @@ void UABUGC::GetChannelsByUserId(const FString& UserId,
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::DeleteChannel(
@@ -517,7 +664,10 @@ void UABUGC::DeleteChannel(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.DeleteChannel(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->DeleteChannel(
 		ChannelId,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -531,7 +681,11 @@ void UABUGC::DeleteChannel(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::SearchContents(const FString& Name,
@@ -548,7 +702,10 @@ void UABUGC::SearchContents(const FString& Name,
 	int32 Limit,
 	int32 Offset)
 {
-	ApiClientPtr->UGC.SearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->SearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
 			{
@@ -559,7 +716,11 @@ void UABUGC::SearchContents(const FString& Name,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 			SortBy, OrderBy, Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::SearchAllContents(FAccelByteModelsUGCSearchContentsRequest const& Request, 
@@ -568,7 +729,10 @@ void UABUGC::SearchAllContents(FAccelByteModelsUGCSearchContentsRequest const& R
 	int32 Limit, 
 	int32 Offset)
 {
-	ApiClientPtr->UGC.SearchContents(Request,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->SearchContents(Request,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
 			{
@@ -579,12 +743,19 @@ void UABUGC::SearchAllContents(FAccelByteModelsUGCSearchContentsRequest const& R
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicSearchContents(const FString& Name, const FString& Creator, const FString& Type, const FString& Subtype, const TArray<FString>& Tags, bool IsOfficial, const FString& UserId, FDModelsUGCSearchContentsPagingResponse const& OnSuccess, FDErrorHandler const& OnError, EAccelByteUgcSortBy SortBy, EAccelByteUgcOrderBy OrderBy, int32 Limit, int32 Offset)
 {
-	ApiClientPtr->UGC.PublicSearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicSearchContents(Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
 			{
@@ -595,12 +766,19 @@ void UABUGC::PublicSearchContents(const FString& Name, const FString& Creator, c
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		SortBy, OrderBy, Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicSearchAllContents(FAccelByteModelsUGCSearchContentsRequest const& Request, FDModelsUGCSearchContentsPagingResponse const& OnSuccess, FDErrorHandler const& OnError, int32 Limit, int32 Offset)
 {
-	ApiClientPtr->UGC.PublicSearchContents(Request,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicSearchContents(Request,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
 			{
@@ -611,7 +789,11 @@ void UABUGC::PublicSearchAllContents(FAccelByteModelsUGCSearchContentsRequest co
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::UpdateLikeStatusToContent(const FString& ContentId,
@@ -620,7 +802,10 @@ void UABUGC::UpdateLikeStatusToContent(const FString& ContentId,
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->UGC.UpdateLikeStatusToContent(
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->UpdateLikeStatusToContent(
 		ContentId,
 		bLikeStatus, 
 		THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse>::CreateLambda(
@@ -635,7 +820,11 @@ void UABUGC::UpdateLikeStatusToContent(const FString& ContentId,
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetListFollowers(const FString& UserId,
@@ -645,7 +834,10 @@ void UABUGC::GetListFollowers(const FString& UserId,
 	int32 Offset
 )
 {
-	ApiClientPtr->UGC.GetListFollowers(UserId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetListFollowers(UserId,
 		THandler<FAccelByteModelsUGCGetListFollowersPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCGetListFollowersPagingResponse const& Response)
 			{
@@ -660,7 +852,11 @@ void UABUGC::GetListFollowers(const FString& UserId,
 		),
 		Limit,
 		Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::UpdateFollowStatusToUser(const FString& UserId,
@@ -669,7 +865,10 @@ void UABUGC::UpdateFollowStatusToUser(const FString& UserId,
 	FDErrorHandler const& OnError 
 )
 {
-	ApiClientPtr->UGC.UpdateFollowStatusToUser(UserId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->UpdateFollowStatusToUser(UserId,
 		bFollowStatus, 
 		THandler<FAccelByteModelsUGCUpdateFollowStatusToUserResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCUpdateFollowStatusToUserResponse const& Response)
@@ -683,7 +882,11 @@ void UABUGC::UpdateFollowStatusToUser(const FString& UserId,
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		) 
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::SearchContentsSpecificToChannel(const FString& ChannelId,
@@ -701,7 +904,10 @@ void UABUGC::SearchContentsSpecificToChannel(const FString& ChannelId,
 	int32 Limit,
 	int32 Offset)
 {
-	ApiClientPtr->UGC.SearchContentsSpecificToChannel(ChannelId, Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->SearchContentsSpecificToChannel(ChannelId, Name, Creator, Type, Subtype, Tags, IsOfficial, UserId,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
 			{
@@ -712,7 +918,11 @@ void UABUGC::SearchContentsSpecificToChannel(const FString& ChannelId,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 			SortBy, OrderBy, Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::SearchContentsByChannelId(FString const& ChannelId,
@@ -722,7 +932,10 @@ void UABUGC::SearchContentsByChannelId(FString const& ChannelId,
 	int32 Limit,
 	int32 Offset)
 {
-	ApiClientPtr->UGC.SearchContentsSpecificToChannel(ChannelId, Request,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->SearchContentsSpecificToChannel(ChannelId, Request,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponse const& Response)
 			{
@@ -733,7 +946,11 @@ void UABUGC::SearchContentsByChannelId(FString const& ChannelId,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::SearchContentsSpecificToChannelV2(const FString& ChannelId, 
@@ -743,7 +960,10 @@ void UABUGC::SearchContentsSpecificToChannelV2(const FString& ChannelId,
 	int32 Offset,
 	EAccelByteUGCContentSortByV2 SortBy)
 {
-	ApiClientPtr->UGC.SearchContentsSpecificToChannelV2(ChannelId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->SearchContentsSpecificToChannelV2(ChannelId,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
 			{
@@ -754,12 +974,19 @@ void UABUGC::SearchContentsSpecificToChannelV2(const FString& ChannelId,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 			Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicSearchContentsSpecificToChannelV2(const FString& ChannelId, FDModelsUGCSearchContentsPagingResponseV2 const& OnSuccess, FDErrorHandler const& OnError, int32 Limit, int32 Offset, EAccelByteUGCContentSortByV2 SortBy)
 {
-	ApiClientPtr->UGC.PublicSearchContentsSpecificToChannelV2(ChannelId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicSearchContentsSpecificToChannelV2(ChannelId,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
 			{
@@ -770,7 +997,11 @@ void UABUGC::PublicSearchContentsSpecificToChannelV2(const FString& ChannelId, F
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::SearchContentsV2(const FAccelByteModelsUGCFilterRequestV2& Filter,
@@ -780,7 +1011,10 @@ void UABUGC::SearchContentsV2(const FAccelByteModelsUGCFilterRequestV2& Filter,
 	int32 Offset, 
 	EAccelByteUGCContentSortByV2 SortBy)
 {
-	ApiClientPtr->UGC.SearchContentsV2(Filter,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->SearchContentsV2(Filter,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
 			{
@@ -791,12 +1025,19 @@ void UABUGC::SearchContentsV2(const FAccelByteModelsUGCFilterRequestV2& Filter,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 			Limit, Offset, SortBy
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicSearchContentsV2(const FAccelByteModelsUGCFilterRequestV2& Filter, FDModelsUGCSearchContentsPagingResponseV2 const& OnSuccess, FDErrorHandler const& OnError, int32 Limit, int32 Offset, EAccelByteUGCContentSortByV2 SortBy)
 {
-	ApiClientPtr->UGC.PublicSearchContentsV2(Filter,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicSearchContentsV2(Filter,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
 			{
@@ -807,14 +1048,21 @@ void UABUGC::PublicSearchContentsV2(const FAccelByteModelsUGCFilterRequestV2& Fi
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		Limit, Offset, SortBy
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetContentBulkByIdsV2(const TArray<FString>& ContentIds, 
 	FDModelsUGCBulkContentResponseV2 const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.GetContentBulkByIdsV2(ContentIds,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetContentBulkByIdsV2(ContentIds,
 		THandler<TArray<FAccelByteModelsUGCContentResponseV2>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsUGCContentResponseV2> const& Response)
 			{
@@ -824,12 +1072,19 @@ void UABUGC::GetContentBulkByIdsV2(const TArray<FString>& ContentIds,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicGetContentBulkByIdsV2(const TArray<FString>& ContentIds, FDModelsUGCBulkContentResponseV2 const& OnSuccess, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.PublicGetContentBulkByIdsV2(ContentIds,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicGetContentBulkByIdsV2(ContentIds,
 		THandler<TArray<FAccelByteModelsUGCContentResponseV2>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsUGCContentResponseV2> const& Response)
 			{
@@ -839,14 +1094,21 @@ void UABUGC::PublicGetContentBulkByIdsV2(const TArray<FString>& ContentIds, FDMo
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetContentByShareCodeV2(FString const& ShareCode, 
 	FDModelsUGCContentResponseV2 const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.GetContentByShareCodeV2(ShareCode,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetContentByShareCodeV2(ShareCode,
 		THandler<FAccelByteModelsUGCContentResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentResponseV2 const& Response)
 			{
@@ -856,12 +1118,19 @@ void UABUGC::GetContentByShareCodeV2(FString const& ShareCode,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicGetContentByShareCodeV2(FString const& ShareCode, FDModelsUGCContentResponseV2 const& OnSuccess, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.PublicGetContentByShareCodeV2(ShareCode,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicGetContentByShareCodeV2(ShareCode,
 		THandler<FAccelByteModelsUGCContentResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentResponseV2 const& Response)
 			{
@@ -871,14 +1140,21 @@ void UABUGC::PublicGetContentByShareCodeV2(FString const& ShareCode, FDModelsUGC
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetContentByContentIdV2(FString const& ContentId, 
 	FDModelsUGCContentResponseV2 const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.GetContentByContentIdV2(ContentId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetContentByContentIdV2(ContentId,
 		THandler<FAccelByteModelsUGCContentResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentResponseV2 const& Response)
 			{
@@ -888,12 +1164,19 @@ void UABUGC::GetContentByContentIdV2(FString const& ContentId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicGetContentByContentIdV2(FString const& ContentId, FDModelsUGCContentResponseV2 const& OnSuccess, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.PublicGetContentByContentIdV2(ContentId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicGetContentByContentIdV2(ContentId,
 		THandler<FAccelByteModelsUGCContentResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCContentResponseV2 const& Response)
 			{
@@ -903,7 +1186,11 @@ void UABUGC::PublicGetContentByContentIdV2(FString const& ContentId, FDModelsUGC
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::CreateContentV2(FString const& ChannelId, 
@@ -911,7 +1198,10 @@ void UABUGC::CreateContentV2(FString const& ChannelId,
 	FDModelsUGCCreateUGCResponseV2 const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.CreateContentV2(ChannelId, CreateRequest,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->CreateContentV2(ChannelId, CreateRequest,
 		THandler<FAccelByteModelsUGCCreateUGCResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCCreateUGCResponseV2 const& Response)
 			{
@@ -921,7 +1211,11 @@ void UABUGC::CreateContentV2(FString const& ChannelId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::DeleteContentV2(FString const& ChannelId, 
@@ -929,7 +1223,10 @@ void UABUGC::DeleteContentV2(FString const& ChannelId,
 	FDHandler const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.DeleteContentV2(ChannelId, ContentId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->DeleteContentV2(ChannelId, ContentId,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -940,7 +1237,11 @@ void UABUGC::DeleteContentV2(FString const& ChannelId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::ModifyContentV2(FString const& ChannelId, 
@@ -949,7 +1250,10 @@ void UABUGC::ModifyContentV2(FString const& ChannelId,
 	FDModelsUGCModifyUGCResponseV2 const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.ModifyContentV2(ChannelId, ContentId, ModifyRequest,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->ModifyContentV2(ChannelId, ContentId, ModifyRequest,
 		THandler<FAccelByteModelsUGCModifyUGCResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCModifyUGCResponseV2 const& Response)
 			{
@@ -959,7 +1263,11 @@ void UABUGC::ModifyContentV2(FString const& ChannelId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GenerateUploadContentURLV2(FString const& ChannelId, 
@@ -968,7 +1276,10 @@ void UABUGC::GenerateUploadContentURLV2(FString const& ChannelId,
 	FDModelsUGCUploadContentResponse const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.GenerateUploadContentURLV2(ChannelId, ContentId, UploadRequest,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GenerateUploadContentURLV2(ChannelId, ContentId, UploadRequest,
 		THandler<FAccelByteModelsUGCUploadContentURLResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCUploadContentURLResponseV2 const& Response)
 			{
@@ -978,7 +1289,11 @@ void UABUGC::GenerateUploadContentURLV2(FString const& ChannelId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::UpdateContentFileLocationV2(FString const& ChannelId, 
@@ -988,7 +1303,10 @@ void UABUGC::UpdateContentFileLocationV2(FString const& ChannelId,
 	FDModelsUGCUpdateContentFileLocation const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.UpdateContentFileLocationV2(ChannelId, ContentId, FileExtension, S3Key,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->UpdateContentFileLocationV2(ChannelId, ContentId, FileExtension, S3Key,
 		THandler<FAccelByteModelsUGCUpdateContentFileLocationResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCUpdateContentFileLocationResponseV2 const& Response)
 			{
@@ -998,7 +1316,11 @@ void UABUGC::UpdateContentFileLocationV2(FString const& ChannelId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetUserContentsV2(const FString& UserId, 
@@ -1007,7 +1329,10 @@ void UABUGC::GetUserContentsV2(const FString& UserId,
 	int32 Limit, 
 	int32 Offset)
 {
-	ApiClientPtr->UGC.GetUserContentsV2(UserId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetUserContentsV2(UserId,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
 			{
@@ -1018,12 +1343,19 @@ void UABUGC::GetUserContentsV2(const FString& UserId,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 			Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::PublicGetUserContentsV2(const FString& UserId, FDModelsUGCContentPageResponseV2 const& OnSuccess, FDErrorHandler const& OnError, int32 Limit, int32 Offset)
 {
-	ApiClientPtr->UGC.PublicGetUserContentsV2(UserId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->PublicGetUserContentsV2(UserId,
 		THandler<FAccelByteModelsUGCSearchContentsPagingResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCSearchContentsPagingResponseV2 const& Response)
 			{
@@ -1034,7 +1366,11 @@ void UABUGC::PublicGetUserContentsV2(const FString& UserId, FDModelsUGCContentPa
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::UpdateContentScreenshotV2(const FString& ContentId, 
@@ -1042,7 +1378,10 @@ void UABUGC::UpdateContentScreenshotV2(const FString& ContentId,
 	FDModelsUGCUpdateScreenshotsV2 const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.UpdateContentScreenshotV2(ContentId, ScreenshotsRequest,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->UpdateContentScreenshotV2(ContentId, ScreenshotsRequest,
 		THandler<FAccelByteModelsUGCUpdateScreenshotsV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCUpdateScreenshotsV2 const& Response)
 			{
@@ -1052,7 +1391,11 @@ void UABUGC::UpdateContentScreenshotV2(const FString& ContentId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::UploadContentScreenshotV2(const FString& ContentId, 
@@ -1060,7 +1403,10 @@ void UABUGC::UploadContentScreenshotV2(const FString& ContentId,
 	FDModelsUGCUpdateContentScreenshotResponse const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.UploadContentScreenshotV2(ContentId, ScreenshotsRequest,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->UploadContentScreenshotV2(ContentId, ScreenshotsRequest,
 		THandler<FAccelByteModelsUGCUpdateContentScreenshotResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCUpdateContentScreenshotResponse const& Response)
 			{
@@ -1070,7 +1416,11 @@ void UABUGC::UploadContentScreenshotV2(const FString& ContentId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::DeleteContentScreenshotV2(const FString& ContentId, 
@@ -1078,7 +1428,10 @@ void UABUGC::DeleteContentScreenshotV2(const FString& ContentId,
 	FDHandler const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.DeleteContentScreenshotV2(ContentId, ScreenshotId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->DeleteContentScreenshotV2(ContentId, ScreenshotId,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -1089,14 +1442,21 @@ void UABUGC::DeleteContentScreenshotV2(const FString& ContentId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::AddDownloadContentCountV2(FString const& ContentId, 
 	FDModelsUGCAddDownloadContentCountResponse const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.AddDownloadContentCountV2(ContentId, 
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->AddDownloadContentCountV2(ContentId, 
 		THandler<FAccelByteModelsUGCAddDownloadContentCountResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCAddDownloadContentCountResponseV2 const& Response)
 			{
@@ -1106,7 +1466,11 @@ void UABUGC::AddDownloadContentCountV2(FString const& ContentId,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetListContentDownloaderV2(FString const& ContentId, 
@@ -1117,7 +1481,10 @@ void UABUGC::GetListContentDownloaderV2(FString const& ContentId,
 	int32 Offset, 
 	EAccelByteUGCContentUtilitiesSortByV2 SortBy)
 {
-	ApiClientPtr->UGC.GetListContentDownloaderV2(ContentId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetListContentDownloaderV2(ContentId,
 		THandler<FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCGetPaginatedContentDownloaderResponseV2 const& Response)
 			{
@@ -1128,7 +1495,11 @@ void UABUGC::GetListContentDownloaderV2(FString const& ContentId,
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		UserId, Limit, Offset, SortBy
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetListContentLikerV2(FString const& ContentId
@@ -1137,7 +1508,10 @@ void UABUGC::GetListContentLikerV2(FString const& ContentId
 	, int32 Limit
 	, int32 Offset)
 {
-	ApiClientPtr->UGC.GetListContentLikerV2(ContentId,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetListContentLikerV2(ContentId,
 		THandler<FAccelByteModelsUGCGetPaginatedContentLikerResponseV2>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCGetPaginatedContentLikerResponseV2 const& Response)
 			{
@@ -1148,7 +1522,11 @@ void UABUGC::GetListContentLikerV2(FString const& ContentId
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 			Limit, Offset
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::UpdateLikeStatusToContentV2(const FString& ContentId
@@ -1156,7 +1534,10 @@ void UABUGC::UpdateLikeStatusToContentV2(const FString& ContentId
 	, FDModelsUGCUpdateLikeStatusToContentResponse const& OnSuccess
 	, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.UpdateLikeStatusToContentV2(ContentId, bLikeStatus,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->UpdateLikeStatusToContentV2(ContentId, bLikeStatus,
 		THandler<FAccelByteModelsUGCUpdateLikeStatusToContentResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUGCUpdateLikeStatusToContentResponse const& Response)
 			{
@@ -1166,7 +1547,11 @@ void UABUGC::UpdateLikeStatusToContentV2(const FString& ContentId
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::ModifyContentByShareCode(FString const& ChannelId
@@ -1175,20 +1560,27 @@ void UABUGC::ModifyContentByShareCode(FString const& ChannelId
 	, FDModelsUGCResponse const& OnSuccess
 	, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.ModifyContentByShareCode(ChannelId, ShareCode, ModifyRequest,
-	THandler<FAccelByteModelsUGCResponse>::CreateLambda(
-		[OnSuccess](FAccelByteModelsUGCResponse const& Response)
-		{
-			OnSuccess.ExecuteIfBound(Response);
-		}
-	),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	)
-);
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->ModifyContentByShareCode(ChannelId, ShareCode, ModifyRequest,
+		THandler<FAccelByteModelsUGCResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::DeleteContentByShareCode(FString const& ChannelId,
@@ -1196,25 +1588,35 @@ void UABUGC::DeleteContentByShareCode(FString const& ChannelId,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.DeleteContentByShareCode(ChannelId, ShareCode,
-	FVoidHandler::CreateLambda(
-		[OnSuccess]()
-		{
-			OnSuccess.ExecuteIfBound();
-		})
-	, FErrorHandler::CreateLambda(
-		[OnError](int Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		})
-	);
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->DeleteContentByShareCode(ChannelId, ShareCode,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			})
+		, FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			})
+			);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::BulkGetContentByShareCode(const TArray<FString>& ShareCodes, 
 	FDModelsUGCBulkContentResponse const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.BulkGetContentByShareCode(ShareCodes,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->BulkGetContentByShareCode(ShareCodes,
 		THandler<TArray<FAccelByteModelsUGCContentResponse>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsUGCContentResponse> const& Response)
 			{
@@ -1224,14 +1626,21 @@ void UABUGC::BulkGetContentByShareCode(const TArray<FString>& ShareCodes,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::BulkGetContentByShareCodeV2(const TArray<FString>& ShareCodes, 
 	FDModelsUGCBulkContentResponseV2 const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.BulkGetContentByShareCodeV2(ShareCodes,
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->BulkGetContentByShareCodeV2(ShareCodes,
 		THandler<TArray<FAccelByteModelsUGCContentResponseV2>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsUGCContentResponseV2> const& Response)
 			{
@@ -1241,7 +1650,11 @@ void UABUGC::BulkGetContentByShareCodeV2(const TArray<FString>& ShareCodes,
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			})
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::ModifyContentShareCode(FString const& ChannelId
@@ -1250,20 +1663,27 @@ void UABUGC::ModifyContentShareCode(FString const& ChannelId
 	, FDModelsUGCResponse const& OnSuccess
 	, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.ModifyContentShareCode(ChannelId, ContentId, ModifyContentShareCodeRequest,
-	THandler<FAccelByteModelsUGCResponse>::CreateLambda(
-		[OnSuccess](FAccelByteModelsUGCResponse const& Response)
-		{
-			OnSuccess.ExecuteIfBound(Response);
-		}
-	),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	)
-);
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->ModifyContentShareCode(ChannelId, ContentId, ModifyContentShareCodeRequest,
+		THandler<FAccelByteModelsUGCResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::ModifyContentShareCodeV2(FString const& ChannelId
@@ -1272,20 +1692,27 @@ void UABUGC::ModifyContentShareCodeV2(FString const& ChannelId
 	, FDModelsUGCCreateUGCResponseV2 const& OnSuccess
 	, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.ModifyContentShareCodeV2(ChannelId, ContentId, ModifyContentShareCodeRequest,
-	THandler<FAccelByteModelsUGCCreateUGCResponseV2>::CreateLambda(
-		[OnSuccess](FAccelByteModelsUGCCreateUGCResponseV2 const& Response)
-		{
-			OnSuccess.ExecuteIfBound(Response);
-		}
-	),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	)
-);
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->ModifyContentShareCodeV2(ChannelId, ContentId, ModifyContentShareCodeRequest,
+		THandler<FAccelByteModelsUGCCreateUGCResponseV2>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCCreateUGCResponseV2 const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetStagingContents(EStagingContentRequestStatus Status
@@ -1295,38 +1722,52 @@ void UABUGC::GetStagingContents(EStagingContentRequestStatus Status
 	, int32 Offset
 	, EAccelByteStagingContentUtilitiesSortBy SortBy)
 {
-	ApiClientPtr->UGC.GetStagingContents(Status,
-	THandler<FAccelByteModelsUGCPaginatedListStagingContentResponse>::CreateLambda(
-		[OnSuccess](FAccelByteModelsUGCPaginatedListStagingContentResponse const& Response)
-		{
-			OnSuccess.ExecuteIfBound(Response);
-		}
-	),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	), Limit, Offset, SortBy);
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetStagingContents(Status,
+		THandler<FAccelByteModelsUGCPaginatedListStagingContentResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCPaginatedListStagingContentResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		), Limit, Offset, SortBy);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::GetStagingContentById(FString const& ContentId
 	, FDModelsUGCStagingContent const& OnSuccess
 	, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.GetStagingContentById(ContentId,
-	THandler<FAccelByteModelsUGCStagingContentResponse>::CreateLambda(
-		[OnSuccess](FAccelByteModelsUGCStagingContentResponse const& Response)
-		{
-			OnSuccess.ExecuteIfBound(Response);
-		}
-	),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	));
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->GetStagingContentById(ContentId,
+		THandler<FAccelByteModelsUGCStagingContentResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCStagingContentResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		));
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::UpdateStagingContent(FString const& ContentId
@@ -1334,38 +1775,52 @@ void UABUGC::UpdateStagingContent(FString const& ContentId
 	, FDModelsUGCStagingContent const& OnSuccess
 	, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.UpdateStagingContent(ContentId, UpdateRequest,
-	THandler<FAccelByteModelsUGCStagingContentResponse>::CreateLambda(
-		[OnSuccess](FAccelByteModelsUGCStagingContentResponse const& Response)
-		{
-			OnSuccess.ExecuteIfBound(Response);
-		}
-	),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	));
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->UpdateStagingContent(ContentId, UpdateRequest,
+		THandler<FAccelByteModelsUGCStagingContentResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsUGCStagingContentResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		));
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABUGC::DeleteStagingContent(FString const& ContentId
 	, FDHandler const& OnSuccess
 	, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->UGC.DeleteStagingContent(ContentId,
-	FVoidHandler::CreateLambda(
-		[OnSuccess]()
-		{
-			OnSuccess.ExecuteIfBound();
-		}
-	),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	));
+	const auto UGCPtr = ApiClientPtr->GetUGCApi().Pin();
+	if (UGCPtr.IsValid())
+	{
+		UGCPtr->DeleteStagingContent(ContentId,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		));
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 

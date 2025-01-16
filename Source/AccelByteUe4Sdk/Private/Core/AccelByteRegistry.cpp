@@ -48,6 +48,7 @@
 #include "Api/AccelBytePredefinedEventApi.h"
 #include "Api/AccelByteGameStandardEventApi.h"
 #include "Api/AccelByteLoginQueueApi.h"
+#include "Api/AccelByteInventoryApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -74,7 +75,8 @@
 using namespace AccelByte;
 
 #pragma region Core
-FHttpRetryScheduler FRegistry::HttpRetryScheduler;
+FHttpRetrySchedulerRef FRegistry::HttpRetrySchedulerRef{ MakeShared<FHttpRetryScheduler, ESPMode::ThreadSafe>() };
+FHttpRetryScheduler& FRegistry::HttpRetryScheduler{ FRegistry::HttpRetrySchedulerRef.Get() };
 FAccelByteMessagingSystemPtr FRegistry::MessagingSystem = MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>();
 Settings FRegistry::Settings;
 FCredentialsRef FRegistry::CredentialsRef { MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*MessagingSystem.Get()) };
@@ -88,64 +90,114 @@ FAccelByteNotificationSender FRegistry::NotificationSender{*MessagingSystem.Get(
 FHttpClient FRegistry::HttpClient{ Credentials, Settings, HttpRetryScheduler };
 #pragma endregion
 
+#pragma region GameClientAccess
+const Api::UserPtr FRegistry::UserPtr{ MakeShared<Api::User, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::UserProfilePtr FRegistry::UserProfilePtr{ MakeShared<Api::UserProfile, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::GameProfilePtr FRegistry::GameProfilePtr{ MakeShared<Api::GameProfile, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::AgreementPtr FRegistry::AgreementPtr{ MakeShared<Api::Agreement, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::GDPRPtr FRegistry::GDPRPtr{ MakeShared<Api::GDPR, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::ReportingPtr FRegistry::ReportingPtr{ MakeShared<Api::Reporting, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::MiscellaneousPtr FRegistry::MiscellaneousPtr{ MakeShared<Api::Miscellaneous, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::ConfigurationsPtr FRegistry::ConfigurationsPtr{MakeShared<Api::Configurations, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler)};
+const Api::LoginQueuePtr FRegistry::LoginQueuePtr{ MakeShared<Api::LoginQueue, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+#pragma endregion
+
+#pragma region GameClientCommerce
+const Api::CurrencyPtr FRegistry::CurrencyPtr{ MakeShared<Api::Currency, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::WalletPtr FRegistry::WalletPtr{ MakeShared<Api::Wallet, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::CategoryPtr FRegistry::CategoryPtr{ MakeShared<Api::Category, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::ItemPtr FRegistry::ItemPtr{ MakeShared<Api::Item, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::OrderPtr FRegistry::OrderPtr{ MakeShared<Api::Order, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::EntitlementPtr FRegistry::EntitlementPtr{ MakeShared<Api::Entitlement, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::FulfillmentPtr FRegistry::FulfillmentPtr{ MakeShared<Api::Fulfillment, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::StoreDisplayPtr FRegistry::StoreDisplayPtr{ MakeShared<Api::StoreDisplay, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+#pragma endregion
+
+#pragma region GameClientStorage
+const Api::CloudStoragePtr FRegistry::CloudStoragePtr{ MakeShared<Api::CloudStorage, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::CloudSavePtr FRegistry::CloudSavePtr{ MakeShared<Api::CloudSave, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::UGCPtr FRegistry::UGCPtr{ MakeShared<Api::UGC, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::InventoryPtr FRegistry::InventoryPtr{MakeShared<Api::Inventory, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler)};
+#pragma endregion
+
+#pragma region GameClientEngagement
+const Api::StatisticPtr FRegistry::StatisticPtr{ MakeShared<Api::Statistic, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::AchievementPtr FRegistry::AchievementPtr{ MakeShared<Api::Achievement, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::LeaderboardPtr FRegistry::LeaderboardPtr{ MakeShared<Api::Leaderboard, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::RewardPtr FRegistry::RewardPtr{ MakeShared<Api::Reward, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::SeasonPassPtr FRegistry::SeasonPassPtr{ MakeShared<Api::SeasonPass, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::GroupPtr FRegistry::GroupPtr{ MakeShared<Api::Group, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::ChallengePtr FRegistry::ChallengePtr{ MakeShared<Api::Challenge, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+#pragma endregion
+
+#pragma region GameClientMultiplayer
+const Api::QosManagerPtr FRegistry::QosManagerPtr{ MakeShared<Api::QosManager, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::QosPtr FRegistry::QosPtr{ MakeShared<Api::Qos, ESPMode::ThreadSafe>( FRegistry::CredentialsRef.Get(), FRegistry::Settings,  *FRegistry::MessagingSystem.Get()) };
 const Api::LobbyPtr FRegistry::LobbyPtr{ MakeShared<Api::Lobby, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler, *FRegistry::MessagingSystem.Get(), FRegistry::NetworkConditioner) };
 const Api::ChatPtr FRegistry::ChatPtr{ MakeShared<Api::Chat, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler,  *FRegistry::MessagingSystem.Get(), FRegistry::NetworkConditioner) };
+const Api::SessionBrowserPtr FRegistry::SessionBrowserPtr{ MakeShared<Api::SessionBrowser, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::TurnManagerPtr FRegistry::TurnManagerPtr{ MakeShared<Api::TurnManager, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::SessionPtr FRegistry::SessionPtr{ MakeShared<Api::Session, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::MatchmakingV2Ptr FRegistry::MatchmakingV2Ptr{ MakeShared<Api::MatchmakingV2, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+const Api::AMSPtr FRegistry::AMSPtr{ MakeShared<Api::AMS, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+#pragma endregion
 
-const TSharedPtr<Api::Qos, ESPMode::ThreadSafe> FRegistry::QosPtr{ MakeShared<Api::Qos, ESPMode::ThreadSafe>( FRegistry::CredentialsRef.Get(), FRegistry::Settings,  *FRegistry::MessagingSystem.Get()) };
-
+#pragma region GameClientAnalytics
 const Api::GameTelemetryPtr FRegistry::GameTelemetryPtr{ MakeShared<Api::GameTelemetry, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
 const Api::PredefinedEventPtr FRegistry::PredefinedEventPtr{ MakeShared<Api::PredefinedEvent, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
 const Api::GameStandardEventPtr FRegistry::GameStandardEventPtr{ MakeShared<Api::GameStandardEvent, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler) };
+#pragma endregion
 
 #pragma region Game Client Access
-Api::User FRegistry::User{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::UserProfile FRegistry::UserProfile{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::GameProfile FRegistry::GameProfile{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Agreement FRegistry::Agreement{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::GDPR FRegistry::GDPR{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Reporting FRegistry::Reporting{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Miscellaneous FRegistry::Miscellaneous{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Configurations FRegistry::Configurations{FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler};
-Api::LoginQueue FRegistry::LoginQueue{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::User& FRegistry::User{ *FRegistry::UserPtr.Get()};
+Api::UserProfile& FRegistry::UserProfile{ *FRegistry::UserProfilePtr.Get()};
+Api::GameProfile& FRegistry::GameProfile{ *FRegistry::GameProfilePtr.Get() };
+Api::Agreement& FRegistry::Agreement{ *FRegistry::AgreementPtr.Get() };
+Api::GDPR& FRegistry::GDPR{ *FRegistry::GDPRPtr.Get() };
+Api::Reporting& FRegistry::Reporting{ *FRegistry::ReportingPtr.Get() };
+Api::Miscellaneous& FRegistry::Miscellaneous{ *FRegistry::MiscellaneousPtr.Get() };
+Api::Configurations& FRegistry::Configurations{*FRegistry::ConfigurationsPtr.Get() };
+Api::LoginQueue& FRegistry::LoginQueue{ *FRegistry::LoginQueuePtr.Get() };
 #pragma endregion
 
 #pragma region Game Client Commerce
-Api::Currency FRegistry::Currency{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Wallet FRegistry::Wallet{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Category FRegistry::Category{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Item FRegistry::Item{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Order FRegistry::Order{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Entitlement FRegistry::Entitlement{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Fulfillment FRegistry::Fulfillment{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::StoreDisplay FRegistry::StoreDisplay{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Currency& FRegistry::Currency{ *FRegistry::CurrencyPtr.Get() };
+Api::Wallet& FRegistry::Wallet{ *FRegistry::WalletPtr.Get() };
+Api::Category& FRegistry::Category{ *FRegistry::CategoryPtr.Get() };
+Api::Item& FRegistry::Item{ *FRegistry::ItemPtr.Get() };
+Api::Order& FRegistry::Order{ *FRegistry::OrderPtr.Get() };
+Api::Entitlement& FRegistry::Entitlement{ *FRegistry::EntitlementPtr.Get() };
+Api::Fulfillment& FRegistry::Fulfillment{ *FRegistry::FulfillmentPtr.Get() };
+Api::StoreDisplay& FRegistry::StoreDisplay{ *FRegistry::StoreDisplayPtr.Get() };
 #pragma endregion
 
 #pragma region Game Client Storage
-Api::CloudStorage FRegistry::CloudStorage{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::CloudSave FRegistry::CloudSave{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::UGC FRegistry::UGC{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::CloudStorage& FRegistry::CloudStorage{ *FRegistry::CloudStoragePtr.Get()};
+Api::CloudSave& FRegistry::CloudSave{ *FRegistry::CloudSavePtr.Get()};
+Api::UGC& FRegistry::UGC{ *FRegistry::UGCPtr.Get()};
+Api::Inventory& FRegistry::Inventory{ *FRegistry::InventoryPtr.Get()};
 #pragma endregion
 
 #pragma region Game Client Engagement
-Api::Statistic FRegistry::Statistic{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Achievement FRegistry::Achievement{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Leaderboard FRegistry::Leaderboard{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Reward FRegistry::Reward{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::SeasonPass FRegistry::SeasonPass{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Group FRegistry::Group{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::Challenge FRegistry::Challenge{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::Statistic& FRegistry::Statistic{ *FRegistry::StatisticPtr.Get() };
+Api::Achievement& FRegistry::Achievement{ *FRegistry::AchievementPtr.Get() };
+Api::Leaderboard& FRegistry::Leaderboard{ *FRegistry::LeaderboardPtr.Get() };
+Api::Reward& FRegistry::Reward{ *FRegistry::RewardPtr.Get() };
+Api::SeasonPass& FRegistry::SeasonPass{ *FRegistry::SeasonPassPtr.Get() };
+Api::Group& FRegistry::Group{ *FRegistry::GroupPtr.Get() };
+Api::Challenge& FRegistry::Challenge{ *FRegistry::ChallengePtr.Get() };
 #pragma endregion
 
 #pragma region Game Client Multiplayer
-Api::QosManager FRegistry::QosManager{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::QosManager& FRegistry::QosManager{ *FRegistry::QosManagerPtr.Get()};
 Api::Qos& FRegistry::Qos{ *FRegistry::QosPtr.Get()};
 Api::Lobby& FRegistry::Lobby{ *FRegistry::LobbyPtr.Get() };
 Api::Chat& FRegistry::Chat{ *FRegistry::ChatPtr.Get() };
-Api::SessionBrowser FRegistry::SessionBrowser{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::TurnManager FRegistry::TurnManager{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, HttpRetryScheduler };
-Api::Session FRegistry::Session{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::MatchmakingV2 FRegistry::MatchmakingV2{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
-Api::AMS FRegistry::AMS{ FRegistry::CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler };
+Api::SessionBrowser& FRegistry::SessionBrowser{ *FRegistry::SessionBrowserPtr.Get()};
+Api::TurnManager& FRegistry::TurnManager{ *FRegistry::TurnManagerPtr.Get()};
+Api::Session& FRegistry::Session{ *FRegistry::SessionPtr.Get()};
+Api::MatchmakingV2& FRegistry::MatchmakingV2{ *FRegistry::MatchmakingV2Ptr.Get()};
+Api::AMS& FRegistry::AMS{ *FRegistry::AMSPtr.Get()};
 #pragma endregion
 
 #pragma region Game Client Analytics

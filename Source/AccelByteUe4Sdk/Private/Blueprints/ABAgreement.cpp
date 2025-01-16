@@ -17,23 +17,31 @@ void UABAgreement::GetLegalPolicies(
 	FDArrayModelsPublicPolicyResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.GetLegalPolicies(
-		AgreementPolicyType,
-		DefaultOnEmpty,
-		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-			[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
-			{
-				FArrayModelsPublicPolicyResponse Result;
-				Result.Content = Response;
-				OnSuccess.ExecuteIfBound(Result);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->GetLegalPolicies(
+			AgreementPolicyType,
+			DefaultOnEmpty,
+			THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+				[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
+				{
+					FArrayModelsPublicPolicyResponse Result;
+					Result.Content = Response;
+					OnSuccess.ExecuteIfBound(Result);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::GetLegalPoliciesByNamespace(
@@ -43,24 +51,32 @@ void UABAgreement::GetLegalPoliciesByNamespace(
 	FDArrayModelsPublicPolicyResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.GetLegalPolicies(
-		Namespace,
-		AgreementPolicyType,
-		DefaultOnEmpty,
-		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-			[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
-			{
-				FArrayModelsPublicPolicyResponse Result;
-				Result.Content = Response;
-				OnSuccess.ExecuteIfBound(Result);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->GetLegalPolicies(
+			Namespace,
+			AgreementPolicyType,
+			DefaultOnEmpty,
+			THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+				[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
+				{
+					FArrayModelsPublicPolicyResponse Result;
+					Result.Content = Response;
+					OnSuccess.ExecuteIfBound(Result);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::GetLegalPoliciesByTags(
@@ -70,24 +86,32 @@ void UABAgreement::GetLegalPoliciesByTags(
 	FDArrayModelsPublicPolicyResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.GetLegalPolicies(
-		AgreementPolicyType,
-		tags,
-		DefaultOnEmpty,
-		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-			[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
-			{
-				FArrayModelsPublicPolicyResponse Result;
-				Result.Content = Response;
-				OnSuccess.ExecuteIfBound(Result);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->GetLegalPolicies(
+			AgreementPolicyType,
+			tags,
+			DefaultOnEmpty,
+			THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+				[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
+				{
+					FArrayModelsPublicPolicyResponse Result;
+					Result.Content = Response;
+					OnSuccess.ExecuteIfBound(Result);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::GetLegalPoliciesByCountry(
@@ -97,24 +121,32 @@ void UABAgreement::GetLegalPoliciesByCountry(
 	FDArrayModelsPublicPolicyResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.GetLegalPoliciesByCountry(
-		CountryCode,
-		AgreementPolicyType,
-		DefaultOnEmpty,
-		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-			[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
-			{
-				FArrayModelsPublicPolicyResponse Result;
-				Result.Content = Response;
-				OnSuccess.ExecuteIfBound(Result);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->GetLegalPoliciesByCountry(
+			CountryCode,
+			AgreementPolicyType,
+			DefaultOnEmpty,
+			THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+				[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
+				{
+					FArrayModelsPublicPolicyResponse Result;
+					Result.Content = Response;
+					OnSuccess.ExecuteIfBound(Result);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::GetLegalPoliciesByCountryAndTags(
@@ -125,25 +157,33 @@ void UABAgreement::GetLegalPoliciesByCountryAndTags(
 	FDArrayModelsPublicPolicyResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.GetLegalPoliciesByCountry(
-		CountryCode,
-		AgreementPolicyType,
-		Tags,
-		DefaultOnEmpty,
-		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-			[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
-			{
-				FArrayModelsPublicPolicyResponse Result;
-				Result.Content = Response;
-				OnSuccess.ExecuteIfBound(Result);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->GetLegalPoliciesByCountry(
+			CountryCode,
+			AgreementPolicyType,
+			Tags,
+			DefaultOnEmpty,
+			THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+				[OnSuccess](TArray<FAccelByteModelsPublicPolicy> const& Response)
+				{
+					FArrayModelsPublicPolicyResponse Result;
+					Result.Content = Response;
+					OnSuccess.ExecuteIfBound(Result);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::BulkAcceptPolicyVersions(
@@ -151,21 +191,29 @@ void UABAgreement::BulkAcceptPolicyVersions(
 	FDModelsAcceptAgreementResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.BulkAcceptPolicyVersions(
-		AgreementRequests.Content,
-		THandler<FAccelByteModelsAcceptAgreementResponse>::CreateLambda(
-			[OnSuccess](FAccelByteModelsAcceptAgreementResponse const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->BulkAcceptPolicyVersions(
+			AgreementRequests.Content,
+			THandler<FAccelByteModelsAcceptAgreementResponse>::CreateLambda(
+				[OnSuccess](FAccelByteModelsAcceptAgreementResponse const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::AcceptPolicyVersion(
@@ -173,21 +221,29 @@ void UABAgreement::AcceptPolicyVersion(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.AcceptPolicyVersion(
-		LocalizedPolicyVersionId,
-		FVoidHandler::CreateLambda(
-			[OnSuccess]()
-			{
-				OnSuccess.ExecuteIfBound();
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->AcceptPolicyVersion(
+			LocalizedPolicyVersionId,
+			FVoidHandler::CreateLambda(
+				[OnSuccess]()
+				{
+					OnSuccess.ExecuteIfBound();
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::ChangePolicyPreferences(
@@ -195,21 +251,29 @@ void UABAgreement::ChangePolicyPreferences(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.ChangePolicyPreferences(
-		ChangeAgreementRequests,
-		FVoidHandler::CreateLambda(
-			[OnSuccess]()
-			{
-				OnSuccess.ExecuteIfBound();
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->ChangePolicyPreferences(
+			ChangeAgreementRequests,
+			FVoidHandler::CreateLambda(
+				[OnSuccess]()
+				{
+					OnSuccess.ExecuteIfBound();
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::QueryLegalEligibilities(
@@ -217,23 +281,31 @@ void UABAgreement::QueryLegalEligibilities(
 	FDArrayModelsRetrieveUserEligibilitiesResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.QueryLegalEligibilities(
-		Namespace,
-		THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
-			[OnSuccess](TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> const& Response)
-			{
-				FArrayModelsRetrieveUserEligibilitiesResponse Result;
-				Result.Content = Response;
-				OnSuccess.ExecuteIfBound(Result);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->QueryLegalEligibilities(
+			Namespace,
+			THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
+				[OnSuccess](TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> const& Response)
+				{
+					FArrayModelsRetrieveUserEligibilitiesResponse Result;
+					Result.Content = Response;
+					OnSuccess.ExecuteIfBound(Result);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAgreement::GetLegalDocument(
@@ -241,19 +313,27 @@ void UABAgreement::GetLegalDocument(
 	FDString const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Agreement.GetLegalDocument(
-		Url,
-		THandler<FString>::CreateLambda(
-			[OnSuccess](FString const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto AgreementPtr = ApiClientPtr->GetAgreementApi().Pin();
+	if (AgreementPtr.IsValid())
+	{
+		AgreementPtr->GetLegalDocument(
+			Url,
+			THandler<FString>::CreateLambda(
+				[OnSuccess](FString const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

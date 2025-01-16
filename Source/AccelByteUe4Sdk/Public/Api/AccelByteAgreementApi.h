@@ -20,7 +20,7 @@ namespace Api
 /**
  * @brief Agreement API to obtain and accept legal in a namespace.
  */
-class ACCELBYTEUE4SDK_API Agreement : public FApiBase
+class ACCELBYTEUE4SDK_API Agreement : public FApiBase, public TSharedFromThis<Agreement, ESPMode::ThreadSafe>
 {
 public:
 	Agreement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -195,6 +195,10 @@ private:
 
 	static FString ConvertAgreementPolicyType(EAccelByteAgreementPolicyType const& AgreementPolicyType);
 };
+
+typedef TSharedRef<Agreement, ESPMode::ThreadSafe> AgreementRef;
+typedef TSharedPtr<Agreement, ESPMode::ThreadSafe> AgreementPtr;
+typedef TWeakPtr<Agreement, ESPMode::ThreadSafe> AgreementWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

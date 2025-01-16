@@ -9,6 +9,9 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteGeneralModels.h"
 
+#define FAccelByteTimeManagerPtr TSharedPtr<FAccelByteTimeManager, ESPMode::ThreadSafe>
+#define FAccelByteTimeManagerWPtr TWeakPtr<FAccelByteTimeManager, ESPMode::ThreadSafe>
+
 namespace AccelByte
 {
 
@@ -19,6 +22,7 @@ class ACCELBYTEUE4SDK_API FAccelByteTimeManager
 {
 public:
 	FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& InHttpRef);
+	FAccelByteTimeManager();
 	virtual ~FAccelByteTimeManager();
 
 	/**
@@ -53,7 +57,7 @@ public:
 	 * 
 	 * @return Current Server Time in FDateTime.
 	 */
-	virtual FDateTime GetCurrentServerTime() const;
+	virtual FDateTime GetCurrentServerTime();
 
 	/**
 	 * @brief Check whether the time manager is in sync with server time or not.
@@ -68,7 +72,7 @@ protected:
 	 * 
 	 * @return The timespan from the last time the Server Time is sync'd in FTimespan.
 	 */
-	virtual FTimespan BackCalculateServerTime() const;
+	virtual FTimespan BackCalculateServerTime();
 
 private:
 	bool bUseSharedResources{ false };
@@ -77,6 +81,11 @@ private:
 	/** Critical sections for thread safe operation of ServerTime */
 	mutable FCriticalSection ServerTimeLock;
 
+	FDateTime CachedServerTime{ FDateTime::MinValue() };
+	FDateTime CurrentServerTime{ FDateTime::MinValue() };
+	FDateTime ServerTimeLastUpdated{ FDateTime::MinValue() };
+	FThreadSafeCounter ReferenceCount{0};
+	
 	FAccelByteTaskWPtr AccelByteGetServerTimeTaskWPtr;
 };
 }

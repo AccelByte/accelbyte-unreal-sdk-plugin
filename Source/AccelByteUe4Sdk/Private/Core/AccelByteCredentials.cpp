@@ -41,6 +41,11 @@ Credentials::~Credentials()
 	{
 		RefreshTokenTaskPtr->Cancel();
 	}
+
+	if (BearerAuthRejectedHandle.IsValid())
+	{
+		BearerAuthRejectedHandle.Reset();
+	}
 }
 
 const FString Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
@@ -290,6 +295,7 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	switch (SessionState)
 	{
 	case ESessionState::Expired:
+	case ESessionState::Rejected:
 	case ESessionState::Valid:
 		if (RefreshTime <= CurrentTime)
 		{
@@ -353,6 +359,7 @@ void Credentials::PollRefreshToken(double CurrentTime)
 		break;
 	case ESessionState::Refreshing:
 	case ESessionState::Invalid:
+	default:
 		break;
 	}
 }
@@ -369,11 +376,14 @@ const FOauth2Token& Credentials::GetAuthToken() const
 
 void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 {
-	HttpRef.SetBearerAuthRejectedDelegate(
-		FHttpRetryScheduler::FBearerAuthRejected::CreateLambda([&]()
-			{
-				BearerAuthRejectedRefreshToken(HttpRef);
-			}));
+	if (BearerAuthRejectedHandle.IsValid())
+	{
+		HttpRef.RemoveBearerAuthRejectedDelegate(BearerAuthRejectedHandle);
+		BearerAuthRejectedHandle.Reset();
+	}
+	FHttpRetrySchedulerWPtr HttpWPtr = HttpRef.AsShared();
+	BearerAuthRejectedHandle = HttpRef.AddBearerAuthRejectedDelegate(
+		FHttpRetryScheduler::FBearerAuthRejected::CreateThreadSafeSP(AsShared(), &Credentials::OnBearerAuthRejected, HttpWPtr));
 }
 
 void Credentials::SetErrorOAuth(const FErrorOAuthInfo& NewErrorOAuthInfo)
@@ -406,33 +416,45 @@ Credentials::FOnLogoutSuccessDelegate& Credentials::OnLogoutSuccess()
 	return LogoutSuccessDelegate;
 }
 
-void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)
+void Credentials::OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr)
 {
-	if (GetSessionState() == ESessionState::Refreshing)
+	auto HttpPtr = HttpWPtr.Pin();
+
+	if (!HttpPtr.IsValid() || GetSessionState() == ESessionState::Refreshing)
 	{
 		return;
 	}
-	else if (GetSessionState() == ESessionState::Invalid) 
+
+	if (GetSessionState() == ESessionState::Invalid)
 	{
-		HttpRef.ResumeBearerAuthRequest(GetAccessToken());
+		HttpPtr->ResumeBearerAuthRequest(GetAccessToken());
 		return;
 	}
 
-	UE_LOG(LogAccelByteCredentials, Verbose, TEXT("BearerAuthRejectedRefreshToken"));
-	HttpRef.PauseBearerAuthRequest();
+	UE_LOG(LogAccelByteCredentials, Verbose, TEXT("OnBearerAuthRejected triggered"));
+	HttpPtr->PauseBearerAuthRequest();
+	SessionState = ESessionState::Rejected;
 
-	RefreshTokenAdditionalActions.AddLambda([&](bool bSuccess)
-		{
-			FString UpdatedToken = TEXT("");
-			if (bSuccess)
-			{
-				UpdatedToken = GetAccessToken();
-			}
-			
-			HttpRef.ResumeBearerAuthRequest(UpdatedToken);
-		});
+	RefreshTokenAdditionalActions.AddThreadSafeSP(AsShared(), &Credentials::OnBearerAuthRefreshed, HttpWPtr);
 
 	ScheduleRefreshToken(FPlatformTime::Seconds());
+}
+
+void Credentials::OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPtr HttpWPtr)
+{
+	auto HttpPtr = HttpWPtr.Pin();
+	if (!HttpPtr.IsValid())
+	{
+		return;
+	}
+
+	FString UpdatedToken = TEXT("");
+	if (bSuccessful)
+	{
+		UpdatedToken = GetAccessToken();
+	}
+
+	HttpPtr->ResumeBearerAuthRequest(UpdatedToken);
 }
 } // Namespace AccelByte
 

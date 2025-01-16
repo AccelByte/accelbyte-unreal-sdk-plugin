@@ -24,6 +24,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsReportingAdditionalInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
 	TArray<FString> Screenshots{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
+	FString TopicId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
+	FDateTime ChatCreatedAt{0};
 };
 
 USTRUCT(BlueprintType)

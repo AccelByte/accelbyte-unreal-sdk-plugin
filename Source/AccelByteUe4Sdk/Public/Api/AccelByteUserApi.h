@@ -17,13 +17,10 @@ namespace AccelByte
 namespace Api
 {
 
-class Entitlement;
-class Item;
-
 /**
  * @brief User management API for creating user, verifying user, and resetting password.
  */
-class ACCELBYTEUE4SDK_API User : public FApiBase
+class ACCELBYTEUE4SDK_API User : public FApiBase, public TSharedFromThis<User, ESPMode::ThreadSafe>
 {
 public:
 	User(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef);
@@ -1720,6 +1717,7 @@ public:
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	bool IsTokenExpired(FRefreshInfo RefreshInfo);
 private:
 	User() = delete;
 	User(User const&) = delete;
@@ -1775,6 +1773,10 @@ private:
 	void TriggerInvalidRequestError(FString const& ErrorMessage
 		, FOAuthErrorHandler const& OnError);
 };
+
+typedef TSharedRef<User, ESPMode::ThreadSafe> UserRef;
+typedef TSharedPtr<User, ESPMode::ThreadSafe> UserPtr;
+typedef TWeakPtr<User, ESPMode::ThreadSafe> UserWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

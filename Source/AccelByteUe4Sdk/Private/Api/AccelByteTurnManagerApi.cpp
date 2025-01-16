@@ -52,8 +52,9 @@ FAccelByteTaskWPtr TurnManager::GetTurnServersV2(THandler<FAccelByteModelsTurnSe
 FAccelByteTaskWPtr TurnManager::GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer>& OnSuccess
 	, FErrorHandler const& OnError)
 {
+	TurnManagerWPtr TurnManagerWeak = AsShared();
 	return GetTurnServers(THandler<FAccelByteModelsTurnServerList>::CreateLambda(
-			[this, OnError, OnSuccess](const FAccelByteModelsTurnServerList& Result)
+			[TurnManagerWeak, OnError, OnSuccess](const FAccelByteModelsTurnServerList& Result)
 			{
 				if(Result.Servers.Num() == 0)
 				{
@@ -61,29 +62,45 @@ FAccelByteTaskWPtr TurnManager::GetClosestTurnServer(const THandler<FAccelByteMo
 				}
 				else
 				{
-					FastestPing = 1000;
-					Counter = 0;
-					for (int i=0;i< Result.Servers.Num();i++)
+					const auto TurnManagerPtr = TurnManagerWeak.Pin();
+					if(TurnManagerPtr.IsValid())
 					{
-						auto Server = Result.Servers[i];
-						int Count = Result.Servers.Num();
-						FAccelBytePing::SendUdpPing(*Server.Ip, Server.Qos_port
-							, 10.0f
-							, FPingCompleteDelegate::CreateLambda(
-								[this, Server, Count, OnSuccess](FPingResult PingResult)
-								{
-									Counter++;
-									if (FastestPing > PingResult.AverageRoundTrip)
+						TurnManagerPtr->FastestPing = 1000;
+						TurnManagerPtr->Counter = 0;
+						for (int i=0;i< Result.Servers.Num();i++)
+						{
+							auto Server = Result.Servers[i];
+							int Count = Result.Servers.Num();
+							FAccelBytePing::SendUdpPing(*Server.Ip, Server.Qos_port
+								, 10.0f
+								, FPingCompleteDelegate::CreateLambda(
+									[TurnManagerWeak, Server, Count, OnSuccess, OnError](FPingResult PingResult)
 									{
-										FastestPing = PingResult.AverageRoundTrip;
-										ClosestServer = Server;
-									}
-									if (Counter == Count)
-									{
-										OnSuccess.ExecuteIfBound(ClosestServer);
-									}
-								})
-						);
+										const auto TurnManagerPtr = TurnManagerWeak.Pin();
+										if (TurnManagerPtr.IsValid())
+										{
+											TurnManagerPtr->Counter++;
+											if (TurnManagerPtr->FastestPing > PingResult.AverageRoundTrip)
+											{
+												TurnManagerPtr->FastestPing = PingResult.AverageRoundTrip;
+												TurnManagerPtr->ClosestServer = Server;
+											}
+											if (TurnManagerPtr->Counter == Count)
+											{
+												OnSuccess.ExecuteIfBound(TurnManagerPtr->ClosestServer);
+											}
+										}
+										else
+										{
+											OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("turnManager Api is invalid"));
+										}
+									})
+							);
+						}
+					}
+					else
+					{
+						OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("turnManager Api is invalid"));
 					}
 				}
 			})
@@ -97,8 +114,9 @@ FAccelByteTaskWPtr TurnManager::GetClosestTurnServer(const THandler<FAccelByteMo
 FAccelByteTaskWPtr TurnManager::GetClosestTurnServerV2(const THandler<FAccelByteModelsTurnServer>& OnSuccess
 	, FErrorHandler const& OnError)
 {
+	TurnManagerWPtr TurnManagerWeak = AsShared();
 	return GetTurnServersV2(THandler<FAccelByteModelsTurnServerList>::CreateLambda(
-			[this, OnError, OnSuccess](const FAccelByteModelsTurnServerList& Result)
+			[TurnManagerWeak, OnError, OnSuccess](const FAccelByteModelsTurnServerList& Result)
 			{
 				if(Result.Servers.Num() == 0)
 				{
@@ -106,29 +124,45 @@ FAccelByteTaskWPtr TurnManager::GetClosestTurnServerV2(const THandler<FAccelByte
 				}
 				else
 				{
-					FastestPing = 1000;
-					Counter = 0;
-					for (int i=0;i< Result.Servers.Num();i++)
+					const auto TurnManagerPtr = TurnManagerWeak.Pin();
+					if (TurnManagerPtr.IsValid())
 					{
-						auto Server = Result.Servers[i];
-						int Count = Result.Servers.Num();
-						FAccelBytePing::SendUdpPing(*Server.Ip, Server.Qos_port
-							, 10.0f
-							, FPingCompleteDelegate::CreateLambda(
-								[this, Server, Count, OnSuccess](FPingResult PingResult)
-								{
-									Counter++;
-									if (FastestPing > PingResult.AverageRoundTrip)
+						TurnManagerPtr->FastestPing = 1000;
+						TurnManagerPtr->Counter = 0;
+						for (int i = 0; i < Result.Servers.Num(); i++)
+						{
+							auto Server = Result.Servers[i];
+							int Count = Result.Servers.Num();
+							FAccelBytePing::SendUdpPing(*Server.Ip, Server.Qos_port
+								, 10.0f
+								, FPingCompleteDelegate::CreateLambda(
+									[TurnManagerWeak, Server, Count, OnSuccess, OnError](FPingResult PingResult)
 									{
-										FastestPing = PingResult.AverageRoundTrip;
-										ClosestServer = Server;
-									}
-									if (Counter == Count)
-									{
-										OnSuccess.ExecuteIfBound(ClosestServer);
-									}
-								})
-						);
+										const auto TurnManagerPtr = TurnManagerWeak.Pin();
+										if (TurnManagerPtr.IsValid())
+										{
+											TurnManagerPtr->Counter++;
+											if (TurnManagerPtr->FastestPing > PingResult.AverageRoundTrip)
+											{
+												TurnManagerPtr->FastestPing = PingResult.AverageRoundTrip;
+												TurnManagerPtr->ClosestServer = Server;
+											}
+											if (TurnManagerPtr->Counter == Count)
+											{
+												OnSuccess.ExecuteIfBound(TurnManagerPtr->ClosestServer);
+											}
+										}
+										else
+										{
+											OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("turnManager Api is invalid"));
+										}
+									})
+							);
+						}
+					}
+					else
+					{
+						OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("turnManager Api is invalid"));
 					}
 				}
 			})
@@ -143,7 +177,7 @@ FAccelByteTaskWPtr TurnManager::GetTurnServerLatencyByRegion(const FString& Regi
 	THandler<int32> const& OnSuccess, FErrorHandler const& OnError)
 {
 	return GetTurnServersV2(THandler<FAccelByteModelsTurnServerList>::CreateLambda(
-			[this, OnError, OnSuccess, &Region](const FAccelByteModelsTurnServerList& Result)
+			[OnError, OnSuccess, &Region](const FAccelByteModelsTurnServerList& Result)
 			{
 				if(Result.Servers.Num() == 0)
 				{
@@ -237,12 +271,17 @@ FAccelByteTaskWPtr TurnManager::SendMetric(FString const& SelectedTurnServerRegi
 void TurnManager::GetTurnServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess
 	, const FErrorHandler& OnError)
 {
+	TurnManagerWPtr TurnManagerWeak = AsShared();
 	GetTurnServersV2(THandler<FAccelByteModelsTurnServerList>::CreateLambda(
-		[this, OnPingRegionsSuccess, OnError](const FAccelByteModelsTurnServerList Result)
+		[TurnManagerWeak, OnPingRegionsSuccess, OnError](const FAccelByteModelsTurnServerList Result)
 		{
 			TurnManager::TurnServers = Result; // Cache for the session
 
-			PingRegionsSetLatencies(TurnManager::TurnServers, OnPingRegionsSuccess, OnError);
+			const auto TurnManagerPtr = TurnManagerWeak.Pin();
+			if (TurnManagerPtr.IsValid())
+			{
+				TurnManagerPtr->PingRegionsSetLatencies(TurnManager::TurnServers, OnPingRegionsSuccess, OnError);
+			}
 		}), OnError);
 }
 
@@ -270,7 +309,7 @@ void TurnManager::PingRegionsSetLatencies(const FAccelByteModelsTurnServerList& 
 
 			// Ping -> Get the latencies on pong.
 			FAccelBytePing::SendUdpPing(Server.Ip, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
-				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError, this](const FPingResult& PingResult)
+				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError](const FPingResult& PingResult)
 				{
 					if (PingResult.Status == FPingResultStatus::Success)
 					{

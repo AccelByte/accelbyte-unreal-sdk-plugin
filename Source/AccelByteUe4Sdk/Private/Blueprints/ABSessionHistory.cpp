@@ -19,21 +19,29 @@ void UABSessionHistory::QueryGameSessionHistory(
 	int32 Limit
 )
 {
-	ApiClientPtr->SessionHistory.QueryGameSessionHistory(
+	const auto SessionHistoryPtr = ApiClientPtr->GetSessionHistoryApi().Pin();
+	if (SessionHistoryPtr.IsValid())
+	{
+		SessionHistoryPtr->QueryGameSessionHistory(
 		THandler<FAccelByteModelsGameSessionHistoriesResult>::CreateLambda(
 			[OnSuccess](FAccelByteModelsGameSessionHistoriesResult const& Response)
 			{
 				OnSuccess.ExecuteIfBound(Response);
 			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		),
-		SortBy,
-		Offset,
-		Limit
-	);
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			),
+			SortBy,
+			Offset,
+			Limit
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

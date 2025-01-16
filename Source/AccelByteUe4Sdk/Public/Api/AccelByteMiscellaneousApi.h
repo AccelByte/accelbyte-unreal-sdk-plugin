@@ -18,7 +18,7 @@ class Settings;
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API Miscellaneous : public FApiBase
+class ACCELBYTEUE4SDK_API Miscellaneous : public FApiBase, public TSharedFromThis<Miscellaneous, ESPMode::ThreadSafe>
 {
 public:
 	Miscellaneous(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -42,6 +42,10 @@ private:
 
 	AccelByte::FAccelByteTimeManager TimeManager;
 };
+
+typedef TSharedRef<Miscellaneous, ESPMode::ThreadSafe> MiscellaneousRef;
+typedef TSharedPtr<Miscellaneous, ESPMode::ThreadSafe> MiscellaneousPtr;
+typedef TWeakPtr<Miscellaneous, ESPMode::ThreadSafe> MiscellaneousWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

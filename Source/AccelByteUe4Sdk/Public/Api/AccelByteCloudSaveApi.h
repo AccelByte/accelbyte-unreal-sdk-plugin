@@ -19,7 +19,7 @@ namespace Api
 /**
  * @brief CloudSave API for storing records.
  */
-class ACCELBYTEUE4SDK_API CloudSave : public FApiBase
+class ACCELBYTEUE4SDK_API CloudSave : public FApiBase, public TSharedFromThis<CloudSave, ESPMode::ThreadSafe>
 {
 	
 #define MAX_BULK_KEY_COUNT 20
@@ -434,6 +434,10 @@ private:
 	static FAccelByteModelsUserRecord ConvertJsonToUserRecord(FJsonObject const& JSONObject);
 	static FAccelByteModelsGameRecord ConvertJsonToGameRecord(FJsonObject const& JSONObject);
 };
+
+typedef TSharedRef<CloudSave, ESPMode::ThreadSafe> CloudSaveRef;
+typedef TSharedPtr<CloudSave, ESPMode::ThreadSafe> CloudSavePtr;
+typedef TWeakPtr<CloudSave, ESPMode::ThreadSafe> CloudSaveWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

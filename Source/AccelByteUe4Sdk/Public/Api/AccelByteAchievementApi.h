@@ -19,7 +19,7 @@ namespace Api
 /**
  * @brief Provide APIs to access Achievement service.
  */
-class ACCELBYTEUE4SDK_API Achievement : public FApiBase
+class ACCELBYTEUE4SDK_API Achievement : public FApiBase, public TSharedFromThis<Achievement, ESPMode::ThreadSafe>
 {
 public:
 	Achievement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -242,6 +242,10 @@ private:
 	static FString ConvertGlobalAchievementTypeToString(EAccelByteGlobalAchievementStatus const& Status);
 	static FString ConvertGlobalAchievementContributosSortByToString(EAccelByteGlobalAchievementContributorsSortBy const& SortBy);
 };
+
+typedef TSharedRef<Achievement, ESPMode::ThreadSafe> AchievementRef;
+typedef TSharedPtr<Achievement, ESPMode::ThreadSafe> AchievementPtr;
+typedef TWeakPtr<Achievement, ESPMode::ThreadSafe> AchievementWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

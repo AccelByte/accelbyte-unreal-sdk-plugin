@@ -24,7 +24,7 @@ namespace Api
 /**
  * @brief GameProfile API to manage user's in-game profiles (character).
  */
-class ACCELBYTEUE4SDK_API GameProfile : public FApiBase
+class ACCELBYTEUE4SDK_API GameProfile : public FApiBase, public TSharedFromThis<GameProfile, ESPMode::ThreadSafe>
 {
 public:
 	GameProfile(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -143,6 +143,10 @@ private:
 	GameProfile(GameProfile const&) = delete;
 	GameProfile(GameProfile&&) = delete;
 };
+
+typedef TSharedRef<GameProfile, ESPMode::ThreadSafe> GameProfileRef;
+typedef TSharedPtr<GameProfile, ESPMode::ThreadSafe> GameProfilePtr;
+typedef TWeakPtr<GameProfile, ESPMode::ThreadSafe> GameProfileWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

@@ -108,7 +108,7 @@ public:
 	);
 
 	/**
-	 * Create a websocket using server credentials. Used to create a socket for DSHub.
+	 * @brief Create a websocket using server credentials. Used to create a socket for DSHub.
 	 */
 	static TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> Create(
 		const FString& Url,
@@ -164,18 +164,11 @@ private:
 	TSharedPtr<IWebSocketFactory> WebSocketFactory;
 
 	/**
-	 * Pointer to a client credentials instance for authenticating this websocket. Since we don't want the websocket to
-	 * own the credentials instance, but we also want to be able to have it nullable in favor of server credentials. Do
-	 * not delete this pointer!
+	 * @brief Pointer to a client or server credentials instance for authenticating this websocket.
+	 * 
+	 * NOTE: Do not delete this pointer!
 	 */
-	const Credentials* ClientCreds = nullptr;
-	
-	/**
-	 * Pointer to a server credentials instance for authenticating this websocket. Since we don't want the websocket to
-	 * own the credentials instance, but we also want to be able to have it nullable in favor of client credentials. Do
-	 * not delete this pointer!
-	 */
-	const ServerCredentials* ServerCreds = nullptr;
+	TWeakPtr<const BaseCredentials, ESPMode::ThreadSafe> CredentialsWPtr = nullptr;
 
 	FString Url;
 	FString Protocol;

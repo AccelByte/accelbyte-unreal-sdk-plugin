@@ -180,6 +180,33 @@ FAccelByteTaskWPtr Session::SendGameSessionInvite(FString const& GameSessionID
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Session::SendGameSessionInvitePlatform(FString const& GameSessionID, FString const& UserID
+	, EAccelByteV2SessionPlatform const& Platform
+	, THandler<FAccelByteModelsV2SessionInvitePlatformResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Platform == EAccelByteV2SessionPlatform::Unknown)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform type cannot be unknown when sending invite!"));
+		return nullptr;
+	}
+
+	const FAccelByteModelsV2SessionInvitePlatformRequest RequestBody =
+	{
+		FAccelByteUtilities::GetUEnumValueAsString(Platform).ToUpper(),
+		UserID
+	};
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/invite")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *GameSessionID);
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Session::RejectGameSessionInvite(FString const& GameSessionID
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -455,6 +482,34 @@ FAccelByteTaskWPtr Session::SendPartyInvite(FString const& PartyID
 	FReport::Log(FString(__FUNCTION__));
 
 	const FAccelByteModelsV2SessionInviteRequest RequestBody = {InviteeID};
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/invite")
+		, *SettingsRef.SessionServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *PartyID);
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Session::SendPartyInvitePlatform(FString const& PartyID
+	, FString const& UserID
+	, EAccelByteV2SessionPlatform const& Platform
+	, THandler<FAccelByteModelsV2SessionInvitePlatformResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Platform == EAccelByteV2SessionPlatform::Unknown)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform type cannot be unknown when sending invite!"));
+		return nullptr;
+	}
+
+	const FAccelByteModelsV2SessionInvitePlatformRequest RequestBody =
+	{
+		FAccelByteUtilities::GetUEnumValueAsString(Platform).ToUpper(),
+		UserID
+	};
+	
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/invite")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()

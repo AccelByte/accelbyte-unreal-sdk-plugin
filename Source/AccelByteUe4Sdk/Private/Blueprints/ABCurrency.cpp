@@ -18,18 +18,26 @@ void UABCurrency::GetCurrencyList(
 	FDErrorHandler OnError,
 	EAccelByteCurrencyType CurrencyType) 
 {
-	ApiClientPtr->Currency.GetCurrencyList(
-		FRegistry::Settings.Namespace,
-		THandler<TArray<FAccelByteModelsCurrencyList>>::CreateLambda(
-			[OnSuccess](TArray<FAccelByteModelsCurrencyList> const& Response)
-			{
-				FArrayModelsCurrencyList Result;
-				Result.Content = Response;
-				OnSuccess.ExecuteIfBound(Result);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}), CurrencyType);
+	const auto CurrencyPtr = ApiClientPtr->GetCurrencyApi().Pin();
+	if (CurrencyPtr.IsValid())
+	{
+		CurrencyPtr->GetCurrencyList(
+			FRegistry::Settings.Namespace,
+			THandler<TArray<FAccelByteModelsCurrencyList>>::CreateLambda(
+				[OnSuccess](TArray<FAccelByteModelsCurrencyList> const& Response)
+				{
+					FArrayModelsCurrencyList Result;
+					Result.Content = Response;
+					OnSuccess.ExecuteIfBound(Result);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}), CurrencyType);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

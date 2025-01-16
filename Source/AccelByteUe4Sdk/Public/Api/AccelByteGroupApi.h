@@ -20,7 +20,7 @@ namespace Api
  * @brief Provide APIs to access Group [Management] service.
  * - While authed, Namespace is automatically passed to all Requests.
  */
-class ACCELBYTEUE4SDK_API Group : public FApiBase
+class ACCELBYTEUE4SDK_API Group : public FApiBase, public TSharedFromThis<Group, ESPMode::ThreadSafe>
 {
 public:
 	Group(Credentials const& InCredentialsRef
@@ -1044,6 +1044,10 @@ private:
 
 	static FString ConvertGroupAllowedActionToString(const EAccelByteAllowedAction& AllowedAction);
 };
+
+typedef TSharedRef<Group, ESPMode::ThreadSafe> GroupRef;
+typedef TSharedPtr<Group, ESPMode::ThreadSafe> GroupPtr;
+typedef TWeakPtr<Group, ESPMode::ThreadSafe> GroupWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

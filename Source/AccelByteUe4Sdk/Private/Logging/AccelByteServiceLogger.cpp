@@ -7,7 +7,14 @@
 
 #if !UE_BUILD_SHIPPING && ACCELBYTE_SERVICE_LOGGING_ENABLED
 
-DEFINE_LOG_CATEGORY(LogAccelByteServiceLogging);
+static TAutoConsoleVariable<bool> CVarAccelbyteEnableServiceLogging(
+	TEXT("accelbyte.log.EnableServiceLogging"),
+	false,
+	TEXT("Enable Accelbyte Service Logging, read by the Visual Debugger"),
+	ECVF_Default
+);
+
+DEFINE_LOG_CATEGORY(LogAccelByteServiceLoggingEvent);
 
 namespace AccelByte
 {
@@ -28,7 +35,7 @@ FString GenerateHttpHeaderString(const FHttpRequestPtr& Request)
 {
 	auto http_headers = Request->GetAllHeaders(); // return sting in Key: Value format	
 
-	FString headerJsonStr = GetHeaderJsonStr(Request);
+	FString headerJsonStr;
 
 	for (int i = 0; i < http_headers.Num(); i++)
 	{
@@ -37,10 +44,10 @@ FString GenerateHttpHeaderString(const FHttpRequestPtr& Request)
 		FString header_value = TEXT("");
 		header.Split(": ", &header_key, &header_value);
 
-		if (header_key == "Autorization")
+		if (header_key == "Authorization")
 		{
 			// truncate the Authorization header
-			header_key = header_key.Left(0, 16);
+			header_key = header_key.Left(16);
 		}
 
 		headerJsonStr.Append(FString::Printf(TEXT(R"LOG(%s"%s":"%s")LOG"), i > 0 ? "," : "", *header_key, *header_value));
@@ -87,7 +94,7 @@ FString GenerateHttpResponseString(FHttpRequestPtr Request, FHttpResponsePtr Res
 	}
 
 	// build message for http response
-	FString headerJsonStr = GetHeaderJsonStr(Request);
+	FString headerJsonStr = GenerateHttpHeaderString(Request);
 	const TArray<uint8> Payload = Response->GetContent();
 	FString payloadJsonStr = (Response == nullptr ? FAccelByteArrayByteFStringConverter::BytesToFString(Payload, true) : Response->GetContentAsString());
 
@@ -167,22 +174,34 @@ FString GenerateWebsocketResponseString(FString payloadStr)
 
 void ServiceLogger::LogHttpRequest(const FHttpRequestPtr& Request)
 {
-	UE_LOG(LogAccelByteServiceLogging, VeryVerbose, TEXT("%s"), *GenerateHttpRequestString(Request));
+	if (CVarAccelbyteEnableServiceLogging.GetValueOnAnyThread())
+	{
+		UE_LOG(LogAccelByteServiceLoggingEvent, VeryVerbose, TEXT("%s"), *GenerateHttpRequestString(Request));
+	}
 }
 
 void ServiceLogger::LogHttpResponse(const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, bool bFinished)
 {
-	UE_LOG(LogAccelByteServiceLogging, VeryVerbose, TEXT("%s"), *GenerateHttpResponseString(Request, Response, bFinished));
+	if (CVarAccelbyteEnableServiceLogging.GetValueOnAnyThread())
+	{
+		UE_LOG(LogAccelByteServiceLoggingEvent, VeryVerbose, TEXT("%s"), *GenerateHttpResponseString(Request, Response, bFinished));
+	}
 }
 
 void ServiceLogger::LogWebsocketRequest(const FString& message)
 {
-	UE_LOG(LogAccelByteServiceLogging, VeryVerbose, TEXT("%s"), *GenerateWebsocketRequestString(message));
+	if (CVarAccelbyteEnableServiceLogging.GetValueOnAnyThread())
+	{
+		UE_LOG(LogAccelByteServiceLoggingEvent, VeryVerbose, TEXT("%s"), *GenerateWebsocketRequestString(message));
+	}
 }
 
 void ServiceLogger::LogWebsocketResponse(const FString& message)
 {
-	UE_LOG(LogAccelByteServiceLogging, VeryVerbose, TEXT("%s"), *GenerateWebsocketResponseString(message));
+	if (CVarAccelbyteEnableServiceLogging.GetValueOnAnyThread())
+	{
+		UE_LOG(LogAccelByteServiceLoggingEvent, VeryVerbose, TEXT("%s"), *GenerateWebsocketResponseString(message));
+	}
 }
 
 } // Namespace Logging

@@ -4,117 +4,95 @@
 
 #include "Core/AccelByteMultiRegistry.h"
 
+#include "AccelByteUe4SdkModule.h"
+
 namespace AccelByte
 {
-
+	
+FAccelByteInstancePtr FMultiRegistry::AccelByteInstance;
+	
 FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key, bool bCreateIfNotFound)
 {
-	if (!ApiClientInstances.Contains(Key))
+	if(!AccelByteInstance.IsValid())
 	{
-		if (!bCreateIfNotFound)
-		{
-			return nullptr;
-		}
-
-		FApiClientPtr NewClient = nullptr;
-		
-		if (Key.Compare(TEXT("default")) == 0) 
-		{
-			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>(FRegistry::CredentialsRef.Get(), FRegistry::HttpRetryScheduler, FRegistry::MessagingSystem);
-		}
-		else 
-		{
-			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>();
-		}
-
-		ApiClientInstances.Add(Key, NewClient);
+		AccelByteInstance = IAccelByteUe4SdkModuleInterface::Get().CreateAccelByteInstance();
 	}
 
-	return ApiClientInstances[Key];
+	return AccelByteInstance->GetApiClient(Key, bCreateIfNotFound);
 }
 
 FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString &Key)
 {
-	if (!ServerApiClientInstances.Contains(Key))
+	if(!AccelByteInstance.IsValid())
 	{
-		FServerApiClientPtr NewClient = nullptr;
-		
-		if (Key.Compare(TEXT("default")) == 0) 
-		{
-			NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>(FRegistry::ServerCredentialsRef.Get(), FRegistry::HttpRetryScheduler);
-		}
-		else 
-		{
-			NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>();
-		}
-
-		ServerApiClientInstances.Add(Key, NewClient);
+		AccelByteInstance = IAccelByteUe4SdkModuleInterface::Get().CreateAccelByteInstance();
 	}
-	
-	return ServerApiClientInstances[Key];
+
+	return AccelByteInstance->GetServerApiClient(Key);
 }
 
 bool FMultiRegistry::RegisterApiClient(FString const &Key, FApiClientPtr ApiClient)
 {
-	bool bResult = false;
-
-	if (!Key.IsEmpty())
+	if(!AccelByteInstance.IsValid())
 	{
-		ApiClientInstances.Add(Key, ApiClient);
-		bResult = true;
+		AccelByteInstance = IAccelByteUe4SdkModuleInterface::Get().CreateAccelByteInstance();
 	}
 
-	return bResult;
+	return AccelByteInstance->RegisterApiClient(Key, ApiClient);
 }
 
 bool FMultiRegistry::RemoveApiClient(const FString &Key)
 {
-	bool bResult = false;
+	if(!AccelByteInstance.IsValid())
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("FMultiRegistry::RemoveApiClient failed, AccelByteInstance is invalid!"));
+		return false;
+	}
 
-    if (!Key.IsEmpty())
-    {
-        const int32 RemovedNum = ApiClientInstances.Remove(Key);
-        bResult = RemovedNum > 0;
-    }
-
-    return bResult;
+	return AccelByteInstance->RemoveApiClient(Key);
 }
 
 bool FMultiRegistry::RemoveServerApiClient(const FString &Key)
 {
-	bool bResult = false;
-	
-	if (!Key.IsEmpty())
+	if(!AccelByteInstance.IsValid())
 	{
-        const int32 RemovedNum = ServerApiClientInstances.Remove(Key);
-        bResult = RemovedNum > 0;
+		UE_LOG(LogAccelByte, Warning, TEXT("FMultiRegistry::RemoveServerApiClient failed, AccelByteInstance is invalid!"));
+		return false;
 	}
 
-	return bResult;
+	return AccelByteInstance->RemoveServerApiClient(Key);
 }
 
 void FMultiRegistry::Shutdown()
 {
-	TArray<FString> ApiClientKeys{};
-	ApiClientInstances.GenerateKeyArray(ApiClientKeys);
-	ApiClientKeys.Remove(TEXT("default"));
-	for (const auto& Key : ApiClientKeys)
+	if(!AccelByteInstance.IsValid())
 	{
-		const auto& TempApiClient = GetApiClient(Key);
-		RemoveApiClient(Key);
+		UE_LOG(LogAccelByte, Warning, TEXT("FMultiRegistry::Shutdown failed, AccelByteInstance is invalid!"));
+		return;
 	}
 
-	TArray<FString> ServerApiClientKeys{};
-	ServerApiClientInstances.GenerateKeyArray(ServerApiClientKeys);
-	ServerApiClientKeys.Remove(TEXT("default"));
-	for (const auto& Key : ServerApiClientKeys)
-	{
-		const auto& TempApiClient = GetServerApiClient(Key);
-		RemoveServerApiClient(Key);
-	}
+	AccelByteInstance->ClearApiClient();
+	AccelByteInstance->ClearServerApiClient();
 }
 
-TMap<FString, FApiClientPtr> FMultiRegistry::ApiClientInstances;
-TMap<FString, FServerApiClientPtr> FMultiRegistry::ServerApiClientInstances;
+bool FMultiRegistry::HasValidAccelByteInstance()
+{
+	return AccelByteInstance.IsValid();
+}
 
+bool FMultiRegistry::SetAccelByteInstance(FAccelByteInstanceRef InInstance)
+{
+	if(HasValidAccelByteInstance())
+	{
+		return false;
+	}
+	
+	AccelByteInstance = InInstance;
+	return true;
+}
+
+FAccelByteInstanceWPtr FMultiRegistry::GetAccelByteInstance()
+{
+	return AccelByteInstance;
+}
 }

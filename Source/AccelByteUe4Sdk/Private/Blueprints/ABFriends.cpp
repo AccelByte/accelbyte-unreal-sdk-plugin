@@ -18,18 +18,26 @@ void UABFriends::RequestFriend(
 	FDRequestFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetRequestFriendsResponseDelegate(
-		Api::Lobby::FRequestFriendsResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsRequestFriendsResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.RequestFriend(UserId);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetRequestFriendsResponseDelegate(
+			Api::Lobby::FRequestFriendsResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsRequestFriendsResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->RequestFriend(UserId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::Unfriend(
@@ -37,36 +45,52 @@ void UABFriends::Unfriend(
 	FDUnfriendResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetUnfriendResponseDelegate(
-		Api::Lobby::FUnfriendResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsUnfriendResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.Unfriend(UserId);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetUnfriendResponseDelegate(
+			Api::Lobby::FUnfriendResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsUnfriendResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->Unfriend(UserId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::ListOutgoingFriends(
 	FDListOutgoingFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetListOutgoingFriendsResponseDelegate(
-		Api::Lobby::FListOutgoingFriendsResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsListOutgoingFriendsResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.ListOutgoingFriends();
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetListOutgoingFriendsResponseDelegate(
+			Api::Lobby::FListOutgoingFriendsResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsListOutgoingFriendsResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->ListOutgoingFriends();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::CancelFriendRequest(
@@ -74,36 +98,52 @@ void UABFriends::CancelFriendRequest(
 	FDCancelFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetCancelFriendsResponseDelegate(
-		Api::Lobby::FCancelFriendsResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsCancelFriendsResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.CancelFriendRequest(UserId);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetCancelFriendsResponseDelegate(
+			Api::Lobby::FCancelFriendsResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsCancelFriendsResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->CancelFriendRequest(UserId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::ListIncomingFriends(
 	FDListIncomingFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetListIncomingFriendsResponseDelegate(
-		Api::Lobby::FListIncomingFriendsResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsListIncomingFriendsResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.ListIncomingFriends();
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetListIncomingFriendsResponseDelegate(
+			Api::Lobby::FListIncomingFriendsResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsListIncomingFriendsResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->ListIncomingFriends();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::AcceptFriend(
@@ -111,18 +151,26 @@ void UABFriends::AcceptFriend(
 	FDAcceptFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetAcceptFriendsResponseDelegate(
-		Api::Lobby::FAcceptFriendsResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsAcceptFriendsResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.AcceptFriend(UserId);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetAcceptFriendsResponseDelegate(
+			Api::Lobby::FAcceptFriendsResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsAcceptFriendsResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->AcceptFriend(UserId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::RejectFriend(
@@ -130,36 +178,52 @@ void UABFriends::RejectFriend(
 	FDRejectFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetRejectFriendsResponseDelegate(
-		Api::Lobby::FRejectFriendsResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsRejectFriendsResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.RejectFriend(UserId);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetRejectFriendsResponseDelegate(
+			Api::Lobby::FRejectFriendsResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsRejectFriendsResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->RejectFriend(UserId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::LoadFriendsList(
 	FDLoadFriendListResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetLoadFriendListResponseDelegate(
-		Api::Lobby::FLoadFriendListResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsLoadFriendListResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.LoadFriendsList();
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetLoadFriendListResponseDelegate(
+			Api::Lobby::FLoadFriendListResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsLoadFriendListResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->LoadFriendsList();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::GetFriendshipStatus(
@@ -167,18 +231,26 @@ void UABFriends::GetFriendshipStatus(
 	FDGetFriendshipStatusResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetGetFriendshipStatusResponseDelegate(
-		Api::Lobby::FGetFriendshipStatusResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsGetFriendshipStatusResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-	ApiClientPtr->Lobby.GetFriendshipStatus(UserId);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetGetFriendshipStatusResponseDelegate(
+			Api::Lobby::FGetFriendshipStatusResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsGetFriendshipStatusResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+		LobbyPtr->GetFriendshipStatus(UserId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::BulkFriendRequest(
@@ -186,66 +258,94 @@ void UABFriends::BulkFriendRequest(
 	FDHandler OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.BulkFriendRequest(
-		UserIds,
-		FVoidHandler::CreateLambda(
-			[OnSuccess]()
-			{
-				OnSuccess.ExecuteIfBound();
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->BulkFriendRequest(
+			UserIds,
+			FVoidHandler::CreateLambda(
+				[OnSuccess]()
+				{
+					OnSuccess.ExecuteIfBound();
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABFriends::SetOnFriendRequestAcceptedNotifDelegate(FDAcceptFriendsNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetOnFriendRequestAcceptedNotifDelegate(
-		Api::Lobby::FAcceptFriendsNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsAcceptFriendsNotif const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetOnFriendRequestAcceptedNotifDelegate(
+			Api::Lobby::FAcceptFriendsNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsAcceptFriendsNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABFriends::SetOnIncomingRequestFriendsNotifDelegate(FDRequestFriendsNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetOnIncomingRequestFriendsNotifDelegate(
-		Api::Lobby::FRequestFriendsNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsRequestFriendsNotif const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetOnIncomingRequestFriendsNotifDelegate(
+			Api::Lobby::FRequestFriendsNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsRequestFriendsNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABFriends::SetOnUnfriendNotifDelegate(FDUnfriendNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetOnUnfriendNotifDelegate(
-		Api::Lobby::FUnfriendNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsUnfriendNotif const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetOnUnfriendNotifDelegate(
+			Api::Lobby::FUnfriendNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsUnfriendNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABFriends::SetOnCancelFriendsNotifDelegate(FDCancelFriendsNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetOnCancelFriendsNotifDelegate(
-		Api::Lobby::FCancelFriendsNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsCancelFriendsNotif const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetOnCancelFriendsNotifDelegate(
+			Api::Lobby::FCancelFriendsNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsCancelFriendsNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABFriends::SetOnRejectFriendsNotifDelegate(FDRejectFriendsNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetOnRejectFriendsNotifDelegate(
-		Api::Lobby::FRejectFriendsNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsRejectFriendsNotif const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetOnRejectFriendsNotifDelegate(
+			Api::Lobby::FRejectFriendsNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsRejectFriendsNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }

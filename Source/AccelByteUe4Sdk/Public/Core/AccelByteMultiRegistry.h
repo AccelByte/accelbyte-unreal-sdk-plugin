@@ -5,8 +5,9 @@
 #pragma once
 
 #include "AccelByteApiClient.h"
-#include "Api/AccelByteUserProfileApi.h"
+#include "AccelByteInstance.h"
 #include "AccelByteServerApiClient.h"
+#include "Core/AccelByteInstance.h"
 
 namespace AccelByte
 {
@@ -21,10 +22,13 @@ public:
 	static bool RemoveServerApiClient(const FString& Key = FString(TEXT("default")));
 	static void Shutdown();
 
-private:
-	static TMap<FString, FApiClientPtr> ApiClientInstances;
-	static TMap<FString, FServerApiClientPtr> ServerApiClientInstances;
+	static bool HasValidAccelByteInstance();
+	static bool SetAccelByteInstance(FAccelByteInstanceRef InInstance);
+	static FAccelByteInstanceWPtr GetAccelByteInstance();
 
+private:
+	static FAccelByteInstancePtr AccelByteInstance;
+	
 	FMultiRegistry() = delete;
 	FMultiRegistry(FMultiRegistry const& Other) = delete;
 	FMultiRegistry& operator=(FMultiRegistry const& Other) = delete;

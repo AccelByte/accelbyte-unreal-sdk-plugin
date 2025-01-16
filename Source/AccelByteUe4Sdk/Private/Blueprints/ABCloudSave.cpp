@@ -19,23 +19,30 @@ void UABCloudSave::SaveUserRecord(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.SaveUserRecord(
-		Key,
-		*RecordRequest.JsonObject,
-		IsPublic,
-		FVoidHandler::CreateLambda(
-			[OnSuccess]()
-			{
-				OnSuccess.ExecuteIfBound();
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->SaveUserRecord(
+			Key,
+			*RecordRequest.JsonObject,
+			IsPublic,
+			FVoidHandler::CreateLambda(
+				[OnSuccess]()
+				{
+					OnSuccess.ExecuteIfBound();
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::GetUserRecord(
@@ -43,7 +50,10 @@ void UABCloudSave::GetUserRecord(
 	FDModelsUserRecord const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->CloudSave.GetUserRecord(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->GetUserRecord(
 		Key,
 		THandler<FAccelByteModelsUserRecord>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserRecord const& Response)
@@ -57,7 +67,11 @@ void UABCloudSave::GetUserRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::GetPublicUserRecord(
@@ -66,7 +80,10 @@ void UABCloudSave::GetPublicUserRecord(
 	FDModelsUserRecord const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->CloudSave.GetPublicUserRecord(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->GetPublicUserRecord(
 		Key,
 		UserId,
 		THandler<FAccelByteModelsUserRecord>::CreateLambda(
@@ -82,7 +99,11 @@ void UABCloudSave::GetPublicUserRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::ReplaceUserRecord(
@@ -93,7 +114,10 @@ void UABCloudSave::ReplaceUserRecord(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.ReplaceUserRecord(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->ReplaceUserRecord(
 		Key,
 		*RecordRequest.JsonObject,
 		IsPublic,
@@ -109,7 +133,11 @@ void UABCloudSave::ReplaceUserRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::ReplaceUserRecordCheckLatest(
@@ -120,7 +148,10 @@ void UABCloudSave::ReplaceUserRecordCheckLatest(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->ReplaceUserRecordCheckLatest(
 		Key,
 		LastUpdated,
 		RecordRequest,
@@ -136,7 +167,11 @@ void UABCloudSave::ReplaceUserRecordCheckLatest(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
@@ -148,7 +183,10 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->ReplaceUserRecordCheckLatest(
 		TryAttempt,
 		Key,
 		RecordRequest,
@@ -170,7 +208,11 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::ReplaceUserRecordCheckLatestWithResponse(
@@ -181,7 +223,10 @@ void UABCloudSave::ReplaceUserRecordCheckLatestWithResponse(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->ReplaceUserRecordCheckLatest(
 		Key,
 		LastUpdated,
 		RecordRequest,
@@ -197,7 +242,11 @@ void UABCloudSave::ReplaceUserRecordCheckLatestWithResponse(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::ReplaceUserRecordCheckLatestRetryWithResponse(
@@ -209,7 +258,10 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetryWithResponse(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->ReplaceUserRecordCheckLatest(
 		TryAttempt,
 		Key,
 		RecordRequest,
@@ -231,7 +283,11 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetryWithResponse(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::DeleteUserRecord(
@@ -239,7 +295,10 @@ void UABCloudSave::DeleteUserRecord(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->CloudSave.DeleteUserRecord(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->DeleteUserRecord(
 		Key,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -253,7 +312,11 @@ void UABCloudSave::DeleteUserRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::SaveGameRecord(
@@ -263,7 +326,10 @@ void UABCloudSave::SaveGameRecord(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.SaveGameRecord(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->SaveGameRecord(
 		Key,
 		*RecordRequest.JsonObject,
 		FVoidHandler::CreateLambda(
@@ -278,7 +344,11 @@ void UABCloudSave::SaveGameRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::GetGameRecord(
@@ -286,7 +356,10 @@ void UABCloudSave::GetGameRecord(
 	FDModelsGameRecord const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->CloudSave.GetGameRecord(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->GetGameRecord(
 		Key,
 		THandler<FAccelByteModelsGameRecord>::CreateLambda(
 			[OnSuccess](FAccelByteModelsGameRecord const& Response)
@@ -300,7 +373,11 @@ void UABCloudSave::GetGameRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::ReplaceGameRecord(
@@ -310,7 +387,10 @@ void UABCloudSave::ReplaceGameRecord(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.ReplaceGameRecord(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->ReplaceGameRecord(
 		Key,
 		*RecordRequest.JsonObject,
 		FVoidHandler::CreateLambda(
@@ -325,7 +405,11 @@ void UABCloudSave::ReplaceGameRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::ReplaceGameRecordCheckLatest(
@@ -336,7 +420,10 @@ void UABCloudSave::ReplaceGameRecordCheckLatest(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.ReplaceGameRecordCheckLatest(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->ReplaceGameRecordCheckLatest(
 		Key,
 		LastUpdated,
 		RecordRequest,
@@ -352,7 +439,11 @@ void UABCloudSave::ReplaceGameRecordCheckLatest(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
@@ -364,7 +455,10 @@ void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
 	FDErrorHandler const& OnError)
 {
 	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
-	ApiClientPtr->CloudSave.ReplaceGameRecordCheckLatest(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->ReplaceGameRecordCheckLatest(
 		TryAttempt,
 		Key,
 		RecordRequest,
@@ -386,7 +480,11 @@ void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::DeleteGameRecord(
@@ -394,7 +492,10 @@ void UABCloudSave::DeleteGameRecord(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->CloudSave.DeleteGameRecord(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->DeleteGameRecord(
 		Key,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -408,14 +509,21 @@ void UABCloudSave::DeleteGameRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::BulkGetUserRecords(TArray<FString> const& Keys,
 	FDModelsListUserRecords const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->CloudSave.BulkGetUserRecords(Keys,
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->BulkGetUserRecords(Keys,
 		THandler<FListAccelByteModelsUserRecord>::CreateLambda(
 			[OnSuccess](FListAccelByteModelsUserRecord const& Response)
 			{
@@ -428,14 +536,21 @@ void UABCloudSave::BulkGetUserRecords(TArray<FString> const& Keys,
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::BulkGetGameRecords(TArray<FString> const& Keys,
 	FDModelsListGameRecords const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->CloudSave.BulkGetGameRecords(Keys,
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->BulkGetGameRecords(Keys,
 		THandler<FAccelByteModelsListGameRecords>::CreateLambda(
 			[OnSuccess](FAccelByteModelsListGameRecords const& Response)
 			{
@@ -448,7 +563,11 @@ void UABCloudSave::BulkGetGameRecords(TArray<FString> const& Keys,
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
@@ -457,7 +576,10 @@ void UABCloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 	, int32 const& Offset
 	, int32 const& Limit)
 {
-	ApiClientPtr->CloudSave.BulkGetOtherPlayerPublicRecordKeys(UserId,
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->BulkGetOtherPlayerPublicRecordKeys(UserId,
 		THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse const& Response)
 			{
@@ -470,7 +592,11 @@ void UABCloudSave::BulkGetOtherPlayerPublicRecordKeys(FString const& UserId
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		), Offset, Limit
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::BulkGetCurrentPlayerPublicRecordKeys(FDModelsPaginatedBulkGetPublicUserRecordKeysResponse const& OnSuccess
@@ -478,7 +604,10 @@ void UABCloudSave::BulkGetCurrentPlayerPublicRecordKeys(FDModelsPaginatedBulkGet
 	, int32 const& Offset
 	, int32 const& Limit)
 {
-	ApiClientPtr->CloudSave.BulkGetCurrentPlayerPublicRecordKeys(
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->BulkGetCurrentPlayerPublicRecordKeys(
 		THandler<FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsPaginatedBulkGetPublicUserRecordKeysResponse const& Response)
 			{
@@ -491,7 +620,11 @@ void UABCloudSave::BulkGetCurrentPlayerPublicRecordKeys(FDModelsPaginatedBulkGet
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		), Offset, Limit
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABCloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
@@ -499,7 +632,10 @@ void UABCloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 	, FDModelsListUserRecords const& OnSuccess
 	, FDErrorHandler const& OnError)
 {
-	ApiClientPtr->CloudSave.BulkGetOtherPlayerPublicRecords(UserId,
+	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
+	if (CloudSavePtr.IsValid())
+	{
+		CloudSavePtr->BulkGetOtherPlayerPublicRecords(UserId,
 		Keys,
 		THandler<FListAccelByteModelsUserRecord>::CreateLambda(
 			[OnSuccess](FListAccelByteModelsUserRecord const& Response)
@@ -513,5 +649,9 @@ void UABCloudSave::BulkGetOtherPlayerPublicRecords(FString const& UserId
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

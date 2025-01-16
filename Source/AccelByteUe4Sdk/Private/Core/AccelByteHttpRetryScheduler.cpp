@@ -31,8 +31,6 @@ FString FHttpRetryScheduler::HeaderGameClientVersion = TEXT("");
 
 TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> FHttpRetryScheduler::ResponseCodeDelegates{};
 
-typedef FHttpRetryScheduler::FBearerAuthRejectedRefresh FBearerAuthRejectedRefresh;
-
 FHttpRetryScheduler::FHttpRetryScheduler()
 	: TaskQueue()
 {}
@@ -77,15 +75,12 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 
 	FReport::LogHttpRequest(Request);
 
-	FVoidHandler OnBearerAuthReject = FVoidHandler::CreateLambda([&]() {BearerAuthRejected(); });
-
 	Task = MakeShared<FHttpRetryTask, ESPMode::ThreadSafe>
 		( Request
 		, CompleteDelegate
 		, RequestTime
 		, InitialDelay
-		, OnBearerAuthReject
-		, BearerAuthRejectedRefresh
+		, AsShared()
 		, FHttpRetryScheduler::ResponseCodeDelegates );
 
 	FAccelByteHttpRetryTaskPtr HttpRetryTaskPtr(StaticCastSharedPtr< FHttpRetryTask >(Task));
@@ -175,14 +170,31 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 	return ProcessRequest(Request, CompleteDelegate, RequestTime);
 }
 
-void FHttpRetryScheduler::SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected)
+void FHttpRetryScheduler::SetBearerAuthRejectedDelegate(FBearerAuthRejected const& BearerAuthRejected)
 {
-	if (BearerAuthRejectedDelegate.IsBound()) 
-	{
-		BearerAuthRejectedDelegate.Unbind();
-	}
+	AddBearerAuthRejectedDelegate(BearerAuthRejected);
+}
 
-	BearerAuthRejectedDelegate = BearerAuthRejected;
+FDelegateHandle FHttpRetryScheduler::AddBearerAuthRejectedDelegate(FBearerAuthRejected const& BearerAuthRejected)
+{
+	FScopeLock Lock(&LockBearerAuthRejected);
+	return BearerAuthRejectedMulticast.Add(BearerAuthRejected);
+}
+
+bool FHttpRetryScheduler::RemoveBearerAuthRejectedDelegate(FDelegateHandle const& BearerAuthRejectedHandle)
+{
+	return BearerAuthRejectedMulticast.Remove(BearerAuthRejectedHandle);
+}
+
+FDelegateHandle FHttpRetryScheduler::AddBearerAuthRefreshedDelegate(FBearerAuthRefreshed const& BearerAuthRefreshed)
+{
+	FScopeLock Lock(&LockBearerAuthRefreshed);
+	return BearerAuthRefreshedMulticast.Add(BearerAuthRefreshed);
+}
+
+bool FHttpRetryScheduler::RemoveBearerAuthRefreshedDelegate(FDelegateHandle const& BearerAuthRefreshedHandle)
+{
+	return BearerAuthRefreshedMulticast.Remove(BearerAuthRefreshedHandle);
 }
 
 void FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode, FHttpResponseCodeHandler const& Handler)
@@ -208,7 +220,7 @@ FString FHttpRetryScheduler::ParseUStructToJsonString(const TSharedPtr<FJsonObje
 
 	if (!JsonObject.IsValid())
 	{
-		UE_LOG(LogTemp, Verbose, TEXT("HttpClient Request UStructToJsonObject failed!"));
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HttpClient Request UStructToJsonObject failed!"));
 
 		return JsonString;
 	}
@@ -223,7 +235,7 @@ FString FHttpRetryScheduler::ParseUStructToJsonString(const TSharedPtr<FJsonObje
 	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&JsonString);
 	if (!FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer))
 	{
-		UE_LOG(LogTemp, Verbose, TEXT("HttpClient Request FJsonSerializer::Serialize failed!"));
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HttpClient Request FJsonSerializer::Serialize failed!"));
 
 		return JsonString;
 	}
@@ -236,7 +248,7 @@ void FHttpRetryScheduler::BearerAuthRejected()
 	if (State != EState::Paused)
 	{
 		HttpCache.ClearCache();
-		BearerAuthRejectedDelegate.ExecuteIfBound();
+		BearerAuthRejectedMulticast.Broadcast();
 	}
 }
 
@@ -267,10 +279,10 @@ void FHttpRetryScheduler::PauseBearerAuthRequest()
 void FHttpRetryScheduler::ResumeBearerAuthRequest(const FString& AccessToken)
 {
 	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler RESUME"));
-	if (BearerAuthRejectedRefresh.IsBound()) 
+	if (BearerAuthRefreshedMulticast.IsBound()) 
 	{
-		BearerAuthRejectedRefresh.Broadcast(AccessToken);
-		BearerAuthRejectedRefresh.Clear();
+		BearerAuthRefreshedMulticast.Broadcast(AccessToken);
+		BearerAuthRefreshedMulticast.Clear();
 	}
 
 	if (State == EState::Paused) 
@@ -350,6 +362,12 @@ bool FHttpRetryScheduler::PollRetry(double Time)
 
 void FHttpRetryScheduler::Startup()
 {
+	if(State == EState::Initialized)
+	{
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler is initialized, skipping startup process"));
+		return;
+	}
+	
 	InitializeRateLimit();
 	
 	PollRetryHandle = FTickerAlias::GetCoreTicker().AddTicker(

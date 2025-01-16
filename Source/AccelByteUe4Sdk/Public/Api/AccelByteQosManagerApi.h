@@ -20,7 +20,7 @@ namespace Api
 /**
 * @brief QosManager API to manage Qos Server(s).
 */
-class ACCELBYTEUE4SDK_API QosManager : public FApiBase
+class ACCELBYTEUE4SDK_API QosManager : public FApiBase, public TSharedFromThis<QosManager, ESPMode::ThreadSafe>
 {
 public:
 	QosManager(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -49,6 +49,10 @@ private:
 	QosManager(QosManager const&) = delete;
 	QosManager(QosManager&&) = delete;
 };
+
+typedef TSharedRef<QosManager, ESPMode::ThreadSafe> QosManagerRef;
+typedef TSharedPtr<QosManager, ESPMode::ThreadSafe> QosManagerPtr;
+typedef TWeakPtr<QosManager, ESPMode::ThreadSafe> QosManagerWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

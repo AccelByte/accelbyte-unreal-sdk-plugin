@@ -18,23 +18,31 @@ void UABBinaryCloudSave::SaveUserBinaryRecord(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.SaveUserBinaryRecord(
-		Key,
-		FileType,
-		bIsPublic,
-		FVoidHandler::CreateLambda(
-			[OnSuccess]()
-			{
-				OnSuccess.ExecuteIfBound();
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->SaveUserBinaryRecord(
+			Key,
+			FileType,
+			bIsPublic,
+			FVoidHandler::CreateLambda(
+				[OnSuccess]()
+				{
+					OnSuccess.ExecuteIfBound();
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::GetCurrentUserBinaryRecord(
@@ -42,7 +50,10 @@ void UABBinaryCloudSave::GetCurrentUserBinaryRecord(
 	FDModelsUserBinaryRecord const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.GetCurrentUserBinaryRecord(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->GetCurrentUserBinaryRecord(
 		Key,
 		THandler<FAccelByteModelsUserBinaryRecord>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserBinaryRecord const& Response)
@@ -56,7 +67,12 @@ void UABBinaryCloudSave::GetCurrentUserBinaryRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::GetPublicUserBinaryRecord(
@@ -65,7 +81,10 @@ void UABBinaryCloudSave::GetPublicUserBinaryRecord(
 	FDModelsUserBinaryRecord const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.GetPublicUserBinaryRecord(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->GetPublicUserBinaryRecord(
 		Key,
 		UserId,
 		THandler<FAccelByteModelsUserBinaryRecord>::CreateLambda(
@@ -80,7 +99,12 @@ void UABBinaryCloudSave::GetPublicUserBinaryRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::BulkGetCurrentUserBinaryRecords(
@@ -88,7 +112,10 @@ void UABBinaryCloudSave::BulkGetCurrentUserBinaryRecords(
 	FDModelsListUserBinaryRecords const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.BulkGetCurrentUserBinaryRecords(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->BulkGetCurrentUserBinaryRecords(
 		Keys,
 		THandler<FAccelByteModelsListUserBinaryRecords>::CreateLambda(
 			[OnSuccess](FAccelByteModelsListUserBinaryRecords const& Response)
@@ -102,7 +129,12 @@ void UABBinaryCloudSave::BulkGetCurrentUserBinaryRecords(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::BulkGetPublicUserBinaryRecordsByKeys(
@@ -111,7 +143,10 @@ void UABBinaryCloudSave::BulkGetPublicUserBinaryRecordsByKeys(
 	FDModelsListUserBinaryRecords const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.BulkGetPublicUserBinaryRecords(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->BulkGetPublicUserBinaryRecords(
 		Keys,
 		UserId,
 		THandler<FAccelByteModelsListUserBinaryRecords>::CreateLambda(
@@ -126,7 +161,12 @@ void UABBinaryCloudSave::BulkGetPublicUserBinaryRecordsByKeys(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::BulkGetPublicUserBinaryRecordsByUserIds(
@@ -135,7 +175,10 @@ void UABBinaryCloudSave::BulkGetPublicUserBinaryRecordsByUserIds(
 	FDModelsListUserBinaryRecords const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.BulkGetPublicUserBinaryRecords(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->BulkGetPublicUserBinaryRecords(
 		Key,
 		UserIds,
 		THandler<FAccelByteModelsListUserBinaryRecords>::CreateLambda(
@@ -150,7 +193,12 @@ void UABBinaryCloudSave::BulkGetPublicUserBinaryRecordsByUserIds(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::BulkQueryCurrentUserBinaryRecords(
@@ -160,7 +208,10 @@ void UABBinaryCloudSave::BulkQueryCurrentUserBinaryRecords(
 	int32 const& Offset,
 	int32 const& Limit)
 {
-	ApiClientPtr->BinaryCloudSave.BulkQueryCurrentUserBinaryRecords(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->BulkQueryCurrentUserBinaryRecords(
 		Query,
 		THandler<FAccelByteModelsPaginatedUserBinaryRecords>::CreateLambda(
 			[OnSuccess](FAccelByteModelsPaginatedUserBinaryRecords const& Response)
@@ -176,7 +227,12 @@ void UABBinaryCloudSave::BulkQueryCurrentUserBinaryRecords(
 		),
 		Offset,
 		Limit
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::BulkQueryPublicUserBinaryRecords(
@@ -186,7 +242,10 @@ void UABBinaryCloudSave::BulkQueryPublicUserBinaryRecords(
 	int32 const& Offset,
 	int32 const& Limit)
 {
-	ApiClientPtr->BinaryCloudSave.BulkQueryPublicUserBinaryRecords(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->BulkQueryPublicUserBinaryRecords(
 		UserId,
 		THandler<FAccelByteModelsPaginatedUserBinaryRecords>::CreateLambda(
 			[OnSuccess](FAccelByteModelsPaginatedUserBinaryRecords const& Response)
@@ -202,7 +261,12 @@ void UABBinaryCloudSave::BulkQueryPublicUserBinaryRecords(
 		),
 		Offset,
 		Limit
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::UpdateUserBinaryRecordFile(
@@ -212,7 +276,10 @@ void UABBinaryCloudSave::UpdateUserBinaryRecordFile(
 	FDModelsUserBinaryRecord const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.UpdateUserBinaryRecordFile(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->UpdateUserBinaryRecordFile(
 		Key,
 		FileType,
 		FileLocation,
@@ -228,7 +295,12 @@ void UABBinaryCloudSave::UpdateUserBinaryRecordFile(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::UpdateUserBinaryRecordMetadata(
@@ -237,7 +309,10 @@ void UABBinaryCloudSave::UpdateUserBinaryRecordMetadata(
 	FDModelsUserBinaryRecord const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.UpdateUserBinaryRecordMetadata(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->UpdateUserBinaryRecordMetadata(
 		Key,
 		bIsPublic,
 		THandler<FAccelByteModelsUserBinaryRecord>::CreateLambda(
@@ -252,7 +327,12 @@ void UABBinaryCloudSave::UpdateUserBinaryRecordMetadata(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::DeleteUserBinaryRecord(
@@ -260,7 +340,10 @@ void UABBinaryCloudSave::DeleteUserBinaryRecord(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.DeleteUserBinaryRecord(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->DeleteUserBinaryRecord(
 		Key,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -274,7 +357,12 @@ void UABBinaryCloudSave::DeleteUserBinaryRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::RequestUserBinaryRecordPresignedUrl(
@@ -283,7 +371,10 @@ void UABBinaryCloudSave::RequestUserBinaryRecordPresignedUrl(
 	FDModelsBinaryInfo const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.RequestUserBinaryRecordPresignedUrl(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->RequestUserBinaryRecordPresignedUrl(
 		Key,
 		FileType,
 		THandler<FAccelByteModelsBinaryInfo>::CreateLambda(
@@ -298,7 +389,12 @@ void UABBinaryCloudSave::RequestUserBinaryRecordPresignedUrl(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::GetGameBinaryRecord(
@@ -306,7 +402,10 @@ void UABBinaryCloudSave::GetGameBinaryRecord(
 	FDModelsGameBinaryRecord const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.GetGameBinaryRecord(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->GetGameBinaryRecord(
 		Key,
 		THandler<FAccelByteModelsGameBinaryRecord>::CreateLambda(
 			[OnSuccess](FAccelByteModelsGameBinaryRecord const& Response)
@@ -320,7 +419,12 @@ void UABBinaryCloudSave::GetGameBinaryRecord(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::BulkGetGameBinaryRecords(
@@ -328,7 +432,10 @@ void UABBinaryCloudSave::BulkGetGameBinaryRecords(
 	FDModelsListGameBinaryRecords const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->BinaryCloudSave.BulkGetGameBinaryRecords(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->BulkGetGameBinaryRecords(
 		Keys,
 		THandler<FAccelByteModelsListGameBinaryRecords>::CreateLambda(
 			[OnSuccess](FAccelByteModelsListGameBinaryRecords const& Response)
@@ -342,7 +449,12 @@ void UABBinaryCloudSave::BulkGetGameBinaryRecords(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABBinaryCloudSave::BulkQueryGameBinaryRecords(
@@ -352,7 +464,10 @@ void UABBinaryCloudSave::BulkQueryGameBinaryRecords(
 	int32 const& Offset,
 	int32 const& Limit)
 {
-	ApiClientPtr->BinaryCloudSave.BulkQueryGameBinaryRecords(
+	const auto BinaryCloudSavePtr = ApiClientPtr->GetBinaryCloudSaveApi().Pin();
+	if (BinaryCloudSavePtr.IsValid())
+	{
+		BinaryCloudSavePtr->BulkQueryGameBinaryRecords(
 		Query,
 		THandler<FAccelByteModelsPaginatedGameBinaryRecords>::CreateLambda(
 			[OnSuccess](FAccelByteModelsPaginatedGameBinaryRecords const& Response)
@@ -368,5 +483,10 @@ void UABBinaryCloudSave::BulkQueryGameBinaryRecords(
 		),
 		Offset,
 		Limit
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

@@ -20,7 +20,7 @@ namespace Api
 /**
  * @brief Wallet API for buying things from the online store; a wallet can be a virtual or real currency.
  */
-class ACCELBYTEUE4SDK_API Wallet : public FApiBase
+class ACCELBYTEUE4SDK_API Wallet : public FApiBase, public TSharedFromThis<Wallet, ESPMode::ThreadSafe>
 {
 public:
 	Wallet(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -74,6 +74,10 @@ private:
 	Wallet(Wallet const&) = delete;
 	Wallet(Wallet&&) = delete;
 };
+
+typedef TSharedRef<Wallet, ESPMode::ThreadSafe> WalletRef;
+typedef TSharedPtr<Wallet, ESPMode::ThreadSafe> WalletPtr;
+typedef TWeakPtr<Wallet, ESPMode::ThreadSafe> WalletWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

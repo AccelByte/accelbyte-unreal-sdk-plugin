@@ -17,23 +17,31 @@ void UABStatistic::CreateUserStatItems(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->Statistic.CreateUserStatItems(
-		StatCodes,
-		THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda(
-			[OnSuccess](TArray<FAccelByteModelsBulkStatItemOperationResult> const& Response)
-			{
-				FArrayModelsBulkStatItemOperationResultResponse Result;
-				Result.Content = Response;
-				OnSuccess.ExecuteIfBound(Result);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	const auto StatisticPtr = ApiClientPtr->GetStatisticApi().Pin();
+	if (StatisticPtr.IsValid())
+	{
+		StatisticPtr->CreateUserStatItems(
+			StatCodes,
+			THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda(
+				[OnSuccess](TArray<FAccelByteModelsBulkStatItemOperationResult> const& Response)
+				{
+					FArrayModelsBulkStatItemOperationResultResponse Result;
+					Result.Content = Response;
+					OnSuccess.ExecuteIfBound(Result);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABStatistic::GetAllUserStatItems(
@@ -44,7 +52,10 @@ void UABStatistic::GetAllUserStatItems(
 	EAccelByteStatisticSortBy SortBy
 )
 {
-	ApiClientPtr->Statistic.GetAllUserStatItems(
+	const auto StatisticPtr = ApiClientPtr->GetStatisticApi().Pin();
+	if (StatisticPtr.IsValid())
+	{
+		StatisticPtr->GetAllUserStatItems(
 		THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserStatItemPagingSlicedResult const& Response)
 			{
@@ -60,7 +71,12 @@ void UABStatistic::GetAllUserStatItems(
 		Limit,
 		Offset,
 		SortBy
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABStatistic::GetUserStatItems(
@@ -73,7 +89,10 @@ void UABStatistic::GetUserStatItems(
 	EAccelByteStatisticSortBy SortBy
 )
 {
-	ApiClientPtr->Statistic.GetUserStatItems(
+	const auto StatisticPtr = ApiClientPtr->GetStatisticApi().Pin();
+	if (StatisticPtr.IsValid())
+	{
+		StatisticPtr->GetUserStatItems(
 		StatCodes,
 		Tags,
 		THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda(
@@ -91,7 +110,12 @@ void UABStatistic::GetUserStatItems(
 		Limit,
 		Offset,
 		SortBy
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABStatistic::IncrementUserStatItems(
@@ -100,7 +124,10 @@ void UABStatistic::IncrementUserStatItems(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->Statistic.IncrementUserStatItems(
+	const auto StatisticPtr = ApiClientPtr->GetStatisticApi().Pin();
+	if (StatisticPtr.IsValid())
+	{
+		StatisticPtr->IncrementUserStatItems(
 		Data,
 		THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsBulkStatItemOperationResult> const& Response)
@@ -116,7 +143,12 @@ void UABStatistic::IncrementUserStatItems(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABStatistic::GetGlobalStatItemsByStatCode(
@@ -124,7 +156,10 @@ void UABStatistic::GetGlobalStatItemsByStatCode(
 	FDModelsGlobalStatItemDelegate const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Statistic.GetGlobalStatItemsByStatCode(
+	const auto StatisticPtr = ApiClientPtr->GetStatisticApi().Pin();
+	if (StatisticPtr.IsValid())
+	{
+		StatisticPtr->GetGlobalStatItemsByStatCode(
 		StatCode,
 		THandler<FAccelByteModelsGlobalStatItemValueResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsGlobalStatItemValueResponse const& Response)
@@ -138,7 +173,12 @@ void UABStatistic::GetGlobalStatItemsByStatCode(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABStatistic::BulkFetchStatItemsValue(
@@ -147,7 +187,10 @@ void UABStatistic::BulkFetchStatItemsValue(
 	FDModelsStatItemValueResponses const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Statistic.BulkFetchStatItemsValue(
+	const auto StatisticPtr = ApiClientPtr->GetStatisticApi().Pin();
+	if (StatisticPtr.IsValid())
+	{
+		StatisticPtr->BulkFetchStatItemsValue(
 		StatCode,
 		UserIds,
 		THandler<TArray<FAccelByteModelsStatItemValueResponse>>::CreateLambda(
@@ -162,5 +205,10 @@ void UABStatistic::BulkFetchStatItemsValue(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

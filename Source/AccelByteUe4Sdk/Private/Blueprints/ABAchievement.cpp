@@ -22,7 +22,10 @@ void UABAchievement::QueryAchievements(
 	bool bGlobal
 )
 {
-	ApiClientPtr->Achievement.QueryAchievements(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->QueryAchievements(
 		Language,
 		SortBy,
 		THandler<FAccelByteModelsPaginatedPublicAchievement>::CreateLambda(
@@ -41,7 +44,12 @@ void UABAchievement::QueryAchievements(
 		Limit,
 		TagQuery,
 		bGlobal
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::GetAchievement(
@@ -50,7 +58,10 @@ void UABAchievement::GetAchievement(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->Achievement.GetAchievement(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->GetAchievement(
 		AchievementCode,
 		THandler<FAccelByteModelsMultiLanguageAchievement>::CreateLambda(
 			[OnSuccess](FAccelByteModelsMultiLanguageAchievement const& Response)
@@ -64,7 +75,12 @@ void UABAchievement::GetAchievement(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::QueryUserAchievements(
@@ -77,7 +93,10 @@ void UABAchievement::QueryUserAchievements(
 	FString const& TagQuery
 )
 {
-	ApiClientPtr->Achievement.QueryUserAchievements(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->QueryUserAchievements(
 		SortBy,
 		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda(
 			[OnSuccess](FAccelByteModelsPaginatedUserAchievement const& Response)
@@ -95,14 +114,22 @@ void UABAchievement::QueryUserAchievements(
 		Limit,
 		PreferUnlocked,
 		TagQuery
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::QueryUserAchievementsV2(EAccelByteGlobalAchievementListSortBy const& SortBy,
 	FDModelsPaginatedUserAchievementResponse const& OnSuccess, FDErrorHandler const& OnError, int32 const& Offset,
 	int32 const& Limit, bool PreferUnlocked, FString const& TagQuery)
 {
-	ApiClientPtr->Achievement.QueryUserAchievements(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->QueryUserAchievements(
 		SortBy,
 		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda(
 			[OnSuccess](FAccelByteModelsPaginatedUserAchievement const& Response)
@@ -120,7 +147,12 @@ void UABAchievement::QueryUserAchievementsV2(EAccelByteGlobalAchievementListSort
 		Limit,
 		PreferUnlocked,
 		TagQuery
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::UnlockAchievement(
@@ -129,7 +161,10 @@ void UABAchievement::UnlockAchievement(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->Achievement.UnlockAchievement(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->UnlockAchievement(
 		AchievementCode,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -143,7 +178,12 @@ void UABAchievement::UnlockAchievement(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::QueryGlobalAchievements(
@@ -155,7 +195,10 @@ void UABAchievement::QueryGlobalAchievements(
 	int32 const& Offset, 
 	int32 const& Limit)
 {
-	ApiClientPtr->Achievement.QueryGlobalAchievements(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->QueryGlobalAchievements(
 		AchievementCode,
 		AchievementStatus,
 		SortBy,
@@ -170,6 +213,11 @@ void UABAchievement::QueryGlobalAchievements(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 			), Offset, Limit);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::QueryGlobalAchievementContributors(
@@ -180,7 +228,10 @@ void UABAchievement::QueryGlobalAchievementContributors(
 	int32 const& Offset, 
 	int32 const& Limit)
 {
-	ApiClientPtr->Achievement.QueryGlobalAchievementContributors(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->QueryGlobalAchievementContributors(
 		AchievementCode,
 		SortBy,
 		THandler<FAccelByteModelsPaginatedGlobalAchievementContributors>::CreateLambda(
@@ -194,6 +245,11 @@ void UABAchievement::QueryGlobalAchievementContributors(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 			), Offset, Limit);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::QueryGlobalAchievementUserContributed(
@@ -204,7 +260,10 @@ void UABAchievement::QueryGlobalAchievementUserContributed(
 	int32 const& Offset, 
 	int32 const& Limit)
 {
-	ApiClientPtr->Achievement.QueryGlobalAchievementUserContributed(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->QueryGlobalAchievementUserContributed(
 		AchievementCode,
 		SortBy,
 		THandler<FAccelByteModelsPaginatedGlobalAchievementUserContributed>::CreateLambda(
@@ -218,6 +277,11 @@ void UABAchievement::QueryGlobalAchievementUserContributed(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 			), Offset, Limit);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::ClaimGlobalAchievements(
@@ -225,7 +289,10 @@ void UABAchievement::ClaimGlobalAchievements(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Achievement.ClaimGlobalAchievements(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->ClaimGlobalAchievements(
 		AchievementCode,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -237,6 +304,11 @@ void UABAchievement::ClaimGlobalAchievements(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABAchievement::GetTags(
@@ -246,7 +318,10 @@ void UABAchievement::GetTags(
 	FDErrorHandler const& OnError,
 	int32 const& Offset, int32 const& Limit)
 {
-	ApiClientPtr->Achievement.GetTags(
+	const auto AchievementPtr = ApiClientPtr->GetAchievementApi().Pin();
+	if (AchievementPtr.IsValid())
+	{
+		AchievementPtr->GetTags(
 		Name,
 		SortBy,
 		THandler<FAccelByteModelsPaginatedPublicTag>::CreateLambda(
@@ -260,4 +335,9 @@ void UABAchievement::GetTags(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		),Offset,Limit);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

@@ -13,77 +13,113 @@ void UABPresence::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 
 void UABPresence::GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetGetOnlineFriendsPresenceResponseDelegate(
-	Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda(
-		[OnResponse](FAccelByteModelsGetOnlineUsersResponse const& Response)
-		{
-			OnResponse.ExecuteIfBound(Response);
-		}),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetGetOnlineFriendsPresenceResponseDelegate(
+			Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsGetOnlineUsersResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	ApiClientPtr->Lobby.SendGetOnlineFriendPresenceRequest();
+		LobbyPtr->SendGetOnlineFriendPresenceRequest();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABPresence::BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.BulkGetUserPresence(
-		Request.UserIds,
-		THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnResponse](FAccelByteModelsBulkUserStatusNotif const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}),
-		Request.bCountOnly);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->BulkGetUserPresence(
+			Request.UserIds,
+			THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnResponse](FAccelByteModelsBulkUserStatusNotif const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}),
+			Request.bCountOnly);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABPresence::BulkGetUserPresenceV2(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse,
 	FDErrorHandler OnError)
 {
-	ApiClientPtr->Lobby.BulkGetUserPresenceV2(
-		Request.UserIds,
-		THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnResponse](FAccelByteModelsBulkUserStatusNotif const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}),
-		Request.bCountOnly);
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->BulkGetUserPresenceV2(
+			Request.UserIds,
+			THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnResponse](FAccelByteModelsBulkUserStatusNotif const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}),
+			Request.bCountOnly);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABPresence::SetPresenceStatus(FAccelBytePresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError)
 {
-	ApiClientPtr->Lobby.SetUserPresenceResponseDelegate(
-	Api::Lobby::FSetUserPresenceResponse::CreateLambda(
-		[OnResponse](FAccelByteModelsSetOnlineUsersResponse const& Response)
-		{
-			OnResponse.ExecuteIfBound(Response);
-		}),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetUserPresenceResponseDelegate(
+			Api::Lobby::FSetUserPresenceResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsSetOnlineUsersResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	ApiClientPtr->Lobby.SendSetPresenceStatus(Request.Availability, Request.Activity);
+		LobbyPtr->SendSetPresenceStatus(Request.Availability, Request.Activity);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABPresence::SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetUserPresenceNotifDelegate(
-	Api::Lobby::FFriendStatusNotif::CreateLambda(
-		[OnNotif](FAccelByteModelsUsersPresenceNotice const& Response)
-		{
-			OnNotif.ExecuteIfBound(Response);
-		}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetUserPresenceNotifDelegate(
+			Api::Lobby::FFriendStatusNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsUsersPresenceNotice const& Response)
+				{
+					OnNotif.ExecuteIfBound(Response);
+				}));
+	}
 }

@@ -21,7 +21,7 @@ namespace Api
  * The category has tree data structure.
  * Each category has path, for example "/equipments/armor/legs". Items are grouped into a category. The root is equivalent to "/".
  */
-class ACCELBYTEUE4SDK_API Category : public FApiBase
+class ACCELBYTEUE4SDK_API Category : public FApiBase, public TSharedFromThis<Category, ESPMode::ThreadSafe>
 {
 public:
 	Category(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -90,6 +90,10 @@ private:
 	Category(Category const&) = delete;
 	Category(Category&&) = delete;
 };
+
+typedef TSharedRef<Category, ESPMode::ThreadSafe> CategoryRef;
+typedef TSharedPtr<Category, ESPMode::ThreadSafe> CategoryPtr;
+typedef TWeakPtr<Category, ESPMode::ThreadSafe> CategoryWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

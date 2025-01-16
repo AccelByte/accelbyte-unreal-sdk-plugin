@@ -21,7 +21,7 @@ namespace Api
  * Each player has configurable slot(s) that controlled by admin.
  * The configuration affects the amount of slot that owned by user and the allowed size for each slot (byte).
  */
-class ACCELBYTEUE4SDK_API CloudStorage : FApiBase
+class ACCELBYTEUE4SDK_API CloudStorage : FApiBase, public TSharedFromThis<CloudStorage, ESPMode::ThreadSafe>
 {
 public:
 	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -176,6 +176,10 @@ private:
 		, FString const& BoundaryGuid
 		, bool CloseFooter);
 };
+
+typedef TSharedRef<CloudStorage, ESPMode::ThreadSafe> CloudStorageRef;
+typedef TSharedPtr<CloudStorage, ESPMode::ThreadSafe> CloudStoragePtr;
+typedef TWeakPtr<CloudStorage, ESPMode::ThreadSafe> CloudStorageWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

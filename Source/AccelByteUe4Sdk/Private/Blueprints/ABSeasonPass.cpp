@@ -18,7 +18,10 @@ void UABSeasonPass::GetCurrentSeason(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SeasonPass.GetCurrentSeason(
+	const auto SeasonPassPtr = ApiClientPtr->GetSeasonPassApi().Pin();
+	if (SeasonPassPtr.IsValid())
+	{
+		SeasonPassPtr->GetCurrentSeason(
 		Language,
 		THandler<FAccelByteModelsSeasonInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsSeasonInfo const& Response)
@@ -32,7 +35,12 @@ void UABSeasonPass::GetCurrentSeason(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABSeasonPass::GetUserSeason(
@@ -41,7 +49,10 @@ void UABSeasonPass::GetUserSeason(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SeasonPass.GetUserSeason(
+	const auto SeasonPassPtr = ApiClientPtr->GetSeasonPassApi().Pin();
+	if (SeasonPassPtr.IsValid())
+	{
+		SeasonPassPtr->GetUserSeason(
 		SeasonId,
 		THandler<FAccelByteModelsUserSeasonInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserSeasonInfo const& Response)
@@ -55,7 +66,12 @@ void UABSeasonPass::GetUserSeason(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABSeasonPass::GetCurrentUserSeason(
@@ -63,7 +79,10 @@ void UABSeasonPass::GetCurrentUserSeason(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SeasonPass.GetCurrentUserSeason(
+	const auto SeasonPassPtr = ApiClientPtr->GetSeasonPassApi().Pin();
+	if (SeasonPassPtr.IsValid())
+	{
+		SeasonPassPtr->GetCurrentUserSeason(
 		THandler<FAccelByteModelsUserSeasonInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserSeasonInfo const& Response)
 			{
@@ -76,7 +95,12 @@ void UABSeasonPass::GetCurrentUserSeason(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABSeasonPass::ClaimRewards(
@@ -85,7 +109,10 @@ void UABSeasonPass::ClaimRewards(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SeasonPass.ClaimRewards(
+	const auto SeasonPassPtr = ApiClientPtr->GetSeasonPassApi().Pin();
+	if (SeasonPassPtr.IsValid())
+	{
+		SeasonPassPtr->ClaimRewards(
 		RewardRequest,
 		THandler<FAccelByteModelsSeasonClaimRewardResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsSeasonClaimRewardResponse const& Response)
@@ -99,7 +126,12 @@ void UABSeasonPass::ClaimRewards(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABSeasonPass::BulkClaimRewards(
@@ -107,7 +139,10 @@ void UABSeasonPass::BulkClaimRewards(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SeasonPass.BulkClaimRewards(
+	const auto SeasonPassPtr = ApiClientPtr->GetSeasonPassApi().Pin();
+	if (SeasonPassPtr.IsValid())
+	{
+		SeasonPassPtr->BulkClaimRewards(
 		THandler<FAccelByteModelsSeasonClaimRewardResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsSeasonClaimRewardResponse const& Response)
 			{
@@ -120,5 +155,10 @@ void UABSeasonPass::BulkClaimRewards(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

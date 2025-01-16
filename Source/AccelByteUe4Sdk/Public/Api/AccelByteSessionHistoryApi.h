@@ -20,7 +20,7 @@ namespace Api
 /**
  * @brief Provide APIs to access SessionHistory service.
  */
-class ACCELBYTEUE4SDK_API SessionHistory : public FApiBase
+class ACCELBYTEUE4SDK_API SessionHistory : public FApiBase, public TSharedFromThis<SessionHistory, ESPMode::ThreadSafe>
 {
 public:
 	SessionHistory(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -52,6 +52,10 @@ private:
 	SessionHistory(SessionHistory const&) = delete;
 	SessionHistory(SessionHistory&&) = delete;
 };
+
+typedef TSharedRef<SessionHistory, ESPMode::ThreadSafe> SessionHistoryRef;
+typedef TSharedPtr<SessionHistory, ESPMode::ThreadSafe> SessionHistoryPtr;
+typedef TWeakPtr<SessionHistory, ESPMode::ThreadSafe> SessionHistoryWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

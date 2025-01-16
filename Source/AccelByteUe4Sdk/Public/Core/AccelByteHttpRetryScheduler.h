@@ -17,10 +17,13 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpRetry, Log, All);
 namespace AccelByte
 {
 class ACCELBYTEUE4SDK_API FHttpRetryScheduler
+	: public TSharedFromThis<FHttpRetryScheduler, ESPMode::ThreadSafe>
 {
 public:
 	DECLARE_DELEGATE(FBearerAuthRejected);
-	DECLARE_MULTICAST_DELEGATE_OneParam(FBearerAuthRejectedRefresh, FString const&);
+	DECLARE_MULTICAST_DELEGATE(FBearerAuthRejectedMulticast);
+	DECLARE_DELEGATE_OneParam(FBearerAuthRefreshed, FString const&);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FBearerAuthRefreshedMulticast, FString const&);
 
 	/**
 	 * @brief A delegate to handle specified HTTP status code when the HTTP request succeeded
@@ -50,10 +53,15 @@ public:
 
 	FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr Request, TSharedPtr<FJsonObject> Content, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, bool bOmitBlankValues = false);
 
-	void SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected);
+	void SetBearerAuthRejectedDelegate(FBearerAuthRejected const& BearerAuthRejected);
+	FDelegateHandle AddBearerAuthRejectedDelegate(FBearerAuthRejected const& BearerAuthRejected);
+	bool RemoveBearerAuthRejectedDelegate(FDelegateHandle const& BearerAuthRejectedHandle);
 	void BearerAuthRejected();
 	void PauseBearerAuthRequest();
 	void ResumeBearerAuthRequest(const FString& AccessToken);
+
+	FDelegateHandle AddBearerAuthRefreshedDelegate(FBearerAuthRefreshed const& BearerAuthRefreshed);
+	bool RemoveBearerAuthRefreshedDelegate(FDelegateHandle const& BearerAuthRefreshedHandle);
 
 	virtual void Startup();
 	virtual void Shutdown();
@@ -82,9 +90,12 @@ protected:
 
 	Core::FAccelByteHttpCache HttpCache{};
 
-	FBearerAuthRejected BearerAuthRejectedDelegate{};
-	FBearerAuthRejectedRefresh BearerAuthRejectedRefresh{};
+	FBearerAuthRejectedMulticast BearerAuthRejectedMulticast{};
+	FBearerAuthRefreshedMulticast BearerAuthRefreshedMulticast{};
 
+	//for mutex lock
+	FCriticalSection LockBearerAuthRejected;
+	FCriticalSection LockBearerAuthRefreshed;
 
 	enum class EState
 	{
@@ -104,7 +115,8 @@ protected:
 	static int32 RateLimit;
 };
 
-typedef TSharedRef<FHttpRetryScheduler, ESPMode::ThreadSafe> FHttpRetrySchedulerRef;	
+typedef TSharedRef<FHttpRetryScheduler, ESPMode::ThreadSafe> FHttpRetrySchedulerRef;
 typedef TSharedPtr<FHttpRetryScheduler, ESPMode::ThreadSafe> FHttpRetrySchedulerPtr;
+typedef TWeakPtr<FHttpRetryScheduler, ESPMode::ThreadSafe> FHttpRetrySchedulerWPtr;
 
 }

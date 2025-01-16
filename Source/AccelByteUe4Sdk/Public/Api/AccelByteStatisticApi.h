@@ -21,7 +21,7 @@ namespace Api
 /**
  * @brief Statistic API to manage user's in-game profiles's statistic.
  */
-class ACCELBYTEUE4SDK_API Statistic : public FApiBase
+class ACCELBYTEUE4SDK_API Statistic : public FApiBase, public TSharedFromThis<Statistic, ESPMode::ThreadSafe>
 {
 public:
 	Statistic(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -340,5 +340,10 @@ private:
 	
 	static FString ConvertUserStatisticSortByToString(EAccelByteStatisticSortBy SortBy);
 };
+
+typedef TSharedRef<Statistic, ESPMode::ThreadSafe> StatisticRef;
+typedef TSharedPtr<Statistic, ESPMode::ThreadSafe> StatisticPtr;
+typedef TWeakPtr<Statistic, ESPMode::ThreadSafe> StatisticWPtr;
+
 } // Namespace Api
 } // Namespace AccelByte

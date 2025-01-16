@@ -19,7 +19,10 @@ void UABChallenge::GetChallenges(
 	int64 Offset, 
 	int64 Limit)
 {
-	ApiClientPtr->Challenge.GetChallenges(
+	const auto ChallengePtr = ApiClientPtr->GetChallengeApi().Pin();
+	if (ChallengePtr.IsValid())
+	{
+		ChallengePtr->GetChallenges(
 		THandler<FAccelByteModelsGetChallengesResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsGetChallengesResponse const& Response)
 			{
@@ -37,6 +40,11 @@ void UABChallenge::GetChallenges(
 		Offset,
 		Limit
 	);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABChallenge::GetScheduledChallengeGoals(
@@ -47,7 +55,10 @@ void UABChallenge::GetScheduledChallengeGoals(
 	int64 Offset, 
 	int64 Limit)
 {
-	ApiClientPtr->Challenge.GetScheduledChallengeGoals(
+	const auto ChallengePtr = ApiClientPtr->GetChallengeApi().Pin();
+	if (ChallengePtr.IsValid())
+	{
+		ChallengePtr->GetScheduledChallengeGoals(
 		ChallengeCode,
 		THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsGetScheduledChallengeGoalsResponse const& Response)
@@ -65,6 +76,11 @@ void UABChallenge::GetScheduledChallengeGoals(
 		Offset,
 		Limit
 	);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABChallenge::GetPreviousChallengeProgresses(
@@ -77,7 +93,10 @@ void UABChallenge::GetPreviousChallengeProgresses(
 	int64 Offset, 
 	int64 Limit)
 {
-	ApiClientPtr->Challenge.GetPreviousChallengeProgresses(
+	const auto ChallengePtr = ApiClientPtr->GetChallengeApi().Pin();
+	if (ChallengePtr.IsValid())
+	{
+		ChallengePtr->GetPreviousChallengeProgresses(
 		ChallengeCode,
 		Index,
 		THandler<FAccelByteModelsChallengeProgressResponse>::CreateLambda(
@@ -97,6 +116,11 @@ void UABChallenge::GetPreviousChallengeProgresses(
 		Limit,
 		OptionalTags
 	);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABChallenge::GetChallengeProgress(
@@ -108,7 +132,10 @@ void UABChallenge::GetChallengeProgress(
 	int64 Offset, 
 	int64 Limit)
 {
-	ApiClientPtr->Challenge.GetChallengeProgress(
+	const auto ChallengePtr = ApiClientPtr->GetChallengeApi().Pin();
+	if (ChallengePtr.IsValid())
+	{
+		ChallengePtr->GetChallengeProgress(
 		ChallengeCode,
 		GoalCode,
 		THandler<FAccelByteModelsChallengeProgressResponse>::CreateLambda(
@@ -127,6 +154,11 @@ void UABChallenge::GetChallengeProgress(
 		Limit,
 		OptionalTags
 	);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABChallenge::GetRewards(
@@ -137,7 +169,10 @@ void UABChallenge::GetRewards(
 	int64 Offset, 
 	int64 Limit)
 {
-	ApiClientPtr->Challenge.GetRewards(
+	const auto ChallengePtr = ApiClientPtr->GetChallengeApi().Pin();
+	if (ChallengePtr.IsValid())
+	{
+		ChallengePtr->GetRewards(
 		THandler<FAccelByteModelsChallengeGetRewardStatusResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsChallengeGetRewardStatusResponse const& Response)
 			{
@@ -155,6 +190,11 @@ void UABChallenge::GetRewards(
 		Offset,
 		Limit
 	);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABChallenge::ClaimReward(
@@ -162,7 +202,10 @@ void UABChallenge::ClaimReward(
 	FDModelsChallengeRewardsResponse const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Challenge.ClaimReward(
+	const auto ChallengePtr = ApiClientPtr->GetChallengeApi().Pin();
+	if (ChallengePtr.IsValid())
+	{
+		ChallengePtr->ClaimReward(
 		Request,
 		THandler<TArray<FAccelByteModelsChallengeReward>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsChallengeReward> const& Response)
@@ -177,13 +220,21 @@ void UABChallenge::ClaimReward(
 			}
 		)
 	);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABChallenge::EvaluateChallengeProgress(
 	FDHandler const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Challenge.EvaluateChallengeProgress(
+	const auto ChallengePtr = ApiClientPtr->GetChallengeApi().Pin();
+	if (ChallengePtr.IsValid())
+	{
+		ChallengePtr->EvaluateChallengeProgress(
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -197,4 +248,9 @@ void UABChallenge::EvaluateChallengeProgress(
 			}
 		)
 	);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

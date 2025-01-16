@@ -17,7 +17,7 @@ namespace Api
 /**
  * @brief Interface for interacting with the AccelByte challenge service
  */	
-class ACCELBYTEUE4SDK_API Challenge : public FApiBase
+class ACCELBYTEUE4SDK_API Challenge : public FApiBase, public TSharedFromThis<Challenge, ESPMode::ThreadSafe>
 {
 public:
 	Challenge(Credentials const& InCredentialsRef
@@ -183,5 +183,9 @@ private:
 	static FString CreateTagsString(const TArray<FString>& Tags);
 };
 	
+typedef TSharedRef<Challenge, ESPMode::ThreadSafe> ChallengeRef;
+typedef TSharedPtr<Challenge, ESPMode::ThreadSafe> ChallengePtr;
+typedef TWeakPtr<Challenge, ESPMode::ThreadSafe> ChallengeWPtr;
+
 } // Namespace Api
 } // Namespace AccelByte

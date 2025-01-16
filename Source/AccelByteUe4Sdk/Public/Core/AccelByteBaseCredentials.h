@@ -23,6 +23,7 @@ public:
 	{
 		Invalid,
 		Expired,
+		Rejected,
 		Refreshing,
 		Valid,
 	};

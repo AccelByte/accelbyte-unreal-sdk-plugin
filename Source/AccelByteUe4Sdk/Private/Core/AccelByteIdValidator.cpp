@@ -96,3 +96,8 @@ FString AccelByte::FAccelByteIdValidator::GetEntitlementIdInvalidMessage(FString
 {
 	return FString::Printf(TEXT("Invalid request, Entitlement Id format is invalid\nValue: %s"), *EntitlementId);
 }
+
+FString AccelByte::FAccelByteIdValidator::GetObjectIdInvalidMessage(FString const& ObjectId)
+{
+	return FString::Printf(TEXT("Invalid request, Object Id format is invalid\nValue: %s"), *ObjectId);
+}

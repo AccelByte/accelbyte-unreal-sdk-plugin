@@ -20,7 +20,7 @@ namespace Api
 /**
  * @brief Login Queue API for Login Ticket Management.
  */
-class ACCELBYTEUE4SDK_API LoginQueue : public FApiBase
+class ACCELBYTEUE4SDK_API LoginQueue : public FApiBase, public TSharedFromThis<LoginQueue, ESPMode::ThreadSafe>
 {
 public:
 	LoginQueue(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef);
@@ -65,6 +65,10 @@ private:
 	LoginQueue(LoginQueue&&) = delete;
 	 
 };
+
+typedef TSharedRef<LoginQueue, ESPMode::ThreadSafe> LoginQueueRef;
+typedef TSharedPtr<LoginQueue, ESPMode::ThreadSafe> LoginQueuePtr;
+typedef TWeakPtr<LoginQueue, ESPMode::ThreadSafe> LoginQueueWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

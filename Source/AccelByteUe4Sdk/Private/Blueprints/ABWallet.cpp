@@ -18,7 +18,10 @@ void UABWallet::GetWalletInfoByCurrencyCode(
 	FDAccelByteModelsWalletInfoResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Wallet.GetWalletInfoByCurrencyCode(
+	const auto WalletPtr = ApiClientPtr->GetWalletApi().Pin();
+	if (WalletPtr.IsValid())
+	{
+		WalletPtr->GetWalletInfoByCurrencyCode(
 		CurrencyCode,
 		THandler<FAccelByteModelsWalletInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsWalletInfo const& Response)
@@ -30,6 +33,11 @@ void UABWallet::GetWalletInfoByCurrencyCode(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABWallet::GetWalletInfoByCurrencyCodeV2(
@@ -37,7 +45,10 @@ void UABWallet::GetWalletInfoByCurrencyCodeV2(
 	FDAccelByteModelsWalletInfosResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Wallet.GetWalletInfoByCurrencyCodeV2(
+	const auto WalletPtr = ApiClientPtr->GetWalletApi().Pin();
+	if (WalletPtr.IsValid())
+	{
+		WalletPtr->GetWalletInfoByCurrencyCodeV2(
 		CurrencyCode,
 		THandler<FAccelByteModelsWalletInfoResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsWalletInfoResponse const& Response)
@@ -49,4 +60,9 @@ void UABWallet::GetWalletInfoByCurrencyCodeV2(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

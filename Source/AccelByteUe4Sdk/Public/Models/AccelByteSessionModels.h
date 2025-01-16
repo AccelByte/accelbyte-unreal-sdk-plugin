@@ -85,6 +85,15 @@ enum class EAccelByteV2SessionType : uint8
 	PartySession
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteV2SessionPlatform : uint8
+{
+	Unknown = 0,
+	Steam,
+	Xbox,
+	PS4,
+	PS5
+};
 #pragma endregion
 
 #pragma region Game Session Struct Models
@@ -206,6 +215,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionTeam
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionTeam")
 		TArray<FString> UserIDs{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionTeam")
+		FString TeamID{}; // Not mandatory and provided by developer
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionTeam")
 		TArray<FAccelByteModelsV2GameSessionTeamParties> Parties{};
 };
@@ -390,6 +401,25 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionInviteRequest
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionInviteRequest")
 		FString UserID{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionInvitePlatformRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionInvitePlatformRequest")
+	FString PlatformID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionInvitePlatformRequest")
+	FString UserID{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionInvitePlatformResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionInvitePlatformResponse")
+	FString PlatformUserID{};
 };
 
 USTRUCT(BlueprintType)
@@ -768,6 +798,24 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2StorePlayerAttributesRequest
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2NativeSessionSyncNotif
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | NativeSessionSyncNotif")
+	FString PlatformName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | NativeSessionSyncNotif")
+	FString PlatformSessionID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | NativeSessionSyncNotif")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | NativeSessionSyncNotif")
+	FString SessionID{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2ServerQueryGameSessionsRequest
 {
 	GENERATED_BODY()
@@ -1133,7 +1181,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoriesResult
  * Not meant to be exposed to blueprint, this model utilized by OSS Session interface as an optional param when start matchmaking
  * Member of FOnlineSessionSearchAccelByte.
  */
-struct ACCELBYTEUE4SDK_API FAccelBtyeModelsGameSessionExcludedSession
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionExcludedSession
 {
 	enum ExclusionType
 	{
@@ -1143,24 +1191,25 @@ struct ACCELBYTEUE4SDK_API FAccelBtyeModelsGameSessionExcludedSession
 		ALL_MEMBER_CACHED_SESSION
 	};
 	
-	static FAccelBtyeModelsGameSessionExcludedSession CreateNoExclusion();
-	static FAccelBtyeModelsGameSessionExcludedSession CreateExclusionCount(uint32 ExcludedPastSessionCount);
-	static FAccelBtyeModelsGameSessionExcludedSession CreateExclusionList(const TSet<FString>& ExcludedGameSessionIDs);
-	static FAccelBtyeModelsGameSessionExcludedSession CreateExclusionEntireSessionMemberPastSession();
+	static FAccelByteModelsGameSessionExcludedSession CreateNoExclusion();
+	static FAccelByteModelsGameSessionExcludedSession CreateExclusionCount(uint32 ExcludedPastSessionCount);
+	static FAccelByteModelsGameSessionExcludedSession CreateExclusionList(const TSet<FString>& ExcludedGameSessionIDs);
+	static FAccelByteModelsGameSessionExcludedSession CreateExclusionEntireSessionMemberPastSession();
 
 	const ExclusionType& CurrentType;
 	const uint32& ExcludedPastSessionCount;
 	TArray<FString> GetExcludedGameSessionIDs() { return _ExcludedGameSessionIDs.Array(); }
 
-	FAccelBtyeModelsGameSessionExcludedSession() = delete;
-	FAccelBtyeModelsGameSessionExcludedSession& operator=(const FAccelBtyeModelsGameSessionExcludedSession& Copy);
+	FAccelByteModelsGameSessionExcludedSession() = delete;
+	FAccelByteModelsGameSessionExcludedSession& operator=(const FAccelByteModelsGameSessionExcludedSession& Copy);
 
 private:
-	FAccelBtyeModelsGameSessionExcludedSession(ExclusionType Type);
+	FAccelByteModelsGameSessionExcludedSession(ExclusionType Type);
 
 	ExclusionType _CurrentType = ExclusionType::NONE;
 	uint32 _ExcludedPastSessionCount = 0; //ExclusionType::N_PAST_SESSION
 	TSet<FString> _ExcludedGameSessionIDs{}; //ExclusionType::EXPLICIT_LIST
 };
+typedef FAccelByteModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession;
 
 #pragma endregion

@@ -325,6 +325,12 @@ public:
 		OutString.Append(TEXT("]")); 
 		return true;
 	}
+	/**
+	 * @brief Generate a new team Id for player session.
+	 * 
+	 * @return String of team id with UUID format.
+	 */
+	static FString GenerateSessionTeamId();
 
 	/**
 	 * @brief Try to get the DeviceID from current Platform, if not found from the current Platform then 
@@ -480,37 +486,6 @@ public:
 	 */
 	static FString ConvertAccelByteGeneralSortByToString(EAccelByteGeneralSortBy SortBy);
 
-private:
-	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);
-	static FString GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep);
-	static TArray<FString> GenerateAcceptableTOTP(const FString& ServerSecretKey, const FString& UserId);
-
-//To allow override for testing using mock class
-protected:
-#pragma region DEVICE_ID
-	/**
-	 * @brief Create a randomized 30 digit alpha-numeric DeviceID.
-	 *
-	 * @return Random string of DeviceID. 
-	 */
-	static FString RandomizeDeviceId(int64 Seed = FDateTime::UtcNow().ToUnixTimestamp());
-
-	/**
-	 * @brief Try to obtain DeviceID from a cached value if not found using the Default parameter and also store it into the cache
-	 *
-	 * @param Default 
-	 */
-	static FString GetOrSetIfDeviceIdNotFound(FString const& Default = "");
-
-	/**
-	 * @brief Get the development mode DeviceID override method from "DefaultEngine.ini"
-	 *  	Section:	[AccelByte.Dev]
-	 *  	Key:		DeviceIdOverrideMethod=(STRING)
-	 *
-	 * @return DeviceID override method.
-	 */
-	static EAccelByteDevModeDeviceIdMethod GetCurrentDeviceIdOverrideMethod();
-
 	/**
 	 * @brief Obtain DeviceID for development mode
 	 * GAME CLIENT NON SHIPPING BUILD ONLY!
@@ -564,6 +539,37 @@ protected:
 	 *  @return String of DeviceID.
 	 */
 	static FString GetDevModeDeviceId(FString const& Default);
+
+private:
+	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);
+	static FString GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep);
+	static TArray<FString> GenerateAcceptableTOTP(const FString& ServerSecretKey, const FString& UserId);
+
+//To allow override for testing using mock class
+protected:
+#pragma region DEVICE_ID
+	/**
+	 * @brief Create a randomized 30 digit alpha-numeric DeviceID.
+	 *
+	 * @return Random string of DeviceID. 
+	 */
+	static FString RandomizeDeviceId(int64 Seed = FDateTime::UtcNow().ToUnixTimestamp());
+
+	/**
+	 * @brief Try to obtain DeviceID from a cached value if not found using the Default parameter and also store it into the cache
+	 *
+	 * @param Default 
+	 */
+	static FString GetOrSetIfDeviceIdNotFound(FString const& Default = "");
+
+	/**
+	 * @brief Get the development mode DeviceID override method from "DefaultEngine.ini"
+	 *  	Section:	[AccelByte.Dev]
+	 *  	Key:		DeviceIdOverrideMethod=(STRING)
+	 *
+	 * @return DeviceID override method.
+	 */
+	static EAccelByteDevModeDeviceIdMethod GetCurrentDeviceIdOverrideMethod();
 
 	static FString AccelByteStoredSectionIdentifiers() { return FApp::GetProjectName() / FString(TEXT("Identifiers")); }
 #pragma endregion

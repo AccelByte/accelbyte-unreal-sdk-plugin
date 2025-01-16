@@ -22,7 +22,7 @@ namespace Api
 /**
  * @brief SessionBrowser API to handle custom game session.
  */
-class ACCELBYTEUE4SDK_API SessionBrowser : public FApiBase
+class ACCELBYTEUE4SDK_API SessionBrowser : public FApiBase, public TSharedFromThis<SessionBrowser, ESPMode::ThreadSafe>
 {
 public:
 	SessionBrowser(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -415,6 +415,10 @@ private:
 	SessionBrowser(SessionBrowser const&) = delete;
 	SessionBrowser(SessionBrowser&&) = delete;
 };
+
+typedef TSharedRef<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserRef;
+typedef TSharedPtr<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserPtr;
+typedef TWeakPtr<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

@@ -38,7 +38,7 @@ FAccelByteTaskWPtr SeasonPass::GetCurrentSeason(FString const& Language
 	};
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsSeasonTierRewardAsJsonObject>::CreateLambda(
-		[OnSuccess, this](FAccelByteModelsSeasonTierRewardAsJsonObject const& SeasonResult)
+		[OnSuccess](FAccelByteModelsSeasonTierRewardAsJsonObject const& SeasonResult)
 		{
 			// Convert the Tier JsonObject to TMap<FString, TArray<FString>>
 			TArray<FAccelByteModelsSeasonPassTier> Tiers;
@@ -94,7 +94,7 @@ FAccelByteTaskWPtr SeasonPass::GetUserSeason(FString const& SeasonId
 		, *SeasonId);
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject>::CreateLambda(
-		[OnSuccess, this](FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject const& Response)
+		[OnSuccess](FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject const& Response)
 		{
 			TMap<int32, TMap<FString, TArray<FString>>> ToClaimRewards;
 			for (TTuple<int, FJsonObjectWrapper> const& ClaimReward : Response.ToClaimRewards)
@@ -149,7 +149,7 @@ FAccelByteTaskWPtr SeasonPass::GetCurrentUserSeason(THandler<FAccelByteModelsUse
 		, *CredentialsRef->GetUserId());
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject>::CreateLambda(
-		[OnSuccess, this](FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject const& Response)
+		[OnSuccess](FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject const& Response)
 		{
 			TMap<int32, TMap<FString, TArray<FString>>> ToClaimRewards;
 			for (TTuple<int, FJsonObjectWrapper> const& ClaimReward : Response.ToClaimRewards)
@@ -205,7 +205,7 @@ FAccelByteTaskWPtr SeasonPass::ClaimRewards(FAccelByteModelsSeasonClaimRewardReq
 		, *CredentialsRef->GetUserId());
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsSeasonClaimRewardResponseJsonWrapper>::CreateLambda(
-		[OnSuccess, this](FAccelByteModelsSeasonClaimRewardResponseJsonWrapper const& Response)
+		[OnSuccess](FAccelByteModelsSeasonClaimRewardResponseJsonWrapper const& Response)
 		{
 			TMap<int32, TMap<FString, TArray<FString>>> ToClaimRewards;
 			for (TTuple<int, FJsonObjectWrapper> const& ClaimReward : Response.ToClaimRewards)
@@ -246,7 +246,7 @@ FAccelByteTaskWPtr SeasonPass::BulkClaimRewards(THandler<FAccelByteModelsSeasonC
 		, *CredentialsRef->GetUserId());
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsSeasonClaimRewardResponseJsonWrapper>::CreateLambda(
-		[OnSuccess, this](FAccelByteModelsSeasonClaimRewardResponseJsonWrapper const& Response)
+		[OnSuccess](FAccelByteModelsSeasonClaimRewardResponseJsonWrapper const& Response)
 		{
 			TMap<int32, TMap<FString, TArray<FString>>> ToClaimRewards;
 			for (TTuple<int, FJsonObjectWrapper> const& ClaimReward : Response.ToClaimRewards)

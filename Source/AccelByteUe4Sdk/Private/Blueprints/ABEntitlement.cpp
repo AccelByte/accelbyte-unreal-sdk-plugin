@@ -22,18 +22,26 @@ void UABEntitlement::GetCurrentUserEntitlementHistory(
 	int32 Limit, 
 	int32 Offset)
 {
-	ApiClientPtr->Entitlement.GetCurrentUserEntitlementHistory(
-		THandler<FAccelByteModelsUserEntitlementHistoryPagingResult>::CreateLambda(
-			[OnSuccess](FAccelByteModelsUserEntitlementHistoryPagingResult const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}),
-		EntitlementClass, StartDate, EndDate, Limit, Offset);
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetCurrentUserEntitlementHistory(
+			THandler<FAccelByteModelsUserEntitlementHistoryPagingResult>::CreateLambda(
+				[OnSuccess](FAccelByteModelsUserEntitlementHistoryPagingResult const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}),
+			EntitlementClass, StartDate, EndDate, Limit, Offset);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::QueryUserEntitlements(
@@ -46,7 +54,10 @@ void UABEntitlement::QueryUserEntitlements(
 	EAccelByteEntitlementClass EntitlementClass, 
 	EAccelByteAppType AppType) 
 {
-	ApiClientPtr->Entitlement.QueryUserEntitlements(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->QueryUserEntitlements(
 		EntitlementName,
 		ItemIds,
 		Offset,
@@ -63,6 +74,11 @@ void UABEntitlement::QueryUserEntitlements(
 			}),
 		EntitlementClass,
 		AppType);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::GetUserEntitlementById(
@@ -70,7 +86,10 @@ void UABEntitlement::GetUserEntitlementById(
 	FDAccelByteModelsEntitlementInfoResponse OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.GetUserEntitlementById(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetUserEntitlementById(
 		Entitlementid,
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsEntitlementInfo const& Response)
@@ -82,6 +101,11 @@ void UABEntitlement::GetUserEntitlementById(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::GetUserEntitlementByIds(
@@ -90,7 +114,10 @@ void UABEntitlement::GetUserEntitlementByIds(
 	FDErrorHandler OnError, 
 	bool bAvailablePlatformOnly)
 {
-	ApiClientPtr->Entitlement.GetUserEntitlementByIds(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetUserEntitlementByIds(
 		EntitlementIds,
 		THandler<TArray<FAccelByteModelsEntitlementInfo>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsEntitlementInfo> const& Response)
@@ -103,6 +130,11 @@ void UABEntitlement::GetUserEntitlementByIds(
 				OnError.ExecuteIfBound(Code, Message);
 			}),
 		bAvailablePlatformOnly);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::GetUserEntitlementOwnershipByAppId(
@@ -110,7 +142,10 @@ void UABEntitlement::GetUserEntitlementOwnershipByAppId(
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.GetUserEntitlementOwnershipByAppId(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetUserEntitlementOwnershipByAppId(
 		AppId,
 		THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda(
 			[OnSuccess](FAccelByteModelsEntitlementOwnership const& Response)
@@ -122,6 +157,11 @@ void UABEntitlement::GetUserEntitlementOwnershipByAppId(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::GetUserEntitlementOwnershipBySku(
@@ -129,7 +169,10 @@ void UABEntitlement::GetUserEntitlementOwnershipBySku(
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.GetUserEntitlementOwnershipBySku(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetUserEntitlementOwnershipBySku(
 		Sku,
 		THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda(
 			[OnSuccess](FAccelByteModelsEntitlementOwnership const& Response)
@@ -141,6 +184,11 @@ void UABEntitlement::GetUserEntitlementOwnershipBySku(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::GetUserEntitlementOwnershipByItemId(
@@ -148,7 +196,10 @@ void UABEntitlement::GetUserEntitlementOwnershipByItemId(
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.GetUserEntitlementOwnershipByItemId(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetUserEntitlementOwnershipByItemId(
 		ItemId,
 		THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda(
 			[OnSuccess](FAccelByteModelsEntitlementOwnership const& Response)
@@ -160,6 +211,11 @@ void UABEntitlement::GetUserEntitlementOwnershipByItemId(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::GetUserEntitlementOwnershipAny(
@@ -169,7 +225,10 @@ void UABEntitlement::GetUserEntitlementOwnershipAny(
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.GetUserEntitlementOwnershipAny(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetUserEntitlementOwnershipAny(
 		ItemIds,
 		AppIds,
 		Skus,
@@ -183,6 +242,11 @@ void UABEntitlement::GetUserEntitlementOwnershipAny(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::ConsumeUserEntitlement(
@@ -191,7 +255,10 @@ void UABEntitlement::ConsumeUserEntitlement(
 	FDAccelByteModelsEntitlementInfoResponse OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.ConsumeUserEntitlement(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->ConsumeUserEntitlement(
 		EntitlementId,
 		UseCount,
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda(
@@ -204,6 +271,11 @@ void UABEntitlement::ConsumeUserEntitlement(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::CreateDistributionReceiver(
@@ -212,7 +284,10 @@ void UABEntitlement::CreateDistributionReceiver(
 	FDHandler OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.CreateDistributionReceiver(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->CreateDistributionReceiver(
 		ExtUserId,
 		Attributes,
 		FVoidHandler::CreateLambda(
@@ -225,6 +300,11 @@ void UABEntitlement::CreateDistributionReceiver(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::DeleteDistributionReceiver(
@@ -233,7 +313,10 @@ void UABEntitlement::DeleteDistributionReceiver(
 	FDHandler OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.DeleteDistributionReceiver(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->DeleteDistributionReceiver(
 		ExtUserId,
 		UserId,
 		FVoidHandler::CreateLambda(
@@ -246,6 +329,11 @@ void UABEntitlement::DeleteDistributionReceiver(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::GetDistributionReceiver(
@@ -255,7 +343,10 @@ void UABEntitlement::GetDistributionReceiver(
 	FDErrorHandler OnError) 
 
 {
-	ApiClientPtr->Entitlement.GetDistributionReceiver(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetDistributionReceiver(
 		PublisherNamespace,
 		PublisherUserId,
 		THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda(
@@ -270,6 +361,11 @@ void UABEntitlement::GetDistributionReceiver(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::UpdateDistributionReceiver(
@@ -278,7 +374,10 @@ void UABEntitlement::UpdateDistributionReceiver(
 	FDHandler OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.UpdateDistributionReceiver(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->UpdateDistributionReceiver(
 		ExtUserId,
 		Attributes,
 		FVoidHandler::CreateLambda(
@@ -291,6 +390,11 @@ void UABEntitlement::UpdateDistributionReceiver(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::SyncPlatformPurchase(
@@ -298,7 +402,10 @@ void UABEntitlement::SyncPlatformPurchase(
 	FDHandler OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.SyncPlatformPurchase(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->SyncPlatformPurchase(
 		PlatformType,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -310,6 +417,11 @@ void UABEntitlement::SyncPlatformPurchase(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::SyncPlatformPurchaseSingleItem(
@@ -318,7 +430,10 @@ void UABEntitlement::SyncPlatformPurchaseSingleItem(
 	FDHandler OnSuccess,
 	FDErrorHandler OnError)
 {
-	ApiClientPtr->Entitlement.SyncPlatformPurchase(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->SyncPlatformPurchase(
 		EntitlementSyncBase,
 		PlatformType,
 		FVoidHandler::CreateLambda(
@@ -331,6 +446,11 @@ void UABEntitlement::SyncPlatformPurchaseSingleItem(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::SyncMobilePlatformPurchaseGoogle(
@@ -338,7 +458,10 @@ void UABEntitlement::SyncMobilePlatformPurchaseGoogle(
 	FDHandler OnSuccess, 
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.SyncMobilePlatformPurchaseGoogle(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->SyncMobilePlatformPurchaseGoogle(
 		SyncRequest,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -350,6 +473,11 @@ void UABEntitlement::SyncMobilePlatformPurchaseGoogle(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::SyncMobilePlatformPurchaseGooglePlay(
@@ -357,7 +485,10 @@ void UABEntitlement::SyncMobilePlatformPurchaseGooglePlay(
 	FDAccelByteModelsPlatformSyncMobileGoogleResponse OnSuccess,
 	FDErrorHandler OnError)
 {
-	ApiClientPtr->Entitlement.SyncMobilePlatformPurchaseGooglePlay(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->SyncMobilePlatformPurchaseGooglePlay(
 		SyncRequest,
 		THandler<FAccelByteModelsPlatformSyncMobileGoogleResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsPlatformSyncMobileGoogleResponse& Result)
@@ -369,6 +500,11 @@ void UABEntitlement::SyncMobilePlatformPurchaseGooglePlay(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::SyncMobilePlatformPurchaseApple(
@@ -376,7 +512,10 @@ void UABEntitlement::SyncMobilePlatformPurchaseApple(
 	FDHandler OnSuccess, 
 	FDErrorHandler OnError)
 {
-	ApiClientPtr->Entitlement.SyncMobilePlatformPurchaseApple(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->SyncMobilePlatformPurchaseApple(
 		SyncRequest,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -388,13 +527,21 @@ void UABEntitlement::SyncMobilePlatformPurchaseApple(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABEntitlement::SyncTwitchDropEntitlement(
 	FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, 
 	FDHandler OnSuccess, FDErrorHandler OnError) 
 {
-	ApiClientPtr->Entitlement.SyncTwitchDropEntitlement(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->SyncTwitchDropEntitlement(
 		TwitchDropModel,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -406,12 +553,20 @@ void UABEntitlement::SyncTwitchDropEntitlement(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-		}
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
+}
 
 void UABEntitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items,
 	FDAccelByteModelsPlatformValidateUserItemPurchaseResponse OnSuccess, FDErrorHandler OnError)
 {
-	ApiClientPtr->Entitlement.ValidateUserItemPurchaseCondition(
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->ValidateUserItemPurchaseCondition(
 		Items,
 		THandler<TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>>::CreateLambda(
 			[OnSuccess](const TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>& Result)
@@ -423,4 +578,9 @@ void UABEntitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& It
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

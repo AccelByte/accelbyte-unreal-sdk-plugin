@@ -15,7 +15,7 @@ class Settings;
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API Configurations : public FApiBase
+class ACCELBYTEUE4SDK_API Configurations : public FApiBase, public TSharedFromThis<Configurations, ESPMode::ThreadSafe>
 {
 public:
 	Configurations(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -50,6 +50,10 @@ private:
 	Configurations(Configurations const&) = delete;
 	Configurations(Configurations&&) = delete;
 };
+
+typedef TSharedRef<Configurations, ESPMode::ThreadSafe> ConfigurationsRef;
+typedef TSharedPtr<Configurations, ESPMode::ThreadSafe> ConfigurationsPtr;
+typedef TWeakPtr<Configurations, ESPMode::ThreadSafe> ConfigurationsWPtr;
 
 }
 }

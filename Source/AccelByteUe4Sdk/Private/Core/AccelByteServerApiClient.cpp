@@ -10,6 +10,17 @@ namespace AccelByte
 		: bUseSharedCredentials(false)
 		, ServerCredentialsRef(MakeShared<AccelByte::ServerCredentials, ESPMode::ThreadSafe>())
 		, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
+		, ServerSettings(MakeShareable(&FRegistry::ServerSettings))
+	{
+		HttpRef->Startup();
+		ServerCredentialsRef->Startup();
+	}
+
+	FServerApiClient::FServerApiClient(ServerSettingsPtr InServerSettings)
+		: bUseSharedCredentials(false)
+		, ServerCredentialsRef(MakeShared<AccelByte::ServerCredentials, ESPMode::ThreadSafe>())
+		, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
+		, ServerSettings(InServerSettings)
 	{
 		HttpRef->Startup();
 		ServerCredentialsRef->Startup();
@@ -18,7 +29,8 @@ namespace AccelByte
 	FServerApiClient::FServerApiClient(AccelByte::ServerCredentials& Credentials, AccelByte::FHttpRetryScheduler& Http)
 		: bUseSharedCredentials(true)
 		, ServerCredentialsRef(Credentials.AsShared())
-		, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http, [](AccelByte::FHttpRetryScheduler*) {}))
+		, HttpRef(Http.AsShared())
+		, ServerSettings(MakeShareable(&FRegistry::ServerSettings))
 	{
 
 	}

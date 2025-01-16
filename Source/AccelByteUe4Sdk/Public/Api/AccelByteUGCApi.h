@@ -28,7 +28,7 @@ namespace Api
 /**
  * @brief Provide APIs to access UGC service.
  */
-class ACCELBYTEUE4SDK_API UGC : public FApiBase
+class ACCELBYTEUE4SDK_API UGC : public FApiBase, public TSharedFromThis<UGC, ESPMode::ThreadSafe>
 {
 public:
 	UGC(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -1352,6 +1352,10 @@ private:
 	const FString GetNamespace();
 	const TMap<FString, FString> GetDefaultHeaders();
 };
+
+typedef TSharedRef<UGC, ESPMode::ThreadSafe> UGCRef;
+typedef TSharedPtr<UGC, ESPMode::ThreadSafe> UGCPtr;
+typedef TWeakPtr<UGC, ESPMode::ThreadSafe> UGCWPtr;
 
 }
 }

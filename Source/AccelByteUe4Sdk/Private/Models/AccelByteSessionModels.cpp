@@ -155,38 +155,38 @@ void FAccelByteModelsV2GameSessionQuery::AddToQuery(const FString& ComparisonFie
 	JsonWrapper.JsonObject->SetObjectField(TEXT("query"), QueryObject);
 }
 
-FAccelBtyeModelsGameSessionExcludedSession::FAccelBtyeModelsGameSessionExcludedSession(ExclusionType Type)
+FAccelByteModelsGameSessionExcludedSession::FAccelByteModelsGameSessionExcludedSession(ExclusionType Type)
 	: CurrentType(this->_CurrentType)
 	, ExcludedPastSessionCount(this->_ExcludedPastSessionCount)
 {
 	_CurrentType = Type;
 }
 
-FAccelBtyeModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession::CreateNoExclusion()
+FAccelByteModelsGameSessionExcludedSession FAccelByteModelsGameSessionExcludedSession::CreateNoExclusion()
 {
-	return FAccelBtyeModelsGameSessionExcludedSession(ExclusionType::NONE);
+	return FAccelByteModelsGameSessionExcludedSession(ExclusionType::NONE);
 }
 
-FAccelBtyeModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession::CreateExclusionCount(uint32 ExcludedPastSessionCount) 
+FAccelByteModelsGameSessionExcludedSession FAccelByteModelsGameSessionExcludedSession::CreateExclusionCount(uint32 ExcludedPastSessionCount) 
 {
-	auto Output = FAccelBtyeModelsGameSessionExcludedSession(ExclusionType::N_PAST_SESSION);
+	auto Output = FAccelByteModelsGameSessionExcludedSession(ExclusionType::N_PAST_SESSION);
 	Output._ExcludedPastSessionCount = ExcludedPastSessionCount;
 	return Output;
 }
 
-FAccelBtyeModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession::CreateExclusionList(const TSet<FString>& ExcludedGameSessionIDs) 
+FAccelByteModelsGameSessionExcludedSession FAccelByteModelsGameSessionExcludedSession::CreateExclusionList(const TSet<FString>& ExcludedGameSessionIDs) 
 {
-	auto Output = FAccelBtyeModelsGameSessionExcludedSession(ExclusionType::EXPLICIT_LIST);
+	auto Output = FAccelByteModelsGameSessionExcludedSession(ExclusionType::EXPLICIT_LIST);
 	Output._ExcludedGameSessionIDs = ExcludedGameSessionIDs;
 	return Output;
 }
 
-FAccelBtyeModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession::CreateExclusionEntireSessionMemberPastSession()
+FAccelByteModelsGameSessionExcludedSession FAccelByteModelsGameSessionExcludedSession::CreateExclusionEntireSessionMemberPastSession()
 {
-	return FAccelBtyeModelsGameSessionExcludedSession(ExclusionType::ALL_MEMBER_CACHED_SESSION);
+	return FAccelByteModelsGameSessionExcludedSession(ExclusionType::ALL_MEMBER_CACHED_SESSION);
 }
 
-FAccelBtyeModelsGameSessionExcludedSession& FAccelBtyeModelsGameSessionExcludedSession::operator=(const FAccelBtyeModelsGameSessionExcludedSession& Copy)
+FAccelByteModelsGameSessionExcludedSession& FAccelByteModelsGameSessionExcludedSession::operator=(const FAccelByteModelsGameSessionExcludedSession& Copy)
 {
 	this->_CurrentType = Copy._CurrentType;
 	this->_ExcludedPastSessionCount = Copy._ExcludedPastSessionCount;

@@ -19,7 +19,7 @@ namespace Api
 /**
  * @brief Reward API for getting information about the reward
  */	
-class ACCELBYTEUE4SDK_API Reward : public FApiBase
+class ACCELBYTEUE4SDK_API Reward : public FApiBase, public TSharedFromThis<Reward, ESPMode::ThreadSafe>
 {
 public:
 	Reward(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -78,5 +78,9 @@ private:
 	static FString ConvertRewardSortByToString(EAccelByteRewardListSortBy SortBy);
 };
 	
+typedef TSharedRef<Reward, ESPMode::ThreadSafe> RewardRef;
+typedef TSharedPtr<Reward, ESPMode::ThreadSafe> RewardPtr;
+typedef TWeakPtr<Reward, ESPMode::ThreadSafe> RewardWPtr;
+
 } // Namespace Api
 } // Namespace AccelByte

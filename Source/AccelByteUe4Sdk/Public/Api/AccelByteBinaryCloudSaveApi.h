@@ -19,7 +19,7 @@ namespace Api
 /**
  * @brief CloudSave API for storing binaries.
  */
-class ACCELBYTEUE4SDK_API BinaryCloudSave : public FApiBase
+class ACCELBYTEUE4SDK_API BinaryCloudSave : public FApiBase, public TSharedFromThis<BinaryCloudSave, ESPMode::ThreadSafe>
 {
 public:
 	explicit BinaryCloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -308,7 +308,11 @@ private:
 	BinaryCloudSave& operator=(BinaryCloudSave const&) = delete;
 	BinaryCloudSave& operator=(BinaryCloudSave&&) = delete;
 
-	};
+};
+
+typedef TSharedRef<BinaryCloudSave, ESPMode::ThreadSafe> BinaryCloudSaveRef;
+typedef TSharedPtr<BinaryCloudSave, ESPMode::ThreadSafe> BinaryCloudSavePtr;
+typedef TWeakPtr<BinaryCloudSave, ESPMode::ThreadSafe> BinaryCloudSaveWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

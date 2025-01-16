@@ -13,7 +13,11 @@ void UABMessage::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 
 void UABMessage::SendPing() 
 {
-	ApiClientPtr->Lobby.SendPing();
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SendPing();
+	}
 }
 
 FString UABMessage::SendPrivateMessage(
@@ -21,19 +25,24 @@ FString UABMessage::SendPrivateMessage(
 	FDPersonalChatResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetPrivateMessageResponseDelegate(
-	Api::Lobby::FPersonalChatResponse::CreateLambda(
-		[OnResponse](FAccelByteModelsPersonalMessageResponse const& Response)
-		{
-			OnResponse.ExecuteIfBound(Response);
-		}),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPrivateMessageResponseDelegate(
+			Api::Lobby::FPersonalChatResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsPersonalMessageResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	return ApiClientPtr->Lobby.SendPrivateMessage(Request.UserID, Request.Message);
+		return LobbyPtr->SendPrivateMessage(Request.UserID, Request.Message);
+	}
+	return TEXT("");
 }
 
 FString UABMessage::SendPartyMessage(
@@ -41,38 +50,48 @@ FString UABMessage::SendPartyMessage(
 	FDPartyChatResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetPartyMessageResponseDelegate(
-	Api::Lobby::FPartyChatResponse::CreateLambda(
-		[OnResponse](FAccelByteModelsPartyMessageResponse const& Response)
-		{
-			OnResponse.ExecuteIfBound(Response);
-		}),
-	FErrorHandler::CreateLambda(
-		[OnError](int32 Code, FString const& Message)
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyMessageResponseDelegate(
+			Api::Lobby::FPartyChatResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsPartyMessageResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	return ApiClientPtr->Lobby.SendPartyMessage(Request.Message);
+		return LobbyPtr->SendPartyMessage(Request.Message);
+	}
+	return TEXT("");
 }
 
 FString UABMessage::SendJoinDefaultChannelChatRequest(
 	FDJoinDefaultChannelChatResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetJoinChannelChatResponseDelegate(
-		Api::Lobby::FJoinDefaultChannelChatResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsJoinDefaultChannelResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetJoinChannelChatResponseDelegate(
+			Api::Lobby::FJoinDefaultChannelChatResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsJoinDefaultChannelResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	return ApiClientPtr->Lobby.SendJoinDefaultChannelChatRequest();
+		return LobbyPtr->SendJoinDefaultChannelChatRequest();
+	}
+	return TEXT("");
 }
 
 FString UABMessage::SendChannelMessage(
@@ -80,56 +99,77 @@ FString UABMessage::SendChannelMessage(
 	FDChannelChatResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetChannelMessageResponseDelegate(
-		Api::Lobby::FChannelChatResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsChannelMessageResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetChannelMessageResponseDelegate(
+			Api::Lobby::FChannelChatResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsChannelMessageResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	return ApiClientPtr->Lobby.SendChannelMessage(Request.Message);
+		return LobbyPtr->SendChannelMessage(Request.Message);
+	}
+	return TEXT("");
 }
 
 void UABMessage::SetPrivateMessageNotifDelegate(FDPersonalChatNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPrivateMessageNotifDelegate(
-		Api::Lobby::FPersonalChatNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsPersonalMessageNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPrivateMessageNotifDelegate(
+			Api::Lobby::FPersonalChatNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPersonalMessageNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABMessage::SetMessageNotifDelegate(FDMessageNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetMessageNotifDelegate(
-		Api::Lobby::FMessageNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsNotificationMessage const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetMessageNotifDelegate(
+			Api::Lobby::FMessageNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsNotificationMessage const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABMessage::SetChannelMessageNotifDelegate(FDChannelChatNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetChannelMessageNotifDelegate(
-		Api::Lobby::FChannelChatNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsChannelMessageNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetChannelMessageNotifDelegate(
+			Api::Lobby::FChannelChatNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsChannelMessageNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABMessage::SetOnPartyChatNotification(FDPartyChatNotif OnPartyChatNotif)
 {
-	ApiClientPtr->Lobby.SetPartyChatNotifDelegate(
-		Api::Lobby::FPartyChatNotif::CreateLambda([OnPartyChatNotif](const FAccelByteModelsPartyMessageNotice& Notif)
-		{
-			OnPartyChatNotif.ExecuteIfBound(Notif);
-		}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyChatNotifDelegate(
+			Api::Lobby::FPartyChatNotif::CreateLambda([OnPartyChatNotif](const FAccelByteModelsPartyMessageNotice& Notif)
+				{
+					OnPartyChatNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }

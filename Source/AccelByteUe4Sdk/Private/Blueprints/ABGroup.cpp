@@ -15,7 +15,10 @@ void UABGroup::CreateGroup(
 	const FCreateGroupSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.CreateGroup(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->CreateGroup(
 		RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGroupInformation Response)
@@ -26,6 +29,11 @@ void UABGroup::CreateGroup(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetGroupList(
@@ -33,7 +41,10 @@ void UABGroup::GetGroupList(
 	const FSearchGroupsSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.GetGroupList(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetGroupList(
 		RequestContent,
 		THandler<FAccelByteModelsGetGroupListResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetGroupListResponse Response)
@@ -44,6 +55,11 @@ void UABGroup::GetGroupList(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetGroup(
@@ -51,7 +67,10 @@ void UABGroup::GetGroup(
 	const FGetGroupSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.GetGroup(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetGroup(
 		GroupId,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGroupInformation Response)
@@ -63,6 +82,11 @@ void UABGroup::GetGroup(
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
 	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
+}
 
 void UABGroup::UpdateGroup(
 	const FString& GroupId,
@@ -76,7 +100,10 @@ void UABGroup::UpdateGroup(
 		RequestContent.CustomAttributes.JsonObjectFromString(RequestContent.CustomAttributes.JsonString);
 	}
 
-	ApiClientPtr->Group.UpdateGroup(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->UpdateGroup(
 		GroupId,
 		bCompletelyReplace,
 		RequestContent,
@@ -90,6 +117,11 @@ void UABGroup::UpdateGroup(
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
 	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
+}
 
 void UABGroup:: UpdateGroupCustomAttributes(
 	const FString& GroupId,
@@ -102,7 +134,10 @@ void UABGroup:: UpdateGroupCustomAttributes(
 		RequestContent.CustomAttributes.JsonObjectFromString(RequestContent.CustomAttributes.JsonString);
 	}
 
-	ApiClientPtr->Group.UpdateGroupCustomAttributes(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->UpdateGroupCustomAttributes(
 		GroupId,
 		RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
@@ -114,6 +149,11 @@ void UABGroup:: UpdateGroupCustomAttributes(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::DeleteGroup(
@@ -121,7 +161,10 @@ void UABGroup::DeleteGroup(
 	const FDeleteGroupSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.DeleteGroup(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->DeleteGroup(
 	GroupId,
 	FVoidHandler::CreateLambda([OnSuccess]()
 	{
@@ -131,6 +174,11 @@ void UABGroup::DeleteGroup(
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::UpdateGroupCustomRule(
@@ -144,7 +192,10 @@ void UABGroup::UpdateGroupCustomRule(
 		RequestContent.GroupCustomRule.JsonObjectFromString(RequestContent.GroupCustomRule.JsonString);
 	}
 
-	ApiClientPtr->Group.UpdateGroupCustomRule(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->UpdateGroupCustomRule(
 		GroupId,
 		RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
@@ -156,6 +207,11 @@ void UABGroup::UpdateGroupCustomRule(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::UpdateGroupPredefinedRule(
@@ -165,7 +221,10 @@ void UABGroup::UpdateGroupPredefinedRule(
 	const FUpdateGroupPredefinedRuleSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.UpdateGroupPredefinedRule(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->UpdateGroupPredefinedRule(
 		GroupId,
 		AllowedAction,
 		RequestContent,
@@ -178,6 +237,11 @@ void UABGroup::UpdateGroupPredefinedRule(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::DeleteGroupPredefinedRule(
@@ -186,7 +250,10 @@ void UABGroup::DeleteGroupPredefinedRule(
 	const FDeleteGroupPredefinedRuleSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.DeleteGroupPredefinedRule(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->DeleteGroupPredefinedRule(
 		GroupId,
 		AllowedAction,
 		FVoidHandler::CreateLambda([OnSuccess]()
@@ -197,6 +264,11 @@ void UABGroup::DeleteGroupPredefinedRule(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 #pragma endregion /Group (multi-member actions)
 
@@ -207,7 +279,10 @@ void UABGroup::AcceptGroupInvitation(
 	const FAcceptGroupInvitationSuccess& OnSuccess, 
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.AcceptGroupInvitation(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->AcceptGroupInvitation(
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
@@ -218,6 +293,11 @@ void UABGroup::AcceptGroupInvitation(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::RejectGroupInvitation(
@@ -225,7 +305,10 @@ void UABGroup::RejectGroupInvitation(
 	const FRejectGroupInvitationSuccess& OnSuccess, 
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.RejectGroupInvitation(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->RejectGroupInvitation(
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
@@ -236,6 +319,11 @@ void UABGroup::RejectGroupInvitation(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::JoinGroup(
@@ -243,7 +331,10 @@ void UABGroup::JoinGroup(
 	const FJoinGroupSuccess& OnSuccess, 
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.JoinGroup(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->JoinGroup(
 		GroupId,
 		THandler<FAccelByteModelsJoinGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsJoinGroupResponse Response)
@@ -254,6 +345,11 @@ void UABGroup::JoinGroup(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::CancelJoinGroupRequest(
@@ -261,7 +357,10 @@ void UABGroup::CancelJoinGroupRequest(
 	const FCancelJoinGroupRequestSuccess& OnSuccess, 
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.CancelJoinGroupRequest(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->CancelJoinGroupRequest(
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
@@ -272,6 +371,11 @@ void UABGroup::CancelJoinGroupRequest(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetGroupMembersListByGroupId(
@@ -280,7 +384,10 @@ void UABGroup::GetGroupMembersListByGroupId(
 	const FGetGroupMembersListByGroupIdSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.GetGroupMembersListByGroupId(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetGroupMembersListByGroupId(
 		GroupId,
 		RequestContent,
 		THandler<FAccelByteModelsGetGroupMemberListResponse>::CreateLambda(
@@ -292,11 +399,19 @@ void UABGroup::GetGroupMembersListByGroupId(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::LeaveGroup(const FLeaveGroupSuccess& OnSuccess, const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.LeaveGroup(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->LeaveGroup(
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
 		{
@@ -306,6 +421,11 @@ void UABGroup::LeaveGroup(const FLeaveGroupSuccess& OnSuccess, const FDErrorHand
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetUserGroupInfoByUserId(
@@ -313,7 +433,10 @@ void UABGroup::GetUserGroupInfoByUserId(
 	const FGetUserGroupInfoByUserIdSuccess& OnSuccess, 
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.GetUserGroupInfoByUserId(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetUserGroupInfoByUserId(
 		UserId,
 		THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetUserGroupInfoResponse Response)
@@ -324,6 +447,11 @@ void UABGroup::GetUserGroupInfoByUserId(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::InviteUserToGroup(
@@ -331,7 +459,10 @@ void UABGroup::InviteUserToGroup(
 	const FInviteUserToGroupSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.InviteUserToGroup(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->InviteUserToGroup(
 		UserId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
@@ -342,6 +473,11 @@ void UABGroup::InviteUserToGroup(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::AcceptGroupJoinRequest(
@@ -349,7 +485,10 @@ void UABGroup::AcceptGroupJoinRequest(
 	const FAcceptGroupJoinRequestSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.AcceptGroupJoinRequest(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->AcceptGroupJoinRequest(
 		UserId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
@@ -360,6 +499,11 @@ void UABGroup::AcceptGroupJoinRequest(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::RejectGroupJoinRequest(
@@ -367,7 +511,10 @@ void UABGroup::RejectGroupJoinRequest(
 	const FRejectGroupJoinRequestSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.RejectGroupJoinRequest(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->RejectGroupJoinRequest(
 		UserId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
@@ -378,6 +525,11 @@ void UABGroup::RejectGroupJoinRequest(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::KickGroupMember(
@@ -385,7 +537,10 @@ void UABGroup::KickGroupMember(
 	const FKickGroupMemberSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.KickGroupMember(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->KickGroupMember(
 		UserId,
 		THandler<FAccelByteModelsKickGroupMemberResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsKickGroupMemberResponse Response)
@@ -396,6 +551,11 @@ void UABGroup::KickGroupMember(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 #pragma endregion /Group Member (individuals)
 
@@ -406,7 +566,10 @@ void UABGroup::GetMemberRoles(
 	const FGetMemberRolesSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.GetMemberRoles(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetMemberRoles(
 		RequestContent,
 		THandler<FAccelByteModelsGetMemberRolesListResponse>::CreateLambda(
 		[OnSuccess](const FAccelByteModelsGetMemberRolesListResponse Response)
@@ -417,6 +580,11 @@ void UABGroup::GetMemberRoles(
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::AssignMemberRole(
@@ -425,7 +593,10 @@ void UABGroup::AssignMemberRole(
 	const FAssignMemberRoleSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.AssignMemberRole(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->AssignMemberRole(
 	MemberRoleId,
 	RequestContent,
 	THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
@@ -437,6 +608,11 @@ void UABGroup::AssignMemberRole(
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::DeleteMemberRole(
@@ -445,7 +621,10 @@ void UABGroup::DeleteMemberRole(
 	const FDeleteMemberRoleSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
-	ApiClientPtr->Group.DeleteMemberRole(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->DeleteMemberRole(
 		MemberRoleId,
 		RequestContent,
 		FVoidHandler::CreateLambda(
@@ -457,6 +636,11 @@ void UABGroup::DeleteMemberRole(
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 #pragma endregion /Group Roles (permissions)
 
@@ -468,7 +652,10 @@ void UABGroup::GetGroupJoinRequests(
 	const FGetGroupJoinRequestsSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.GetGroupJoinRequests(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetGroupJoinRequests(
 	GroupId,
 	RequestContent,
 	THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
@@ -480,6 +667,11 @@ void UABGroup::GetGroupJoinRequests(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetGroupInvitationRequests(
@@ -487,7 +679,10 @@ void UABGroup::GetGroupInvitationRequests(
 	const FGetGroupInvitationRequestsSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.GetGroupInvitationRequests(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetGroupInvitationRequests(
 	RequestContent,
 	THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
 		[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse Response)
@@ -498,6 +693,11 @@ void UABGroup::GetGroupInvitationRequests(
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 #pragma endregion /Group MemberRequest
@@ -513,7 +713,10 @@ void UABGroup::CreateV2Group(
 	const FCreateGroupSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.CreateV2Group(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->CreateV2Group(
 		RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGroupInformation& Response)
@@ -524,6 +727,11 @@ void UABGroup::CreateV2Group(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetGroupsByGroupIds(
@@ -531,7 +739,10 @@ void UABGroup::GetGroupsByGroupIds(
 	const FGetGroupsByGroupIdsSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.GetGroupsByGroupIds(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetGroupsByGroupIds(
 		GroupIds,
 		THandler<FAccelByteModelsGetGroupListResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetGroupListResponse& Response)
@@ -542,6 +753,11 @@ void UABGroup::GetGroupsByGroupIds(
 		{
 			OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::UpdateV2Group(
@@ -550,7 +766,10 @@ void UABGroup::UpdateV2Group(
 	const FUpdateGroupSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.UpdateV2Group(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->UpdateV2Group(
 		GroupId,
 		RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
@@ -562,6 +781,11 @@ void UABGroup::UpdateV2Group(
 		{
 			OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::DeleteV2Group(
@@ -569,7 +793,10 @@ void UABGroup::DeleteV2Group(
 	const FDeleteGroupSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.DeleteV2Group(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->DeleteV2Group(
 		GroupId,
 		FVoidHandler::CreateLambda([OnSuccess]()
 		{
@@ -579,6 +806,11 @@ void UABGroup::DeleteV2Group(
 		{
 			OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::UpdateV2GroupCustomAttributes(
@@ -587,7 +819,10 @@ void UABGroup::UpdateV2GroupCustomAttributes(
 	const FUpdateGroupCustomAttributesSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.UpdateV2GroupCustomAttributes(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->UpdateV2GroupCustomAttributes(
 		GroupId,RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda([OnSuccess](const FAccelByteModelsGroupInformation& Response)
 		{
@@ -597,6 +832,11 @@ void UABGroup::UpdateV2GroupCustomAttributes(
 		{
 			OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetGroupInviteRequestList(
@@ -605,7 +845,10 @@ void UABGroup::GetGroupInviteRequestList(
 	const FGetGroupInvitationRequestsSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.GetGroupInviteRequestList(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetGroupInviteRequestList(
 		GroupId,RequestContent,
 		THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
@@ -616,6 +859,11 @@ void UABGroup::GetGroupInviteRequestList(
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 
@@ -625,7 +873,10 @@ void UABGroup::UpdateV2GroupCustomRule(
 	const FUpdateGroupCustomRuleSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.UpdateV2GroupCustomRule(GroupId,RequestContent,
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->UpdateV2GroupCustomRule(GroupId,RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGroupInformation& Response)
 			{
@@ -635,6 +886,11 @@ void UABGroup::UpdateV2GroupCustomRule(
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::DeleteV2GroupPredefinedRule(
@@ -643,7 +899,10 @@ void UABGroup::DeleteV2GroupPredefinedRule(
 	const FDeleteGroupPredefinedRuleSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.DeleteV2GroupPredefinedRule(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->DeleteV2GroupPredefinedRule(
 		GroupId,AllowedAction,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -654,6 +913,11 @@ void UABGroup::DeleteV2GroupPredefinedRule(
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetUserGroupStatusInfo(
@@ -662,7 +926,10 @@ void UABGroup::GetUserGroupStatusInfo(
 	const FGetUserGroupInfoSuccess& OnSuccess,
 	const FDErrorHandler OnError)
 {
-	ApiClientPtr->Group.GetUserGroupStatusInfo(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetUserGroupStatusInfo(
 		UserId,GroupId,
 		THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetUserGroupInfoResponse& Response)
@@ -673,6 +940,11 @@ void UABGroup::GetUserGroupStatusInfo(
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::UpdateV2GroupPredefinedRule(
@@ -682,7 +954,10 @@ void UABGroup::UpdateV2GroupPredefinedRule(
 	const FUpdateGroupPredefinedRuleSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.UpdateV2GroupPredefinedRule(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->UpdateV2GroupPredefinedRule(
 		GroupId,AllowedAction,RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGroupInformation& Response)
@@ -693,6 +968,11 @@ void UABGroup::UpdateV2GroupPredefinedRule(
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetGroupJoinRequestList(
@@ -701,7 +981,10 @@ void UABGroup::GetGroupJoinRequestList(
 	const FGetGroupJoinRequestsSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.GetGroupJoinRequestList(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetGroupJoinRequestList(
 		GroupId,RequestContent,
 		THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
@@ -712,6 +995,11 @@ void UABGroup::GetGroupJoinRequestList(
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::CancelGroupMemberInvitation(
@@ -720,7 +1008,10 @@ void UABGroup::CancelGroupMemberInvitation(
 	const FCanceGroupInviteRequestSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.CancelGroupMemberInvitation(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->CancelGroupMemberInvitation(
 		UserId,GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse& Response)
@@ -731,6 +1022,11 @@ void UABGroup::CancelGroupMemberInvitation(
 			{
 				OnError.ExecuteIfBound(ErrorCode,ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 
@@ -743,7 +1039,10 @@ void UABGroup::AcceptV2GroupInvitation(
 	const FAcceptGroupInvitationSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.AcceptV2GroupInvitation(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->AcceptV2GroupInvitation(
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse& Response)
@@ -754,6 +1053,11 @@ void UABGroup::AcceptV2GroupInvitation(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::RejectV2GroupInvitation(
@@ -761,7 +1065,10 @@ void UABGroup::RejectV2GroupInvitation(
 	const FRejectGroupInvitationSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.RejectV2GroupInvitation(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->RejectV2GroupInvitation(
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse& Response)
@@ -772,6 +1079,11 @@ void UABGroup::RejectV2GroupInvitation(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::JoinV2Group(
@@ -779,7 +1091,10 @@ void UABGroup::JoinV2Group(
 	const FJoinGroupSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.JoinV2Group(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->JoinV2Group(
 		GroupId,
 		THandler<FAccelByteModelsJoinGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsJoinGroupResponse& Response)
@@ -790,6 +1105,11 @@ void UABGroup::JoinV2Group(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::LeaveV2Group(
@@ -797,7 +1117,10 @@ void UABGroup::LeaveV2Group(
 	const FLeaveGroupSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.LeaveV2Group(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->LeaveV2Group(
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse& Response)
@@ -808,6 +1131,11 @@ void UABGroup::LeaveV2Group(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::InviteUserToV2Group(
@@ -816,7 +1144,10 @@ void UABGroup::InviteUserToV2Group(
 	const FInviteUserToGroupSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.InviteUserToV2Group(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->InviteUserToV2Group(
 		UserId,
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
@@ -828,6 +1159,11 @@ void UABGroup::InviteUserToV2Group(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::AcceptV2GroupJoinRequest(
@@ -836,7 +1172,10 @@ void UABGroup::AcceptV2GroupJoinRequest(
 	const FAcceptGroupJoinRequestSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.AcceptV2GroupJoinRequest(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->AcceptV2GroupJoinRequest(
 		UserId,
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
@@ -848,6 +1187,11 @@ void UABGroup::AcceptV2GroupJoinRequest(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::RejectV2GroupJoinRequest(
@@ -856,7 +1200,10 @@ void UABGroup::RejectV2GroupJoinRequest(
 	const FRejectGroupJoinRequestSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.RejectV2GroupJoinRequest(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->RejectV2GroupJoinRequest(
 		UserId,
 		GroupId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
@@ -868,6 +1215,11 @@ void UABGroup::RejectV2GroupJoinRequest(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::KickV2GroupMember(
@@ -876,7 +1228,10 @@ void UABGroup::KickV2GroupMember(
 	const FKickGroupMemberSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.KickV2GroupMember(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->KickV2GroupMember(
 		UserId,
 		GroupId,
 		THandler<FAccelByteModelsKickGroupMemberResponse>::CreateLambda(
@@ -888,6 +1243,11 @@ void UABGroup::KickV2GroupMember(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetMyJoinedGroupInfo(
@@ -895,7 +1255,10 @@ void UABGroup::GetMyJoinedGroupInfo(
 	const FGetMyJoinedGroupInfoSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.GetMyJoinedGroupInfo(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetMyJoinedGroupInfo(
 		RequestContent,
 		THandler<FAccelByteModelsGetGroupMemberListResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetGroupMemberListResponse& Response)
@@ -906,6 +1269,11 @@ void UABGroup::GetMyJoinedGroupInfo(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetMyJoinGroupRequest(
@@ -913,7 +1281,10 @@ void UABGroup::GetMyJoinGroupRequest(
 	const FGetMyJoinGroupRequestSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.GetMyJoinGroupRequest(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetMyJoinGroupRequest(
 		RequestContent,
 		THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetMemberRequestsListResponse& Response)
@@ -924,6 +1295,11 @@ void UABGroup::GetMyJoinGroupRequest(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::AssignV2MemberRole(
@@ -933,7 +1309,10 @@ void UABGroup::AssignV2MemberRole(
 	const FAssignMemberRoleSuccess& OnSuccess, 
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.AssignV2MemberRole(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->AssignV2MemberRole(
 		MemberRoleId,
 		GroupId,
 		RequestContent,
@@ -946,6 +1325,11 @@ void UABGroup::AssignV2MemberRole(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::DeleteV2MemberRole(
@@ -955,7 +1339,10 @@ void UABGroup::DeleteV2MemberRole(
 	const FDeleteMemberRoleSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.DeleteV2MemberRole(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->DeleteV2MemberRole(
 		MemberRoleId,
 		GroupId,
 		RequestContent,
@@ -968,6 +1355,11 @@ void UABGroup::DeleteV2MemberRole(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABGroup::GetAllMemberRoles(
@@ -975,7 +1367,10 @@ void UABGroup::GetAllMemberRoles(
 	const FGetMemberRolesSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Group.GetAllMemberRoles(
+	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
+	if (GroupPtr.IsValid())
+	{
+		GroupPtr->GetAllMemberRoles(
 		RequestContent,
 		THandler<FAccelByteModelsGetMemberRolesListResponse>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGetMemberRolesListResponse& Response)
@@ -986,6 +1381,11 @@ void UABGroup::GetAllMemberRoles(
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 

@@ -180,7 +180,13 @@ FAccelByteTaskWPtr ServerUser::BulkGetUserInfo(TArray<FString> const& UserIds
 	if (CopyUserIds.Num() > 100)
 	{
 		UE_LOG(LogAccelByte, Warning, TEXT("The requested UserIds information list exceed max size 100. UserIds index 0-99 will be sent, and the rest will be truncated."));
+
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 5
+		// AllowShrinking as a boolean is deprecated in 5.5, enum is used instead
+		CopyUserIds.SetNum(100, EAllowShrinking::Yes);
+#else
 		CopyUserIds.SetNum(100, true);
+#endif // ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 5
 	}
 
 	const FListBulkUserInfoRequest UserList{ CopyUserIds };

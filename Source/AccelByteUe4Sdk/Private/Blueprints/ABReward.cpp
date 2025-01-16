@@ -17,7 +17,10 @@ void UABReward::GetRewardByRewardCode(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->Reward.GetRewardByRewardCode(
+	const auto RewardPtr = ApiClientPtr->GetRewardApi().Pin();
+	if (RewardPtr.IsValid())
+	{
+		RewardPtr->GetRewardByRewardCode(
 		RewardCode,
 		THandler<FAccelByteModelsRewardInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsRewardInfo const& Response)
@@ -31,7 +34,12 @@ void UABReward::GetRewardByRewardCode(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABReward::GetRewardByRewardId(
@@ -40,7 +48,10 @@ void UABReward::GetRewardByRewardId(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->Reward.GetRewardByRewardId(
+	const auto RewardPtr = ApiClientPtr->GetRewardApi().Pin();
+	if (RewardPtr.IsValid())
+	{
+		RewardPtr->GetRewardByRewardId(
 		RewardId,
 		THandler<FAccelByteModelsRewardInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsRewardInfo const& Response)
@@ -54,7 +65,12 @@ void UABReward::GetRewardByRewardId(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABReward::QueryRewards(
@@ -66,7 +82,10 @@ void UABReward::QueryRewards(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->Reward.QueryRewards(
+	const auto RewardPtr = ApiClientPtr->GetRewardApi().Pin();
+	if (RewardPtr.IsValid())
+	{
+		RewardPtr->QueryRewards(
 		EventTopic,
 		Offset,
 		Limit,
@@ -83,5 +102,10 @@ void UABReward::QueryRewards(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

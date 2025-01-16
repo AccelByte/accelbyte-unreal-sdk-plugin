@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [26.5.0] (2025-01-16)
+
+
+### Features
+
+* **access:** change APIs to WeakPtr 
+* **access:** change user and agreement blueprints, to use ApiWeakPtr 
+* **commerce:** change APIs to WeakPtr 
+* **commerce:** change blueprints, to use ApiWeakPtr 
+* **engagement:** change APIs to WeakPtr 
+* **HttpRetryScheduler:** change HttpRetryScheduler object to shared object 
+* Implement AccelByteInstance 
+* **multiplayer:** change APIs to WeakPtr 
+* **presenceBroadcast:** change APIs to WeakPtr 
+* put service logging on console var (off by default but compiled in) 
+* **Session:** add team id variable to session creation and history 
+* **session:** exclude past session when create a match ticket & introduce party session storage 
+* **session:** implement notification handling for first-party platform session sync 
+* **storage:** change APIs to WeakPtr 
+* support Unreal 5.5 
+
+
+### Bug Fixes
+
+* AccelByteInstance not connecting to AMS 
+* adjust report validation by the category 
+* **HttpRetryTask:** add validation to unbind request complete if request is valid 
+* **model:** correct the FAccelBtyeModelsGameSessionExcludedSession mistype and introducing typedef to avoid breaking change 
+* prevent connecting to the Lobby and Chat WebSocket server when Credentials is NOT Valid 
+* **websocket:** move the state correctly when Disconnect the connection 
+* **websocket:** stuck in the reconnection state when got disconnect notification (4041 & ban notif) 
+
+
+### Refactors
+
+* change BearerAuthRejected and BearerAuthRefreshed to multicast delegates 
+
 ## [26.4.0] (2024-12-04)
 
 

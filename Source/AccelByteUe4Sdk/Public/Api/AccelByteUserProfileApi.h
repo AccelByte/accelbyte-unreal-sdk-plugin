@@ -21,7 +21,7 @@ namespace Api
 /**
  * @brief API to create, update, and get user's profile.
  */
-class ACCELBYTEUE4SDK_API UserProfile : public FApiBase
+class ACCELBYTEUE4SDK_API UserProfile : public FApiBase, public TSharedFromThis<UserProfile, ESPMode::ThreadSafe>
 {
 public:
 	UserProfile(Credentials const& Credentials, Settings const& Settings, FHttpRetryScheduler& InHttpRef);
@@ -274,6 +274,10 @@ private:
 	UserProfile(UserProfile const&) = delete;
 	UserProfile(UserProfile&&) = delete;	
 };
+
+typedef TSharedRef<UserProfile, ESPMode::ThreadSafe> UserProfileRef;
+typedef TSharedPtr<UserProfile, ESPMode::ThreadSafe> UserProfilePtr;
+typedef TWeakPtr<UserProfile, ESPMode::ThreadSafe> UserProfileWPtr;
 
 } // Namespace Service
 } // Namespace AccelByte

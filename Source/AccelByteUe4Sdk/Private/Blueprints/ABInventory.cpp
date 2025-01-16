@@ -20,7 +20,10 @@ void UABInventory::GetInventoryConfigurations(
 	FString const& InventoryConfigurationCode
 )
 {
-	ApiClientPtr->Inventory.GetInventoryConfigurations(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->GetInventoryConfigurations(
 		THandler<FAccelByteModelsInventoryConfigurationsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsInventoryConfigurationsPagingResponse const& Response)
 			{
@@ -37,7 +40,11 @@ void UABInventory::GetInventoryConfigurations(
 		Offset,
 		Limit,
 		InventoryConfigurationCode
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::GetInventoryTags(
@@ -47,7 +54,10 @@ void UABInventory::GetInventoryTags(
 	int32 const& Limit,
 	int32 const& Offset)
 {
-	ApiClientPtr->Inventory.GetInventoryTags(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->GetInventoryTags(
 		THandler<FAccelByteModelsInventoryTagPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsInventoryTagPagingResponse const& Response)
 			{
@@ -63,7 +73,11 @@ void UABInventory::GetInventoryTags(
 		SortBy,
 		Offset,
 		Limit
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::GetUserInventories(
@@ -74,7 +88,10 @@ void UABInventory::GetUserInventories(
 	int32 const& Offset, 
 	FString const& InventoryConfigurationCode)
 {
-	ApiClientPtr->Inventory.GetUserInventories(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->GetUserInventories(
 		THandler<FAccelByteModelsUserInventoriesPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserInventoriesPagingResponse const& Response)
 			{
@@ -91,7 +108,11 @@ void UABInventory::GetUserInventories(
 		Offset,
 		Limit,
 		InventoryConfigurationCode
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::GetItemTypes(
@@ -101,7 +122,10 @@ void UABInventory::GetItemTypes(
 	int32 const& Limit, 
 	int32 const& Offset)
 {
-	ApiClientPtr->Inventory.GetItemTypes(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->GetItemTypes(
 		THandler<FAccelByteModelsItemTypePagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsItemTypePagingResponse const& Response)
 			{
@@ -117,7 +141,11 @@ void UABInventory::GetItemTypes(
 		SortBy,
 		Offset,
 		Limit
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::GetUserInventoryAllItems(
@@ -130,7 +158,10 @@ void UABInventory::GetUserInventoryAllItems(
 	FString const& SourceItemId, 
 	FString const& Tags)
 {
-	ApiClientPtr->Inventory.GetUserInventoryAllItems(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->GetUserInventoryAllItems(
 		InventoryId,
 		THandler<FAccelByteModelsUserItemsPagingResponse>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserItemsPagingResponse const& Response)
@@ -149,7 +180,11 @@ void UABInventory::GetUserInventoryAllItems(
 		Limit,
 		SourceItemId,
 		Tags
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::GetUserInventoryItem(
@@ -159,7 +194,10 @@ void UABInventory::GetUserInventoryItem(
 	FDModelsUserItemResponse const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Inventory.GetUserInventoryItem(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->GetUserInventoryItem(
 		InventoryId,
 		SlotId,
 		SourceItemId,
@@ -175,7 +213,11 @@ void UABInventory::GetUserInventoryItem(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::BulkUpdateInventoryItems(
@@ -184,7 +226,10 @@ void UABInventory::BulkUpdateInventoryItems(
 	FDModelsUpdateUserItemsResponses const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Inventory.BulkUpdateInventoryItems(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->BulkUpdateInventoryItems(
 		InventoryId,
 		UpdatedItemsRequest,
 		THandler<TArray<FAccelByteModelsUpdateUserInventoryItemResponse>>::CreateLambda(
@@ -199,7 +244,11 @@ void UABInventory::BulkUpdateInventoryItems(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::BulkDeleteInventoryItems(
@@ -208,7 +257,10 @@ void UABInventory::BulkDeleteInventoryItems(
 	FDModelsDeleteUserItemsResponses const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Inventory.BulkDeleteInventoryItems(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->BulkDeleteInventoryItems(
 		InventoryId,
 		DeletedItemsRequest,
 		THandler<TArray<FAccelByteModelsDeleteUserInventoryItemResponse>>::CreateLambda(
@@ -223,7 +275,11 @@ void UABInventory::BulkDeleteInventoryItems(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::MoveItemsBetweenInventories(
@@ -232,7 +288,10 @@ void UABInventory::MoveItemsBetweenInventories(
 	FDModelsMoveUserItemsBetweenInventoriesResponse const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Inventory.MoveItemsBetweenInventories(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->MoveItemsBetweenInventories(
 		TargetInventoryId,
 		MoveItemsRequest,
 		THandler<FAccelByteModelsMoveUserItemsBetweenInventoriesResponse>::CreateLambda(
@@ -247,7 +306,11 @@ void UABInventory::MoveItemsBetweenInventories(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABInventory::ConsumeUserInventoryItem(
@@ -256,7 +319,10 @@ void UABInventory::ConsumeUserInventoryItem(
 	FDModelsUserItemResponse const& OnSuccess, 
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->Inventory.ConsumeUserInventoryItem(
+	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();
+	if (InventoryPtr.IsValid())
+	{
+		InventoryPtr->ConsumeUserInventoryItem(
 		InventoryId,
 		ConsumedItemsRequest,
 		THandler<FAccelByteModelsUserItemResponse>::CreateLambda(
@@ -271,5 +337,9 @@ void UABInventory::ConsumeUserInventoryItem(
 				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-	);
+		);
+	}else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

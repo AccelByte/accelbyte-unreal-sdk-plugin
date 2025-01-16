@@ -20,7 +20,7 @@ namespace Api
 /**
  * @brief TurnManager API to manage Qos Server(s).
  */
-class ACCELBYTEUE4SDK_API TurnManager : public FApiBase
+class ACCELBYTEUE4SDK_API TurnManager : public FApiBase, public TSharedFromThis<TurnManager, ESPMode::ThreadSafe>
 {
 public:
 	TurnManager(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -149,6 +149,10 @@ private:
 	static FAccelByteModelsTurnServerList TurnServers;
 	static TArray<TPair<FString, float>> Latencies;
 };
+
+typedef TSharedRef<TurnManager, ESPMode::ThreadSafe> TurnManagerRef;
+typedef TSharedPtr<TurnManager, ESPMode::ThreadSafe> TurnManagerPtr;
+typedef TWeakPtr<TurnManager, ESPMode::ThreadSafe> TurnManagerWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

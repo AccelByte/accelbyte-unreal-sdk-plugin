@@ -17,7 +17,7 @@ namespace Api
 /**
  * @brief Item API for buying things from the online store. An item represents a single product sold in the online store. Each category has items inside it. You can get a list of items by criteria or by its ID.
  */
-class ACCELBYTEUE4SDK_API Item : public FApiBase
+class ACCELBYTEUE4SDK_API Item : public FApiBase, public TSharedFromThis<Item, ESPMode::ThreadSafe>
 {
 public:
 	Item(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -219,6 +219,10 @@ private:
 
 	static FString ConvertPlatformMappingToString(EAccelBytePlatformMapping Platform);
 };
+
+typedef TSharedRef<Item, ESPMode::ThreadSafe> ItemRef;
+typedef TSharedPtr<Item, ESPMode::ThreadSafe> ItemPtr;
+typedef TWeakPtr<Item, ESPMode::ThreadSafe> ItemWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

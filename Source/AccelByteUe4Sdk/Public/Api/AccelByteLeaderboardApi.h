@@ -20,7 +20,7 @@ namespace Api
 /**
  * @brief Leaderboard API to obtain player's ranking in a namespace.
  */
-class ACCELBYTEUE4SDK_API Leaderboard : FApiBase
+class ACCELBYTEUE4SDK_API Leaderboard : FApiBase, public TSharedFromThis<Leaderboard, ESPMode::ThreadSafe>
 {
 	static constexpr int32 LeaderboardUserIdsURLLimit = 20;
 
@@ -134,6 +134,10 @@ private:
 	Leaderboard(Leaderboard const&) = delete;
 	Leaderboard(Leaderboard&&) = delete;
 };
+
+typedef TSharedRef<Leaderboard, ESPMode::ThreadSafe> LeaderboardRef;
+typedef TSharedPtr<Leaderboard, ESPMode::ThreadSafe> LeaderboardPtr;
+typedef TWeakPtr<Leaderboard, ESPMode::ThreadSafe> LeaderboardWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

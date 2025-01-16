@@ -13,19 +13,19 @@
 
 namespace AccelByte
 {
-
-static FDateTime SERVER_TIME_CACHED{ FDateTime::MinValue() };
-static FDateTime SERVER_TIME_CURRENT{ FDateTime::MinValue() };
-static FDateTime LAST_UPDATED_SERVER_TIME{ FDateTime::MinValue() };
-static FThreadSafeCounter ReferenceCount{0};
-
+	
 FAccelByteTimeManager::FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& Http)
 	: bUseSharedResources(true)
-	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http,
-		[](AccelByte::FHttpRetryScheduler*) {}))
+	, HttpRef(Http.AsShared())
 {
 	ReferenceCount.Increment();
 }
+
+FAccelByteTimeManager::FAccelByteTimeManager()
+	: HttpRef(MakeShared<FHttpRetryScheduler, ESPMode::ThreadSafe>())
+{
+	HttpRef->Startup();
+};
 
 FAccelByteTimeManager::~FAccelByteTimeManager()
 {
@@ -67,9 +67,9 @@ FAccelByteTimeManager::~FAccelByteTimeManager()
 
 void FAccelByteTimeManager::Reset()
 {
-	SERVER_TIME_CACHED = FDateTime::MinValue();
-	SERVER_TIME_CURRENT = FDateTime::MinValue();
-	LAST_UPDATED_SERVER_TIME = FDateTime::MinValue();
+	CachedServerTime = FDateTime::MinValue();
+	CurrentServerTime = FDateTime::MinValue();
+	ServerTimeLastUpdated = FDateTime::MinValue();
 }
 
 FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& OnSuccess
@@ -80,9 +80,8 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 
 	bool bShouldSync{ bForceSync };
 	FDateTime MinimumDateTime{ FDateTime::MinValue() };
-	FDateTime CurrentServerTime{ 0 };
 
-	if (SERVER_TIME_CACHED == MinimumDateTime)
+	if (CachedServerTime == MinimumDateTime)
 	{
 		bShouldSync = true;
 	}
@@ -128,8 +127,8 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 				if (RetryTaskPtr.IsValid())
 				{
 					FScopeLock ScopeLock(&ServerTimeLock);
-					LAST_UPDATED_SERVER_TIME = RetryTaskPtr->GetResponseTime();
-					SERVER_TIME_CACHED = ServerTime.CurrentTime;
+					ServerTimeLastUpdated = RetryTaskPtr->GetResponseTime();
+					CachedServerTime = ServerTime.CurrentTime;
 				}
 			}
 			OnSuccess.ExecuteIfBound(ServerTime);
@@ -140,7 +139,7 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 	else
 	{
 		FTime ServerTime{};
-		ServerTime.CurrentTime = SERVER_TIME_CURRENT;
+		ServerTime.CurrentTime = CurrentServerTime;
 		OnSuccess.ExecuteIfBound(ServerTime);
 		return nullptr;
 	}
@@ -148,13 +147,13 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 
 FDateTime FAccelByteTimeManager::GetCachedServerTime() const
 {
-	return SERVER_TIME_CACHED;
+	return CachedServerTime;
 }
 
-FDateTime FAccelByteTimeManager::GetCurrentServerTime() const
+FDateTime FAccelByteTimeManager::GetCurrentServerTime()
 {
 	BackCalculateServerTime();
-	return SERVER_TIME_CURRENT;
+	return CurrentServerTime;
 }
 
 bool FAccelByteTimeManager::IsInSync()
@@ -162,14 +161,14 @@ bool FAccelByteTimeManager::IsInSync()
 	return GetCurrentServerTime() != FDateTime::MinValue();
 }
 
-FTimespan FAccelByteTimeManager::BackCalculateServerTime() const
+FTimespan FAccelByteTimeManager::BackCalculateServerTime()
 {
 	FTimespan DeltaTime{ -1 };
-	if (SERVER_TIME_CACHED != FDateTime::MinValue())
+	if (CachedServerTime != FDateTime::MinValue())
 	{
 		FDateTime CurrentTime = FDateTime::UtcNow();
-		DeltaTime = CurrentTime - LAST_UPDATED_SERVER_TIME;
-		SERVER_TIME_CURRENT = SERVER_TIME_CACHED + DeltaTime;
+		DeltaTime = CurrentTime - ServerTimeLastUpdated;
+		CurrentServerTime = CachedServerTime + DeltaTime;
 	}
 	return DeltaTime;
 }

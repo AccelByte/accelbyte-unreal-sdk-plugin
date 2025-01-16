@@ -26,7 +26,7 @@ namespace Api
 
 class ServerSessionApi;
 
-class ACCELBYTEUE4SDK_API Session : public FApiBase
+class ACCELBYTEUE4SDK_API Session : public FApiBase, public TSharedFromThis<Session, ESPMode::ThreadSafe>
 {
 public:
 	Session(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -116,6 +116,21 @@ public:
 	FAccelByteTaskWPtr SendGameSessionInvite(FString const& GameSessionID
 		, FString const& UserID
 		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Send an invite to a game session by ID.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param UserID The ID of the user to invite.
+	 * @param Platform The platform of the user
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	FAccelByteTaskWPtr SendGameSessionInvitePlatform(FString const& GameSessionID
+		, FString const& UserID
+		, EAccelByteV2SessionPlatform const& Platform
+		, THandler<FAccelByteModelsV2SessionInvitePlatformResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**
@@ -340,6 +355,21 @@ public:
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Send a party invite to the given user on native platform.
+	 *
+	 * @param PartyID The ID of the party session for which the invite will be created.
+	 * @param UserID The ID of the user to invite.
+	 * @param Platform The platform of the user
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	FAccelByteTaskWPtr SendPartyInvitePlatform(FString const& PartyID
+		, FString const& UserID
+		, EAccelByteV2SessionPlatform const& Platform
+		, THandler<FAccelByteModelsV2SessionInvitePlatformResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+	
 	/**
 	 * @brief Reject an invite to a party 
 	 *
@@ -632,6 +662,10 @@ private:
 		OutJsonObjectPtr = JsonObjectPtr;
 	}
 };
+
+typedef TSharedRef<Session, ESPMode::ThreadSafe> SessionRef;
+typedef TSharedPtr<Session, ESPMode::ThreadSafe> SessionPtr;
+typedef TWeakPtr<Session, ESPMode::ThreadSafe> SessionWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

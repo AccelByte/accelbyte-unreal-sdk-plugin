@@ -17,7 +17,7 @@ namespace Api
 /**
  * @brief StoreDisplayAPI its to display Items in Item Shop/Store and to configure items on the View
  */
-class ACCELBYTEUE4SDK_API StoreDisplay : public FApiBase
+class ACCELBYTEUE4SDK_API StoreDisplay : public FApiBase, public TSharedFromThis<StoreDisplay, ESPMode::ThreadSafe>
 {
 public:
 	StoreDisplay(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -66,5 +66,9 @@ private:
 	StoreDisplay(StoreDisplay&&) = delete; 
 };
 	
+typedef TSharedRef<StoreDisplay, ESPMode::ThreadSafe> StoreDisplayRef;
+typedef TSharedPtr<StoreDisplay, ESPMode::ThreadSafe> StoreDisplayPtr;
+typedef TWeakPtr<StoreDisplay, ESPMode::ThreadSafe> StoreDisplayWPtr;
+
 }// Namespace Api
 } // Namespace AccelByte

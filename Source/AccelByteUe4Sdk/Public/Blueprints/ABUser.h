@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteUserModels.h"
+#include "Models/AccelByteOauth2Models.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABUser.generated.h"
 

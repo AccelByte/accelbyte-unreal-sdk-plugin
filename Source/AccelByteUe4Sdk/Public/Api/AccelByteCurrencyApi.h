@@ -20,7 +20,7 @@ namespace Api
 /**
  * @brief Currency API for getting information from Currency
  */
-class ACCELBYTEUE4SDK_API Currency : public FApiBase
+class ACCELBYTEUE4SDK_API Currency : public FApiBase, public TSharedFromThis<Currency, ESPMode::ThreadSafe>
 {
 public:
 	Currency(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -46,6 +46,10 @@ private:
 	Currency(Currency const&) = delete;
 	Currency(Currency&&) = delete;
 };
+
+typedef TSharedRef<Currency, ESPMode::ThreadSafe> CurrencyRef;
+typedef TSharedPtr<Currency, ESPMode::ThreadSafe> CurrencyPtr;
+typedef TWeakPtr<Currency, ESPMode::ThreadSafe> CurrencyWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

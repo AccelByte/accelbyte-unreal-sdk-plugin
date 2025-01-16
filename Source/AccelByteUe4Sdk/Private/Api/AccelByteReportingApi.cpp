@@ -21,21 +21,59 @@ Reporting::Reporting(Credentials const& InCredentialsRef
 Reporting::~Reporting()
 {}
 
+FString Reporting::AdditionalValidationByCategory(FAccelByteModelsReportingSubmitData const& InReportData)
+{
+	switch (InReportData.Category)
+	{
+	case EAccelByteReportingCategory::CHAT:
+		if (InReportData.AdditionalInfo.TopicId.IsEmpty())
+		{
+			return TEXT("Invalid request, topic id is empty");
+		}
+		if (InReportData.AdditionalInfo.ChatCreatedAt == FDateTime::MinValue())
+		{
+			return TEXT("Invalid request, chat time created at is empty");
+		}
+	case EAccelByteReportingCategory::UGC:
+	case EAccelByteReportingCategory::USER:
+	case EAccelByteReportingCategory::EXTENSION:
+	default:
+		return TEXT("");
+	}
+}
+
 FAccelByteTaskWPtr Reporting::SubmitReport(FAccelByteModelsReportingSubmitData const& ReportData
 	, THandler<FAccelByteModelsReportingSubmitResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ReportData.ObjectId.IsEmpty())
+	if (ReportData.Category == EAccelByteReportingCategory::UGC || ReportData.Category == EAccelByteReportingCategory::CHAT)
 	{
-		OnError.ExecuteIfBound(404, TEXT("ObjectID is Empty, You Should Fill it with UUID v4 without hyphen format"));
+		if (!ValidateAccelByteId(ReportData.ObjectId, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetObjectIdInvalidMessage(ReportData.ObjectId)
+			, OnError))
+		{
+			return nullptr;
+		}
+
+		if (ReportData.ObjectType.IsEmpty())
+		{
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, object type is empty"));
+			return nullptr;
+		}
+	}
+
+	if (ReportData.Reason.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, reason is empty"));
 		return nullptr;
 	}
 
-	if (ReportData.ObjectId.Contains("-"))
+	if (!ValidateAccelByteId(ReportData.UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(ReportData.UserID)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(404, TEXT("ObjectId doesn't follow the UUID V4 without hyphen format, You Should Fill it with UUID v4 without hyphen format"));
 		return nullptr;
 	}
 
@@ -52,17 +90,17 @@ FAccelByteTaskWPtr Reporting::SubmitChatReport(FAccelByteModelsReportingSubmitDa
 {
 	if (ReportData.ChatId.IsEmpty())
 	{
-		OnError.ExecuteIfBound(404, TEXT("Chat report failed! ChatId cannot be empty."));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Chat report failed! ChatId cannot be empty."));
 		return nullptr;
 	}
 	if (ReportData.UserId.IsEmpty())
 	{
-		OnError.ExecuteIfBound(404, TEXT("Chat report failed! UserId cannot be empty."));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Chat report failed! UserId cannot be empty."));
 		return nullptr;
 	}
 	if (ReportData.ChatTopicId.IsEmpty())
 	{
-		OnError.ExecuteIfBound(404, TEXT("Chat report failed! ChatTopicId cannot be empty."));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Chat report failed! ChatTopicId cannot be empty."));
 		return nullptr;
 	}
 	

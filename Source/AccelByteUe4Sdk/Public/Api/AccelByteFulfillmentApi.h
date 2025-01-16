@@ -18,7 +18,7 @@ namespace Api
 /**
  * @brief Fulfillment API for user to fulfill an item to their entitlements.
  */
-class ACCELBYTEUE4SDK_API Fulfillment : public FApiBase
+class ACCELBYTEUE4SDK_API Fulfillment : public FApiBase, public TSharedFromThis<Fulfillment, ESPMode::ThreadSafe>
 {
 public:
 	Fulfillment(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -46,6 +46,10 @@ private:
 	Fulfillment(Fulfillment const&) = delete;
 	Fulfillment(Fulfillment&&) = delete;
 };
+
+typedef TSharedRef<Fulfillment, ESPMode::ThreadSafe> FulfillmentRef;
+typedef TSharedPtr<Fulfillment, ESPMode::ThreadSafe> FulfillmentPtr;
+typedef TWeakPtr<Fulfillment, ESPMode::ThreadSafe> FulfillmentWPtr;
 
 } // Namespace Api
 }

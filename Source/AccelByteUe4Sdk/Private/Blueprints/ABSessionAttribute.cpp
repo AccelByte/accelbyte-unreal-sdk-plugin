@@ -16,19 +16,24 @@ FString UABSessionAttribute::SetSessionAttribute(
 	FDSetSessionAttributeResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetSetSessionAttributeDelegate(
-		Api::Lobby::FSetSessionAttributeResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsSetSessionAttributesResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetSetSessionAttributeDelegate(
+			Api::Lobby::FSetSessionAttributeResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsSetSessionAttributesResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	return ApiClientPtr->Lobby.SetSessionAttribute(Request.Key, Request.Value);
+		return LobbyPtr->SetSessionAttribute(Request.Key, Request.Value);
+	}
+	return TEXT("");
 }
 
 FString UABSessionAttribute::GetSessionAttribute(
@@ -36,36 +41,46 @@ FString UABSessionAttribute::GetSessionAttribute(
 	FDGetSessionAttributeResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetGetSessionAttributeDelegate(
-		Api::Lobby::FGetSessionAttributeResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsGetSessionAttributesResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetGetSessionAttributeDelegate(
+			Api::Lobby::FGetSessionAttributeResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsGetSessionAttributesResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	return ApiClientPtr->Lobby.GetSessionAttribute(Request.Key);
+		return LobbyPtr->GetSessionAttribute(Request.Key);
+	}
+	return TEXT("");
 }
 
 FString UABSessionAttribute::GetAllSessionAttribute(
 	FDGetAllSessionAttributeResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetGetAllSessionAttributeDelegate(
-		Api::Lobby::FGetAllSessionAttributeResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsGetAllSessionAttributesResponse const& Response)
-			{
-				OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetGetAllSessionAttributeDelegate(
+			Api::Lobby::FGetAllSessionAttributeResponse::CreateLambda(
+				[OnResponse](FAccelByteModelsGetAllSessionAttributesResponse const& Response)
+				{
+					OnResponse.ExecuteIfBound(Response);
+				}),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}));
 
-	return ApiClientPtr->Lobby.GetAllSessionAttribute();
+		return LobbyPtr->GetAllSessionAttribute();
+	}
+	return TEXT("");
 }

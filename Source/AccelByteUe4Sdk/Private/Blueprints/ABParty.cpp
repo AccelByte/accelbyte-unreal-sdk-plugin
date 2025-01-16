@@ -15,7 +15,10 @@ void UABParty::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 
 void UABParty::PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetInfoPartyResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetInfoPartyResponseDelegate(
 		Api::Lobby::FPartyInfoResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsInfoPartyResponse const& Response)
 			{
@@ -26,12 +29,20 @@ void UABParty::PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError)
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendInfoPartyRequest();
+		LobbyPtr->SendInfoPartyRequest();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetCreatePartyResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetCreatePartyResponseDelegate(
 		Api::Lobby::FPartyCreateResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsCreatePartyResponse const& Response)
 			{
@@ -43,12 +54,20 @@ void UABParty::CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnEr
 				OnError.ExecuteIfBound(Code, Message);
 			}));
 
-	ApiClientPtr->Lobby.SendCreatePartyRequest();
+		LobbyPtr->SendCreatePartyRequest();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetLeavePartyResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetLeavePartyResponseDelegate(
 		Api::Lobby::FPartyLeaveResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsLeavePartyResponse const& Response)
 			{
@@ -59,7 +78,12 @@ void UABParty::PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnErro
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendLeavePartyRequest();
+		LobbyPtr->SendLeavePartyRequest();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyInvite(
@@ -67,7 +91,10 @@ void UABParty::PartyInvite(
 	FDPartyInviteResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetInvitePartyResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetInvitePartyResponseDelegate(
 		Api::Lobby::FPartyInviteResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyInviteResponse const& Response)
 			{
@@ -78,7 +105,12 @@ void UABParty::PartyInvite(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendInviteToPartyRequest(Request.friendID);
+		LobbyPtr->SendInviteToPartyRequest(Request.friendID);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyJoin(
@@ -86,7 +118,10 @@ void UABParty::PartyJoin(
 	FDPartyJoinResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetInvitePartyJoinResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetInvitePartyJoinResponseDelegate(
 		Api::Lobby::FPartyJoinResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyJoinResponse const& Response)
 			{
@@ -97,7 +132,12 @@ void UABParty::PartyJoin(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendAcceptInvitationRequest(Request.partyID, Request.invitationToken);
+		LobbyPtr->SendAcceptInvitationRequest(Request.partyID, Request.invitationToken);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyReject(
@@ -105,7 +145,10 @@ void UABParty::PartyReject(
 	FDPartyRejectResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetInvitePartyRejectResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetInvitePartyRejectResponseDelegate(
 		Api::Lobby::FPartyRejectResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyRejectResponse const& Response)
 			{
@@ -116,7 +159,12 @@ void UABParty::PartyReject(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendRejectInvitationRequest(Request.partyID, Request.invitationToken);
+		LobbyPtr->SendRejectInvitationRequest(Request.partyID, Request.invitationToken);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyKick(
@@ -124,7 +172,10 @@ void UABParty::PartyKick(
 	FDPartyKickResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetInvitePartyKickMemberResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetInvitePartyKickMemberResponseDelegate(
 		Api::Lobby::FPartyKickResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsKickPartyMemberResponse Response)
 			{
@@ -135,14 +186,22 @@ void UABParty::PartyKick(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendKickPartyMemberRequest(Request.memberID);
+		LobbyPtr->SendKickPartyMemberRequest(Request.memberID);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyGenerateCode(
 	FDPartyGenerateCodeResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetPartyGenerateCodeResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyGenerateCodeResponseDelegate(
 		Api::Lobby::FPartyGenerateCodeResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyGenerateCodeResponse Response)
 			{
@@ -154,14 +213,22 @@ void UABParty::PartyGenerateCode(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendPartyGenerateCodeRequest();
+		LobbyPtr->SendPartyGenerateCodeRequest();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyGetCode(
 	FDPartyGetCodeResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetPartyGetCodeResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyGetCodeResponseDelegate(
 		Api::Lobby::FPartyGetCodeResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyGetCodeResponse Response)
 			{
@@ -172,14 +239,22 @@ void UABParty::PartyGetCode(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendPartyGetCodeRequest();
+		LobbyPtr->SendPartyGetCodeRequest();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyDeleteCode(
 	FDPartyDeleteCodeResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetPartyDeleteCodeResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyDeleteCodeResponseDelegate(
 		Api::Lobby::FPartyDeleteCodeResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyDeleteCodeResponse Response)
 			{
@@ -190,7 +265,12 @@ void UABParty::PartyDeleteCode(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendPartyDeleteCodeRequest();
+		LobbyPtr->SendPartyDeleteCodeRequest();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyJoinViaCode(
@@ -198,7 +278,10 @@ void UABParty::PartyJoinViaCode(
 	FDPartyJoinViaCodeResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetPartyJoinViaCodeResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyJoinViaCodeResponseDelegate(
 		Api::Lobby::FPartyJoinViaCodeResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyJoinResponse Response)
 			{
@@ -209,7 +292,12 @@ void UABParty::PartyJoinViaCode(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendPartyJoinViaCodeRequest(Request.partyCode);
+		LobbyPtr->SendPartyJoinViaCodeRequest(Request.partyCode);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::PartyPromoteLeader(
@@ -217,7 +305,10 @@ void UABParty::PartyPromoteLeader(
 	FDPartyPromoteLeaderResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.SetPartyPromoteLeaderResponseDelegate(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyPromoteLeaderResponseDelegate(
 		Api::Lobby::FPartyPromoteLeaderResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyPromoteLeaderResponse Response)
 			{
@@ -228,21 +319,34 @@ void UABParty::PartyPromoteLeader(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
-	ApiClientPtr->Lobby.SendPartyPromoteLeaderRequest(Request.userId);
+		LobbyPtr->SendPartyPromoteLeaderRequest(Request.userId);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FDHandler& OnSuccess,
 	FDErrorHandler OnError)
 {
-	ApiClientPtr->Lobby.SetPartySizeLimit(PartyId, Limit,
-	FVoidHandler::CreateLambda([OnSuccess]()
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
 	{
-		OnSuccess.ExecuteIfBound();
-	}),
-	FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+		LobbyPtr->SetPartySizeLimit(PartyId, Limit,
+		FVoidHandler::CreateLambda([OnSuccess]()
+		{
+			OnSuccess.ExecuteIfBound();
+		}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString const& Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}));
+	}
+	else
 	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::GetPartyData(
@@ -250,7 +354,10 @@ void UABParty::GetPartyData(
 	FDPartyGetDataResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.GetPartyData(Request.partyId,
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->GetPartyData(Request.partyId,
 		THandler<FAccelByteModelsPartyData>::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyData Response)
 			{
@@ -261,6 +368,11 @@ void UABParty::GetPartyData(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::GetPartyStorage(
@@ -268,7 +380,10 @@ void UABParty::GetPartyStorage(
 	FDPartyGetStorageResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.GetPartyStorage(Request.partyId,
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->GetPartyStorage(Request.partyId,
 		THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyDataNotif Response)
 			{
@@ -279,6 +394,11 @@ void UABParty::GetPartyStorage(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABParty::WritePartyStorage(
@@ -286,7 +406,10 @@ void UABParty::WritePartyStorage(
 	FDPartyWriteDataResponse OnResponse,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Lobby.WritePartyStorage(
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->WritePartyStorage(
 		Request.partyId,
 		Request.PayloadModifier,
 		THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
@@ -298,123 +421,177 @@ void UABParty::WritePartyStorage(
 			[OnError](int32 Code, FString const& Message)
 			{
 				OnError.ExecuteIfBound(Code, Message);
-			}));}
+			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
+}
 
 void UABParty::SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
-		Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyDataUpdateNotifDelegate(
+			Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyGetInvitedNotifDelegate(
-		Api::Lobby::FPartyGetInvitedNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsPartyGetInvitedNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyGetInvitedNotifDelegate(
+			Api::Lobby::FPartyGetInvitedNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyGetInvitedNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyJoin(FDPartyJoinNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyJoinNotifDelegate(
-		Api::Lobby::FPartyJoinNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsPartyJoinNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyJoinNotifDelegate(
+			Api::Lobby::FPartyJoinNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyJoinNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyReject(FDPartyRejectNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyInvitationRejectedNotifDelegate(
-		Api::Lobby::FPartyRejectNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsPartyRejectNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyInvitationRejectedNotifDelegate(
+			Api::Lobby::FPartyRejectNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyRejectNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyLeave(FDPartyLeaveNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyLeaveNotifDelegate(
-		Api::Lobby::FPartyLeaveNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsLeavePartyNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyLeaveNotifDelegate(
+			Api::Lobby::FPartyLeaveNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsLeavePartyNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyMemberLeave(FDPartyMemberLeaveNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyMemberLeaveNotifDelegate(
-		Api::Lobby::FPartyMemberLeaveNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsLeavePartyNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyMemberLeaveNotifDelegate(
+			Api::Lobby::FPartyMemberLeaveNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsLeavePartyNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyKick(FDPartyKickNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyKickNotifDelegate(
-		Api::Lobby::FPartyKickNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsGotKickedFromPartyNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyKickNotifDelegate(
+			Api::Lobby::FPartyKickNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsGotKickedFromPartyNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyUpdate(FDPartyUpdateNotif OnNotif)
 {
-	ApiClientPtr->Lobby.SetPartyNotifDelegate(
-		Api::Lobby::FPartyNotif::CreateLambda([OnNotif](const FAccelByteModelsPartyNotif& Notif)
-		{
-			OnNotif.ExecuteIfBound(Notif);
-		}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyNotifDelegate(
+			Api::Lobby::FPartyNotif::CreateLambda([OnNotif](const FAccelByteModelsPartyNotif& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyInvite(FDPartyInviteNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyInviteNotifDelegate(
-		Api::Lobby::FPartyInviteNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsInvitationNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyInviteNotifDelegate(
+			Api::Lobby::FPartyInviteNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsInvitationNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
-		Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyDataUpdateNotifDelegate(
+			Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyMemberConnect(FDPartyMemberConnectNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyMemberConnectNotifDelegate(
-		Api::Lobby::FPartyMemberConnectNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsPartyMemberConnectionNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyMemberConnectNotifDelegate(
+			Api::Lobby::FPartyMemberConnectNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyMemberConnectionNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }
 
 void UABParty::SetOnPartyMemberDisconnect(FDPartyMemberDisconnectNotif OnNotif) 
 {
-	ApiClientPtr->Lobby.SetPartyMemberDisconnectNotifDelegate(
-		Api::Lobby::FPartyMemberDisconnectNotif::CreateLambda(
-			[OnNotif](FAccelByteModelsPartyMemberConnectionNotice const& Notif)
-			{
-				OnNotif.ExecuteIfBound(Notif);
-			}));
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyMemberDisconnectNotifDelegate(
+			Api::Lobby::FPartyMemberDisconnectNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyMemberConnectionNotice const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
 }

@@ -18,7 +18,10 @@ void UABOrder::CreateNewOrder(
 	FDAccelByteModelsOrderInfoResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Order.CreateNewOrder(
+	const auto OrderPtr = ApiClientPtr->GetOrderApi().Pin();
+	if (OrderPtr.IsValid())
+	{
+		OrderPtr->CreateNewOrder(
 		OrderCreateRequest,
 		THandler<FAccelByteModelsOrderInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsOrderInfo const& Response)
@@ -30,6 +33,11 @@ void UABOrder::CreateNewOrder(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABOrder::CancelOrder(
@@ -37,7 +45,10 @@ void UABOrder::CancelOrder(
 	FDAccelByteModelsOrderInfoResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Order.CancelOrder(
+	const auto OrderPtr = ApiClientPtr->GetOrderApi().Pin();
+	if (OrderPtr.IsValid())
+	{
+		OrderPtr->CancelOrder(
 		OrderNo,
 		THandler<FAccelByteModelsOrderInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsOrderInfo const& Response)
@@ -49,6 +60,11 @@ void UABOrder::CancelOrder(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABOrder::GetUserOrder(
@@ -56,7 +72,10 @@ void UABOrder::GetUserOrder(
 	FDAccelByteModelsOrderInfoResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Order.GetUserOrder(
+	const auto OrderPtr = ApiClientPtr->GetOrderApi().Pin();
+	if (OrderPtr.IsValid())
+	{
+		OrderPtr->GetUserOrder(
 		OrderNo,
 		THandler<FAccelByteModelsOrderInfo>::CreateLambda(
 			[OnSuccess](FAccelByteModelsOrderInfo const& Response)
@@ -68,6 +87,11 @@ void UABOrder::GetUserOrder(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABOrder::GetUserOrders(
@@ -76,7 +100,10 @@ void UABOrder::GetUserOrders(
 	FDAccelByteModelsPagedOrderInfoResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Order.GetUserOrders(
+	const auto OrderPtr = ApiClientPtr->GetOrderApi().Pin();
+	if (OrderPtr.IsValid())
+	{
+		OrderPtr->GetUserOrders(
 		Page,
 		Size,
 		THandler<FAccelByteModelsPagedOrderInfo>::CreateLambda(
@@ -89,6 +116,11 @@ void UABOrder::GetUserOrders(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABOrder::GetUserOrderHistory(
@@ -96,7 +128,10 @@ void UABOrder::GetUserOrderHistory(
 	FDArrayModelsOrderHistoryInfoResponse OnSuccess,
 	FDErrorHandler OnError) 
 {
-	ApiClientPtr->Order.GetUserOrderHistory(
+	const auto OrderPtr = ApiClientPtr->GetOrderApi().Pin();
+	if (OrderPtr.IsValid())
+	{
+		OrderPtr->GetUserOrderHistory(
 		OrderNo,
 		THandler<TArray<FAccelByteModelsOrderHistoryInfo>>::CreateLambda(
 			[OnSuccess](TArray<FAccelByteModelsOrderHistoryInfo> const& Response)
@@ -110,12 +145,20 @@ void UABOrder::GetUserOrderHistory(
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }
 
 void UABOrder::PreviewUserOrder(const FAccelByteModelsUserPreviewOrderRequest& OrderPreviewRequest,
 	const FDAccelByteModelsPreviewOrderResponse& OnSuccess, const FDErrorHandler& OnError)
 {
-	ApiClientPtr->Order.PreviewUserOrder(OrderPreviewRequest, THandler<FAccelByteModelsUserPreviewOrderResponse>::CreateLambda(
+	const auto OrderPtr = ApiClientPtr->GetOrderApi().Pin();
+	if (OrderPtr.IsValid())
+	{
+		OrderPtr->PreviewUserOrder(OrderPreviewRequest, THandler<FAccelByteModelsUserPreviewOrderResponse>::CreateLambda(
 		[OnSuccess](const FAccelByteModelsUserPreviewOrderResponse& Result)
 		{
 			OnSuccess.ExecuteIfBound(Result);
@@ -124,4 +167,9 @@ void UABOrder::PreviewUserOrder(const FAccelByteModelsUserPreviewOrderRequest& O
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
 }

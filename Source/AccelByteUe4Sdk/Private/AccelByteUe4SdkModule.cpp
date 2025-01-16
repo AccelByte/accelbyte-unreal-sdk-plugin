@@ -3,7 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUe4SdkModule.h"
-#include "CoreUObject.h"
 #include "Core/Version.h"
 #include "Interfaces/IPluginManager.h"
 #include "Core/AccelByteSettings.h"
@@ -11,8 +10,8 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteReport.h"
-#include "Core/AccelByteSignalHandler.h"
 #include "Core/AccelByteDataStorageBinaryFile.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/Platform/AccelBytePlatformHandler.h"
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Api/AccelByteHeartBeatApi.h"
@@ -45,14 +44,17 @@ public:
 	virtual AccelByte::FAccelBytePlatformHandler& GetPlatformHandler() override;
 
 private:
-	AccelByte::Settings ClientSettings{};
-	AccelByte::ServerSettings ServerSettings{};
+	AccelByte::Settings GlobalClientSettings{};
+	AccelByte::ServerSettings GlobalServerSettings{};
 	ESettingsEnvironment SettingsEnvironment{ESettingsEnvironment::Default};
 	FEnvironmentChangedDelegate EnvironmentChangedDelegate{};
 	TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage = nullptr;
 	AccelByte::FAccelBytePlatformHandler PlatformHandler;
+	FThreadSafeCounter GameInstanceCount {0};
 
-	// For registering settings in UE4 editor
+	FAccelByteTimeManagerPtr TimeManager;
+
+    // For registering settings in UE4 editor
 	void RegisterSettings();
 	void UnregisterSettings();
 	
@@ -75,6 +77,11 @@ private:
 
 	void OnGameInstanceCreated(UGameInstance* GameInstance);
 	void OnPreExit();
+
+public:
+	virtual FAccelByteInstancePtr CreateAccelByteInstance() override;
+
+protected:
 };
 
 void FAccelByteUe4SdkModule::StartupModule()
@@ -95,6 +102,7 @@ void FAccelByteUe4SdkModule::StartupModule()
 	LoadServerSettingsFromConfigUObject();
 
 	LocalDataStorage = MakeShared<AccelByte::DataStorageBinaryFile>();
+	TimeManager = MakeShared<AccelByte::FAccelByteTimeManager, ESPMode::ThreadSafe>();
 
 #ifdef TEMPORARY_ENABLE_COMPAT_CHECK
 #if UE_BUILD_DEVELOPMENT && TEMPORARY_ENABLE_COMPAT_CHECK
@@ -173,12 +181,12 @@ void FAccelByteUe4SdkModule::SetEnvironment(ESettingsEnvironment const Environme
 
 AccelByte::Settings const& FAccelByteUe4SdkModule::GetClientSettings() const
 {
-	return ClientSettings;
+	return GlobalClientSettings;
 }
 
 AccelByte::ServerSettings const& FAccelByteUe4SdkModule::GetServerSettings() const
 {
-	return ServerSettings;
+	return GlobalServerSettings;
 }
 
 ESettingsEnvironment const& FAccelByteUe4SdkModule::GetSettingsEnvironment() const
@@ -231,11 +239,11 @@ void FAccelByteUe4SdkModule::UnregisterSettings()
 bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Environment)
 {
 	bool bResult = true;
-	ClientSettings.Reset(Environment);
+	GlobalClientSettings.Reset(Environment);
 	
-	bResult &= NullCheckConfig(ClientSettings.ClientId, TEXT("Client ID"));
-	bResult &= NullCheckConfig(ClientSettings.Namespace, TEXT("Namespace"));
-	bResult &= NullCheckConfig(ClientSettings.BaseUrl, TEXT("Base URL"));
+	bResult &= NullCheckConfig(GlobalClientSettings.ClientId, TEXT("Client ID"));
+	bResult &= NullCheckConfig(GlobalClientSettings.Namespace, TEXT("Namespace"));
+	bResult &= NullCheckConfig(GlobalClientSettings.BaseUrl, TEXT("Base URL"));
 
 	if (!bResult)
 	{
@@ -244,7 +252,7 @@ bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Envir
 	
 	AccelByte::FRegistry::Settings.Reset(Environment);
 	AccelByte::FRegistry::CredentialsRef->SetClientCredentials(Environment);
-	SetDefaultHttpCustomHeader(ClientSettings.Namespace);
+	SetDefaultHttpCustomHeader(GlobalClientSettings.Namespace);
 
 	return bResult;
 }
@@ -253,11 +261,11 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 {
 	bool bResult = true;
 
-	ServerSettings.Reset(Environment);
+	GlobalServerSettings.Reset(Environment);
 
-	bResult &= NullCheckConfig(ServerSettings.ClientId, TEXT("Client ID"));
-	bResult &= NullCheckConfig(ServerSettings.Namespace, TEXT("Namespace"));
-	bResult &= NullCheckConfig(ServerSettings.BaseUrl, TEXT("Base URL"));
+	bResult &= NullCheckConfig(GlobalServerSettings.ClientId, TEXT("Client ID"));
+	bResult &= NullCheckConfig(GlobalServerSettings.Namespace, TEXT("Namespace"));
+	bResult &= NullCheckConfig(GlobalServerSettings.BaseUrl, TEXT("Base URL"));
 	
 	if (!bResult)
 	{
@@ -266,7 +274,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 	
 	AccelByte::FRegistry::ServerSettings.Reset(Environment);
 	AccelByte::FRegistry::ServerCredentialsRef->SetClientCredentials(Environment);
-	SetDefaultHttpCustomHeader(ServerSettings.Namespace);
+	SetDefaultHttpCustomHeader(GlobalServerSettings.Namespace);
 	
 	return bResult;
 }
@@ -390,7 +398,7 @@ FEnvironmentChangedDelegate& FAccelByteUe4SdkModule::OnEnvironmentChanged()
 	return EnvironmentChangedDelegate;
 }
 
-AccelByte::IAccelByteDataStorage * FAccelByteUe4SdkModule::GetLocalDataStorage()
+AccelByte::IAccelByteDataStorage* FAccelByteUe4SdkModule::GetLocalDataStorage()
 {
 	if (LocalDataStorage.IsValid())
 	{
@@ -422,35 +430,11 @@ void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
 	{
 		return;
 	}
-	
-	if (IsRunningDedicatedServer())
-	{
-		if (AccelByte::FRegistry::ServerSettings.bServerUseAMS)
-		{
-			if (!AccelByte::FRegistry::ServerSettings.LoadAMSSettings())
-			{
-				UE_LOG(LogAccelByte, Log, TEXT("Dedicated server could not connect to AMS. Some mandatory settings were not configured correctly."));
-			}
-			else
-			{
-				AccelByte::FRegistry::ServerAMS.Connect();
-			}
-		}
-		else 
-		{
-			UE_LOG(LogAccelByte, Log, TEXT("Dedicated server will NOT use AMS because the feature flag is not enabled. Please configure bServerUseAMS to use AMS."));
-		}
-	}
-	else
-	{
-		// only do QoS latency check if not disabled in settings
-		if(!AccelByte::FRegistry::Settings.bDisableAutoGetQosLatencies)
-		{
-			AccelByte::FRegistry::Qos.GetServerLatencies(nullptr, nullptr);
-		}
-	}
+
+	GameInstanceCount.Increment();
 	
 	AccelByte::FRegistry::TimeManager.GetServerTime({}, {});
+	TimeManager->GetServerTime({}, {});
 }
 
 void FAccelByteUe4SdkModule::OnPreExit()
@@ -465,6 +449,11 @@ void FAccelByteUe4SdkModule::OnPreExit()
 	AccelByte::FRegistry::CredentialsRef->Shutdown();
 	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
 	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();
+}
+
+FAccelByteInstancePtr FAccelByteUe4SdkModule::CreateAccelByteInstance()
+{
+	return MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(GlobalClientSettings, GlobalServerSettings, LocalDataStorage, TimeManager, GameInstanceCount.GetValue());
 }
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)

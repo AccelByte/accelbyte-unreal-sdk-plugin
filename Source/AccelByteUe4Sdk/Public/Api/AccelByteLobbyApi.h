@@ -646,6 +646,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FChangeUserRegionResponse, FAccelByteModelsChangeUserRegionResponse const&);
 
+	/**
+	 * @brief Delegate for a native session sync event from session service
+	 */
+	DECLARE_DELEGATE_OneParam(FV2NativeSessionSyncNotif, FAccelByteModelsV2NativeSessionSyncNotif);
+
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOneTimeCodeLinkedNotif, FAccelByteModelsOneTimeCodeLinked const&);
 
 public:
@@ -1825,6 +1830,15 @@ public:
 	void SetV2MatchmakingCanceledNotifDelegate(FV2MatchmakingCanceledNotif const& OnMatchmakingCanceledNotif)
 	{
 		V2MatchmakingCanceledNotif = OnMatchmakingCanceledNotif;
+	}
+
+	/**
+	 * @brief Set a trigger function when leader cancelled matchmaking (v2)
+	 * @param OnMatchmakingCanceledNotif return models called FAccelByteModelsV2MatchmakingCanceledNotif
+	 */
+	void SetV2NativeSessionSyncNotifDelegate(const FV2NativeSessionSyncNotif& OnV2NativeSessionSyncNotif)
+	{
+		V2NativeSessionSyncNotif = OnV2NativeSessionSyncNotif;
 	}
 
 	/**
@@ -3119,6 +3133,7 @@ private:
 	FV2MatchmakingStartNotif V2MatchmakingStartNotif;
 	FV2MatchmakingExpiredNotif V2MatchmakingExpiredNotif;
 	FV2MatchmakingCanceledNotif V2MatchmakingCanceledNotif;
+	FV2NativeSessionSyncNotif V2NativeSessionSyncNotif;
 
 	// Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;

@@ -2983,6 +2983,11 @@ void Lobby::DispatchV2SessionMessageByTopic(FString const& Topic, FString const&
 			DispatchMulticastV2JsonNotif<FAccelByteModelsV2GameSessionInviteCanceledEvent>(Payload, V2GameSessionInviteCanceledNotif);
 			break;
 		}
+		case EV2SessionNotifTopic::OnSessionNativePlatformSynced:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2NativeSessionSyncNotif>(Payload, V2NativeSessionSyncNotif);
+			break;
+		}
 		default: UE_LOG(LogAccelByteLobby, Log, TEXT("Unknown session notification topic\nNotification: %s"), *ParsedJsonString);
 	}
 }

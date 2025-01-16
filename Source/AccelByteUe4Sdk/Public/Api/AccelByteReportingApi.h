@@ -19,7 +19,7 @@ namespace Api
 /**
  * @brief Reporting API for Reporting content.
  */
-class ACCELBYTEUE4SDK_API Reporting : public FApiBase
+class ACCELBYTEUE4SDK_API Reporting : public FApiBase, public TSharedFromThis<Reporting, ESPMode::ThreadSafe>
 {
 public:
 	Reporting(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -85,7 +85,14 @@ public:
 		, THandler<FAccelByteModelsReasonGroupsResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
+private:
+
+	static FString AdditionalValidationByCategory(FAccelByteModelsReportingSubmitData const& InReportData);
 };
+
+typedef TSharedRef<Reporting, ESPMode::ThreadSafe> ReportingRef;
+typedef TSharedPtr<Reporting, ESPMode::ThreadSafe> ReportingPtr;
+typedef TWeakPtr<Reporting, ESPMode::ThreadSafe> ReportingWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

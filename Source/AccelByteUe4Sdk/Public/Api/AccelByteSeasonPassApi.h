@@ -25,7 +25,7 @@ class ServerSeasonPass;
 /**
  * @brief Season Pass APIs to access Season Pass service. User can obtaining season and claiming rewards.
  */
-class ACCELBYTEUE4SDK_API SeasonPass : public FApiBase
+class ACCELBYTEUE4SDK_API SeasonPass : public FApiBase, public TSharedFromThis<SeasonPass, ESPMode::ThreadSafe>
 {
 public:
 	SeasonPass(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -105,5 +105,10 @@ private:
 	SeasonPass(SeasonPass const&) = delete;
 	SeasonPass(SeasonPass&&) = delete;
 };
+
+typedef TSharedRef<SeasonPass, ESPMode::ThreadSafe> SeasonPassRef;
+typedef TSharedPtr<SeasonPass, ESPMode::ThreadSafe> SeasonPassPtr;
+typedef TWeakPtr<SeasonPass, ESPMode::ThreadSafe> SeasonPassWPtr;
+
 };
 }

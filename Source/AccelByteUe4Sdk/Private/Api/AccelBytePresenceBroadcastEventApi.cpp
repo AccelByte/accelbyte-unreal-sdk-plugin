@@ -17,7 +17,6 @@ PresenceBroadcastEvent::PresenceBroadcastEvent(Credentials& InCredentialsRef
 	, CredentialsRef{ InCredentialsRef.AsShared() }
 {
 	SetHeartbeatInterval(FTimespan::FromSeconds(SettingsRef.PresenceBroadcastEventHeartbeatInterval));
-	PresenceBroadcastLoginSuccess = CredentialsRef->OnLoginSuccess().AddRaw(this, &PresenceBroadcastEvent::OnLoginSuccess);
 }
 
 PresenceBroadcastEvent::~PresenceBroadcastEvent()
@@ -100,6 +99,7 @@ void PresenceBroadcastEvent::RemovePresenceData(FString const& Key)
 
 void PresenceBroadcastEvent::Startup()
 {
+	PresenceBroadcastLoginSuccess = CredentialsRef->OnLoginSuccess().AddThreadSafeSP(AsShared(), &PresenceBroadcastEvent::OnLoginSuccess);
 	bIsShuttingDown = false;
 }
 
@@ -111,7 +111,7 @@ void PresenceBroadcastEvent::StartHeartbeat()
 	{
 		return;
 	}
-	PresenceBroadcastEventHeartbeatTickDelegate = FTickerDelegate::CreateRaw(this, &PresenceBroadcastEvent::PeriodicHeartbeat);
+	PresenceBroadcastEventHeartbeatTickDelegate = FTickerDelegate::CreateThreadSafeSP(AsShared(), &PresenceBroadcastEvent::PeriodicHeartbeat);
 	PresenceBroadcastEventHeartbeatTickDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(PresenceBroadcastEventHeartbeatTickDelegate, static_cast<float>(BroadcastInterval.GetTotalSeconds()));
 }
 
@@ -168,9 +168,14 @@ void PresenceBroadcastEvent::OnLoginSuccess(FOauth2Token const& Response)
 	PresencePayload.Game_state = FAccelByteUtilities::GetUEnumValueAsString(GameState);
 	PresencePayload.Platform_name = FAccelByteUtilities::GetPlatformName();
 
-	SendPlatform(FVoidHandler::CreateLambda([this]()
+	const PresenceBroadcastEventWPtr PresenceBroadcastWeak = AsShared();
+	SendPlatform(FVoidHandler::CreateLambda([PresenceBroadcastWeak]()
 		{
-			bIsGamePlatformSent = true;
+			const auto PresenceBroadcastPtr = PresenceBroadcastWeak.Pin();
+			if (PresenceBroadcastPtr.IsValid())
+			{
+				PresenceBroadcastPtr->bIsGamePlatformSent = true;
+			}
 		}),
 		FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 		{

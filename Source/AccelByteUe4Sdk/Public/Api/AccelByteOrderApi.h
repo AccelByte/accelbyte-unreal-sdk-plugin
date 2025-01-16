@@ -21,7 +21,7 @@ namespace Api
 /**
  * @brief Order is used to purchase something from the online store.
  */
-class ACCELBYTEUE4SDK_API Order : public FApiBase
+class ACCELBYTEUE4SDK_API Order : public FApiBase, public TSharedFromThis<Order, ESPMode::ThreadSafe>
 {
 public:
 	Order(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -129,6 +129,10 @@ private:
 	Order(Order const&) = delete;
 	Order(Order&&) = delete;
 };
+
+typedef TSharedRef<Order, ESPMode::ThreadSafe> OrderRef;
+typedef TSharedPtr<Order, ESPMode::ThreadSafe> OrderPtr;
+typedef TWeakPtr<Order, ESPMode::ThreadSafe> OrderWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

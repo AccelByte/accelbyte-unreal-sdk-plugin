@@ -27,5 +27,6 @@ public:
 	static FString GetContentIdInvalidMessage(FString const& ContentId);
 	static FString GetScreenshotIdInvalidMessage(FString const& ScreenshotId);
 	static FString GetEntitlementIdInvalidMessage(FString const& EntitlementId);
+	static FString GetObjectIdInvalidMessage(FString const& ObjectId);
 };
 }

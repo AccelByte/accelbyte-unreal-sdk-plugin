@@ -18,7 +18,7 @@ namespace Api
 /**
  * @brief Send presence event securely and the user should be logged in first.
  */
-class ACCELBYTEUE4SDK_API PresenceBroadcastEvent : public FApiBase
+class ACCELBYTEUE4SDK_API PresenceBroadcastEvent : public FApiBase, public TSharedFromThis<PresenceBroadcastEvent, ESPMode::ThreadSafe>
 {
 public:
 	PresenceBroadcastEvent(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
@@ -152,6 +152,10 @@ private:
 	bool bIsShuttingDown = false;
 
 };
+
+typedef TSharedRef<PresenceBroadcastEvent, ESPMode::ThreadSafe> PresenceBroadcastEventRef;
+typedef TSharedPtr<PresenceBroadcastEvent, ESPMode::ThreadSafe> PresenceBroadcastEventPtr;
+typedef TWeakPtr<PresenceBroadcastEvent, ESPMode::ThreadSafe> PresenceBroadcastEventWPtr;
 
 } // Namespace Api
 } // Namespace AccelByte

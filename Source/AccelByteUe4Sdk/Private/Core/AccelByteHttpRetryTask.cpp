@@ -9,11 +9,10 @@ namespace AccelByte
 {
 	FHttpRetryTask::FHttpRetryTask(
 		FHttpRequestPtr& InRequest,
-		const FHttpRequestCompleteDelegate& InCompleteDelegate,
+		FHttpRequestCompleteDelegate const& InCompleteDelegate,
 		double InRequestTime,
 		double InNextDelay,
-		const FVoidHandler& InOnBearerAuthRejectDelegate,
-		FBearerAuthRejectedRefresh& InBearerAuthRejectedRefresh,
+		FHttpRetrySchedulerWPtr const& InHttpRetrySchedulerWPtr,
 		TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> HandlerDelegates)
 		: Request{ InRequest }
 		, CompleteDelegate{ InCompleteDelegate }
@@ -22,11 +21,8 @@ namespace AccelByte
 		, PauseDuration{}
 		, NextRetryTime{ InNextDelay }
 		, NextDelay{ InNextDelay }
-		, OnBearerAuthRejectDelegate{ InOnBearerAuthRejectDelegate }
-		, BearerAuthRejectedRefresh{ InBearerAuthRejectedRefresh }
+		, HttpRetrySchedulerWPtr{ InHttpRetrySchedulerWPtr }
 	{
-		Request->OnProcessRequestComplete().BindRaw(this, &FHttpRetryTask::OnProcessRequestComplete);
-		
 		TaskTime = RequestTime;
 		InitializeDefaultDelegates();
 		for (auto& Handler : HandlerDelegates)
@@ -37,7 +33,37 @@ namespace AccelByte
 
 	FHttpRetryTask::~FHttpRetryTask()
 	{
-		BearerAuthRejectedRefresh.Remove(BearerAuthRejectedRefreshHandle);
+		auto HttpRetrySchedulerPtr = HttpRetrySchedulerWPtr.Pin();
+		if (HttpRetrySchedulerPtr.IsValid())
+		{
+			HttpRetrySchedulerPtr->RemoveBearerAuthRejectedDelegate(BearerAuthRejectedHandle);
+			if (BearerAuthRefreshedHandle.IsValid())
+			{
+				HttpRetrySchedulerPtr->RemoveBearerAuthRefreshedDelegate(BearerAuthRefreshedHandle);
+				BearerAuthRefreshedHandle.Reset();
+			}
+		}
+
+#if UE_BUILD_SHIPPING
+
+		if (!ensure(Request.IsValid()))
+		{
+			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Error during HTTP Retry Task Destructor: Request is invalid"));
+			return;
+		}
+
+		const bool bIsTaskStateFinishProperly = (TaskState != EAccelByteTaskState::Completed) && (TaskState != EAccelByteTaskState::Failed) && (TaskState != EAccelByteTaskState::Cancelled);
+		if (ensure(bIsTaskStateFinishProperly))
+		{
+			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Error during HTTP Retry Task Destructor: Task state is not ready to proceed"));
+			return;
+		}
+#endif
+
+		if (Request.IsValid() && Request->OnProcessRequestComplete().IsBound())
+		{
+			Request->OnProcessRequestComplete().Unbind();
+		}
 	}
 
 	bool FHttpRetryTask::Start()
@@ -46,6 +72,18 @@ namespace AccelByte
 		{
 			TaskState = EAccelByteTaskState::Failed;
 			return false;
+		}
+
+		if (!Request->OnProcessRequestComplete().IsBound())
+		{
+			Request->OnProcessRequestComplete().BindThreadSafeSP(this, &FHttpRetryTask::OnProcessRequestComplete);
+		}
+
+		auto HttpRetrySchedulerPtr = HttpRetrySchedulerWPtr.Pin();
+		if (HttpRetrySchedulerPtr.IsValid())
+		{
+			BearerAuthRejectedHandle = HttpRetrySchedulerPtr->AddBearerAuthRejectedDelegate(
+				FHttpRetryScheduler::FBearerAuthRejected::CreateThreadSafeSP(AsShared(), &FHttpRetryTask::OnBearerAuthRejected));
 		}
 
 		Request->ProcessRequest();
@@ -72,11 +110,6 @@ namespace AccelByte
 		if (TaskState != EAccelByteTaskState::Paused)
 		{
 			TaskState = EAccelByteTaskState::Paused;
-			BearerAuthRejectedRefreshHandle = BearerAuthRejectedRefresh.Add(THandler<FString>::CreateLambda([&](const FString& AccessToken) 
-			{
-				BearerAuthUpdated(AccessToken);
-			}));
-			OnBearerAuthRejectDelegate.ExecuteIfBound();
 		}
 		PauseTime = TaskTime;
 
@@ -298,14 +331,41 @@ namespace AccelByte
 				if (IsRefreshable())
 				{
 					UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Denied and will refresh with Status Code %d"), StatusCode);
-					Result = Pause();
+					Result = TriggerBearerAuthRejected();
 				}
 #endif
 				return Result;
 			}));
 	}
 
-	void FHttpRetryTask::BearerAuthUpdated(const FString& AccessToken)
+	EAccelByteTaskState FHttpRetryTask::TriggerBearerAuthRejected()
+	{
+		auto Result = EAccelByteTaskState::Failed;
+		auto HttpRetrySchedulerPtr = HttpRetrySchedulerWPtr.Pin();
+		if (HttpRetrySchedulerPtr.IsValid())
+		{
+			HttpRetrySchedulerPtr->BearerAuthRejected();
+			Result = Pause();
+		}
+		return Result;
+	}
+
+	void FHttpRetryTask::OnBearerAuthRejected()
+	{
+		auto HttpRetrySchedulerPtr = HttpRetrySchedulerWPtr.Pin();
+		if (HttpRetrySchedulerPtr.IsValid())
+		{
+			if (BearerAuthRefreshedHandle.IsValid())
+			{
+				HttpRetrySchedulerPtr->RemoveBearerAuthRefreshedDelegate(BearerAuthRefreshedHandle);
+				BearerAuthRefreshedHandle.Reset();
+			}
+			BearerAuthRefreshedHandle = HttpRetrySchedulerPtr->AddBearerAuthRefreshedDelegate(
+				FHttpRetryScheduler::FBearerAuthRefreshed::CreateThreadSafeSP(AsShared(), &FHttpRetryTask::OnBearerAuthRefreshed));
+		}
+	}
+
+	void FHttpRetryTask::OnBearerAuthRefreshed(const FString& AccessToken)
 	{
 		bIsBeenRunFromPause = true;
 		if (TaskState != EAccelByteTaskState::Paused)
@@ -326,6 +386,12 @@ namespace AccelByte
 		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Bearer token updated, Task will be resumed"));
 		TaskState = EAccelByteTaskState::Retrying;
 		NextRetryTime = FPlatformTime::Seconds();
+		auto HttpRetrySchedulerPtr = HttpRetrySchedulerWPtr.Pin();
+		if (HttpRetrySchedulerPtr.IsValid())
+		{
+			HttpRetrySchedulerPtr->RemoveBearerAuthRefreshedDelegate(BearerAuthRefreshedHandle);
+			BearerAuthRefreshedHandle.Reset();
+		}
 	}
 
 	EAccelByteTaskState FHttpRetryTask::HandleDefaultRetry(int32 StatusCode)

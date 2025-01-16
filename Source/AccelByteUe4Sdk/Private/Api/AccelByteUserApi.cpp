@@ -107,15 +107,20 @@ FAccelByteTaskWPtr User::LoginWithUsername(FString const& Username
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
-    	
+    
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithPasswordCredentials(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError, Username](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError, Username](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, Username);
+				const auto UserPtr = UserWeak.Pin();
+				if(UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, Username);
+				}
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -166,14 +171,19 @@ FAccelByteTaskWPtr User::LoginWithUsernameV3(FString const& Username
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithPasswordCredentialsV3(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError, Username](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError, Username](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, Username);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, Username);
+				}
 			})
 		, OnError
 		, bRememberMe
@@ -209,16 +219,18 @@ FAccelByteTaskWPtr User::LoginWithUsernameV4(FString const& Username
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithPasswordCredentialsV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError, Username](FOauth2TokenV4 const& Result)
+			[UserWeak, OnSuccess, OnError, Username](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty()&&UserPtr.IsValid())
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]() 
+					UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
 						{
 							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
 						}), OnError, Username);
@@ -255,12 +267,17 @@ FAccelByteTaskWPtr User::LoginWithDeviceId(FVoidHandler const& OnSuccess
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithDeviceId(CredentialsRef->GetOAuthClientId()
 		, CredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess](FOauth2Token const& Result)
+			[UserWeak, OnSuccess](FOauth2Token const& Result)
 			{
-				OnLoginSuccess(OnSuccess, Result, Result.Platform_user_id); // Curry to general handler	
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->OnLoginSuccess(OnSuccess, Result, Result.Platform_user_id); // Curry to general handler
+				}
 			})
 		, OnError
 		, SettingsRef.IamServerUrl
@@ -277,17 +294,19 @@ FAccelByteTaskWPtr User::LoginWithDeviceIdV4(THandler<FAccelByteModelsLoginQueue
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithDeviceIdV4(CredentialsRef->GetOAuthClientId()
 		, CredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess](FOauth2TokenV4 const& Result)
+			[UserWeak, OnSuccess](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 				{
-					OnLoginSuccess(FVoidHandler::CreateLambda([OnSuccess]()
-						{
-							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
-						}), Result, Result.Platform_user_id); // Curry to general handler	
+					UserPtr->OnLoginSuccess(FVoidHandler::CreateLambda([OnSuccess]()
+					{
+						OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
+					}), Result, Result.Platform_user_id); // Curry to general handler	
 				}
 				else
 				{
@@ -356,19 +375,28 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformId(FString const& PlatformId
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, PlatformId
 		, PlatformToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
+				}
 			})
 		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			[UserWeak, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
-				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
+				}
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, bCreateHeadless
@@ -412,19 +440,21 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformIdV4(FString const& PlatformId
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithOtherPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, PlatformId
 		, PlatformToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
-						{
-							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
-						}), OnError, Result.Platform_user_id);
+					UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
+					{
+						OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
+					}), OnError, Result.Platform_user_id);
 				}
 				else
 				{
@@ -432,9 +462,13 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformIdV4(FString const& PlatformId
 				}
 			})
 		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			[UserWeak, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
-				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
+				}
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, bCreateHeadless
@@ -497,6 +531,7 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(FString const& NativePlat
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
@@ -504,14 +539,22 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(FString const& NativePlat
 		, SecondaryPlatform
 		, SecondaryPlatformToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
+				}
 			})
 		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			[UserWeak, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
-				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
+				}
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, SettingsRef.IamServerUrl);
@@ -571,6 +614,7 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePl
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithSimultaneousPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
@@ -578,14 +622,15 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePl
 		, SecondaryPlatform
 		, SecondaryPlatformToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]() 
-						{
-							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
-						}), OnError, Result.Platform_user_id);
+					UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]() 
+					{
+						OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
+					}), OnError, Result.Platform_user_id);
 				}
 				else
 				{
@@ -593,9 +638,13 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePl
 				}
 			})
 		, FOAuthErrorHandler::CreateLambda(
-			[this, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
+			[UserWeak, OnError](const int32 ErrorCode, FString const& ErrorMessage, const FErrorOAuthInfo& ErrorOauthInfo)
 			{
-				UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->UserCredentialsRef->SetErrorOAuth(ErrorOauthInfo);
+				}
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
 		, SettingsRef.IamServerUrl);
@@ -612,15 +661,20 @@ FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabled(FString const& MfaTo
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::VerifyAndRememberNewDevice(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
 		, Code
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				}
 			})
 		, OnError
 		, bRememberDevice
@@ -638,20 +692,22 @@ FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabledV4(FString const& Mfa
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::VerifyAndRememberNewDeviceV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
 		, Code
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
-						{
-							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
-						}), OnError, TEXT(""));
+					UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
+					{
+						OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
+					}), OnError, TEXT(""));
 				}
 				else
 				{
@@ -699,14 +755,19 @@ FAccelByteTaskWPtr User::LoginWithLauncher(FVoidHandler const& OnSuccess
 	}
 	else
 	{
+		UserWPtr UserWeak = AsShared();
 		return Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef->GetOAuthClientId()
 			, UserCredentialsRef->GetOAuthClientSecret()
 			, AuthorizationCode
 			, SettingsRef.RedirectURI
 			, THandler<FOauth2Token>::CreateLambda(
-				[this, OnSuccess, OnError](FOauth2Token const& Result)
+				[UserWeak, OnSuccess, OnError](FOauth2Token const& Result)
 				{
-					ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+					const auto UserPtr = UserWeak.Pin();
+					if (UserPtr.IsValid())
+					{
+						UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+					}
 				})
 			, OnError
 			, SettingsRef.IamServerUrl);
@@ -736,19 +797,21 @@ FAccelByteTaskWPtr User::LoginWithLauncherV4(THandler<FAccelByteModelsLoginQueue
 	}
 	else
 	{
+		UserWPtr UserWeak = AsShared();
 		return Oauth2::GetTokenWithAuthorizationCodeV4(UserCredentialsRef->GetOAuthClientId()
 			, UserCredentialsRef->GetOAuthClientSecret()
 			, AuthorizationCode
 			, SettingsRef.RedirectURI
 			, THandler<FOauth2TokenV4>::CreateLambda(
-				[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
+				[UserWeak, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 				{
-					if (Result.Ticket.IsEmpty())
+					const auto UserPtr = UserWeak.Pin();
+					if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 					{
-						ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
-							{
-								OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
-							}), OnError, TEXT(""));
+						UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
+						{
+							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
+						}), OnError, TEXT(""));
 					}
 					else
 					{
@@ -795,13 +858,18 @@ FAccelByteTaskWPtr User::LoginWithRefreshToken(FString const& RefreshToken
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithRefreshToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, RefreshToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, PlatformUserId, OnSuccess, OnError](FOauth2Token const& Result)
+			[UserWeak, PlatformUserId, OnSuccess, OnError](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, PlatformUserId);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, PlatformUserId);
+				}
 			})
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -824,18 +892,20 @@ FAccelByteTaskWPtr User::LoginWithRefreshTokenV4(THandler<FAccelByteModelsLoginQ
 
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithRefreshTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, InRefreshToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, PlatformUserId, OnSuccess, OnError](FOauth2TokenV4 const& Result)
+			[UserWeak, PlatformUserId, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
-						{
-							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
-						}), OnError, PlatformUserId);
+					UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
+					{
+						OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
+					}), OnError, PlatformUserId);
 				}
 				else
 				{
@@ -887,7 +957,7 @@ FAccelByteTaskWPtr User::RefreshPlatformToken(FString const& NativePlatform
 		, SettingsRef.IamServerUrl);
 }
 
-bool IsTokenExpired(FRefreshInfo RefreshInfo)
+bool User::IsTokenExpired(FRefreshInfo RefreshInfo)
 {
 	return RefreshInfo.Expiration <= FDateTime::UtcNow();
 }
@@ -910,9 +980,10 @@ FAccelByteTaskWPtr User::TryRelogin(FString const& PlatformUserID
 #if PLATFORM_WINDOWS || PLATFORM_LINUX || PLATFORM_MAC
 	FReport::Log(FString(__FUNCTION__));
 
+	UserWPtr UserWeak = AsShared();
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(PlatformUserID
 		, THandler<TPair<FString, FString>>::CreateLambda(
-			[this, PlatformUserID, OnSuccess, OnError](TPair<FString, FString> Pair)
+			[UserWeak, PlatformUserID, OnSuccess, OnError](TPair<FString, FString> Pair)
 			{
 				if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
 				{
@@ -928,13 +999,20 @@ FAccelByteTaskWPtr User::TryRelogin(FString const& PlatformUserID
 					return;
 				}
 
-				if (IsTokenExpired(RefreshInfo))
+				const auto UserPtr = UserWeak.Pin();
+				if (!UserPtr.IsValid())
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("User API already invalid, can't proccess futher."), FErrorOAuthInfo{});
+					return;
+				}
+
+				if (UserPtr->IsTokenExpired(RefreshInfo))
 				{
 					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenExpired), TEXT("Your previous login session is expired. Please login again."), FErrorOAuthInfo{});
 					return;
 				}
 
-				this->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError, PlatformUserID);
+				UserPtr->LoginWithRefreshToken(RefreshInfo.RefreshToken, OnSuccess, OnError, PlatformUserID);
 			})
 		, FAccelByteUtilities::GetCacheFilenameGeneralPurpose());
 #else
@@ -950,9 +1028,10 @@ FAccelByteTaskWPtr User::TryReloginV4(FString const& PlatformUserID
 #if PLATFORM_WINDOWS || PLATFORM_LINUX || PLATFORM_MAC
 	FReport::Log(FString(__FUNCTION__));
 
+	UserWPtr UserWeak = AsShared();
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(PlatformUserID
 		, THandler<TPair<FString, FString>>::CreateLambda(
-			[this, PlatformUserID, OnSuccess, OnError](TPair<FString, FString> Pair)
+			[UserWeak, PlatformUserID, OnSuccess, OnError](TPair<FString, FString> Pair)
 			{
 				if (Pair.Key.IsEmpty() || Pair.Value.IsEmpty())
 				{
@@ -968,13 +1047,20 @@ FAccelByteTaskWPtr User::TryReloginV4(FString const& PlatformUserID
 					return;
 				}
 
-				if (IsTokenExpired(RefreshInfo))
+				const auto UserPtr = UserWeak.Pin();
+				if (!UserPtr.IsValid())
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("User API already invalid, can't proccess futher."), FErrorOAuthInfo{});
+					return;
+				}
+
+				if (UserPtr->IsTokenExpired(RefreshInfo))
 				{
 					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::CachedTokenExpired), TEXT("Your previous login session is expired. Please login again."), FErrorOAuthInfo{});
 					return;
 				}
 
-				this->LoginWithRefreshTokenV4(OnSuccess, OnError, RefreshInfo.RefreshToken, PlatformUserID);
+				UserPtr->LoginWithRefreshTokenV4(OnSuccess, OnError, RefreshInfo.RefreshToken, PlatformUserID);
 			})
 		, FAccelByteUtilities::GetCacheFilenameGeneralPurpose());
 #else
@@ -1001,13 +1087,18 @@ FAccelByteTaskWPtr User::CreateHeadlessAccountAndLogin(FString const& LinkingTok
 		return nullptr;
 	}
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::CreateHeadlessAccountAndResponseToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, LinkingToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				}
 			})	
 		, OnError
 		, SettingsRef.IamServerUrl); 
@@ -1027,15 +1118,17 @@ FAccelByteTaskWPtr User::CreateHeadlessAccountAndLoginV4(THandler<FAccelByteMode
 		return nullptr;
 	}
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::CreateHeadlessAccountAndResponseTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, InLinkingToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
+					UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
 						{
 							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
 						}), OnError, TEXT(""));
@@ -1088,15 +1181,20 @@ FAccelByteTaskWPtr User::AuthenticationWithPlatformLinkAndLogin(FString const& U
 		return nullptr;
 	}
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::AuthenticationWithPlatformLink(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, LinkingToken
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				}
 			})		
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -1135,17 +1233,19 @@ FAccelByteTaskWPtr User::AuthenticationWithPlatformLinkAndLoginV4(FString const&
 		UE_LOG(LogAccelByte, Warning, TEXT("Username is plan to deprecated - please use email instead"));
 	}
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::AuthenticationWithPlatformLinkV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
 		, InLinkingToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
+					UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]()
 						{
 							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
 						}), OnError, TEXT(""));
@@ -1171,13 +1271,18 @@ FAccelByteTaskWPtr User::ClaimAccessToken(FString const& LoginTicket
 		return nullptr;
 	}
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GetTokenWithLoginTicket(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, LoginTicket
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, Result.Platform_user_id);
+				}
 			})		
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -1212,11 +1317,16 @@ void User::OnLoginSuccess(FVoidHandler const& OnSuccess
 	{
 		FAccelByteUtilities::SetAuthTrustId(Response.Auth_Trust_Id);
 	}
-	
+
+	UserWPtr UserWeak = AsShared();
 	FVoidHandler CallbackFunction = FVoidHandler::CreateLambda(
-		[this, OnSuccess, Response]()
+		[UserWeak, OnSuccess, Response]()
 		{
-			UserCredentialsRef->OnLoginSuccess().Broadcast(Response); // Sets auth tokens, inits qosScheduler
+			const auto UserPtr = UserWeak.Pin();
+			if (UserPtr.IsValid())
+			{
+				UserPtr->UserCredentialsRef->OnLoginSuccess().Broadcast(Response); // Sets auth tokens, inits qosScheduler
+			}
 			OnSuccess.ExecuteIfBound();
 		});
 
@@ -1263,10 +1373,11 @@ void User::SaveCachedTokenToLocalDataStorage(FString const& CachedTokenKey
 	FJsonObjectConverter::UStructToJsonObjectString(Info, SerializedInfo);
 
 	auto XorInfo = FAccelByteUtilities::XOR(SerializedInfo, FAccelByteUtilities::GetDeviceId());
+	UserWPtr UserWeak = AsShared();
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(CachedTokenKey
 		, XorInfo
 		, THandler<bool>::CreateLambda(
-			[this](bool IsSuccess)
+			[UserWeak](bool IsSuccess)
 			{
 				FReport::Log(FString::Printf(TEXT("[AccelByte] Save Refresh Token %s. "),
 					IsSuccess ? TEXT("Success") : TEXT("Fail")));
@@ -1311,11 +1422,16 @@ FAccelByteTaskWPtr User::LogoutV3(FVoidHandler const& OnSuccess, FErrorHandler c
 		{TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken())}
 	};
 
+	UserWPtr UserWeak = AsShared();
 	return HttpClient.Request(TEXT("POST"), Url, FString(), Headers, FVoidHandler::CreateLambda(
-			[OnSuccess, this]()
+			[OnSuccess, UserWeak]()
 			{
-				UserCredentialsRef->OnLogoutSuccess().Broadcast();
-				UserCredentialsRef->ForgetAll();
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->UserCredentialsRef->OnLogoutSuccess().Broadcast();
+					UserPtr->UserCredentialsRef->ForgetAll();
+				}
 				OnSuccess.ExecuteIfBound();
 			}), OnError);
 }
@@ -1490,11 +1606,16 @@ FAccelByteTaskWPtr User::GetData(THandler<FAccountUserData> const& OnSuccess
 		{"includeAllPlatforms", bIncludeAllPlatforms ? TEXT("true") : TEXT("false")}
 	}); 
 
+	UserWPtr UserWeak = AsShared();
 	const TDelegate<void(FAccountUserData const&)> OnSuccessHttpClient =
 		THandler<FAccountUserData>::CreateLambda(
-			[this, OnSuccess, OnError](const FAccountUserData& AccountUserData)
+			[UserWeak, OnSuccess, OnError](const FAccountUserData& AccountUserData)
 			{
-				UserCredentialsRef->SetAccountUserData(AccountUserData);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->UserCredentialsRef->SetAccountUserData(AccountUserData);
+				}
 				OnSuccess.ExecuteIfBound(AccountUserData);
 			});
 
@@ -2331,14 +2452,19 @@ FAccelByteTaskWPtr User::GetUserEligibleToPlay(THandler<bool> const& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	UserWPtr UserWeak = AsShared();
 	auto onItemInfoGot = THandler<FAccelByteModelsItemInfo>::CreateLambda(
-		[this, OnSuccess, OnError](FAccelByteModelsItemInfo const& itemInfoResult)
+		[UserWeak, OnSuccess, OnError](FAccelByteModelsItemInfo const& itemInfoResult)
 		{
 
 			TArray<FString> itemIds;
 			TArray<FString> skus = itemInfoResult.Features;
 			TArray<FString> appIds;
-			appIds.Init(*SettingsRef.AppId, 1);
+			const auto UserPtr = UserWeak.Pin();
+			if (UserPtr.IsValid())
+			{
+				appIds.Init(*UserPtr->SettingsRef.AppId, 1);
+			}
 
 			FRegistry::Entitlement.GetUserEntitlementOwnershipAny(itemIds, appIds, skus, THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([OnSuccess, OnError](FAccelByteModelsEntitlementOwnership ownership)
 			{
@@ -2637,11 +2763,12 @@ FAccelByteTaskWPtr User::VerifyToken(FVoidHandler const& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::VerifyToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, UserCredentialsRef->GetAccessToken()
 		, FVoidHandler::CreateLambda(
-			[this, OnSuccess, OnError]() 
+			[UserWeak, OnSuccess, OnError]() 
 			{
 				OnSuccess.ExecuteIfBound();
 			})
@@ -2681,10 +2808,11 @@ FAccelByteTaskWPtr User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType
 	FReport::Log(FString(__FUNCTION__)); 
 
 	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType); 	
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GenerateOneTimeCode(UserCredentialsRef->GetAccessToken()
 		, PlatformString
 		, THandler<FGeneratedOneTimeCode>::CreateLambda(
-			[this, OnSuccess, OnError](const FGeneratedOneTimeCode& Result) 
+			[UserWeak, OnSuccess, OnError](const FGeneratedOneTimeCode& Result) 
 			{
 				OnSuccess.ExecuteIfBound(Result);
 			})
@@ -2697,13 +2825,18 @@ FAccelByteTaskWPtr User::GenerateGameToken(FString const& Code
 	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GenerateGameToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Code
 		, THandler<FOauth2Token>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2Token const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2Token const& Result)
 			{
-				ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->ProcessLoginResponse(Result, OnSuccess, OnError, TEXT(""));
+				}
 			})		
 		, OnError
 		, SettingsRef.IamServerUrl);
@@ -2714,15 +2847,17 @@ FAccelByteTaskWPtr User::GenerateGameTokenV4(FString const& Code
 	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::GenerateGameTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Code
 		, THandler<FOauth2TokenV4>::CreateLambda(
-			[this, OnSuccess, OnError](FOauth2TokenV4 const& Result)
+			[UserWeak, OnSuccess, OnError](FOauth2TokenV4 const& Result)
 			{
-				if (Result.Ticket.IsEmpty())
+				const auto UserPtr = UserWeak.Pin();
+				if (Result.Ticket.IsEmpty() && UserPtr.IsValid())
 				{
-					ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]() 
+					UserPtr->ProcessLoginResponse(Result, FVoidHandler::CreateLambda([OnSuccess]() 
 						{
 							OnSuccess.ExecuteIfBound(FAccelByteModelsLoginQueueTicketInfo{});
 						}), OnError, TEXT(""));
@@ -2788,8 +2923,9 @@ FAccelByteTaskWPtr User::CheckUserAccountAvailability(FString const& DisplayName
 		{"field", *Field},
 		{"query", *DisplayName}
 	}); 
+	UserWPtr UserWeak = AsShared();
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess,
-		FErrorHandler::CreateLambda([this, OnError](int32 ErrorCode, FString const& ErrorMessage)
+		FErrorHandler::CreateLambda([UserWeak, OnError](int32 ErrorCode, FString const& ErrorMessage)
 		{
 			FString Message = ErrorMessage;
 			if (ErrorCode == EHttpResponseCodes::NotFound)
@@ -2828,11 +2964,16 @@ FAccelByteTaskWPtr User::RetrieveUserThirdPartyPlatformToken(EAccelBytePlatformT
 	const FString UserId = CredentialsRef->GetUserId();
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
+	UserWPtr UserWeak = AsShared();
 	return Oauth2::RetrieveUserThirdPartyPlatformToken(UserId, PlatformId, Authorization, 
 		THandler<FThirdPartyPlatformTokenData>::CreateLambda(
-			[this, PlatformId, OnSuccess](const FThirdPartyPlatformTokenData& Result)
+			[UserWeak, PlatformId, OnSuccess](const FThirdPartyPlatformTokenData& Result)
 			{
-				UserCredentialsRef->SetThridPartyPlatformTokenData(PlatformId, Result);
+				const auto UserPtr = UserWeak.Pin();
+				if (UserPtr.IsValid())
+				{
+					UserPtr->UserCredentialsRef->SetThridPartyPlatformTokenData(PlatformId, Result);
+				}
 				OnSuccess.ExecuteIfBound(Result); 
 			}), OnError);
 }

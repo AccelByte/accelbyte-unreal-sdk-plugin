@@ -74,11 +74,11 @@ FAccelByteTaskWPtr CloudSave::GetUserRecord(FString const& Key
 		, *CredentialsRef->GetNamespace()
 		, *CredentialsRef->GetUserId()
 		, *Key);
-
+	
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
-		[OnSuccess, this](FJsonObject const& JSONObject)
+		[OnSuccess](FJsonObject const& JSONObject)
 		{
-			const FAccelByteModelsUserRecord UserRecord = ConvertJsonToUserRecord(JSONObject);
+			const FAccelByteModelsUserRecord UserRecord = CloudSave::ConvertJsonToUserRecord(JSONObject);
 			OnSuccess.ExecuteIfBound(UserRecord);
 		});
 
@@ -106,9 +106,9 @@ FAccelByteTaskWPtr CloudSave::GetPublicUserRecord(FString const& Key
 		, *Key);
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
-		[OnSuccess, this](FJsonObject const& JSONObject)
+		[OnSuccess](FJsonObject const& JSONObject)
 		{
-			const FAccelByteModelsUserRecord UserRecord = ConvertJsonToUserRecord(JSONObject);
+			const FAccelByteModelsUserRecord UserRecord = CloudSave::ConvertJsonToUserRecord(JSONObject);
 			OnSuccess.ExecuteIfBound(UserRecord);
 		});
 
@@ -281,14 +281,16 @@ FAccelByteTaskWPtr CloudSave::ReplaceUserRecord(int TryAttempt
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
 
+	CloudSaveWPtr CloudSaveWeak = AsShared();
 	const auto OnErrorHttpClient = FErrorHandler::CreateLambda(
-		[this, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](const int32 Code, FString const& Message)
+		[CloudSaveWeak, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](const int32 Code, FString const& Message)
 		{
 			if (Code == static_cast<int32>(ErrorCodes::PlayerRecordPreconditionFailedException))
 			{
-				if (TryAttempt > 0)
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (TryAttempt > 0 && CloudSavePtr.IsValid())
 				{
-					ReplaceUserRecordCheckLatest(TryAttempt - 1
+					CloudSavePtr->ReplaceUserRecordCheckLatest(TryAttempt - 1
 						, Key
 						, Data.Value
 						, PayloadModifier
@@ -339,9 +341,10 @@ FAccelByteTaskWPtr CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 		return nullptr;
 	}
 
+	CloudSaveWPtr CloudSaveWeak = AsShared();
 	return GetUserRecord(Key
 		, THandler<FAccelByteModelsUserRecord>::CreateLambda(
-			[this, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsUserRecord LatestData)
+			[CloudSaveWeak, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsUserRecord LatestData)
 			{
 				if (PayloadModifier.IsBound())
 				{
@@ -352,23 +355,32 @@ FAccelByteTaskWPtr CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 				UpdateRequest.Value = LatestData.Value;
 				UpdateRequest.UpdatedAt = LatestData.UpdatedAt;
 
-				ReplaceUserRecord(TryAttempt
-					, Key
-					, UpdateRequest
-					, PayloadModifier
-					, OnSuccess
-					, OnError);
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (CloudSavePtr.IsValid())
+				{
+					CloudSavePtr->ReplaceUserRecord(TryAttempt
+						, Key
+						, UpdateRequest
+						, PayloadModifier
+						, OnSuccess
+						, OnError);
+				}
+				else
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+				}
 			})
 		, FErrorHandler::CreateLambda(
-			[this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, FString const& Message)
+			[CloudSaveWeak, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, FString const& Message)
 			{
-				if (Code == static_cast<int32>(ErrorCodes::PlayerRecordNotFoundException))
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (Code == static_cast<int32>(ErrorCodes::PlayerRecordNotFoundException) && CloudSavePtr.IsValid())
 				{
 					FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
 					UpdateRequest.Value = RecordRequest;
 					UpdateRequest.UpdatedAt = FDateTime::Now();
 
-					ReplaceUserRecord(TryAttempt
+					CloudSavePtr->ReplaceUserRecord(TryAttempt
 						, Key
 						, UpdateRequest
 						, PayloadModifier
@@ -420,14 +432,16 @@ FAccelByteTaskWPtr CloudSave::ReplaceUserRecord(int TryAttempt
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
 
+	CloudSaveWPtr CloudSaveWeak = AsShared();
 	const auto OnErrorHttpClient = FErrorHandler::CreateLambda(
-		[this, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](const int32 Code, FString const& Message)
+		[CloudSaveWeak, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](const int32 Code, FString const& Message)
 		{
 			if (Code == static_cast<int32>(ErrorCodes::PlayerRecordPreconditionFailedException))
 			{
-				if (TryAttempt > 0)
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (TryAttempt > 0 && CloudSavePtr.IsValid())
 				{
-					ReplaceUserRecordCheckLatest(TryAttempt - 1
+					CloudSavePtr->ReplaceUserRecordCheckLatest(TryAttempt - 1
 						, Key
 						, Data.Value
 						, PayloadModifier
@@ -478,9 +492,10 @@ FAccelByteTaskWPtr CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 		return nullptr;
 	}
 
+	CloudSaveWPtr CloudSaveWeak = AsShared();
 	return GetUserRecord(Key
 		, THandler<FAccelByteModelsUserRecord>::CreateLambda(
-			[this, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsUserRecord LatestData)
+			[CloudSaveWeak, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsUserRecord LatestData)
 			{
 				if (PayloadModifier.IsBound())
 				{
@@ -491,23 +506,32 @@ FAccelByteTaskWPtr CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt
 				UpdateRequest.Value = LatestData.Value;
 				UpdateRequest.UpdatedAt = LatestData.UpdatedAt;
 
-				ReplaceUserRecord(TryAttempt
-					, Key
-					, UpdateRequest
-					, PayloadModifier
-					, OnSuccess
-					, OnError);
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (CloudSavePtr.IsValid())
+				{
+					CloudSavePtr->ReplaceUserRecord(TryAttempt
+						, Key
+						, UpdateRequest
+						, PayloadModifier
+						, OnSuccess
+						, OnError);
+				}
+				else
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+				}
 			})
 		, FErrorHandler::CreateLambda(
-			[this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, FString const& Message)
+			[CloudSaveWeak, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, FString const& Message)
 			{
-				if (Code == static_cast<int32>(ErrorCodes::PlayerRecordNotFoundException))
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (Code == static_cast<int32>(ErrorCodes::PlayerRecordNotFoundException) && CloudSavePtr.IsValid())
 				{
 					FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
 					UpdateRequest.Value = RecordRequest;
 					UpdateRequest.UpdatedAt = FDateTime::Now();
 
-					ReplaceUserRecord(TryAttempt
+					CloudSavePtr->ReplaceUserRecord(TryAttempt
 						, Key
 						, UpdateRequest
 						, PayloadModifier
@@ -622,14 +646,16 @@ FAccelByteTaskWPtr CloudSave::ReplaceGameRecord(int TryAttempt
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
 
+	CloudSaveWPtr CloudSaveWeak = AsShared();
 	const auto OnErrorHttpClient = FErrorHandler::CreateLambda(
-		[this, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](const int32& Code, FString const& Message)
+		[CloudSaveWeak, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](const int32& Code, FString const& Message)
 		{
 			if (Code == static_cast<int32>(ErrorCodes::GameRecordPreconditionFailedException))
 			{
-				if (TryAttempt > 0)
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (TryAttempt > 0 && CloudSavePtr.IsValid())
 				{
-					ReplaceGameRecordCheckLatest(TryAttempt - 1
+					CloudSavePtr->ReplaceGameRecordCheckLatest(TryAttempt - 1
 						, Key
 						, Data.Value
 						, PayloadModifier
@@ -678,9 +704,10 @@ FAccelByteTaskWPtr CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt
 		return nullptr;
 	}
 
+	CloudSaveWPtr CloudSaveWeak = AsShared();
 	return GetGameRecord(Key
 		, THandler<FAccelByteModelsGameRecord>::CreateLambda(
-			[this, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsGameRecord LatestData)
+			[CloudSaveWeak, TryAttempt, PayloadModifier, Key, OnSuccess, OnError](FAccelByteModelsGameRecord LatestData)
 			{
 				if (PayloadModifier.IsBound())
 				{
@@ -691,23 +718,32 @@ FAccelByteTaskWPtr CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt
 				UpdateRequest.Value = LatestData.Value;
 				UpdateRequest.UpdatedAt = LatestData.UpdatedAt;
 
-				ReplaceGameRecord(TryAttempt
-					, Key
-					, UpdateRequest
-					, PayloadModifier
-					, OnSuccess
-					, OnError);
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (CloudSavePtr.IsValid())
+				{
+					CloudSavePtr->ReplaceGameRecord(TryAttempt
+						, Key
+						, UpdateRequest
+						, PayloadModifier
+						, OnSuccess
+						, OnError);
+				}
+				else
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+				}
 			})
 		, FErrorHandler::CreateLambda(
-			[this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, FString const& Message)
+			[CloudSaveWeak, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, FString const& Message)
 			{
-				if (Code == static_cast<int32>(ErrorCodes::GameRecordNotFoundException))
+				const auto CloudSavePtr = CloudSaveWeak.Pin();
+				if (Code == static_cast<int32>(ErrorCodes::GameRecordNotFoundException) && CloudSavePtr.IsValid())
 				{
 					FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
 					UpdateRequest.Value = RecordRequest;
 					UpdateRequest.UpdatedAt = FDateTime::Now();
 
-					ReplaceGameRecord(TryAttempt
+					CloudSavePtr->ReplaceGameRecord(TryAttempt
 						, Key
 						, UpdateRequest
 						, PayloadModifier

@@ -25,7 +25,7 @@ AccelByteWebSocket::AccelByteWebSocket(
 )
 	: ParentReconnectionStrategyRef(InParentReconnectionStrategyRef)
 	, PingDelay(PingDelay)
-	, ClientCreds(&Credentials)
+	, CredentialsWPtr(Credentials.AsShared())
 {
 	TickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByteWebSocket::Tick);
 	TickerDelegateHandle.Reset();
@@ -38,7 +38,7 @@ AccelByteWebSocket::AccelByteWebSocket(
 	)
 	: ParentReconnectionStrategyRef(InParentReconnectionStrategyRef)
 	, PingDelay(PingDelay)
-	, ServerCreds(&Credentials)
+	, CredentialsWPtr(Credentials.AsShared())
 {
 	TickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByteWebSocket::Tick);
 	TickerDelegateHandle.Reset();
@@ -58,9 +58,6 @@ AccelByteWebSocket::~AccelByteWebSocket()
 
 	TeardownTicker();
 	TeardownWebsocket();
-
-	ClientCreds = nullptr;
-	ServerCreds = nullptr;
 }
 
 void AccelByteWebSocket::SetupWebSocket()
@@ -82,13 +79,10 @@ void AccelByteWebSocket::SetupWebSocket()
 
 	TMap<FString, FString> Headers = UpgradeHeaders;
 
-	if (ClientCreds != nullptr)
+	auto CredentialsPtr = CredentialsWPtr.Pin();
+	if (CredentialsPtr.IsValid() && CredentialsPtr->GetSessionState() == BaseCredentials::ESessionState::Valid)
 	{
-		Headers.Add("Authorization", "Bearer " + ClientCreds->GetAccessToken());
-	}
-	else if (ServerCreds != nullptr)
-	{
-		Headers.Add("Authorization", "Bearer " + ServerCreds->GetClientAccessToken());
+		Headers.Add("Authorization", "Bearer " + CredentialsPtr->GetAccessToken());
 	}
 	WebSocket = WebSocketFactory->CreateWebSocket(Url, Protocol, Headers);
 
@@ -182,6 +176,13 @@ TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> AccelByteWebSocket::Create(
 void AccelByteWebSocket::Connect()
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	auto CredentialsPtr = CredentialsWPtr.Pin();
+	if (!CredentialsPtr.IsValid() || CredentialsPtr->GetSessionState() != BaseCredentials::ESessionState::Valid)
+	{
+		ConnectionErrorDelegate.Broadcast(TEXT("Failed to connect to WebSocket server due to invalid Credentials!"));
+		return;
+	}
 	
 	if(!WebSocket.IsValid())
 	{
@@ -219,6 +220,9 @@ void AccelByteWebSocket::Connect()
 void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 {
 	FReport::Log(FString(__FUNCTION__));
+	WsState = EWebSocketState::Closed;
+	WsEvents &= ~EWebSocketEvent::Connected; //Remove Connected event
+	WsEvents &= ~EWebSocketEvent::Connect; //Remove Connect event
 	
 	if(!ForceCleanup && (bConnectTriggered || !OnMessageQueue.IsEmpty() || !OnConnectionClosedQueue.IsEmpty() || !OnConnectionErrorQueue.IsEmpty() || !OnReconnectingAttemptQueue.IsEmpty() || !OnMassiveOutageQueue.IsEmpty()))
 	{

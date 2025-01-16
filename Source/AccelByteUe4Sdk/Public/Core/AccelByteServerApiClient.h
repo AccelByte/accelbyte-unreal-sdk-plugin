@@ -43,6 +43,7 @@ class ACCELBYTEUE4SDK_API FServerApiClient final
 {
 public:
 	FServerApiClient();
+	FServerApiClient(ServerSettingsPtr InServerSettings);
 	FServerApiClient(AccelByte::ServerCredentials& Credentials, AccelByte::FHttpRetryScheduler& Http);
 	~FServerApiClient();
 
@@ -50,39 +51,40 @@ public:
 
 	FServerCredentialsRef ServerCredentialsRef{};
 	FHttpRetrySchedulerRef HttpRef{};
+	ServerSettingsPtr ServerSettings{};
 
-	GameServerApi::ServerAchievement ServerAchievement{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerCloudSave ServerCloudSave{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerDSM ServerDSM{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerEcommerce ServerEcommerce{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerGameTelemetry ServerGameTelemetry{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerLobby ServerLobby{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerChat ServerChat{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerMatchmaking ServerMatchmaking{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerOauth2 ServerOauth2{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerQosManager ServerQosManager{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerSeasonPass ServerSeasonPass{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerSessionBrowser ServerSessionBrowser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerStatistic ServerStatistic{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerUGC ServerUGC{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerUser ServerUser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerSession ServerSession{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerDSHub ServerDSHub{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerAMS ServerAMS{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerMetricExporter ServerMetric{ FRegistry::ServerSettings };
-	GameServerApi::ServerPredefinedEvent ServerPredefinedEvent{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerGameStandardEvent ServerGameStandardEvent{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerBinaryCloudSave ServerBinaryCloudSave{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerChallenge ServerChallenge{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerInventory ServerInventory{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerAchievement ServerAchievement{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerCloudSave ServerCloudSave{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerDSM ServerDSM{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerEcommerce ServerEcommerce{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerGameTelemetry ServerGameTelemetry{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerLobby ServerLobby{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerChat ServerChat{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerMatchmaking ServerMatchmaking{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerOauth2 ServerOauth2{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerQosManager ServerQosManager{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerSeasonPass ServerSeasonPass{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerSessionBrowser ServerSessionBrowser{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerStatistic ServerStatistic{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerUGC ServerUGC{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerUser ServerUser{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerSession ServerSession{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerDSHub ServerDSHub{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerMatchmakingV2 ServerMatchmakingV2{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerAMS ServerAMS{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerMetricExporter ServerMetric{ *ServerSettings };
+	GameServerApi::ServerPredefinedEvent ServerPredefinedEvent{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerGameStandardEvent ServerGameStandardEvent{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerBinaryCloudSave ServerBinaryCloudSave{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerChallenge ServerChallenge{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
+	GameServerApi::ServerInventory ServerInventory{ *ServerCredentialsRef, *ServerSettings, *HttpRef };
 
 	template<typename T, typename... U>
 	T GetServerApi(U&&... Args)
 	{
 		static_assert(std::is_base_of<FServerApiBase, T>::value, "API class must be subclass of FServerApiBase");
 
-		return T(*ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef, Forward<U>(Args)...);
+		return T(*ServerCredentialsRef, *ServerSettings, *HttpRef, Forward<U>(Args)...);
 	}
 
 	template<typename T, typename... U>
@@ -91,7 +93,7 @@ public:
 		static_assert(std::is_base_of<FServerApiBase, T>::value, "API class must be subclass of FServerApiBase");
 
 		return MakeShared<T, ESPMode::ThreadSafe>(
-			*ServerCredentialsRef, FRegistry::ServerSettings,
+			*ServerCredentialsRef, *ServerSettings,
 			*HttpRef, Forward<U>(Args)...);
 	}
 };
