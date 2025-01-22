@@ -122,7 +122,7 @@ public:
 
 	void UpdateUpgradeHeaders(const FString& Key, const FString& Value);
 	
-	void Connect();
+	void Connect(bool ForceConnect = false);
 	void Disconnect(bool ForceCleanup = false);
 	bool IsConnected() const;
 	void SendPing() const;

@@ -64,7 +64,7 @@ void ServerAMS::Connect()
 		return;
 	}
 
-	WebSocket->Connect();
+	WebSocket->Connect(true);
 
 	UE_LOG(LogAccelByteAMS, Log, TEXT("Connecting to %s"), *AMSWatchdogUrl);
 }

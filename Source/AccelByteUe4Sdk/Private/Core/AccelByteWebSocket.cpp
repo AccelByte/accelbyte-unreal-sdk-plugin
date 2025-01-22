@@ -173,28 +173,28 @@ TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> AccelByteWebSocket::Create(
 	return Ws;
 }
 
-void AccelByteWebSocket::Connect()
+void AccelByteWebSocket::Connect(bool ForceConnect)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	auto CredentialsPtr = CredentialsWPtr.Pin();
-	if (!CredentialsPtr.IsValid() || CredentialsPtr->GetSessionState() != BaseCredentials::ESessionState::Valid)
+	if (!ForceConnect && (!CredentialsPtr.IsValid() || CredentialsPtr->GetSessionState() != BaseCredentials::ESessionState::Valid))
 	{
 		ConnectionErrorDelegate.Broadcast(TEXT("Failed to connect to WebSocket server due to invalid Credentials!"));
 		return;
 	}
 	
-	if(!WebSocket.IsValid())
+	if (!WebSocket.IsValid())
 	{
 		SetupWebSocket();
 	}
 
-	if(IsConnected())
+	if (IsConnected())
 	{
 		return;
 	}
 
-	if(bWasWsConnectionError)
+	if (bWasWsConnectionError)
 	{
 		SetupWebSocket();
 	}
@@ -557,6 +557,7 @@ void AccelByteWebSocket::TeardownWebsocket()
 		WebSocket->OnConnected().Clear();
 		WebSocket->OnConnectionError().Clear();
 		WebSocket->OnClosed().Clear();
+		WebSocket->Close();
 		WebSocket.Reset();
 	}
 }

@@ -521,5 +521,15 @@ FString GameTelemetry::GetTelemetryKey()
 	return TelemetryKey;
 }
 
+void GameTelemetry::ShouldCacheEnabled(bool bShouldCache)
+{
+	bCacheEvent = bShouldCache;
+}
+
+bool GameTelemetry::IsCacheEnabled() const
+{
+	return bCacheEvent;
+}
+
 } 
 }

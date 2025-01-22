@@ -85,6 +85,18 @@ public:
 	*/
 	bool IsCacheUpdated() { return bCacheUpdated; }
 
+	/**
+	 * @brief Set a flag to cache events.
+	 * 
+	 * @param bShouldCache boolean flag to cache events
+	 */
+	void ShouldCacheEnabled(bool bShouldCache);
+
+	/**
+	 * @brief Check the flag value to cache events
+	 */
+	bool IsCacheEnabled() const;
+
 private:
 	void SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 		, FVoidHandler const& OnSuccess

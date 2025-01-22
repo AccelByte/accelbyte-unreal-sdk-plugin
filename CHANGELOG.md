@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [26.6.0] (2025-01-22)
+
+
+### Features
+
+* **GameTelemetry:** add functionalities to set flag to enable or disable caching 
+
+
+### Bug Fixes
+
+* **websocket:** teardown should close the connection again to ensure the old websocket connection is closed 
+
+
+### Refactors
+
+* connecting to AMS will not use credentials 
+
 ## [26.5.0] (2025-01-16)
 
 
