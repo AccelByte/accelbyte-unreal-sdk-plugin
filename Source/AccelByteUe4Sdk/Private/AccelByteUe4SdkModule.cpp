@@ -23,6 +23,10 @@
 #include "GameServerApi/AccelByteServerAMSApi.h"
 #include "Engine/GameInstance.h"
 
+#if UE_SERVER
+#include "Core/AccelByteSignalHandler.h"
+#endif
+
 #if WITH_EDITOR
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"

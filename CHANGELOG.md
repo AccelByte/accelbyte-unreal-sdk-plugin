@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+### [26.6.1] (2025-01-24)
+
+
+### Bug Fixes
+
+* adding missing header file that cause compile error on Linux server build 
+
 ## [26.6.0] (2025-01-22)
 
 
