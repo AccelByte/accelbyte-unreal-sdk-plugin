@@ -132,6 +132,19 @@ public:
 	FAccelByteTaskWPtr BulkGetUserInfo(TArray<FString> const& UserIds
 		, THandler<FListBulkUserInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief This function will get user basic and public info using users email
+	 *
+	 * @param Request Request struct containing chosen users emails.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUsersData.
+	 * @param OnError This will be called when the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUsersInfoByEmails(FUsersEmailsRequest const& Request
+		, THandler<FAccountUsersData> const& OnSuccess
+		, FErrorHandler const& OnError);
 	
 private:
 	ServerUser() = delete;

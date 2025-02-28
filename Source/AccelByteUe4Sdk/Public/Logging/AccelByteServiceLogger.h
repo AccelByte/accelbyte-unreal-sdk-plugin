@@ -30,7 +30,7 @@ public:
 #define ACCELBYTE_SERVICE_LOGGING_HTTP_REQUEST(request) AccelByte::Logging::ServiceLogger::LogHttpRequest(request);
 #define ACCELBYTE_SERVICE_LOGGING_HTTP_RESPONSE(request,response,bFinished) AccelByte::Logging::ServiceLogger::LogHttpResponse(request,response,bFinished);
 #define ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_REQUEST(message) AccelByte::Logging::ServiceLogger::LogWebsocketRequest(message);
-#define ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_RESPONSE(message) AccelByte::Logging::ServiceLogger::LogWebsocketRequest(message);
+#define ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_RESPONSE(message) AccelByte::Logging::ServiceLogger::LogWebsocketResponse(message);
 } // namespace Logging
 } // namespace AccelByte
 

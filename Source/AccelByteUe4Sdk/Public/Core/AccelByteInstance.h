@@ -17,6 +17,8 @@ using namespace AccelByte;
 class ACCELBYTEUE4SDK_API FAccelByteInstance
 {
 public:
+	~FAccelByteInstance();
+	
 	FAccelByteInstance(Settings& InSettings, ServerSettings& InServerSettings, TSharedPtr<IAccelByteDataStorage> LocalDataStorage, FAccelByteTimeManagerPtr TimeManager, int32 RegistryIndex = 0);
 	FApiClientPtr GetApiClient(FString const& Key = TEXT("default"), bool bCreateIfNotFound = true);
 	SettingsPtr GetSettings();

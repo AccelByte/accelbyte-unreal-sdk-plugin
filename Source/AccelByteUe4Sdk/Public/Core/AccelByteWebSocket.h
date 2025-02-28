@@ -57,8 +57,8 @@ struct FMassiveOutageInfo
 
 ENUM_CLASS_FLAGS(EWebSocketEvent);
 
-class ACCELBYTEUE4SDK_API AccelByteWebSocket
-{
+class ACCELBYTEUE4SDK_API AccelByteWebSocket :
+    public TSharedFromThis<AccelByteWebSocket, ESPMode::ThreadSafe> {
 public:
 	// To be used by Lobby, Chat, and DSM. Using typedef is possible too.
 	DECLARE_DELEGATE_ThreeParams(FConnectionCloseDelegate, int32 /* StatusCode */, FString const& /* Reason */, bool /* WasClean */);

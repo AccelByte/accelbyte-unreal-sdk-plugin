@@ -27,7 +27,6 @@ AccelByteWebSocket::AccelByteWebSocket(
 	, PingDelay(PingDelay)
 	, CredentialsWPtr(Credentials.AsShared())
 {
-	TickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByteWebSocket::Tick);
 	TickerDelegateHandle.Reset();
 }
 
@@ -40,7 +39,6 @@ AccelByteWebSocket::AccelByteWebSocket(
 	, PingDelay(PingDelay)
 	, CredentialsWPtr(Credentials.AsShared())
 {
-	TickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByteWebSocket::Tick);
 	TickerDelegateHandle.Reset();
 }
 
@@ -203,6 +201,9 @@ void AccelByteWebSocket::Connect(bool ForceConnect)
 
 	TeardownTicker();
 
+	if (!TickerDelegate.IsBound()) {
+        TickerDelegate = FTickerDelegate::CreateThreadSafeSP(AsShared(), &AccelByteWebSocket::Tick);
+	}
 	TickerDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickerDelegate, TickPeriod);
 
 	FString HeaderString;

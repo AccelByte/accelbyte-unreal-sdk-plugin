@@ -339,14 +339,14 @@ FApiClient::~FApiClient()
 		else
 		{
 			FFunctionGraphTask::CreateAndDispatchWhenReady(
-				[Credentials = CredentialsRef, HttpScheduler = HttpRef]()
-				{
-					Credentials->Shutdown();
-					HttpScheduler->Shutdown();
-				}
+					[Credentials = CredentialsRef, HttpScheduler = HttpRef]()
+					{
+						Credentials->Shutdown();
+						HttpScheduler->Shutdown();
+					}
 				, TStatId()
-					, nullptr
-					, ENamedThreads::GameThread);
+				, nullptr
+				, ENamedThreads::GameThread);
 		}
 	}
 }
@@ -528,6 +528,11 @@ Api::BinaryCloudSaveWPtr FApiClient::GetBinaryCloudSaveApi() const
 Api::UGCWPtr FApiClient::GetUGCApi() const
 {
 	return UGCPtr;
+}
+
+Api::CloudStorageWPtr FApiClient::GetCloudStorageApi() const
+{
+	return CloudStoragePtr;
 }
 
 Api::InventoryWPtr FApiClient::GetInventoryApi() const

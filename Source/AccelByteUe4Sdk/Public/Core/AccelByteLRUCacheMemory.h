@@ -89,6 +89,14 @@ private:
 		return static_cast<const FAccelByteCacheWrapper<T>*>(InsertResult);
 	}
 
+	// Not applicable
+	inline bool ForcefullyPopulateChunkArrayFromStorage() override
+	{
+		return false;
+	}
+
+	inline TSharedPtr<T> GetTheValueFromChunkArray(int Index) override { return this->ArrayGetIndex(Index).Data; }
+
 	TSharedPtr<FAccelByteMemory<T>> Memory;
 	MemoryConstructionParameter MemoryParameter = { MemoryMethod::Dynamic, this->MAX_HTTP_LRU_CACHE_SIZE, this->MAX_HTTP_LRU_CACHE_COUNT };
 };

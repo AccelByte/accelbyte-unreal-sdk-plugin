@@ -75,6 +75,9 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 
 	FReport::LogHttpRequest(Request);
 
+	// AccelByteTracing track http request 
+	ACCELBYTE_SERVICE_LOGGING_HTTP_REQUEST(Request);
+
 	Task = MakeShared<FHttpRetryTask, ESPMode::ThreadSafe>
 		( Request
 		, CompleteDelegate
@@ -371,18 +374,11 @@ void FHttpRetryScheduler::Startup()
 	InitializeRateLimit();
 	
 	PollRetryHandle = FTickerAlias::GetCoreTicker().AddTicker(
-        FTickerDelegate::CreateLambda([this](float DeltaTime)
-        {
-            PollRetry(FPlatformTime::Seconds());
-
-            return true;
-        }),
+        FTickerDelegate::CreateThreadSafeSP(AsShared(), &FHttpRetryScheduler::Tick),
         0.2f);
 
 	State = EState::Initialized;
 	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler has been INITIALIZED"));
-
-	HttpCache.ClearCache();
 }
 
 void FHttpRetryScheduler::Shutdown()
@@ -430,6 +426,12 @@ void FHttpRetryScheduler::Shutdown()
 		// cancel unfinished http requests, so don't hinder the shutdown
 		TaskQueue.Empty();
 	}
+}
+
+bool FHttpRetryScheduler::Tick(float DeltaTime)
+{
+	PollRetry(FPlatformTime::Seconds());
+	return true;
 }
 
 }

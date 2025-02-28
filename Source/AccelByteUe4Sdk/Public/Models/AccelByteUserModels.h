@@ -1383,6 +1383,24 @@ struct ACCELBYTEUE4SDK_API FAccountUserPlatformInfosResponse
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUsersEmailsRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | FUsersEmailsRequest")
+	TArray<FString> ListEmailAddressRequest{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccountUsersData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | FAccountUsersData")
+	TArray<FAccountUserData> Data{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUpdatePasswordRequest
 {
 	GENERATED_BODY()

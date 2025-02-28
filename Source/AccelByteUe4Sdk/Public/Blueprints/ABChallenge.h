@@ -46,6 +46,18 @@ public:
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Challenge | Api")
+	void GetChallengeList(
+		FDModelsGetChallengesResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		TArray<FString> const& OptionalTags, // Note: This is supposed to be optional, but the blueprint can't parse an array when a default value is provided.
+		EAccelByteModelsChallengeSortBy SortBy = EAccelByteModelsChallengeSortBy::UPDATED_AT_DESC,
+		EAccelByteModelsChallengeStatus Status = EAccelByteModelsChallengeStatus::NONE,
+		int64 Offset = 0,
+		int64 Limit = 20,
+		FString Keyword = TEXT("")
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Challenge | Api")
 	void GetScheduledChallengeGoals(
 		FString const& ChallengeCode,
 		FDModelsGetScheduledChallengeGoalsResponse const& OnSuccess,

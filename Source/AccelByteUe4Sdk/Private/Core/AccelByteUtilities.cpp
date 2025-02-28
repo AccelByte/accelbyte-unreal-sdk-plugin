@@ -63,6 +63,12 @@ private:
 };
 #endif
 
+#if !PLATFORM_SWITCH
+static constexpr size_t ShaDigestLength = SHA_DIGEST_LENGTH;
+#else
+static constexpr size_t ShaDigestLength = 20;
+#endif
+
 class FConfigurationSettings
 {
 public:
@@ -1513,7 +1519,7 @@ FString FAccelByteUtilities::GenerateTOTP(int64 CurrentTime, const FString& Secr
 		((TimeStepCount & 0xFF00000000000000) >> 56);
 
 	// Convert the secret key to bytes
-	uint8 EncodeOutput[SHA_DIGEST_LENGTH];
+	uint8 EncodeOutput[ShaDigestLength];
 	TArray<uint8> SecretKeyBytes = FAccelByteArrayByteFStringConverter::FStringToBytes(SecretKey);
 
 	// Calculate the HMAC-SHA-1

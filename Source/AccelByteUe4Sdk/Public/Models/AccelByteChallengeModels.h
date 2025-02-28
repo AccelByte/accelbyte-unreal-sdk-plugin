@@ -290,6 +290,45 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeGoal
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeGoalResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	FString Code{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	FString ChallengeCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	FString Description{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	FString CreatedAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	FString UpdatedAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	bool IsActive{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	TArray<FString> Tags{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	TArray<FAccelByteModelsChallengeGoalRequirement> RequirementGroups{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
+	TArray<FAccelByteModelsChallengeGoalReward> Rewards{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeGoalMeta
 {
 	GENERATED_BODY()
@@ -592,4 +631,51 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeServerEvaluateProgressReques
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Server | Progress")
 	TArray<FString> UserIds{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsScheduleByGoalResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	FDateTime StartTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	FDateTime EndTime{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsScheduleResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	FDateTime StartTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	FDateTime EndTime{0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	TArray<FAccelByteModelsChallengeGoalResponse> Goals{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeListSchedulesResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	TArray<FAccelByteModelsScheduleResponse> Data{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	FAccelByteModelsPaging Paging{};
+
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeListScheduleByGoalResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	TArray<FAccelByteModelsScheduleByGoalResponse> Data{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Schedules")
+	FAccelByteModelsPaging Paging{};
 };

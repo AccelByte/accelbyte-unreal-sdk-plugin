@@ -47,6 +47,38 @@ void UABChallenge::GetChallenges(
 	}
 }
 
+void UABChallenge::GetChallengeList(
+	FDModelsGetChallengesResponse const& OnSuccess,
+	FDErrorHandler const& OnError,
+	TArray<FString> const& OptionalTags,
+	EAccelByteModelsChallengeSortBy SortBy,
+	EAccelByteModelsChallengeStatus Status,
+	int64 Offset,
+	int64 Limit,
+	FString Keyword)
+{
+	ApiClientPtr->Challenge.GetChallenges(
+		THandler<FAccelByteModelsGetChallengesResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsGetChallengesResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		),
+		SortBy,
+		Status,
+		Offset,
+		Limit,
+		Keyword,
+		OptionalTags
+	);
+}
+
 void UABChallenge::GetScheduledChallengeGoals(
 	FString const& ChallengeCode,
 	FDModelsGetScheduledChallengeGoalsResponse const& OnSuccess, 

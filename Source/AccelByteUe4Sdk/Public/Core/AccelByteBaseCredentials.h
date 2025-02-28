@@ -89,6 +89,8 @@ protected:
 
 	FDelegateHandleAlias PollRefreshTokenHandle;
 	FTokenRefreshedEvent TokenRefreshedEvent;
+
+	virtual bool Tick(float DeltaTime);
 };
 
 typedef TSharedRef<BaseCredentials, ESPMode::ThreadSafe> FBaseCredentialsRef;

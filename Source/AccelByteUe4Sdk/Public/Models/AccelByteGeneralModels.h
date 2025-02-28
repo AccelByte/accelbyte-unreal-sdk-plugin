@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Interfaces/IHttpRequest.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "AccelByteGeneralModels.generated.h"
 
 UENUM(BlueprintType)
@@ -170,3 +171,111 @@ struct ACCELBYTEUE4SDK_API FTTLConfig
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | TTLConfig")
 	FDateTime Expires_At{0};
 };
+
+class FAccelByteHttpResponseConstructable : public IHttpResponse
+{
+private:
+	int32 ResponseCode{};
+
+	TArray<uint8> RawContent{};
+
+	TArray<FString> CombinedHeaders; // key: value
+
+	const FString EffectiveURL = TEXT("");
+
+	FString URL{};
+
+public:
+	
+	virtual int32 GetResponseCode() const override
+	{
+		return ResponseCode;
+	}
+
+	void SetResponseCode(int32 InResponseCode)
+	{
+		ResponseCode = InResponseCode;
+	}
+
+	virtual FString GetContentAsString() const override
+	{
+		FUTF8ToTCHAR TCHARData(reinterpret_cast<const ANSICHAR*>(RawContent.GetData()), RawContent.Num());
+		return FString(TCHARData.Length(), TCHARData.Get());
+	}
+
+	void SetPayload(const TArray<uint8>& Input)
+	{
+		RawContent = Input;
+	}
+
+	virtual FString GetURL() const override
+	{
+		return URL;
+	}
+
+	void SetURL(const FString& Input)
+	{
+		URL = Input;
+	}
+
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
+	virtual const FString& GetEffectiveURL() const override
+	{
+		return EffectiveURL;
+	}
+
+	virtual EHttpRequestStatus::Type GetStatus() const override
+	{
+		return EHttpRequestStatus::Processing;
+	}
+
+	virtual EHttpFailureReason GetFailureReason() const override
+	{
+		return EHttpFailureReason::TimedOut;
+	}
+#endif
+
+	virtual FString GetURLParameter(const FString& ParameterName) const override { return ""; }
+
+	virtual FString GetHeader(const FString& HeaderName) const override
+	{
+		for (const auto& HeaderKeyValue : CombinedHeaders)
+		{
+			if (HeaderKeyValue.Contains(HeaderName))
+			{
+				FString Copy = HeaderKeyValue;
+				FString Key = "";
+				FString Value = "";
+				Copy.Split(":", &Key, &Value);
+				
+				return Value.TrimStartAndEnd();
+			}
+		}
+
+		return "";
+	}
+
+	virtual TArray<FString> GetAllHeaders() const override
+	{
+		return CombinedHeaders;
+	}
+
+	void SetHeaders(const TArray<FString>& Input) { CombinedHeaders = Input; }
+
+	virtual FString GetContentType() const override { return GetHeader(TEXT("Content-Type")); }
+
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+	virtual uint64 GetContentLength() const override
+#else
+	virtual int32 GetContentLength() const override
+#endif
+	{
+		return RawContent.Num();
+	}
+
+	virtual const TArray<uint8>& GetContent() const override
+	{
+		return RawContent;
+	}
+};
+

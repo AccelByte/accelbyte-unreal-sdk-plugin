@@ -14,6 +14,8 @@
 #include "Models/AccelByteQosModels.h"
 #include "Templates/SharedPointer.h"
 
+#define ACCELBYTE_MAX_PING 9999.0
+
 namespace AccelByte
 {
 namespace Api

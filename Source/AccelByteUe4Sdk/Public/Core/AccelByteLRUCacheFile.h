@@ -74,6 +74,7 @@ private:
 
 	FString ConvertKeyToFilename(const FName& Key) { return ConvertKeyToFilename(Key.ToString()); }
 
+#pragma region OVERRIDE
 	/**
 	* @brief Get All files from data storage binary class directory
 	* delete each file with specified prefix & suffix
@@ -171,6 +172,62 @@ private:
 		return &DerivedChunkArray[Index];
 	}
 
+	bool ForcefullyPopulateChunkArrayFromStorage() override
+	{
+		this->ArraySetEmpty();
+		this->DLLSetEmpty();
+
+		FDirectoryPath Directory = DataStorage.GetAbsoluteFileDirectory();
+		FString AbsoluteDirPath = Directory.Path;
+		TArray<FString> Files;
+		IFileManager::Get().FindFiles(Files, *AbsoluteDirPath, *EXTENSION_CACHE_NAME);
+
+		for (int i = 0; i < Files.Num(); i++)
+		{
+			if (!Files[i].Contains(PREFIX_CACHE_NAME))
+			{
+				continue;
+			}
+			FString AbsFilePath = AbsoluteDirPath + Files[i];
+
+			TArray<uint8> ArrayByte;
+			bool bIsOK = FFileHelper::LoadFileToArray(ArrayByte, *AbsFilePath);
+			if (!bIsOK || ArrayByte.Num() == 0)
+			{
+				continue;
+			}
+
+			FString StringValue = FAccelByteArrayByteFStringConverter::BytesToFString(ArrayByte, false);
+
+			if (StringValue.IsEmpty())
+			{
+				continue;
+			}
+
+			TSharedPtr<T> Output = FromFString(StringValue);
+			if (!Output.IsValid())
+			{
+				continue;
+			}
+			const size_t Size = FAccelByteLRUCache<T>::GetRequiredSize(Output.Get());
+			FString Key = Files[i];//relative path
+			Key.RemoveFromStart(PREFIX_CACHE_NAME);
+			Key.RemoveFromEnd(EXTENSION_CACHE_NAME);
+			Key = FGenericPlatformHttp::UrlDecode(Key);
+			if (Key.IsEmpty())
+			{
+				continue;
+			}
+			FAccelByteCacheWrapper<T> Result{ FName(Key), nullptr, Size };
+			int Index = DerivedChunkArray.Add(Result);
+			this->ArrayAdd(&DerivedChunkArray[Index]);
+			this->DLLAddHead(DerivedChunkArray[Index]);
+		}
+
+		return true;
+	}
+#pragma endregion
+
 	inline bool InsertPrerequisiteOkay() 
 	{
 		if (CurrentFileCount >= MaxFileCount)
@@ -191,6 +248,11 @@ private:
 	{
 		FAccelByteCacheWrapper<T>& ChunkInfo = this->ArrayGetIndex(Index);
 		FString Key = ChunkInfo.Key.ToString();
+
+		if (ChunkInfo.Data.IsValid())
+		{
+			return ChunkInfo.Data;
+		}
 
 		TArray<uint8> ArrayByte;
 		auto AbsPath = CompleteFilenameToAbsolute(ConvertKeyToFilename(Key));

@@ -339,6 +339,10 @@ FPingResult FAccelByteUdpPingAsync::PingResponsesToResult(const TArray<FPingResp
 		{
 			PingResult.AverageRoundTrip /= PingResult.Received;
 		}
+		else
+		{
+			PingResult.Status = FPingResultStatus::Failure;
+		}
 	}
 	return PingResult;
 }

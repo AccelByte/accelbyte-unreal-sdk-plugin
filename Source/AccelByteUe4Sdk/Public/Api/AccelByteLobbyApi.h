@@ -1383,219 +1383,160 @@ public:
 	/**
 	 * @brief Set a trigger function when successfully connect to lobby.
 	 */
-	void SetConnectSuccessDelegate(FConnectSuccess const& OnConnectSuccess)
-	{
-		ConnectSuccess = OnConnectSuccess;
-	}
+	void SetConnectSuccessDelegate(FConnectSuccess const& OnConnectSuccess);
 
 	/**
 	 * @brief Set a trigger function when connection to lobby failed.
 	 */
-	void SetConnectFailedDelegate(FErrorHandler const& OnConnectError)
-	{
-		ConnectError = OnConnectError;
-	}
+	void SetConnectFailedDelegate(FErrorHandler const& OnConnectError);
 	
 	/**
 	 * @brief Set a trigger function when connection to lobby is disconnected.
 	 */
-	void SetDisconnectNotifDelegate(FDisconnectNotif const& OnDisconnectNotice)
-	{
-		DisconnectNotif = OnDisconnectNotice;
-	}
+	void SetDisconnectNotifDelegate(FDisconnectNotif const& OnDisconnectNotice);
 
 	/**
 	 * @brief Set a trigger function when connection is closed.
 	 */
-	void SetConnectionClosedDelegate(FConnectionClosed const& OnConnectionClosed)
-	{
-		ConnectionClosed = OnConnectionClosed;
-	}
+	void SetConnectionClosedDelegate(FConnectionClosed const& OnConnectionClosed);
 
 	/**
 	 * @brief Set a trigger function when connection is closed and reconnecting.
 	 */
-	void SetReconnectingDelegate(FConnectionClosed const& OnReconnecting)
-	{
-		Reconnecting = OnReconnecting;
-	}
+	void SetReconnectingDelegate(FConnectionClosed const& OnReconnecting);
 
 	/**
 	 * @brief Get a multicast delegate that will be triggered when an attempt to reconnect websocket has been done.
 	 */
-	FReconnectAttempted& OnReconnectAttemptedMulticastDelegate()
-	{
-		return ReconnectAttempted;
-	}
+	FReconnectAttempted& OnReconnectAttemptedMulticastDelegate();
 
 	/**
 	 * @brief Get a multicast delegate that will be triggered when connection is down & can't be reestablished. Longer than usual.
 	 */
-	FMassiveOutage& OnMassiveOutageMulticastDelegate()
-	{
-		return MassiveOutage;
-	}
+	FMassiveOutage& OnMassiveOutageMulticastDelegate();
 	
 	/**
 	 * @brief Set a trigger function when a party member leave from the party. This function is DEPRECATED
+	 * 
 	 * @param OnPartyLeaveNotice delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
 	 */
-	void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnPartyLeaveNotice)
-	{
-		PartyLeaveNotif = OnPartyLeaveNotice;
-	}
+	void SetPartyLeaveNotifDelegate(FPartyLeaveNotif const& OnPartyLeaveNotice);
 	
 	/**
 	 * @brief Set a trigger function when a party member leave from the party
 	 * 
 	 * @param OnPartyMemberLeaveNotice delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
 	 */
-	void SetPartyMemberLeaveNotifDelegate(FPartyMemberLeaveNotif const& OnPartyMemberLeaveNotice)
-	{
-		PartyMemberLeaveNotif = OnPartyMemberLeaveNotice;
-	}
+	void SetPartyMemberLeaveNotifDelegate(FPartyMemberLeaveNotif const& OnPartyMemberLeaveNotice);
 	
 	/**
 	 * @brief Set a trigger function when a party member reconnecting to the lobby
 	 * 
 	 * @param OnPartyMemberConnectNotif return models called FAccelByteModelsPartyMemberConnectionNotice
 	 */
-	void SetPartyMemberConnectNotifDelegate(FPartyMemberConnectNotif const& OnPartyMemberConnectNotif)
-	{
-		PartyMemberConnectNotif = OnPartyMemberConnectNotif;
-	}
+	void SetPartyMemberConnectNotifDelegate(FPartyMemberConnectNotif const& OnPartyMemberConnectNotif);
 	
 	/**
 	 * @brief Set a trigger function when a party member disconnect from lobby
+	 * 
 	 * @param OnPartyMemberDisconnectNotif return models called FAccelByteModelsPartyMemberConnectionNotice
 	 */
-	void SetPartyMemberDisconnectNotifDelegate(FPartyMemberDisconnectNotif const& OnPartyMemberDisconnectNotif)
-	{
-		PartyMemberDisconnectNotif = OnPartyMemberDisconnectNotif;
-	}
+	void SetPartyMemberDisconnectNotifDelegate(FPartyMemberDisconnectNotif const& OnPartyMemberDisconnectNotif);
 
 	/**
 	 * @brief Set a trigger function when other user is invited to party
+	 * 
 	 * @param OnPartyInviteNotif return models called FAccelByteModelsInvitationNotice
 	 */
-	void SetPartyInviteNotifDelegate(FPartyInviteNotif const& OnPartyInviteNotif)
-	{
-		PartyInviteNotif = OnPartyInviteNotif;
-	}
+	void SetPartyInviteNotifDelegate(FPartyInviteNotif const& OnPartyInviteNotif);
 	
 	/**
 	 * @brief Set a trigger function when receiving a party invite
+	 * 
 	 * @param OnInvitePartyGetInvitedNotice return models called FAccelByteModelsPartyGetInvitedNotice
 	 */
-	void SetPartyGetInvitedNotifDelegate(FPartyGetInvitedNotif const& OnInvitePartyGetInvitedNotice)
-	{
-		PartyGetInvitedNotif = OnInvitePartyGetInvitedNotice;
-	}
+	void SetPartyGetInvitedNotifDelegate(FPartyGetInvitedNotif const& OnInvitePartyGetInvitedNotice);
 	
 	/**
 	 * @brief Set a trigger function when a new member joins the party
+	 * 
 	 * @param OnInvitePartyJoinNotice return models called FAccelByteModelsPartyJoinNotice
 	 */
-	void SetPartyJoinNotifDelegate(FPartyJoinNotif const& OnInvitePartyJoinNotice)
-	{
-		PartyJoinNotif = OnInvitePartyJoinNotice;
-	}
+	void SetPartyJoinNotifDelegate(FPartyJoinNotif const& OnInvitePartyJoinNotice);
 
 	/**
 	 * @brief Set a trigger function when a party invitation is rejected
+	 * 
 	 * @param OnInvitePartyRejectNotice return models called FAccelByteModelsPartyRejectNotice
 	 */
-	void SetPartyInvitationRejectedNotifDelegate(FPartyRejectNotif const& OnInvitePartyRejectNotice)
-	{
-		PartyRejectNotif = OnInvitePartyRejectNotice;
-	}
+	void SetPartyInvitationRejectedNotifDelegate(FPartyRejectNotif const& OnInvitePartyRejectNotice);
 
 	/**
 	 * @brief Set a trigger function when kicked from party
+	 * 
 	 * @param OnInvitePartyKickedNotice return models called FAccelByteModelsGotKickedFromPartyNotice
 	 */
-	void SetPartyKickNotifDelegate(FPartyKickNotif const& OnInvitePartyKickedNotice)
-	{
-		PartyKickNotif = OnInvitePartyKickedNotice;
-	}
+	void SetPartyKickNotifDelegate(FPartyKickNotif const& OnInvitePartyKickedNotice);
 
 	/**
 	 * @brief Set a trigger function when party data is updated
+	 * 
 	 * @param OnPartyNotif return models called FAccelByteModelsPartyNotif
 	 */
-	void SetPartyNotifDelegate(FPartyNotif const& OnPartyNotif)
-	{
-		PartyNotif = OnPartyNotif;
-	}
+	void SetPartyNotifDelegate(FPartyNotif const& OnPartyNotif);
 
 	/**
 	 * @brief Set a trigger function when party data is updated
+	 * 
 	 * @param OnPersonalChatNotif return models called FAccelByteModelsPartyNotif
 	 */
-	void SetPrivateMessageNotifDelegate(FPersonalChatNotif const& OnPersonalChatNotif)
-	{
-		PersonalChatNotif = OnPersonalChatNotif;
-	};
+	void SetPrivateMessageNotifDelegate(FPersonalChatNotif const& OnPersonalChatNotif);
 
 	/**
 	 * @brief Set a trigger function when received a party chat (v1)
+	 * 
 	 * @param OnPersonalChatNotif return models called FAccelByteModelsPartyMessageNotice
 	 */
-	void SetPartyChatNotifDelegate(FPartyChatNotif const& OnPersonalChatNotif)
-	{
-		PartyChatNotif = OnPersonalChatNotif;
-	}
+	void SetPartyChatNotifDelegate(FPartyChatNotif const& OnPersonalChatNotif);
 
 	/**
 	 * @brief Set a trigger function when friends presence is updated
+	 * 
 	 * @param OnUserPresenceNotif return models called FAccelByteModelsUsersPresenceNotice
 	 */
-	void SetUserPresenceNotifDelegate(FFriendStatusNotif const& OnUserPresenceNotif)
-	{
-		FriendStatusNotif = OnUserPresenceNotif;
-	};
+	void SetUserPresenceNotifDelegate(FFriendStatusNotif const& OnUserPresenceNotif);
 
 	/**
 	 * @brief Set a trigger function when receiving a notification message
+	 * 
 	 * @param OnNotificationMessage return models called FAccelByteModelsNotificationMessage
 	 */
-	void SetMessageNotifDelegate(FMessageNotif const& OnNotificationMessage)
-	{
-		if (RemoveMessageNotifBroadcasterDelegate(NotificationMessageDelegateHandle))
-		{
-			NotificationMessageDelegateHandle.Reset();
-		}
+	void SetMessageNotifDelegate(FMessageNotif const& OnNotificationMessage);
 
-		NotificationMessageDelegateHandle = MessageNotifBroadcaster.AddLambda(
-			[OnNotificationMessage](FAccelByteModelsNotificationMessage const& Message)
-			{
-				OnNotificationMessage.ExecuteIfBound(Message);
-			});
-	}
+	/**
+	 * @brief Add a delegate when receiving a notification message
+	 *
+	 * @param OnNotificationMessage return models called FAccelByteModelsNotificationMessage
+	 */
+	FDelegateHandle AddMessageNotifDelegate(FMessageNotif const& OnNotificationMessage);
 
 	/**
 	 * @brief Set a trigger function when receiving a notification message
+	 * 
 	 * @param OnNotificationBroadcasterMessage return models called FAccelByteModelsNotificationMessage
 	 */
-	FDelegateHandle AddMessageNotifBroadcasterDelegate(FNotifBroadcaster const& OnNotificationBroadcasterMessage)
-	{
-		return MessageNotifBroadcaster.AddLambda([OnNotificationBroadcasterMessage](FAccelByteModelsNotificationMessage const& Message)
-			{
-				OnNotificationBroadcasterMessage.Broadcast(Message);
-			});
-	}
+	FDelegateHandle AddMessageNotifBroadcasterDelegate(FNotifBroadcaster const& OnNotificationBroadcasterMessage);
 
 	/**
 	 * @brief Remove a trigger function when receiving a notification message
+	 * 
 	 * @param OnNotificationBroadcasterDelegate Delegate handle to be removed
 	 */
-	bool RemoveMessageNotifBroadcasterDelegate(FDelegateHandle const& OnNotificationBroadcasterDelegate)
-	{
-		return MessageNotifBroadcaster.Remove(OnNotificationBroadcasterDelegate);
-	}
+	bool RemoveMessageNotifBroadcasterDelegate(FDelegateHandle const& OnNotificationBroadcasterDelegate);
 
 	/**
 	 * @brief Set a trigger function when receiving invite to a party (v2)
+	 * 
 	 * @param OnPartyInvitedNotif return models called FAccelByteModelsV2PartyInvitedEvent
 	 */
 	void SetV2PartyInvitedNotifDelegate(FV2PartyInvitedNotif const& OnPartyInvitedNotif)

@@ -39,6 +39,11 @@ namespace AccelByte
 			/// </summary>
 			void ClearCache();
 
+			/*
+			 * Find the cache & load it to memory. Please call it early when the game start to avoid heavy I/O in the middle of the game.
+			 */
+			bool RetrieveAndLoadCacheFileInfo();
+
 			/**
 			 * @brief To be called by CreateHttpResultHandler to obtain the CacheItem
 			 *

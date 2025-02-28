@@ -4,6 +4,12 @@
 
 #include "Core/AccelByteInstance.h"
 
+FAccelByteInstance::~FAccelByteInstance()
+{
+	ClearApiClient();
+	ClearServerApiClient();
+}
+
 FAccelByteInstance::FAccelByteInstance(
 	class Settings& InSettings
 	, class ServerSettings& InServerSettings

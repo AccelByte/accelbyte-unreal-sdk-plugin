@@ -19,7 +19,25 @@ BaseAnalytics::BaseAnalytics(Credentials& InCredentialsRef
 	, EventName(InEventName)
 {}
 
-void BaseAnalytics::SendEventData(FAccelByteModelsTelemetryBody Payload, 
+void BaseAnalytics::SendEventData(const TSharedPtr<FJsonObject>& Payload, FVoidHandler const& OnSuccess, FErrorHandler const& OnError, FDateTime const& ClientTimestamp)
+{
+	if (Payload.IsValid())
+	{
+		FAccelByteModelsTelemetryBody Body;
+		Body.EventName = EventName;
+		Body.Payload = Payload;
+		Body.ClientTimestamp = ClientTimestamp;
+
+		Send(Body, OnSuccess, OnError);
+	}
+	else
+	{
+		OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::InvalidRequest, TEXT("Failed to convert UStruct to Json!"));
+		return;
+	}
+}
+
+void BaseAnalytics::SendEventData(FAccelByteModelsTelemetryBody Payload,
 									FVoidHandler const& OnSuccess, 
 									FErrorHandler const& OnError, 
 									FDateTime const& ClientTimestamp)

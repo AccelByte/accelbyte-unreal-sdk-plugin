@@ -19,6 +19,7 @@
 #include "Api/AccelByteGameStandardEventApi.h"
 #include "Api/AccelByteQos.h"
 #include "Api/AccelByteLobbyApi.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "GameServerApi/AccelByteServerAMSApi.h"
 #include "Engine/GameInstance.h"
@@ -451,8 +452,9 @@ void FAccelByteUe4SdkModule::OnPreExit()
 	AccelByte::FRegistry::PredefinedEventPtr->Shutdown();
 	AccelByte::FRegistry::GameStandardEventPtr->Shutdown();
 	AccelByte::FRegistry::CredentialsRef->Shutdown();
-	AccelByte::FRegistry::HttpRetryScheduler.GetHttpCache().ClearCache();
 	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();
+
+	FMultiRegistry::Shutdown();
 }
 
 FAccelByteInstancePtr FAccelByteUe4SdkModule::CreateAccelByteInstance()

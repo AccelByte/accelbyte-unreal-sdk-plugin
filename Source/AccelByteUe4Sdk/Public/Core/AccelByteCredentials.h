@@ -100,6 +100,9 @@ private:
 
 	void OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr);
 	void OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPtr HttpWPtr);
+
+	void OnRefreshTokenSuccessful(FOauth2Token const& Token);
+	void OnRefreshTokenFailed(int32 ErrorCode, FString const& ErrorMessage);
 };
 
 typedef TSharedRef<Credentials, ESPMode::ThreadSafe> FCredentialsRef;

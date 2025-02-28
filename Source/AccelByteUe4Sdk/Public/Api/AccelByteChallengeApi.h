@@ -35,6 +35,8 @@ public:
 	 * @param Status Determines how the returned challenge list should be filtered, defaults to EAccelByteModelsChallengeStatus::NONE
 	 * @param Offset Number of challenges to skip when returning the challenge list, defaults to 0
 	 * @param Limit Number of challenges that should be included in the challenge list, defaults to 20
+	 * @param Keyword String challenge code for the specific challenge list
+	 * @param Tags Array of tag strings used to filter resulting challenge list
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
@@ -43,7 +45,9 @@ public:
 		, EAccelByteModelsChallengeSortBy SortBy = EAccelByteModelsChallengeSortBy::UPDATED_AT_DESC
 		, EAccelByteModelsChallengeStatus Status = EAccelByteModelsChallengeStatus::NONE
 		, uint64 Offset = 0
-		, uint64 Limit = 20);
+		, uint64 Limit = 20
+		, FString Keyword = TEXT("")
+		, TArray<FString> const& Tags = {});
 
 	/**
 	 * @brief Send a request to get all scheduled goals for a specific challenge
@@ -174,6 +178,40 @@ public:
 	 */
 	FAccelByteTaskWPtr EvaluateChallengeProgress(FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Send a request to query the List schedules of given challenge
+	 * 
+	 * @param ChallengeCode String code for the challenge to check the schedules for
+	 * @param OnSuccess Delegate executed when request succeeds
+	 * @param OnError Delegate executed when request fails
+	 * @param DateTime Optional parameter to query schedules prior to specific date time
+	 * @param Offset Number of rewards to skip when returning reward list, defaults to 0
+	 * @param Limit Number of rewards to include when returning reward list, defaults to 20
+	 */
+	FAccelByteTaskWPtr ListSchedules(FString ChallengeCode
+		, THandler<FAccelByteModelsChallengeListSchedulesResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FDateTime const& DateTime = FDateTime::MinValue()
+		, uint64 Offset = 0
+		, uint64 Limit = 20);
+
+	/**
+	 * @brief Send a request to query the List schedules of given goal in a challenge
+	 *
+	 * @param ChallengeCode String code for the challenge to check the schedules for
+	 * @param GoalCode String code for the specific challenge goal to check the schedules for
+	 * @param OnSuccess Delegate executed when request succeeds
+	 * @param OnError Delegate executed when request fails
+	 * @param Offset Number of rewards to skip when returning reward list, defaults to 0
+	 * @param Limit Number of rewards to include when returning reward list, defaults to 20
+	 */
+	FAccelByteTaskWPtr ListScheduleByGoal(FString ChallengeCode
+		, FString GoalCode
+		, THandler<FAccelByteModelsChallengeListScheduleByGoalResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint64 Offset = 0
+		, uint64 Limit = 20);
 
 private:
 	Challenge() = delete;

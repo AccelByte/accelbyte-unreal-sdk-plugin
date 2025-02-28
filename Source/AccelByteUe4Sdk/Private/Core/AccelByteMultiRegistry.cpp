@@ -73,6 +73,7 @@ void FMultiRegistry::Shutdown()
 
 	AccelByteInstance->ClearApiClient();
 	AccelByteInstance->ClearServerApiClient();
+	AccelByteInstance.Reset();
 }
 
 bool FMultiRegistry::HasValidAccelByteInstance()

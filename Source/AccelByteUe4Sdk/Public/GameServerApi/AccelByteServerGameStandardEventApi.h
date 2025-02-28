@@ -25,6 +25,56 @@ class ACCELBYTEUE4SDK_API ServerGameStandardEvent : public ServerBaseAnalytics
 public:
 	ServerGameStandardEvent(ServerCredentials& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 
+	bool SendMissionStartedEventData(FAccelByteId const& UserId
+		, FMissionId const& MissionId
+		, FMissionInstanceId const& MissionInstanceId
+		, FAccelByteModelsMissionStartedOptPayload const& Optional = FAccelByteModelsMissionStartedOptPayload{});
+
+	bool SendMissionStepEndedEventData(FAccelByteUserId const& UserId
+		, FMissionId const& MissionId
+		, FMissionInstanceId const& MissionInstanceId
+		, FMissionStep const& MissionStep
+		, FMissionStepName const& MissionStepName = FMissionStepName{});
+
+	bool SendMissionEndedEventData(FAccelByteUserId const& UserId
+		, FMissionId const& MissionId
+		, FMissionInstanceId const& MissionInstanceId
+		, FMissionSuccess const& MissionSuccess
+		, FMissionOutcome const& MissionOutcome = FMissionOutcome{});
+
+	bool SendMatchInfoEventData(FMatchInfoId const& MatchInfoId
+		, FAccelByteModelsMatchInfoOptPayload const& Optional = FAccelByteModelsMatchInfoOptPayload{});
+
+	bool SendMatchInfoPlayerEventData(FAccelByteUserId const& UserId
+		, FMatchInfoId const& MatchInfoId
+		, FAccelByteModelsMatchInfoPlayerOptPayload const& Optional = FAccelByteModelsMatchInfoPlayerOptPayload{});
+
+	bool SendMatchInfoEndedEventData(FMatchInfoId const& MatchInfoId
+		, FMatchEndReason const& EndReason
+		, FAccelByteModelsMatchInfoEndedOptPayload const& Optional = FAccelByteModelsMatchInfoEndedOptPayload{});
+
+	bool SendPopupAppearEventData(FAccelByteUserId const& UserId
+		, FPopupEventId const& PopupId
+		, FAccelByteModelsPopupAppearOptPayload const& Optional = FAccelByteModelsPopupAppearOptPayload{});
+
+	bool SendEntityLeveledEventData(FEntityType const& EntityType
+		, FEntityId const& EntityId = FEntityId{}
+		, FAccelByteUserId const& UserId = FAccelByteUserId{}
+	, FAccelByteModelsEntityLeveledOptPayload const& Optional = FAccelByteModelsEntityLeveledOptPayload{});
+
+	bool SendEntityDeadEventData(FEntityType const& EntityType
+		, FEntityId const& EntityId = FEntityId{}
+		, FAccelByteUserId const& UserId = FAccelByteUserId{}
+	, FAccelByteModelsEntityDeadOptPayload const& Optional = FAccelByteModelsEntityDeadOptPayload{});
+
+	bool SendResourceFlowEventData(FAccelByteUserId const& UserId
+		, EAccelByteFlowType const& FlowType
+		, FAccelByteTransactionId const& TransactionId
+		, FTransactionType const& TransactionType
+		, FResourceName const& ResourceName
+		, FResourceAmount const& Amount
+		, FResourceEndBalance const& EndBalance);
+
 	/**
 	 * @brief Send/enqueue a single authorized telemetry data of a game standard event.
 	 * Server should be logged in.

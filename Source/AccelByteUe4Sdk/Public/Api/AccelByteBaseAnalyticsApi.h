@@ -23,6 +23,11 @@ class ACCELBYTEUE4SDK_API BaseAnalytics : public GameTelemetry
 protected:
 	BaseAnalytics(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, FString const& InEventName, bool bInCacheEvent, bool bInRetryOnFailed = false);
 
+	void SendEventData(const TSharedPtr<FJsonObject>& Payload,
+		FVoidHandler const& OnSuccess,
+		FErrorHandler const& OnError,
+		FDateTime const& ClientTimestamp = FDateTime::UtcNow());
+	
 	/**
 	 * @brief Send/enqueue a single authorized telemetry data of an event.
 	 * User should be logged in.
@@ -39,26 +44,14 @@ protected:
 						FDateTime const& ClientTimestamp = FDateTime::UtcNow())
 	{
 		const TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(Payload.Get());
-		if (JsonObject.IsValid())
-		{
-			FAccelByteModelsTelemetryBody Body;
-			Body.EventName = EventName;
-			Body.Payload = JsonObject;
-			Body.ClientTimestamp = ClientTimestamp;
-
-			Send(Body, OnSuccess, OnError);
-		}
-		else
-		{
-			OnError.ExecuteIfBound((int32)AccelByte::ErrorCodes::InvalidRequest, TEXT("Failed to convert UStruct to Json!"));
-			return;
-		}
+		SendEventData(JsonObject, OnSuccess, OnError, ClientTimestamp);
 	}
 
 	void SendEventData(FAccelByteModelsTelemetryBody Payload, 
 						FVoidHandler const& OnSuccess, 
 						FErrorHandler const& OnError, 
 						FDateTime const& ClientTimestamp = FDateTime::UtcNow());
+
 
 	const FString EventName;
 	using FApiBase::CredentialsRef;

@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [26.7.0] (2025-02-28)
+
+
+### Features
+
+* **apiClient:** add GetCloudStorageApi 
+* **challenge:** add ListSchedules and ListScheduleByGoal, deprecate FAccelByteModelsChallengeGoal::Schedule 
+* **challenge:** add new blueprint endpoint with tags parameter 
+* **challenge:** add tags parameter to filter the challenges 
+* **gameStandardEvent:** add new events 
+* **HTTPCache:** improvement to support actual CDN usage 
+* **LobbyApi:** add new functionality to AddMessageNotifDelegate 
+* **user:** replace and deprecate user data endpoints 
+
+
+### Bug Fixes
+
+* cleanup ApiRegistries and AccelByteInstance 
+* compile error against Nintendo Switch 
+* crash due to invalid object captured in the lambda delegates 
+* **EnhancedPresence:** change ClientTimestamp format from UnixTimestamp to ISO8601 
+* fixed websocket responses being labeled as requests by enhanced logging 
+* issue when socket is deleted in multithread whilst in middle of a tick execution 
+* move enhanced logging of requests to retry scheduler for completeness (was missing some requests before) 
+* **websocket:** teardown should close the connection again to ensure the old websocket connection is closed 
+
 ### [26.6.1] (2025-01-24)
 
 

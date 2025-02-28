@@ -191,7 +191,15 @@ namespace AccelByte
 				if (CheckCachedItemFreshness(Key) == EHttpCacheFreshness::FRESH)
 				{
 					Out = CachedItem->Request;
-					OutCachedResponse = CachedItem->Request->GetResponse();
+					
+					FAccelByteHttpResponseConstructable Response;
+					Response.SetPayload(CachedItem->SerializableRequestAndResponse.ResponsePayload);
+					Response.SetResponseCode(CachedItem->SerializableRequestAndResponse.ResponseCode);
+					Response.SetHeaders(CachedItem->SerializableRequestAndResponse.ResponseHeaders);
+					Response.SetURL(CachedItem->SerializableRequestAndResponse.RequestURL);
+
+					auto ResponsePtr = MakeShared<FAccelByteHttpResponseConstructable, ESPMode::ThreadSafe>(Response);
+					OutCachedResponse = ResponsePtr;
 
 					bRetrieved = true;
 					UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Valid cached response found, will return that instead of sending request"));
@@ -295,6 +303,16 @@ namespace AccelByte
 			{
 				CachedItemsInternal->Empty();
 			}
+		}
+
+		bool FAccelByteHttpCache::RetrieveAndLoadCacheFileInfo()
+		{
+			if (!CachedItemsInternal.IsValid())
+			{
+				return false;
+			}
+
+			return CachedItemsInternal->RetrieveAndLoadCacheFileInfo();
 		}
 
 		FAccelByteHttpCache::EHttpCacheFreshness FAccelByteHttpCache::CheckCachedItemFreshness(const FName& Key)

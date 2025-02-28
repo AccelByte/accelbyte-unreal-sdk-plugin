@@ -3710,6 +3710,134 @@ Lobby::~Lobby()
 
 TMap<FString, FString> Lobby::LobbyErrorMessages{};
 
+void Lobby::SetConnectSuccessDelegate(Lobby::FConnectSuccess const& OnConnectSuccess)
+{
+	ConnectSuccess = OnConnectSuccess;
+}
+
+void Lobby::SetConnectFailedDelegate(FErrorHandler const& OnConnectError)
+{
+	ConnectError = OnConnectError;
+}
+
+void Lobby::SetDisconnectNotifDelegate(Lobby::FDisconnectNotif const& OnDisconnectNotice)
+{
+	DisconnectNotif = OnDisconnectNotice;
+}
+
+void Lobby::SetConnectionClosedDelegate(Lobby::FConnectionClosed const& OnConnectionClosed)
+{
+	ConnectionClosed = OnConnectionClosed;
+}
+
+void Lobby::SetReconnectingDelegate(Lobby::FConnectionClosed const& OnReconnecting)
+{
+	Reconnecting = OnReconnecting;
+}
+
+Lobby::FReconnectAttempted& Lobby::OnReconnectAttemptedMulticastDelegate()
+{
+	return ReconnectAttempted;
+}
+
+Lobby::FMassiveOutage& Lobby::OnMassiveOutageMulticastDelegate()
+{
+	return MassiveOutage;
+}
+
+void Lobby::SetPartyLeaveNotifDelegate(Lobby::FPartyLeaveNotif const& OnPartyLeaveNotice)
+{
+	PartyLeaveNotif = OnPartyLeaveNotice;
+}
+
+void Lobby::SetPartyMemberLeaveNotifDelegate(Lobby::FPartyMemberLeaveNotif const& OnPartyMemberLeaveNotice)
+{
+	PartyMemberLeaveNotif = OnPartyMemberLeaveNotice;
+}
+
+void Lobby::SetPartyMemberConnectNotifDelegate(Lobby::FPartyMemberConnectNotif const& OnPartyMemberConnectNotif)
+{
+	PartyMemberConnectNotif = OnPartyMemberConnectNotif;
+}
+
+void Lobby::SetPartyMemberDisconnectNotifDelegate(Lobby::FPartyMemberDisconnectNotif const& OnPartyMemberDisconnectNotif)
+{
+	PartyMemberDisconnectNotif = OnPartyMemberDisconnectNotif;
+}
+
+void Lobby::SetPartyInviteNotifDelegate(Lobby::FPartyInviteNotif const& OnPartyInviteNotif)
+{
+	PartyInviteNotif = OnPartyInviteNotif;
+}
+
+void Lobby::SetPartyGetInvitedNotifDelegate(Lobby::FPartyGetInvitedNotif const& OnInvitePartyGetInvitedNotice)
+{
+	PartyGetInvitedNotif = OnInvitePartyGetInvitedNotice;
+}
+
+void Lobby::SetPartyJoinNotifDelegate(Lobby::FPartyJoinNotif const& OnInvitePartyJoinNotice)
+{
+	PartyJoinNotif = OnInvitePartyJoinNotice;
+}
+
+void Lobby::SetPartyInvitationRejectedNotifDelegate(Lobby::FPartyRejectNotif const& OnInvitePartyRejectNotice)
+{
+	PartyRejectNotif = OnInvitePartyRejectNotice;
+}
+
+void Lobby::SetPartyKickNotifDelegate(Lobby::FPartyKickNotif const& OnInvitePartyKickedNotice)
+{
+	PartyKickNotif = OnInvitePartyKickedNotice;
+}
+
+void Lobby::SetPartyNotifDelegate(Lobby::FPartyNotif const& OnPartyNotif)
+{
+	PartyNotif = OnPartyNotif;
+}
+
+void Lobby::SetPrivateMessageNotifDelegate(Lobby::FPersonalChatNotif const& OnPersonalChatNotif)
+{
+	PersonalChatNotif = OnPersonalChatNotif;
+}
+
+void Lobby::SetPartyChatNotifDelegate(Lobby::FPartyChatNotif const& OnPersonalChatNotif)
+{
+	PartyChatNotif = OnPersonalChatNotif;
+}
+
+void Lobby::SetUserPresenceNotifDelegate(Lobby::FFriendStatusNotif const& OnUserPresenceNotif)
+{
+	FriendStatusNotif = OnUserPresenceNotif;
+}
+
+void Lobby::SetMessageNotifDelegate(Lobby::FMessageNotif const& OnNotificationMessage)
+{
+	if (RemoveMessageNotifBroadcasterDelegate(NotificationMessageDelegateHandle))
+	{
+		NotificationMessageDelegateHandle.Reset();
+	}
+
+	NotificationMessageDelegateHandle = AddMessageNotifDelegate(OnNotificationMessage);
+}
+
+FDelegateHandle Lobby::AddMessageNotifDelegate(Lobby::FMessageNotif const& OnNotificationMessage)
+{
+	return MessageNotifBroadcaster.Add(OnNotificationMessage);
+}
+
+FDelegateHandle Lobby::AddMessageNotifBroadcasterDelegate(Lobby::FNotifBroadcaster const& OnNotificationBroadcasterMessage)
+{
+	return MessageNotifBroadcaster.AddLambda([OnNotificationBroadcasterMessage](FAccelByteModelsNotificationMessage const& Message)
+		{
+			OnNotificationBroadcasterMessage.Broadcast(Message);
+		});
+}
+
+bool Lobby::RemoveMessageNotifBroadcasterDelegate(FDelegateHandle const& OnNotificationBroadcasterDelegate)
+{
+	return MessageNotifBroadcaster.Remove(OnNotificationBroadcasterDelegate);
+}
+
 void Lobby::OnReceivedQosLatencies(FString const& Payload)
 {
 	if (!IsConnected())

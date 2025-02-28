@@ -38,7 +38,7 @@ protected:
 public:
 	typename TDoubleLinkedList<FAccelByteCacheWrapper<T>>::TDoubleLinkedListNode* DLLGetTail() { return ChunkDll.GetTail(); }
 	typename TDoubleLinkedList<FAccelByteCacheWrapper<T>>::TDoubleLinkedListNode* DLLGetHead() { return ChunkDll.GetHead(); }
-private:
+protected:
 	void DLLSetEmpty() { ChunkDll.Empty(); }
 	int DLLGetSize() { return ChunkDll.Num(); }
 	void DLLAddHead(FAccelByteCacheWrapper<T> NewHead) { ChunkDll.AddHead(NewHead); }
@@ -50,7 +50,6 @@ private:
 protected:
 	int ArrayGetNum() { return ChunkArray.Num(); }
 	FAccelByteCacheWrapper<T>& ArrayGetIndex(int Index) { return ChunkArray[Index]; }
-private:
 	void ArraySetEmpty() { ChunkArray.Empty(); }
 	void ArrayRemoveAt(int Index) { ChunkArray.RemoveAt(Index); }
 	void ArrayAdd(const FAccelByteCacheWrapper<T>* Entry)
@@ -94,6 +93,13 @@ protected:
 	*/
 	virtual inline const FAccelByteCacheWrapper<T>* InsertToCache(T& Item, const FName& Key) = 0;
 
+	/**
+	* @brief LRUMemory: Not applicable since memory has nothing to do with persistent storage
+	* @brief LRUFileCache: Retrieve the file (persistent storage) & set it to ChunkArray
+	* 
+	* @return Operation success or not
+	*/
+	virtual bool ForcefullyPopulateChunkArrayFromStorage() = 0;
 #pragma endregion
 
 /**
@@ -204,8 +210,7 @@ public:
 		return Find(Key);
 	}
 
-	//LRUCacheFile should override this function
-	virtual inline TSharedPtr<T> GetTheValueFromChunkArray(int Index){ return ArrayGetIndex(Index).Data; }
+	virtual inline TSharedPtr<T> GetTheValueFromChunkArray(int Index) = 0;
 
 	/**
 	* @brief Check the value only, does not affect the order of the linked list
@@ -215,6 +220,10 @@ public:
 	*/
 	inline TSharedPtr<T> Peek(const FName& Key) { return Find(Key, true); }
 
+	/*
+	 * The public facing function of the ForcefullyPopulateChunkArrayFromStorage()
+	 */
+	bool RetrieveAndLoadCacheFileInfo() { return ForcefullyPopulateChunkArrayFromStorage(); };
 protected:
 
 	/**

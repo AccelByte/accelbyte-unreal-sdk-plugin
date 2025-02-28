@@ -81,6 +81,8 @@ protected:
 
 	FString ParseUStructToJsonString(const TSharedPtr<FJsonObject>& JsonObject, bool bOmitBlankValues = false);
 
+	bool Tick(float DeltaTime);
+
 	static TMap<EHttpResponseCodes::Type, FHttpResponseCodeHandler> ResponseCodeDelegates;
 	TMap<FString /*Endpoint*/, FRequestBucket> RequestsBucket;
 	mutable FCriticalSection RequestBucketLock;

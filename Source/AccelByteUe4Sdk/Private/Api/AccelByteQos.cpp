@@ -152,12 +152,19 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 					int TotalLatencies = SuccessLatencies->Num() + FailedLatencies->Num();
 					if (Count == TotalLatencies)
 					{
-						Qos::Latencies.Empty();
-						Qos::Latencies.Append(*SuccessLatencies);
-
-						if (SuccessLatencies->Num() > 0)
+						TSharedRef<TArray<TPair<FString, float>>> ResultLatencies = MakeShared<TArray<TPair<FString, float>>>();
+						ResultLatencies->Append(*SuccessLatencies);
+						for (const FString& FailedLatency : *FailedLatencies)
 						{
-							OnSuccess.ExecuteIfBound(*SuccessLatencies);
+							ResultLatencies->Emplace(FailedLatency, ACCELBYTE_MAX_PING);
+						}
+						
+						Qos::Latencies.Empty();
+						Qos::Latencies.Append(*ResultLatencies);
+
+						if (ResultLatencies->Num() > 0)
+						{
+							OnSuccess.ExecuteIfBound(*ResultLatencies);
 							const auto QosApi = QosWeak.Pin();
 							if (QosApi.IsValid())
 							{

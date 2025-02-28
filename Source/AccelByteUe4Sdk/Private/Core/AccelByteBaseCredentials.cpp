@@ -72,4 +72,10 @@ namespace AccelByte
 		}
 		return TMap<FString, FString>{};
 	}
+
+	bool BaseCredentials::Tick(float DeltaTime)
+	{
+		PollRefreshToken(FPlatformTime::Seconds());
+		return true;
+	}
 }

@@ -92,11 +92,7 @@ void ServerCredentials::SetClientToken(const FString& InAccessToken, double Expi
 
 	if (!PollRefreshTokenHandle.IsValid()) {
 		PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
-			FTickerDelegate::CreateLambda([this](float DeltaTime)
-				{
-					PollRefreshToken(FPlatformTime::Seconds());
-					return true;
-				}),
+			FTickerDelegate::CreateThreadSafeSP(AsShared(), &ServerCredentials::Tick),
 			0.2f);
 	}
 }

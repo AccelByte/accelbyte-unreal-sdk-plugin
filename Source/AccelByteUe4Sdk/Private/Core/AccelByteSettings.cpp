@@ -177,13 +177,18 @@ void Settings::LoadSettings(const FString& SectionPath)
 	}
 
 	//If configuration value is empty/not found, assume the caching is disabled
-	FString bEnableHttpCacheString;
+	bool bEnableHttpCacheString = false;
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("bEnableHttpCache"), bEnableHttpCacheString, DefaultSection);
-	this->bEnableHttpCache = bEnableHttpCacheString.IsEmpty() ? false : bEnableHttpCacheString.ToBool();
+	this->bEnableHttpCache = bEnableHttpCacheString;
 
 	FString HttpCacheTypeString;
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("HttpCacheType"), HttpCacheTypeString, DefaultSection);
 	this->HttpCacheType = FAccelByteUtilities::GetUEnumValueFromString<EHttpCacheType>(HttpCacheTypeString);
+	// Currently non-Windows platform only able to cache in Memory
+	// Windows platform able to cache in both Memory & Storage
+#if !PLATFORM_WINDOWS
+	this->HttpCacheType = EHttpCacheType::MEMORY;
+#endif
 
 	FString PresenceBroadcastEventHeartbeatIntervalString;
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("PresenceBroadcastEventHeartbeatInterval"), PresenceBroadcastEventHeartbeatIntervalString, DefaultSection);

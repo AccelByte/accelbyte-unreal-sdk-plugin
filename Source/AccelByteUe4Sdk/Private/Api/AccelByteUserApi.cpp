@@ -2416,10 +2416,34 @@ FAccelByteTaskWPtr User::GetUserByOtherPlatformUserId(EAccelBytePlatformType Pla
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Get user by other platform user id V3 is deprecated & might be removed without notice - please use GetUserPublicInfoByOtherPlatformUserId (V4) instead!!"));
 
-	const FString PlatformId      = FAccelByteUtilities::GetPlatformString(PlatformType);
+	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s")
+		, *SettingsRef.IamServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *PlatformId
+		, *OtherPlatformUserId);
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::GetUserPublicInfoByOtherPlatformUserId(EAccelBytePlatformType PlatformType
+	, FString const& OtherPlatformUserId
+	, THandler<FAccountUserData> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
+
+	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/platforms/%s/users/%s")
 		, *SettingsRef.IamServerUrl
 		, *CredentialsRef->GetNamespace()
 		, *PlatformId
@@ -2489,6 +2513,9 @@ FAccelByteTaskWPtr User::BulkGetUserInfo(TArray<FString> const& UserIds
 	, FErrorHandler const& OnError) 
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("BulkGetUserInfo is deprecated & might be removed without notice - please use GetUserOtherPlatformBasicPublicInfo instead!!"));
 
 	if (UserIds.Num() <= 0)
 	{

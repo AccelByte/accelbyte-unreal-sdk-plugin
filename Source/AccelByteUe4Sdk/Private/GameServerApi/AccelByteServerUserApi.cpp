@@ -171,6 +171,9 @@ FAccelByteTaskWPtr ServerUser::BulkGetUserInfo(TArray<FString> const& UserIds
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("BulkGetUserInfo is deprecated & might be removed without notice - please use GetUsersInfoByEmails instead!!"));
+
 	TArray<FString> CopyUserIds = UserIds;
 	if (CopyUserIds.Num() <= 0)
 	{
@@ -204,6 +207,25 @@ FAccelByteTaskWPtr ServerUser::BulkGetUserInfo(TArray<FString> const& UserIds
 	};
 
 	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerUser::GetUsersInfoByEmails(FUsersEmailsRequest const& Request
+	, THandler<FAccountUsersData> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Request.ListEmailAddressRequest.Num() < 1)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("ListEmailAddressRequest cannot be empty."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/search/bulk")
+		, *ServerSettingsRef.IamServerUrl
+		, *ServerCredentialsRef->GetClientNamespace());
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
 	
 } // Namespace GameServerApi

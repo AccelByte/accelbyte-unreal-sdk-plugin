@@ -217,12 +217,7 @@ bool Credentials::IsComply() const
 void Credentials::Startup()
 {
 	PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
-        FTickerDelegate::CreateLambda([this](float DeltaTime)
-        {
-            PollRefreshToken(FPlatformTime::Seconds());
-
-            return true;
-        }),
+        FTickerDelegate::CreateThreadSafeSP(AsShared(), &Credentials::Tick),
         0.2f);
 	IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 	SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
@@ -302,55 +297,8 @@ void Credentials::PollRefreshToken(double CurrentTime)
 			RefreshTokenTask = Oauth2::GetTokenWithRefreshToken(ClientId
 				, ClientSecret
 				, AuthToken.Refresh_token
-				, THandler<FOauth2Token>::CreateLambda([this](const FOauth2Token& Result)
-				{
-					SetAuthToken(Result, FPlatformTime::Seconds());
-					if (RefreshTokenAdditionalActions.IsBound()) 
-					{
-						RefreshTokenAdditionalActions.Broadcast(true);
-						RefreshTokenAdditionalActions.Clear();
-					}
-					TokenRefreshedEvent.Broadcast(true);
-				})
-				, FErrorHandler::CreateLambda([this](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					BackoffCount++;
-
-					if (BackoffCount < MaxBackoffCount)
-					{
-						if (ExpireTime > MaxBackoffTime)
-						{
-							ExpireTime = MaxBackoffTime;
-						}
-						else if (ExpireTime <= MinBackoffTime)
-						{
-							ExpireTime = MinBackoffTime;
-						}
-						else
-						{
-							ExpireTime = ExpireTime * BackoffRatio;
-						}
-
-						RefreshBackoff = ExpireTime * BackoffRatio;
-						ScheduleRefreshToken(FPlatformTime::Seconds() + RefreshBackoff);
-					}
-
-					if (RefreshTokenAdditionalActions.IsBound())
-					{
-						RefreshTokenAdditionalActions.Broadcast(false);
-						RefreshTokenAdditionalActions.Clear();
-					}
-					
-					if (BackoffCount < MaxBackoffCount)
-					{
-						SessionState = ESessionState::Expired;
-					}
-					else
-					{
-						SessionState = ESessionState::Invalid;
-					}
-					TokenRefreshedEvent.Broadcast(false);
-				})
+				, THandler<FOauth2Token>::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenSuccessful)
+				, FErrorHandler::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenFailed)
 			);
 
 			SessionState = ESessionState::Refreshing;
@@ -456,6 +404,58 @@ void Credentials::OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPt
 
 	HttpPtr->ResumeBearerAuthRequest(UpdatedToken);
 }
+
+void Credentials::OnRefreshTokenSuccessful(FOauth2Token const& Token)
+{
+	SetAuthToken(Token, FPlatformTime::Seconds());
+	if (RefreshTokenAdditionalActions.IsBound())
+	{
+		RefreshTokenAdditionalActions.Broadcast(true);
+		RefreshTokenAdditionalActions.Clear();
+	}
+	TokenRefreshedEvent.Broadcast(true);
+}
+
+void Credentials::OnRefreshTokenFailed(int32 ErrorCode, FString const& ErrorMessage)
+{
+	BackoffCount++;
+
+	if (BackoffCount < MaxBackoffCount)
+	{
+		if (ExpireTime > MaxBackoffTime)
+		{
+			ExpireTime = MaxBackoffTime;
+		}
+		else if (ExpireTime <= MinBackoffTime)
+		{
+			ExpireTime = MinBackoffTime;
+		}
+		else
+		{
+			ExpireTime = ExpireTime * BackoffRatio;
+		}
+
+		RefreshBackoff = ExpireTime * BackoffRatio;
+		ScheduleRefreshToken(FPlatformTime::Seconds() + RefreshBackoff);
+	}
+
+	if (RefreshTokenAdditionalActions.IsBound())
+	{
+		RefreshTokenAdditionalActions.Broadcast(false);
+		RefreshTokenAdditionalActions.Clear();
+	}
+
+	if (BackoffCount < MaxBackoffCount)
+	{
+		SessionState = ESessionState::Expired;
+	}
+	else
+	{
+		SessionState = ESessionState::Invalid;
+	}
+	TokenRefreshedEvent.Broadcast(false);
+}
+
 } // Namespace AccelByte
 
 #include "Core/AccelByteRegistry.h"

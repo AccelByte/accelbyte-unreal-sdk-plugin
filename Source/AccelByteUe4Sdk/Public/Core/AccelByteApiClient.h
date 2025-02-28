@@ -487,6 +487,7 @@ public:
 #pragma region Storage
 	Api::CloudSaveWPtr GetCloudSaveApi() const;
 	Api::BinaryCloudSaveWPtr GetBinaryCloudSaveApi() const;
+	Api::CloudStorageWPtr GetCloudStorageApi() const;
 	Api::UGCWPtr GetUGCApi() const;
 	Api::InventoryWPtr GetInventoryApi() const;
 #pragma endregion

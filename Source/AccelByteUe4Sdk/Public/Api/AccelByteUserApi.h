@@ -1186,6 +1186,23 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief This function will get user by other platform user id it linked to.
+	 * Note : For Nintendo Login you have to add Environment ID Suffix behind platform id with PlatformID:EnvironmentID as format
+	 * e.g csg123jskansdk:dd1
+	 *
+	 * @param PlatformType Other platform type .
+	 * @param OtherPlatformUserId Targeted user's ID.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserPublicInfoByOtherPlatformUserId(EAccelBytePlatformType PlatformType
+		, FString const& OtherPlatformUserId
+		, THandler<FAccountUserData> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief This function for update user account info within the game.
 	 *
 	 * @param UpdateRequest The data you want to update. for DateOfBirth, the format is YYYY-MM-DD.
@@ -1275,7 +1292,8 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
-	 * @brief This function will get user(s) information like user's DisplayName.
+	 * @brief DEPRECATED: This function is no longer supported and will be removed in future releases.
+	 * This function will get user(s) information like user's DisplayName.
 	 *
 	 * @param UserIds List UserId(s) to get.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FListBulkUserInfo.
