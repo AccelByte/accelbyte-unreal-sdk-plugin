@@ -29,7 +29,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerUGC : public FServerApiBase
 {
 public:
-	ServerUGC(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler & InHttpRef);
+	ServerUGC(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler & InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerUGC();
 
 	/**

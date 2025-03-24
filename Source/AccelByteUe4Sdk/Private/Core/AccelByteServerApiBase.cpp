@@ -9,12 +9,18 @@ namespace AccelByte
 	
 FServerApiBase::FServerApiBase( ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: ServerCredentialsRef{InCredentialsRef.AsShared()}
 	, ServerSettingsRef{InSettingsRef}
 	, HttpRef{InHttpRef}
 	, HttpClient(InCredentialsRef, InSettingsRef, InHttpRef)
+	, ServerApiClient(InServerApiClient)
 {
 }
 
+void FServerApiBase::SetServerApiClient(TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+{
+	ServerApiClient = InServerApiClient;
+}
 }

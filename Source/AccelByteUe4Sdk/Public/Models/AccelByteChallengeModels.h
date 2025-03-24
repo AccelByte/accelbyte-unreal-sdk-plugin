@@ -562,12 +562,42 @@ enum class EAccelByteModelsChallengeGoalProgressStatus : uint8
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeClaimableUserReward
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | ClaimableUserReward")
+	FString GoalProgressionId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | ClaimableUserReward")
+	FString Id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | ClaimableUserReward")
+	FString ItemId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | ClaimableUserReward")
+	FString ItemName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | ClaimableUserReward")
+	int32 Qty{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | ClaimableUserReward")
+	EAccelByteModelsChallengeRewardStatus Status{ EAccelByteModelsChallengeRewardStatus::NONE };
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | ClaimableUserReward")
+	EAccelByteModelsChallengeRewardType Type{ EAccelByteModelsChallengeRewardType::NONE };
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeGoalProgress
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
 	FString ChallengeCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
+	FDateTime CompletedAt{ 0 };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
 	FAccelByteModelsChallengeGoal Goal{};
@@ -583,6 +613,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeGoalProgress
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
 	EAccelByteModelsChallengeGoalProgressStatus Status{EAccelByteModelsChallengeGoalProgressStatus::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
+	TArray<FAccelByteModelsChallengeClaimableUserReward> ToClaimRewards{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeProgressMetaPeriod
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress ")
+	FDateTime StartTime{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress ")
+	FDateTime EndTime{ 0 };
 };
 
 USTRUCT(BlueprintType)
@@ -607,6 +651,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeProgressMeta
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
 	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Progress")
+	FAccelByteModelsChallengeProgressMetaPeriod Period{};
 };
 
 USTRUCT(BlueprintType)

@@ -31,7 +31,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API UGC : public FApiBase, public TSharedFromThis<UGC, ESPMode::ThreadSafe>
 {
 public:
-	UGC(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	UGC(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~UGC();
 
 #pragma region UGC V1

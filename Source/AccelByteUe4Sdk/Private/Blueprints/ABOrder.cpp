@@ -4,7 +4,7 @@
 
 #include "Blueprints/ABOrder.h"
 #include "Api/AccelByteOrderApi.h"
-#include "Core/AccelByteRegistry.h"
+
 
 using namespace AccelByte;
 

@@ -25,7 +25,8 @@ class ACCELBYTEUE4SDK_API Group : public FApiBase, public TSharedFromThis<Group,
 public:
 	Group(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef);
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	
 	~Group();
 

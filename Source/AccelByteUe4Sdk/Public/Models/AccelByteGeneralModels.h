@@ -10,6 +10,31 @@
 #include "Runtime/Launch/Resources/Version.h"
 #include "AccelByteGeneralModels.generated.h"
 
+UENUM()
+enum class EAccelByteTaskState
+{
+	/** Task has completed execution. */
+	Completed,
+
+	/** Task execution is still pending. */
+	Pending,
+
+	/** Task execution is paused because Bearer Auth Rejected. */
+	Paused,
+
+	/** Task is executing. */
+	Running,
+
+	/** Task execution failed. */
+	Failed,
+
+	/** Task has been canceled. */
+	Cancelled,
+
+	/** Task has been canceled. */
+	Retrying,
+};
+
 UENUM(BlueprintType)
 enum class EAccelBytePaginationType : uint8
 {

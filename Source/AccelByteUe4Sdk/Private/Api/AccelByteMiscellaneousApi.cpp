@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteMiscellaneousApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
@@ -15,9 +15,10 @@ namespace Api
 
 Miscellaneous::Miscellaneous(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler & InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-	, TimeManager(InHttpRef)
+	, FHttpRetryScheduler & InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
+	, TimeManager(InHttpRef, InSettingsRef.BasicServerUrl)
 {}
 
 Miscellaneous::~Miscellaneous()

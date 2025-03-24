@@ -21,7 +21,22 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, FHttpRetryScheduler& InHttpRef
 	, bool bInCacheEvent
 	, bool bInRetryOnFailed)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, nullptr)
+	, CredentialsRef{InCredentialsRef.AsShared()}
+	, ShuttingDown(false)
+	, bCacheEvent(bInCacheEvent)
+	, bRetryOnFailed(bInRetryOnFailed)
+{
+	bCacheEvent = SettingsRef.bEnableGameTelemetryCache;
+}
+
+GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+	, bool bInCacheEvent
+	, bool bInRetryOnFailed)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, CredentialsRef{InCredentialsRef.AsShared()}
 	, ShuttingDown(false)
 	, bCacheEvent(bInCacheEvent)
@@ -257,6 +272,17 @@ void GameTelemetry::SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 	const FString Url = FString::Printf(TEXT("%s/v1/protected/events")
 		, *SettingsRef.GameTelemetryServerUrl);
 
+	FString ClientTimestamp;
+	const FApiClientPtr ApiClientPtr = ApiClient.Pin();
+	if(ApiClientPtr.IsValid())
+	{
+		FAccelByteTimeManagerPtr TimeManagerPtr = ApiClientPtr->GetTimeManager().Pin();
+		if(TimeManagerPtr.IsValid())
+		{
+			ClientTimestamp = TimeManagerPtr->GetCurrentServerTime().ToIso8601();
+		}
+	}
+
 	FString Content = TEXT("");
 	TArray<TSharedPtr<FJsonValue>> JsonArray;
 	for (auto const& Event : Events)
@@ -265,7 +291,7 @@ void GameTelemetry::SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 		JsonObject->SetStringField("EventNamespace", Event->EventNamespace);
 		JsonObject->SetStringField("EventName", Event->EventName);
 		JsonObject->SetObjectField("Payload", Event->Payload);
-		JsonObject->SetStringField("ClientTimestamp", FAccelByteUtilities::GetCurrentServerTime().ToIso8601());
+		JsonObject->SetStringField("ClientTimestamp", ClientTimestamp);
 		JsonObject->SetStringField("FlightId", FAccelByteUtilities::GetFlightId());
 		JsonObject->SetStringField("DeviceType", FAccelByteUtilities::GetPlatformName());
 

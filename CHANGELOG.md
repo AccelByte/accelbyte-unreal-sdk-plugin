@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [27.0.0] (2025-03-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* decommissioned ApiClass reference usage in ApiClient
+* decommissioned static FRegistry and FMultiregistry
+
+### Features
+
+* **achievement:** bulk unlock achievement API for both client & server 
+* **ams:** provide AMS drain notif multicast delegate since the existing delegate is only single delegate 
+* **ban:** schedule unban notification in Lobby when logging in 
+* **Challenge:** add ServerChallenge::GetUserChallengeProgress() function & add additional field to response model FAccelByteModelsChallengeGoalProgress & FAccelByteModelsChallengeProgressMeta 
+* **chat:** expose SenderPlatformId in chat message notification 
+* **ecommerce:** add notifications for entitlement updated, wallet status changed, and wallet balance changed 
+* **game profile:** add deprecation message to the game profile service 
+* **iap:** Implement Steam IAP sync by transaction API methods 
+* **session:** implement server API endpoint to update DS information for a game session 
+
+
+### Bug Fixes
+
+* **Session:** remove typo definition of the FAccelBtyeModelsGameSessionExcludedSession 
+
+
+### Refactors
+
+* decommissioned ApiClass reference usage in ApiClient 
+* decommissioned static FRegistry and FMultiregistry 
+
 ## [26.7.0] (2025-02-28)
 
 

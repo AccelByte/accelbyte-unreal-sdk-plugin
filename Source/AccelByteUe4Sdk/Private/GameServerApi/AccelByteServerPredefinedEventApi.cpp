@@ -11,8 +11,9 @@ namespace GameServerApi
 	
 ServerPredefinedEvent::ServerPredefinedEvent(ServerCredentials& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: ServerBaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, TEXT("PreDefinedEvent"))
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: ServerBaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, TEXT("PreDefinedEvent"), InServerApiClient)
 {
 }
 

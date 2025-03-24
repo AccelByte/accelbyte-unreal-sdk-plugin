@@ -23,7 +23,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerEcommerce : public FServerApiBase
 {
 public:
-	ServerEcommerce(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerEcommerce(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerEcommerce();
 
 	/**

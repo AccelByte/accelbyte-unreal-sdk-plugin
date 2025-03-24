@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "GameServerApi/AccelByteServerUGCApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteUtilities.h"
@@ -16,8 +16,9 @@ namespace GameServerApi
 
 ServerUGC::ServerUGC(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
 
 ServerUGC::~ServerUGC()

@@ -12,8 +12,9 @@ namespace Api
 
 Challenge::Challenge(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
 
 Challenge::~Challenge()

@@ -25,7 +25,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerCloudSave : public FServerApiBase
 {
 public:
-	ServerCloudSave(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerCloudSave(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerCloudSave();
 
 	/**

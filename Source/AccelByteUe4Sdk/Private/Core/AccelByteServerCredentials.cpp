@@ -3,11 +3,11 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteServerCredentials.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "AccelByteUe4SdkModule.h"
-#include "Core/AccelByteRegistry.h"
+
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -19,10 +19,12 @@ DEFINE_LOG_CATEGORY(LogAccelByteServerCredentials);
 namespace AccelByte
 {
 
-ServerCredentials::ServerCredentials()
+ServerCredentials::ServerCredentials(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl)
 	: AccessToken()
 	, Namespace()
 	, UserId()
+	, IamServerUrl(InIamServerUrl)
+	, Oauth(InHttpRef, InIamServerUrl)
 {
 }
 
@@ -127,7 +129,7 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 		case ESessionState::Valid:
 			if (GetRefreshTime() <= CurrentTime)
 			{
-				Oauth2::GetTokenWithClientCredentials(ClientId
+				Oauth.GetTokenWithClientCredentials(ClientId
 					, ClientSecret
 					, THandler<FOauth2Token>::CreateLambda(
 						[this, CurrentTime](const FOauth2Token& Result)
@@ -165,7 +167,7 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 							}
 							TokenRefreshedEvent.Broadcast(false);
 						})
-					, FRegistry::ServerSettings.IamServerUrl);
+					, IamServerUrl);
 
 				SessionState = ESessionState::Refreshing;
 			}
@@ -229,20 +231,3 @@ const FString& ServerCredentials::GetUserId() const
 }
 
 } // Namespace AccelByte
-
-#include "Core/AccelByteRegistry.h"
-
-FString UAccelByteBlueprintsServerCredentials::GetClientAccessToken()
-{
-	return FRegistry::ServerCredentials.GetClientAccessToken();
-}
-
-FString UAccelByteBlueprintsServerCredentials::GetClientNamespace()
-{
-	return FRegistry::ServerCredentials.GetClientNamespace();
-}
-
-FString UAccelByteBlueprintsServerCredentials::GetMatchId()
-{
-	return FRegistry::ServerCredentials.GetMatchId();
-}

@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Entitlement : public FApiBase, public TSharedFromThis<Entitlement, ESPMode::ThreadSafe>
 {
 public:
-	Entitlement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Entitlement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Entitlement();
 
 public:
@@ -594,6 +594,32 @@ public:
 	FAccelByteTaskWPtr QueryUserSubcriptions(EAccelBytePlatformSync PlatformType
 		, FAccelByteModelsThirdPartyUserSubscriptionQueryRequest const& Request
 		, THandler<FAccelByteModelsThirdPartyUserSubscriptions> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Synchronize Steam IAP using a specific order ID. Only to be used when Steam sync mode is set to TRANSACTION
+	 * in the admin portal.
+	 *
+	 * @param Request Data to attach to this request, such as Steam order ID
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncSteamIAPTransaction(FAccelByteModelsSyncSteamIAPTransactionRequest const& Request
+		, THandler<FAccelByteModelsSyncSteamIAPTransactionResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Synchronize abornal Steam IAP purchases. Such as when a user purchases an item from Steam, but has not
+	 * yet linked an AGS account. Only to be used when Steam sync mode is set to TRANSACTION in the admin portal.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncSteamAbnormalIAPTransaction(FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 	
 private:

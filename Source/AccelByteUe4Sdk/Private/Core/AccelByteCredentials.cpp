@@ -8,7 +8,7 @@
 #include "Models/AccelByteOauth2Models.h"
 #include "AccelByteUe4SdkModule.h"
 #include "Core/AccelByteReport.h"
-#include "Core/AccelByteRegistry.h"
+
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -20,14 +20,16 @@ DEFINE_LOG_CATEGORY(LogAccelByteCredentials);
 namespace AccelByte
 {
 
-Credentials::Credentials(FAccelByteMessagingSystem& MessagingRef)
+Credentials::Credentials(FHttpRetryScheduler& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& InIamServerUrl)
 	: AuthToken()
+	, Oauth(InHttpRef, InIamServerUrl)
 #if ENGINE_MAJOR_VERSION < 5
 	, MessagingSystemWPtr(MessagingRef.AsShared())
 #else
 	, MessagingSystemWPtr(MessagingRef.AsWeak())
 #endif
 	, RefreshTokenTask(nullptr)
+	, IamServerUrl(InIamServerUrl)
 {
 }
 
@@ -294,11 +296,12 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	case ESessionState::Valid:
 		if (RefreshTime <= CurrentTime)
 		{
-			RefreshTokenTask = Oauth2::GetTokenWithRefreshToken(ClientId
+			RefreshTokenTask = Oauth.GetTokenWithRefreshToken(ClientId
 				, ClientSecret
 				, AuthToken.Refresh_token
 				, THandler<FOauth2Token>::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenSuccessful)
 				, FErrorHandler::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenFailed)
+				, IamServerUrl
 			);
 
 			SessionState = ESessionState::Refreshing;
@@ -457,50 +460,3 @@ void Credentials::OnRefreshTokenFailed(int32 ErrorCode, FString const& ErrorMess
 }
 
 } // Namespace AccelByte
-
-#include "Core/AccelByteRegistry.h"
-
-FString UAccelByteBlueprintsCredentials::GetOAuthClientId()
-{
-	return FRegistry::Credentials.GetOAuthClientId();
-}
-
-FString UAccelByteBlueprintsCredentials::GetOAuthClientSecret()
-{
-	return FRegistry::Credentials.GetOAuthClientSecret();
-}
-
-FString UAccelByteBlueprintsCredentials::GetUserSessionId()
-{
-	return FRegistry::Credentials.GetAccessToken();
-}
-
-FString UAccelByteBlueprintsCredentials::GetUserId()
-{
-	return FRegistry::Credentials.GetUserId();
-}
-
-FString UAccelByteBlueprintsCredentials::GetUserDisplayName()
-{
-	return FRegistry::Credentials.GetUserDisplayName();
-}
-
-FString UAccelByteBlueprintsCredentials::GetUserNamespace()
-{
-	return FRegistry::Credentials.GetNamespace();
-}
-
-FString UAccelByteBlueprintsCredentials::GetUserEmailAddress()
-{
-	return FRegistry::Credentials.GetUserEmailAddress();
-}
-
-FString UAccelByteBlueprintsCredentials::GetUserName()
-{
-	return FRegistry::Credentials.GetUserName();
-}
-
-FString UAccelByteBlueprintsCredentials::GetUniqueDisplayName()
-{
-	return FRegistry::Credentials.GetUniqueDisplayName();
-}

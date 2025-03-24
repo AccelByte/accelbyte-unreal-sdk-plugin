@@ -27,7 +27,18 @@ typedef TSharedPtr< FAccelByteModelsTelemetryBody, ESPMode::ThreadSafe> Telemetr
 class ACCELBYTEUE4SDK_API GameTelemetry : public FApiBase, public TSharedFromThis<GameTelemetry, ESPMode::ThreadSafe>
 {
 public:
-	GameTelemetry(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, bool bInCacheEvent = true, bool bInRetryOnFailed = false);
+	GameTelemetry(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, bool bInCacheEvent = true
+		, bool bInRetryOnFailed = false);
+
+	GameTelemetry(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+		, bool bInCacheEvent = true
+		, bool bInRetryOnFailed = false);
 	virtual ~GameTelemetry();
 
 	/**

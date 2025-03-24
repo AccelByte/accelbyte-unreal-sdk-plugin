@@ -22,8 +22,9 @@ namespace GameServerApi
 ServerAMS::ServerAMS(
 	ServerCredentials const& InCredentialsRef,
 	ServerSettings const& InSettingsRef,
-	FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	FHttpRetryScheduler& InHttpRef,
+	TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
 	auto Strategy = FReconnectionStrategy::CreateLimitlessStrategy();
 	IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
@@ -186,6 +187,7 @@ void ServerAMS::OnMessage(const FString& Message)
 	if (MessageObject->HasTypedField<EJson::Object>(TEXT("drain")))
 	{
 		OnAMSDrainReceivedDelegate.ExecuteIfBound();
+		AMSDrainReceivedMulticastDelegate.Broadcast();
 	}
 }
 
@@ -215,6 +217,11 @@ void ServerAMS::SetOnAMSDrainReceivedDelegate(FOnAMSDrainReceived OnAMSDrain)
 	}
 
 	OnAMSDrainReceivedDelegate = OnAMSDrain;
+}
+
+FDelegateHandle ServerAMS::AddOnAMSDrainReceivedMulticastDelegate(FOnAMSDrainReceived OnAMSDrain)
+{
+	return AMSDrainReceivedMulticastDelegate.Add(OnAMSDrain);
 }
 
 void ServerAMS::SendReadyMessage()

@@ -3,6 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelBytePresenceBroadcastEventApi.h"
+
+#include "Core/AccelByteApiClient.h"
 #include "Core/AccelByteReport.h"
 
 namespace AccelByte
@@ -12,8 +14,9 @@ namespace Api
 
 PresenceBroadcastEvent::PresenceBroadcastEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, CredentialsRef{ InCredentialsRef.AsShared() }
 {
 	SetHeartbeatInterval(FTimespan::FromSeconds(SettingsRef.PresenceBroadcastEventHeartbeatInterval));
@@ -210,12 +213,32 @@ void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadc
 
 	const FString Url = FString::Printf(TEXT("%s/v1/protected/events")
 		, *SettingsRef.GameTelemetryServerUrl);
+		
+	FString ClientTimestamp;
+	const FApiClientPtr ApiClientPtr = ApiClient.Pin();
+	if (!ApiClientPtr.IsValid())
+	{
+		StopHeartbeat();
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ApiClient is not valid."));
+		return;
+	}
+
+	auto TimeManager = ApiClientPtr->GetTimeManager().Pin();
+
+	if (!TimeManager.IsValid())
+	{
+		StopHeartbeat();
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, TimeManager is not valid."));
+		return;
+	}
+
+	ClientTimestamp = TimeManager->GetCurrentServerTime().ToIso8601();
 
 	TSharedPtr<FJsonObject> JsonObjectPtr = MakeShared<FJsonObject>();
 	JsonObjectPtr->SetStringField("EventNamespace", EventNamespace);
 	JsonObjectPtr->SetStringField("EventName", EventName);
 	JsonObjectPtr->SetObjectField("Payload", FJsonObjectConverter::UStructToJsonObject(Events));
-	JsonObjectPtr->SetStringField("ClientTimestamp", FAccelByteUtilities::GetCurrentServerTime().ToIso8601());
+	JsonObjectPtr->SetStringField("ClientTimestamp", ClientTimestamp);
 	JsonObjectPtr->SetStringField("flightId", FAccelByteUtilities::GetFlightId());
 	JsonObjectPtr->SetStringField("DeviceType", FAccelByteUtilities::GetPlatformName());
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll);

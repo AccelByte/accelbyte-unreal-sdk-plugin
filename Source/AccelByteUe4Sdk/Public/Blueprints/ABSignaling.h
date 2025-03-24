@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteLobbyModels.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteApiClient.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABSignaling.generated.h"
 

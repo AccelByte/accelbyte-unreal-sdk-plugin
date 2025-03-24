@@ -5,13 +5,15 @@
 #include "Blueprints/AccelByteInstanceBlueprints.h"
 
 #include "AccelByteUe4SdkModule.h"
+#include "Blueprints/AccelByteBPServerApiClient.h"
 
 UAccelByteInstance::UAccelByteInstance()
 {}
 
 UAccelByteInstance::UAccelByteInstance(FAccelByteInstancePtr InAccelByteInstance)
 	: AccelByteInstance(InAccelByteInstance)
-{}
+{
+}
 
 void UAccelByteInstance::SetAccelByteInstance(FAccelByteInstancePtr InAccelByteInstance)
 {
@@ -35,6 +37,19 @@ UABApiClient* UAccelByteInstance::GetApiClient(FString const Key)
 	
 	UABApiClient* WrapperPtr = NewObject<UABApiClient>();
 	WrapperPtr->SetApiClient(AccelByteInstance->GetApiClient(Key));
+
+	return WrapperPtr;
+}
+
+UServerApiClient* UAccelByteInstance::GetServerApiClient(FString const Key)
+{
+	if(!AccelByteInstance.IsValid())
+	{
+		return nullptr;
+	}
+	
+	UServerApiClient* WrapperPtr = NewObject<UServerApiClient>();
+	WrapperPtr->SetServerApiClient(AccelByteInstance->GetServerApiClient(Key));
 
 	return WrapperPtr;
 }

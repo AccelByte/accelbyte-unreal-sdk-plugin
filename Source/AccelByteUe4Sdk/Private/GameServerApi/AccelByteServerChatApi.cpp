@@ -89,8 +89,9 @@ bool ConvertDateTimeFieldsFromUnixTimestamp(TSet<FString> const& InFieldNames
 
 ServerChat::ServerChat(ServerCredentials const& Credentials
 	, ServerSettings const& Settings
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(Credentials, Settings, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(Credentials, Settings, InHttpRef, InServerApiClient)
 {}
 
 ServerChat::~ServerChat()

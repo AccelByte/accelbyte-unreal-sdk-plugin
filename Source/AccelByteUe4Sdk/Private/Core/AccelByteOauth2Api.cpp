@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteOauth2Api.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
@@ -15,6 +15,15 @@ namespace AccelByte
 {
 namespace Api
 {
+
+Oauth2::Oauth2(FHttpRetryScheduler& InHttpRef)
+: HttpRef{InHttpRef}
+{}
+
+Oauth2::Oauth2(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl)
+	: HttpRef(InHttpRef)
+	, IamServerUrl(InIamServerUrl)
+{}
 
 FHttpRequestPtr Oauth2::ConstructTokenRequest(FString const& Url
 	, FString const& ClientId
@@ -89,7 +98,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithAuthorizationCode(FString const& ClientId
 		, TEXT("The API might be removed wihtout notice, so please use GetTokenWithAuthorizationCodeV3 instead!!"));
 
 	const FString Url = FString::Printf(TEXT("%s/oauth/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -100,7 +109,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithAuthorizationCode(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	
 FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentials(FString const& ClientId
@@ -110,7 +119,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentials(FString const& Client
 	, THandler<FOauth2Token> const& OnSuccess
 	, FErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	return GetTokenWithPasswordCredentials(ClientId
 		, ClientSecret
@@ -123,7 +133,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentials(FString const& Client
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			})
 		, IamUrl
-		, AdditionalHeaders);
+		, AdditionalHeaders
+		, DeviceId);
 }
 	
 FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentials(FString const& ClientId
@@ -133,28 +144,29 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentials(FString const& Client
 	, THandler<FOauth2Token> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__)
 		, TEXT("The API might be removed without notice, please use GetTokenWithPasswordCredentialsV3 instead!!"));
 	
 	const FString Url = FString::Printf(TEXT("%s/oauth/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{ TEXT("grant_type"), TEXT("password") },
 		{ TEXT("username"), FGenericPlatformHttp::UrlEncode(Username) },
 		{ TEXT("password"), FGenericPlatformHttp::UrlEncode(Password) },
-		{ TEXT("device_id"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId()) },
+		{ TEXT("device_id"), FGenericPlatformHttp::UrlEncode(DeviceId) },
 		{ TEXT("additionalData"), ConstructAdditionalData() },
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithClientCredentials(FString const& ClientId
@@ -167,7 +179,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithClientCredentials(FString const& ClientId
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -176,7 +188,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithClientCredentials(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithDeviceId(FString const& ClientId
@@ -185,7 +197,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithDeviceId(FString const& ClientId
 	, FErrorHandler const& OnError
 	, FString const& IamUrl
 	, bool bCreateHeadless
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	return GetTokenWithDeviceId(ClientId
 		, ClientSecret
@@ -197,7 +210,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithDeviceId(FString const& ClientId
 			})
 		, IamUrl
 		, bCreateHeadless
-		, AdditionalHeaders);
+		, AdditionalHeaders
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithDeviceId(FString const& ClientId
@@ -206,22 +220,23 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithDeviceId(FString const& ClientId
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
 	, bool bCreateHeadless
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/platforms/device/token?createHeadless=%s")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl, bCreateHeadless ? TEXT("true") : TEXT("false"));
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl, bCreateHeadless ? TEXT("true") : TEXT("false"));
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
-		{ TEXT("device_id"), *FGenericPlatformHttp::UrlEncode(*FAccelByteUtilities::GetDeviceId()) },
+		{ TEXT("device_id"), *FGenericPlatformHttp::UrlEncode(*DeviceId) },
 		{ TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false") },
 		{ TEXT("additionalData"), ConstructAdditionalData() },
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
 }
 	
 FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientId
@@ -232,7 +247,9 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 	, FErrorHandler const& OnError
 	, FString const& IamUrl
 	, TMap<FString, FString> AdditionalHeaders
-	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams
+	, FString const& EncodedMacAddress
+	, FString const& DeviceId)
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
     	
@@ -249,7 +266,9 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 		, true
 		, IamUrl
 		, AdditionalHeaders
-		, OptionalParams);
+		, OptionalParams
+		, EncodedMacAddress
+		, DeviceId);
 }
 	
 FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientId
@@ -261,28 +280,30 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 	, bool bCreateHeadless
 	, FString const& IamUrl
 	, TMap<FString, FString> AdditionalHeaders
-	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams
+	, FString const& EncodedMacAddress
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/platforms/%s/token?createHeadless=%s")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl
 		, *PlatformId
 		, bCreateHeadless ? TEXT("true") : TEXT("false"));
 	
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{TEXT("platform_token"), FGenericPlatformHttp::UrlEncode(PlatformToken)},
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
-		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress(true)) },
+		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(EncodedMacAddress) },
 		{TEXT("additionalData"), ConstructAdditionalData()},
 		{TEXT("serviceLabel"), OptionalParams.ServiceLabelForPSN},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithRefreshToken(FString const& ClientId
@@ -319,7 +340,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithRefreshToken(FString const& ClientId
 	FReport::Log(FString(__FUNCTION__));
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/token")
-			, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+			, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -329,7 +350,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithRefreshToken(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::RefreshPlatformToken(FString const& ClientID
@@ -344,14 +365,14 @@ FAccelByteTaskWPtr Oauth2::RefreshPlatformToken(FString const& ClientID
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/platforms/%s/token/verify")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl,
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl,
 		*PlatformID);
 
 	FString Content = FString::Printf(TEXT("platform_token=%s"), *PlatformToken);
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientID, ClientSecret, AdditionalHeaders);
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::RevokeToken(FString const& AccessToken
@@ -366,7 +387,7 @@ FAccelByteTaskWPtr Oauth2::RevokeToken(FString const& AccessToken
 		TEXT("This method uses wrong auth type, so please use RevokeToken with ClientId and ClientSecret instead!"));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/revoke")
-					, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+					, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	AdditionalHeaders.Emplace(TEXT("Authorization"), TEXT("Bearer " + AccessToken));
 
@@ -374,7 +395,7 @@ FAccelByteTaskWPtr Oauth2::RevokeToken(FString const& AccessToken
 
 	Request->SetContentAsString(FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(*AccessToken)));
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::RevokeToken(FString const& ClientId
@@ -411,12 +432,12 @@ FAccelByteTaskWPtr Oauth2::RevokeToken(FString const& ClientId
 	FReport::Log(FString(__FUNCTION__));
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/revoke")
-				, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+				, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	Request->SetContentAsString(FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(*AccessToken)));
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithAuthorizationCodeV3(FString const& ClientId
@@ -456,7 +477,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithAuthorizationCodeV3(FString const& Client
 	FReport::Log(FString(__FUNCTION__));
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/token")
-					, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+					, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -467,7 +488,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithAuthorizationCodeV3(FString const& Client
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV3(FString const& ClientId
@@ -478,7 +499,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV3(FString const& Clie
 	, FErrorHandler const& OnError
 	, bool bRememberMe
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	UE_LOG(LogAccelByte, Warning, TEXT("When 2FA is enabled, please use %s with FOAuthErrorHandler instead."), *FString(__FUNCTION__));
     
@@ -494,7 +516,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV3(FString const& Clie
 			})
 		, bRememberMe
 		, IamUrl
-		, AdditionalHeaders);
+		, AdditionalHeaders
+		, DeviceId);
 }
 	
 FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV3(FString const& ClientId
@@ -505,14 +528,15 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV3(FString const& Clie
 	, FOAuthErrorHandler const& OnError
 	, bool bRememberMe
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/token")
-					, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+					, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 	AdditionalHeaders.Emplace(TEXT("Auth-Trust-Id"), FAccelByteUtilities::GetAuthTrustId());
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
@@ -525,7 +549,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV3(FString const& Clie
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	
 FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformToken(FString const& ClientId
@@ -537,14 +561,15 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformToken(FString const& 
 	, THandler<FOauth2Token> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/simultaneousLogin")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 	AdditionalHeaders.Emplace(TEXT("Auth-Trust-Id"), FAccelByteUtilities::GetAuthTrustId());
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
@@ -557,7 +582,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformToken(FString const& 
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::VerifyAndRememberNewDevice(FString const& ClientId
@@ -569,16 +594,17 @@ FAccelByteTaskWPtr Oauth2::VerifyAndRememberNewDevice(FString const& ClientId
 	, FOAuthErrorHandler const& OnError
 	, bool bRememberDevice
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Factor = FAccelByteUtilities::GetAuthenticatorString(AuthFactorType);
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/mfa/verify")
-					, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+					, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -589,7 +615,7 @@ FAccelByteTaskWPtr Oauth2::VerifyAndRememberNewDevice(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	
 FAccelByteTaskWPtr Oauth2::CreateHeadlessAccountAndResponseToken(FString const& ClientId
@@ -603,7 +629,7 @@ FAccelByteTaskWPtr Oauth2::CreateHeadlessAccountAndResponseToken(FString const& 
 	FReport::Log(FString(__FUNCTION__));
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/headless/token")
-					, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+					, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -613,7 +639,7 @@ FAccelByteTaskWPtr Oauth2::CreateHeadlessAccountAndResponseToken(FString const& 
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
 }
 	
 FAccelByteTaskWPtr Oauth2::AuthenticationWithPlatformLink(FString const& ClientId
@@ -629,7 +655,7 @@ FAccelByteTaskWPtr Oauth2::AuthenticationWithPlatformLink(FString const& ClientI
 	FReport::Log(FString(__FUNCTION__));
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/authenticateWithLink")
-					, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+					, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -640,7 +666,7 @@ FAccelByteTaskWPtr Oauth2::AuthenticationWithPlatformLink(FString const& ClientI
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 	
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	
 FAccelByteTaskWPtr Oauth2::VerifyToken(FString const& ClientId
@@ -649,19 +675,20 @@ FAccelByteTaskWPtr Oauth2::VerifyToken(FString const& ClientId
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/verify")
-					, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+					, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	Request->SetContentAsString(FString::Printf(TEXT("token=%s"), *Token));
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request,
+	return HttpRef.ProcessRequest(Request,
 		CreateHttpResultHandler(
 			THandler<FJsonObject>::CreateLambda([OnSuccess, Token](FJsonObject const& JsonObject)
 			{
@@ -686,14 +713,14 @@ FAccelByteTaskWPtr Oauth2::GenerateOneTimeCode(FString const& AccessToken
 	FReport::Log(FString(__FUNCTION__));
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/link/code/request")
-					, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+					, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 	
 	AdditionalHeaders.Emplace(TEXT("Authorization"), TEXT("Bearer " + AccessToken));
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, TEXT(""), TEXT(""), AdditionalHeaders);
 	Request->SetContentAsString(FString::Printf(TEXT("platformId=%s"), *PlatformId));
 	
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
 }
 	
 FAccelByteTaskWPtr Oauth2::GenerateGameToken(FString const& ClientId
@@ -702,14 +729,15 @@ FAccelByteTaskWPtr Oauth2::GenerateGameToken(FString const& ClientId
 	, THandler<FOauth2Token> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/token/exchange")
-							, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+							, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 	
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -718,7 +746,7 @@ FAccelByteTaskWPtr Oauth2::GenerateGameToken(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
 }
 
 FAccelByteTaskWPtr Oauth2::GenerateCodeForPublisherTokenExchange(FString const& AccessToken
@@ -731,7 +759,7 @@ FAccelByteTaskWPtr Oauth2::GenerateCodeForPublisherTokenExchange(FString const& 
 {
 	FReport::Log(FString(__FUNCTION__));
 	const FString Url = FString::Printf(TEXT("%s/v3/namespace/%s/token/request")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl
 		, *PublisherNamespace);
 
 	AdditionalHeaders.Emplace(TEXT("Authorization"), TEXT("Bearer " + AccessToken));
@@ -739,20 +767,22 @@ FAccelByteTaskWPtr Oauth2::GenerateCodeForPublisherTokenExchange(FString const& 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, TEXT(""), TEXT(""), AdditionalHeaders);
 	Request->SetContentAsString(FString::Printf(TEXT("client_id=%s"), *PublisherClientID));
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-FAccelByteTaskWPtr Oauth2::RetrieveUserThirdPartyPlatformToken(FString const& UserId
+FAccelByteTaskWPtr Oauth2::RetrieveUserThirdPartyPlatformToken(FString const& Namespace
+	, FString const& UserId
 	, FString const& PlatformId
 	, FString const& Authorization
 	, THandler<FThirdPartyPlatformTokenData> const& OnSuccess
-	, FOAuthErrorHandler const& OnError)
+	, FOAuthErrorHandler const& OnError
+	, FString const& IamUrl)
 {
-	FReport::Log(FString(__FUNCTION__));  
+	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/namespaces/%s/users/%s/platforms/%s/platformToken")
-		, *FRegistry::Settings.IamServerUrl
-		, *FRegistry::CredentialsRef->GetNamespace() 
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl
+		, *Namespace 
 		, *UserId
 		, *PlatformId);
 
@@ -763,7 +793,7 @@ FAccelByteTaskWPtr Oauth2::RetrieveUserThirdPartyPlatformToken(FString const& Us
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV4(FString const& ClientId
@@ -774,14 +804,15 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV4(FString const& Clie
 	, FOAuthErrorHandler const& OnError
 	, bool bRememberMe
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 	AdditionalHeaders.Emplace(TEXT("Auth-Trust-Id"), FAccelByteUtilities::GetAuthTrustId());
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
@@ -794,7 +825,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithPasswordCredentialsV4(FString const& Clie
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithDeviceIdV4(FString const& ClientId
@@ -803,22 +834,23 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithDeviceIdV4(FString const& ClientId
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
 	, bool bCreateHeadless
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/platforms/device/token?createHeadless=%s")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl, bCreateHeadless ? TEXT("true") : TEXT("false"));
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl, bCreateHeadless ? TEXT("true") : TEXT("false"));
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
-		{TEXT("device_id"), *FGenericPlatformHttp::UrlEncode(*FAccelByteUtilities::GetDeviceId()) },
+		{TEXT("device_id"), *FGenericPlatformHttp::UrlEncode(*DeviceId) },
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false") },
 		{TEXT("additionalData"), ConstructAdditionalData() },
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithAuthorizationCodeV4(FString const& ClientId
@@ -833,7 +865,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithAuthorizationCodeV4(FString const& Client
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -844,7 +876,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithAuthorizationCodeV4(FString const& Client
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformTokenV4(FString const& ClientId
@@ -856,28 +888,30 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformTokenV4(FString const& Clien
 	, bool bCreateHeadless
 	, FString const& IamUrl
 	, TMap<FString, FString> AdditionalHeaders
-	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams)
+	, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams
+	, FString const& DeviceId
+	, FString const& EncodedMacAddress)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/platforms/%s/token?createHeadless=%s")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl
 		, *PlatformId
 		, bCreateHeadless ? TEXT("true") : TEXT("false"));
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{TEXT("platform_token"), FGenericPlatformHttp::UrlEncode(PlatformToken)},
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
-		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetMacAddress(true)) },
+		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(EncodedMacAddress) },
 		{TEXT("additionalData"), ConstructAdditionalData()},
 		{TEXT("serviceLabel"), OptionalParams.ServiceLabelForPSN},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::VerifyAndRememberNewDeviceV4(FString const& ClientId
@@ -889,16 +923,17 @@ FAccelByteTaskWPtr Oauth2::VerifyAndRememberNewDeviceV4(FString const& ClientId
 	, FOAuthErrorHandler const& OnError
 	, bool bRememberDevice
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Factor = FAccelByteUtilities::GetAuthenticatorString(AuthFactorType);
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/mfa/verify")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -909,7 +944,7 @@ FAccelByteTaskWPtr Oauth2::VerifyAndRememberNewDeviceV4(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GenerateGameTokenV4(FString const& ClientId
@@ -918,14 +953,15 @@ FAccelByteTaskWPtr Oauth2::GenerateGameTokenV4(FString const& ClientId
 	, THandler<FOauth2TokenV4> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/token/exchange")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -933,7 +969,7 @@ FAccelByteTaskWPtr Oauth2::GenerateGameTokenV4(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::AuthenticationWithPlatformLinkV4(FString const& ClientId
@@ -949,7 +985,7 @@ FAccelByteTaskWPtr Oauth2::AuthenticationWithPlatformLinkV4(FString const& Clien
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/authenticateWithLink")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -960,7 +996,7 @@ FAccelByteTaskWPtr Oauth2::AuthenticationWithPlatformLinkV4(FString const& Clien
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::CreateHeadlessAccountAndResponseTokenV4(FString const& ClientId
@@ -974,7 +1010,7 @@ FAccelByteTaskWPtr Oauth2::CreateHeadlessAccountAndResponseTokenV4(FString const
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/headless/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -984,7 +1020,7 @@ FAccelByteTaskWPtr Oauth2::CreateHeadlessAccountAndResponseTokenV4(FString const
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformTokenV4(FString const& ClientId
@@ -996,14 +1032,15 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformTokenV4(FString const
 	, THandler<FOauth2TokenV4> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/simultaneousLogin")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 	AdditionalHeaders.Emplace(TEXT("Auth-Trust-Id"), FAccelByteUtilities::GetAuthTrustId());
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
@@ -1016,7 +1053,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformTokenV4(FString const
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithRefreshTokenV4(FString const& ClientId
@@ -1030,7 +1067,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithRefreshTokenV4(FString const& ClientId
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
 	FString Content = FAccelByteUtilities::CreateQueryParams({
@@ -1040,7 +1077,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithRefreshTokenV4(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FAccelByteTaskWPtr Oauth2::GetTokenWithLoginTicket(FString const& ClientId
@@ -1049,14 +1086,15 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithLoginTicket(FString const& ClientId
 	, THandler<FOauth2Token> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FString const& DeviceId)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v4/oauth/token")
-		, IamUrl.IsEmpty() ? *FRegistry::Settings.IamServerUrl : *IamUrl);
+		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl);
 
-	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(FAccelByteUtilities::GetDeviceId())));
+	AdditionalHeaders.Emplace(TEXT("cookie"), TEXT("device-token=" + FGenericPlatformHttp::UrlEncode(DeviceId)));
 	AdditionalHeaders.Emplace(TEXT("Auth-Trust-Id"), FAccelByteUtilities::GetAuthTrustId());
 
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientId, ClientSecret, AdditionalHeaders);
@@ -1067,7 +1105,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithLoginTicket(FString const& ClientId
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
-	return FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	return HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

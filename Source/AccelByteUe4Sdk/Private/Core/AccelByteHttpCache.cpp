@@ -7,7 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Core/AccelByteLRUCacheFile.h"
 #include "Core/AccelByteLRUCacheMemory.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteUtilities.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpCache, Log, All);
@@ -72,7 +72,7 @@ namespace AccelByte
 		}
 		
 		FAccelByteHttpCache::FAccelByteHttpCache()
-			: CachedItemsInternal {nullptr}
+			: CachedItemsInternal{nullptr}
 		{
 		}
 
@@ -81,9 +81,9 @@ namespace AccelByte
 			// empty
 		};
 
-		void FAccelByteHttpCache::InitializeFromConfig()
+		void FAccelByteHttpCache::Initialize()
 		{
-			switch (FRegistry::Settings.HttpCacheType)
+			switch (CacheType)
 			{
 			case EHttpCacheType::MEMORY:
 				CachedItemsInternal = MakeShareable<FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>());
@@ -99,7 +99,7 @@ namespace AccelByte
 		{
 			if (!CachedItemsInternal.IsValid())
 			{
-				InitializeFromConfig();
+				Initialize();
 			}
 
 			return CachedItemsInternal;
@@ -175,6 +175,11 @@ namespace AccelByte
 			}
 		
 			return bCacheable;
+		}
+
+		void FAccelByteHttpCache::SetCacheType(const EHttpCacheType InCacheType)
+		{
+			CacheType = InCacheType;
 		}
 
 		bool FAccelByteHttpCache::TryRetrieving(FHttpRequestPtr& Out, FHttpResponsePtr& OutCachedResponse)

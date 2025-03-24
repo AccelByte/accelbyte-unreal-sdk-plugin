@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteGameProfileApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
@@ -15,8 +15,9 @@ namespace Api
 
 GameProfile::GameProfile(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
 
 GameProfile::~GameProfile()
@@ -27,6 +28,9 @@ FAccelByteTaskWPtr GameProfile::BatchGetPublicGameProfiles(TArray<FString> const
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Game Profile is deprecated - please use Cloudsave (Player/User Records) for the replacement"));
 
 	if (UserIds.Num() < 1)
 	{
@@ -53,6 +57,9 @@ FAccelByteTaskWPtr GameProfile::GetAllGameProfiles(THandler<TArray<FAccelByteMod
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Game Profile is deprecated - please use Cloudsave (Player/User Records) for the replacement"));
+
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.GameProfileServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -67,6 +74,9 @@ FAccelByteTaskWPtr GameProfile::CreateGameProfile(FAccelByteModelsGameProfileReq
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Game Profile is deprecated - please use Cloudsave (Player/User Records) for the replacement"));
+
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.GameProfileServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -80,6 +90,9 @@ FAccelByteTaskWPtr GameProfile::GetGameProfile(FString const& ProfileId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Game Profile is deprecated - please use Cloudsave (Player/User Records) for the replacement"));
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
@@ -97,6 +110,9 @@ FAccelByteTaskWPtr GameProfile::UpdateGameProfile(FString const& ProfileId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Game Profile is deprecated - please use Cloudsave (Player/User Records) for the replacement"));
+
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -111,6 +127,9 @@ FAccelByteTaskWPtr GameProfile::DeleteGameProfile(FString const& ProfileId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Game Profile is deprecated - please use Cloudsave (Player/User Records) for the replacement"));
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
@@ -128,6 +147,9 @@ FAccelByteTaskWPtr GameProfile::GetGameProfileAttribute(FString const& ProfileId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Game Profile is deprecated - please use Cloudsave (Player/User Records) for the replacement"));
+
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s")
 		, *SettingsRef.GameProfileServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -143,6 +165,9 @@ FAccelByteTaskWPtr GameProfile::UpdateGameProfileAttribute(FString const& Profil
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Game Profile is deprecated - please use Cloudsave (Player/User Records) for the replacement"));
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s")
 		, *SettingsRef.GameProfileServerUrl

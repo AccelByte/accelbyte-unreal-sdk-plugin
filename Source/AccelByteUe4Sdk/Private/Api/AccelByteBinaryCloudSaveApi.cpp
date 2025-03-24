@@ -4,7 +4,7 @@
 
 #include "Api/AccelByteBinaryCloudSaveApi.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
@@ -22,8 +22,9 @@ namespace Api
 
 BinaryCloudSave::BinaryCloudSave(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
 
 BinaryCloudSave::~BinaryCloudSave()

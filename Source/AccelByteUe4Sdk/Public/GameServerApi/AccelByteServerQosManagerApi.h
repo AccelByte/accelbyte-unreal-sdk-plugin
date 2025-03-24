@@ -26,7 +26,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerQosManager : public FServerApiBase
 {
 public:
-	ServerQosManager(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerQosManager(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerQosManager();
 
 	/**
@@ -64,5 +67,9 @@ private:
 	ServerQosManager(ServerQosManager&&) = delete;
 };
 
-} // Namespace Api
+typedef TSharedRef<ServerQosManager, ESPMode::ThreadSafe> ServerQosManagerRef;
+typedef TSharedPtr<ServerQosManager, ESPMode::ThreadSafe> ServerQosManagerPtr;
+typedef TWeakPtr<ServerQosManager, ESPMode::ThreadSafe> ServerQosManagerWPtr;
+
+} // Namespace GameServerApi
 } // Namespace AccelByte

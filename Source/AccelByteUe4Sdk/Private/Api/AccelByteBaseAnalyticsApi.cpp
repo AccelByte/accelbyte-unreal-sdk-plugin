@@ -19,6 +19,17 @@ BaseAnalytics::BaseAnalytics(Credentials& InCredentialsRef
 	, EventName(InEventName)
 {}
 
+BaseAnalytics::BaseAnalytics(Credentials& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+	, FString const& InEventName
+	, bool bInCacheEvent
+	, bool bInRetryOnFailed)
+	: GameTelemetry(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient, bInCacheEvent, bInRetryOnFailed)
+	, EventName(InEventName)
+{}
+
 void BaseAnalytics::SendEventData(const TSharedPtr<FJsonObject>& Payload, FVoidHandler const& OnSuccess, FErrorHandler const& OnError, FDateTime const& ClientTimestamp)
 {
 	if (Payload.IsValid())

@@ -12,13 +12,19 @@
 
 namespace AccelByte
 {
+
+// forward declaration
+class FApiClient;
 	
 class ACCELBYTEUE4SDK_API FApiBase
 {
 public:
 	FApiBase(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef);
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
+
+	void SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
 	
 protected:
 	template<typename T>
@@ -36,6 +42,7 @@ protected:
 	Settings const& SettingsRef;
 	FHttpRetryScheduler& HttpRef;
 	FHttpClient HttpClient;
+	TWeakPtr<FApiClient, ESPMode::ThreadSafe> ApiClient;
 };
 
 }

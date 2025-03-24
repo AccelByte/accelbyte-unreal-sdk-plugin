@@ -25,7 +25,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerInventory : public FServerApiBase
 {
 public:
-	ServerInventory(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler & InHttpRef);
+	ServerInventory(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler & InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~ServerInventory();
 
 #pragma region V1 Inventory

@@ -4,7 +4,6 @@
 
 #include "Blueprints/ABCurrency.h"
 #include "Api/AccelByteCurrencyApi.h"
-#include "Core/AccelByteRegistry.h"
 
 using namespace AccelByte;
 
@@ -22,7 +21,7 @@ void UABCurrency::GetCurrencyList(
 	if (CurrencyPtr.IsValid())
 	{
 		CurrencyPtr->GetCurrencyList(
-			FRegistry::Settings.Namespace,
+			ApiClientPtr->Settings->Namespace,
 			THandler<TArray<FAccelByteModelsCurrencyList>>::CreateLambda(
 				[OnSuccess](TArray<FAccelByteModelsCurrencyList> const& Response)
 				{

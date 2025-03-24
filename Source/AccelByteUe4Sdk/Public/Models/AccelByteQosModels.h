@@ -79,4 +79,15 @@ struct FAccelByteModelsQosRegionLatencies
 
 		return ClosestRegion;
 	}
+
+	TArray<TPair<FString, float>> AsPairs()
+	{
+		TArray<TPair<FString, float>> Result;
+		for (FAccelByteModelsQosRegionLatency& RegionLatency : Data)
+		{
+			Result.Emplace(RegionLatency.Region, RegionLatency.Latency);
+		}
+
+		return Result;
+	}
 };

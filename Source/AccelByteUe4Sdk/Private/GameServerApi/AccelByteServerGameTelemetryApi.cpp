@@ -4,11 +4,12 @@
 
 #include "GameServerApi/AccelByteServerGameTelemetryApi.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
 #include "JsonUtilities.h"
+#include "Core/AccelByteServerApiClient.h"
 
 namespace AccelByte
 {
@@ -17,8 +18,9 @@ namespace GameServerApi
 
 ServerGameTelemetry::ServerGameTelemetry(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
 
 ServerGameTelemetry::~ServerGameTelemetry()
@@ -144,6 +146,13 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 
 	FString Content = TEXT("");
 
+	FString ClientTimestamp;
+	const FServerApiClientPtr ServerApiClientPtr = ServerApiClient.Pin();
+	if(ServerApiClientPtr.IsValid())
+	{
+		ClientTimestamp = ServerApiClientPtr->ServerTimeManager->GetCurrentServerTime().ToIso8601();
+	}
+
 	TArray<TSharedPtr<FJsonValue>> JsonArray;
 	for (const auto& Event : Events)
 	{
@@ -151,7 +160,7 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 		JsonObject->SetStringField("EventNamespace", Event.EventNamespace);
 		JsonObject->SetStringField("EventName", Event.EventName);
 		JsonObject->SetObjectField("Payload", Event.Payload);
-		JsonObject->SetStringField("ClientTimestamp", FAccelByteUtilities::GetCurrentServerTime().ToIso8601());
+		JsonObject->SetStringField("ClientTimestamp", ClientTimestamp);
 		JsonObject->SetStringField("FlightId", FAccelByteUtilities::GetFlightId());
 		JsonObject->SetStringField("DeviceType", FAccelByteUtilities::GetPlatformName());
 

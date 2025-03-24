@@ -4,7 +4,7 @@
 
 #include "GameServerApi/AccelByteServerMetricExporterApi.h"
 #include "Core/AccelByteCredentials.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/StatsD/AccelByteStatsDMetricBuilder.h"
@@ -19,8 +19,10 @@ namespace AccelByte
 {
 	namespace GameServerApi
 	{
-		ServerMetricExporter::ServerMetricExporter(ServerSettings const& InServerSettingsRef)
+		ServerMetricExporter::ServerMetricExporter(ServerSettings const& InServerSettingsRef
+			, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 			: ServerSettingsRef(InServerSettingsRef)
+			, ServerApiClient(InServerApiClient)
 		{
 			StatsDMetricCollector = MakeShared<FAccelByteStatsDMetricCollector>();
 		}
@@ -28,6 +30,12 @@ namespace AccelByte
 		ServerMetricExporter::~ServerMetricExporter()
 		{
 			StopExporting();
+		}
+
+		void ServerMetricExporter::SetServerApiClient(
+			TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+		{
+			ServerApiClient = InServerApiClient;
 		}
 
 		void ServerMetricExporter::Initialize()

@@ -5,7 +5,7 @@
 #include "Core/ServerTime/AccelByteTimeManager.h"
 
 #include "Core/AccelByteHttpRetryTask.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteServerSettings.h"
@@ -14,15 +14,17 @@
 namespace AccelByte
 {
 	
-FAccelByteTimeManager::FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& Http)
+FAccelByteTimeManager::FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& Http, const FString& InBasicServerUrl)
 	: bUseSharedResources(true)
 	, HttpRef(Http.AsShared())
+	, BasicServerUrl(InBasicServerUrl)
 {
 	ReferenceCount.Increment();
 }
 
-FAccelByteTimeManager::FAccelByteTimeManager()
+FAccelByteTimeManager::FAccelByteTimeManager(const FString& InBasicServerUrl)
 	: HttpRef(MakeShared<FHttpRetryScheduler, ESPMode::ThreadSafe>())
+	, BasicServerUrl(InBasicServerUrl)
 {
 	HttpRef->Startup();
 };
@@ -98,17 +100,12 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 
 	if (bShouldSync)
 	{
-		FString BasicServerUrl;
-
-		if (IsRunningDedicatedServer())
+		if(BasicServerUrl.IsEmpty())
 		{
-			BasicServerUrl = FRegistry::ServerSettings.BasicServerUrl;
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to GetServerTime, BasicServerUrl is empty!"));
+			return nullptr;
 		}
-		else
-		{
-			BasicServerUrl = FRegistry::Settings.BasicServerUrl;
-		}
-
+		
 		const FString Url = FString::Printf(TEXT("%s/v1/public/misc/time"), *BasicServerUrl);
 		const FString Accept = TEXT("application/json");
 
@@ -134,7 +131,7 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 			OnSuccess.ExecuteIfBound(ServerTime);
 		});
 
-		return AccelByteGetServerTimeTaskWPtr = FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(SuccessDelegate, OnError), FPlatformTime::Seconds());
+		return AccelByteGetServerTimeTaskWPtr = HttpRef->ProcessRequest(Request, CreateHttpResultHandler(SuccessDelegate, OnError), FPlatformTime::Seconds());
 	}
 	else
 	{

@@ -8,7 +8,7 @@
 #include <string>
 
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteServerCredentials.h"
@@ -21,8 +21,9 @@ namespace GameServerApi
 
 ServerSeasonPass::ServerSeasonPass(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
 }
 

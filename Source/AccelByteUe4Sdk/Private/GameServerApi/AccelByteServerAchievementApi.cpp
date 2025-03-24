@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "GameServerApi/AccelByteServerAchievementApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
@@ -15,8 +15,9 @@ namespace GameServerApi
 
 ServerAchievement::ServerAchievement(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
 
 ServerAchievement::~ServerAchievement()
@@ -49,6 +50,27 @@ FAccelByteTaskWPtr ServerAchievement::UnlockAchievement(FString const& UserId
 		, *AchievementCode);
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerAchievement::BulkUnlockAchievement(FString const& UserId
+	, FAccelByteModelsAchievementBulkUnlockRequest const& AchievementsToUnlock
+	, THandler<TArray<FAccelByteModelsAchievementBulkUnlockRespone>> const& UnlockResponses
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (AchievementsToUnlock.AchievementCodes.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Request is invalid due to provided AchievementCodes is empty."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/achievements/bulkUnlock")
+		, *ServerSettingsRef.AchievementServerUrl
+		, *ServerCredentialsRef->GetClientNamespace()
+		, *UserId);
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, AchievementsToUnlock, UnlockResponses, OnError);
 }
 
 FAccelByteTaskWPtr ServerAchievement::BulkCreatePSNEvent(FAccelByteModelsAchievementBulkCreatePSNEventRequest const& Request

@@ -4,7 +4,7 @@
 
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "Core/AccelByteReport.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
 
@@ -15,8 +15,9 @@ namespace GameServerApi
 
 ServerMatchmaking::ServerMatchmaking(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 	, bStatusPollingActive{false}
 {
 	StatusPollingDelegate = FTickerDelegate::CreateRaw(this, &ServerMatchmaking::StatusPollingTick);

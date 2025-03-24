@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API TurnManager : public FApiBase, public TSharedFromThis<TurnManager, ESPMode::ThreadSafe>
 {
 public:
-	TurnManager(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	TurnManager(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~TurnManager();
 
 	/**

@@ -22,7 +22,11 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerBaseAnalytics : public ServerGameTelemetry
 {
 protected:
-	ServerBaseAnalytics(ServerCredentials& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, FString const& InEventName);
+	ServerBaseAnalytics(ServerCredentials& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, FString const& InEventName
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient);
 
 	/**
 	 * @brief Send/enqueue a single authorized telemetry data of an event.

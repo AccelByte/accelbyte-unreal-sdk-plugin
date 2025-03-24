@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Agreement : public FApiBase, public TSharedFromThis<Agreement, ESPMode::ThreadSafe>
 {
 public:
-	Agreement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Agreement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Agreement();
 
 	/**

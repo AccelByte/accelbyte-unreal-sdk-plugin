@@ -20,7 +20,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API GDPR : public FApiBase, public TSharedFromThis<GDPR, ESPMode::ThreadSafe>
 {
 public:
-	GDPR(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	GDPR(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~GDPR();
 		
 	/**

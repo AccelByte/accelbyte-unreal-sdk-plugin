@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteApiClient.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteLeaderboardModels.h"
 #include "ABLeaderboard.generated.h"

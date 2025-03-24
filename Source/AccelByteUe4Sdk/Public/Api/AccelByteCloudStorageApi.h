@@ -21,10 +21,10 @@ namespace Api
  * Each player has configurable slot(s) that controlled by admin.
  * The configuration affects the amount of slot that owned by user and the allowed size for each slot (byte).
  */
-class ACCELBYTEUE4SDK_API CloudStorage : FApiBase, public TSharedFromThis<CloudStorage, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API CloudStorage : public FApiBase, public TSharedFromThis<CloudStorage, ESPMode::ThreadSafe>
 {
 public:
-	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~CloudStorage();
 
 	/**

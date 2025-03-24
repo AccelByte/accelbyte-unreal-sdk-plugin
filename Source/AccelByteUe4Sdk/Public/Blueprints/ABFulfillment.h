@@ -5,9 +5,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiClient.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteEcommerceModels.h"
-#include "Core/AccelByteMultiRegistry.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ABFulfillment.generated.h"
 

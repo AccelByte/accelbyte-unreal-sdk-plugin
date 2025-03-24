@@ -22,7 +22,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Achievement : public FApiBase, public TSharedFromThis<Achievement, ESPMode::ThreadSafe>
 {
 public:
-	Achievement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Achievement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Achievement();
 
 	/**
@@ -143,6 +143,19 @@ public:
 	FAccelByteTaskWPtr UnlockAchievement(FString const& AchievementCode
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Unlock multiple achievement.
+	 *
+	 * @param AchievementsToUnlock Request of achievement that needs to be unlocked.
+	 * @param UnlockResponses This will be called when the operation completed. In a form of array for each achievement that was requested.
+	 * @param OnGeneralError This will be called when the entire operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkUnlockAchievement(FAccelByteModelsAchievementBulkUnlockRequest const& AchievementsToUnlock
+		, THandler<TArray<FAccelByteModelsAchievementBulkUnlockRespone>> const& UnlockResponses
+		, FErrorHandler const& OnGeneralError);
 
 	/**
 	 * @brief Get the progress list of global achievements. Include achieved and in-progress.

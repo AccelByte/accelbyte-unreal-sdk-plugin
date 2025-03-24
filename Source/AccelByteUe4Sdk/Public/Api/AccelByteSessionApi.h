@@ -29,7 +29,7 @@ class ServerSessionApi;
 class ACCELBYTEUE4SDK_API Session : public FApiBase, public TSharedFromThis<Session, ESPMode::ThreadSafe>
 {
 public:
-	Session(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Session(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Session();
 
 	/**

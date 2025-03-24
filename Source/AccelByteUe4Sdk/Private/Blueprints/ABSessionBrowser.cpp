@@ -4,6 +4,9 @@
 
 #include "Blueprints/ABSessionBrowser.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteSessionBrowser, Log, All);
+DEFINE_LOG_CATEGORY(LogAccelByteSessionBrowser);
+
 using namespace AccelByte;
 
 void UABSessionBrowser::SetApiClient(FApiClientPtr const& NewApiClientPtr)
@@ -23,26 +26,35 @@ void UABSessionBrowser::CreateGameSessionPublic(
 )
 {
 	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
-	ApiClientPtr->SessionBrowser.CreateGameSession(
-		GameMode,
-		GameMapName,
-		GameVersion,
-		BotCount,
-		MaxPlayer,
-		OtherSettings.JsonObject,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->CreateGameSession(
+			GameMode,
+			GameMapName,
+			GameVersion,
+			BotCount,
+			MaxPlayer,
+			OtherSettings.JsonObject,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::CreateGameSessionPrivate(
@@ -59,28 +71,37 @@ void UABSessionBrowser::CreateGameSessionPrivate(
 )
 {
 	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
-	ApiClientPtr->SessionBrowser.CreateGameSession(
-		GameMode,
-		GameMapName,
-		GameVersion,
-		BotCount,
-		MaxPlayer,
-		MaxSpectator,
-		Password,
-		OtherSettings.JsonObject,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->CreateGameSession(
+			GameMode,
+			GameMapName,
+			GameVersion,
+			BotCount,
+			MaxPlayer,
+			MaxSpectator,
+			Password,
+			OtherSettings.JsonObject,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::CreateGameSessionTypeSpecifiedByString(
@@ -98,29 +119,38 @@ void UABSessionBrowser::CreateGameSessionTypeSpecifiedByString(
 )
 {
 	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
-	ApiClientPtr->SessionBrowser.CreateGameSession(
-		SessionTypeString,
-		GameMode,
-		GameMapName,
-		GameVersion,
-		BotCount,
-		MaxPlayer,
-		MaxSpectator,
-		Password,
-		OtherSettings.JsonObject,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->CreateGameSession(
+			SessionTypeString,
+			GameMode,
+			GameMapName,
+			GameVersion,
+			BotCount,
+			MaxPlayer,
+			MaxSpectator,
+			Password,
+			OtherSettings.JsonObject,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
@@ -138,29 +168,38 @@ void UABSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 )
 {
 	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
-	ApiClientPtr->SessionBrowser.CreateGameSession(
-		SessionType,
-		GameMode,
-		GameMapName,
-		GameVersion,
-		BotCount,
-		MaxPlayer,
-		MaxSpectator,
-		Password,
-		OtherSettings.JsonObject,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->CreateGameSession(
+			SessionType,
+			GameMode,
+			GameMapName,
+			GameVersion,
+			BotCount,
+			MaxPlayer,
+			MaxSpectator,
+			Password,
+			OtherSettings.JsonObject,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::CreateGameSessionTypeSpecificByStruct(
@@ -171,21 +210,30 @@ void UABSessionBrowser::CreateGameSessionTypeSpecificByStruct(
 {
 	CreateSessionRequest.Game_session_setting.Settings.JsonObjectFromString(CreateSessionRequest.Game_session_setting.Settings.JsonString);
 	FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequestConst = CreateSessionRequest;
-	ApiClientPtr->SessionBrowser.CreateGameSession(
-		CreateSessionRequestConst,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->CreateGameSession(
+			CreateSessionRequestConst,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::UpdateGameSession(
@@ -196,23 +244,32 @@ void UABSessionBrowser::UpdateGameSession(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SessionBrowser.UpdateGameSession(
-		SessionId,
-		MaxPlayer,
-		CurrentPlayerCount,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->UpdateGameSession(
+			SessionId,
+			MaxPlayer,
+			CurrentPlayerCount,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::UpdateGameSessionByStruct(
@@ -222,22 +279,31 @@ void UABSessionBrowser::UpdateGameSessionByStruct(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SessionBrowser.UpdateGameSession(
-		SessionId,
-		UpdateSessionRequest,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->UpdateGameSession(
+			SessionId,
+			UpdateSessionRequest,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::UpdateGameSettings(
@@ -247,22 +313,31 @@ void UABSessionBrowser::UpdateGameSettings(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SessionBrowser.UpdateGameSettings(
-		SessionId,
-		Settings,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->UpdateGameSettings(
+			SessionId,
+			Settings,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::UpdateGameSettingsByJsonObject(
@@ -273,22 +348,31 @@ void UABSessionBrowser::UpdateGameSettingsByJsonObject(
 )
 {
 	Settings.JsonObjectFromString(Settings.JsonString);
-	ApiClientPtr->SessionBrowser.UpdateGameSettings(
-		SessionId,
-		Settings.JsonObject,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->UpdateGameSettings(
+			SessionId,
+			Settings.JsonObject,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::RemoveGameSession(
@@ -297,21 +381,30 @@ void UABSessionBrowser::RemoveGameSession(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SessionBrowser.RemoveGameSession(
-		SessionId,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->RemoveGameSession(
+			SessionId,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::GetGameSessionsByTypeString(
@@ -323,24 +416,33 @@ void UABSessionBrowser::GetGameSessionsByTypeString(
 	int32 Limit
 )
 {
-	ApiClientPtr->SessionBrowser.GetGameSessions(
-		SessionTypeString,
-		GameMode,
-		THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserGetResult const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		),
-		Offset,
-		Limit
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->GetGameSessions(
+			SessionTypeString,
+			GameMode,
+			THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserGetResult const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			),
+			Offset,
+			Limit
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::GetGameSessionsByTypeEnum(
@@ -352,24 +454,33 @@ void UABSessionBrowser::GetGameSessionsByTypeEnum(
 	int32 Limit
 )
 {
-	ApiClientPtr->SessionBrowser.GetGameSessions(
-		SessionType,
-		GameMode,
-		THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserGetResult const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		),
-		Offset,
-		Limit
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->GetGameSessions(
+			SessionType,
+			GameMode,
+			THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserGetResult const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			),
+			Offset,
+			Limit
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::GetGameSessionsByTypeStringAndMatchExist(
@@ -382,25 +493,34 @@ void UABSessionBrowser::GetGameSessionsByTypeStringAndMatchExist(
 	int32 Limit
 )
 {
-	ApiClientPtr->SessionBrowser.GetGameSessions(
-		SessionTypeString,
-		GameMode,
-		MatchExist,
-		THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserGetResult const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		),
-		Offset,
-		Limit
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->GetGameSessions(
+			SessionTypeString,
+			GameMode,
+			MatchExist,
+			THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserGetResult const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			),
+			Offset,
+			Limit
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::GetGameSessionsByTypeEnumAndMatchExist(
@@ -413,46 +533,64 @@ void UABSessionBrowser::GetGameSessionsByTypeEnumAndMatchExist(
 	int32 Limit
 )
 {
-	ApiClientPtr->SessionBrowser.GetGameSessions(
-		SessionType,
-		GameMode,
-		MatchExist,
-		THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserGetResult const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		),
-		Offset,
-		Limit
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->GetGameSessions(
+			SessionType,
+			GameMode,
+			MatchExist,
+			THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserGetResult const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			),
+			Offset,
+			Limit
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::GetGameSessionsByUserIds(TArray<FString> UserIds,
 	FDModelsSessionBrowserGetResultByUserIdsResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	ApiClientPtr->SessionBrowser.GetGameSessionsByUserIds(
-		UserIds,
-		THandler<FAccelByteModelsSessionBrowserGetByUserIdsResult>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserGetByUserIdsResult const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->GetGameSessionsByUserIds(
+			UserIds,
+			THandler<FAccelByteModelsSessionBrowserGetByUserIdsResult>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserGetByUserIdsResult const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::RegisterPlayer(
@@ -463,23 +601,32 @@ void UABSessionBrowser::RegisterPlayer(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SessionBrowser.RegisterPlayer(
-		SessionId,
-		PlayerToAdd,
-		AsSpectator,
-		THandler<FAccelByteModelsSessionBrowserAddPlayerResponse>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserAddPlayerResponse const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->RegisterPlayer(
+			SessionId,
+			PlayerToAdd,
+			AsSpectator,
+			THandler<FAccelByteModelsSessionBrowserAddPlayerResponse>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserAddPlayerResponse const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::UnregisterPlayer(
@@ -489,22 +636,31 @@ void UABSessionBrowser::UnregisterPlayer(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SessionBrowser.UnregisterPlayer(
-		SessionId,
-		PlayerToRemove,
-		THandler<FAccelByteModelsSessionBrowserAddPlayerResponse>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserAddPlayerResponse const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->UnregisterPlayer(
+			SessionId,
+			PlayerToRemove,
+			THandler<FAccelByteModelsSessionBrowserAddPlayerResponse>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserAddPlayerResponse const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::GetRecentPlayer(
@@ -515,23 +671,32 @@ void UABSessionBrowser::GetRecentPlayer(
 	int32 Limit
 )
 {
-	ApiClientPtr->SessionBrowser.GetRecentPlayer(
-		UserId,
-		THandler<FAccelByteModelsSessionBrowserRecentPlayerGetResult>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserRecentPlayerGetResult const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		),
-		Offset,
-		Limit
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->GetRecentPlayer(
+			UserId,
+			THandler<FAccelByteModelsSessionBrowserRecentPlayerGetResult>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserRecentPlayerGetResult const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			),
+			Offset,
+			Limit
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::JoinSession(
@@ -541,22 +706,31 @@ void UABSessionBrowser::JoinSession(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SessionBrowser.JoinSession(
-		SessionId,
-		Password,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->JoinSession(
+			SessionId,
+			Password,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }
 
 void UABSessionBrowser::GetGameSession(
@@ -565,19 +739,28 @@ void UABSessionBrowser::GetGameSession(
 	FDErrorHandler const& OnError
 )
 {
-	ApiClientPtr->SessionBrowser.GetGameSession(
-		SessionId,
-		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
-			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
-			{
-				OnSuccess.ExecuteIfBound(Response);
-			}
-		),
-		FErrorHandler::CreateLambda(
-			[OnError](int32 Code, FString const& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		)
-	);
+	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
+	if (SessionBrowser.IsValid())
+	{
+		SessionBrowser->GetGameSession(
+			SessionId,
+			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
+				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
+				{
+					OnSuccess.ExecuteIfBound(Response);
+				}
+			),
+			FErrorHandler::CreateLambda(
+				[OnError](int32 Code, FString const& Message)
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			)
+		);
+	}
+	else
+	{
+		UE_LOG(LogAccelByteSessionBrowser, Warning, TEXT("Invalid SessionBrowser API from API Client"));
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
+	}
 }

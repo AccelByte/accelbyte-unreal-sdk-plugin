@@ -22,7 +22,8 @@ class ACCELBYTEUE4SDK_API Challenge : public FApiBase, public TSharedFromThis<Ch
 public:
 	Challenge(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef);
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 
 	~Challenge();
 

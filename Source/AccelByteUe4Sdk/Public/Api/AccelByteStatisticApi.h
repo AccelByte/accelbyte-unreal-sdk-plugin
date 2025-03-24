@@ -24,7 +24,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Statistic : public FApiBase, public TSharedFromThis<Statistic, ESPMode::ThreadSafe>
 {
 public:
-	Statistic(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Statistic(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Statistic();
 
 	/**

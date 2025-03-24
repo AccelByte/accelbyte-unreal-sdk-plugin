@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AccelByteBaseSettings.h"
 #include "HttpManager.h"
 #include "Misc/ScopeLock.h"
 #include "Misc/ScopeTryLock.h"
@@ -28,7 +29,7 @@ namespace AccelByte
 			/// We need to avoid access configuration (AccelByte::FRegistry.Settings) from a class constructor
 			/// Because FRegistry.Settings load the value when triggered by startup module phase
 			/// </summary>
-			void InitializeFromConfig();
+			void Initialize();
 
 			bool TryRetrieving(FHttpRequestPtr& Out, FHttpResponsePtr& OutCachedResponse);
 			bool TryStoring(const FHttpRequestPtr& Request);
@@ -68,7 +69,8 @@ namespace AccelByte
 			FCriticalSection CacheCritSection;
 			
 			TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> CachedItemsInternal;
-			
+			EHttpCacheType CacheType {EHttpCacheType::STORAGE};
+
 			TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> GetCachedItems();
 
 		public:
@@ -81,6 +83,8 @@ namespace AccelByte
 			*/
 			static bool IsResponseCacheable(const FHttpRequestPtr& CompletedRequest);
 
+			void SetCacheType(const EHttpCacheType InCacheType);
+
 		private:
 			/**
 			 * @brief Check whether the cached response is not stale nor invalid
@@ -89,7 +93,7 @@ namespace AccelByte
 			 * @return EHttpCacheFreshness 
 			*/
 			FAccelByteHttpCache::EHttpCacheFreshness CheckCachedItemFreshness(const FName& Key);
-
+			
 			/**
 			 * @brief Extract specific control directive value from a Cache-Control header
 			 * 

@@ -6,9 +6,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Core/AccelByteMultiRegistry.h"
-#include "Models/AccelByteAgreementModels.h"
+#include "Core/AccelByteApiClient.h"
 #include "Core/AccelByteError.h"
+#include "Models/AccelByteAgreementModels.h"
 #include "ABAgreement.generated.h"
 
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE

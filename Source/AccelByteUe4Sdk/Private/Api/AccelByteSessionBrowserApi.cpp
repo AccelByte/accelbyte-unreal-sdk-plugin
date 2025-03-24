@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteSessionBrowserApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteError.h"
@@ -16,8 +16,9 @@ namespace Api
 
 SessionBrowser::SessionBrowser(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
 
 SessionBrowser::~SessionBrowser()

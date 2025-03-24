@@ -5,7 +5,7 @@
 #include "Api/AccelByteTurnManagerApi.h"
 
 #include "Icmp.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteReport.h"
@@ -20,8 +20,9 @@ TArray<TPair<FString, float>> TurnManager::Latencies = {};
 
 TurnManager::TurnManager(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, FastestPing{.0f}
 	, Counter{0}
 {}
@@ -308,7 +309,7 @@ void TurnManager::PingRegionsSetLatencies(const FAccelByteModelsTurnServerList& 
 			FString Region = Server.Region;
 
 			// Ping -> Get the latencies on pong.
-			FAccelBytePing::SendUdpPing(Server.Ip, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
+			FAccelBytePing::SendUdpPing(Server.Ip, Server.Port, SettingsRef.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
 				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError](const FPingResult& PingResult)
 				{
 					if (PingResult.Status == FPingResultStatus::Success)

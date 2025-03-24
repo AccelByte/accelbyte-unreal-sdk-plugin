@@ -28,8 +28,8 @@
 #include "ABSessionAttribute.h"
 #include "ABSignaling.h"
 #include "ABGroup.h"
+#include "Core/AccelByteApiClient.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteMultiRegistry.h"
 #include "Core/AccelByteEnvironment.h"
 #include "AccelByteBPApiClient.generated.h"
 
@@ -205,16 +205,3 @@ public:
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;
 };
-
-
-UCLASS(Blueprintable, BlueprintType)
-class UABMultiRegistry final : public UBlueprintFunctionLibrary
-{
-	GENERATED_BODY()
-
-public:
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | MultiRegistry | Api")
-	static UABApiClient* GetApiClient(FString const& Key);
-};
-

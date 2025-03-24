@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AccelByteMessagingSystem.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "Core/AccelByteBaseCredentials.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "Models/AccelByteErrorModels.h"
@@ -12,11 +13,10 @@
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteCredentials.generated.h"
 
 namespace AccelByte
 {
-
+	
 // forward declaration
 class FHttpRetryScheduler;
 	
@@ -34,9 +34,9 @@ class ACCELBYTEUE4SDK_API Credentials
 public:
 	using BaseCredentials::SetClientCredentials;
 
-	Credentials(FAccelByteMessagingSystem& MessagingRef);
-	virtual ~Credentials();
-
+	Credentials(FHttpRetryScheduler& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& IamServerUrl);
+	virtual ~Credentials() override;
+	
 	/** @brief The user was just authed: At this point, Credential auth tokens are already set. */
 	FOnLoginSuccessDelegate& OnLoginSuccess();
 
@@ -83,6 +83,7 @@ public:
 
 private:
 	FOauth2Token AuthToken;
+	Api::Oauth2 Oauth;
 	
 	FString UserName; // DEPRECATED
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
@@ -95,6 +96,7 @@ private:
 	FAccelByteTaskWPtr RefreshTokenTask;
 
 	FDelegateHandle BearerAuthRejectedHandle;
+	FString IamServerUrl;
 
 	static const FString DefaultSection;
 
@@ -106,33 +108,6 @@ private:
 };
 
 typedef TSharedRef<Credentials, ESPMode::ThreadSafe> FCredentialsRef;
-typedef TSharedPtr<Credentials, ESPMode::ThreadSafe> FCredentialsPtr;	
+typedef TSharedPtr<Credentials, ESPMode::ThreadSafe> FCredentialsPtr;
 
 } // Namespace AccelByte
-
-
-UCLASS(Blueprintable, BlueprintType)
-class UAccelByteBlueprintsCredentials : public UBlueprintFunctionLibrary
-{
-public:
-	GENERATED_BODY()
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetOAuthClientId();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetOAuthClientSecret();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserSessionId();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserId();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserDisplayName();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserNamespace();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserEmailAddress();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserName(); // DEPRECATED
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUniqueDisplayName();
-};
-

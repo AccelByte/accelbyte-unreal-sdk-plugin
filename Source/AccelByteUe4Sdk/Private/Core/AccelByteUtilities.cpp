@@ -4,7 +4,6 @@
 
 #include "Core/AccelByteUtilities.h"
 #include "AccelByteUe4SdkModule.h"
-#include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteHttpClient.h"
@@ -61,12 +60,6 @@ public:
 private:
 	EVP_MD_CTX* Context;
 };
-#endif
-
-#if !PLATFORM_SWITCH
-static constexpr size_t ShaDigestLength = SHA_DIGEST_LENGTH;
-#else
-static constexpr size_t ShaDigestLength = 20;
 #endif
 
 class FConfigurationSettings
@@ -778,63 +771,6 @@ FString FAccelByteUtilities::GenerateSessionTeamId()
 	return FGuid::NewGuid().ToString(EGuidFormats::Digits);
 }
 
-FString FAccelByteUtilities::GetDeviceId(bool bIsDeviceIdRequireEncode)
-{
-	FString Output = FString();
-
-	FString PlatformDeviceId = FPlatformMisc::GetDeviceId();
-	if (PlatformDeviceId.IsEmpty())
-	{
-		bool bIsCached = false;
-		IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->GetItem(AccelByteStoredKeyDeviceId()
-			, THandler<TPair<FString, FString>>::CreateLambda(
-				[&Output, &bIsCached](TPair<FString, FString> SavedDeviceId)
-				{
-					if (SavedDeviceId.Key.IsEmpty() || SavedDeviceId.Value.IsEmpty())
-					{
-						return;
-					}
-					Output = SavedDeviceId.Value;
-					bIsCached = true;
-
-				})
-			, GetCacheFilenameGeneralPurpose());
-		if (!bIsCached)
-		{
-			FString PlainMacAddress = GetMacAddress(false);
-			if (PlainMacAddress.IsEmpty())
-			{
-				Output = FGuid::NewGuid().ToString();
-			}
-			else
-			{
-				Output = PlainMacAddress;
-			}
-			IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(AccelByteStoredKeyDeviceId()
-				, Output
-				, THandler<bool>::CreateLambda([](bool bIsSuccess){})
-				, GetCacheFilenameGeneralPurpose());
-		}
-	}
-	else //IF Platform-specific DeviceID available
-	{
-		Output = PlatformDeviceId;
-	}
-	
-	bool bIsClientDevMode = IsRunningDevMode() && !IsRunningDedicatedServer();
-
-	if (bIsClientDevMode)
-	{
-		Output = GetDevModeDeviceId(Output);
-	}
-
-	if (bIsDeviceIdRequireEncode || !bIsClientDevMode)
-	{
-		Output = EncodeHMACBase64(Output, FRegistry::Settings.PublisherNamespace);
-	}
-	return Output;
-}
-
 FString FAccelByteUtilities::GetDevModeDeviceId(FString const& DefaultDeviceId)
 {
 #pragma region RETRIEVE_OVERRIDE_CONDITION
@@ -936,20 +872,6 @@ FString FAccelByteUtilities::GetDevModeDeviceId(FString const& DefaultDeviceId)
 #pragma endregion
 
 	return DefaultDeviceId;
-}
-
-FString FAccelByteUtilities::GetMacAddress(bool bEncoded)
-{
-	FString MacAddressString = TEXT("");
-	PRAGMA_DISABLE_DEPRECATION_WARNINGS
-		const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
-	PRAGMA_ENABLE_DEPRECATION_WARNINGS
-	for (TArray<uint8>::TConstIterator it(MacAddr); it; ++it)
-	{
-		MacAddressString += FString::Printf(TEXT("%02x"), *it);
-	}
-
-	return (bEncoded && !MacAddressString.IsEmpty()) ? EncodeHMACBase64(MacAddressString, FRegistry::Settings.PublisherNamespace) : MacAddressString;
 }
 
 FString FAccelByteUtilities::GetPlatformName()
@@ -1207,83 +1129,6 @@ FString FAccelByteUtilities::GetFlightId()
 	return FlightId;
 }
 
-void FAccelByteNetUtilities::GetPublicIP(THandler<FAccelByteModelsPubIp> const& OnSuccess
-	, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(
-		FString(__FUNCTION__),
-		TEXT("ipify support is deprecated. Please use ISocketSubsystem to get public IP address."));
-	
-	FString Url = FString::Printf(TEXT("https://api.ipify.org?format=json"));
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void FAccelByteNetUtilities::DownloadFrom(FString const& Url
-	, FHttpRequestProgressDelegate const& OnProgress
-	, THandler<TArray<uint8>> const& OnDownloaded
-	, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("FHttpRequestProgressDelegate is Deprecated - please use DownloadFrom with FHttpRequestProgressDelegate64 param instead."));
-#endif
-
-	FRegistry::HttpClient.Request(TEXT("GET"), Url, {}, TEXT(""), {{TEXT("Accept"), TEXT("application/octet-stream")}}, OnDownloaded, OnProgress, OnError);
-}
-
-void FAccelByteNetUtilities::UploadTo(FString const& Url
-	, TArray<uint8> const& DataUpload
-	, FHttpRequestProgressDelegate const& OnProgress
-	, FVoidHandler const& OnSuccess
-	, FErrorHandler const& OnError
-	, FString const& ContentType)
-{
-	FReport::Log(FString(__FUNCTION__));
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("FHttpRequestProgressDelegate is Deprecated - please use UploadTo with FHttpRequestProgressDelegate64 param instead."));
-#endif
-
-	FRegistry::HttpClient.Request(TEXT("PUT"), Url, {}, DataUpload, { {TEXT("Content-Type"), ContentType} }, OnSuccess, OnProgress, OnError);
-	
-}
-
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
-void FAccelByteNetUtilities::DownloadFrom(FString const& Url
-	, FHttpRequestProgressDelegate64 const& OnProgress
-	, THandler<TArray<uint8>> const& OnDownloaded
-	, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FRegistry::HttpClient.Request(TEXT("GET"), Url, {}, TEXT(""), { {TEXT("Accept"), TEXT("application/octet-stream")} }, OnDownloaded, OnProgress, OnError);
-}
-
-void FAccelByteNetUtilities::UploadTo(FString const& Url
-	, TArray<uint8> const& DataUpload
-	, FHttpRequestProgressDelegate64 const& OnProgress
-	, FVoidHandler const& OnSuccess
-	, FErrorHandler const& OnError
-	, FString const& ContentType)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FRegistry::HttpClient.Request(TEXT("PUT"), Url, {}, DataUpload, { {TEXT("Content-Type"), ContentType} }, OnSuccess, OnProgress, OnError);
-
-}
-#endif
-
 #define REGEX_BASE_URL_WITH_DOMAIN "https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,128}\\.[a-zA-Z0-9()]{1,6}"
 #define REGEX_BASE_URL_WITHOUT_DOMAIN "(?:(https?:\\/\\/)?((?:[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|localhost))"
 #define REGEX_OPTIONAL_PORT "(:(?:[1-9]{1}[0-9]{1,4}|[0-9]{1}))?"
@@ -1446,30 +1291,6 @@ void FAccelByteUtilities::AppendModulesVersionToMap(TMap<FString, FString>& Head
 	Headers.Add(TEXT("Game-Client-Version"), ProjectVersion);
 }
 
-EAccelByteCurrentServerManagementType FAccelByteUtilities::GetCurrentServerManagementType()
-{
-	//Sort this decision based on priority
-	if (!IsRunningDedicatedServer())
-	{
-		return EAccelByteCurrentServerManagementType::NOT_A_SERVER;
-	}
-
-	if (!FRegistry::ServerSettings.DSId.IsEmpty())
-	{
-		return EAccelByteCurrentServerManagementType::ONLINE_AMS;
-	}
-
-	FString PodNameValue = FPlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"));
-	if (!PodNameValue.IsEmpty())
-	{
-		return EAccelByteCurrentServerManagementType::ONLINE_ARMADA;
-	}
-	else
-	{
-		return EAccelByteCurrentServerManagementType::LOCAL_SERVER;
-	}
-}
-
 // Helper function to get content type based on EAccelByteFileType enum
 FString FAccelByteUtilities::GetContentType(EAccelByteFileType const& FileType)
 {
@@ -1503,111 +1324,11 @@ const FString FAccelByteUtilities::GenerateHashString(const FString& Message)
 	return FullHash.ToString().ToLower();
 }
 
-FString FAccelByteUtilities::GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep)
-{
-	// Calculate the time step
-	const uint64 TimeStepCount = CurrentTime / TimeStep;
-
-	// Convert the time step count to network byte order
-	const uint64 TimeStepCountNetworkOrder = ((TimeStepCount & 0x00000000000000FF) << 56) |
-		((TimeStepCount & 0x000000000000FF00) << 40) |
-		((TimeStepCount & 0x0000000000FF0000) << 24) |
-		((TimeStepCount & 0x00000000FF000000) << 8) |
-		((TimeStepCount & 0x000000FF00000000) >> 8) |
-		((TimeStepCount & 0x0000FF0000000000) >> 24) |
-		((TimeStepCount & 0x00FF000000000000) >> 40) |
-		((TimeStepCount & 0xFF00000000000000) >> 56);
-
-	// Convert the secret key to bytes
-	uint8 EncodeOutput[ShaDigestLength];
-	TArray<uint8> SecretKeyBytes = FAccelByteArrayByteFStringConverter::FStringToBytes(SecretKey);
-
-	// Calculate the HMAC-SHA-1
-	FSHA1::HMACBuffer(SecretKeyBytes.GetData(), SecretKeyBytes.Num(), 
-		reinterpret_cast<const uint8*>(&TimeStepCountNetworkOrder), sizeof(TimeStepCountNetworkOrder), 
-		EncodeOutput); 
-
-	// Dynamic truncation to get the offset and Calculate the truncated value
-	uint32 TruncationValue = (EncodeOutput[15] & 0x7f) << 24 |
-		(EncodeOutput[16] & 0xff) << 16 |
-		(EncodeOutput[17] & 0xff) << 8 |
-		(EncodeOutput[18] & 0xff);
-	 
-	// Modulo to get the final code 
-	uint32 TruncatedHash = TruncationValue; 
-	TruncatedHash %= static_cast<uint32>(FMath::Pow(10.0f, CodeLength));
-
-	// Convert to string with leading zeros if necessary
-	FString Result = FString::Printf(TEXT("%0*d"), CodeLength, TruncatedHash);
-
-	return Result;
-}
-
-const FString FAccelByteUtilities::GenerateTOTP(const FString& SecretKey, int CodeLength, int TimeStep)
-{
-	// Get the current Unix time
-	int64 CurrentTime;
-	if (FRegistry::TimeManager.IsInSync())
-	{
-		CurrentTime = FRegistry::TimeManager.GetCurrentServerTime().ToUnixTimestamp();
-	}
-	else
-	{
-		CurrentTime = FDateTime::UtcNow().ToUnixTimestamp();
-		UE_LOG(LogAccelByte, Warning, TEXT("TimeManager is not in sync with server, generating TOTP using local time."))
-	}
-
-	return GenerateTOTP(CurrentTime, SecretKey, CodeLength, TimeStep);
-}
-
-TArray<FString> FAccelByteUtilities::GenerateAcceptableTOTP(const FString& ServerSecretKey, const FString& UserId)
-{
-	constexpr int32 AcceptableWindow{30};
-	constexpr int32 CodeLength{6};
-	TArray<FString> AcceptableTOTP;
-	FString HashString = GenerateHashString(ServerSecretKey + UserId);
-
-	// Get the current Unix time
-	int64 CurrentTime;
-	if (FRegistry::TimeManager.IsInSync())
-	{
-		CurrentTime = FRegistry::TimeManager.GetCurrentServerTime().ToUnixTimestamp();
-	}
-	else
-	{
-		CurrentTime = FDateTime::UtcNow().ToUnixTimestamp();
-		UE_LOG(LogAccelByte, Warning, TEXT("TimeManager is not in sync with server, generating TOTP using local time."))
-	}
-
-	for (int32 i = 0; i < AcceptableWindow; i++)
-	{
-		const FString ServerGeneratedTOTP = GenerateTOTP(CurrentTime - i, HashString, CodeLength, AcceptableWindow);
-		if (!AcceptableTOTP.Contains(ServerGeneratedTOTP))
-		{
-			AcceptableTOTP.Emplace(ServerGeneratedTOTP);
-		}
-	}
-
-	return AcceptableTOTP;
-}
-
-bool FAccelByteUtilities::ValidateTOTP(const FString& ServerSecretKey, const FString& TOTP, const FString& UserId)
-{
-	TArray<FString> AcceptableTOTP = GenerateAcceptableTOTP(ServerSecretKey, UserId);
-
-	return AcceptableTOTP.Contains(TOTP);
-}
-
 bool FAccelByteUtilities::IsValidEmail(const FString& Email)
 {
 	const std::regex pattern
 	("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+");
 	return std::regex_match(TCHAR_TO_UTF8(*Email), pattern);
-}
-
-FDateTime FAccelByteUtilities::GetCurrentServerTime()
-{
-	return FRegistry::TimeManager.GetCurrentServerTime();
 }
 
 bool FAccelByteUtilities::SplitArraysToNum(const TArray<FString>& InArray

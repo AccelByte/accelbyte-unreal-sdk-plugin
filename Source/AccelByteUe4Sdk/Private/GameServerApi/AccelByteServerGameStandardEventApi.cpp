@@ -11,8 +11,9 @@ namespace GameServerApi
 	
 ServerGameStandardEvent::ServerGameStandardEvent(ServerCredentials& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: ServerBaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, TEXT("GameStandardEvent"))
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: ServerBaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, TEXT("GameStandardEvent"), InServerApiClient)
 {
 }
 

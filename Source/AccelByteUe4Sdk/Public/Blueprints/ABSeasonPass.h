@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteApiClient.h"
 #include "Models/AccelByteSeasonPassModels.h"
 #include "ABSeasonPass.generated.h"
 

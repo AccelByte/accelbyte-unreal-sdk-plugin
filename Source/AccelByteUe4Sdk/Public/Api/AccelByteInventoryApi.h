@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Inventory : public FApiBase, public TSharedFromThis<Inventory, ESPMode::ThreadSafe>
 {
 public:
-	Inventory(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Inventory(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Inventory();
 
 #pragma region V1 Inventory

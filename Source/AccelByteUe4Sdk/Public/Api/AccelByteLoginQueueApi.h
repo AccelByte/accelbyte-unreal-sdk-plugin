@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API LoginQueue : public FApiBase, public TSharedFromThis<LoginQueue, ESPMode::ThreadSafe>
 {
 public:
-	LoginQueue(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef);
+	LoginQueue(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~LoginQueue();
 private:
 	TSharedRef<Credentials, ESPMode::ThreadSafe> UserCredentialsRef;

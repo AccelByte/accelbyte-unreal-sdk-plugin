@@ -6,7 +6,7 @@
 
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
@@ -49,8 +49,9 @@ void Session::RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> & JsonOb
 
 Session::Session(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
 
 Session::~Session()

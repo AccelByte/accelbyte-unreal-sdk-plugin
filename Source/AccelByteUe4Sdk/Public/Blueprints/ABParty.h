@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteLobbyModels.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteApiClient.h"
 #include "ABParty.generated.h"
 
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE

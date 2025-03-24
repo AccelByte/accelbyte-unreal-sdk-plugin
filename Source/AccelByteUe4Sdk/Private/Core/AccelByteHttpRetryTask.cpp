@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteHttpRetryTask.h"
+#include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteReport.h"
 
 namespace AccelByte
@@ -74,10 +75,12 @@ namespace AccelByte
 			return false;
 		}
 
-		if (!Request->OnProcessRequestComplete().IsBound())
+		if (Request->OnProcessRequestComplete().IsBound())
 		{
-			Request->OnProcessRequestComplete().BindThreadSafeSP(this, &FHttpRetryTask::OnProcessRequestComplete);
+			Request->OnProcessRequestComplete().Unbind();
 		}
+		Request->OnProcessRequestComplete().BindThreadSafeSP(this, &FHttpRetryTask::OnProcessRequestComplete);
+
 
 		auto HttpRetrySchedulerPtr = HttpRetrySchedulerWPtr.Pin();
 		if (HttpRetrySchedulerPtr.IsValid())
@@ -269,6 +272,9 @@ namespace AccelByte
 
 	bool FHttpRetryTask::Finish()
 	{
+		FString State = FAccelByteUtilities::GetUEnumValueAsString(TaskState);
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTPRetryTask finsihed with status: %s"), *State);
+
 		if (TaskState == EAccelByteTaskState::Running)
 		{
 			Cancel();
@@ -276,9 +282,11 @@ namespace AccelByte
 
 		if (TaskState == EAccelByteTaskState::Completed || TaskState == EAccelByteTaskState::Cancelled || TaskState == EAccelByteTaskState::Failed)
 		{
-			FReport::LogHttpResponse(Request, Request->GetResponse());
-			CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), IsFinished());
+			auto Response = Request->GetResponse();
+			FReport::LogHttpResponse(Request, Response);
+			CompleteDelegate.ExecuteIfBound(Request, Response, IsFinished());
 		}
+
 		return FAccelByteTask::Finish();
 	}
 
@@ -475,9 +483,28 @@ namespace AccelByte
 		return TaskTime >= RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeout;
 	}
 
-	void FHttpRetryTask::OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse,
-		bool bConnectedSuccessfully)
+	void FHttpRetryTask::OnProcessRequestComplete(FHttpRequestPtr InRequest
+		, FHttpResponsePtr InResponse
+		, bool bConnectedSuccessfully)
 	{
+		int32 ResponseCode = 0;
+
+		if (InResponse.IsValid())
+		{
+			ResponseCode = InResponse->GetResponseCode();
+		}
+
+		FString Message = TEXT("");
+		if (bConnectedSuccessfully)
+		{
+			Message = FString::Printf(TEXT("success with response code %d"), ResponseCode);
+		}
+		else
+		{
+			Message = FString::Printf(TEXT("failed with response code %d"), ResponseCode);
+		}
+
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("OnProcessRequestCompleted triggered - %s"), *Message);
 		SetResponseTime(FDateTime::UtcNow());
 	}
 }

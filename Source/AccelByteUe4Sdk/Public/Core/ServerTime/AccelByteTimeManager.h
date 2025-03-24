@@ -7,10 +7,8 @@
 #include "Misc/Timespan.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteSettings.h"
 #include "Models/AccelByteGeneralModels.h"
-
-#define FAccelByteTimeManagerPtr TSharedPtr<FAccelByteTimeManager, ESPMode::ThreadSafe>
-#define FAccelByteTimeManagerWPtr TWeakPtr<FAccelByteTimeManager, ESPMode::ThreadSafe>
 
 namespace AccelByte
 {
@@ -21,8 +19,8 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API FAccelByteTimeManager
 {
 public:
-	FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& InHttpRef);
-	FAccelByteTimeManager();
+	FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& InHttpRef, FString const& InBasicServerUrl);
+	FAccelByteTimeManager(const FString& InBasicServerUrl);
 	virtual ~FAccelByteTimeManager();
 
 	/**
@@ -87,5 +85,9 @@ private:
 	FThreadSafeCounter ReferenceCount{0};
 	
 	FAccelByteTaskWPtr AccelByteGetServerTimeTaskWPtr;
+	FString BasicServerUrl;
 };
+
+using FAccelByteTimeManagerPtr = TSharedPtr<FAccelByteTimeManager, ESPMode::ThreadSafe>;
+using FAccelByteTimeManagerWPtr = TWeakPtr<FAccelByteTimeManager, ESPMode::ThreadSafe>;
 }

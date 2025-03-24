@@ -5,18 +5,15 @@
 
 #include "Api/AccelByteLoginQueueApi.h"
 #include "AccelByteUe4SdkModule.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
-#include "Core/AccelByteOauth2Api.h"
 #include "Core/AccelByteUtilities.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLoginQueue, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteLoginQueue);
-
-using AccelByte::Api::Oauth2;
 
 namespace AccelByte
 {
@@ -25,8 +22,9 @@ namespace Api
 
 LoginQueue::LoginQueue(Credentials& InCredentialsRef
 	, Settings& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, UserCredentialsRef{InCredentialsRef.AsShared()}
 {
 }

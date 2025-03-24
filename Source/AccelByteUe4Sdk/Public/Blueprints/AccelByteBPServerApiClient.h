@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Core/AccelByteMultiRegistry.h"
 #include "ABServerOauth2.h"
 #include "ABServerDSM.h"
 #include "ABServerLobby.h"
@@ -12,6 +11,7 @@
 #include "ABServerSessionBrowser.h"
 #include "ABServerAchievement.h"
 #include "ABServerStatistic.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "AccelByteBPServerApiClient.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
@@ -64,13 +64,4 @@ public:
 	UABServerStatistic* ServerStatistic;
 private:
 	AccelByte::FServerApiClientPtr ApiClientPtr;
-};
-
-UCLASS(Blueprintable, BlueprintType)
-class UServerMultiRegistry final : public UBlueprintFunctionLibrary
-{
-	GENERATED_BODY()
-public:
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | MultiRegistry | Api")
-	static UServerApiClient* GetServerApiClient(FString const& Key);
 };

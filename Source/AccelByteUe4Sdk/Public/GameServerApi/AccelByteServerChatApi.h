@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
@@ -27,7 +27,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerChat : public FServerApiBase
 {
 public:
-	ServerChat(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+	ServerChat(const ServerCredentials& Credentials
+		, const ServerSettings& Settings
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerChat();
 
 private:

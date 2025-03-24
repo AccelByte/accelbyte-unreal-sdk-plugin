@@ -5,7 +5,7 @@
 #pragma once
 
 #include "AccelByteApiClient.h"
-#include "AccelByteRegistry.h"
+
 #include "IAccelByteTokenGenerator.h"
 
 namespace AccelByte

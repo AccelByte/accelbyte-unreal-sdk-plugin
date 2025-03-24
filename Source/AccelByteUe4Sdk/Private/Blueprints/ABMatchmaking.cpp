@@ -4,7 +4,7 @@
 
 #include "Blueprints/ABMatchmaking.h"
 #include "Api/AccelByteLobbyApi.h"
-#include "Core/AccelByteRegistry.h"
+
 
 using namespace AccelByte;
 

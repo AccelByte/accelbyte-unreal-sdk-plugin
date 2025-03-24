@@ -28,7 +28,7 @@ class ServerSeasonPass;
 class ACCELBYTEUE4SDK_API SeasonPass : public FApiBase, public TSharedFromThis<SeasonPass, ESPMode::ThreadSafe>
 {
 public:
-	SeasonPass(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	SeasonPass(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~SeasonPass();
 
 	/**

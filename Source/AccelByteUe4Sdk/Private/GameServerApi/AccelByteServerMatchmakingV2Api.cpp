@@ -12,8 +12,9 @@ namespace GameServerApi
 
 ServerMatchmakingV2::ServerMatchmakingV2(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingRef, InHttpRef, InServerApiClient)
 {
 }
 

@@ -53,6 +53,17 @@ public:
 		, float InMaxBackoffDelay = 30.f
 		, float InTotalTimeout = 60.f);
 
+	Chat(Credentials & InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler & InHttpRef
+		, FAccelByteMessagingSystem & InMessagingSystemRef
+		, FAccelByteNetworkConditioner & InNetworkConditionerRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+		, float InPingDelay = 30.f
+		, float InInitialBackoffDelay = 1.f
+		, float InMaxBackoffDelay = 30.f
+		, float InTotalTimeout = 60.f);
+
 	~Chat();
 private:
 	const FString ChatSessionHeaderName = TEXT("X-Ab-ChatSessionID");

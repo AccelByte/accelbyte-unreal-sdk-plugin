@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "GameServerApi/AccelByteServerSessionBrowserApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteUtilities.h"
@@ -15,8 +15,9 @@ namespace GameServerApi
 
 ServerSessionBrowser::ServerSessionBrowser(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
 
 ServerSessionBrowser::~ServerSessionBrowser()

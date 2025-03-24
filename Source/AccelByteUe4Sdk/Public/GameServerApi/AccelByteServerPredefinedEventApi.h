@@ -23,7 +23,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerPredefinedEvent : public ServerBaseAnalytics
 {
 public:
-	ServerPredefinedEvent(ServerCredentials& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerPredefinedEvent(ServerCredentials& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 
 	/**
 	 * @brief Send/enqueue a single authorized telemetry data of a predefined event.

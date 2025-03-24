@@ -24,6 +24,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | AccelByteInstance")
 	UABApiClient* GetApiClient(FString const Key);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | AccelByteInstance")
+	UServerApiClient* GetServerApiClient(FString const Key);
 	
 	FAccelByteInstancePtr GetAccelByteInstance();
 

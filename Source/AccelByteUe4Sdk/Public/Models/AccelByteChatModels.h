@@ -104,6 +104,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatNotif
 	//! Sender's UserId
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatNotif")
 	FString From {};
+
+	//! Platform ID of the player that sent this chat message.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | ChatNotif")
+	EAccelBytePlatformType SenderPlatformId {};
 };
 
 #pragma endregion

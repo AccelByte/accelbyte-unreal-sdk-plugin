@@ -5,7 +5,7 @@
 
 #include "GameServerApi/AccelByteServerChallengeApi.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteServerCredentials.h"
@@ -18,13 +18,69 @@ namespace GameServerApi
 
 ServerChallenge::ServerChallenge(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
 }
 
 ServerChallenge::~ServerChallenge()
 {
+}
+
+FAccelByteTaskWPtr ServerChallenge::GetUserChallengeProgress(const FString& UserId
+	, FString const& ChallengeCode
+	, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, uint64 Offset
+	, uint64 Limit
+	, FString const& GoalCode
+	, TArray<FString> const& Tags
+	, TOptional<FDateTime> DateTime)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (UserId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserId cannot be empty."));
+		return nullptr;
+	}
+
+	if (ChallengeCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("ChallengeCode cannot be empty."));
+		return nullptr;
+	}
+
+	TMap<FString, FString> QueryParams{
+		{ TEXT("offset"), FString::FromInt(Offset) },
+		{ TEXT("limit"), FString::FromInt(Limit) },
+	};
+
+	if (!GoalCode.IsEmpty())
+	{
+		QueryParams.Emplace(TEXT("goalCode"), GoalCode);
+	}
+
+	FString CSVTags = FString::Join(Tags, TEXT(","));
+
+	if (DateTime.IsSet())
+	{
+		//format(2006-01-02T15:04:05Z)
+		FString DateTimeFormatted = DateTime.GetValue().ToIso8601();
+		if (!DateTimeFormatted.IsEmpty())
+		{
+			QueryParams.Emplace(TEXT("dateTime"), DateTimeFormatted);
+		}
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/progress/%s")
+		, *ServerSettingsRef.ChallengeServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserId
+		, *ChallengeCode);
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr ServerChallenge::EvaluateChallengeProgress(FAccelByteModelsChallengeServerEvaluateProgressRequest const& Request

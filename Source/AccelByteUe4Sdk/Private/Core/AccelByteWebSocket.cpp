@@ -5,7 +5,7 @@
 #include "Core/AccelByteWebSocket.h"
 #include "WebSocketsModule.h"
 #include "Core/IWebSocketFactory.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteCredentials.h"

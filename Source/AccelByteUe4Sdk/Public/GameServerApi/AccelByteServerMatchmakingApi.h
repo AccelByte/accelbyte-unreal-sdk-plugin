@@ -24,7 +24,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerMatchmaking : public FServerApiBase
 {
 public:
-	ServerMatchmaking(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerMatchmaking(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerMatchmaking();
 
 	/**

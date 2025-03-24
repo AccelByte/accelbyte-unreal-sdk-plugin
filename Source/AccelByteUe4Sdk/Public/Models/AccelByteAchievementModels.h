@@ -67,6 +67,46 @@ enum class ConvertAchievementStatus : uint8
 	UNLOCKED = 2
 };
 
+#pragma region BULK_OPERATION
+
+/** @brief Request to unlock multiple achievement in bulk operation */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementBulkUnlockRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | BulkUnlockRequest ")
+	TArray<FString> AchievementCodes{};
+};
+
+/** @brief Error information from specific achievement when performing bulk operation */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementBulkUnlockErrorDetail
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | BulkUnlockResponseErrorDetail ")
+	int32 ErrorCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | BulkUnlockResponseErrorDetail ")
+	FString ErrorMessage{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | BulkUnlockResponseErrorDetail ")
+	FString ThirdPartyReferenceId{};
+};
+
+/** @brief Response from bulk operation to unlock multiple achievement */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementBulkUnlockRespone
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | BulkUnlockResponse ")
+	FString AchievementCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | BulkUnlockResponse ")
+	FAccelByteModelsAchievementBulkUnlockErrorDetail ErrorDetail{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | BulkUnlockResponse ")
+	bool Success{ false };
+};
+
+#pragma endregion
+
 /** @brief Data Model for Achievement's Icon */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementIcon

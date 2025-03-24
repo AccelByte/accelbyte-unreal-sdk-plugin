@@ -313,7 +313,9 @@ enum class EAccelByteEntitlementIAPOrderStatus : uint8
 	FULFILLED,
 	FAILED,
 	PARTIAL_REVOKED,
-	REVOKED
+	REVOKED,
+	// Specific to Steam for now
+	REVOKE_FAILED,
 };
 
 UENUM(BlueprintType)
@@ -452,6 +454,41 @@ enum class EAccelByteSubscriptionStatus : uint8
 	ON_HOLD, 
 	CANCELED, 
 	UNKNOWN
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteEntitlementUpdatedAction : uint8
+{
+	Grant,
+	Sell,
+	Split,
+	Delete,
+	Update,
+	Transfer,
+	Consume,
+	Revoke,
+	Disable,
+	Enable,
+	Unknown
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteWalletBalanceChangedAction : uint8
+{
+	Payment,
+	Debit,
+	Expire,
+	Credit,
+	Transaction_cancelled,
+	Unknown
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteWalletStatusChangedAction : uint8
+{
+	Enable,
+	Disable,
+	Unknown
 };
 
 #pragma endregion EnumField
@@ -1640,6 +1677,96 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTwitchDropEntitlement
 	FString Language{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementUpdate
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString Id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	EAccelByteEntitlementClass Clazz{ EAccelByteEntitlementClass::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	EAccelByteEntitlementType Type{ EAccelByteEntitlementType::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	EAccelByteEntitlementStatus Status{ EAccelByteEntitlementStatus::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString AppId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	EAccelByteAppType AppType{ EAccelByteAppType::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString Sku{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString ItemId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString GrantedCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString ItemNamespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	int32 UseCount{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	EAccelByteEntitlementSource Source{ EAccelByteEntitlementSource::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	FDateTime StartDate{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	FDateTime EndDate{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	FDateTime GrantedAt{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	FDateTime CreatedAt{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	FDateTime UpdatedAt{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	EAccelByteUserEntitlementOrigin Origin{ EAccelByteUserEntitlementOrigin::NONE };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	FString CollectionId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	bool Stackable{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementUpdateNotification ")
+	int32 StackedUseCount{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementUpdatedNotification
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	EAccelByteEntitlementUpdatedAction Action{ EAccelByteEntitlementUpdatedAction::Unknown };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | EntitlementUpdateNotification")
+	TArray<FAccelByteModelsEntitlementUpdate> Data{};
+};
+
 #pragma endregion EntitlementModelsField
 
 #pragma region OrderModelsField
@@ -2410,6 +2537,60 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletTransactionPaging
 		TArray<FAccelByteModelsWalletTransactionInfo> Data;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionPaging")
 		FAccelByteModelsPaging Paging;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletBalanceChangedData
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	FString CurrencyCode{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	int64 Amount{ 0 };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	FString Source{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	FString Reason{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	FString Origin{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletBalanceChangedNotification
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	EAccelByteWalletBalanceChangedAction Action{EAccelByteWalletBalanceChangedAction::Unknown};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletBalanceUpdated")
+	FAccelByteModelsWalletBalanceChangedData Data{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletStatusChangedData
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletStatusUpdated")
+	FString WalletId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletStatusUpdated")
+	FString UserId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletStatusUpdated")
+	EAccelByteWalletStatus Status{ EAccelByteWalletStatus::NONE };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletStatusUpdated")
+	EAccelByteWalletStatus PreviousStatus{ EAccelByteWalletStatus::NONE };
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletStatusChangedNotification
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletStatusUpdated")
+	EAccelByteWalletStatusChangedAction Action{ EAccelByteWalletStatusChangedAction::Unknown };
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletStatusUpdated")
+	FAccelByteModelsWalletStatusChangedData Data{};
 };
 
 #pragma endregion WalletModelsField
@@ -3498,4 +3679,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsThirdPartyUserSubscriptionQueryReques
 	int32 Offset{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UserSubscriptionsQuery")
 	int32 Limit{20};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSyncSteamIAPTransactionRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SyncSteamIAPTransactionRequest")
+	FString OrderId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSyncSteamIAPTransactionResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SyncSteamIAPTransactionResponse")
+	EAccelByteEntitlementIAPOrderStatus IapOrderStatus{EAccelByteEntitlementIAPOrderStatus::NONE};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SyncSteamIAPTransactionResponse")
+	FString IapOrderNo{};
 };

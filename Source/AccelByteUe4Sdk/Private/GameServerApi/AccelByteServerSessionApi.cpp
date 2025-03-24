@@ -6,7 +6,7 @@
 
 #include "Api/AccelByteSessionApi.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteUtilities.h"
@@ -18,8 +18,9 @@ namespace GameServerApi
 
 ServerSession::ServerSession(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
 
 ServerSession::~ServerSession()
@@ -514,6 +515,21 @@ FAccelByteTaskWPtr ServerSession::GetRecentTeamPlayers(FString const& UserId
 	QueryParam.Emplace(TEXT("limit"), FString::FromInt(Limit));
 	
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParam, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerSession::UpdateDSInformation(FString const& GameSessionID
+	, FAccelByteModelsGameSessionUpdateDSInformationRequest const& DSInformation
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions/%s/dsinformation")
+		, *ServerSettingsRef.SessionServerUrl
+		, *ServerCredentialsRef->GetClientNamespace()
+		, *GameSessionID);
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DSInformation, OnSuccess, OnError);
 }
 
 } // Namespace GameServerApi

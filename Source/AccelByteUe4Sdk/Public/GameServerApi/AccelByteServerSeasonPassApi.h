@@ -25,7 +25,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerSeasonPass : public FServerApiBase
 {
 public:
-	ServerSeasonPass(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerSeasonPass(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerSeasonPass();
 
 	/**

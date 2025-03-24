@@ -4,7 +4,7 @@
 #include "Api/AccelByteHeartBeatApi.h"
 
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
@@ -16,10 +16,11 @@ namespace AccelByte
 {
 namespace Api
 {
-	HeartBeat::HeartBeat(Credentials const& InCredentialsRef,
-		Settings const& InSettingsRef,
-		FHttpRetryScheduler& InHttpRef)
-		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	HeartBeat::HeartBeat(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	{}
 
 	HeartBeat::~HeartBeat()

@@ -5,7 +5,7 @@
 #include "Api/AccelByteStoreDisplayApi.h"
 #include "Core/AccelByteError.h"
 #include "JsonUtilities.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
@@ -17,9 +17,10 @@ namespace Api
 {
 	
 StoreDisplay::StoreDisplay(Credentials const& InCredentialsRef
-		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef)
-		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {
 }
 	

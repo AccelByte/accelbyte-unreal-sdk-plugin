@@ -22,7 +22,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API BinaryCloudSave : public FApiBase, public TSharedFromThis<BinaryCloudSave, ESPMode::ThreadSafe>
 {
 public:
-	explicit BinaryCloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	explicit BinaryCloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~BinaryCloudSave();
 
 	

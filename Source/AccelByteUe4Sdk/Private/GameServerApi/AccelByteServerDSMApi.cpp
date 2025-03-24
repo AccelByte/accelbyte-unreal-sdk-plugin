@@ -5,12 +5,13 @@
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
 #include "Core/AccelByteServerCredentials.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "Core/AccelByteUtilities.h"
 #include "Engine/GameEngine.h"
 #include "GameFramework/GameState.h"
@@ -237,7 +238,22 @@ FAccelByteTaskWPtr ServerDSM::RegisterLocalServerToDSM(int32 Port
 		{
 			RegisterLocalServerToDSM(Result.Ip, Port, ServerName_, OnSuccess, OnError, CustomAttribute);
 		});
-	FAccelByteNetUtilities::GetPublicIP(GetPubIpDelegate, OnError);
+	
+	FServerApiClientPtr ServerApiClientPtr = ServerApiClient.Pin();
+	if(!ServerApiClientPtr.IsValid())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Server api client is invalid!"));
+		return nullptr;
+	}
+
+	FAccelByteApiUtilitiesPtr UtilitiesPtr = ServerApiClientPtr->GetServerApiUtilities().Pin();
+	if(!UtilitiesPtr.IsValid())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Server utilities is invalid!"));
+		return nullptr;
+	}
+	
+	UtilitiesPtr->GetPublicIP(GetPubIpDelegate, OnError);
 	return nullptr;
 }
 
@@ -295,7 +311,7 @@ FAccelByteTaskWPtr ServerDSM::RegisterServerGameSession(FString const& SessionId
 	Request.Configuration = "";
 	Request.Deployment = RegisteredServerInfo.Deployment;
 	Request.Region = RegisteredServerInfo.Region;
-	Request.Namespace = FRegistry::ServerCredentialsRef->GetClientNamespace();
+	Request.Namespace = ServerCredentialsRef->GetClientNamespace();
 	Request.Matching_allies = {{{Party}}};
 	
 	if(ServerType == EServerType::LOCALSERVER)
@@ -537,8 +553,9 @@ int32 ServerDSM::GetPlayerNum()
 
 ServerDSM::ServerDSM(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-    : FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+    : FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
 	AutoShutdownDelegate = FTickerDelegate::CreateRaw(this, &ServerDSM::ShutdownTick);
 }

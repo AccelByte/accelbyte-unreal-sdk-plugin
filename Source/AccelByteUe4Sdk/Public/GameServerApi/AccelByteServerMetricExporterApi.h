@@ -24,8 +24,11 @@ namespace GameServerApi
 	class ACCELBYTEUE4SDK_API ServerMetricExporter
 	{
 	public:
-		ServerMetricExporter(ServerSettings const& InServerSettingsRef);
+		ServerMetricExporter(ServerSettings const& InServerSettingsRef
+			, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 		virtual ~ServerMetricExporter();
+
+		void SetServerApiClient(TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient);
 
 		/**
 		 * @brief Initialize Metric Exporter with default value.
@@ -111,7 +114,7 @@ namespace GameServerApi
 		 * By default it will use AccelByteStatsDMetricCollector class.
 		 * Should be set if custom collector is needed.
 		 *
-		 * @param Collecetor The collector object inherited from IAccelByteStatsDMetricCollector
+		 * @param Collector The collector object inherited from IAccelByteStatsDMetricCollector
 		 */
 		void SetStatsDMetricCollector(const TSharedPtr<IAccelByteStatsDMetricCollector>& Collector);
 
@@ -134,6 +137,7 @@ namespace GameServerApi
 		void StopExporting();
 
 		ServerSettings const& ServerSettingsRef;
+		TWeakPtr<FServerApiClient, ESPMode::ThreadSafe> ServerApiClient;
 		TSharedPtr<IAccelByteStatsDMetricCollector> StatsDMetricCollector;
 		TSharedPtr<FSocket> Socket;
 		FTickerDelegate MetricExporterTickDelegate;

@@ -10,6 +10,7 @@
 #include "Models/AccelByteEcommerceModels.h"
 #include "Math/NumericLimits.h"
 #include "Models/AccelByteChallengeModels.h"
+#include "openssl/sha.h"
 #include "AccelByteUtilities.generated.h"
 
 // AccelByte IDs have a max length of 32, as they are UUIDs that are striped of their hyphens
@@ -23,6 +24,12 @@ static constexpr int32 UserIdsURLLimit = 40;
 
 static constexpr int32 MaximumQueryLimit = 100;
 static constexpr int32 MaximumEntitlementIds = 20;
+
+#if !PLATFORM_SWITCH
+static constexpr size_t ShaDigestLength = SHA_DIGEST_LENGTH;
+#else
+static constexpr size_t ShaDigestLength = 20;
+#endif
 
 enum class EAccelBytePlatformType : uint8;
 enum class EAccelByteDevModeDeviceIdMethod : uint8;
@@ -333,22 +340,6 @@ public:
 	static FString GenerateSessionTeamId();
 
 	/**
-	 * @brief Try to get the DeviceID from current Platform, if not found from the current Platform then 
-	 * the first fallback option will get the DeviceID from a cached file and if not found in the cached file then 
-	 * the second fallback option will try to get the MAC Address value and if MAC Address not found then
-	 * the last fallback option is generating random UUID and then cached in a file.
-	 *
-	 * NOTE:
-	 * DeviceID for shipping build and Dedicated Server are always encoded, and other thant those it can use development
-	 * mode DeviceID that is configurable from the .ini file.
-	 *
-	 * @param bIsDeviceIdRequireEncode Flag to encode DeviceID. (default: true)
-	 * 
-	 * @return String of DeviceID.
-	 */
-	static FString GetDeviceId(bool bIsDeviceIdRequireEncode = true);
-
-	/**
 	 * @brief Encode HMAC the message using built in function from UnrealEngine and then Base64 the result.
 	 * 
 	 * @param Message Specified text.
@@ -358,14 +349,6 @@ public:
 	 */
 	static FString EncodeHMACBase64(FString const& Message
 		, FString const& Key);
-
-	/**
-	 * @brief Obtain an HMAC Buffer encoded MAC Address, using PublisherNamespace as key.
-	 *
-	 * @param bEncoded Flag to encode the return value. (default: true)
-	 * @return Either plain MAC Address or encoded one.
-	 */
-	static FString GetMacAddress(bool bEncoded = true);
 
 	/**
 	 * @brief Get current Platform name.
@@ -421,11 +404,6 @@ public:
 	static FString GetFlightId();
 
 	/**
-	 * @brief To be called from game server to decide the type of the game server management.
-	 */
-	static EAccelByteCurrentServerManagementType GetCurrentServerManagementType();
-
-	/**
 	 * @brief Get the key to DeviceID cache entry
 	 */
 	static FString AccelByteStoredKeyDeviceId() { return FString(TEXT("DeviceId")); }
@@ -463,11 +441,7 @@ public:
 	static void AppendModulesVersionToMap(TMap<FString, FString>& Headers);
 	static FString GetContentType(EAccelByteFileType const& FileType);
 	static const FString GenerateHashString(const FString& Message);
-	static const FString GenerateTOTP(const FString& SecretKey, int CodeLength = 6, int TimeStep = 30);
-	static bool ValidateTOTP(const FString& ServerSecretKey, const FString& TOTP, const FString& UserId);
 	static bool IsValidEmail(const FString& Email);
-
-	static FDateTime GetCurrentServerTime();
 
 	/**
 	 * Split an array into multiple arrays with a maximum element number.
@@ -542,8 +516,6 @@ public:
 
 private:
 	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);
-	static FString GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep);
-	static TArray<FString> GenerateAcceptableTOTP(const FString& ServerSecretKey, const FString& UserId);
 
 //To allow override for testing using mock class
 protected:
@@ -600,77 +572,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPubIp
 class ACCELBYTEUE4SDK_API FAccelByteNetUtilities
 {
 public:
-	/**
-	 * @brief Get Public IP using api.ipify.org
-	 *
-	 * @param OnSuccess Callback function for successful delegate.
-	 * @param OnError Callback function for error delegate.
-	 */
-	static void GetPublicIP(THandler<FAccelByteModelsPubIp> const& OnSuccess
-		, FErrorHandler const& OnError);
-
-	/**
-	 * @brief Download  acontent from specified URL with several callback functions including OnProgress, OnDownloaded, and OnError.
-	 *
-	 * @param Url Specified URL to download the content.
-	 * @param OnProgress Callback function for on progress delegate.
-	 * @param OnDownloaded Callback function for successful download delegate.
-	 * @param OnError Callback function for error delegate.
-	 */
-	static void DownloadFrom(FString const& Url
-		, FHttpRequestProgressDelegate const& OnProgress
-		, const THandler<TArray<uint8>>& OnDownloaded
-		, const FErrorHandler& OnError);
-
-	/**
-	 * @brief Upload a content using specified URL with several callback functions including OnProgress, OnSuccess, and OnError.
-	 *
-	 * @param Url Specified URL to upload the content.
-	 * @param DataUpload Content to upload.
-	 * @param OnProgress Callback function for on progress delegate.
-	 * @param OnSuccess Callback function for successful upload delegate.
-	 * @param OnError Callback function for error delegate.
-	 * @param ContentType Specified content-type header which determine the type of uploaded content (default: application/octet-stream)
-	 */
-	static void UploadTo(FString const& Url
-		, TArray<uint8> const& DataUpload
-		, FHttpRequestProgressDelegate const& OnProgress
-		, AccelByte::FVoidHandler const& OnSuccess
-		, FErrorHandler const& OnError
-		, FString const& ContentType = TEXT("application/octet-stream"));
-
-#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
-	/**
-	 * @brief Download  acontent from specified URL with several callback functions including OnProgress, OnDownloaded, and OnError.
-	 *
-	 * @param Url Specified URL to download the content.
-	 * @param OnProgress Callback function for on progress delegate.
-	 * @param OnDownloaded Callback function for successful download delegate.
-	 * @param OnError Callback function for error delegate.
-	 */
-	static void DownloadFrom(FString const& Url
-		, FHttpRequestProgressDelegate64 const& OnProgress
-		, const THandler<TArray<uint8>>& OnDownloaded
-		, const FErrorHandler& OnError);
-
-	/**
-	 * @brief Upload a content using specified URL with several callback functions including OnProgress, OnSuccess, and OnError.
-	 *
-	 * @param Url Specified URL to upload the content.
-	 * @param DataUpload Content to upload.
-	 * @param OnProgress Callback function for on progress delegate.
-	 * @param OnSuccess Callback function for successful upload delegate.
-	 * @param OnError Callback function for error delegate.
-	 * @param ContentType Specified content-type header which determine the type of uploaded content (default: application/octet-stream)
-	 */
-	static void UploadTo(FString const& Url
-		, TArray<uint8> const& DataUpload
-		, FHttpRequestProgressDelegate64 const& OnProgress
-		, AccelByte::FVoidHandler const& OnSuccess
-		, FErrorHandler const& OnError
-		, FString const& ContentType = TEXT("application/octet-stream"));
-#endif
-
 	/**
 	 * @brief Check whether specified URL is a valid URL format or not.
 	 *

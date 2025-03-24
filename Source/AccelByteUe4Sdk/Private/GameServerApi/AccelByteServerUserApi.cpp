@@ -6,7 +6,7 @@
 #include "GameServerApi/AccelByteServerUserApi.h"
 
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteServerSettings.h"
@@ -19,8 +19,9 @@ namespace GameServerApi
 
 ServerUser::ServerUser(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
 }
 

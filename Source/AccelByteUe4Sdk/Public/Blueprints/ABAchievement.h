@@ -5,8 +5,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiClient.h"
 #include "UObject/NoExportTypes.h"
-#include "Core/AccelByteMultiRegistry.h"
+
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteAchievementModels.h"
 #include "ABAchievement.generated.h"

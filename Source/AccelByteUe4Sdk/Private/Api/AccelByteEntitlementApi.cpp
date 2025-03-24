@@ -4,7 +4,7 @@
 
 #include "Api/AccelByteEntitlementApi.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteHttpClient.h"
@@ -20,8 +20,9 @@ namespace Api
 
 Entitlement::Entitlement(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {
 }
 
@@ -1073,6 +1074,33 @@ FAccelByteTaskWPtr Entitlement::QueryUserSubcriptions(EAccelBytePlatformSync Pla
 
 	// Api Request 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, Content, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Entitlement::SyncSteamIAPTransaction(FAccelByteModelsSyncSteamIAPTransactionRequest const& Request
+	, THandler<FAccelByteModelsSyncSteamIAPTransactionResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/steam/syncByTransaction")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Entitlement::SyncSteamAbnormalIAPTransaction(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/steam/syncAbnormalTransaction")
+		, *SettingsRef.PlatformServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, OnSuccess, OnError);
 }
 	
 } // Namespace Api

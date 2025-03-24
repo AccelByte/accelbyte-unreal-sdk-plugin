@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AccelByteQosManagerApi.h"
 #include "IPAddress.h"
 #include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteCredentials.h"
@@ -27,8 +28,10 @@ namespace Api
 class ACCELBYTEUE4SDK_API Qos : public TSharedFromThis<Qos, ESPMode::ThreadSafe>
 {
 public:
-	Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef, FAccelByteMessagingSystem& InMessagingSystemRef);
+	Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef, FAccelByteMessagingSystem& InMessagingSystemRef, const QosManagerWPtr QosManagerWeak, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Qos();
+
+	void SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
 
 	/**
 	 * @brief Check server latencies (ping) per-region, with optional polling.
@@ -81,7 +84,9 @@ private:
 	// Constructor
 	FCredentialsRef CredentialsRef;
 	const Settings& SettingsRef;
+	QosManagerWPtr QosManagerWeak;
 	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
+	TWeakPtr<FApiClient, ESPMode::ThreadSafe> ApiClient;
 
 	static FAccelByteModelsQosServerList QosServers;
 	static TArray<TPair<FString, float>> Latencies;
@@ -94,12 +99,6 @@ private:
 	 * - Default 0 (off).
 	 */
 	static FDelegateHandleAlias PollLatenciesHandle;
-
-	/**
-	 * @brief Get Server region latency targets and cache for Latencies object/handle, every x seconds.
-	 * - Default 0 (off).
-	 */
-	static FDelegateHandleAlias PollServerLatenciesHandle;
 
 	/** @brief Static cleanup handler for Tickers (Latencies Pollers) */
 	static void RemoveFromTicker(FDelegateHandleAlias& Handle);
@@ -140,18 +139,6 @@ private:
 	 * @param LatencyPollIntervalSecs the interval for polling the latency in seconds
 	 */
 	void InitGetLatenciesScheduler(float LatencyPollIntervalSecs);
-
-	/**
-	 * @brief Poll every x second to refresh target server region Latencies (pings) to later use as cached for Latency pollers/objects.
-	 * - SecondsPerTick is set from SettingsRef.QosServerLatencyPollIntervalSecs
-	 * - Only polls when QosServerLatencyPollIntervalSecs polling Settings > 0.
-	 * - Default Qos server polling intervals: 0 (no polling).
-	 * - Explicitly calling this a 2nd+ time will reset the poller without conflict and use the new tick interval.
-	 * - Not to be confused with InitGetLatenciesScheduler(), that uses this func's cached target server regions for Latencies polling.
-	 *
-	 * @param QosServerPollIntervalSecs the interval for polling the Qos servers in seconds
-	 */
-	void InitGetServerLatenciesScheduler(float QosServerPollIntervalSecs);
 
 	/**
 	 * @brief Resolves QOS server IP using the platform's socket subsystem.

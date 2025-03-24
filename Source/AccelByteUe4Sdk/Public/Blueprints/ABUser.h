@@ -4,7 +4,7 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteUserModels.h"
 #include "Models/AccelByteOauth2Models.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteApiClient.h"
 #include "ABUser.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDRegisterResponse, FRegisterResponse, Response);

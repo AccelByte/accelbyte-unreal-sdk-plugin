@@ -11,8 +11,9 @@ namespace Api
 	
 PredefinedEvent::PredefinedEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: BaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, TEXT("PreDefinedEvent"), false)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: BaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient, TEXT("PreDefinedEvent"), false)
 {
 	if (!SettingsRef.bSendPredefinedEvent)
 	{

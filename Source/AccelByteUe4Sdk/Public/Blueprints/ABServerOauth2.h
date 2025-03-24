@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteOauth2Models.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "ABServerOauth2.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDJwkSetDelegate, FJwkSet, Response);

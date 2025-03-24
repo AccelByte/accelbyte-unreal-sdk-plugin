@@ -18,7 +18,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Configurations : public FApiBase, public TSharedFromThis<Configurations, ESPMode::ThreadSafe>
 {
 public:
-	Configurations(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Configurations(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Configurations();
 
 	/**

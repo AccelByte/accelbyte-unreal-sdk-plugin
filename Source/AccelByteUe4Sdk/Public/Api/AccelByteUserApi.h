@@ -5,10 +5,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AccelByteEntitlementApi.h"
+#include "AccelByteItemApi.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteApiBase.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "Models/AccelByteUserModels.h"
 
 namespace AccelByte
@@ -23,10 +26,14 @@ namespace Api
 class ACCELBYTEUE4SDK_API User : public FApiBase, public TSharedFromThis<User, ESPMode::ThreadSafe>
 {
 public:
-	User(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef);
+	User(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef, const EntitlementWPtr InEntitlementWeak, const ItemWPtr InItemWeak, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~User();
 private:
 	TSharedRef<Credentials, ESPMode::ThreadSafe> UserCredentialsRef;
+	EntitlementWPtr EntitlementWeak;
+	ItemWPtr ItemWeak;
+	Oauth2 Oauth;
+
 public:
 	/**
 	* @brief delegate for handling upgrade headless account notification.
@@ -1790,6 +1797,8 @@ private:
 	 */
 	void TriggerInvalidRequestError(FString const& ErrorMessage
 		, FOAuthErrorHandler const& OnError);
+
+	FString GetDeviceId() const;
 };
 
 typedef TSharedRef<User, ESPMode::ThreadSafe> UserRef;

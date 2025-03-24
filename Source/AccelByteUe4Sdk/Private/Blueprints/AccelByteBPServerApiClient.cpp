@@ -3,7 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Blueprints/AccelByteBPServerApiClient.h"
-#include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteServerCredentials.h"
 
 using namespace AccelByte;
@@ -41,14 +40,4 @@ UServerApiClient::UServerApiClient()
 	ServerSessionBrowser = NewObject<UABServerSessionBrowser>();
 	ServerAchievement = NewObject<UABServerAchievement>();
 	ServerStatistic = NewObject<UABServerStatistic>();
-
-
-	SetServerApiClient(FMultiRegistry::GetServerApiClient());
-}
-
-UServerApiClient* UServerMultiRegistry::GetServerApiClient(FString const& Key)
-{
-	UServerApiClient* WrapperPtr = NewObject<UServerApiClient>();
-	WrapperPtr->SetServerApiClient(FMultiRegistry::GetServerApiClient(Key));
-	return WrapperPtr;
 }

@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "Core/AccelByteError.h"
 #include "ABInventory.h"
 #include "Models/AccelByteInventoryModels.h"

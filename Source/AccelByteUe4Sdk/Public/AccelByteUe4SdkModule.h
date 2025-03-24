@@ -8,7 +8,6 @@
 #include "Core/AccelByteApiClient.h"
 #include "Modules/ModuleManager.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteInstance.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteServerApiClient.h"
 #include "Core/IAccelByteDataStorage.h"
@@ -23,6 +22,9 @@ namespace AccelByte
 	class IAccelByteDataStorage;
 	class FAccelBytePlatformHandler;
 }
+
+// forward declaration
+class FAccelByteInstance;
 
 class IAccelByteUe4SdkModuleInterface : public IModuleInterface
 {
@@ -47,5 +49,5 @@ public:
 	virtual AccelByte::IAccelByteDataStorage* GetLocalDataStorage() = 0;
 	virtual AccelByte::FAccelBytePlatformHandler& GetPlatformHandler() = 0;
 
-	virtual FAccelByteInstancePtr CreateAccelByteInstance() = 0;
+	virtual TSharedPtr<FAccelByteInstance, ESPMode::ThreadSafe> CreateAccelByteInstance() = 0;
 };

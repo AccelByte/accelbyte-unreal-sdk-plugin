@@ -35,7 +35,10 @@ enum class EServerType :uint8
 class ACCELBYTEUE4SDK_API ServerDSM : public FServerApiBase
 {
 public:
-	ServerDSM(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerDSM(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerDSM();
 
 	/**

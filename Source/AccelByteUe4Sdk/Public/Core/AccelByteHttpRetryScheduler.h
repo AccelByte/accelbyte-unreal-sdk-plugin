@@ -5,6 +5,8 @@
 #pragma once
 
 #include <chrono>
+
+#include "AccelByteSettings.h"
 #include "Delegates/DelegateCombinations.h"
 #include "HttpManager.h"
 #include "Core/AccelByteTask.h"
@@ -45,6 +47,7 @@ public:
 	static constexpr uint32 DefaultRateLimit = 6;
 
 	FHttpRetryScheduler();
+	explicit FHttpRetryScheduler(const SettingsWPtr InSettingsWeak);
 	virtual ~FHttpRetryScheduler();
 
 	void InitializeRateLimit();
@@ -91,6 +94,8 @@ protected:
 	FDelegateHandleAlias PollRetryHandle{};
 
 	Core::FAccelByteHttpCache HttpCache{};
+
+	SettingsWPtr SettingsWeak;
 
 	FBearerAuthRejectedMulticast BearerAuthRejectedMulticast{};
 	FBearerAuthRefreshedMulticast BearerAuthRefreshedMulticast{};

@@ -4,25 +4,16 @@
 
 #include "AccelByteUe4SdkModule.h"
 #include "Core/Version.h"
-#include "Interfaces/IPluginManager.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteServerSettings.h"
-#include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteDataStorageBinaryFile.h"
 #include "Core/AccelByteInstance.h"
 #include "Core/Platform/AccelBytePlatformHandler.h"
-#include "Api/AccelByteGameTelemetryApi.h"
-#include "Api/AccelByteHeartBeatApi.h"
-#include "Api/AccelBytePredefinedEventApi.h"
-#include "Api/AccelByteGameStandardEventApi.h"
-#include "Api/AccelByteQos.h"
-#include "Api/AccelByteLobbyApi.h"
-#include "Core/AccelByteMultiRegistry.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
-#include "GameServerApi/AccelByteServerAMSApi.h"
 #include "Engine/GameInstance.h"
+#include "Interfaces/IPluginManager.h"
 
 #if UE_SERVER
 #include "Core/AccelByteSignalHandler.h"
@@ -57,7 +48,7 @@ private:
 	AccelByte::FAccelBytePlatformHandler PlatformHandler;
 	FThreadSafeCounter GameInstanceCount {0};
 
-	FAccelByteTimeManagerPtr TimeManager;
+    AccelByte::FAccelByteTimeManagerPtr TimeManager;
 
     // For registering settings in UE4 editor
 	void RegisterSettings();
@@ -107,25 +98,13 @@ void FAccelByteUe4SdkModule::StartupModule()
 	LoadServerSettingsFromConfigUObject();
 
 	LocalDataStorage = MakeShared<AccelByte::DataStorageBinaryFile>();
-	TimeManager = MakeShared<AccelByte::FAccelByteTimeManager, ESPMode::ThreadSafe>();
+	TimeManager = MakeShared<AccelByte::FAccelByteTimeManager, ESPMode::ThreadSafe>(GlobalClientSettings.BasicServerUrl);
 
 #ifdef TEMPORARY_ENABLE_COMPAT_CHECK
 #if UE_BUILD_DEVELOPMENT && TEMPORARY_ENABLE_COMPAT_CHECK
 	CheckServicesCompatibility();
 #endif // UE_BUILD_DEVELOPMENT && TEMPORARY_ENABLE_COMPAT_CHECK
 #endif // defined(TEMPORARY_ENABLE_COMPAT_CHECK)
-
-	AccelByte::FRegistry::HttpRetryScheduler.Startup();
-	AccelByte::FRegistry::CredentialsRef->Startup();
-	AccelByte::FRegistry::QosPtr->Startup();
-	AccelByte::FRegistry::GameTelemetryPtr->Startup();
-	AccelByte::FRegistry::PredefinedEventPtr->Startup();
-	AccelByte::FRegistry::GameStandardEventPtr->Startup();
-	AccelByte::FRegistry::LobbyPtr->Startup();
-#if !UE_SERVER
-	AccelByte::FRegistry::HeartBeat.Startup();
-#endif
-	AccelByte::FRegistry::ServerCredentialsRef->Startup();
 
 #if UE_SERVER
 	FAccelByteSignalHandler::Initialize();
@@ -255,8 +234,6 @@ bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Envir
 		return bResult;
 	}
 	
-	AccelByte::FRegistry::Settings.Reset(Environment);
-	AccelByte::FRegistry::CredentialsRef->SetClientCredentials(Environment);
 	SetDefaultHttpCustomHeader(GlobalClientSettings.Namespace);
 
 	return bResult;
@@ -277,8 +254,6 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 		return bResult;
 	}
 	
-	AccelByte::FRegistry::ServerSettings.Reset(Environment);
-	AccelByte::FRegistry::ServerCredentialsRef->SetClientCredentials(Environment);
 	SetDefaultHttpCustomHeader(GlobalServerSettings.Namespace);
 	
 	return bResult;
@@ -386,7 +361,7 @@ void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
 		}
 
 		GetVersionInfo(
-			AccelByte::FRegistry::Settings.BaseUrl / ServiceName,
+			GlobalClientSettings.BaseUrl / ServiceName,
 			[CompatibilityMapPtr, ServiceName](FVersionInfo const VersionInfo)
 			{
 				FResult const Result = CompatibilityMapPtr->Check(ServiceName, VersionInfo.Version, true);
@@ -438,28 +413,19 @@ void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
 
 	GameInstanceCount.Increment();
 	
-	AccelByte::FRegistry::TimeManager.GetServerTime({}, {});
 	TimeManager->GetServerTime({}, {});
 }
 
 void FAccelByteUe4SdkModule::OnPreExit()
 {
-	AccelByte::FRegistry::ServerCredentialsRef->Shutdown();
-#if !UE_SERVER
-	AccelByte::FRegistry::HeartBeat.Shutdown();
-#endif
-	AccelByte::FRegistry::GameTelemetryPtr->Shutdown();
-	AccelByte::FRegistry::PredefinedEventPtr->Shutdown();
-	AccelByte::FRegistry::GameStandardEventPtr->Shutdown();
-	AccelByte::FRegistry::CredentialsRef->Shutdown();
-	AccelByte::FRegistry::HttpRetryScheduler.Shutdown();
-
-	FMultiRegistry::Shutdown();
 }
 
 FAccelByteInstancePtr FAccelByteUe4SdkModule::CreateAccelByteInstance()
 {
-	return MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(GlobalClientSettings, GlobalServerSettings, LocalDataStorage, TimeManager, GameInstanceCount.GetValue());
+	FAccelByteInstancePtr ABInstance = MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(GlobalClientSettings, GlobalServerSettings, LocalDataStorage, TimeManager, GameInstanceCount.GetValue());
+	ABInstance->SetEnvironmentChangeDelegate();
+	
+	return ABInstance;
 }
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)

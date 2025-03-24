@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API SessionHistory : public FApiBase, public TSharedFromThis<SessionHistory, ESPMode::ThreadSafe>
 {
 public:
-	SessionHistory(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	SessionHistory(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~SessionHistory();
 
 #pragma region SessionHistory

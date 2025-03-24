@@ -50,6 +50,15 @@ public:
 		, float InMaxBackoffDelay = 30.f
 		, float InTotalTimeout = 60.f);
 
+	explicit ServerDSHub(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient
+		, float InPingDelay = 30.f
+		, float InInitialBackoffDelay = 1.f
+		, float InMaxBackoffDelay = 30.f
+		, float InTotalTimeout = 60.f );
+
 	~ServerDSHub();
 
 	/**

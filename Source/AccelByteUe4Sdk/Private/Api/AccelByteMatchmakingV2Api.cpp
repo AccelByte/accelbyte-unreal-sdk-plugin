@@ -10,8 +10,9 @@ namespace Api
 {
 MatchmakingV2::MatchmakingV2(Credentials const& InCredentialsRef
 	, Settings const& InSettingRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingRef, InHttpRef, InApiClient)
 {
 }
 

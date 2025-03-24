@@ -21,7 +21,11 @@ namespace Api
 class ACCELBYTEUE4SDK_API PresenceBroadcastEvent : public FApiBase, public TSharedFromThis<PresenceBroadcastEvent, ESPMode::ThreadSafe>
 {
 public:
-	PresenceBroadcastEvent(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	PresenceBroadcastEvent(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	
 	~PresenceBroadcastEvent();
 
 	/**

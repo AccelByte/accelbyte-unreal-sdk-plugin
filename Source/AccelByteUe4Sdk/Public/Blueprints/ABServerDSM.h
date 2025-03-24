@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteDSMModels.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "ABServerDSM.generated.h"
 

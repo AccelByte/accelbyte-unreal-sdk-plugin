@@ -18,6 +18,7 @@
 #include "Core/AccelByteNetworkConditioner.h"
 #include "Core/AccelByteNotificationBuffer.h"
 #include "Core/AccelByteLockableQueue.h"
+#include "Models/AccelByteQosModels.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 
@@ -88,6 +89,17 @@ public:
 		, float InInitialBackoffDelay = 1.f
 		, float InMaxBackoffDelay = 30.f
 		, float InTotalTimeout = 60.f);
+
+	Lobby(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, FAccelByteMessagingSystem& InMessagingSystemRef
+		, FAccelByteNetworkConditioner& InNetworkConditionerRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+		, float InPingDelay = 30.f
+		, float InInitialBackoffDelay = 1.f
+		, float InMaxBackoffDelay = 30.f
+		, float InTotalTimeout = 60.f);
 	~Lobby();
 private:
 	FCredentialsRef LobbyCredentialsRef;
@@ -109,6 +121,8 @@ private:
 	FDelegateHandle AuthTokenSetDelegateHandle;
 	
 	FDelegateHandleAlias LobbyTickerHandle;
+
+	FAccelByteModelsQosRegionLatencies RegionLatencies;
 
 public:
 	
@@ -652,6 +666,23 @@ public:
 	DECLARE_DELEGATE_OneParam(FV2NativeSessionSyncNotif, FAccelByteModelsV2NativeSessionSyncNotif);
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOneTimeCodeLinkedNotif, FAccelByteModelsOneTimeCodeLinked const&);
+
+#pragma region ecommerce
+	/**
+	 * @brief Delegate for notification when entitlements are updated
+	 */
+	DECLARE_MULTICAST_DELEGATE_OneParam(FEntitlementUpdatedNotif, FAccelByteModelsEntitlementUpdatedNotification const&);
+
+	/**
+	 * @brief Delegate for notification when wallet balance are changed
+	 */
+	DECLARE_MULTICAST_DELEGATE_OneParam(FWalletBalanceChangedNotif, FAccelByteModelsWalletBalanceChangedNotification const&);
+
+	/**
+	 * @brief Delegate for notification when wallet status are changed
+	 */
+	DECLARE_MULTICAST_DELEGATE_OneParam(FWalletStatusChangedNotif, FAccelByteModelsWalletStatusChangedNotification const&);
+#pragma endregion
 
 public:
 	/**
@@ -1379,6 +1410,11 @@ public:
 	 * @brief Unbind all V2 matchmaking delegates set previously.
 	 */
 	void UnbindV2MatchmakingEvents();
+
+	/**
+	 * @brief Unbind all message notification delegates set previously.
+	 */
+	void UnbindMessageNotificationEvents();
 	
 	/**
 	 * @brief Set a trigger function when successfully connect to lobby.
@@ -2570,6 +2606,75 @@ public:
 	}
 
 	/**
+	 * @brief Add a function triggered when there is an entitlement updated notification.
+	 *
+	 * @param EntitlementUpdatedNotifDelegate Delegate that will be added.
+	 */
+	FDelegateHandle AddEntitlementUpdatedNotifDelegate(THandler<FAccelByteModelsEntitlementUpdatedNotification> const& EntitlementUpdatedNotifDelegate)
+	{
+		return EntitlementUpdatedNotif.AddLambda([EntitlementUpdatedNotifDelegate](const FAccelByteModelsEntitlementUpdatedNotification& Response)
+			{
+				EntitlementUpdatedNotifDelegate.ExecuteIfBound(Response);
+			});
+	}
+
+	/**
+	 * @brief Remove a delegate from wallet balance changed notification.
+	 *
+	 * @param EntitlementUpdatedNotifDelegateHandle DelegateHandle that will be removed.
+	 */
+	bool RemoveEntitlementUpdatedNotifDelegate(FDelegateHandle const& EntitlementUpdatedNotifDelegateHandle)
+	{
+		return EntitlementUpdatedNotif.Remove(EntitlementUpdatedNotifDelegateHandle);
+	}
+
+	/**
+	 * @brief Add a function triggered when there is a wallet balance changed notification.
+	 * 
+	 * @param WalletBalanceChangedNotifDelegate Delegate that will be added.
+	 */
+	FDelegateHandle AddWalletBalanceChangedNotifDelegate(THandler<FAccelByteModelsWalletBalanceChangedNotification> const& WalletBalanceChangedNotifDelegate)
+	{
+		return WalletBalanceChangedNotif.AddLambda([WalletBalanceChangedNotifDelegate](const FAccelByteModelsWalletBalanceChangedNotification& Response)
+			{
+				WalletBalanceChangedNotifDelegate.ExecuteIfBound(Response);
+			});
+	}
+
+	/**
+	 * @brief Remove a delegate from wallet balance changed notification.
+	 *
+	 * @param WalletBalanceChangedNotifDelegateHandle DelegateHandle that will be removed.
+	 */
+	bool RemoveWalletBalanceChangedNotifDelegate(FDelegateHandle const& WalletBalanceChangedNotifDelegateHandle)
+	{
+		return WalletBalanceChangedNotif.Remove(WalletBalanceChangedNotifDelegateHandle);
+	}
+
+	/**
+	 * @brief Add a function triggered when there is a wallet status changed notification.
+	 *
+	 * @param WalletStatusChangedNotifDelegate Delegate that will be added.
+	 */
+	FDelegateHandle AddWalletStatusChangedNotifDelegate(THandler<FAccelByteModelsWalletStatusChangedNotification> const& WalletStatusChangedNotifDelegate)
+	{
+		return WalletStatusChangedNotif.AddLambda([WalletStatusChangedNotifDelegate](const FAccelByteModelsWalletStatusChangedNotification& Response)
+			{
+				WalletStatusChangedNotifDelegate.ExecuteIfBound(Response);
+			});
+	}
+
+	/**
+	 * @brief Remove a delegate from wallet status changed notification.
+	 *
+	 * @param WalletStatusChangedNotifDelegateHandle DelegateHandle that will be removed.
+	 */
+	bool RemoveWalletStatusChangedNotifDelegate(FDelegateHandle const& WalletStatusChangedNotifDelegateHandle)
+	{
+		return WalletStatusChangedNotif.Remove(WalletStatusChangedNotifDelegateHandle);
+	}
+
+	/**
 	 * @brief Bulk add friend(s), don't need any confirmation from the player.
 	 *
 	 * @param UserIds the list of UserId you want to make friend with.
@@ -2800,6 +2905,12 @@ public:
 	 * @brief Startup module
 	 */
 	void Startup();
+
+	/**
+	 * @brief Checks whether any future unban notifications are scheduled.
+	 */
+	bool HasUnbanNotificationsScheduled() const;
+
 private:
 	Lobby(Lobby const&) = delete; // Copy constructor
 	Lobby(Lobby&&) = delete; // Move constructor
@@ -2878,6 +2989,8 @@ private:
 	void DispatchV2MatchmakingMessageByTopic(FString const& Topic, FString const& Payload) const;
 
 	void HandleOneTimeCodeLinkedNotif(FAccelByteModelsNotificationMessage const& Message);
+
+	void HandleEcommerceNotif(FAccelByteModelsNotificationMessage const& Message);
 
 	void InitializeV2MatchmakingNotifTopics();
 
@@ -3043,6 +3156,9 @@ private:
 	FUserBannedNotification UserBannedNotification;
 	FUserUnbannedNotification UserUnbannedNotification;
 	FOneTimeCodeLinkedNotif OneTimeCodeLinkedNotif;
+	FEntitlementUpdatedNotif EntitlementUpdatedNotif;
+	FWalletBalanceChangedNotif WalletBalanceChangedNotif;
+	FWalletStatusChangedNotif WalletStatusChangedNotif;
 
 	// session v2
 	FV2PartyInvitedNotif V2PartyInvitedNotif;
@@ -3217,6 +3333,10 @@ private:
 	void OnReceivedQosLatencies(FString const& Payload);
 
 #pragma endregion
+
+	FDelegateHandle LobbyLoginSuccessDelegateHandle{};
+
+	void OnLoginSuccess(const FOauth2Token& AuthToken);
 };
 
 typedef TSharedRef<Lobby, ESPMode::ThreadSafe> LobbyRef;

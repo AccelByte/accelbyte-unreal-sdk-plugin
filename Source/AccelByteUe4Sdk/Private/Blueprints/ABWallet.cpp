@@ -4,7 +4,7 @@
 
 #include "Blueprints/ABWallet.h"
 #include "Api/AccelByteWalletApi.h"
-#include "Core/AccelByteRegistry.h"
+
 
 using namespace AccelByte;
 

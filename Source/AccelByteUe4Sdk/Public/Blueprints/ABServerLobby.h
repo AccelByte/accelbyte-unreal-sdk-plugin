@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteLobbyModels.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "ABServerLobby.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDDataPartyResponseDelegate, FAccelByteModelsDataPartyResponse, Response);

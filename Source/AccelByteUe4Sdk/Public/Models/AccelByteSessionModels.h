@@ -1173,6 +1173,45 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoriesResult
 	FAccelByteModelsPaging Paging{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionUpdateDSInformationRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString ClientVersion{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString CreatedRegion{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString Deployment{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString Description{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString GameMode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString Ip{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	int32 Port{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString Region{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString ServerId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	FString Source{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUpdateDSInformationRequest")
+	EAccelByteV2GameSessionDsStatus Status{};
+};
+
 #pragma endregion
 
 #pragma region Game Session Misc Models
@@ -1210,6 +1249,5 @@ private:
 	uint32 _ExcludedPastSessionCount = 0; //ExclusionType::N_PAST_SESSION
 	TSet<FString> _ExcludedGameSessionIDs{}; //ExclusionType::EXPLICIT_LIST
 };
-typedef FAccelByteModelsGameSessionExcludedSession FAccelBtyeModelsGameSessionExcludedSession;
 
 #pragma endregion

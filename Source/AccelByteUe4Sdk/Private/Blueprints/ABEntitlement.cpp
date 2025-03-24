@@ -4,7 +4,7 @@
 
 #include "Blueprints/ABEntitlement.h"
 #include "Api/AccelByteEntitlementApi.h"
-#include "Core/AccelByteRegistry.h"
+
 
 using namespace AccelByte;
 

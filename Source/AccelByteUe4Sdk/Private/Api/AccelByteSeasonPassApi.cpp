@@ -6,7 +6,7 @@
 #include "Api/AccelByteSeasonPassApi.h"
 
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 
 namespace AccelByte
@@ -16,8 +16,9 @@ namespace Api
 
 SeasonPass::SeasonPass(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
 
 SeasonPass::~SeasonPass()

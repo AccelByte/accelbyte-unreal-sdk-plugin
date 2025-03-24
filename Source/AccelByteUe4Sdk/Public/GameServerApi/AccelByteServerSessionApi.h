@@ -21,7 +21,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerSession : public FServerApiBase
 {
 public:
-	ServerSession(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerSession(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerSession();
 
 	/**
@@ -301,6 +304,21 @@ public:
 		, THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20);
+
+	/**
+	 * @brief Update the DS information associated with the specified session.
+	 *
+	 * @param GameSessionId ID of the session to update
+	 * @param DSInformation Structure describing the DS information to update with
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr UpdateDSInformation(FString const& GameSessionId
+		, FAccelByteModelsGameSessionUpdateDSInformationRequest const& DSInformation
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	ServerSession() = delete;

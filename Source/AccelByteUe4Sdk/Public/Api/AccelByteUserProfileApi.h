@@ -9,7 +9,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Models/AccelByteUserProfileModels.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
+
 
 namespace AccelByte
 {
@@ -24,7 +24,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API UserProfile : public FApiBase, public TSharedFromThis<UserProfile, ESPMode::ThreadSafe>
 {
 public:
-	UserProfile(Credentials const& Credentials, Settings const& Settings, FHttpRetryScheduler& InHttpRef);
+	UserProfile(Credentials const& Credentials, Settings const& Settings, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~UserProfile();
 
 	/**

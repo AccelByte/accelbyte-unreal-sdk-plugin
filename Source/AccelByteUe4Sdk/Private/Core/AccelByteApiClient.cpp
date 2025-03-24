@@ -4,130 +4,20 @@
 
 #include "Core/AccelByteApiClient.h"
 
+#include "Core/AccelByteApiUtilities.h"
+#include "Core/AccelByteInstance.h"
+
 namespace AccelByte
 {
-	
-FApiClient::FApiClient()
-	: bUseSharedCredentials(false)
-	, MessagingSystem(MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>())
-	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*MessagingSystem.Get()))
-	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
-	, Settings(MakeShareable(&FRegistry::Settings))
-	, TimeManagerPtr(MakeShared<FAccelByteTimeManager, ESPMode::ThreadSafe>(*HttpRef))
-	, UserPtr(MakeShared<AccelByte::Api::User, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, UserProfilePtr(MakeShared<AccelByte::Api::UserProfile, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GameProfilePtr(MakeShared<AccelByte::Api::GameProfile, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, AgreementPtr(MakeShared<AccelByte::Api::Agreement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GDPRPtr(MakeShared<AccelByte::Api::GDPR, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ReportingPtr(MakeShared<AccelByte::Api::Reporting, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, MiscellaneousPtr(MakeShared<AccelByte::Api::Miscellaneous, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ConfigurationsPtr(MakeShared<AccelByte::Api::Configurations, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, LoginQueuePtr(MakeShared<AccelByte::Api::LoginQueue, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, CurrencyPtr(MakeShared<AccelByte::Api::Currency, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, WalletPtr(MakeShared<AccelByte::Api::Wallet, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, CategoryPtr(MakeShared<AccelByte::Api::Category, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ItemPtr(MakeShared<AccelByte::Api::Item, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, OrderPtr(MakeShared<AccelByte::Api::Order, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, EntitlementPtr(MakeShared<AccelByte::Api::Entitlement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, FulfillmentPtr(MakeShared<AccelByte::Api::Fulfillment, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, StoreDisplayPtr(MakeShared<AccelByte::Api::StoreDisplay, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, CloudStoragePtr(MakeShared<AccelByte::Api::CloudStorage, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, CloudSavePtr(MakeShared<AccelByte::Api::CloudSave, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, BinaryCloudSavePtr(MakeShared<AccelByte::Api::BinaryCloudSave, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, UGCPtr(MakeShared<AccelByte::Api::UGC, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, InventoryPtr(MakeShared<AccelByte::Api::Inventory, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, StatisticPtr(MakeShared<AccelByte::Api::Statistic, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, AchievementPtr(MakeShared<AccelByte::Api::Achievement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, LeaderboardPtr(MakeShared<AccelByte::Api::Leaderboard, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, RewardPtr(MakeShared<AccelByte::Api::Reward, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, SeasonPassPtr(MakeShared<AccelByte::Api::SeasonPass, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GroupPtr(MakeShared<AccelByte::Api::Group, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ChallengePtr(MakeShared<AccelByte::Api::Challenge, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, QosPtr(MakeShared<Api::Qos, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *MessagingSystem.Get()))
-	, QosManagerPtr(MakeShared<AccelByte::Api::QosManager, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
-	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
-	, SessionBrowserPtr(MakeShared<AccelByte::Api::SessionBrowser, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, TurnManagerPtr(MakeShared<AccelByte::Api::TurnManager, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, SessionPtr(MakeShared<AccelByte::Api::Session, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, SessionHistoryPtr(MakeShared<AccelByte::Api::SessionHistory, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, MatchmakingV2Ptr(MakeShared<AccelByte::Api::MatchmakingV2, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, AmsPtr(MakeShared<AccelByte::Api::AMS, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GameTelemetryPtr(MakeShared<AccelByte::Api::GameTelemetry, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, PredefinedEventPtr( MakeShared<AccelByte::Api::PredefinedEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GameStandardEventPtr(MakeShared<AccelByte::Api::GameStandardEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, PresenceBroadcastEventPtr(MakeShared<AccelByte::Api::PresenceBroadcastEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, TimeManager(*TimeManagerPtr.Get())
-	, User(*UserPtr.Get())
-	, UserProfile(*UserProfilePtr.Get())
-	, GameProfile(*GameProfilePtr.Get())
-	, Agreement(*AgreementPtr.Get())
-	, GDPR(*GDPRPtr.Get())
-	, Reporting(*ReportingPtr.Get())
-	, Miscellaneous(*MiscellaneousPtr.Get())
-	, Configurations(*ConfigurationsPtr.Get())
-	, LoginQueue(*LoginQueuePtr.Get())
-	, Currency(*CurrencyPtr.Get())
-	, Wallet(*WalletPtr.Get())
-	, Category(*CategoryPtr.Get())
-	, Item(*ItemPtr.Get())
-	, Order(*OrderPtr.Get())
-	, Entitlement(*EntitlementPtr.Get())
-	, Fulfillment(*FulfillmentPtr.Get())
-	, StoreDisplay(*StoreDisplayPtr.Get())
-	, CloudStorage(*CloudStoragePtr.Get())
-	, CloudSave(*CloudSavePtr.Get())
-	, BinaryCloudSave(*BinaryCloudSavePtr.Get())
-	, UGC(*UGCPtr.Get())
-	, Inventory(*InventoryPtr.Get())
-	, Statistic(*StatisticPtr.Get())
-	, Achievement(*AchievementPtr.Get())
-	, Leaderboard(*LeaderboardPtr.Get())
-	, Reward(*RewardPtr.Get())
-	, SeasonPass(*SeasonPassPtr.Get())
-	, Group(*GroupPtr.Get())
-	, Challenge(*ChallengePtr.Get())
-	, Qos(*QosPtr.Get())
-	, QosManager(*QosManagerPtr.Get())
-	, Lobby(*LobbyPtr.Get())
-	, Chat(*ChatPtr.Get())
-	, SessionBrowser(*SessionBrowserPtr.Get())
-	, TurnManager(*TurnManagerPtr.Get())
-	, Session(*SessionPtr.Get())
-	, SessionHistory(*SessionHistoryPtr.Get())
-	, MatchmakingV2(*MatchmakingV2Ptr.Get())
-	, Ams(*AmsPtr.Get())
-	, GameTelemetry(*GameTelemetryPtr.Get())
-	, PredefinedEvent(*PredefinedEventPtr.Get())
-	, GameStandardEvent(*GameStandardEventPtr.Get())
-	, PresenceBroadcastEvent(*PresenceBroadcastEventPtr.Get())
-{
-	HttpRef->Startup();
-	CredentialsRef->Startup();
-	QosPtr->Startup();
-	LobbyPtr->Startup();
-	GameTelemetryPtr->Startup();
-	PredefinedEventPtr->Startup();
-	GameStandardEventPtr->Startup();
-	PresenceBroadcastEventPtr->Startup();
-}
 
-FApiClient::FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr InTimeManager)
+FApiClient::FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr InTimeManager, TSharedRef<FAccelByteInstance, ESPMode::ThreadSafe> InAccelByteInstance)
 	: bUseSharedCredentials(false)
+	, AccelByteInstanceWeak(InAccelByteInstance)
 	, MessagingSystem(MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>())
-	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*MessagingSystem.Get()))
 	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
 	, Settings(InSettings)
+	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*HttpRef, *MessagingSystem.Get(), InSettings->IamServerUrl))
 	, TimeManagerPtr(InTimeManager)
-	, UserPtr(MakeShared<AccelByte::Api::User, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, UserProfilePtr(MakeShared<AccelByte::Api::UserProfile, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GameProfilePtr(MakeShared<AccelByte::Api::GameProfile, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, AgreementPtr(MakeShared<AccelByte::Api::Agreement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GDPRPtr(MakeShared<AccelByte::Api::GDPR, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ReportingPtr(MakeShared<AccelByte::Api::Reporting, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, MiscellaneousPtr(MakeShared<AccelByte::Api::Miscellaneous, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ConfigurationsPtr(MakeShared<AccelByte::Api::Configurations, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, LoginQueuePtr(MakeShared<AccelByte::Api::LoginQueue, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, CurrencyPtr(MakeShared<AccelByte::Api::Currency, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, WalletPtr(MakeShared<AccelByte::Api::Wallet, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, CategoryPtr(MakeShared<AccelByte::Api::Category, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
@@ -136,6 +26,15 @@ FApiClient::FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr I
 	, EntitlementPtr(MakeShared<AccelByte::Api::Entitlement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, FulfillmentPtr(MakeShared<AccelByte::Api::Fulfillment, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, StoreDisplayPtr(MakeShared<AccelByte::Api::StoreDisplay, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, UserPtr(MakeShared<AccelByte::Api::User, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, EntitlementPtr, ItemPtr))
+	, UserProfilePtr(MakeShared<AccelByte::Api::UserProfile, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, GameProfilePtr(MakeShared<AccelByte::Api::GameProfile, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, AgreementPtr(MakeShared<AccelByte::Api::Agreement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, GDPRPtr(MakeShared<AccelByte::Api::GDPR, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, ReportingPtr(MakeShared<AccelByte::Api::Reporting, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, MiscellaneousPtr(MakeShared<AccelByte::Api::Miscellaneous, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, ConfigurationsPtr(MakeShared<AccelByte::Api::Configurations, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, LoginQueuePtr(MakeShared<AccelByte::Api::LoginQueue, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, CloudStoragePtr(MakeShared<AccelByte::Api::CloudStorage, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, CloudSavePtr(MakeShared<AccelByte::Api::CloudSave, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, BinaryCloudSavePtr(MakeShared<AccelByte::Api::BinaryCloudSave, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
@@ -148,8 +47,8 @@ FApiClient::FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr I
 	, SeasonPassPtr(MakeShared<AccelByte::Api::SeasonPass, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, GroupPtr(MakeShared<AccelByte::Api::Group, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, ChallengePtr(MakeShared<AccelByte::Api::Challenge, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, QosPtr(MakeShared<Api::Qos, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *MessagingSystem.Get()))
 	, QosManagerPtr(MakeShared<AccelByte::Api::QosManager, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+	, QosPtr(MakeShared<Api::Qos, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *MessagingSystem.Get(), QosManagerPtr))
 	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
 	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
 	, SessionBrowserPtr(MakeShared<AccelByte::Api::SessionBrowser, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
@@ -162,156 +61,10 @@ FApiClient::FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr I
 	, PredefinedEventPtr( MakeShared<AccelByte::Api::PredefinedEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, GameStandardEventPtr(MakeShared<AccelByte::Api::GameStandardEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, PresenceBroadcastEventPtr(MakeShared<AccelByte::Api::PresenceBroadcastEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, TimeManager(*TimeManagerPtr.Get())
-	, User(*UserPtr.Get())
-	, UserProfile(*UserProfilePtr.Get())
-	, GameProfile(*GameProfilePtr.Get())
-	, Agreement(*AgreementPtr.Get())
-	, GDPR(*GDPRPtr.Get())
-	, Reporting(*ReportingPtr.Get())
-	, Miscellaneous(*MiscellaneousPtr.Get())
-	, Configurations(*ConfigurationsPtr.Get())
-	, LoginQueue(*LoginQueuePtr.Get())
-	, Currency(*CurrencyPtr.Get())
-	, Wallet(*WalletPtr.Get())
-	, Category(*CategoryPtr.Get())
-	, Item(*ItemPtr.Get())
-	, Order(*OrderPtr.Get())
-	, Entitlement(*EntitlementPtr.Get())
-	, Fulfillment(*FulfillmentPtr.Get())
-	, StoreDisplay(*StoreDisplayPtr.Get())
-	, CloudStorage(*CloudStoragePtr.Get())
-	, CloudSave(*CloudSavePtr.Get())
-	, BinaryCloudSave(*BinaryCloudSavePtr.Get())
-	, UGC(*UGCPtr.Get())
-	, Inventory(*InventoryPtr.Get())
-	, Statistic(*StatisticPtr.Get())
-	, Achievement(*AchievementPtr.Get())
-	, Leaderboard(*LeaderboardPtr.Get())
-	, Reward(*RewardPtr.Get())
-	, SeasonPass(*SeasonPassPtr.Get())
-	, Group(*GroupPtr.Get())
-	, Challenge(*ChallengePtr.Get())
-	, Qos(*QosPtr.Get())
-	, QosManager(*QosManagerPtr.Get())
-	, Lobby(*LobbyPtr.Get())
-	, Chat(*ChatPtr.Get())
-	, SessionBrowser(*SessionBrowserPtr.Get())
-	, TurnManager(*TurnManagerPtr.Get())
-	, Session(*SessionPtr.Get())
-	, SessionHistory(*SessionHistoryPtr.Get())
-	, MatchmakingV2(*MatchmakingV2Ptr.Get())
-	, Ams(*AmsPtr.Get())
-	, GameTelemetry(*GameTelemetryPtr.Get())
-	, PredefinedEvent(*PredefinedEventPtr.Get())
-	, GameStandardEvent(*GameStandardEventPtr.Get())
-	, PresenceBroadcastEvent(*PresenceBroadcastEventPtr.Get())
+	, ApiUtilitiesPtr(MakeShared<FAccelByteApiUtilities, ESPMode::ThreadSafe>(CredentialsRef, Settings.ToSharedRef(), HttpRef, TimeManagerPtr))
 {
 	HttpRef->Startup();
 	CredentialsRef->Startup();
-	QosPtr->Startup();
-	LobbyPtr->Startup();
-	GameTelemetryPtr->Startup();
-	PredefinedEventPtr->Startup();
-	GameStandardEventPtr->Startup();
-	PresenceBroadcastEventPtr->Startup();
-}
-
-FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http, AccelByte::FAccelByteMessagingSystemPtr InMessagingSystemPtr)
-	: bUseSharedCredentials(true)
-	, MessagingSystem(InMessagingSystemPtr.IsValid() ? InMessagingSystemPtr: MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>())
-	, CredentialsRef(Credentials.AsShared())
-	, HttpRef(Http.AsShared())
-	, Settings(MakeShareable(&FRegistry::Settings))
-	, TimeManagerPtr(MakeShared<FAccelByteTimeManager, ESPMode::ThreadSafe>(*HttpRef))
-	, UserPtr(MakeShared<AccelByte::Api::User, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, UserProfilePtr(MakeShared<AccelByte::Api::UserProfile, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GameProfilePtr(MakeShared<AccelByte::Api::GameProfile, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, AgreementPtr(MakeShared<AccelByte::Api::Agreement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GDPRPtr(MakeShared<AccelByte::Api::GDPR, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ReportingPtr(MakeShared<AccelByte::Api::Reporting, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, MiscellaneousPtr(MakeShared<AccelByte::Api::Miscellaneous, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ConfigurationsPtr(MakeShared<AccelByte::Api::Configurations, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, LoginQueuePtr(MakeShared<AccelByte::Api::LoginQueue, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, CurrencyPtr(MakeShared<AccelByte::Api::Currency, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, WalletPtr(MakeShared<AccelByte::Api::Wallet, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, CategoryPtr(MakeShared<AccelByte::Api::Category, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ItemPtr(MakeShared<AccelByte::Api::Item, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, OrderPtr(MakeShared<AccelByte::Api::Order, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, EntitlementPtr(MakeShared<AccelByte::Api::Entitlement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, FulfillmentPtr(MakeShared<AccelByte::Api::Fulfillment, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, StoreDisplayPtr(MakeShared<AccelByte::Api::StoreDisplay, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, CloudStoragePtr(MakeShared<AccelByte::Api::CloudStorage, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, CloudSavePtr(MakeShared<AccelByte::Api::CloudSave, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, BinaryCloudSavePtr(MakeShared<AccelByte::Api::BinaryCloudSave, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, UGCPtr(MakeShared<AccelByte::Api::UGC, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, InventoryPtr(MakeShared<AccelByte::Api::Inventory, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, StatisticPtr(MakeShared<AccelByte::Api::Statistic, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, AchievementPtr(MakeShared<AccelByte::Api::Achievement, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, LeaderboardPtr(MakeShared<AccelByte::Api::Leaderboard, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, RewardPtr(MakeShared<AccelByte::Api::Reward, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, SeasonPassPtr(MakeShared<AccelByte::Api::SeasonPass, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GroupPtr(MakeShared<AccelByte::Api::Group, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, ChallengePtr(MakeShared<AccelByte::Api::Challenge, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, QosPtr(MakeShared<Api::Qos, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *MessagingSystem.Get()))
-	, QosManagerPtr(MakeShared<AccelByte::Api::QosManager, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
-	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
-	, SessionBrowserPtr(MakeShared<AccelByte::Api::SessionBrowser, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, TurnManagerPtr(MakeShared<AccelByte::Api::TurnManager, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, SessionPtr(MakeShared<AccelByte::Api::Session, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, SessionHistoryPtr(MakeShared<AccelByte::Api::SessionHistory, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, MatchmakingV2Ptr(MakeShared<AccelByte::Api::MatchmakingV2, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, AmsPtr(MakeShared<AccelByte::Api::AMS, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GameTelemetryPtr(MakeShared<AccelByte::Api::GameTelemetry, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, PredefinedEventPtr(MakeShared<AccelByte::Api::PredefinedEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, GameStandardEventPtr(MakeShared<AccelByte::Api::GameStandardEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, PresenceBroadcastEventPtr(MakeShared<AccelByte::Api::PresenceBroadcastEvent, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, TimeManager(*TimeManagerPtr.Get())
-	, User(*UserPtr.Get())
-	, UserProfile(*UserProfilePtr.Get())
-	, GameProfile(*GameProfilePtr.Get())
-	, Agreement(*AgreementPtr.Get())
-	, GDPR(*GDPRPtr.Get())
-	, Reporting(*ReportingPtr.Get())
-	, Miscellaneous(*MiscellaneousPtr.Get())
-	, Configurations(*ConfigurationsPtr.Get())
-	, LoginQueue(*LoginQueuePtr.Get())
-	, Currency(*CurrencyPtr.Get())
-	, Wallet(*WalletPtr.Get())
-	, Category(*CategoryPtr.Get())
-	, Item(*ItemPtr.Get())
-	, Order(*OrderPtr.Get())
-	, Entitlement(*EntitlementPtr.Get())
-	, Fulfillment(*FulfillmentPtr.Get())
-	, StoreDisplay(*StoreDisplayPtr.Get())
-	, CloudStorage(*CloudStoragePtr.Get())
-	, CloudSave(*CloudSavePtr.Get())
-	, BinaryCloudSave(*BinaryCloudSavePtr.Get())
-	, UGC(*UGCPtr.Get())
-	, Inventory(*InventoryPtr.Get())
-	, Statistic(*StatisticPtr.Get())
-	, Achievement(*AchievementPtr.Get())
-	, Leaderboard(*LeaderboardPtr.Get())
-	, Reward(*RewardPtr.Get())
-	, SeasonPass(*SeasonPassPtr.Get())
-	, Group(*GroupPtr.Get())
-	, Challenge(*ChallengePtr.Get())
-	, Qos(*QosPtr.Get())
-	, QosManager(*QosManagerPtr.Get())
-	, Lobby(*LobbyPtr.Get())
-	, Chat(*ChatPtr.Get())
-	, SessionBrowser(*SessionBrowserPtr.Get())
-	, TurnManager(*TurnManagerPtr.Get())
-	, Session(*SessionPtr.Get())
-	, SessionHistory(*SessionHistoryPtr.Get())
-	, MatchmakingV2(*MatchmakingV2Ptr.Get())
-	, Ams(*AmsPtr.Get())
-	, GameTelemetry(*GameTelemetryPtr.Get())
-	, PredefinedEvent(*PredefinedEventPtr.Get())
-	, GameStandardEvent(*GameStandardEventPtr.Get())
-	, PresenceBroadcastEvent(*PresenceBroadcastEventPtr.Get())
-{
 	QosPtr->Startup();
 	LobbyPtr->Startup();
 	GameTelemetryPtr->Startup();
@@ -349,6 +102,53 @@ FApiClient::~FApiClient()
 				, ENamedThreads::GameThread);
 		}
 	}
+}
+
+void FApiClient::Init()
+{
+	CurrencyPtr->SetApiClient(AsShared());
+	WalletPtr->SetApiClient(AsShared());
+	CategoryPtr->SetApiClient(AsShared());
+	ItemPtr->SetApiClient(AsShared());
+	OrderPtr->SetApiClient(AsShared());
+	EntitlementPtr->SetApiClient(AsShared());
+	FulfillmentPtr->SetApiClient(AsShared());
+	StoreDisplayPtr->SetApiClient(AsShared());
+	UserPtr->SetApiClient(AsShared());
+	UserProfilePtr->SetApiClient(AsShared());
+	GameProfilePtr->SetApiClient(AsShared());
+	AgreementPtr->SetApiClient(AsShared());
+	GDPRPtr->SetApiClient(AsShared());
+	ReportingPtr->SetApiClient(AsShared());
+	MiscellaneousPtr->SetApiClient(AsShared());
+	ConfigurationsPtr->SetApiClient(AsShared());
+	LoginQueuePtr->SetApiClient(AsShared());
+	CloudStoragePtr->SetApiClient(AsShared());
+	CloudSavePtr->SetApiClient(AsShared());
+	BinaryCloudSavePtr->SetApiClient(AsShared());
+	UGCPtr->SetApiClient(AsShared());
+	InventoryPtr->SetApiClient(AsShared());
+	StatisticPtr->SetApiClient(AsShared());
+	AchievementPtr->SetApiClient(AsShared());
+	LeaderboardPtr->SetApiClient(AsShared());
+	RewardPtr->SetApiClient(AsShared());
+	SeasonPassPtr->SetApiClient(AsShared());
+	GroupPtr->SetApiClient(AsShared());
+	ChallengePtr->SetApiClient(AsShared());
+	QosManagerPtr->SetApiClient(AsShared());
+	QosPtr->SetApiClient(AsShared());
+	LobbyPtr->SetApiClient(AsShared());
+	ChatPtr->SetApiClient(AsShared());
+	SessionBrowserPtr->SetApiClient(AsShared());
+	TurnManagerPtr->SetApiClient(AsShared());
+	SessionPtr->SetApiClient(AsShared());
+	SessionHistoryPtr->SetApiClient(AsShared());
+	MatchmakingV2Ptr->SetApiClient(AsShared());
+	AmsPtr->SetApiClient(AsShared());
+	GameTelemetryPtr->SetApiClient(AsShared());
+	PredefinedEventPtr->SetApiClient(AsShared());
+	GameStandardEventPtr->SetApiClient(AsShared());
+	PresenceBroadcastEventPtr->SetApiClient(AsShared());
 }
 
 #pragma region Access
@@ -581,5 +381,21 @@ Api::ChallengeWPtr FApiClient::GetChallengeApi() const
 FAccelByteTimeManagerWPtr FApiClient::GetTimeManager() const
 {
 	return TimeManagerPtr;
+}
+
+FAccelByteApiUtilitiesWPtr FApiClient::GetApiUtilities() const
+{
+	return ApiUtilitiesPtr;
+}
+
+FString FApiClient::GetDeviceId() const
+{
+	const FAccelByteInstancePtr AccelByteInstancePtr = AccelByteInstanceWeak.Pin();
+	if(AccelByteInstancePtr.IsValid())
+	{
+		return AccelByteInstancePtr->GetDeviceId();
+	}
+
+	return TEXT("");
 }
 }

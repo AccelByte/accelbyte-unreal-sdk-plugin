@@ -23,10 +23,13 @@ namespace GameServerApi
 /**
  * @brief CloudSave API for storing records.
  */
-class ACCELBYTEUE4SDK_API ServerSessionBrowser : FServerApiBase
+class ACCELBYTEUE4SDK_API ServerSessionBrowser : public FServerApiBase
 {
 public:
-	ServerSessionBrowser(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerSessionBrowser(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerSessionBrowser();
 
 	/**

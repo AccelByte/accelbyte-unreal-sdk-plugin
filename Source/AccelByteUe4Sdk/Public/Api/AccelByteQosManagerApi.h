@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API QosManager : public FApiBase, public TSharedFromThis<QosManager, ESPMode::ThreadSafe>
 {
 public:
-	QosManager(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& InHttpRef);
+	QosManager(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~QosManager();
 
 	/**

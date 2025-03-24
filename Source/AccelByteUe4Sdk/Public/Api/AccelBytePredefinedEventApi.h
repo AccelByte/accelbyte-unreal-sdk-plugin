@@ -24,7 +24,10 @@ namespace Api
 class ACCELBYTEUE4SDK_API PredefinedEvent : public BaseAnalytics
 {
 public:
-	PredefinedEvent(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	PredefinedEvent(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 
 	/**
 	 * @brief Send/enqueue a single authorized telemetry data of a predefined event.

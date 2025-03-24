@@ -5,7 +5,7 @@
 #include "Api/AccelByteChatApi.h"
 
 #include "Core/AccelByteMessageParser.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/IWebSocketFactory.h"
@@ -427,7 +427,7 @@ namespace IncomingMessage
 		, float InInitialBackoffDelay
 		, float InMaxBackoffDelay
 		, float InTotalTimeout)
-		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, nullptr)
 		, ChatCredentialsRef{InCredentialsRef.AsShared()}
 #if ENGINE_MAJOR_VERSION < 5
 		, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
@@ -444,6 +444,34 @@ namespace IncomingMessage
 		);
 		IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
 	}
+
+	Chat::Chat(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, FAccelByteMessagingSystem& InMessagingSystemRef
+		, FAccelByteNetworkConditioner& InNetworkConditionerRef
+		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+		, float InPingDelay
+		, float InInitialBackoffDelay
+		, float InMaxBackoffDelay
+		, float InTotalTimeout)
+		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
+		, ChatCredentialsRef{InCredentialsRef.AsShared()}
+	#if ENGINE_MAJOR_VERSION < 5
+		, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
+	#else
+		, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
+	#endif
+		, NetworkConditioner{InNetworkConditionerRef}
+		, PingDelay{InPingDelay}
+		{
+			auto Strategy = FReconnectionStrategy::CreateBalancedStrategy(
+				FReconnectionStrategy::FBalancedMaxRetryInterval(FTimespan::FromSeconds(InMaxBackoffDelay)),
+				FReconnectionStrategy::FTotalTimeoutDuration(FTimespan::FromSeconds(InTotalTimeout)),
+				FReconnectionStrategy::FInitialBackoffDelay(FTimespan::FromSeconds(InInitialBackoffDelay))
+			);
+			IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
+		}
 
 	Chat::~Chat()
 	{

@@ -9,7 +9,7 @@
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteNetworkConditioner.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
@@ -25,6 +25,7 @@
 #include "Misc/Base64.h"
 #include "Core/AccelByteEntitlementTokenGenerator.h"
 #include "Core/AccelByteWebSocketErrorTypes.h"
+#include "Models/AccelByteEcommerceModels.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -920,7 +921,7 @@ FString Lobby::SendStartMatchmaking(FString const& GameMode
 	const bool bUseCustomLatencies = OptionalParams.Latencies.Num() > 0;
 	const TArray<TPair<FString, float>> SelectedLatencies = bUseCustomLatencies
 		? OptionalParams.Latencies
-		: FRegistry::Qos.GetCachedLatencies();
+		: RegionLatencies.AsPairs();
 
 	// Validate Latencies (now initially set, immediately after login success): Important for multi-regioning.
 	if (SelectedLatencies.Num() == 0)
@@ -1999,6 +2000,8 @@ void Lobby::UnbindEvent()
 	UnbindV2GameSessionEvents();
 	UnbindV2MatchmakingEvents();
 	UnbindV2SessionGeneralEvents();
+
+	UnbindMessageNotificationEvents();
 	
 	UserBannedNotification.Unbind();
 	UserUnbannedNotification.Unbind();
@@ -2217,6 +2220,16 @@ void Lobby::UnbindV2MatchmakingEvents()
 	V2MatchmakingExpiredNotif.Unbind();
 	V2MatchmakingStartNotif.Unbind();
 	V2MatchmakingCanceledNotif.Unbind();
+}
+
+void Lobby::UnbindMessageNotificationEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	OneTimeCodeLinkedNotif.Clear();
+	EntitlementUpdatedNotif.Clear();
+	WalletBalanceChangedNotif.Clear();
+	WalletStatusChangedNotif.Clear();
 }
 
 void Lobby::OnNotificationSenderMessageReceived(FString const& Payload)
@@ -3061,6 +3074,65 @@ void Lobby::HandleOneTimeCodeLinkedNotif(const FAccelByteModelsNotificationMessa
 	}
 }
 
+void Lobby::HandleEcommerceNotif(FAccelByteModelsNotificationMessage const& Message)
+{
+	TSharedPtr<FJsonObject> ParsedJsonObj;
+	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Message.Payload);
+	if (FJsonSerializer::Deserialize(JsonReader, ParsedJsonObj))
+	{
+		FString StringType;
+		const TSharedPtr<FJsonObject> JsonPayload = ParsedJsonObj->GetObjectField(TEXT("payload"));
+		if (ParsedJsonObj->TryGetStringField(TEXT("type"), StringType)
+			&& JsonPayload.IsValid())
+		{
+			if (Message.Topic.Equals(TEXT("e-commerce/entitlements")))
+			{
+				EAccelByteEntitlementsNotificationType Type = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteEntitlementsNotificationType>(StringType);
+				if (Type == EAccelByteEntitlementsNotificationType::EntitlementUpdated)
+				{
+					FAccelByteModelsEntitlementUpdatedNotification EntitlementUpdatedResult;
+					if (FJsonObjectConverter::JsonObjectToUStruct(JsonPayload.ToSharedRef(), &EntitlementUpdatedResult))
+					{
+						EntitlementUpdatedNotif.Broadcast(EntitlementUpdatedResult);
+						return;
+					}
+				}
+			}
+			else if (Message.Topic.Equals(TEXT("e-commerce/wallets")))
+			{
+				EAccelByteWalletNotificationType Type = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteWalletNotificationType>(StringType);
+				switch (Type)
+				{
+				case EAccelByteWalletNotificationType::WalletStatusChanged:
+				{
+					FAccelByteModelsWalletStatusChangedNotification WalletStatusResult;
+					if(FJsonObjectConverter::JsonObjectToUStruct(JsonPayload.ToSharedRef(), &WalletStatusResult))
+					{
+						WalletStatusChangedNotif.Broadcast(WalletStatusResult);
+						return;
+					}
+					break;
+				}
+				case EAccelByteWalletNotificationType::WalletBalanceChanged:
+				{
+					FAccelByteModelsWalletBalanceChangedNotification WalletBalanceResult;
+					if (FJsonObjectConverter::JsonObjectToUStruct(JsonPayload.ToSharedRef(), &WalletBalanceResult))
+					{
+						WalletBalanceChangedNotif.Broadcast(WalletBalanceResult);
+						return;
+					}
+					break;
+				}
+				default: break;
+				}
+			}
+		}
+	}
+
+	//Fallback, broadcast generic message notif
+	MessageNotifBroadcaster.Broadcast(Message);
+}
+
 void Lobby::InitializeV2MatchmakingNotifTopics()
 {
 	MatchmakingV2NotifTopics = {
@@ -3205,6 +3277,12 @@ void Lobby::HandleMessageNotif(FString const& ReceivedMessageType
 				break;
 			}
 				
+			if (NotificationMessage.Topic.Contains(TEXT("e-commerce")))
+			{
+				HandleEcommerceNotif(NotificationMessage);
+				break;
+			}
+
 			MessageNotifBroadcaster.Broadcast(NotificationMessage);
 			break;
 		}
@@ -3660,7 +3738,40 @@ Lobby::Lobby(Credentials & InCredentialsRef
 	, float InInitialBackoffDelay
 	, float InMaxBackoffDelay
 	, float InTotalTimeout)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, nullptr)
+	, LobbyCredentialsRef{InCredentialsRef.AsShared()}
+#if ENGINE_MAJOR_VERSION < 5
+	, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
+#else
+	, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
+#endif
+	, NetworkConditioner{InNetworkConditionerRef}
+	, PingDelay{InPingDelay}
+	, TimeSinceLastPing{.0f}
+	, TimeSinceLastReconnect{.0f}
+	, TimeSinceConnectionLost{.0f}
+{
+	InitializeV2MatchmakingNotifTopics();
+
+	auto Strategy = FReconnectionStrategy::CreateBalancedStrategy(
+		FReconnectionStrategy::FBalancedMaxRetryInterval(FTimespan::FromSeconds(InMaxBackoffDelay)),
+		FReconnectionStrategy::FTotalTimeoutDuration(FTimespan::FromSeconds(InTotalTimeout)),
+		FReconnectionStrategy::FInitialBackoffDelay(FTimespan::FromSeconds(InInitialBackoffDelay))
+	);
+	IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
+}
+
+Lobby::Lobby(Credentials& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef
+	, FAccelByteMessagingSystem& InMessagingSystemRef
+	, FAccelByteNetworkConditioner& InNetworkConditionerRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+	, float InPingDelay
+	, float InInitialBackoffDelay
+	, float InMaxBackoffDelay
+	, float InTotalTimeout)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, LobbyCredentialsRef{InCredentialsRef.AsShared()}
 #if ENGINE_MAJOR_VERSION < 5
 	, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
@@ -3845,7 +3956,6 @@ void Lobby::OnReceivedQosLatencies(FString const& Payload)
 		return;
 	}
 
-	FAccelByteModelsQosRegionLatencies RegionLatencies;
 	FJsonObjectConverter::JsonObjectStringToUStruct(Payload, &RegionLatencies);
 
 	const FString ClosestRegion = RegionLatencies.GetClosestRegion();
@@ -3864,7 +3974,56 @@ void Lobby::Startup()
 	{
 		InitializeMessaging();
 		LobbyTickerHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateThreadSafeSP(AsShared(), &Lobby::Tick), LobbyTickPeriod);
+		
+		if (LobbyCredentialsRef->IsSessionValid())
+		{
+			// User is already logged in, handle log in success and schedule unban notifications if needed
+			OnLoginSuccess(LobbyCredentialsRef->GetAuthToken());
+		}
+		else
+		{
+			// User is not already logged in, wait for success delegate to trigger and schedule unban notifications if needed
+			LobbyLoginSuccessDelegateHandle = LobbyCredentialsRef->OnLoginSuccess().AddThreadSafeSP(AsShared(), &Lobby::OnLoginSuccess);
+		}
+		
 		bIsStarted = true;
+	}
+}
+
+bool Lobby::HasUnbanNotificationsScheduled() const
+{
+	return UnbanSchedules.Num() > 0;
+}
+
+void Lobby::OnLoginSuccess(const FOauth2Token& AuthToken)
+{
+	if (AuthToken.Bans.Num() <= 0)
+	{
+		return;
+	}
+
+	for (const FOauth2TokenBan& Ban : AuthToken.Bans)
+	{
+		if (!Ban.Enabled)
+		{
+			continue;
+		}
+
+		if (FDateTime::UtcNow() >= Ban.EndDate)
+		{
+			continue;
+		}
+
+		// Construct ban notification structure to set unban scheduled notification
+		const EBanType BanNotifType = FAccelByteUtilities::GetUEnumValueFromString<EBanType>(Ban.Ban);
+		FAccelByteModelsUserBannedNotification BanNotif{};
+		BanNotif.UserId = AuthToken.User_id;
+		BanNotif.Namespace = Ban.TargetedNamespace;
+		BanNotif.Ban = BanNotifType;
+		BanNotif.EndDate = Ban.EndDate.ToIso8601();
+		BanNotif.Enable = Ban.Enabled;
+
+		SetUnbanSchedule(BanNotif);
 	}
 }
 

@@ -4,15 +4,16 @@
 
 #pragma once
 
+#include "AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "Core/AccelByteBaseCredentials.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteServerCredentials.generated.h"
+
 
 namespace AccelByte
 {
-
 /**
- * @brief Singleston class for storing server credentials.
+ * @brief Singleton class for storing server credentials.
  */
 class ACCELBYTEUE4SDK_API ServerCredentials
 	: public BaseCredentials
@@ -21,8 +22,7 @@ class ACCELBYTEUE4SDK_API ServerCredentials
 public:
 	using BaseCredentials::SetClientCredentials;
 
-	ServerCredentials();
-
+	ServerCredentials(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl);
 	virtual void ForgetAll() override;
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
 	void SetMatchId(const FString& GivenMatchId);
@@ -49,6 +49,10 @@ private:
 	FString MatchId;
 	FString UserId;
 	
+	FString IamServerUrl;
+
+	Api::Oauth2 Oauth;
+
 	static const FString DefaultSection;
 
 	void RemoveFromTicker(FDelegateHandleAlias& handle);
@@ -58,18 +62,3 @@ typedef TSharedRef<ServerCredentials, ESPMode::ThreadSafe> FServerCredentialsRef
 typedef TSharedPtr<ServerCredentials, ESPMode::ThreadSafe> FServerCredentialsPtr;
 
 } // Namespace AccelByte
-
-
-UCLASS(Blueprintable, BlueprintType)
-class UAccelByteBlueprintsServerCredentials : public UBlueprintFunctionLibrary
-{
-public:
-	GENERATED_BODY()
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Credentials")
-	static FString GetClientAccessToken();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Credentials")
-	static FString GetClientNamespace();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Credentials")
-	static FString GetMatchId();
-};
-

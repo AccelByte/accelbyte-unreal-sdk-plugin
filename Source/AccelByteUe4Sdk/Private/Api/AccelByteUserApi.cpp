@@ -2,17 +2,17 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-
 #include "Api/AccelByteUserApi.h"
 #include "AccelByteUe4SdkModule.h"
 #include "Api/AccelByteEntitlementApi.h"
 #include "Api/AccelByteItemApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/AccelByteOauth2Api.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/IAccelByteDataStorage.h"
@@ -29,9 +29,15 @@ namespace Api
 
 User::User(Credentials& InCredentialsRef
 	, Settings& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
-	, UserCredentialsRef{InCredentialsRef.AsShared()}
+	, FHttpRetryScheduler& InHttpRef
+	, EntitlementWPtr InEntitlementWeak
+	, ItemWPtr InItemWeak
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
+	  , UserCredentialsRef{InCredentialsRef.AsShared()}
+	  , EntitlementWeak{InEntitlementWeak}
+	  , ItemWeak{InItemWeak}
+	  , Oauth(InHttpRef, InSettingsRef.IamServerUrl)
 {
 }
 
@@ -62,7 +68,18 @@ void User::TriggerInvalidRequestError(FString const& ErrorMessage
 	ErrorOAuth.ErrorMessage = ErrorMessage;
 	OnError.ExecuteIfBound(ErrorOAuth.ErrorCode, ErrorOAuth.ErrorMessage, ErrorOAuth);
 }
-	
+
+FString User::GetDeviceId() const
+{
+	const FApiClientPtr ApiClientPtr = ApiClient.Pin();
+	if(ApiClientPtr.IsValid())
+	{
+		return ApiClientPtr->GetDeviceId();
+	}
+
+	return TEXT("");
+}
+
 #pragma region Login Methods
 	
 FAccelByteTaskWPtr User::LoginWithUsername(FString const& Username
@@ -107,9 +124,11 @@ FAccelByteTaskWPtr User::LoginWithUsername(FString const& Username
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 	
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	const FString DeviceId = GetDeviceId();
     
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithPasswordCredentials(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithPasswordCredentials(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
@@ -123,7 +142,9 @@ FAccelByteTaskWPtr User::LoginWithUsername(FString const& Username
 				}
 			})
 		, OnError
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::LoginWithUsernameV3(FString const& Username
@@ -170,9 +191,11 @@ FAccelByteTaskWPtr User::LoginWithUsernameV3(FString const& Username
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	const FString DeviceId = GetDeviceId();
 	
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithPasswordCredentialsV3(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithPasswordCredentialsV3(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
@@ -187,7 +210,9 @@ FAccelByteTaskWPtr User::LoginWithUsernameV3(FString const& Username
 			})
 		, OnError
 		, bRememberMe
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::LoginWithUsernameV4(FString const& Username
@@ -219,8 +244,10 @@ FAccelByteTaskWPtr User::LoginWithUsernameV4(FString const& Username
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	const FString DeviceId = GetDeviceId();
+
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithPasswordCredentialsV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithPasswordCredentialsV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
@@ -242,7 +269,9 @@ FAccelByteTaskWPtr User::LoginWithUsernameV4(FString const& Username
 			})
 		, OnError
 		, bRememberMe
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::LoginWithDeviceId(FVoidHandler const& OnSuccess
@@ -266,9 +295,11 @@ FAccelByteTaskWPtr User::LoginWithDeviceId(FVoidHandler const& OnSuccess
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	const FString DeviceId = GetDeviceId();
 	
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithDeviceId(CredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithDeviceId(CredentialsRef->GetOAuthClientId()
 		, CredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
 			[UserWeak, OnSuccess](FOauth2Token const& Result)
@@ -281,7 +312,9 @@ FAccelByteTaskWPtr User::LoginWithDeviceId(FVoidHandler const& OnSuccess
 			})
 		, OnError
 		, SettingsRef.IamServerUrl
-		, bCreateHeadless);
+		, bCreateHeadless
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::LoginWithDeviceIdV4(THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
@@ -294,8 +327,10 @@ FAccelByteTaskWPtr User::LoginWithDeviceIdV4(THandler<FAccelByteModelsLoginQueue
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	const FString DeviceId = GetDeviceId();
+	
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithDeviceIdV4(CredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithDeviceIdV4(CredentialsRef->GetOAuthClientId()
 		, CredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2TokenV4>::CreateLambda(
 			[UserWeak, OnSuccess](FOauth2TokenV4 const& Result)
@@ -315,7 +350,9 @@ FAccelByteTaskWPtr User::LoginWithDeviceIdV4(THandler<FAccelByteModelsLoginQueue
 			})
 		, OnError
 		, SettingsRef.IamServerUrl
-		, bCreateHeadless);
+		, bCreateHeadless
+		, {}
+		, DeviceId);
 }
 	
 FAccelByteTaskWPtr User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType
@@ -374,9 +411,23 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformId(FString const& PlatformId
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
+
+	FString DeviceId;
+	FString MacAddress {TEXT("")};
+	const FApiClientPtr ApiClientPtr = ApiClient.Pin();
+	if(ApiClientPtr.IsValid())
+	{
+		DeviceId = ApiClientPtr->GetDeviceId();
+		
+		const FAccelByteInstancePtr AccelByteInstancePtr =  ApiClientPtr->AccelByteInstanceWeak.Pin();
+		if(AccelByteInstancePtr.IsValid())
+		{
+			MacAddress = AccelByteInstancePtr->GetMacAddress(true);
+		}
+	}
 	
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithOtherPlatformToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithOtherPlatformToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, PlatformId
 		, PlatformToken
@@ -402,7 +453,9 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformId(FString const& PlatformId
 		, bCreateHeadless
 		, SettingsRef.IamServerUrl
 		, {} //AdditionalHeaders
-		, OptionalParams);
+		, OptionalParams
+		, MacAddress
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType
@@ -440,8 +493,10 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformIdV4(FString const& PlatformId
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	const FString DeviceId = GetDeviceId();
+
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithOtherPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithOtherPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, PlatformId
 		, PlatformToken
@@ -474,7 +529,8 @@ FAccelByteTaskWPtr User::LoginWithOtherPlatformIdV4(FString const& PlatformId
 		, bCreateHeadless
 		, SettingsRef.IamServerUrl
 		, {} //AdditionalHeaders 
-		, OptionalParams);
+		, OptionalParams
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(EAccelBytePlatformType NativePlatform
@@ -527,12 +583,14 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(FString const& NativePlat
 		return nullptr;
 	}
 
+	const FString DeviceId = GetDeviceId();
+
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 	
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithSimultaneousPlatformToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithSimultaneousPlatformToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
@@ -557,7 +615,9 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(FString const& NativePlat
 				}
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(EAccelBytePlatformType NativePlatform
@@ -614,8 +674,10 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePl
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	const FString DeviceId = GetDeviceId();
+
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithSimultaneousPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithSimultaneousPlatformTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
@@ -647,7 +709,9 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePl
 				}
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorOauthInfo);
 			})
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabled(FString const& MfaToken
@@ -661,8 +725,10 @@ FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabled(FString const& MfaTo
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	const FString DeviceId = GetDeviceId();
+
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::VerifyAndRememberNewDevice(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.VerifyAndRememberNewDevice(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
@@ -678,7 +744,9 @@ FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabled(FString const& MfaTo
 			})
 		, OnError
 		, bRememberDevice
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabledV4(FString const& MfaToken
@@ -692,8 +760,10 @@ FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabledV4(FString const& Mfa
 
 	UserCredentialsRef->SetBearerAuthRejectedHandler(HttpRef);
 
+	const FString DeviceId = GetDeviceId();
+
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::VerifyAndRememberNewDeviceV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.VerifyAndRememberNewDeviceV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, MfaToken
 		, AuthFactorType
@@ -716,7 +786,9 @@ FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabledV4(FString const& Mfa
 			})
 		, OnError
 		, bRememberDevice
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::LoginWithLauncher(FVoidHandler const& OnSuccess
@@ -756,7 +828,7 @@ FAccelByteTaskWPtr User::LoginWithLauncher(FVoidHandler const& OnSuccess
 	else
 	{
 		UserWPtr UserWeak = AsShared();
-		return Oauth2::GetTokenWithAuthorizationCode(UserCredentialsRef->GetOAuthClientId()
+		return Oauth.GetTokenWithAuthorizationCode(UserCredentialsRef->GetOAuthClientId()
 			, UserCredentialsRef->GetOAuthClientSecret()
 			, AuthorizationCode
 			, SettingsRef.RedirectURI
@@ -798,7 +870,7 @@ FAccelByteTaskWPtr User::LoginWithLauncherV4(THandler<FAccelByteModelsLoginQueue
 	else
 	{
 		UserWPtr UserWeak = AsShared();
-		return Oauth2::GetTokenWithAuthorizationCodeV4(UserCredentialsRef->GetOAuthClientId()
+		return Oauth.GetTokenWithAuthorizationCodeV4(UserCredentialsRef->GetOAuthClientId()
 			, UserCredentialsRef->GetOAuthClientSecret()
 			, AuthorizationCode
 			, SettingsRef.RedirectURI
@@ -859,7 +931,7 @@ FAccelByteTaskWPtr User::LoginWithRefreshToken(FString const& RefreshToken
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithRefreshToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithRefreshToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, RefreshToken
 		, THandler<FOauth2Token>::CreateLambda(
@@ -893,7 +965,7 @@ FAccelByteTaskWPtr User::LoginWithRefreshTokenV4(THandler<FAccelByteModelsLoginQ
 	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
 
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithRefreshTokenV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithRefreshTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, InRefreshToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
@@ -948,7 +1020,7 @@ FAccelByteTaskWPtr User::RefreshPlatformToken(FString const& NativePlatform
 		return nullptr;
 	}
 
-	return Oauth2::RefreshPlatformToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.RefreshPlatformToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, NativePlatform
 		, NativePlatformToken
@@ -991,18 +1063,32 @@ FAccelByteTaskWPtr User::TryRelogin(FString const& PlatformUserID
 					return;
 				}
 
-				auto Decoded = FAccelByteUtilities::XOR(Pair.Value, FAccelByteUtilities::GetDeviceId());
-				FRefreshInfo RefreshInfo;
-				if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
-				{
-					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."), FErrorOAuthInfo{});
-					return;
-				}
-
 				const auto UserPtr = UserWeak.Pin();
 				if (!UserPtr.IsValid())
 				{
 					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("User API already invalid, can't proccess futher."), FErrorOAuthInfo{});
+					return;
+				}
+
+				const FApiClientPtr ApiClientPtr = UserPtr->ApiClient.Pin();
+				if(!ApiClientPtr.IsValid())
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("User API's API client already invalid, can't proccess futher."), FErrorOAuthInfo{});
+					return;
+				}
+
+				const FAccelByteInstancePtr AccelByteInstancePtr = ApiClientPtr->AccelByteInstanceWeak.Pin();
+				if(!AccelByteInstancePtr.IsValid())
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("User API's AccelByteInstance already invalid, can't proccess futher."), FErrorOAuthInfo{});
+					return;
+				}
+
+				const auto Decoded = FAccelByteUtilities::XOR(Pair.Value, AccelByteInstancePtr->GetDeviceId());
+				FRefreshInfo RefreshInfo;
+				if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."), FErrorOAuthInfo{});
 					return;
 				}
 
@@ -1039,18 +1125,32 @@ FAccelByteTaskWPtr User::TryReloginV4(FString const& PlatformUserID
 					return;
 				}
 
-				auto Decoded = FAccelByteUtilities::XOR(Pair.Value, FAccelByteUtilities::GetDeviceId());
-				FRefreshInfo RefreshInfo;
-				if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
-				{
-					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."), FErrorOAuthInfo{});
-					return;
-				}
-
 				const auto UserPtr = UserWeak.Pin();
 				if (!UserPtr.IsValid())
 				{
 					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("User API already invalid, can't proccess futher."), FErrorOAuthInfo{});
+					return;
+				}
+
+				const FApiClientPtr ApiClientPtr = UserPtr->ApiClient.Pin();
+				if(!ApiClientPtr.IsValid())
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("User API's API client already invalid, can't proccess futher."), FErrorOAuthInfo{});
+					return;
+				}
+
+				const FAccelByteInstancePtr AccelByteInstancePtr = ApiClientPtr->AccelByteInstanceWeak.Pin();
+				if(!AccelByteInstancePtr.IsValid())
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidResponse), TEXT("User API's AccelByteInstance already invalid, can't proccess futher."), FErrorOAuthInfo{});
+					return;
+				}
+
+				auto Decoded = FAccelByteUtilities::XOR(Pair.Value, AccelByteInstancePtr->GetDeviceId());
+				FRefreshInfo RefreshInfo;
+				if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
+				{
+					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."), FErrorOAuthInfo{});
 					return;
 				}
 
@@ -1088,7 +1188,7 @@ FAccelByteTaskWPtr User::CreateHeadlessAccountAndLogin(FString const& LinkingTok
 	}
 
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::CreateHeadlessAccountAndResponseToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.CreateHeadlessAccountAndResponseToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, LinkingToken
 		, THandler<FOauth2Token>::CreateLambda(
@@ -1119,7 +1219,7 @@ FAccelByteTaskWPtr User::CreateHeadlessAccountAndLoginV4(THandler<FAccelByteMode
 	}
 
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::CreateHeadlessAccountAndResponseTokenV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.CreateHeadlessAccountAndResponseTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, InLinkingToken
 		, THandler<FOauth2TokenV4>::CreateLambda(
@@ -1182,7 +1282,7 @@ FAccelByteTaskWPtr User::AuthenticationWithPlatformLinkAndLogin(FString const& U
 	}
 
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::AuthenticationWithPlatformLink(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.AuthenticationWithPlatformLink(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
@@ -1234,7 +1334,7 @@ FAccelByteTaskWPtr User::AuthenticationWithPlatformLinkAndLoginV4(FString const&
 	}
 
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::AuthenticationWithPlatformLinkV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.AuthenticationWithPlatformLinkV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Username
 		, Password
@@ -1271,8 +1371,10 @@ FAccelByteTaskWPtr User::ClaimAccessToken(FString const& LoginTicket
 		return nullptr;
 	}
 
+	const FString DeviceId = GetDeviceId(); 
+
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GetTokenWithLoginTicket(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithLoginTicket(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, LoginTicket
 		, THandler<FOauth2Token>::CreateLambda(
@@ -1285,7 +1387,9 @@ FAccelByteTaskWPtr User::ClaimAccessToken(FString const& LoginTicket
 				}
 			})		
 		, OnError
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 #pragma endregion /Login Methods
@@ -1372,7 +1476,19 @@ void User::SaveCachedTokenToLocalDataStorage(FString const& CachedTokenKey
 	FString SerializedInfo;
 	FJsonObjectConverter::UStructToJsonObjectString(Info, SerializedInfo);
 
-	auto XorInfo = FAccelByteUtilities::XOR(SerializedInfo, FAccelByteUtilities::GetDeviceId());
+	const FApiClientPtr ApiClientPtr = ApiClient.Pin();
+	if(!ApiClientPtr.IsValid())
+	{
+		return;
+	}
+
+	const FAccelByteInstancePtr AccelByteInstancePtr = ApiClientPtr->AccelByteInstanceWeak.Pin();
+	if(!AccelByteInstancePtr.IsValid())
+	{
+		return;
+	}
+
+	auto XorInfo = FAccelByteUtilities::XOR(SerializedInfo, AccelByteInstancePtr->GetDeviceId());
 	UserWPtr UserWeak = AsShared();
 	IAccelByteUe4SdkModuleInterface::Get().GetLocalDataStorage()->SaveItem(CachedTokenKey
 		, XorInfo
@@ -1396,7 +1512,7 @@ FAccelByteTaskWPtr User::Logout(FVoidHandler const& OnSuccess
 	FReport::LogDeprecated(FString(__FUNCTION__),
 		TEXT("Logout by directly revoking token is deprecated, please use LogoutV3."));
 
-	return Oauth2::RevokeToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.RevokeToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, UserCredentialsRef->GetAccessToken()
 		, FVoidHandler::CreateLambda(
@@ -2476,11 +2592,17 @@ FAccelByteTaskWPtr User::GetUserEligibleToPlay(THandler<bool> const& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	const ItemPtr ItemPin = ItemWeak.Pin();
+	if(ItemPin.IsValid())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to GetUserEligibleToPlay, ItemPtr is invalid"));
+		return nullptr;
+	}
+
 	UserWPtr UserWeak = AsShared();
 	auto onItemInfoGot = THandler<FAccelByteModelsItemInfo>::CreateLambda(
 		[UserWeak, OnSuccess, OnError](FAccelByteModelsItemInfo const& itemInfoResult)
 		{
-
 			TArray<FString> itemIds;
 			TArray<FString> skus = itemInfoResult.Features;
 			TArray<FString> appIds;
@@ -2490,7 +2612,14 @@ FAccelByteTaskWPtr User::GetUserEligibleToPlay(THandler<bool> const& OnSuccess
 				appIds.Init(*UserPtr->SettingsRef.AppId, 1);
 			}
 
-			FRegistry::Entitlement.GetUserEntitlementOwnershipAny(itemIds, appIds, skus, THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([OnSuccess, OnError](FAccelByteModelsEntitlementOwnership ownership)
+			const EntitlementPtr EntitlementPin = UserPtr->EntitlementWeak.Pin();
+			if(!EntitlementPin.IsValid())
+			{
+				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to query entitlement, EntitlementPtr is invalid"));
+				return;
+			}
+
+			EntitlementPin->GetUserEntitlementOwnershipAny(itemIds, appIds, skus, THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([OnSuccess, OnError](FAccelByteModelsEntitlementOwnership ownership)
 			{
 				OnSuccess.ExecuteIfBound(ownership.Owned);
 			}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString const& ErrorMsg)
@@ -2500,7 +2629,7 @@ FAccelByteTaskWPtr User::GetUserEligibleToPlay(THandler<bool> const& OnSuccess
 		});
 
 	// #TODO: Change the FRegistry implementation with ApiClient
-	return FRegistry::Item.GetItemByAppId(*SettingsRef.AppId
+	return ItemPin->GetItemByAppId(*SettingsRef.AppId
 		, TEXT(""), TEXT(""), onItemInfoGot, FErrorHandler::CreateLambda(
 			[OnError](int32 ErrorCode, FString const& ErrorMsg)
 			{
@@ -2790,8 +2919,10 @@ FAccelByteTaskWPtr User::VerifyToken(FVoidHandler const& OnSuccess
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	const FString DeviceId = GetDeviceId();
+
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::VerifyToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.VerifyToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, UserCredentialsRef->GetAccessToken()
 		, FVoidHandler::CreateLambda(
@@ -2800,7 +2931,9 @@ FAccelByteTaskWPtr User::VerifyToken(FVoidHandler const& OnSuccess
 				OnSuccess.ExecuteIfBound();
 			})
 		, OnError
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::GetUserInformation(FString const& UserId
@@ -2836,7 +2969,7 @@ FAccelByteTaskWPtr User::GenerateOneTimeCode(EAccelBytePlatformType PlatformType
 
 	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType); 	
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GenerateOneTimeCode(UserCredentialsRef->GetAccessToken()
+	return Oauth.GenerateOneTimeCode(UserCredentialsRef->GetAccessToken()
 		, PlatformString
 		, THandler<FGeneratedOneTimeCode>::CreateLambda(
 			[UserWeak, OnSuccess, OnError](const FGeneratedOneTimeCode& Result) 
@@ -2851,9 +2984,12 @@ FAccelByteTaskWPtr User::GenerateGameToken(FString const& Code
 	, FVoidHandler const& OnSuccess
 	, FOAuthErrorHandler const& OnError)
 {
-	FReport::Log(FString(__FUNCTION__)); 
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString DeviceId = GetDeviceId();
+	
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GenerateGameToken(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GenerateGameToken(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Code
 		, THandler<FOauth2Token>::CreateLambda(
@@ -2866,7 +3002,9 @@ FAccelByteTaskWPtr User::GenerateGameToken(FString const& Code
 				}
 			})		
 		, OnError
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::GenerateGameTokenV4(FString const& Code
@@ -2874,8 +3012,11 @@ FAccelByteTaskWPtr User::GenerateGameTokenV4(FString const& Code
 	, FOAuthErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	const FString DeviceId = GetDeviceId();
+	
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::GenerateGameTokenV4(UserCredentialsRef->GetOAuthClientId()
+	return Oauth.GenerateGameTokenV4(UserCredentialsRef->GetOAuthClientId()
 		, UserCredentialsRef->GetOAuthClientSecret()
 		, Code
 		, THandler<FOauth2TokenV4>::CreateLambda(
@@ -2895,7 +3036,9 @@ FAccelByteTaskWPtr User::GenerateGameTokenV4(FString const& Code
 				}
 			})
 		, OnError
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, DeviceId);
 }
 
 FAccelByteTaskWPtr User::GenerateCodeForPublisherTokenExchange(FString const& PublisherClientID
@@ -2903,11 +3046,12 @@ FAccelByteTaskWPtr User::GenerateCodeForPublisherTokenExchange(FString const& Pu
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__)); 
-	return Oauth2::GenerateCodeForPublisherTokenExchange(UserCredentialsRef->GetAccessToken()
+	return Oauth.GenerateCodeForPublisherTokenExchange(UserCredentialsRef->GetAccessToken()
 		, SettingsRef.PublisherNamespace
 		, PublisherClientID
 		, OnSuccess
-		, OnError);
+		, OnError
+		, SettingsRef.IamServerUrl);
 }
 
 FAccelByteTaskWPtr User::LinkHeadlessAccountToCurrentFullAccount(FLinkHeadlessAccountRequest const& Request
@@ -2992,7 +3136,7 @@ FAccelByteTaskWPtr User::RetrieveUserThirdPartyPlatformToken(EAccelBytePlatformT
 	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
 	UserWPtr UserWeak = AsShared();
-	return Oauth2::RetrieveUserThirdPartyPlatformToken(UserId, PlatformId, Authorization, 
+	return Oauth.RetrieveUserThirdPartyPlatformToken(CredentialsRef->GetNamespace(), UserId, PlatformId, Authorization, 
 		THandler<FThirdPartyPlatformTokenData>::CreateLambda(
 			[UserWeak, PlatformId, OnSuccess](const FThirdPartyPlatformTokenData& Result)
 			{
@@ -3002,7 +3146,10 @@ FAccelByteTaskWPtr User::RetrieveUserThirdPartyPlatformToken(EAccelBytePlatformT
 					UserPtr->UserCredentialsRef->SetThridPartyPlatformTokenData(PlatformId, Result);
 				}
 				OnSuccess.ExecuteIfBound(Result); 
-			}), OnError);
+			})
+			, OnError
+			, SettingsRef.IamServerUrl
+			);
 }
 
 FAccelByteTaskWPtr User::GetUserOtherPlatformBasicPublicInfo(FPlatformAccountInfoRequest const& Request

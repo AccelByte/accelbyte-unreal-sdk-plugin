@@ -15,6 +15,7 @@ namespace AccelByte
 		, RefreshTime(0.0)
 		, ExpireTime(0.0)
 		, RefreshBackoff(0.0)
+		, BackoffCount(0)
 	{
 	}
 

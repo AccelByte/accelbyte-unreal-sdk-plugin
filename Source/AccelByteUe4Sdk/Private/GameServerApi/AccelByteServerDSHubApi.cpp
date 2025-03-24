@@ -36,7 +36,25 @@ ServerDSHub::ServerDSHub(
 	float InInitialBackoffDelay,
 	float InMaxBackoffDelay,
 	float InTotalTimeout)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, nullptr)
+	, PingDelay(InPingDelay)
+	, InitialBackoffDelay(InInitialBackoffDelay)
+	, MaxBackoffDelay(InMaxBackoffDelay)
+	, TotalTimeout(InTotalTimeout)
+{
+	auto Strategy = FReconnectionStrategy::CreateLimitlessStrategy();
+	IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
+}
+
+ServerDSHub::ServerDSHub(ServerCredentials const& InCredentialsRef
+	, ServerSettings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient
+	, float InPingDelay
+	, float InInitialBackoffDelay
+	, float InMaxBackoffDelay
+	, float InTotalTimeout)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 	, PingDelay(InPingDelay)
 	, InitialBackoffDelay(InInitialBackoffDelay)
 	, MaxBackoffDelay(InMaxBackoffDelay)

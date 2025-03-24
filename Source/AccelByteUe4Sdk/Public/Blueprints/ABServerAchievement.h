@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteMultiRegistry.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "ABServerAchievement.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)

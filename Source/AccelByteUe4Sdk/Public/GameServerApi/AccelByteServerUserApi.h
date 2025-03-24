@@ -25,7 +25,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerUser : public FServerApiBase
 {
 public:
-	ServerUser(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerUser(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerUser();
 
 	/**

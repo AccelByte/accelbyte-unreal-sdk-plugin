@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiClient.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteLobbyModels.h"
-#include "Core/AccelByteMultiRegistry.h"
 #include "Core/IAccelByteTokenGenerator.h"
 #include "AccelByteBPLobby.generated.h"
 

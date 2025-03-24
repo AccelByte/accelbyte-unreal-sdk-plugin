@@ -71,6 +71,23 @@ enum class EV2SessionNotifTopic : uint8
 	OnPartyCancelled
 };
 
+/** @brief Entitlements Notification types enums. */
+UENUM(BlueprintType)
+enum class EAccelByteEntitlementsNotificationType : uint8
+{
+	EntitlementUpdated,
+	Unknown
+};
+
+/** @brief Wallet Notification types enums. */
+UENUM(BlueprintType)
+enum class EAccelByteWalletNotificationType : uint8
+{
+	WalletStatusChanged,
+	WalletBalanceChanged,
+	Unknown
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FLobbySequence
 {
@@ -852,6 +869,28 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyNotif
 	FString Sender{};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 	FString Topic{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Payload{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementsNotificationPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	EAccelByteEntitlementsNotificationType Type{ EAccelByteEntitlementsNotificationType::Unknown };
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Payload{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletNotificationPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	EAccelByteWalletNotificationType Type{ EAccelByteWalletNotificationType::Unknown };
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 	FString Payload{};
 };

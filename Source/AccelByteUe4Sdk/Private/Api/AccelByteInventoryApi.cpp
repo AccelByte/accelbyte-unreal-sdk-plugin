@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteInventoryApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
@@ -17,8 +17,9 @@ namespace Api
 
 Inventory::Inventory(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
 
 Inventory::~Inventory(){}

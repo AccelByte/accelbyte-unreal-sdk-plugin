@@ -137,8 +137,6 @@ UABApiClient::UABApiClient()
 	SessionAttribute = NewObject<UABSessionAttribute>();
 	Signaling = NewObject<UABSignaling>();
 	Group = NewObject<UABGroup>();
-
-	SetApiClient(FMultiRegistry::GetApiClient());
 }
 
 void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
@@ -171,12 +169,4 @@ void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	SessionAttribute->SetApiClient(ApiClientPtr);
 	Signaling->SetApiClient(ApiClientPtr);
 	Group->SetApiClient(ApiClientPtr);
-}
-
-UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)
-{
-	UABApiClient* WrapperPtr = NewObject<UABApiClient>();
-	WrapperPtr->SetApiClient(FMultiRegistry::GetApiClient(Key));
-
-	return WrapperPtr;
 }

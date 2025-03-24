@@ -6,7 +6,7 @@
 #include "Icmp.h"
 #include "Networking.h"
 #include "Api/AccelByteQosManagerApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/Ping/AccelBytePing.h"
 
 namespace AccelByte
@@ -17,18 +17,21 @@ FAccelByteModelsQosServerList Qos::QosServers = {};
 TArray<TPair<FString, float>> Qos::Latencies = {};
 TMap<FString, TSharedPtr<FInternetAddr>> Qos::ResolvedAddresses = {};
 FDelegateHandleAlias Qos::PollLatenciesHandle;
-FDelegateHandleAlias Qos::PollServerLatenciesHandle;
 
 Qos::Qos(Credentials& InCredentialsRef
-	, Settings const& InSettingsRef
-	, FAccelByteMessagingSystem& InMessagingSystemRef)
+	, const Settings& InSettingsRef
+	, FAccelByteMessagingSystem& InMessagingSystemRef
+	, const QosManagerWPtr InQosManagerWeak
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: CredentialsRef{InCredentialsRef.AsShared()}
 	, SettingsRef{InSettingsRef}
+	, QosManagerWeak{InQosManagerWeak}
 #if ENGINE_MAJOR_VERSION < 5
 	, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
 #else
 	, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
 #endif
+	, ApiClient(InApiClient)
 {}
 
 Qos::~Qos()
@@ -43,8 +46,13 @@ Qos::~Qos()
 	FTickerAlias::GetCoreTicker().RemoveTicker(QosUpdateCheckerHandle);
 }
 
+void Qos::SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+{
+	ApiClient = InApiClient;
+}
+
 void Qos::GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
-	, const FErrorHandler& OnError)
+                             , const FErrorHandler& OnError)
 {
 	StartLatencyPollers();
 
@@ -55,8 +63,15 @@ void Qos::GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSu
 void Qos::GetActiveServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
 	, const FErrorHandler& OnError)
 {
+	const QosManagerPtr QosManagerPtr = QosManagerWeak.Pin();
+	if(!QosManagerPtr.IsValid())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("QosManager is invalid!"));
+		return;
+	}
+	
 	QosWPtr QosWeak = AsShared();
-	FRegistry::QosManager.GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
+	QosManagerPtr->GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
 	[QosWeak, OnSuccess, OnError](const FAccelByteModelsQosServerList Result)
 	{
 		const auto QosApi = QosWeak.Pin();
@@ -84,8 +99,15 @@ void Qos::CallGetQosServers(const bool bPingRegionsOnSuccess
 	, const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess
 	, const FErrorHandler& OnError)
 {
+	const QosManagerPtr QosManagerPtr = QosManagerWeak.Pin();
+	if(!QosManagerPtr.IsValid())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("QosManager is invalid!"));
+		return;
+	}
+	
 	QosWPtr QosWeak = AsShared();
-	FRegistry::QosManager.GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
+	QosManagerPtr->GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
 		[QosWeak, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError](const FAccelByteModelsQosServerList Result)
 		{
 			const auto QosApi = QosWeak.Pin();
@@ -136,7 +158,7 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 
 			// Ping -> Get the latencies on pong.
 			QosWPtr QosWeak = AsShared();
-			FAccelBytePing::SendUdpPing(Server.ResolvedIp, Server.Port, FRegistry::Settings.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
+			FAccelBytePing::SendUdpPing(Server.ResolvedIp, Server.Port, SettingsRef.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
 				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError, QosWeak](const FPingResult& PingResult)
 				{
 					if (PingResult.Status == FPingResultStatus::Success)
@@ -221,42 +243,6 @@ void Qos::InitGetLatenciesScheduler(float LatencyPollIntervalSecs)
 		}), AdjustedSecondsPerTick);
 }
 
-void Qos::InitGetServerLatenciesScheduler(float QosServerPollIntervalSecs)
-{
-	const bool bActivateScheduler = QosServerPollIntervalSecs > 0;
-	
-	if (Qos::PollServerLatenciesHandle.IsValid())
-	{
-		RemoveFromTicker(Qos::PollServerLatenciesHandle);
-	}
-
-	if (!bActivateScheduler)
-	{
-		return;
-	}
-
-	// Active (>0): ensure min value to prevent flooding
-	const float AdjustedSecondsPerTick = QosServerPollIntervalSecs < Settings::MinNumSecsQosLatencyPolling
-		? Settings::MinNumSecsQosLatencyPolling
-		: QosServerPollIntervalSecs;
-
-	// -----------------------------------
-	// Schedule a Latencies refresh poller
-	// Loop infinitely, every x seconds, until we tell the delegate to stop via RemoveFromTicker()
-	QosWPtr QosWeak = AsShared();
-	Qos::PollServerLatenciesHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
-		[QosWeak](float DeltaTime)
-		{
-			constexpr bool bPingRegionsOnSuccess = false;
-			const auto QosApi = QosWeak.Pin();
-			if (QosApi.IsValid())
-			{
-				QosApi->CallGetQosServers(bPingRegionsOnSuccess, nullptr, nullptr);
-			}
-			return true;
-		}), AdjustedSecondsPerTick);
-}
-
 void Qos::RemoveFromTicker(FDelegateHandleAlias& Handle)
 {
 	if (!Handle.IsValid())
@@ -269,20 +255,18 @@ void Qos::RemoveFromTicker(FDelegateHandleAlias& Handle)
 void Qos::StartLatencyPollers()
 {
 	// Setup polling schedulers that will consistently refresh Latencies.
-	InitGetLatenciesScheduler(FRegistry::Settings.QosLatencyPollIntervalSecs);
-	InitGetServerLatenciesScheduler(FRegistry::Settings.QosServerLatencyPollIntervalSecs);
+	InitGetLatenciesScheduler(SettingsRef.QosLatencyPollIntervalSecs);
 }
 
 void Qos::StopLatencyPollers()
 {
 	RemoveFromTicker(Qos::PollLatenciesHandle);
-	RemoveFromTicker(Qos::PollServerLatenciesHandle);
 	Qos::Latencies.Empty();
 }
 
 bool Qos::AreLatencyPollersActive()
 {
-	return PollLatenciesHandle.IsValid() || PollServerLatenciesHandle.IsValid();
+	return PollLatenciesHandle.IsValid();
 }
 
 const TArray<TPair<FString, float>>& Qos::GetCachedLatencies()

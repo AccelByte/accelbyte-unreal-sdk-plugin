@@ -24,7 +24,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Order : public FApiBase, public TSharedFromThis<Order, ESPMode::ThreadSafe>
 {
 public:
-	Order(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Order(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Order();
 
 	/**

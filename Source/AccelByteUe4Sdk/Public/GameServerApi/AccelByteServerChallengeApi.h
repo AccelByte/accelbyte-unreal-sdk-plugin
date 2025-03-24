@@ -27,9 +27,34 @@ class ACCELBYTEUE4SDK_API ServerChallenge : public FServerApiBase
 public:
 	ServerChallenge(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef);
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerChallenge();
-	
+
+	/**
+	 * @brief Send a request to get current progress for a specific challenge from a specific user
+	 *
+	 * @param ChallengeCode String code for the challenge to check progress for
+	 * @param OnSuccess Delegate executed when request succeeds
+	 * @param OnError Delegate executed when request fails
+	 * @param Offset Number of goals to skip when returning goal progress list, defaults to 0
+	 * @param Limit Number of goals to include when returning goal progress list, defaults to 20
+	 * @param GoalCode String code for the specific challenge goal to get progress for
+	 * @param Tags Array of tag strings used to filter resulting challenge progress list
+	 * @param DateTime Filter the result of query to progression before the specified date time, by default no specified dateTime. WARNING: cannot use DateTime from future, only past.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserChallengeProgress(const FString& UserId
+		, FString const& ChallengeCode
+		, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint64 Offset = 0
+		, uint64 Limit = 20
+		, FString const& GoalCode = TEXT("")
+		, TArray<FString> const& Tags = {}
+		, TOptional<FDateTime> DateTime = {});
+
 	/**
 	 * @brief Send a request to attempt to evaluate many user's challenge progress
 	 *

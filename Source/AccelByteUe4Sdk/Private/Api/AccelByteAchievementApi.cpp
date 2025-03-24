@@ -4,7 +4,7 @@
 
 #include "Api/AccelByteAchievementApi.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
@@ -16,8 +16,9 @@ namespace Api
 
 Achievement::Achievement(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
 
 Achievement::~Achievement()
@@ -262,6 +263,26 @@ FAccelByteTaskWPtr Achievement::UnlockAchievement(const FString& AchievementCode
 		, *AchievementCode);
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Achievement::BulkUnlockAchievement(FAccelByteModelsAchievementBulkUnlockRequest const& AchievementsToUnlock
+	, THandler<TArray<FAccelByteModelsAchievementBulkUnlockRespone>> const& UnlockResponses
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (AchievementsToUnlock.AchievementCodes.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Request is invalid due to provided AchievementCodes is empty."));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/bulkUnlock")
+		, *SettingsRef.AchievementServerUrl
+		, *CredentialsRef->GetNamespace()
+		, *CredentialsRef->GetUserId());
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, AchievementsToUnlock, UnlockResponses, OnError);
 }
 
 FAccelByteTaskWPtr Achievement::QueryGlobalAchievements(FString const& AchievementCode

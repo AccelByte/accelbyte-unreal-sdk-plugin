@@ -5,9 +5,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/AccelByteApiClient.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteGroupModels.h"
-#include "Core/AccelByteMultiRegistry.h"
+
 #include "ABGroup.generated.h"
 
 #pragma region Dynamic Delegates

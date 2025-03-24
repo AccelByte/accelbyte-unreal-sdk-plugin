@@ -28,6 +28,7 @@ class ACCELBYTEUE4SDK_API ServerAMS : public FServerApiBase, public IWebsocketCo
 public:
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE(FOnAMSDrainReceived);
+	DECLARE_MULTICAST_DELEGATE(FMulticastOnAMSDrainReceived);
 	DECLARE_DELEGATE_OneParam(FConnectError, const FString& /* Message */);
 	typedef AccelByteWebSocket::FConnectionCloseDelegate FConnectionClosed;
 	typedef AccelByteWebSocket::FReconnectAttemptMulticastDelegate FReconnectAttempted;
@@ -35,7 +36,8 @@ public:
 
 	ServerAMS(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef);
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 
 	~ServerAMS();
 
@@ -88,11 +90,19 @@ public:
 	void SendReadyMessage();
 
 	/**
-	 * @brief set delegate to be called when drain message is received.
+	 * @brief set delegate to be called when drain message is received. Only able to set one delegate.
+	 * For multiple delegate, please refer to AddOnAMSDrainReceivedMulticastDelegate.
 	 *
 	 * @param OnAMSDrain delegate to set.
 	 */
 	void SetOnAMSDrainReceivedDelegate(FOnAMSDrainReceived OnAMSDrain);
+
+	/**
+	 * @brief Add delegate that can be registered to multicast when drain message is received.
+	 *
+	 * @return OnAMSDrain delegate to add.
+	 */
+	FDelegateHandle AddOnAMSDrainReceivedMulticastDelegate(FOnAMSDrainReceived OnAMSDrain);
 
 	/**
 	 * @brief set DS session timeout to the new number given.
@@ -148,6 +158,7 @@ private:
 	FConnectError OnConnectErrorDelegate;
 	FConnectionClosed OnConnectionClosedDelegate;
 	FOnAMSDrainReceived OnAMSDrainReceivedDelegate;
+	FMulticastOnAMSDrainReceived AMSDrainReceivedMulticastDelegate;
 	FTickerDelegate AMSHeartbeatTickDelegate;
 	FReconnectAttempted ReconnectAttempted;
 	FMassiveOutage MassiveOutage;

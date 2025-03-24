@@ -27,7 +27,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerGameTelemetry : public FServerApiBase
 {
 public:
-	ServerGameTelemetry(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerGameTelemetry(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	virtual ~ServerGameTelemetry();
 
 	/**

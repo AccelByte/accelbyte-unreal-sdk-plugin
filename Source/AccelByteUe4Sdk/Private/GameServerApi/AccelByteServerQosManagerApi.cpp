@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
@@ -16,8 +16,9 @@ namespace GameServerApi
 
 ServerQosManager::ServerQosManager(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
 
 ServerQosManager::~ServerQosManager()
@@ -58,7 +59,7 @@ void ServerQosManager::GetServerLatencies(const THandler<TArray<TPair<FString, f
 					auto Server = Result.Servers[i];
 					int32 Count = Result.Servers.Num();
 					FAccelBytePing::SendUdpPing(*Server.Ip, Server.Port
-						, FRegistry::ServerSettings.QosPingTimeout
+						, ServerSettingsRef.QosPingTimeout
 						, FPingCompleteDelegate::CreateLambda(
 							[this, Server, OnSuccess, Count](FPingResult Result)
 							{

@@ -23,7 +23,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerAchievement : public FServerApiBase
 {
 public:
-	ServerAchievement(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler & InHttpRef);
+	ServerAchievement(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler & InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerAchievement();
 
 	/**
@@ -40,6 +43,21 @@ public:
 		, FString const& AchievementCode
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Unlock multiple achievement.
+	 *
+	 * @param UserId The id of the user who will unlock multiple achievements.
+	 * @param AchievementsToUnlock Request of achievement that needs to be unlocked.
+	 * @param UnlockResponses This will be called when the operation completed. In a form of array for each achievement that was requested.
+	 * @param OnGeneralError This will be called when the entire operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr BulkUnlockAchievement(FString const& UserId
+		, FAccelByteModelsAchievementBulkUnlockRequest const& AchievementsToUnlock
+		, THandler<TArray<FAccelByteModelsAchievementBulkUnlockRespone>> const& UnlockResponses
+		, FErrorHandler const& OnGeneralError);
 
 	/**
 	 * @brief Create events to sync to PSN, used to unlock trophies through game server

@@ -23,7 +23,10 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerGameStandardEvent : public ServerBaseAnalytics
 {
 public:
-	ServerGameStandardEvent(ServerCredentials& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	ServerGameStandardEvent(ServerCredentials& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 
 	bool SendMissionStartedEventData(FAccelByteId const& UserId
 		, FMissionId const& MissionId

@@ -4,7 +4,7 @@
 
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteReport.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteHttpRetryTask.h"
 #include "Core/AccelByteUtilities.h"
 
@@ -34,6 +34,17 @@ TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> FH
 FHttpRetryScheduler::FHttpRetryScheduler()
 	: TaskQueue()
 {}
+
+FHttpRetryScheduler::FHttpRetryScheduler(const SettingsWPtr InSettingsWeak)
+: TaskQueue()
+, SettingsWeak(InSettingsWeak)
+{
+	const SettingsPtr Settings = SettingsWeak.Pin();
+	if(Settings.IsValid())
+	{
+		HttpCache.SetCacheType(Settings->HttpCacheType);
+	}
+}
 
 FHttpRetryScheduler::~FHttpRetryScheduler()
 {
@@ -66,9 +77,9 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, HTTP Retry Scheduler is UNINITIALIZED"));
 		return Task;
 	}
-	if (FAccelByteNetUtilities::IsValidUrl(Request->GetURL()) == false)
+	if (!FAccelByteNetUtilities::IsValidUrl(Request->GetURL()))
 	{
-		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, Request URL is not valid"));
+		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, Request URL (%s) is not valid"), *Request->GetURL());
 		CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), false);
 		return Task;
 	}
@@ -101,7 +112,8 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 	else
 	{
 		FHttpResponsePtr CachedResponse;
-		if (UAccelByteBlueprintsSettings::IsHttpCacheEnabled() && HttpCache.TryRetrieving(Request, CachedResponse))
+		SettingsPtr Settings = SettingsWeak.Pin();
+		if (Settings.IsValid() && Settings->bEnableHttpCache && HttpCache.TryRetrieving(Request, CachedResponse))
 		{
 			HttpRetryTaskPtr->FinishFromCached(CachedResponse);
 		}
@@ -348,10 +360,10 @@ bool FHttpRetryScheduler::PollRetry(double Time)
 		}
 	} while (Loop);
 
-	const bool bIsHttpCacheEnabled = UAccelByteBlueprintsSettings::IsHttpCacheEnabled();
+	const SettingsPtr Settings = SettingsWeak.Pin();
 	for (auto& Task : RemovedTasks)
 	{
-		if (bIsHttpCacheEnabled && Task->State() == EAccelByteTaskState::Completed)
+		if (Settings.IsValid() && Settings->bEnableHttpCache && Task->State() == EAccelByteTaskState::Completed)
 		{
 			FAccelByteHttpRetryTaskPtr HttpRetryTaskPtr(StaticCastSharedPtr< FHttpRetryTask >(Task));
 			HttpCache.TryStoring(HttpRetryTaskPtr->GetHttpRequest());

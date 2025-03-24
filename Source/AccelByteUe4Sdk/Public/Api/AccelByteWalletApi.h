@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Wallet : public FApiBase, public TSharedFromThis<Wallet, ESPMode::ThreadSafe>
 {
 public:
-	Wallet(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Wallet(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Wallet();
 
 	/**

@@ -25,7 +25,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API SessionBrowser : public FApiBase, public TSharedFromThis<SessionBrowser, ESPMode::ThreadSafe>
 {
 public:
-	SessionBrowser(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	SessionBrowser(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~SessionBrowser();
 
 	/**

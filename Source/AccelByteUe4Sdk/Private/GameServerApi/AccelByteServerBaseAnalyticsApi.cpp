@@ -12,8 +12,9 @@ namespace GameServerApi
 ServerBaseAnalytics::ServerBaseAnalytics(ServerCredentials& InCredentialsRef
 	, ServerSettings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef
-	, FString const& InEventName)
-	: ServerGameTelemetry(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FString const& InEventName
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: ServerGameTelemetry(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 	, EventName(InEventName)
 {
 }

@@ -3,12 +3,13 @@
 // and restrictions contact your company contract manager.
 
 #include "GameServerApi/AccelByteServerOauth2Api.h"
-#include "Core/AccelByteRegistry.h"
+
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteOauth2Api.h"
 #include "JsonUtilities.h"
+#include "Core/AccelByteServerApiClient.h"
 #include "Misc/Base64.h"
 
 namespace AccelByte
@@ -48,7 +49,7 @@ FAccelByteTaskWPtr ServerOauth2::LoginWithClientCredentials(FVoidHandler const& 
 		DSID = FPlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"));
 	}
 
-	return AccelByte::Api::Oauth2::GetTokenWithClientCredentials(ServerCredentialsRef->GetOAuthClientId()
+	return Oauth.GetTokenWithClientCredentials(ServerCredentialsRef->GetOAuthClientId()
 		, ServerCredentialsRef->GetOAuthClientSecret()
 		, THandler<FOauth2Token>::CreateLambda(
 			[this, OnSuccess](FOauth2Token const& Result)
@@ -60,7 +61,7 @@ FAccelByteTaskWPtr ServerOauth2::LoginWithClientCredentials(FVoidHandler const& 
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 			})
-		, FRegistry::ServerSettings.IamServerUrl
+		, ServerSettingsRef.IamServerUrl
 		, TMap<FString, FString>{ { TEXT("x-ab-dsid"), DSID } });
 }
 
@@ -96,9 +97,11 @@ void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess
 
 ServerOauth2::ServerOauth2(ServerCredentials& InCredentialsRef
 	, ServerSettings& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef)
-	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, FHttpRetryScheduler& InHttpRef
+	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
+	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 	, ServerCredentialsRef{InCredentialsRef.AsShared()}
+	, Oauth(InHttpRef, InSettingsRef.IamServerUrl)
 {}
 
 ServerOauth2::~ServerOauth2()

@@ -4,10 +4,28 @@
 
 #include "Core/AccelByteInstance.h"
 
+#include "AccelByteUe4SdkModule.h"
+
 FAccelByteInstance::~FAccelByteInstance()
 {
 	ClearApiClient();
 	ClearServerApiClient();
+
+	if(OnEnvironmentChangeHandle.IsValid() && IAccelByteUe4SdkModuleInterface::IsAvailable())
+	{
+		IAccelByteUe4SdkModuleInterface::Get().OnEnvironmentChanged().Remove(OnEnvironmentChangeHandle);
+	}
+}
+
+void FAccelByteInstance::OnSettingsEnvironmentChanges(ESettingsEnvironment SettingsEnvironment)
+{
+	Settings->Reset(SettingsEnvironment);
+	ServerSettings->Reset(SettingsEnvironment);
+}
+
+void FAccelByteInstance::SetEnvironmentChangeDelegate()
+{
+	OnEnvironmentChangeHandle = IAccelByteUe4SdkModuleInterface::Get().OnEnvironmentChanged().AddThreadSafeSP(AsShared(), &FAccelByteInstance::OnSettingsEnvironmentChanges);
 }
 
 FAccelByteInstance::FAccelByteInstance(
@@ -15,7 +33,7 @@ FAccelByteInstance::FAccelByteInstance(
 	, class ServerSettings& InServerSettings
 	, TSharedPtr<IAccelByteDataStorage> InLocalDataStorage
 	, FAccelByteTimeManagerPtr InTimeManager
-	,int32 RegistryIndex)
+	, int32 RegistryIndex)
 	: Settings(MakeShared<class Settings, ESPMode::ThreadSafe>(InSettings))
 	, ServerSettings(MakeShared<class ServerSettings, ESPMode::ThreadSafe>(InServerSettings))
 	, LocalDataStorage(InLocalDataStorage)
@@ -24,7 +42,8 @@ FAccelByteInstance::FAccelByteInstance(
 {
 	FlightId = FGuid::NewGuid().ToString().ToLower();
 
-	DeviceId = GenerateDeviceId(Index, true);
+	DeviceId = GenerateDeviceId(Index);
+	EncodedDeviceId = FAccelByteUtilities::EncodeHMACBase64(DeviceId, Settings->PublisherNamespace);
 }
 
 FApiClientPtr FAccelByteInstance::GetApiClient(FString const& Key, bool bCreateIfNotFound /* = true */)
@@ -37,7 +56,8 @@ FApiClientPtr FAccelByteInstance::GetApiClient(FString const& Key, bool bCreateI
 		}
 
 		FApiClientPtr NewClient = nullptr;
-		NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>(Settings, TimeManager);
+		NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>(Settings, TimeManager, AsShared());
+		NewClient->Init();
 
 		if(!IsRunningDedicatedServer())
 		{
@@ -114,7 +134,8 @@ FServerApiClientPtr FAccelByteInstance::GetServerApiClient(FString const& Key)
 	if (!ServerApiClients.Contains(Key))
 	{
 		FServerApiClientPtr NewClient = nullptr;
-		NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>(ServerSettings);
+		NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>(ServerSettings, TimeManager, AsShared());
+		NewClient->Init();
 
 		if (IsRunningDedicatedServer())
 		{
@@ -169,12 +190,30 @@ FString FAccelByteInstance::GetFlightId()
 	return FlightId;
 }
 
-FString FAccelByteInstance::GetDeviceId()
+FString FAccelByteInstance::GetDeviceId(bool bIsEncoded /*= true*/) const
 {
+	if(bIsEncoded)
+	{
+		return EncodedDeviceId;
+	}
 	return DeviceId;
 }
 
-FString FAccelByteInstance::GenerateDeviceId(int32 InIndex, bool bIsDeviceIdRequireEncode)
+FString FAccelByteInstance::GetMacAddress(bool bEncoded) const
+{
+	FString MacAddressString = TEXT("");
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
+		const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
+	for (TArray<uint8>::TConstIterator it(MacAddr); it; ++it)
+	{
+		MacAddressString += FString::Printf(TEXT("%02x"), *it);
+	}
+
+	return (bEncoded && !MacAddressString.IsEmpty()) ? FAccelByteUtilities::EncodeHMACBase64(MacAddressString, Settings->PublisherNamespace) : MacAddressString;
+}
+
+FString FAccelByteInstance::GenerateDeviceId(int32 InIndex)
 {
 	FString Output = FString();
 
@@ -197,7 +236,7 @@ FString FAccelByteInstance::GenerateDeviceId(int32 InIndex, bool bIsDeviceIdRequ
 			, FAccelByteUtilities::GetCacheFilenameGeneralPurpose());
 		if (!bIsCached)
 		{
-			FString PlainMacAddress = FAccelByteUtilities::GetMacAddress(false);
+			FString PlainMacAddress = GetMacAddress(false);
 			if (PlainMacAddress.IsEmpty())
 			{
 				Output = FGuid::NewGuid().ToString();
@@ -222,11 +261,6 @@ FString FAccelByteInstance::GenerateDeviceId(int32 InIndex, bool bIsDeviceIdRequ
 	if (bIsClientDevMode)
 	{
 		Output = FAccelByteUtilities::GetDevModeDeviceId(Output);
-	}
-
-	if (bIsDeviceIdRequireEncode || !bIsClientDevMode)
-	{
-		Output = FAccelByteUtilities::EncodeHMACBase64(Output, Settings->PublisherNamespace);
 	}
 
 	// append index to deviceID so each PIE instance have different deviceID

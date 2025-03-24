@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Models/AccelByteOauth2Models.h"
-#include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteError.h"
@@ -29,7 +28,10 @@ namespace Api
  */
 class ACCELBYTEUE4SDK_API Oauth2
 {
-public:	
+public:
+	Oauth2(FHttpRetryScheduler& InHttpRef);
+	Oauth2(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl);
+	
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher.
 	 *
@@ -50,7 +52,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithAuthorizationCode(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithAuthorizationCode(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& AuthorizationCode
 		, FString const& RedirectUri
@@ -79,7 +81,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithAuthorizationCode(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithAuthorizationCode(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& AuthorizationCode
 		, FString const& RedirectUri
@@ -107,14 +109,15 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithPasswordCredentials(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithPasswordCredentials(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Username
 		, FString const& Password
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user using a registered Email Account with 2FA enabled.
@@ -135,14 +138,15 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithPasswordCredentials(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithPasswordCredentials(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Username
 		, FString const& Password
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Get access token from specified OAuth/IAM client.
@@ -157,7 +161,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithClientCredentials(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithClientCredentials(FString const& ClientId
 		, FString const& ClientSecret
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -178,13 +182,14 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithDeviceId(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithDeviceId(FString const& ClientId
 		, FString const& ClientSecret
 		, THandler<FOauth2Token> const& OnSuccess
 		, FErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
 		, bool bCreateHeadless = true
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	* @brief Get access token using the user's device information and its unique Id.
@@ -200,13 +205,14 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithDeviceId(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithDeviceId(FString const& ClientId
 		, FString const& ClientSecret
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
 		, bool bCreateHeadless = true
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 	
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -227,7 +233,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithOtherPlatformToken(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithOtherPlatformToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& PlatformId
 		, FString const& PlatformToken
@@ -235,7 +241,9 @@ public:
 		, FErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
 		, TMap<FString, FString> AdditionalHeaders = {}
-		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {}
+		, FString const& EncodedMacAddress = TEXT("")
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user with their native platform account,
@@ -255,7 +263,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithOtherPlatformToken(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithOtherPlatformToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& PlatformId
 		, FString const& PlatformToken
@@ -264,7 +272,9 @@ public:
 		, bool bCreateHeadless = true
 		, FString const& IamUrl = TEXT("")
 		, TMap<FString, FString> AdditionalHeaders = {}
-		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {}
+		, FString const& EncodedMacAddress = TEXT("")
+		, FString const& DeviceId = TEXT(""));
 	
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid.
@@ -280,7 +290,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithRefreshToken(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithRefreshToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& RefreshToken
 		, THandler<FOauth2Token> const& OnSuccess
@@ -302,7 +312,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithRefreshToken(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithRefreshToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& RefreshToken
 		, THandler<FOauth2Token> const& OnSuccess
@@ -327,7 +337,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr RefreshPlatformToken(FString const& ClientID
+	 FAccelByteTaskWPtr RefreshPlatformToken(FString const& ClientID
 		, FString const& ClientSecret
 		, FString const& PlatformID
 		, FString const& PlatformToken
@@ -352,7 +362,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-    static FAccelByteTaskWPtr RevokeToken(FString const& AccessToken
+     FAccelByteTaskWPtr RevokeToken(FString const& AccessToken
     	, FVoidHandler const& OnSuccess
     	, FErrorHandler const& OnError
     	, FString const& IamUrl = TEXT("")
@@ -372,7 +382,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr RevokeToken(FString const& ClientId
+	 FAccelByteTaskWPtr RevokeToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& AccessToken
 		, FVoidHandler const& OnSuccess
@@ -394,7 +404,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr RevokeToken(FString const& ClientId
+	 FAccelByteTaskWPtr RevokeToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& AccessToken
 		, FVoidHandler const& OnSuccess
@@ -419,7 +429,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV3(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV3(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& AuthorizationCode
 		, FString const& RedirectUri
@@ -443,7 +453,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV3(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV3(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& AuthorizationCode
 		, FString const& RedirectUri
@@ -470,7 +480,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV3(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV3(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Username
 		, FString const& Password
@@ -478,7 +488,8 @@ public:
 		, FErrorHandler const& OnError
 		, bool bRememberMe = false
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Get access token from the user using a registered Email account with 2FA enabled.
@@ -496,7 +507,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV3(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV3(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Username
 		, FString const& Password
@@ -504,7 +515,8 @@ public:
 		, FOAuthErrorHandler const& OnError
 		, bool bRememberMe = false
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -523,7 +535,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithSimultaneousPlatformToken(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithSimultaneousPlatformToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& NativePlatformName
 		, FString const& NativePlatformToken
@@ -532,7 +544,8 @@ public:
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 	
 	/**
 	 * @brief Verify and Remember new device when user enabled 2FA.
@@ -551,7 +564,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr VerifyAndRememberNewDevice(FString const& ClientId
+	 FAccelByteTaskWPtr VerifyAndRememberNewDevice(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& MfaToken
 		, EAccelByteLoginAuthFactorType AuthFactorType
@@ -560,7 +573,8 @@ public:
 		, FOAuthErrorHandler const& OnError
 		, bool bRememberDevice = false
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 	
 	/**
 	 * @brief Log user in with create headless account after 3rd platform authenticated
@@ -577,7 +591,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr CreateHeadlessAccountAndResponseToken(FString const& ClientId
+	 FAccelByteTaskWPtr CreateHeadlessAccountAndResponseToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& LinkingToken
 		, THandler<FOauth2Token> const& OnSuccess
@@ -601,7 +615,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr AuthenticationWithPlatformLink(FString const& ClientId
+	 FAccelByteTaskWPtr AuthenticationWithPlatformLink(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Username
 		, FString const& Password
@@ -625,13 +639,14 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr VerifyToken(FString const& ClientId
+	 FAccelByteTaskWPtr VerifyToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Token
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Generate one time linking code. 
@@ -646,7 +661,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GenerateOneTimeCode(FString const& AccessToken
+	 FAccelByteTaskWPtr GenerateOneTimeCode(FString const& AccessToken
 		, FString const& PlatformId
 		, THandler<FGeneratedOneTimeCode> const& OnSuccess
 		, FErrorHandler const& OnError
@@ -667,13 +682,14 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GenerateGameToken(FString const& ClientId
+	 FAccelByteTaskWPtr GenerateGameToken(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Code
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief This function generate a code that can be exchanged into publisher namespace token (i.e. by web portal)
@@ -687,7 +703,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GenerateCodeForPublisherTokenExchange(FString const& AccessToken
+	 FAccelByteTaskWPtr GenerateCodeForPublisherTokenExchange(FString const& AccessToken
 		, FString const& PublisherNamespace
 		, FString const& PublisherClientID
 		, THandler<FCodeForTokenExchangeResponse> const& OnSuccess
@@ -701,19 +717,22 @@ public:
 	 * Passing platform group name or it's member will return same access token that can be used across the platform members.
 	 * Note: The third party platform and platform group covered for this is:
 	 *    (psn) ps4web, (psn) ps4, (psn) ps5, epicgames, twitch, awscognito.
+	 * @param Namespace User's namespace
 	 * @param UserId UserId.
-	 * @param PlatformType Platform type value.
+	 * @param PlatformId Platform type value.
 	 * @param Authorization Authorization.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FThirdPartyPlatformTokenData.
 	 * @param OnError This will be called when the operation failed.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr RetrieveUserThirdPartyPlatformToken(FString const& UserId
+	 FAccelByteTaskWPtr RetrieveUserThirdPartyPlatformToken(FString const& Namespace
+	 	, FString const& UserId
 		, FString const& PlatformId
 		, FString const& Authorization
 		, THandler<FThirdPartyPlatformTokenData> const& OnSuccess
-		, FOAuthErrorHandler const& OnError);
+		, FOAuthErrorHandler const& OnError
+		, FString const& IamUrl = TEXT(""));
 
 #pragma region OAuthV4
 	/**
@@ -732,7 +751,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV4(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithPasswordCredentialsV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Username
 		, FString const& Password
@@ -740,7 +759,8 @@ public:
 		, FOAuthErrorHandler const& OnError
 		, bool bRememberMe = false
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Get access token using the user's device information and its unique Id.
@@ -756,13 +776,14 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithDeviceIdV4(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithDeviceIdV4(FString const& ClientId
 		, FString const& ClientSecret
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
 		, bool bCreateHeadless = true
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher with 2FA enabled.
@@ -779,7 +800,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV4(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithAuthorizationCodeV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& AuthorizationCode
 		, FString const& RedirectUri
@@ -806,7 +827,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithOtherPlatformTokenV4(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithOtherPlatformTokenV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& PlatformId
 		, FString const& PlatformToken
@@ -815,7 +836,9 @@ public:
 		, bool bCreateHeadless = true
 		, FString const& IamUrl = TEXT("")
 		, TMap<FString, FString> AdditionalHeaders = {}
-		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {});
+		, FAccelByteLoginWithOtherPlatformOptionalParameters OptionalParams = {}
+		, FString const& DeviceId = TEXT("")
+		, FString const& EncodedMacAddress = TEXT(""));
 
 	/**
 	 * @brief Verify and Remember new device when user enabled 2FA.
@@ -834,7 +857,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr VerifyAndRememberNewDeviceV4(FString const& ClientId
+	 FAccelByteTaskWPtr VerifyAndRememberNewDeviceV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& MfaToken
 		, EAccelByteLoginAuthFactorType AuthFactorType
@@ -843,7 +866,8 @@ public:
 		, FOAuthErrorHandler const& OnError
 		, bool bRememberDevice = false
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Generate publisher user's game token. Required a code from request game token.
@@ -859,13 +883,14 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GenerateGameTokenV4(FString const& ClientId
+	 FAccelByteTaskWPtr GenerateGameTokenV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Code
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Log user in with authenticate a user account and perform platform link. It validates user's email and password.
@@ -883,7 +908,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr AuthenticationWithPlatformLinkV4(FString const& ClientId
+	 FAccelByteTaskWPtr AuthenticationWithPlatformLinkV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& Username
 		, FString const& Password
@@ -908,7 +933,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr CreateHeadlessAccountAndResponseTokenV4(FString const& ClientId
+	 FAccelByteTaskWPtr CreateHeadlessAccountAndResponseTokenV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& LinkingToken
 		, THandler<FOauth2TokenV4> const& OnSuccess
@@ -933,7 +958,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithSimultaneousPlatformTokenV4(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithSimultaneousPlatformTokenV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& NativePlatformName
 		, FString const& NativePlatformToken
@@ -942,7 +967,8 @@ public:
 		, THandler<FOauth2TokenV4> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid with 2FA enabled.
@@ -958,7 +984,7 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithRefreshTokenV4(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithRefreshTokenV4(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& RefreshToken
 		, THandler<FOauth2TokenV4> const& OnSuccess
@@ -980,26 +1006,28 @@ public:
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	static FAccelByteTaskWPtr GetTokenWithLoginTicket(FString const& ClientId
+	 FAccelByteTaskWPtr GetTokenWithLoginTicket(FString const& ClientId
 		, FString const& ClientSecret
 		, FString const& LoginTicket
 		, THandler<FOauth2Token> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FString const& DeviceId = TEXT(""));
 #pragma endregion
 
 private:
-	Oauth2() = delete; // static class can't have instance
 	Oauth2(Oauth2 const&) = delete;
 	Oauth2(Oauth2&&) = delete;
 
-	static FHttpRequestPtr ConstructTokenRequest(FString const& Url
-		, FString const& ClientId
-		, FString const& ClientSecret
-		, TMap<FString, FString> const& AdditionalHeaders);
+	FHttpRequestPtr ConstructTokenRequest(FString const& Url
+	, FString const& ClientId
+	, FString const& ClientSecret
+	, TMap<FString, FString> const& AdditionalHeaders);
 
-	static FString ConstructAdditionalData();
+	FString ConstructAdditionalData();
+	FHttpRetryScheduler& HttpRef;
+	FString IamServerUrl;
 };
 
 } // Namespace Api

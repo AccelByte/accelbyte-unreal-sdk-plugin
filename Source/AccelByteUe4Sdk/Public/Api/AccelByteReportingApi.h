@@ -22,7 +22,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Reporting : public FApiBase, public TSharedFromThis<Reporting, ESPMode::ThreadSafe>
 {
 public:
-	Reporting(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
+	Reporting(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Reporting();
 
 	/**

@@ -40,19 +40,24 @@ void FAccelByteEntitlementTokenGenerator::RequestToken()
 
 	if (ApiClient.IsValid())
 	{
-		ApiClient->Entitlement.GetUserEntitlementOwnershipTokenOnly(ItemIds
-			, AppIds
-			, Skus
-			, OnGetUserEntitlementOwnershipTokenSuccessDelegate
-			, OnGetUserEntitlementOwnershipTokenErrorDelegate);
+		auto Entitlement = ApiClient->GetEntitlementApi().Pin();
+		if (Entitlement.IsValid())
+		{
+			Entitlement->GetUserEntitlementOwnershipTokenOnly(ItemIds
+				, AppIds
+				, Skus
+				, OnGetUserEntitlementOwnershipTokenSuccessDelegate
+				, OnGetUserEntitlementOwnershipTokenErrorDelegate);
+		}
+		else
+		{
+			UE_LOG(LogAccelByteEntitlementTokenGenerator, Warning, TEXT("Invalid Entitlement API from API Client"));
+			OnGetUserEntitlementOwnershipTokenError(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid Entitlement API from API Client"));
+		}
 	}
 	else
 	{
-		FRegistry::Entitlement.GetUserEntitlementOwnershipTokenOnly(ItemIds
-			, AppIds
-			, Skus
-			, OnGetUserEntitlementOwnershipTokenSuccessDelegate
-			, OnGetUserEntitlementOwnershipTokenErrorDelegate);
+		OnGetUserEntitlementOwnershipTokenError(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("ApiClient is invalid"));
 	}
 }
 
