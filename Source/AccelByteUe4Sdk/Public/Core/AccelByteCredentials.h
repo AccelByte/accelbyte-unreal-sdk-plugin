@@ -27,9 +27,12 @@ class ACCELBYTEUE4SDK_API Credentials
 	: public BaseCredentials
 	, public TSharedFromThis<Credentials, ESPMode::ThreadSafe>
 {
+private:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoginSuccessDelegate, const FOauth2Token& /*Response*/);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshTokenAdditionalActions, bool);
 	DECLARE_MULTICAST_DELEGATE(FOnLogoutSuccessDelegate);
+	FRWLock mutable CredentialAccessLock{};
+	FRWLock mutable DelegateLock{};
 
 public:
 	using BaseCredentials::SetClientCredentials;
@@ -98,13 +101,15 @@ private:
 	FDelegateHandle BearerAuthRejectedHandle;
 	FString IamServerUrl;
 
-	static const FString DefaultSection;
+	static TCHAR const* DefaultSection;
 
 	void OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr);
 	void OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPtr HttpWPtr);
 
-	void OnRefreshTokenSuccessful(FOauth2Token const& Token);
-	void OnRefreshTokenFailed(int32 ErrorCode, FString const& ErrorMessage);
+	void OnRefreshTokenSuccessful(FOauth2TokenV4 const& Token);
+	void OnRefreshTokenFailed(int32 ErrorCode
+		, FString const& ErrorMessage
+		, FErrorOAuthInfo const& OAuthError);
 };
 
 typedef TSharedRef<Credentials, ESPMode::ThreadSafe> FCredentialsRef;

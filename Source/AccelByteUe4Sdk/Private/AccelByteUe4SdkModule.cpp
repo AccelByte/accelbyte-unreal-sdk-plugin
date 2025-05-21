@@ -47,6 +47,9 @@ private:
 	TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage = nullptr;
 	AccelByte::FAccelBytePlatformHandler PlatformHandler;
 	FThreadSafeCounter GameInstanceCount {0};
+	TArray<uint32> InactiveIndexes;
+	uint32 HighestIndex = 0;
+	mutable FCriticalSection CreateAccelByteInstanceLock;
 
     AccelByte::FAccelByteTimeManagerPtr TimeManager;
 
@@ -71,8 +74,10 @@ private:
 	void CheckServicesCompatibility() const;
 	void SetDefaultHttpCustomHeader(FString const& Namespace);
 
+	void OnAccelByteInstanceIndexListed(uint32 Index);
 	void OnGameInstanceCreated(UGameInstance* GameInstance);
 	void OnPreExit();
+	friend void OnAccelByteModuleInstanceDestroyed(uint32);
 
 public:
 	virtual FAccelByteInstancePtr CreateAccelByteInstance() override;
@@ -404,6 +409,14 @@ void FAccelByteUe4SdkModule::SetDefaultHttpCustomHeader(FString const& Namespace
 	AccelByte::FHttpRetryScheduler::SetHeaderGameClientVersion(ProjectVersion);
 }
 
+void FAccelByteUe4SdkModule::OnAccelByteInstanceIndexListed(uint32 Index)
+{
+	FScopeLock Lock(&CreateAccelByteInstanceLock);
+
+	InactiveIndexes.AddUnique(Index);
+	InactiveIndexes.Sort();
+}
+
 void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
 {
 	if (!GameInstance->IsValidLowLevel())
@@ -420,11 +433,57 @@ void FAccelByteUe4SdkModule::OnPreExit()
 {
 }
 
+void OnAccelByteModuleInstanceDestroyed(uint32 Index)
+{
+	if (FAccelByteUe4SdkModule::IsAvailable())
+	{
+		static_cast<FAccelByteUe4SdkModule&>(FAccelByteUe4SdkModule::Get()).OnAccelByteInstanceIndexListed(Index);
+	}
+}
+
 FAccelByteInstancePtr FAccelByteUe4SdkModule::CreateAccelByteInstance()
 {
-	FAccelByteInstancePtr ABInstance = MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(GlobalClientSettings, GlobalServerSettings, LocalDataStorage, TimeManager, GameInstanceCount.GetValue());
+	FScopeLock Lock(&CreateAccelByteInstanceLock);
+
+	uint32 InstanceIndex;
+	FAccelByteInstancePtr ABInstance = nullptr;
+
+	if (InactiveIndexes.Num() == 0)
+	{
+		InstanceIndex = HighestIndex;
+
+		ABInstance = MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(
+			GlobalClientSettings,
+			GlobalServerSettings,
+			LocalDataStorage,
+			TimeManager,
+			InstanceIndex
+		);
+
+		HighestIndex++;
+	}
+	else
+	{
+		InstanceIndex = InactiveIndexes[0];
+
+		InactiveIndexes.RemoveAt(0);
+
+		ABInstance = MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(
+			GlobalClientSettings,
+			GlobalServerSettings,
+			LocalDataStorage,
+			TimeManager,
+			InstanceIndex 
+		);
+	}
+
 	ABInstance->SetEnvironmentChangeDelegate();
-	
+
+	ABInstance->AddOnDestroyedDelegate([](uint32 Index)
+		{
+			OnAccelByteModuleInstanceDestroyed(Index);
+		});
+
 	return ABInstance;
 }
 

@@ -17,7 +17,11 @@ namespace AccelByte
  */
 class ACCELBYTEUE4SDK_API BaseCredentials
 {
+private:
 	DECLARE_EVENT_OneParam(Credentials, FTokenRefreshedEvent, bool);
+	FRWLock mutable CredentialAccessLock{};
+	FRWLock mutable DelegateLock{};
+
 public:
 	enum class ESessionState
 	{
@@ -81,7 +85,7 @@ protected:
 	double RefreshTime;
 	double ExpireTime;
 	double RefreshBackoff;
-	int32 BackoffCount;
+	FThreadSafeCounter BackoffCount;
 	const double MaxBackoffTime = 3600;
 	const double MinBackoffTime = 60;
 	const int32 MaxBackoffCount = 10;

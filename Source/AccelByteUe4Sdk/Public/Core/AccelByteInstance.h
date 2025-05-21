@@ -9,34 +9,48 @@
 #include "Core/AccelByteSettings.h"
 #include "Core/IAccelByteDataStorage.h"
 
-using namespace AccelByte;
-
 class ACCELBYTEUE4SDK_API FAccelByteInstance : public TSharedFromThis<FAccelByteInstance, ESPMode::ThreadSafe>
 {
 public:
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnInstanceDestroyed, uint32 /* InstanceIndex */);
+
+	FAccelByteInstance(AccelByte::Settings& InSettings, AccelByte::ServerSettings& InServerSettings, TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage, AccelByte::FAccelByteTimeManagerPtr TimeManager, int32 RegistryIndex = 0);
+
+	FAccelByteInstance(FAccelByteInstance const&) = delete;
+	FAccelByteInstance& operator=(FAccelByteInstance const&) = delete;
+
+	FAccelByteInstance(FAccelByteInstance&&) = delete;
+	FAccelByteInstance& operator=(FAccelByteInstance&&) = delete;
+
 	~FAccelByteInstance();
 
-	FAccelByteInstance(Settings& InSettings, ServerSettings& InServerSettings, TSharedPtr<IAccelByteDataStorage> LocalDataStorage, FAccelByteTimeManagerPtr TimeManager, int32 RegistryIndex = 0);
+	AccelByte::FApiClientPtr GetApiClient(FString const& Key = TEXT("default"), bool bCreateIfNotFound = true);
 
-	void OnSettingsEnvironmentChanges(ESettingsEnvironment SettingsEnvironment);
-	void SetEnvironmentChangeDelegate();
-	
-	FApiClientPtr GetApiClient(FString const& Key = TEXT("default"), bool bCreateIfNotFound = true);
-	SettingsPtr GetSettings();
+	bool RegisterApiClient(FString const& Key, AccelByte::FApiClientPtr ApiClient);
 
-	bool RegisterApiClient(FString const& Key, FApiClientPtr ApiClient);
 	bool RemoveApiClient(const FString& Key = TEXT("default"));
 
 	void ClearApiClient();
-	void ClearServerApiClient();
-	
-	FServerApiClientPtr GetServerApiClient(FString const& Key = TEXT("default"));
-	ServerSettingsPtr GetServerSettings();
+
+	AccelByte::FServerApiClientPtr GetServerApiClient(FString const& Key = TEXT("default"));
+
 	bool RemoveServerApiClient(const FString& Key = TEXT("default"));
 
-	FAccelByteTimeManagerWPtr GetTimeManager();
+	void ClearServerApiClient();
 
-	FString GetFlightId();
+	void AddOnDestroyedDelegate(TFunction<void(uint32)> Fn);
+
+	void OnSettingsEnvironmentChanges(ESettingsEnvironment SettingsEnvironment);
+
+	void SetEnvironmentChangeDelegate();
+
+	AccelByte::SettingsPtr GetSettings() const;
+
+	AccelByte::ServerSettingsPtr GetServerSettings() const;
+
+	AccelByte::FAccelByteTimeManagerWPtr GetTimeManager() const;
+
+	FString GetFlightId() const;
 	
 	/**
 	 * @brief Obtain an HMAC Buffer encoded MAC Address, using PublisherNamespace as key.
@@ -49,21 +63,32 @@ public:
 	FString GetDeviceId(bool bIsEncoded = true) const;
 
 private:
-	SettingsRef Settings;
-	TMap<FString, FApiClientPtr> ApiClients;
+	FString GenerateDeviceId(int32 InIndex);
 
-	ServerSettingsRef ServerSettings;
-	TMap<FString, FServerApiClientPtr> ServerApiClients;
-	TSharedPtr<IAccelByteDataStorage> LocalDataStorage;
-	FAccelByteTimeManagerPtr TimeManager;
+private:
+	mutable FRWLock SettingsMtx;
+	AccelByte::SettingsRef Settings;
+	AccelByte::ServerSettingsRef ServerSettings;
+	
+	AccelByte::FAccelByteTimeManagerPtr TimeManager;
+
+	FCriticalSection ApiClientMtx;
+	TMap<FString, AccelByte::FApiClientPtr> ApiClients;
+
+	FCriticalSection ServerApiClientMtx;
+	TMap<FString, AccelByte::FServerApiClientPtr> ServerApiClients;
+
+	TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage;
 	int32 Index {0};
-
 	FString FlightId;
 	FString DeviceId;
 	FString EncodedDeviceId;
+
+	FCriticalSection EnvChangeHandleMtx;
 	FDelegateHandle OnEnvironmentChangeHandle;
 
-	FString GenerateDeviceId(int32 InIndex);
+	FCriticalSection OnDestroyedDelegateMtx;
+	FOnInstanceDestroyed OnDestroyedDelegate;
 };
 
 using FAccelByteInstancePtr = TSharedPtr<FAccelByteInstance, ESPMode::ThreadSafe>;

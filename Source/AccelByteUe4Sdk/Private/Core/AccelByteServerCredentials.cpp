@@ -28,16 +28,20 @@ ServerCredentials::ServerCredentials(FHttpRetryScheduler& InHttpRef, FString con
 {
 }
 
-const FString ServerCredentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
+TCHAR const* ServerCredentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
 
 void ServerCredentials::ForgetAll()
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	BaseCredentials::ForgetAll();
 	AccessToken = FString();
 }
 
 void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environment)
 {
+	//Only read ClietId & ClientSecret at the end of scope
+	FReadScopeLock ReadLock(CredentialAccessLock);
+
 	FString SectionPath;
 	switch (Environment)
 	{
@@ -71,16 +75,22 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 	}
 	else
 	{
-		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
-		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+		GConfig->GetString(DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
+		GConfig->GetString(DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
 	}
 }
 
 void ServerCredentials::SetClientToken(const FString& InAccessToken, double ExpiresIn, const FString& InNamespace)
 {
-	AccessToken = InAccessToken;
-	ExpireTime = ExpiresIn;
-	if (ExpireTime > MaxBackoffTime)
+	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
+		AccessToken = InAccessToken;
+		ExpireTime = ExpiresIn;
+		Namespace = InNamespace;
+		SessionState = ESessionState::Valid;
+	}
+
+	if (ExpiresIn > MaxBackoffTime)
 	{
 		ScheduleRefreshToken(ExpireTime - MaxBackoffTime);
 	}
@@ -88,14 +98,15 @@ void ServerCredentials::SetClientToken(const FString& InAccessToken, double Expi
 	{
 		ScheduleRefreshToken(ExpireTime*BackoffRatio);
 	}
-	Namespace = InNamespace;
-	BackoffCount = 0;
-	SessionState = ESessionState::Valid;
 
-	if (!PollRefreshTokenHandle.IsValid()) {
-		PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
-			FTickerDelegate::CreateThreadSafeSP(AsShared(), &ServerCredentials::Tick),
-			0.2f);
+	{
+		FWriteScopeLock WriteLock(DelegateLock);
+		BackoffCount.Reset();
+		if (!PollRefreshTokenHandle.IsValid()) {
+			PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
+				FTickerDelegate::CreateThreadSafeSP(AsShared(), &ServerCredentials::Tick),
+				0.2f);
+		}
 	}
 }
 
@@ -107,6 +118,8 @@ void ServerCredentials::Startup()
 
 void ServerCredentials::Shutdown()
 {
+	// Required because this function is accessing PollRefreshTokenHandle
+	FWriteScopeLock WriteLock(DelegateLock);
 	RemoveFromTicker(PollRefreshTokenHandle);
 }
 
@@ -120,6 +133,8 @@ void ServerCredentials::RemoveFromTicker(FDelegateHandleAlias& handle)
 }
 void ServerCredentials::PollRefreshToken(double CurrentTime)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
+
 #ifdef ACCELBYTE_ACTIVATE_PROFILER
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteServerPollRefreshToken"));
 #endif
@@ -127,46 +142,12 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 	{
 		case ESessionState::Expired:
 		case ESessionState::Valid:
-			if (GetRefreshTime() <= CurrentTime)
+			if (RefreshTime <= CurrentTime)
 			{
 				Oauth.GetTokenWithClientCredentials(ClientId
 					, ClientSecret
-					, THandler<FOauth2Token>::CreateLambda(
-						[this, CurrentTime](const FOauth2Token& Result)
-						{
-							SessionState = ESessionState::Valid;
-							SetClientToken(Result.Access_token, Result.Expires_in, Result.Namespace);
-							TokenRefreshedEvent.Broadcast(true);
-						})
-					, FErrorHandler::CreateLambda(
-						[&](int32 Code, const FString& Message) 
-						{ 
-							BackoffCount++;
-							if (BackoffCount < MaxBackoffCount)
-							{
-								if (ExpireTime > MaxBackoffTime)
-								{
-									ExpireTime = MaxBackoffTime;
-								}
-								else if (ExpireTime <= MinBackoffTime)
-								{
-									ExpireTime = MinBackoffTime;
-								}
-								else
-								{
-									ExpireTime = ExpireTime * BackoffRatio;
-								}
-
-								RefreshBackoff = ExpireTime * BackoffRatio;
-								ScheduleRefreshToken(RefreshBackoff);
-								SessionState = ESessionState::Expired;
-							}
-							else
-							{
-								SessionState = ESessionState::Invalid;
-							}
-							TokenRefreshedEvent.Broadcast(false);
-						})
+					, THandler<FOauth2Token>::CreateThreadSafeSP(this, &ServerCredentials::OnPollRefreshTokenResponseSuccess)
+					, FErrorHandler::CreateThreadSafeSP(this, &ServerCredentials::OnPollRefreshTokenResponseError)
 					, IamServerUrl);
 
 				SessionState = ESessionState::Refreshing;
@@ -179,16 +160,73 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 	}
 }
 
+void ServerCredentials::OnPollRefreshTokenResponseSuccess(const FOauth2Token& Result)
+{
+	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
+		SessionState = ESessionState::Valid;
+	}
+
+	SetClientToken(Result.Access_token, Result.Expires_in, Result.Namespace);
+
+	{
+		FWriteScopeLock WriteLock(DelegateLock);
+		TokenRefreshedEvent.Broadcast(true); 
+	}
+}
+
+void ServerCredentials::OnPollRefreshTokenResponseError(int32 Code, const FString& Message)
+{
+	BackoffCount.Increment();
+
+	if (BackoffCount.GetValue() < MaxBackoffCount)
+	{
+		{
+			// Separate scope to avoid locking with ScheduleRefreshToken
+			FWriteScopeLock WriteLock(CredentialAccessLock);
+
+			if (ExpireTime > MaxBackoffTime)
+			{
+				ExpireTime = MaxBackoffTime;
+			}
+			else if (ExpireTime <= MinBackoffTime)
+			{
+				ExpireTime = MinBackoffTime;
+			}
+			else
+			{
+				ExpireTime = ExpireTime * BackoffRatio;
+			}
+
+			RefreshBackoff = ExpireTime * BackoffRatio;
+			SessionState = ESessionState::Expired;
+		}
+
+		ScheduleRefreshToken(RefreshBackoff);
+	}
+	else
+	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
+		SessionState = ESessionState::Invalid;
+	}
+
+	{
+		FWriteScopeLock WriteLock(DelegateLock);
+		TokenRefreshedEvent.Broadcast(false);
+	}
+}
+
 void ServerCredentials::ScheduleRefreshToken(double NextRefreshTime)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	RefreshTime = FPlatformTime::Seconds() + NextRefreshTime;
 }
 
 void ServerCredentials::SetMatchId(const FString& GivenMatchId)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	MatchId = GivenMatchId;
 }
-
 
 const FString& ServerCredentials::GetClientAccessToken() const
 {
@@ -197,6 +235,7 @@ const FString& ServerCredentials::GetClientAccessToken() const
 
 const FString& ServerCredentials::GetAccessToken() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AccessToken;
 }
 
@@ -207,26 +246,31 @@ const FString& ServerCredentials::GetClientNamespace() const
 
 const FString& ServerCredentials::GetNamespace() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return Namespace;
 }
 
 const double ServerCredentials::GetExpireTime() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return ExpireTime;
 }
 
 const double ServerCredentials::GetRefreshTime() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return RefreshTime;
 }
 
 const FString& ServerCredentials::GetMatchId() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return MatchId;
 }
 
 const FString& ServerCredentials::GetUserId() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return UserId;
 }
 

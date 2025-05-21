@@ -53,10 +53,12 @@ namespace AccelByte
 
 class ACCELBYTEUE4SDK_API DataStorageBinaryFile : public IAccelByteDataStorage
 {
+private:
+	FRWLock FileAccessLock;
 
 public:
 #if PLATFORM_WINDOWS
-	DataStorageBinaryFile(FString DirectoryPath = FPaths::ProjectContentDir());
+	DataStorageBinaryFile(FString DirectoryPath = FPaths::ProjectSavedDir());
 #else
 	DataStorageBinaryFile(FString DirectoryPath = TEXT(""));
 #endif
@@ -239,6 +241,27 @@ protected:
 	* @param NewGenerelPurposeCacheFilename 
 	*/
 	virtual void MoveOldCacheToNewCacheFiles(const FABBinaryFileStructure& CacheContent, const FString& NewTelemetryCacheFilename, const FString& NewGenerelPurposeCacheFilename);
+
+	/**
+	 * @brief Read file from Source directory then write to destination directory, effectively copying. 
+	 * @param FileName 
+	 * @param DestinationAbsoluteDirPath 
+	 * @param SourceAbsoluteDirPath 
+	 * @return returns true if copy is successful
+	 */
+	bool CopyFile(const FString& FileName, const FString& DestinationAbsoluteDirPath, const FString& SourceAbsoluteDirPath);
+	
+	/**
+	 * Migrate AccelByte-related cache files from one directory to another directory.
+	 * AccelByteGeneralCache & AccelByteTelemetryCache are the affected files.
+	 * 
+	 * @param SourceDirectory
+	 * @param DestinationDirectory
+	 *
+	 * @return returns true when there is no need to migrate or migrate success
+	 * @return returns false failed to migrate & need to fallback and use the old cache
+	 */
+	bool MigrateStorageFiles(const FDirectoryPath& SourceDirectory, const FDirectoryPath& DestinationDirectory);
 };
 
 }

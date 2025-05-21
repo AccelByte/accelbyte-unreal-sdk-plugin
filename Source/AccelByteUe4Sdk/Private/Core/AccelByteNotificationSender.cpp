@@ -31,8 +31,13 @@ namespace AccelByte
 		 */
 
 		const FString Payload = bPayloadEncoded ? JsonStringContent : FBase64::Encode(JsonStringContent);
-		FString LobbyMessage = FString::Printf(TEXT("%stype: messageNotif\ntopic: %s\npayload: %s\nsequenceID: %d\nsequenceNumber: %d%s"),
-			*LobbyMessageEnvelopeStartContent, *Topic, *Payload, SequenceID.GetValue(), SequenceNumber.GetValue(), *LobbyMessageEnvelopeEndContent);
+		FString LobbyMessage = FString::Printf(TEXT("%stype: messageNotif\ntopic: %s\npayload: %s\nsequenceID: %d\nsequenceNumber: %d%s")
+			, LobbyMessageEnvelopeStartContent
+			, *Topic
+			, *Payload
+			, SequenceID.GetValue()
+			, SequenceNumber.GetValue()
+			, LobbyMessageEnvelopeEndContent);
 		
 		return LobbyMessage;
 	}
@@ -55,8 +60,13 @@ namespace AccelByte
 		 */
 
 		const FString Payload = bPayloadEncoded ? JsonStringContent : FBase64::Encode(JsonStringContent);
-		FString LobbyMessage = FString::Printf(TEXT("%stype: messageSessionNotif\ntopic: %s\npayload: %s\nsequenceID: %d\nsequenceNumber: %d%s"),
-			*LobbyMessageEnvelopeStartContent, *Topic, *Payload, SequenceID.GetValue(), SequenceNumber.GetValue(), *LobbyMessageEnvelopeEndContent);
+		FString LobbyMessage = FString::Printf(TEXT("%stype: messageSessionNotif\ntopic: %s\npayload: %s\nsequenceID: %d\nsequenceNumber: %d%s")
+			, LobbyMessageEnvelopeStartContent
+			, *Topic
+			, *Payload
+			, SequenceID.GetValue()
+			, SequenceNumber.GetValue()
+			, LobbyMessageEnvelopeEndContent);
 
 		return LobbyMessage;
 	}
@@ -80,8 +90,14 @@ namespace AccelByte
 		 * 06 Sept 2024, added sequenceID and sequenceNumber so can be properly sorted by notification buffer
 		 */
 
-		FString LobbyMessage = FString::Printf(TEXT("%stype: connectNotif\nloginType: %s\nreconnectFromCode: %d\nlobbySessionID: %s\nsequenceID: %d\nsequenceNumber: %d%s"),
-			*LobbyMessageEnvelopeStartContent, *LoginType, ReconnectFromCode, *LobbySessionId, SequenceID.GetValue(), SequenceNumber.GetValue(), *LobbyMessageEnvelopeEndContent);
+		FString LobbyMessage = FString::Printf(TEXT("%stype: connectNotif\nloginType: %s\nreconnectFromCode: %d\nlobbySessionID: %s\nsequenceID: %d\nsequenceNumber: %d%s")
+			, LobbyMessageEnvelopeStartContent
+			, *LoginType
+			, ReconnectFromCode
+			, *LobbySessionId
+			, SequenceID.GetValue()
+			, SequenceNumber.GetValue()
+			, LobbyMessageEnvelopeEndContent);
 
 		return LobbyMessage;
 	}

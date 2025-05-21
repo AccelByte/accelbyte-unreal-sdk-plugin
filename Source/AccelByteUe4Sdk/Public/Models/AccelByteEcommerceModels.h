@@ -3698,3 +3698,210 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSyncSteamIAPTransactionResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | SyncSteamIAPTransactionResponse")
 	FString IapOrderNo{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyWallet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyWallet")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyWallet")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyWallet")
+	FString CurrencyCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyWallet")
+	FString CurrencySymbol{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyWallet")
+	int64 Balance{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyWallet")
+	int64 TotalPermanentBalance{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyWallet")
+	int64 TotalTimeLimitedBalance{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyWallet")
+	TArray<FAccelByteModelsWalletInfo> WalletInfos{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDebitByWalletPlatformRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | DebitByWalletPlatformRequest")
+	int64 Amount{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | DebitByWalletPlatformRequest")
+	FString Reason{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | DebitByWalletPlatformRequest")
+	EAccelByteWalletPlatform WalletPlatform{EAccelByteWalletPlatform::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | DebitByWalletPlatformRequest")
+	EAccelByteDebitUserWalletSource DebitBalanceSource{EAccelByteDebitUserWalletSource::OTHER};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | DebitByWalletPlatformRequest")
+	FJsonObjectWrapper Metadata{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDebitByWalletPlatformResponse : public FAccelByteModelsPlatformWallet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | DebitByWalletPlatformResponse")
+	FString TransactionId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyTransactionAmount
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransactionAmount")
+	FString WalletId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransactionAmount")
+	FString Origin{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransactionAmount")
+	FDateTime ExpireAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransactionAmount")
+	int64 Amount{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyTransaction
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FString Operator{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FString Reason{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	EAccelByteWalletAction WalletAction{EAccelByteWalletAction::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FString CurrencyCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FString BalanceSource{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	int64 Amount{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	TArray<FAccelByteModelsCurrencyTransactionAmount> TransactionAmountDetails{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CurrencyTransaction")
+	FJsonObjectWrapper Metadata{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsListUserCurrencyTransactionsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ListUserCurrencyTransactionsResponse")
+	TArray<FAccelByteModelsCurrencyTransaction> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | ListUserCurrencyTransactionsResponse")
+	FAccelByteModelsPaging Paging{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformWalletConfig
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | PlatformWalletConfig")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | PlatformWalletConfig")
+	FString Id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | PlatformWalletConfig")
+	EAccelByteWalletPlatform Platform{EAccelByteWalletPlatform::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | PlatformWalletConfig")
+	TArray<EAccelBytePlatformBalanceOrigin> AllowedBalanceOrigins{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | PlatformWalletConfig")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | PlatformWalletConfig")
+	FDateTime UpdatedAt{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdatePlatformWalletConfigRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | PlatformWalletConfig")
+	TArray<EAccelBytePlatformBalanceOrigin> AllowedBalanceOrigins{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletConfig
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | WalletConfig")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | WalletConfig")
+	bool EnablePaidForVCExpiration{false};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateWalletConfigRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | UpdateWalletConfigRequest")
+	bool EnablePaidForVCExpiration{false};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCheckBalanceRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CheckBalanceRequest")
+	int64 Amount{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CheckBalanceRequest")
+	FString Reason{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CheckBalanceRequest")
+	EAccelByteWalletPlatform WalletPlatform{EAccelByteWalletPlatform::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CheckBalanceRequest")
+	EAccelByteDebitUserWalletSource DebitBalanceSource{EAccelByteDebitUserWalletSource::OTHER};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | IAP | Models | CheckBalanceRequest")
+	FJsonObjectWrapper Metadata{};
+};

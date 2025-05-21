@@ -20,7 +20,7 @@ UAccelByteServerSettingsCert::UAccelByteServerSettingsCert()
 UAccelByteServerSettingsProd::UAccelByteServerSettingsProd()
 {}
 
-static const FString DefaultServerSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
+static TCHAR const* DefaultServerSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
 
 FString GetServerConfigUrlValue(const FString& SectionPath, const FString& Key, const FString& BaseUrl, const FString& DefaultPrefix)
 {
@@ -174,7 +174,7 @@ void ServerSettings::LoadFallback(const FString& SectionPath, const FString& Key
 {
 	if (!GConfig->GetString(*SectionPath, *Key, Value, GEngineIni))
 	{
-		GConfig->GetString(*DefaultServerSection, *Key, Value, GEngineIni);
+		GConfig->GetString(DefaultServerSection, *Key, Value, GEngineIni);
 	}
 }
 
@@ -222,7 +222,7 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 			if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("watchdog_url"), AMSServerWatchdogUrl))
 			{
 				// If not exist, then fetch the setting from game default engine ini file
-				if (!GConfig->GetString(*DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni))
+				if (!GConfig->GetString(DefaultServerSection, TEXT("WatchdogUrl"), AMSServerWatchdogUrl, GEngineIni))
 				{
 					UE_LOG(LogAccelByte, Log, TEXT("WatchdogUrl is not defined, default value will be assigned."));
 				}
@@ -234,7 +234,7 @@ bool AccelByte::ServerSettings::LoadAMSSettings()
 	{
 		if (!FAccelByteUtilities::GetValueFromCommandLineSwitch(TEXT("heartbeat"), AMSHeartbeatInterval))
 		{
-			if (!GConfig->GetInt(*DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni))
+			if (!GConfig->GetInt(DefaultServerSection, TEXT("AMSHeartbeatInterval"), AMSHeartbeatInterval, GEngineIni))
 			{
 				// Assigning default AMS heartbeat; the default value is 15 seconds.
 				UE_LOG(LogAccelByte, Log, TEXT("Heartbeat is not defined, default value will be assigned."));

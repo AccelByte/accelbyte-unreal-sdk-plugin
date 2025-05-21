@@ -227,8 +227,10 @@ public:
 
 	/**
 	 * @brief Disconnect from server if and only if the you have connected to server. If not currently connected, then this does nothing.
+	 * 
+	 * @param ForceCleanup boolean flag to forcefully cleanup the WebSocket connection
 	 */
-	void Disconnect();
+	void Disconnect(bool ForceCleanup = false);
 
 	/**
 	 * @brief Check whether the websocket is currently connected to the Chat server.

@@ -553,42 +553,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatActionUserTopicResponse
 	FString UserId {};
 };
 
-//!@brief Notification structure when the user is added / removed from a topic
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUpdateUserTopicNotif
-{
-	GENERATED_BODY()
-	
-	//! Chat topic types; either PERSONAL or GROUP; differs in member capacity. PERSONAL==2; GROUP>2
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
-	ETopicType Type {ETopicType::Unknown};
-
-	//! Name of chat topic, only relevant for type GROUP
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
-	FString Name {};
-
-	//! Topic id 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
-	FString TopicId {};
-
-	//! User id of action initiator (add to topic / remove from topic) 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
-	FString SenderId {};
-	
-	//! Affected user id that added to topic or removed from topic
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
-	FString UserId {};
-
-	//! Is this topic a channel 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
-	bool IsChannel {false};
-
-	FORCEINLINE bool operator==(const FAccelByteModelsChatUpdateUserTopicNotif& Other) const
-	{
-		return Type == Other.Type && Name == Other.Name && TopicId == Other.TopicId && SenderId == Other.SenderId && IsChannel == Other.IsChannel && UserId == Other.UserId;
-	}
-};
-
 //!@brief Update chat topic notification structure (topic update or deletion)
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUpdateTopicNotif
@@ -597,19 +561,40 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUpdateTopicNotif
 
 	//! Predefined topic Id alias if GROUP or sender's name if PERSONAL
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateTopicNotif")
-	FString Name {};
+	FString Name{};
 
 	//! Updated chat topic id 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateTopicNotif")
-	FString TopicId {};
+	FString TopicId{};
 
 	//! Sender's UserId who triggers the chat topic update
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateTopicNotif")
-	FString SenderId {};
+	FString SenderId{};
 
 	//! Is this topic a channel 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
-	bool IsChannel {false};
+	bool IsChannel{ false };
+};
+
+//!@brief Notification structure when the user is added / removed from a topic
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChatUpdateUserTopicNotif
+	: public FAccelByteModelsChatUpdateTopicNotif
+{
+	GENERATED_BODY()
+	
+	//! Chat topic types; either PERSONAL or GROUP; differs in member capacity. PERSONAL==2; GROUP>2
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
+	ETopicType Type {ETopicType::Unknown};
+	
+	//! Affected user id that added to topic or removed from topic
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Chat | Models | UpdateUserTopicNotif")
+	FString UserId {};
+
+	FORCEINLINE bool operator==(const FAccelByteModelsChatUpdateUserTopicNotif& Other) const
+	{
+		return Type == Other.Type && Name == Other.Name && TopicId == Other.TopicId && SenderId == Other.SenderId && IsChannel == Other.IsChannel && UserId == Other.UserId;
+	}
 };
 
 #pragma endregion

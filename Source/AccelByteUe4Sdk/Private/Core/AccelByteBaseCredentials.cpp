@@ -21,11 +21,13 @@ namespace AccelByte
 
 	BaseCredentials::~BaseCredentials()
 	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
 		TokenRefreshedEvent.Clear();
 	}
 
 	void BaseCredentials::ForgetAll()
 	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
 		UserSessionExpire = 0;
 		RefreshBackoff = 0.0;
 		RefreshTime = 0.0;
@@ -35,35 +37,42 @@ namespace AccelByte
 
 	void BaseCredentials::SetClientCredentials(const FString& InClientId, const FString& InClientSecret)
 	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
 		ClientId = InClientId;
 		ClientSecret = InClientSecret;
 	}
 
 	BaseCredentials::FTokenRefreshedEvent& BaseCredentials::OnTokenRefreshed()
 	{
+		FReadScopeLock ReadLock(CredentialAccessLock);
 		return TokenRefreshedEvent;
 	}
 
 	const FString& BaseCredentials::GetOAuthClientId() const
 	{
+		FReadScopeLock ReadLock(CredentialAccessLock);
 		return ClientId;
 	}
 
 	const FString& BaseCredentials::GetOAuthClientSecret() const
 	{
+		FReadScopeLock ReadLock(CredentialAccessLock);
 		return ClientSecret;
 	}
 
 	BaseCredentials::ESessionState BaseCredentials::GetSessionState() const
 	{
+		FReadScopeLock ReadLock(CredentialAccessLock);
 		return SessionState;
 	}
 
 	const TMap<FString, FString> BaseCredentials::GetAuthHeader() const
 	{
+		FString const AccessToken = GetAccessToken();
+		
+		FReadScopeLock ReadLock(CredentialAccessLock);
 		if (SessionState == ESessionState::Valid)
 		{
-			FString const AccessToken = GetAccessToken();
 			if(!AccessToken.IsEmpty())
 			{
 				TMap<FString, FString> Headers{};

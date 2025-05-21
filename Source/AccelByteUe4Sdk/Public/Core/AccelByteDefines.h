@@ -19,7 +19,6 @@ using FTickerObjectBaseAlias = FTickerObjectBase;
 using FDelegateHandleAlias = FDelegateHandle;
 #endif
 
-static const FString LobbyMessageEnvelopeStartContent {"LbS"};
-static const FString LobbyMessageEnvelopeEndContent {"LbE"};
-
-static const FString HEADER_FEATURE_FLAG {TEXT("X-Ab-Feature-Flags")};
+static TCHAR const* LobbyMessageEnvelopeStartContent = TEXT("LbS");
+static TCHAR const* LobbyMessageEnvelopeEndContent = TEXT("LbE");
+static TCHAR const* HEADER_FEATURE_FLAG = TEXT("X-Ab-Feature-Flags");

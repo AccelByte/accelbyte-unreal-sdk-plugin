@@ -35,6 +35,8 @@ Credentials::Credentials(FHttpRetryScheduler& InHttpRef, FAccelByteMessagingSyst
 
 Credentials::~Credentials()
 {
+	FWriteScopeLock WriteLock(DelegateLock);
+
 	LoginSuccessDelegate.Clear();
 	LogoutSuccessDelegate.Clear();
 
@@ -50,16 +52,20 @@ Credentials::~Credentials()
 	}
 }
 
-const FString Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
+TCHAR const* Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
 
 void Credentials::ForgetAll()
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	BaseCredentials::ForgetAll();
 	AuthToken = {};
 }
 
 void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 {
+	//Only read ClietId & ClientSecret at the end of scope
+	FReadScopeLock ReadLock(CredentialAccessLock);
+
 	FString SectionPath;
 	switch (Environment)
 	{
@@ -93,14 +99,15 @@ void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 	}
 	else
 	{
-		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
-		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+		GConfig->GetString(DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
+		GConfig->GetString(DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
 	}
 }
 
-
 void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
+
 	ExpireTime = NewAuthToken.Expires_in;
 	UserSessionExpire = CurrentTime + (NewAuthToken.Expires_in * FMath::FRandRange(0.7, 0.9));
 	
@@ -137,7 +144,7 @@ void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTi
 	}
 
 	AuthToken = NewAuthToken;
-	BackoffCount = 0;
+	BackoffCount.Reset();
 	SessionState = ESessionState::Valid;
 
 	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
@@ -163,70 +170,88 @@ void Credentials::SetUserName(const FString& Name)
 
 void Credentials::SetUserDisplayName(const FString& UserDisplayName)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	AuthToken.Display_name = UserDisplayName;
 }
 
 const FString& Credentials::GetAccessToken() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.Access_token;
 }
 
 const FString& Credentials::GetRefreshToken() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.Refresh_token;
 }
 
 const FString& Credentials::GetNamespace() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.Namespace;
 }
 
 const FString& Credentials::GetPlatformUserId() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.Platform_user_id;
 }
 
 const FString& Credentials::GetSimultaneousPlatformId() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.Simultaneous_platform_id;
 }
 
 const FString& Credentials::GetSimultaneousPlatformUserId() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.Simultaneous_platform_user_id;
 }
 
 FString Credentials::GetSimultaneousPlatformUserIdByPlatformName(const FString& PlatformName) const
 {
-	FString OutPlatformUserId = TEXT("");
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	if (AuthToken.Simultaneous_platform_id.Contains(PlatformName))
 	{
-		OutPlatformUserId = AuthToken.Simultaneous_platform_user_id;
+		return AuthToken.Simultaneous_platform_user_id;
 	}
-	return OutPlatformUserId;
+	else
+	{
+		return TEXT("");
+	}
 }
 
 bool Credentials::IsSessionValid() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return SessionState == ESessionState::Valid;
 }
 
 bool Credentials::IsComply() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.Is_comply;
 }
 
 void Credentials::Startup()
 {
-	PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
-        FTickerDelegate::CreateThreadSafeSP(AsShared(), &Credentials::Tick),
-        0.2f);
+	{
+		FWriteScopeLock WriteLock(DelegateLock);
+		PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateThreadSafeSP(AsShared(), &Credentials::Tick),
+			0.2f);
+	}
+
 	IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 	SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 }
 
 void Credentials::Shutdown()
 {
+	FWriteScopeLock WriteLock(DelegateLock);
+
 	if (PollRefreshTokenHandle.IsValid())
 	{
 		// Core ticker by this point in engine shutdown has already been torn down - only remove ticker if this is not an engine shutdown
@@ -240,16 +265,19 @@ void Credentials::Shutdown()
 
 const FString& Credentials::GetUserId() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.User_id;
 }
 
 const FString& Credentials::GetUserDisplayName() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken.Display_name;
 }
 
 const FString& Credentials::GetUserEmailAddress() const
-{ 
+{
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AccountUserData.EmailAddress;
 }
 
@@ -262,6 +290,7 @@ const FString& Credentials::GetUserName() const
 
 const FString& Credentials::GetUniqueDisplayName() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	if (!AuthToken.Unique_display_name.IsEmpty())
 	{
 		return AuthToken.Unique_display_name;
@@ -271,21 +300,26 @@ const FString& Credentials::GetUniqueDisplayName() const
 
 const FString& Credentials::GetLinkingToken() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return ErrorOAuth.LinkingToken;
 }
 
 const FAccountUserData& Credentials::GetAccountUserData() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AccountUserData;
 }
 
 const TMap<FString, FThirdPartyPlatformTokenData>& Credentials::GetThridPartyPlatformTokenData() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return ThirdPartyPlatformTokenData;
 }
 
 void Credentials::PollRefreshToken(double CurrentTime)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
+
 #ifdef ACCELBYTE_ACTIVATE_PROFILER
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelBytePollRefreshToken"));
 #endif
@@ -296,11 +330,11 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	case ESessionState::Valid:
 		if (RefreshTime <= CurrentTime)
 		{
-			RefreshTokenTask = Oauth.GetTokenWithRefreshToken(ClientId
+			RefreshTokenTask = Oauth.GetTokenWithRefreshTokenV4(ClientId
 				, ClientSecret
 				, AuthToken.Refresh_token
-				, THandler<FOauth2Token>::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenSuccessful)
-				, FErrorHandler::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenFailed)
+				, THandler<FOauth2TokenV4>::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenSuccessful)
+				, FOAuthErrorHandler::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenFailed)
 				, IamServerUrl
 			);
 
@@ -317,16 +351,20 @@ void Credentials::PollRefreshToken(double CurrentTime)
 
 void Credentials::ScheduleRefreshToken(double LRefreshTime)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	RefreshTime = LRefreshTime;
 }
 
 const FOauth2Token& Credentials::GetAuthToken() const
 {
+	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AuthToken;
 }
 
 void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 {
+	FWriteScopeLock WriteLock(DelegateLock);
+
 	if (BearerAuthRejectedHandle.IsValid())
 	{
 		HttpRef.RemoveBearerAuthRejectedDelegate(BearerAuthRejectedHandle);
@@ -339,44 +377,54 @@ void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 
 void Credentials::SetErrorOAuth(const FErrorOAuthInfo& NewErrorOAuthInfo)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	ErrorOAuth = NewErrorOAuthInfo;
 }
 
 void Credentials::SetAccountUserData(const FAccountUserData& InAccountUserData)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	AccountUserData = InAccountUserData;
 }
 
 void Credentials::SetThridPartyPlatformTokenData(const FString& PlatformId, const FThirdPartyPlatformTokenData& InThirdPartyPlatformTokenData)
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	ThirdPartyPlatformTokenData.Emplace(PlatformId, InThirdPartyPlatformTokenData);
 }
 	
 void Credentials::ClearThridPartyPlatformTokenData()
 {
+	FWriteScopeLock WriteLock(CredentialAccessLock);
 	ThirdPartyPlatformTokenData.Empty();
 }
 
 Credentials::FOnLoginSuccessDelegate& Credentials::OnLoginSuccess()
 {
+	FReadScopeLock ReadLock(DelegateLock);
 	return LoginSuccessDelegate;
 }
 
 Credentials::FOnLogoutSuccessDelegate& Credentials::OnLogoutSuccess()
 {
+	FReadScopeLock ReadLock(DelegateLock);
 	return LogoutSuccessDelegate;
 }
 
 void Credentials::OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr)
 {
+	ESessionState CopySessionState{};
+
+	CopySessionState = GetSessionState();
+
 	auto HttpPtr = HttpWPtr.Pin();
 
-	if (!HttpPtr.IsValid() || GetSessionState() == ESessionState::Refreshing)
+	if (!HttpPtr.IsValid() || CopySessionState == ESessionState::Refreshing)
 	{
 		return;
 	}
 
-	if (GetSessionState() == ESessionState::Invalid)
+	if (CopySessionState == ESessionState::Invalid)
 	{
 		HttpPtr->ResumeBearerAuthRequest(GetAccessToken());
 		return;
@@ -384,7 +432,11 @@ void Credentials::OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr)
 
 	UE_LOG(LogAccelByteCredentials, Verbose, TEXT("OnBearerAuthRejected triggered"));
 	HttpPtr->PauseBearerAuthRequest();
-	SessionState = ESessionState::Rejected;
+
+	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
+		SessionState = ESessionState::Rejected;
+	}
 
 	RefreshTokenAdditionalActions.AddThreadSafeSP(AsShared(), &Credentials::OnBearerAuthRefreshed, HttpWPtr);
 
@@ -393,6 +445,9 @@ void Credentials::OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr)
 
 void Credentials::OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPtr HttpWPtr)
 {
+	// No need to use ScopeLock at the moment
+	// There is no access to this->member directly, only rely to GetAccessToken() below
+
 	auto HttpPtr = HttpWPtr.Pin();
 	if (!HttpPtr.IsValid())
 	{
@@ -408,9 +463,11 @@ void Credentials::OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPt
 	HttpPtr->ResumeBearerAuthRequest(UpdatedToken);
 }
 
-void Credentials::OnRefreshTokenSuccessful(FOauth2Token const& Token)
+void Credentials::OnRefreshTokenSuccessful(FOauth2TokenV4 const& Token)
 {
 	SetAuthToken(Token, FPlatformTime::Seconds());
+
+	FWriteScopeLock WriteLock(DelegateLock);
 	if (RefreshTokenAdditionalActions.IsBound())
 	{
 		RefreshTokenAdditionalActions.Broadcast(true);
@@ -419,44 +476,54 @@ void Credentials::OnRefreshTokenSuccessful(FOauth2Token const& Token)
 	TokenRefreshedEvent.Broadcast(true);
 }
 
-void Credentials::OnRefreshTokenFailed(int32 ErrorCode, FString const& ErrorMessage)
+void Credentials::OnRefreshTokenFailed(int32 ErrorCode
+	, FString const& ErrorMessage
+	, FErrorOAuthInfo const& OAuthError)
 {
-	BackoffCount++;
+	BackoffCount.Increment();
 
-	if (BackoffCount < MaxBackoffCount)
+	if (BackoffCount.GetValue() < MaxBackoffCount)
 	{
-		if (ExpireTime > MaxBackoffTime)
 		{
-			ExpireTime = MaxBackoffTime;
-		}
-		else if (ExpireTime <= MinBackoffTime)
-		{
-			ExpireTime = MinBackoffTime;
-		}
-		else
-		{
-			ExpireTime = ExpireTime * BackoffRatio;
+			// Separate scope to avoid locking with ScheduleRefreshToken
+			FWriteScopeLock WriteLock(CredentialAccessLock);
+
+			if (ExpireTime > MaxBackoffTime)
+			{
+				ExpireTime = MaxBackoffTime;
+			}
+			else if (ExpireTime <= MinBackoffTime)
+			{
+				ExpireTime = MinBackoffTime;
+			}
+			else
+			{
+				ExpireTime = ExpireTime * BackoffRatio;
+			}
+
+			RefreshBackoff = ExpireTime * BackoffRatio;
+			SessionState = ESessionState::Expired;
 		}
 
-		RefreshBackoff = ExpireTime * BackoffRatio;
 		ScheduleRefreshToken(FPlatformTime::Seconds() + RefreshBackoff);
-	}
-
-	if (RefreshTokenAdditionalActions.IsBound())
-	{
-		RefreshTokenAdditionalActions.Broadcast(false);
-		RefreshTokenAdditionalActions.Clear();
-	}
-
-	if (BackoffCount < MaxBackoffCount)
-	{
-		SessionState = ESessionState::Expired;
 	}
 	else
 	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
 		SessionState = ESessionState::Invalid;
 	}
-	TokenRefreshedEvent.Broadcast(false);
+
+	{
+		FWriteScopeLock WriteLock(DelegateLock);
+
+		if (RefreshTokenAdditionalActions.IsBound())
+		{
+			RefreshTokenAdditionalActions.Broadcast(false);
+			RefreshTokenAdditionalActions.Clear();
+		}
+
+		TokenRefreshedEvent.Broadcast(false);
+	}
 }
 
 } // Namespace AccelByte

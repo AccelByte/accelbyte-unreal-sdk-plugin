@@ -24,13 +24,15 @@ SessionHistory::SessionHistory(Credentials const& InCredentialsRef
 
 SessionHistory::~SessionHistory(){}
 
+// This function is deprecated and will be removed on AGS 2025.4. 
 FAccelByteTaskWPtr SessionHistory::QueryGameSessionHistory(THandler<FAccelByteModelsGameSessionHistoriesResult> const& OnSuccess
 	, FErrorHandler const& OnError
 	, EAccelByteGeneralSortBy const& SortBy
 	, int32 Offset
 	, int32 Limit)
 {
-	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("SessionHistory::QueryGameSessionHistory is deprecated and will be removed on AGS 2025.4"));
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/gamesessions")
 		, *SettingsRef.SessionHistoryServerUrl

@@ -19,6 +19,10 @@ class ACCELBYTEUE4SDK_API ServerCredentials
 	: public BaseCredentials
 	, public TSharedFromThis<ServerCredentials, ESPMode::ThreadSafe>
 {
+private:
+	FRWLock mutable CredentialAccessLock{};
+	FRWLock mutable DelegateLock{};
+
 public:
 	using BaseCredentials::SetClientCredentials;
 
@@ -53,9 +57,11 @@ private:
 
 	Api::Oauth2 Oauth;
 
-	static const FString DefaultSection;
+	static TCHAR const* DefaultSection;
 
 	void RemoveFromTicker(FDelegateHandleAlias& handle);
+	void OnPollRefreshTokenResponseSuccess(const FOauth2Token& Result);
+	void OnPollRefreshTokenResponseError(int32 Code, const FString& Message);
 };
 
 typedef TSharedRef<ServerCredentials, ESPMode::ThreadSafe> FServerCredentialsRef;

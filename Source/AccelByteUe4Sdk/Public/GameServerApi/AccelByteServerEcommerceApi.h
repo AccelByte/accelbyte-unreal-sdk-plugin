@@ -383,6 +383,127 @@ public:
 		, FErrorHandler const& OnError
 		, const FString& StoreId = TEXT(""));
 
+	/**
+	 * @brief Query all of a single user's wallets.
+	 *
+	 * @param UserId ID of the user to query
+	 * @param OnSuccess Delegate called when query for user currency wallets is successful
+	 * @param OnError Delegate called when query for user currency wallets fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr QueryUserCurrencyWallets(FString const& UserId
+		, THandler<TArray<FAccelByteModelsCurrencyWallet>> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Debit a specific currency from a user based on platform.
+	 *
+	 * @param UserId ID of the user to debit from
+	 * @param CurrencyCode Code of the currency that we wish to debit using
+	 * @param Request Structure describing the requested amount, reason, and platform for debiting the wallet
+	 * @param OnSuccess Delegate called when debit of user's wallet succeeds
+	 * @param OnError Delegate called when debit of user's wallet fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr DebitByWalletPlatform(FString const& UserId
+		, FString const& CurrencyCode
+		, FAccelByteModelsDebitByWalletPlatformRequest const& Request
+		, THandler<FAccelByteModelsDebitByWalletPlatformResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief List transactions for a given user's currency wallet, sorted by creation time in descending order.
+	 *
+	 * @param UserId ID of the user to query currency transactions for
+	 * @param CurrencyCode Code of the currency to query transactions for
+	 * @param Offset Paging offset for this request, set to zero for first page
+	 * @param Limit Paging limit for this request, if set to zero, the default of 20 items will be used
+	 * @param OnSuccess Delegate called when query for currency transactions succeeds
+	 * @param OnError Delegate called when query for currency transactions fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr ListUserCurrencyTransactions(FString const& UserId
+		, FString const& CurrencyCode
+		, int32 Offset
+		, int32 Limit
+		, THandler<FAccelByteModelsListUserCurrencyTransactionsResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get current configuration for a specific platform's wallet.
+	 *
+	 * @param Platform Enum represeting the platform to get wallet configuration for
+	 * @param OnSuccess Delegate called when query for platform wallet config succeeds
+	 * @param OnError Delegate called when query for platform wallet config fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr GetPlatformWalletConfig(EAccelByteWalletPlatform const& Platform
+		, THandler<FAccelByteModelsPlatformWalletConfig> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Update the configuration for a specific platform's wallet.
+	 *
+	 * @param Platform Enum represeting the platform to update wallet configuration for
+	 * @param Request Structure representing the updated values for a platform's wallet config
+	 * @param OnSuccess Delegate called when updating platform wallet config succeeds
+	 * @param OnError Delegate called when updating platform wallet config fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr UpdatePlatformWalletConfig(EAccelByteWalletPlatform const& Platform
+		, FAccelByteModelsUpdatePlatformWalletConfigRequest const& Request
+		, THandler<FAccelByteModelsPlatformWalletConfig> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Reset the configuration for a specific platform's wallet back to its default.
+	 *
+	 * @param Platform Enum represeting the platform to update wallet configuration for
+	 * @param OnSuccess Delegate called when resetting platform wallet config succeeds
+	 * @param OnError Delegate called when resetting platform wallet config fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr ResetPlatformWalletConfig(EAccelByteWalletPlatform const& Platform
+		, THandler<FAccelByteModelsPlatformWalletConfig> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get current configuration for non-platform specific wallets.
+	 *
+	 * @param OnSuccess Delegate called when query for wallet config succeeds
+	 * @param OnError Delegate called when query for wallet config fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr GetWalletConfig(THandler<FAccelByteModelsWalletConfig> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get current configuration for non-platform specific wallets.
+	 *
+	 * @param Request Structure representing the updated values for the wallet config
+	 * @param OnSuccess Delegate called when update to wallet config succeeds
+	 * @param OnError Delegate called when update to wallet config fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr UpdateWalletConfig(FAccelByteModelsUpdateWalletConfigRequest const& Request
+		, THandler<FAccelByteModelsWalletConfig> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Check the given user's balance to see if it meets the given criteria.
+	 *
+	 * @param UserId ID of the user to check balance for
+	 * @param CurrencyCode Code of the currency to check balance against
+	 * @param Request Structure representing the criteria for the balance check
+	 * @param OnSuccess Delegate called when balance check succeeds
+	 * @param OnError Delegate called when balance check fails
+	 * @return AccelByteTask object to track and cancel the ongoing API operation
+	 */
+	FAccelByteTaskWPtr CheckBalance(FString const& UserId
+		, FString const& CurrencyCode
+		, FAccelByteModelsCheckBalanceRequest const& Request
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
 
 private:
 	ServerEcommerce() = delete;

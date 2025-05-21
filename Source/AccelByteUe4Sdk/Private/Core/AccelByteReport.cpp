@@ -46,7 +46,6 @@ namespace AccelByte
 			}
 			//INTENTIONAL: Request->GetContent() && Request->GetContentLength() could throw an error if it doesn't have content
 
-			LogMessage += "Content-Length: " + FString::FromInt(Request->GetContentLength());
 
 			LogMessage += "\n\n";
 
@@ -90,17 +89,13 @@ namespace AccelByte
 		
 		if (!Response.IsValid())
 		{
-			UE_LOG(LogAccelByte, Warning, TEXT("INVALID RSP HTTP"));
+			UE_LOG(LogAccelByte, Warning, TEXT("INVALID HTTP RESPONSE"));
 			return;
 		}
 
 		const FString ShortLogMessage = FString::Printf(TEXT("HTTP %d %s %s, %p"), Response->GetResponseCode(), *Request->GetVerb(), *Response->GetURL(), Request.Get());
 		
-		if (Response->GetResponseCode() >= 400)
-		{
-			UE_LOG(LogAccelByte, Warning, TEXT("%s"), *ShortLogMessage);
-		}
-		else if (Response->GetResponseCode() >= 300)
+		if (Response->GetResponseCode() >= 300)
 		{
 			UE_LOG(LogAccelByte, Warning, TEXT("%s"), *ShortLogMessage);
 		}
@@ -120,7 +115,6 @@ namespace AccelByte
 					LogMessage += "\n" + Header;
 				}
 			}
-			LogMessage += "\nContent-Length: " + FString::FromInt(Response->GetContent().Num());
 			LogMessage += "\n\n" + Response->GetContentAsString();
 			LogMessage += "\n---\n";
 

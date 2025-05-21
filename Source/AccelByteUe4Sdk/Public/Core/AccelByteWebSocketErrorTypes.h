@@ -68,6 +68,8 @@ namespace AccelByte
 		DisconnectFromExternalReconnect = 4401,
 
 		//WILL BE DEPRECATED
+		//Translated & split into 4021-4041
+		DisconnectCloseCode = 4003,
 		//Translated & split into 3101-3103
 		DisconnectSenderError = 4004,
 		//WILL BE DEPRECATED

@@ -43,6 +43,7 @@ public:
 	static int InitialDelay;
 	static int MaximumDelay;
 	static int TotalTimeout;
+	static int TotalTimeoutIncludingRetries;
 	static int PauseTimeout;
 	static constexpr uint32 DefaultRateLimit = 6;
 

@@ -766,5 +766,285 @@ FAccelByteTaskWPtr ServerEcommerce::BulkGetItemsById(TArray<FString> const& Item
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr ServerEcommerce::QueryUserCurrencyWallets(FString const& UserId
+	, THandler<TArray<FAccelByteModelsCurrencyWallet>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/currencies/summary")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserId);
+
+	return HttpClient.ApiRequest(TEXT("GET")
+		, Url
+		, {} // Query
+		, FString{} // Content
+		, OnSuccess
+		, OnError);
+}
+
+FAccelByteTaskWPtr ServerEcommerce::DebitByWalletPlatform(FString const& UserId
+	, FString const& CurrencyCode
+	, FAccelByteModelsDebitByWalletPlatformRequest const& Request
+	, THandler<FAccelByteModelsDebitByWalletPlatformResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	if (CurrencyCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest)
+			, FString::Printf(TEXT("CurrencyCode parameter cannot be empty!")));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debitByWalletPlatform")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserId
+		, *CurrencyCode);
+
+	return HttpClient.ApiRequest(TEXT("PUT")
+		, Url
+		, {} // Query
+		, Request
+		, OnSuccess
+		, OnError);
+}
+
+FAccelByteTaskWPtr ServerEcommerce::ListUserCurrencyTransactions(FString const& UserId
+	, FString const& CurrencyCode
+	, int32 Offset
+	, int32 Limit
+	, THandler<FAccelByteModelsListUserCurrencyTransactionsResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	if (CurrencyCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest)
+			, FString::Printf(TEXT("CurrencyCode parameter cannot be empty!")));
+		return nullptr;
+	}
+
+	if (Offset < 0)
+	{
+		Offset = 0;
+	}
+
+	if (Limit == 0)
+	{
+		Limit = 20;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/currencies/%s/transactions")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserId
+		, *CurrencyCode);
+
+	TMap<FString, FString> QueryParams {
+		{ TEXT("offset"), FString::FromInt(Offset) },
+		{ TEXT("limit"), FString::FromInt(Limit) },
+	};
+
+	return HttpClient.ApiRequest(TEXT("GET")
+		, Url
+		, QueryParams
+		, FString{} // Content
+		, OnSuccess
+		, OnError);
+}
+
+FAccelByteTaskWPtr ServerEcommerce::GetPlatformWalletConfig(EAccelByteWalletPlatform const& Platform
+	, THandler<FAccelByteModelsPlatformWalletConfig> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Platform == EAccelByteWalletPlatform::NONE)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest)
+			, FString::Printf(TEXT("Platform parameter cannot be NONE!")));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/platforms/%s/wallet/config")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *FAccelByteUtilities::GetUEnumValueAsString(Platform).ToLower());
+
+	return HttpClient.ApiRequest(TEXT("GET")
+		, Url
+		, {}
+		, FString{} // Content
+		, OnSuccess
+		, OnError);
+}
+
+FAccelByteTaskWPtr ServerEcommerce::UpdatePlatformWalletConfig(EAccelByteWalletPlatform const& Platform
+	, FAccelByteModelsUpdatePlatformWalletConfigRequest const& Request
+	, THandler<FAccelByteModelsPlatformWalletConfig> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Platform == EAccelByteWalletPlatform::NONE)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest)
+			, FString::Printf(TEXT("Platform parameter cannot be NONE!")));
+		return nullptr;
+	}
+
+	if (Request.AllowedBalanceOrigins.Num() <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest)
+			, FString::Printf(TEXT("AllowedBalanceOrigins field in request cannot be empty!")));
+		return nullptr;
+	}
+
+	const bool bRequestContainsNone = Request.AllowedBalanceOrigins.Contains(EAccelBytePlatformBalanceOrigin::NONE);
+	if (bRequestContainsNone)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest)
+			, FString::Printf(TEXT("AllowedBalanceOrigins in update request cannot contain NONE!")));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/platforms/%s/wallet/config")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *FAccelByteUtilities::GetUEnumValueAsString(Platform).ToLower());
+
+	return HttpClient.ApiRequest(TEXT("PUT")
+		, Url
+		, {}
+		, Request
+		, OnSuccess
+		, OnError);
+}
+
+
+FAccelByteTaskWPtr ServerEcommerce::ResetPlatformWalletConfig(EAccelByteWalletPlatform const& Platform
+	, THandler<FAccelByteModelsPlatformWalletConfig> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (Platform == EAccelByteWalletPlatform::NONE)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest)
+			, FString::Printf(TEXT("Platform parameter cannot be NONE!")));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/platforms/%s/wallet/config/reset")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *FAccelByteUtilities::GetUEnumValueAsString(Platform).ToLower());
+
+	return HttpClient.ApiRequest(TEXT("PUT")
+		, Url
+		, {}
+		, FString{}
+		, OnSuccess
+		, OnError);
+}
+
+FAccelByteTaskWPtr ServerEcommerce::GetWalletConfig(THandler<FAccelByteModelsWalletConfig> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/wallet/config")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace());
+
+	return HttpClient.ApiRequest(TEXT("GET")
+		, Url
+		, {}
+		, FString{} // Content
+		, OnSuccess
+		, OnError);
+}
+
+FAccelByteTaskWPtr ServerEcommerce::UpdateWalletConfig(FAccelByteModelsUpdateWalletConfigRequest const& Request
+	, THandler<FAccelByteModelsWalletConfig> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/wallet/config")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace());
+
+	return HttpClient.ApiRequest(TEXT("PUT")
+		, Url
+		, {}
+		, Request
+		, OnSuccess
+		, OnError);
+}
+
+FAccelByteTaskWPtr ServerEcommerce::CheckBalance(FString const& UserId
+	, FString const& CurrencyCode
+	, FAccelByteModelsCheckBalanceRequest const& Request
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	if (CurrencyCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest)
+			, FString::Printf(TEXT("CurrencyCode parameter cannot be empty!")));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/balanceCheck")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserId
+		, *CurrencyCode);
+
+	return HttpClient.ApiRequest(TEXT("POST")
+		, Url
+		, {}
+		, Request
+		, OnSuccess
+		, OnError);
+}
+
 } // Namespace GameServerApi
 } // Namespace AccelByte

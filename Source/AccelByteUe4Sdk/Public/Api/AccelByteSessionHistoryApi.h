@@ -39,6 +39,7 @@ public:
 	 *
 	 * @return An AccelByteTask object to track and cancel the ongoing API operation.
 	 */
+	 // This function is deprecated and will be removed on AGS 2025.4. 
 	FAccelByteTaskWPtr QueryGameSessionHistory(THandler<FAccelByteModelsGameSessionHistoriesResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, EAccelByteGeneralSortBy const& SortBy = EAccelByteGeneralSortBy::DESC

@@ -194,6 +194,7 @@ namespace AccelByte
 
 			if (PauseDuration > FHttpRetryScheduler::PauseTimeout)
 			{
+				UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTPRetryTask pause timeout of %d seconds reached! Cancelling..."), FHttpRetryScheduler::PauseTimeout);
 				Cancel();
 			}
 			return;
@@ -210,12 +211,7 @@ namespace AccelByte
 		const EHttpRequestStatus::Type RequestStatus = Request->GetStatus();
 		switch (RequestStatus)
 		{
-		case EHttpRequestStatus::Processing:
-			if (IsTimedOut()) 
-			{
-				Cancel();
-				NextState = TaskState;
-			}
+		case EHttpRequestStatus::Processing: //Do nothing, request is still processing
 			break;
 		case EHttpRequestStatus::Succeeded: //got response
 		{
@@ -239,30 +235,23 @@ namespace AccelByte
 					}
 				}
 			}
-			break;
-		}
+		}break;
+		// Whatever the failure reason, try to retry. HTTP 4xx doesn't count as failure from http client perspective.
 #if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 4
 		case EHttpRequestStatus::Failed:
 		{
-			const EHttpFailureReason FailureReason = Request->GetFailureReason();
-			if (FailureReason == EHttpFailureReason::ConnectionError)
-			{
-				CheckRetry(NextState);
-			}
-			else
-			{
-				Cancel();
-				NextState = TaskState;
-			}
-			break;
-		}
+			TaskState = EAccelByteTaskState::Failed;
+			NextState = TaskState;
+			CheckRetry(NextState);
+		}break;
 #else
 		case EHttpRequestStatus::Failed_ConnectionError: //network error
-			CheckRetry(NextState);
-			break;
-		case EHttpRequestStatus::Failed: //request cancelled
-			Cancel();
+		case EHttpRequestStatus::Failed: //request failed
+		{
+			TaskState = EAccelByteTaskState::Failed;
 			NextState = TaskState;
+			CheckRetry(NextState);
+		}break;
 #endif
 		default:
 			break;
@@ -273,7 +262,7 @@ namespace AccelByte
 	bool FHttpRetryTask::Finish()
 	{
 		FString State = FAccelByteUtilities::GetUEnumValueAsString(TaskState);
-		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTPRetryTask finsihed with status: %s"), *State);
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTPRetryTask finished with status: %s"), *State);
 
 		if (TaskState == EAccelByteTaskState::Running)
 		{
@@ -424,6 +413,7 @@ namespace AccelByte
 
 	EAccelByteTaskState FHttpRetryTask::Retry()
 	{
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Retrying HTTP Request to : %s"), *Request->GetURL());
 		if (Start())
 		{
 			FReport::LogHttpRequest(Request);
@@ -443,9 +433,9 @@ namespace AccelByte
 
 		NextRetryTime = TaskTime + NextDelay;
 
-		if (NextRetryTime > RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeout)
+		if (NextRetryTime > RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeoutIncludingRetries)
 		{
-			NextRetryTime = RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeout;
+			NextRetryTime = RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeoutIncludingRetries;
 		}
 
 		Request->OnRequestWillRetry().ExecuteIfBound(Request, Request->GetResponse(), NextRetryTime);
@@ -480,31 +470,21 @@ namespace AccelByte
 
 	bool FHttpRetryTask::IsTimedOut()
 	{
-		return TaskTime >= RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeout;
+		return TaskTime >= RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeoutIncludingRetries;
 	}
 
-	void FHttpRetryTask::OnProcessRequestComplete(FHttpRequestPtr InRequest
-		, FHttpResponsePtr InResponse
-		, bool bConnectedSuccessfully)
+	void FHttpRetryTask::OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse,
+		bool bConnectedSuccessfully)
 	{
-		int32 ResponseCode = 0;
-
-		if (InResponse.IsValid())
+		if (InRequest.IsValid() && InResponse.IsValid())
 		{
-			ResponseCode = InResponse->GetResponseCode();
+			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Got %s %s HTTP Request to: %s; Response: HTTP %d"), (bConnectedSuccessfully ? TEXT("SUCCESSFUL") : TEXT("FAILED")), *InRequest->GetVerb(), *InRequest->GetURL(), InResponse->GetResponseCode());
 		}
-
-		FString Message = TEXT("");
-		if (bConnectedSuccessfully)
-		{
-			Message = FString::Printf(TEXT("success with response code %d"), ResponseCode);
+		else if (InResponse.IsValid()) {
+			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Got %s %s HTTP Request to: %s; Response: INVALID HTTP RESPONSE"), (bConnectedSuccessfully ? TEXT("SUCCESSFUL") : TEXT("FAILED")), *InRequest->GetVerb(), *InRequest->GetURL());
 		}
-		else
-		{
-			Message = FString::Printf(TEXT("failed with response code %d"), ResponseCode);
+		else {
 		}
-
-		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("OnProcessRequestCompleted triggered - %s"), *Message);
 		SetResponseTime(FDateTime::UtcNow());
 	}
 }

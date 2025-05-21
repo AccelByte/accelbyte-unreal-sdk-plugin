@@ -533,7 +533,7 @@ namespace IncomingMessage
 		UE_LOG(LogAccelByteChat, Log, TEXT("Connecting to %s"), *SettingsRef.ChatServerWsUrl);
 	}
 
-	void Chat::Disconnect()
+	void Chat::Disconnect(bool ForceCleanup)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -545,7 +545,7 @@ namespace IncomingMessage
 
 		if (WebSocket.IsValid())
 		{
-			WebSocket->Disconnect();
+			WebSocket->Disconnect(ForceCleanup);
 		}
 
 		UE_LOG(LogAccelByteChat, Log, TEXT("Disconnected"));

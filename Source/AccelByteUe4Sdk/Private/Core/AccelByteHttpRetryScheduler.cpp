@@ -20,7 +20,8 @@ namespace AccelByte
 
 int FHttpRetryScheduler::InitialDelay = 1;
 int FHttpRetryScheduler::MaximumDelay = 30;
-int FHttpRetryScheduler::TotalTimeout = 60;
+int FHttpRetryScheduler::TotalTimeout = 10;
+int FHttpRetryScheduler::TotalTimeoutIncludingRetries = 60;
 int FHttpRetryScheduler::PauseTimeout = 60;
 int FHttpRetryScheduler::RateLimit = FHttpRetryScheduler::DefaultRateLimit;
 
@@ -104,6 +105,7 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 	Request->SetHeader("Game-Client-Version", HeaderGameClientVersion);
 	Request->SetHeader("AccelByte-SDK-Version", HeaderSDKVersion);
 	Request->SetHeader("AccelByte-OSS-Version", HeaderOSSVersion);
+	Request->SetTimeout(TotalTimeout);
 
 	if (State == EState::Paused && Request->GetHeader("Authorization").Contains("Bearer"))
 	{

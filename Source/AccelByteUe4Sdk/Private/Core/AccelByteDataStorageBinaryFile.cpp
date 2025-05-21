@@ -17,6 +17,67 @@ DEFINE_LOG_CATEGORY(LogAccelByteDataStorageBinaryFile);
 
 namespace AccelByte
 {
+	
+bool DataStorageBinaryFile::CopyFile(const FString& FileName, const FString& DestinationAbsoluteDirPath, const FString& SourceAbsoluteDirPath)
+{
+	const FString SourceFilePath = SourceAbsoluteDirPath + FileName;
+	const FString DestFilePath = DestinationAbsoluteDirPath + FileName;
+
+	// make sure no file in new dir, and exist file in old dir
+	if(!FPaths::FileExists(DestFilePath) && FPaths::FileExists(SourceFilePath))
+	{
+		TArray64<uint8> FileContent;
+		bool bLoadSuccess = false; 
+		
+		{
+			FReadScopeLock ReadLock(FileAccessLock);
+			bLoadSuccess = FFileHelper::LoadFileToArray(FileContent, *SourceFilePath);
+		}
+
+		if (bLoadSuccess)
+		{
+			FWriteScopeLock WriteLock(FileAccessLock);
+			bool bSuccess = FFileHelper::SaveArrayToFile(FileContent, *DestFilePath);
+			return bSuccess;
+		}
+	}
+
+	return false;
+}
+
+bool DataStorageBinaryFile::MigrateStorageFiles(const FDirectoryPath& SourceDirectory, const FDirectoryPath& DestinationDirectory)
+{
+	auto DestinedABGeneralCachePath = DestinationDirectory.Path + FAccelByteUtilities::GetCacheFilenameGeneralPurpose();
+	auto bCacheHasBeenMigrated = FPaths::FileExists(DestinedABGeneralCachePath);
+
+	// If the AccelByteGeneralCache already EXIST in the destined directory, NO need to migrate
+	if (bCacheHasBeenMigrated)
+	{
+		return true;
+	}
+
+	auto ABGeneralCacheOld = SourceDirectory.Path + FAccelByteUtilities::GetCacheFilenameGeneralPurpose();
+	auto bSourceCacheExist = FPaths::FileExists(ABGeneralCacheOld);
+
+	// If the source cache does not exist, the no need to migrate. Straightaway create new cache
+	if (!bSourceCacheExist)
+	{
+		return true;
+	}
+
+	const FString SourceAbsoluteDirPath = FPaths::ConvertRelativePathToFull(SourceDirectory.Path);
+	const FString DestinationAbsoluteDirPath = FPaths::ConvertRelativePathToFull(DestinationDirectory.Path);
+
+	const FString GeneralFileName = FAccelByteUtilities::GetCacheFilenameGeneralPurpose();
+	const FString TelemetryFileName = FAccelByteUtilities::GetCacheFilenameTelemetry();
+	
+	CopyFile(GeneralFileName, DestinationAbsoluteDirPath, SourceAbsoluteDirPath);
+	CopyFile(TelemetryFileName, DestinationAbsoluteDirPath, SourceAbsoluteDirPath);
+
+	auto MigratedResultFilePath = DestinationDirectory.Path + GeneralFileName;
+	return FPaths::FileExists(MigratedResultFilePath);
+}
+
 DataStorageBinaryFile::DataStorageBinaryFile(FString DirectoryPath)
 {
 	FDirectoryPath DirPath;
@@ -28,13 +89,34 @@ DataStorageBinaryFile::DataStorageBinaryFile(FString DirectoryPath)
 		FSwitchFileSystem::MountCacheStorage();
 	}
 #endif
+
+	// Cache migration performed for Editor-only
+#if defined(UE_EDITOR) && UE_EDITOR
+
+	FDirectoryPath ProjectContentDirectory;
+	ProjectContentDirectory.Path = FPaths::ProjectContentDir();
+	
+	FDirectoryPath TargetDirectory = GetAbsoluteFileDirectory();
+
+	bool bMigrateOk = MigrateStorageFiles(ProjectContentDirectory, TargetDirectory);
+
+	// If not success, FALLBACK/revert to use the old content directory
+	if (!bMigrateOk)
+	{
+		this->RelativeFileDirectory = ProjectContentDirectory;
+	}
+#endif
 }
 
 void DataStorageBinaryFile::Reset(const THandler<bool>& Result, const FString & FileName)
 {
 	auto Value = TArray<uint8>();
 	FString Path = CompleteAbsoluteFilePath(FileName);
-	Result.ExecuteIfBound(FFileHelper::SaveArrayToFile(Value, *Path));
+
+	{
+		FWriteScopeLock WriteLock(FileAccessLock);
+		Result.ExecuteIfBound(FFileHelper::SaveArrayToFile(Value, *Path));
+	}
 }
 
 FString DataStorageBinaryFile::FABBinaryFileStructureToString(FABBinaryFileStructure* Structure)
@@ -75,7 +157,12 @@ void DataStorageBinaryFile::DeleteItem(const FString & Key, const FVoidHandler O
 	TArray<uint8> ByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(SerializedText);
 
 	FString Path = CompleteAbsoluteFilePath(FileName);
-	FFileHelper::SaveArrayToFile(ByteArray, *Path);
+
+	{
+		FWriteScopeLock WriteLock(FileAccessLock);
+		FFileHelper::SaveArrayToFile(ByteArray, *Path);
+	}
+
 	OnDone.ExecuteIfBound();
 }
 
@@ -105,7 +192,12 @@ void DataStorageBinaryFile::SaveItemOverwiteEntireFile(FString Key, FString Item
 	TArray<uint8> FileByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(SerializedText);
 
 	FString Path = CompleteAbsoluteFilePath(FileName);
-	bool bSuccess = FFileHelper::SaveArrayToFile(FileByteArray, *Path);
+
+	bool bSuccess = false;
+	{
+		FWriteScopeLock WriteLock(FileAccessLock);
+		bSuccess = FFileHelper::SaveArrayToFile(FileByteArray, *Path);
+	}
 
 	OnDone.ExecuteIfBound(bSuccess);
 }
@@ -227,8 +319,14 @@ TOptional<FString> DataStorageBinaryFile::LoadFromFile(const FString& FileName)
 	}
 
 	FString Path = CompleteAbsoluteFilePath(FileName);
+
 	TArray<uint8> Result;
-	bool LoadOK = FFileHelper::LoadFileToArray(Result, *Path);
+	bool LoadOK = false;
+	{
+		FReadScopeLock ReadLock(FileAccessLock);
+		LoadOK = FFileHelper::LoadFileToArray(Result, *Path);
+	}
+
 	if (LoadOK && Result.Num() > 0)
 	{
 		Output = FAccelByteArrayByteFStringConverter::BytesToFString(Result, false);
@@ -265,7 +363,13 @@ bool DataStorageBinaryFile::SaveToFile(const FString& FileName, const FString& K
 	TArray<uint8> ByteArray = FAccelByteArrayByteFStringConverter::FStringToBytes(SerializedText);
 
 	FString Path = CompleteAbsoluteFilePath(FileName);
-	return FFileHelper::SaveArrayToFile(ByteArray, *Path);
+	bool bSuccess = false;
+	{
+		FWriteScopeLock WriteLock(FileAccessLock);
+		bSuccess = FFileHelper::SaveArrayToFile(ByteArray, *Path);
+	}
+
+	return bSuccess;
 }
 
 TSharedPtr<FABBinaryFileStructure> DataStorageBinaryFile::ParseStructureFromFile(const FString& FileName)

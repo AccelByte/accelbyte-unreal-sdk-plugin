@@ -69,6 +69,7 @@ void GameTelemetry::OnLoginSuccess(FOauth2Token const& Response)
 void GameTelemetry::OnLogoutSuccess()
 {
 	EventPtrArrayAccumulation.Empty();
+	FScopeLock ScopeLock(&EventPtrArrayLock);
 	EventPtrArray.Empty();
 }
 

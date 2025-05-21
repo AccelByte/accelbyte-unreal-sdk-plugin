@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [27.1.0] (2025-05-21)
+
+
+### Features
+
+* add thread lock in messaging system 
+* **cache:** isolate cache copying for Editory-only 
+* **Credentials:** adding safeguard to improve the thread-safety 
+* **DataStorage:** improve thread-safety by using CriticalSection 
+* move the default storage cache from ProjectSaved to ProjectContent directory 
+* **threadsafety:** change the way to use FRWScopeLock, avoid copy 
+* **wallet:** Add server APIs for managing both platform and non-platform wallets 
+
+
+### Bug Fixes
+
+* change FString to TCHAR for better portability between different platforms 
+* change the behaviour of HttpRetryScheduler 
+* **chat:** add forceCleanup flag to forcefully close the WebSocket connection 
+* **credentials:** separate lock for credentials information and delegate 
+* **device id:** re-use instance index for device id instead making a new one 
+* **gameTelemetry:** missing scopelock on OnLogoutSuccess, potentially cause a crash 
+* improve thread safety of FAccelByteInstance 
+* make ABInstance unmovable 
+* wrong behaviour on UE5.4 and above 
+
+
+### Refactors
+
+* change automatic refresh token to use V4 endpoint 
+* refactor ChatUpdateUserTopicNotif to derive from ChatUpdateTopicNotif 
+
 ## [27.0.0] (2025-03-24)
 
 

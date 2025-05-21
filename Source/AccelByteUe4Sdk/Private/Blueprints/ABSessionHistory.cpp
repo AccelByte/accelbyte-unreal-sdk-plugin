@@ -11,6 +11,7 @@ void UABSessionHistory::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
+// This blueprint is deprecated and will be removed on AGS 2025.4. 
 void UABSessionHistory::QueryGameSessionHistory(
 	FDModelsV2SessionHistoriesResult const& OnSuccess,
 	FDErrorHandler const& OnError,

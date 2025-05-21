@@ -24,7 +24,7 @@ UAccelByteSettingsProd::UAccelByteSettingsProd()
 {
 }
 
-static const FString DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
+static TCHAR const* DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
 
 FString GetClientConfigUrlValue(const FString& SectionPath, const FString& Key, const FString& BaseUrl, const FString& DefaultPrefix)
 {
@@ -44,18 +44,19 @@ FString GetClientConfigUrlValue(const FString& SectionPath, const FString& Key, 
 
 void Settings::LoadSettings(const FString& SectionPath)
 {
-	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, "ClientId", ClientId, DefaultSection))
+	TCHAR const* Section = *SectionPath;
+	if (!FAccelByteUtilities::LoadABConfigFallback(Section, "ClientId", ClientId, DefaultSection))
 	{
 		ClientId = TEXT("");
 	}
-	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, "ClientSecret", ClientSecret, DefaultSection))
+	if (!FAccelByteUtilities::LoadABConfigFallback(Section, "ClientSecret", ClientSecret, DefaultSection))
 	{
 		ClientSecret = TEXT("");
 	}
 
-	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("Namespace"), Namespace, DefaultSection);
-	LoadBaseUrlFallback(SectionPath, BaseUrl);
-	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("PublisherNamespace"), PublisherNamespace, DefaultSection);
+	FAccelByteUtilities::LoadABConfigFallback(Section, TEXT("Namespace"), Namespace, DefaultSection);
+	LoadBaseUrlFallback(Section, BaseUrl);
+	FAccelByteUtilities::LoadABConfigFallback(Section, TEXT("PublisherNamespace"), PublisherNamespace, DefaultSection);
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("RedirectURI"), RedirectURI, DefaultSection);
 
 	IamServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("IamServerUrl"), BaseUrl, TEXT("iam"));
@@ -217,7 +218,7 @@ void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FStr
 	{
 		if (!GConfig->GetString(*SectionPath, *Key, Value, GEngineIni))
 		{
-			GConfig->GetString(*DefaultSection, *Key, Value, GEngineIni);
+			GConfig->GetString(DefaultSection, *Key, Value, GEngineIni);
 		}
 	}
 }

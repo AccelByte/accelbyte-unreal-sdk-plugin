@@ -6,135 +6,154 @@
 
 #include "AccelByteUe4SdkModule.h"
 
+FAccelByteInstance::FAccelByteInstance(
+	class AccelByte::Settings& InSettings
+	, class AccelByte::ServerSettings& InServerSettings
+	, TSharedPtr<AccelByte::IAccelByteDataStorage> InLocalDataStorage
+	, AccelByte::FAccelByteTimeManagerPtr InTimeManager
+	, int32 RegistryIndex)
+	: Settings(MakeShared<AccelByte::Settings, ESPMode::ThreadSafe>(InSettings))
+	, ServerSettings(MakeShared<AccelByte::ServerSettings, ESPMode::ThreadSafe>(InServerSettings))
+	, TimeManager(InTimeManager)
+	, LocalDataStorage(InLocalDataStorage)
+	, Index(RegistryIndex)
+{
+	FlightId = FGuid::NewGuid().ToString().ToLower();
+	DeviceId = GenerateDeviceId(Index);
+	EncodedDeviceId = FAccelByteUtilities::EncodeHMACBase64(DeviceId, Settings->PublisherNamespace);
+}
+
 FAccelByteInstance::~FAccelByteInstance()
 {
 	ClearApiClient();
 	ClearServerApiClient();
 
-	if(OnEnvironmentChangeHandle.IsValid() && IAccelByteUe4SdkModuleInterface::IsAvailable())
 	{
-		IAccelByteUe4SdkModuleInterface::Get().OnEnvironmentChanged().Remove(OnEnvironmentChangeHandle);
+		FScopeLock Lock (&EnvChangeHandleMtx);
+		if(OnEnvironmentChangeHandle.IsValid() && IAccelByteUe4SdkModuleInterface::IsAvailable())
+		{
+			IAccelByteUe4SdkModuleInterface::Get().OnEnvironmentChanged().Remove(OnEnvironmentChangeHandle);
+		}
+	}
+
+	{
+		FScopeLock Lock (&OnDestroyedDelegateMtx);
+		if (OnDestroyedDelegate.IsBound())
+		{
+			OnDestroyedDelegate.Broadcast(Index);
+			OnDestroyedDelegate.Clear();
+		}
 	}
 }
 
-void FAccelByteInstance::OnSettingsEnvironmentChanges(ESettingsEnvironment SettingsEnvironment)
+AccelByte::FApiClientPtr FAccelByteInstance::GetApiClient(FString const& Key, bool bCreateIfNotFound /* = true */)
 {
-	Settings->Reset(SettingsEnvironment);
-	ServerSettings->Reset(SettingsEnvironment);
-}
-
-void FAccelByteInstance::SetEnvironmentChangeDelegate()
-{
-	OnEnvironmentChangeHandle = IAccelByteUe4SdkModuleInterface::Get().OnEnvironmentChanged().AddThreadSafeSP(AsShared(), &FAccelByteInstance::OnSettingsEnvironmentChanges);
-}
-
-FAccelByteInstance::FAccelByteInstance(
-	class Settings& InSettings
-	, class ServerSettings& InServerSettings
-	, TSharedPtr<IAccelByteDataStorage> InLocalDataStorage
-	, FAccelByteTimeManagerPtr InTimeManager
-	, int32 RegistryIndex)
-	: Settings(MakeShared<class Settings, ESPMode::ThreadSafe>(InSettings))
-	, ServerSettings(MakeShared<class ServerSettings, ESPMode::ThreadSafe>(InServerSettings))
-	, LocalDataStorage(InLocalDataStorage)
-	, TimeManager(InTimeManager)
-	, Index(RegistryIndex)
-{
-	FlightId = FGuid::NewGuid().ToString().ToLower();
-
-	DeviceId = GenerateDeviceId(Index);
-	EncodedDeviceId = FAccelByteUtilities::EncodeHMACBase64(DeviceId, Settings->PublisherNamespace);
-}
-
-FApiClientPtr FAccelByteInstance::GetApiClient(FString const& Key, bool bCreateIfNotFound /* = true */)
-{
-	if (!ApiClients.Contains(Key))
+	FScopeLock Lock(&ApiClientMtx);
+	if(ApiClients.Contains(Key))
+	{
+		return ApiClients[Key];
+	}
+	else 
 	{
 		if (!bCreateIfNotFound)
 		{
 			return nullptr;
 		}
 
-		FApiClientPtr NewClient = nullptr;
-		NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>(Settings, TimeManager, AsShared());
+		AccelByte::FApiClientPtr NewClient = nullptr;
+		{
+			FReadScopeLock SettingsReadLock(SettingsMtx);
+			NewClient = MakeShared<AccelByte::FApiClient, ESPMode::ThreadSafe>(Settings, TimeManager, AsShared());
+		}
+		if(!NewClient.IsValid())
+		{
+			return nullptr;
+		}
 		NewClient->Init();
 
 		if(!IsRunningDedicatedServer())
 		{
-			// only do QoS latency check if not disabled in settings
+			// Only do QoS latency check if not disabled in settings
 			if(!NewClient->Settings->bDisableAutoGetQosLatencies)
 			{
-				TSharedPtr<Api::Qos, ESPMode::ThreadSafe> QoSApi = NewClient->GetQosApi().Pin();
+				TSharedPtr<AccelByte::Api::Qos, ESPMode::ThreadSafe> QoSApi = NewClient->GetQosApi().Pin();
 				if(QoSApi.IsValid())
 				{
 					QoSApi->GetServerLatencies(nullptr, nullptr);
 				}
 			}
 		}
-		
 		ApiClients.Emplace(Key, NewClient);
+		return ApiClients[Key];
 	}
-
-	return ApiClients[Key];
 }
 
-SettingsPtr FAccelByteInstance::GetSettings()
+bool FAccelByteInstance::RegisterApiClient(FString const& Key, AccelByte::FApiClientPtr ApiClient)
 {
-	return Settings;
-}
-
-bool FAccelByteInstance::RegisterApiClient(FString const& Key, FApiClientPtr ApiClient)
-{
-	bool bResult = false;
-
+	FScopeLock Lock(&ApiClientMtx);
 	if (!Key.IsEmpty())
 	{
 		ApiClients.Add(Key, ApiClient);
-		bResult = true;
+		return true;
 	}
-
-	return bResult;
+	else
+	{
+		return false;
+	}
 }
 
 bool FAccelByteInstance::RemoveApiClient(const FString& Key)
 {
-	bool bResult = false;
-
+	FScopeLock Lock(&ApiClientMtx);
 	if (!Key.IsEmpty())
 	{
 		const int32 RemovedNum = ApiClients.Remove(Key);
-		bResult = RemovedNum > 0;
+		return RemovedNum > 0;
 	}
-
-	return bResult;
+	else 
+	{
+		return false;
+	}
 }
 
 void FAccelByteInstance::ClearApiClient()
 {
-	for (auto ApiClient : ApiClients)
+	FScopeLock Lock(&ApiClientMtx);
+	for (auto& ApiClient : ApiClients)
 	{
 		ApiClient.Value.Reset();
 	}
-
 	ApiClients.Empty();
 }
 
 void FAccelByteInstance::ClearServerApiClient()
 {
-	for (auto ServerApiClient : ServerApiClients)
+	FScopeLock Lock(&ServerApiClientMtx);
+	for (auto& ServerApiClient : ServerApiClients)
 	{
 		ServerApiClient.Value.Reset();
 	}
-
 	ServerApiClients.Empty();
 }
 
-FServerApiClientPtr FAccelByteInstance::GetServerApiClient(FString const& Key)
+AccelByte::FServerApiClientPtr FAccelByteInstance::GetServerApiClient(FString const& Key)
 {
-	if (!ServerApiClients.Contains(Key))
+	FScopeLock Lock(&ServerApiClientMtx);
+	if(ServerApiClients.Contains(Key))
 	{
-		FServerApiClientPtr NewClient = nullptr;
-		NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>(ServerSettings, TimeManager, AsShared());
+		return ServerApiClients[Key];
+	}
+	else
+	{
+		AccelByte::FServerApiClientPtr NewClient = nullptr;
+		{
+			FReadScopeLock SettingsReadLock(SettingsMtx);
+			NewClient = MakeShared<AccelByte::FServerApiClient, ESPMode::ThreadSafe>(ServerSettings, TimeManager, AsShared());
+		}
+		if(!NewClient.IsValid())
+		{
+			return nullptr;
+		}
 		NewClient->Init();
 
 		if (IsRunningDedicatedServer())
@@ -155,37 +174,62 @@ FServerApiClientPtr FAccelByteInstance::GetServerApiClient(FString const& Key)
 				UE_LOG(LogAccelByte, Log, TEXT("Dedicated server will NOT use AMS because the feature flag is not enabled. Please configure bServerUseAMS to use AMS."));
 			}
 		}
-
 		ServerApiClients.Emplace(Key, NewClient);
+		return ServerApiClients[Key];
 	}
-	
-	return ServerApiClients[Key];
-}
-
-ServerSettingsPtr FAccelByteInstance::GetServerSettings()
-{
-	return ServerSettings;
 }
 
 bool FAccelByteInstance::RemoveServerApiClient(const FString& Key)
 {
-	bool bResult = false;
-	
+	FScopeLock Lock(&ServerApiClientMtx);
 	if (!Key.IsEmpty())
 	{
 		const int32 RemovedNum = ServerApiClients.Remove(Key);
-		bResult = RemovedNum > 0;
+		return RemovedNum > 0;
 	}
-
-	return bResult;
+	else 
+	{
+		return false;
+	}
 }
 
-TWeakPtr<FAccelByteTimeManager, ESPMode::ThreadSafe> FAccelByteInstance::GetTimeManager()
+void FAccelByteInstance::AddOnDestroyedDelegate(TFunction<void(uint32)> Fn)
+{
+	FScopeLock Lock(&OnDestroyedDelegateMtx);
+	OnDestroyedDelegate.AddLambda(MoveTemp(Fn));
+}
+
+void FAccelByteInstance::OnSettingsEnvironmentChanges(ESettingsEnvironment SettingsEnvironment)
+{
+	FWriteScopeLock WriteLock(SettingsMtx);
+	Settings->Reset(SettingsEnvironment);
+	ServerSettings->Reset(SettingsEnvironment);
+}
+
+void FAccelByteInstance::SetEnvironmentChangeDelegate()
+{
+	FScopeLock Lock(&EnvChangeHandleMtx);
+	OnEnvironmentChangeHandle = IAccelByteUe4SdkModuleInterface::Get().OnEnvironmentChanged().AddThreadSafeSP(AsShared(), &FAccelByteInstance::OnSettingsEnvironmentChanges);
+}
+
+AccelByte::SettingsPtr FAccelByteInstance::GetSettings() const
+{
+	FReadScopeLock ReadLock(SettingsMtx);
+	return Settings;
+}
+
+AccelByte::ServerSettingsPtr FAccelByteInstance::GetServerSettings() const
+{
+	FReadScopeLock ReadLock(SettingsMtx);
+	return ServerSettings;
+}
+
+TWeakPtr<AccelByte::FAccelByteTimeManager, ESPMode::ThreadSafe> FAccelByteInstance::GetTimeManager() const
 {
 	return TimeManager;
 }
 
-FString FAccelByteInstance::GetFlightId()
+FString FAccelByteInstance::GetFlightId() const
 {
 	return FlightId;
 }
@@ -205,11 +249,12 @@ FString FAccelByteInstance::GetMacAddress(bool bEncoded) const
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 		const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
 	PRAGMA_ENABLE_DEPRECATION_WARNINGS
-	for (TArray<uint8>::TConstIterator it(MacAddr); it; ++it)
+	for (auto it = MacAddr.begin(); it != MacAddr.end(); ++it)
 	{
 		MacAddressString += FString::Printf(TEXT("%02x"), *it);
 	}
 
+	FReadScopeLock ReadLock(SettingsMtx);
 	return (bEncoded && !MacAddressString.IsEmpty()) ? FAccelByteUtilities::EncodeHMACBase64(MacAddressString, Settings->PublisherNamespace) : MacAddressString;
 }
 
@@ -268,5 +313,6 @@ FString FAccelByteInstance::GenerateDeviceId(int32 InIndex)
 	{
 		Output.Append(FString::FromInt(InIndex));
 	}
+
 	return Output;
 }
