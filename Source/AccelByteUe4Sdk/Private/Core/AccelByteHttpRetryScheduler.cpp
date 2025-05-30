@@ -105,7 +105,6 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 	Request->SetHeader("Game-Client-Version", HeaderGameClientVersion);
 	Request->SetHeader("AccelByte-SDK-Version", HeaderSDKVersion);
 	Request->SetHeader("AccelByte-OSS-Version", HeaderOSSVersion);
-	Request->SetTimeout(TotalTimeout);
 
 	if (State == EState::Paused && Request->GetHeader("Authorization").Contains("Bearer"))
 	{

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+### [27.1.1] (2025-05-30)
+
+
+### Bug Fixes
+
+* **HttpRetryScheduler:** unassigned timeout in HttpRequest and use the timeout in HttpRetryScheduler instead 
+
 ## [27.1.0] (2025-05-21)
 
 
