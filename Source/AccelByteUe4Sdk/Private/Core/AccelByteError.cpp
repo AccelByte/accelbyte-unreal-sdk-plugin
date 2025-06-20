@@ -3,7 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteError.h"
-
 namespace AccelByte
 {
 
@@ -346,7 +345,7 @@ namespace AccelByte
 		{
 			if (!Response->GetContentAsString().IsEmpty())
 			{
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0))
+				if (FAccelByteJsonConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error))
 				{
 					if (Error.NumericErrorCode != -1)
 					{

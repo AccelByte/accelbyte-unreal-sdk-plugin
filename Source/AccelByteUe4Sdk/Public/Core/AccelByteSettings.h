@@ -27,7 +27,6 @@ public:
 	FString InventoryServerUrl{};
 	FString ReportingServerUrl{};
 	FString LoginQueueServerUrl{};
-	FString SessionHistoryServerUrl{};
 	FString AppId{};
 	FString CustomerName{};
 	FString SettingsEnvironment{};
@@ -154,9 +153,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString SessionServerUrl{};
-
-	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
-	FString SessionHistoryServerUrl{};
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString MatchmakingV2ServerUrl{};

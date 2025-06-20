@@ -68,6 +68,32 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief This function gets a specific user's platform accounts linked to user's account.
+	 *
+	 * @param UserID Target User
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserPlatformLinks(FString const& UserID
+		, THandler<FPagedPlatformLinks> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief This function will search a specific user by their AccelByte User ID.
+	 *
+	 * @param UserId Targeted user identifier
+	 * @param OnSuccess This will be called when the operation succeeded. 
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserPublicInfoByUserId(FString const& UserId
+		, THandler<FUserPublicInfoResponseV4> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief This function will ban a user with specific type of ban. Ban types and reason can be queried.
 	 * @param UserId Id of user that will be banned.
 	 * @param BanUser Information of user that will be banned.
@@ -121,19 +147,6 @@ public:
 	 */
 	FAccelByteTaskWPtr ListUserByUserId(FListUserDataRequest const& Request
 		, THandler<FListUserDataResponse> const& OnSuccess
-		, FErrorHandler const& OnError);
-
-	/**
-	 * @brief This function will get multiple user(s) information. 
-	 *
-	 * @param UserIds List UserId(s) to get. SHOULD NOT EXCEED 100
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FListBulkUserInfo.
-	 * @param OnError This will be called when the operation failed.
-	 * 
-	 * @return AccelByteTask object to track and cancel the ongoing API operation.
-	 */
-	FAccelByteTaskWPtr BulkGetUserInfo(TArray<FString> const& UserIds
-		, THandler<FListBulkUserInfo> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**

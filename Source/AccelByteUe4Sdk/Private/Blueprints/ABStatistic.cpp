@@ -181,6 +181,44 @@ void UABStatistic::GetGlobalStatItemsByStatCode(
 	}
 }
 
+void UABStatistic::ListGlobalStatItemsWithFilter(FDModelsGlobalStatItemPagingSlicedResultResponse const& OnSuccess
+		, FDErrorHandler const& OnError 
+		, TArray<FString> const& StatCodes
+		, int32 Limit
+		, int32 Offset)
+{
+	const auto StatisticPtr = ApiClientPtr->GetStatisticApi().Pin();
+	if (StatisticPtr.IsValid())
+	{
+		StatisticPtr->ListGlobalStatItems(
+		THandler<FAccelByteModelsGlobalStatItemPagingSlicedResult>::CreateLambda(
+			[OnSuccess](FAccelByteModelsGlobalStatItemPagingSlicedResult const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}
+		),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		), StatCodes, Limit, Offset);
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
+}
+
+void UABStatistic::ListGlobalStatItems(FDModelsGlobalStatItemPagingSlicedResultResponse const& OnSuccess
+		, FDErrorHandler const& OnError 
+		, int32 Limit
+		, int32 Offset)
+{
+	// Call with empty array
+	ListGlobalStatItemsWithFilter(OnSuccess, OnError, TArray<FString>(), Limit, Offset);
+}
+
 void UABStatistic::BulkFetchStatItemsValue(
 	const FString StatCode, 
 	TArray<FString> const& UserIds, 

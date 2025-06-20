@@ -1378,3 +1378,31 @@ FString FAccelByteUtilities::ConvertAccelByteGeneralSortByToString(EAccelByteGen
 		return TEXT("");
 	}
 }
+
+FString FAccelByteUtilities::GetPluginVersionAccelByteSDK()
+{
+	FString const PluginName = "AccelByteUe4Sdk";
+
+	TSharedPtr<IPlugin> const Plugin = IPluginManager::Get().FindPlugin(PluginName);
+	if (!Plugin.IsValid())
+	{
+		return FString();
+	}
+	const FPluginDescriptor& Descriptor = Plugin->GetDescriptor();
+
+	return Descriptor.VersionName;
+}
+
+FString FAccelByteUtilities::GetPluginVersionOnlineSubsystemAccelByte()
+{
+	FString const PluginName = "OnlineSubsystemAccelByte";
+
+	TSharedPtr<IPlugin> const Plugin = IPluginManager::Get().FindPlugin(PluginName);
+	if (!Plugin.IsValid())
+	{
+		return FString();
+	}
+	const FPluginDescriptor& Descriptor = Plugin->GetDescriptor();
+
+	return Descriptor.VersionName;
+}

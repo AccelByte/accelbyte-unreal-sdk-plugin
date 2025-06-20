@@ -263,6 +263,20 @@ public:
 		, THandler<FAccelByteModelsGlobalStatItemValueResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
+	/**
+	 * @brief List global stat items. 
+	 * 
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsGlobalStatItemValueResponse.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr ListGlobalStatItems(THandler<FAccelByteModelsGlobalStatItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, TArray<FString> const& StatCodes = {}
+	, int32 Limit = 20
+	, int32 Offset = 0);
+
 private:
 	ServerStatistic() = delete;
 	ServerStatistic(ServerStatistic const&) = delete;

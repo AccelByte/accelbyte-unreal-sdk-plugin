@@ -383,21 +383,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeGoalMeta
 	FDateTime UpdatedAt{0};
 };
 
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsGetScheduledChallengeGoalsResponse
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
-	TArray<FAccelByteModelsChallengeGoal> Data{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
-	FAccelByteModelsChallengeGoalMeta Meta;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Goals")
-	FAccelByteModelsPaging Paging{};
-};
-
 UENUM(BlueprintType)
 enum class EAccelByteModelsChallengeRewardStatus : uint8
 {

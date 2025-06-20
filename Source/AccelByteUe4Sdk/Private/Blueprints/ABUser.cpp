@@ -1204,33 +1204,6 @@ void UABUser::GetUserByUserId(FString const& UserId
 	}
 }
 
-void UABUser::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType
-	, FString const& OtherPlatformUserId
-	, FDAccountUserDataResponse OnSuccess
-	, FDErrorHandler OnError) 
-{
-	const auto UserPtr = ApiClientPtr->GetUserApi().Pin();
-	if (UserPtr.IsValid())
-	{
-		UserPtr->GetUserByOtherPlatformUserId(PlatformType
-			, OtherPlatformUserId
-			, THandler<FAccountUserData>::CreateLambda(
-				[OnSuccess](FAccountUserData const& Response)
-				{
-					OnSuccess.ExecuteIfBound(Response);
-				})
-			, FErrorHandler::CreateLambda(
-				[OnError](int Code, FString const& Message)
-				{
-					OnError.ExecuteIfBound(Code, Message);
-				}));
-	}
-	else
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
-	}
-}
-
 void UABUser::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 	, TArray<FString> const& OtherPlatformUserId
 	, FDBulkPlatformUserIdResponse OnSuccess
@@ -1243,31 +1216,6 @@ void UABUser::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformT
 			, OtherPlatformUserId
 			, THandler<FBulkPlatformUserIdResponse>::CreateLambda(
 				[OnSuccess](FBulkPlatformUserIdResponse const& Response)
-				{
-					OnSuccess.ExecuteIfBound(Response);
-				})
-			, FErrorHandler::CreateLambda(
-				[OnError](int Code, FString const& Message)
-				{
-					OnError.ExecuteIfBound(Code, Message);
-				}));
-	}
-	else
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
-	}
-}
-
-void UABUser::BulkGetUserInfo(TArray<FString> const& UserIds
-	, FDListBulkUserInfoResponse OnSuccess
-	, FDErrorHandler OnError) 
-{
-	const auto UserPtr = ApiClientPtr->GetUserApi().Pin();
-	if (UserPtr.IsValid())
-	{
-		UserPtr->BulkGetUserInfo(UserIds
-			, THandler<FListBulkUserInfo>::CreateLambda(
-				[OnSuccess](FListBulkUserInfo const& Response)
 				{
 					OnSuccess.ExecuteIfBound(Response);
 				})

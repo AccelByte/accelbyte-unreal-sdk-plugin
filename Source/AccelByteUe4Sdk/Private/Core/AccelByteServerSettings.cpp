@@ -40,7 +40,7 @@ FString GetServerConfigUrlValue(const FString& SectionPath, const FString& Key, 
 
 void ServerSettings::LoadSettings(const FString& SectionPath)
 {
-#if WITH_EDITOR || UE_SERVER || UE_BUILD_DEVELOPMENT
+#if WITH_EDITOR || UE_SERVER || UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG
 	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("ClientId"), ClientId, DefaultServerSection))
 	{
 		ClientId = TEXT("");

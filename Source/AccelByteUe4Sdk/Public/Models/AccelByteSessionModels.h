@@ -52,7 +52,9 @@ enum class EAccelByteV2GameSessionDsStatus : uint8
 	AVAILABLE,
 	FAILED_TO_REQUEST,
 	ENDED,
-	UNKNOWN
+	UNKNOWN,
+	DS_ERROR,
+	DS_CANCELLED
 };
 
 UENUM(BlueprintType)
@@ -1137,40 +1139,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoryDetail
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session History Detail")
 	FDateTime Timestamp{ 0 };
 
-};
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoriesData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
-	FDateTime Created_at{ 0 };
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
-	TArray<FAccelByteModelsGameSessionHistoryDetail> Histories{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
-	FString Namespace{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
-	FString SessionID{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Session Histories Data")
-	FString Session_template{};
-
-};
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsGameSessionHistoriesResult
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Paginated Session Histories Result")
-	TArray<FAccelByteModelsGameSessionHistoriesData> Data{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | Paginated Session Histories Result")
-	FAccelByteModelsPaging Paging{};
 };
 
 USTRUCT(BlueprintType)

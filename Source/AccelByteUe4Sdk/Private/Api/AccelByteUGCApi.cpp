@@ -32,6 +32,14 @@ FAccelByteTaskWPtr UGC::CreateContent(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -80,6 +88,18 @@ FAccelByteTaskWPtr UGC::ModifyContent(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/%s")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -105,6 +125,18 @@ FAccelByteTaskWPtr UGC::ModifyContent(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), TEXT("The API might be removed without notice, please use ModifyContent(.., FAccelByteModelsUGCUpdateRequest const& ModifyRequest, ..) instead!!"));
+
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
+	{
+		return nullptr;
+	}
 
 	FAccelByteModelsUGCUpdateRequest Req;
 	Req.Name = ModifyRequest.Name;
@@ -137,6 +169,18 @@ FAccelByteTaskWPtr UGC::ModifyContent(FString const& ChannelId
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(FString(__FUNCTION__), TEXT("The API might be removed without notice, please use ModifyContent(.., FAccelByteModelsUGCUpdateRequest const& ModifyRequest, ..) instead!!"));
 
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
+	{
+		return nullptr;
+	}
+
 	FAccelByteModelsUGCRequest Req;
 	Req.Name = Name;
 	Req.Type = Type;
@@ -156,6 +200,18 @@ FAccelByteTaskWPtr UGC::DeleteContent(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -172,17 +228,11 @@ FAccelByteTaskWPtr UGC::GetContentByContentId(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
-		OnError.ExecuteIfBound(404, TEXT("Url is invalid. ContentId is empty."));
-		return nullptr;
-	}
-
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is not valid."));
 		return nullptr;
 	}
 
@@ -200,17 +250,11 @@ FAccelByteTaskWPtr UGC::PublicGetContentByContentId(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Url is invalid. ContentId is empty."));
-		return nullptr;
-	}
-
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is not valid."));
 		return nullptr;
 	}
 
@@ -228,6 +272,12 @@ FAccelByteTaskWPtr UGC::GetContentByShareCode(FString const& ShareCode
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty"));
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -242,6 +292,12 @@ FAccelByteTaskWPtr UGC::PublicGetContentByShareCode(FString const& ShareCode
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (ShareCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty"));
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
 		, *GetNamespace()
@@ -255,6 +311,14 @@ FAccelByteTaskWPtr UGC::GetContentPreview(FString const& ContentId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
+	{
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/preview")
 		, *SettingsRef.UGCServerUrl
@@ -352,6 +416,14 @@ FAccelByteTaskWPtr UGC::UpdateChannel(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef->GetNamespace(), *CredentialsRef->GetUserId(), *ChannelId);
@@ -381,7 +453,8 @@ FAccelByteTaskWPtr UGC::GetChannels(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+	if (!ValidateAccelByteId(UserId
+		, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
@@ -407,6 +480,14 @@ FAccelByteTaskWPtr UGC::DeleteChannel(FString const& ChannelId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError))
+	{
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s")
 		, *SettingsRef.UGCServerUrl
@@ -555,7 +636,8 @@ FAccelByteTaskWPtr UGC::GetListFollowers(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+	if (!ValidateAccelByteId(UserId
+		, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
@@ -587,7 +669,8 @@ FAccelByteTaskWPtr UGC::UpdateFollowStatusToUser(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
+	if (!ValidateAccelByteId(UserId
+		, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
 	{
@@ -621,6 +704,14 @@ FAccelByteTaskWPtr UGC::SearchContentsSpecificToChannel(FString const& ChannelId
 )
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError))
+	{
+		return nullptr;
+	}
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
@@ -657,12 +748,8 @@ FAccelByteTaskWPtr UGC::SearchContentsSpecificToChannel(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+	if (!ValidateAccelByteId(ChannelId
+		, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
 		, OnError))
 	{
@@ -739,9 +826,10 @@ FAccelByteTaskWPtr UGC::GetUserContent(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
-		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
-		, OnError))
+	if (!ValidateAccelByteId(UserId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -772,9 +860,10 @@ FAccelByteTaskWPtr UGC::PublicGetUserContent(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
-		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
-		, OnError))
+	if (!ValidateAccelByteId(UserId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -805,9 +894,14 @@ FAccelByteTaskWPtr UGC::UploadContentScreenshot(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
-		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
-		, OnError))
+	if (!ValidateAccelByteId(UserId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -949,9 +1043,10 @@ FAccelByteTaskWPtr UGC::GetCreator(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
-		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
-		, OnError))
+	if (!ValidateAccelByteId(UserId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -972,9 +1067,10 @@ FAccelByteTaskWPtr UGC::GetGroups(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
-		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
-		, OnError))
+	if (!ValidateAccelByteId(UserId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1035,12 +1131,8 @@ FAccelByteTaskWPtr UGC::SearchContentsSpecificToChannelV2(FString const& Channel
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
+	if (!ValidateAccelByteId(ChannelId
+		, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
 		, OnError))
 	{
@@ -1070,14 +1162,10 @@ FAccelByteTaskWPtr UGC::PublicSearchContentsSpecificToChannelV2(FString const& C
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1272,14 +1360,10 @@ FAccelByteTaskWPtr UGC::GetContentByContentIdV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1298,14 +1382,10 @@ FAccelByteTaskWPtr UGC::PublicGetContentByContentIdV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1353,25 +1433,14 @@ FAccelByteTaskWPtr UGC::DeleteContentV2(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return nullptr;
-	}
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
-	{
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1394,25 +1463,14 @@ FAccelByteTaskWPtr UGC::ModifyContentV2(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return nullptr;
-	}
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
-	{
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1435,31 +1493,20 @@ FAccelByteTaskWPtr UGC::GenerateUploadContentURLV2(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return nullptr;
-	}
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
 		return nullptr;
 	}
 	if (UploadRequest.FileExtension.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, FileExtension is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
-	{
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
-	{
 		return nullptr;
 	}
 
@@ -1482,16 +1529,18 @@ FAccelByteTaskWPtr UGC::UpdateContentFileLocationV2(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
+	if (!ValidateAccelByteId(ChannelId
+		, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
 		return nullptr;
 	}
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
+
 	if (FileExtension.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, FileExtension is empty."));
@@ -1500,18 +1549,6 @@ FAccelByteTaskWPtr UGC::UpdateContentFileLocationV2(FString const& ChannelId
 	if (S3Key.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, S3Key is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
-	{
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
-	{
 		return nullptr;
 	}
 
@@ -1538,14 +1575,10 @@ FAccelByteTaskWPtr UGC::GetUserContentsV2(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, UserId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
-		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
-		, OnError))
+	if (!ValidateAccelByteId(UserId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1573,14 +1606,10 @@ FAccelByteTaskWPtr UGC::PublicGetUserContentsV2(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (UserId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, UserId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
-		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
-		, OnError))
+	if (!ValidateAccelByteId(UserId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1606,14 +1635,10 @@ FAccelByteTaskWPtr UGC::UpdateContentScreenshotV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1634,11 +1659,14 @@ FAccelByteTaskWPtr UGC::UploadContentScreenshotV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
 		return nullptr;
 	}
+
 	if (ScreenshotsRequest.Screenshots.Num() == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Screenshots is empty."));
@@ -1667,25 +1695,14 @@ FAccelByteTaskWPtr UGC::DeleteContentScreenshotV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (ScreenshotId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ScreenshotId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
-	{
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ScreenshotId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetScreenshotIdInvalidMessage(ScreenshotId)
-		, OnError))
+	if (!ValidateAccelByteId(ScreenshotId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetScreenshotIdInvalidMessage(ScreenshotId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1708,22 +1725,17 @@ FAccelByteTaskWPtr UGC::ModifyContentByShareCode(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
+	if (!ValidateAccelByteId(ChannelId
+		, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
 		return nullptr;
 	}
 
 	if (ShareCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
-		return nullptr;
-	}
-	
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
-	{
 		return nullptr;
 	}
 
@@ -1751,15 +1763,15 @@ FAccelByteTaskWPtr UGC::ModifyContentShareCode(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return nullptr;
-	}
-
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
 		return nullptr;
 	}
 
@@ -1772,20 +1784,6 @@ FAccelByteTaskWPtr UGC::ModifyContentShareCode(FString const& ChannelId
 	if (ModifyContentShareCodeRequest.ShareCode.Len() > 7)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode length exceeds the maximum of 7 characters."));
-		return nullptr;
-	}
-	
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
-	{
-		return nullptr;
-	}
-
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
-	{
 		return nullptr;
 	}
 
@@ -1806,22 +1804,17 @@ FAccelByteTaskWPtr UGC::DeleteContentByShareCode(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
 		return nullptr;
 	}
 
 	if (ShareCode.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode is empty."));
-		return nullptr;
-	}
-	
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
-	{
 		return nullptr;
 	}
 
@@ -1870,15 +1863,15 @@ FAccelByteTaskWPtr UGC::ModifyContentShareCodeV2(FString const& ChannelId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ChannelId.IsEmpty())
+	if (!ValidateAccelByteId(ChannelId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
+			, OnError) ||
+		!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ChannelId is empty."));
-		return nullptr;
-	}
-
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
 		return nullptr;
 	}
 
@@ -1891,20 +1884,6 @@ FAccelByteTaskWPtr UGC::ModifyContentShareCodeV2(FString const& ChannelId
 	if (ModifyContentShareCodeRequest.ShareCode.Len() > 7)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ShareCode length exceeds the maximum of 7 characters."));
-		return nullptr;
-	}
-	
-	if (!ValidateAccelByteId(ChannelId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetChannelIdInvalidMessage(ChannelId)
-		, OnError))
-	{
-		return nullptr;
-	}
-
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
-	{
 		return nullptr;
 	}
 
@@ -1928,14 +1907,10 @@ FAccelByteTaskWPtr UGC::AddDownloadContentCountV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1958,14 +1933,10 @@ FAccelByteTaskWPtr UGC::GetListContentDownloaderV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -1998,14 +1969,10 @@ FAccelByteTaskWPtr UGC::GetListContentLikerV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -2031,14 +1998,10 @@ FAccelByteTaskWPtr UGC::UpdateLikeStatusToContentV2(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (ContentId.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ContentId is empty."));
-		return nullptr;
-	}
-	if (!ValidateAccelByteId(ContentId, EAccelByteIdHypensRule::NO_RULE
-		, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
-		, OnError))
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
 	{
 		return nullptr;
 	}
@@ -2086,6 +2049,14 @@ FAccelByteTaskWPtr UGC::GetStagingContentById(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -2101,6 +2072,14 @@ FAccelByteTaskWPtr UGC::UpdateStagingContent(FString const& ContentId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -2115,6 +2094,14 @@ FAccelByteTaskWPtr UGC::DeleteStagingContent(FString const& ContentId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(ContentId
+			, EAccelByteIdHypensRule::NO_HYPENS
+			, FAccelByteIdValidator::GetContentIdInvalidMessage(ContentId)
+			, OnError))
+	{
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl

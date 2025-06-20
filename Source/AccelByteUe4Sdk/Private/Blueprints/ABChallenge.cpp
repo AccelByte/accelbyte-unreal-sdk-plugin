@@ -92,42 +92,6 @@ void UABChallenge::GetChallengeList(
 	}
 }
 
-void UABChallenge::GetScheduledChallengeGoals(
-	FString const& ChallengeCode,
-	FDModelsGetScheduledChallengeGoalsResponse const& OnSuccess,
-	FDErrorHandler const& OnError,
-	TArray<FString> const& OptionalTags,
-	int64 Offset,
-	int64 Limit)
-{
-	const auto ChallengePtr = ApiClientPtr->GetChallengeApi().Pin();
-	if (ChallengePtr.IsValid())
-	{
-		ChallengePtr->GetScheduledChallengeGoals(
-			ChallengeCode,
-			THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse>::CreateLambda(
-				[OnSuccess](FAccelByteModelsGetScheduledChallengeGoalsResponse const& Response)
-				{
-					OnSuccess.ExecuteIfBound(Response);
-				}
-			),
-			FErrorHandler::CreateLambda(
-				[OnError](int Code, FString const& Message)
-				{
-					OnError.ExecuteIfBound(Code, Message);
-				}
-			),
-			OptionalTags,
-			Offset,
-			Limit
-		);
-	}
-	else
-	{
-		UE_LOG(LogAccelByteChallenge, Warning, TEXT("Invalid Challenge API from API Client"));
-		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Challenge API already destroyed!"));
-	}
-}
 
 void UABChallenge::GetPreviousChallengeProgresses(
 	FString const& ChallengeCode,

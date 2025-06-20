@@ -54,7 +54,6 @@
 #include "Api/AccelByteLoginQueueApi.h"
 #include "Core/AccelByteMessagingSystem.h"
 #include "Api/AccelByteChallengeApi.h"
-#include "Api/AccelByteSessionHistoryApi.h"
 
 class FAccelByteInstance;
 
@@ -136,7 +135,6 @@ private:
 	const AccelByte::Api::SessionBrowserPtr SessionBrowserPtr;
 	const AccelByte::Api::TurnManagerPtr TurnManagerPtr;
 	const AccelByte::Api::SessionPtr SessionPtr;
-	const AccelByte::Api::SessionHistoryPtr SessionHistoryPtr;
 	const AccelByte::Api::MatchmakingV2Ptr MatchmakingV2Ptr;
 	const AccelByte::Api::AMSPtr AmsPtr;
 #pragma endregion
@@ -200,7 +198,6 @@ public:
 	Api::SessionBrowserWPtr GetSessionBrowserApi() const;
 	Api::TurnManagerWPtr GetTurnManagerApi() const;
 	Api::SessionWPtr GetSessionApi() const;
-	Api::SessionHistoryWPtr GetSessionHistoryApi() const;
 	Api::MatchmakingV2WPtr GetMatchmakingV2Api() const;
 	Api::AMSWPtr GetAmsApi() const;
 #pragma endregion

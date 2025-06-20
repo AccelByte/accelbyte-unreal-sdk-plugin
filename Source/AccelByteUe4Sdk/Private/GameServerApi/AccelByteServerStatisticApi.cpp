@@ -440,6 +440,33 @@ FAccelByteTaskWPtr ServerStatistic::GetGlobalStatItemsByStatCode(FString const& 
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
-	
+
+FAccelByteTaskWPtr ServerStatistic::ListGlobalStatItems(THandler<FAccelByteModelsGlobalStatItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, TArray<FString> const& StatCodes
+	, int32 Limit
+	, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/globalstatitems")
+		, *ServerSettingsRef.StatisticServerUrl
+		, *ServerCredentialsRef->GetNamespace());
+
+	TMultiMap<FString, FString> QueryParams {
+		{ TEXT("limit"), FString::FromInt(Limit) },
+		{ TEXT("offset"), FString::FromInt(Offset) },
+	};
+	if(StatCodes.Num() > 0)
+	{
+		QueryParams.Emplace(TEXT("statCodes"), FString::Join(StatCodes, TEXT(",")));
+	}
+	else
+	{
+		// Don't add statCodes into the QueryParams
+	}
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 } // Namespace GameServerApi
 } // Namespace AccelByte

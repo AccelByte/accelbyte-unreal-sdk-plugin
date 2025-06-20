@@ -10,6 +10,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteDataStorageBinaryFile.h"
 #include "Core/AccelByteInstance.h"
+#include "Core/AccelByteTypeConverter.h"
 #include "Core/Platform/AccelBytePlatformHandler.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Engine/GameInstance.h"
@@ -69,7 +70,6 @@ private:
 	bool LoadSettingsFromConfigUObject();
 	bool LoadServerSettingsFromConfigUObject();
 	bool NullCheckConfig(FString const& Value, FString const& ConfigField);
-	static FVersion GetPluginVersion();
 	void GetVersionInfo(FString const& Url, TFunction<void(FVersionInfo)> Callback) const;
 	void CheckServicesCompatibility() const;
 	void SetDefaultHttpCustomHeader(FString const& Namespace);
@@ -101,6 +101,8 @@ void FAccelByteUe4SdkModule::StartupModule()
 	RegisterSettings();
 	LoadSettingsFromConfigUObject();
 	LoadServerSettingsFromConfigUObject();
+
+	UE_LOG(LogAccelByte, Log, TEXT("AccelByteSDK version: %s"), *(FAccelByteUtilities::GetPluginVersionAccelByteSDK()));
 
 	LocalDataStorage = MakeShared<AccelByte::DataStorageBinaryFile>();
 	TimeManager = MakeShared<AccelByte::FAccelByteTimeManager, ESPMode::ThreadSafe>(GlobalClientSettings.BasicServerUrl);
@@ -274,7 +276,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUObject()
 	bool bResult = false;
 	bool bEnableSettings = false;
 
-#if UE_BUILD_DEVELOPMENT
+#if UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG
 	GConfig->GetBool(TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings"), TEXT("ForceEnableSettings"), bEnableSettings, GEngineIni);
 #endif
 
@@ -301,16 +303,6 @@ bool FAccelByteUe4SdkModule::NullCheckConfig(FString const& Value, FString const
 	return true;
 }
 
-FVersion FAccelByteUe4SdkModule::GetPluginVersion()
-{
-	FString const PluginName = "AccelByteUe4Sdk";
- 
-	TSharedPtr<IPlugin> const Plugin = IPluginManager::Get().FindPlugin("AccelByteUe4Sdk");
-	const FPluginDescriptor& Descriptor = Plugin->GetDescriptor();
-
-	return Descriptor.VersionName;
-}
-
 void FAccelByteUe4SdkModule::GetVersionInfo(FString const& Url, TFunction<void(FVersionInfo)> Callback) const
 {
 	FHttpRequestPtr const Request = FHttpModule::Get().CreateRequest();
@@ -334,7 +326,7 @@ void FAccelByteUe4SdkModule::GetVersionInfo(FString const& Url, TFunction<void(F
 			}
 
 			FVersionInfo VersionInfo;
-			FJsonObjectConverter::JsonObjectStringToUStruct(Content, &VersionInfo, 0, 0);
+			FAccelByteJsonConverter::JsonObjectStringToUStruct(Content, &VersionInfo);
 
 			if (Callback)
 			{
@@ -348,7 +340,8 @@ void FAccelByteUe4SdkModule::GetVersionInfo(FString const& Url, TFunction<void(F
 
 void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
 {
-	if (GetPluginVersion().Compare(FVersion{TEXT("4.0.0")}) <= 0)
+	auto PluginVersion = FVersion(FAccelByteUtilities::GetPluginVersionAccelByteSDK());
+	if (PluginVersion.Compare(FVersion{TEXT("4.0.0")}) <= 0)
 	{
 		return;
 	}
@@ -403,7 +396,7 @@ AccelByte::FAccelBytePlatformHandler& FAccelByteUe4SdkModule::GetPlatformHandler
 void FAccelByteUe4SdkModule::SetDefaultHttpCustomHeader(FString const& Namespace)
 {
 	AccelByte::FHttpRetryScheduler::SetHeaderNamespace(Namespace);
-	AccelByte::FHttpRetryScheduler::SetHeaderSDKVersion(GetPluginVersion().ToString());
+	AccelByte::FHttpRetryScheduler::SetHeaderSDKVersion(FAccelByteUtilities::GetPluginVersionAccelByteSDK());
 	FString ProjectVersion;
 	GConfig->GetString(TEXT("/Script/EngineSettings.GeneralProjectSettings"), TEXT("ProjectVersion"), ProjectVersion, GGameIni);
 	AccelByte::FHttpRetryScheduler::SetHeaderGameClientVersion(ProjectVersion);

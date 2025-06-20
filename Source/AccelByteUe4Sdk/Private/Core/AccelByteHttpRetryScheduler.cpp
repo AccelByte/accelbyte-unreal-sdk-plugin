@@ -106,6 +106,15 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 	Request->SetHeader("AccelByte-SDK-Version", HeaderSDKVersion);
 	Request->SetHeader("AccelByte-OSS-Version", HeaderOSSVersion);
 
+	// Previously SetTimeout() sets the "Activity Timeout", but Unreal changed the behaviour 
+	// of SetTimeout() to sets "Total Timeout" and Added SetActivityTimeout(), the behaviour that 
+	// we want is the one that set "Activity Timeout"
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 4
+	Request->SetActivityTimeout(TotalTimeout);
+#else
+	Request->SetTimeout(TotalTimeout);
+#endif
+
 	if (State == EState::Paused && Request->GetHeader("Authorization").Contains("Bearer"))
 	{
 		HttpRetryTaskPtr->Pause();

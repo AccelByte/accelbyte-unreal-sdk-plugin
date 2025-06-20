@@ -191,13 +191,7 @@ public:
 	void GetUserByUserId(FString const& UserId, FDSimpleUserDataResponse OnSuccess, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, FString const& OtherPlatformUserId, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType, TArray<FString> const& OtherPlatformUserId, FDBulkPlatformUserIdResponse OnSuccess, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void BulkGetUserInfo(TArray<FString> const& UserIds, FDListBulkUserInfoResponse OnSuccess, FDErrorHandler OnError);
 
 //Misc.
 public:

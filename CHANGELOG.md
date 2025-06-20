@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.0.0] (2025-06-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* require adjustment if there is a call to the deleted function
+
+### Features
+
+* adds list global stat item into Statistics API 
+* **statistic:** expose more optional parameter for Statistic::GetListStatCycleConfigs 
+* **UGC:** add input validation for UGC APIs 
+* **version:** print version on module initialization 
+
+
+### Bug Fixes
+
+* adjust for changed behaviour of SetTimeout() 
+* change JsonConverter to AccelByteJsonConverter to prevent crashes when enum values are not found 
+* **compile:** illegal character set in header file 
+* **compile:** statistic array on UE 4.27 
+* **DS:** introduce more enums to EAccelByteV2GameSessionDsStatus 
+* increase HTTP TotalTimeout to prevent failed HTTP requests 
+* **Session:** add ID validation for GameSession ID and PartySession ID 
+* **Session:** missing break OnPartyCreated case causing it to fall through the next case 
+
+
+* refactor!(User): remove functions not supported by backend anymore 
+
 ### [27.1.1] (2025-05-30)
 
 

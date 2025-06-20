@@ -12,8 +12,9 @@
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayBulkStatItemOperationDelegate, TArray<FAccelByteModelsBulkStatItemOperationResult>, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserStatItemPagingSlicedDelegate, FAccelByteModelsUserStatItemPagingSlicedResult, Response);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDGlobalStatItemDelegate, FAccelByteModelsGlobalStatItemValueResponse, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDFetchUserStatistic, TArray<FAccelByteModelsStatItemValueResponse>, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDGlobalStatItemDelegate, FAccelByteModelsGlobalStatItemValueResponse, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDGlobalStatItemPagingSlicedDelegate, FAccelByteModelsGlobalStatItemPagingSlicedResult, Response);
 
 UCLASS(Blueprintable, BlueprintType)
 class UABServerStatistic final : public UObject
@@ -43,6 +44,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
 	void GetGlobalStatItemsByStatCode(FString const& StatCode, FDGlobalStatItemDelegate OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
+	void ListGlobalStatItemsWithFilter(FDGlobalStatItemPagingSlicedDelegate OnSuccess, FDErrorHandler OnError, TArray<FString> const& StatCodes, int32 Limit = 20, int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | Statistic | Api")
+	void ListGlobalStatItems(FDGlobalStatItemPagingSlicedDelegate OnSuccess, FDErrorHandler OnError, int32 Limit, int32 Offset);
 
 private:
 	AccelByte::FServerApiClientPtr ApiClientPtr;

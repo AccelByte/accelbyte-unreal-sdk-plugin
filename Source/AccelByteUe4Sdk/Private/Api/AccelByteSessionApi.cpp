@@ -92,6 +92,13 @@ FAccelByteTaskWPtr Session::GetGameSessionDetails(FString const& GameSessionID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -137,6 +144,13 @@ FAccelByteTaskWPtr Session::UpdateGameSession(FString const& GameSessionID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -157,6 +171,13 @@ FAccelByteTaskWPtr Session::DeleteGameSession(FString const& GameSessionID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -172,6 +193,13 @@ FAccelByteTaskWPtr Session::SendGameSessionInvite(FString const& GameSessionID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FAccelByteModelsV2SessionInviteRequest RequestBody = {UserID};
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/invite")
 		, *SettingsRef.SessionServerUrl
@@ -181,12 +209,23 @@ FAccelByteTaskWPtr Session::SendGameSessionInvite(FString const& GameSessionID
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::SendGameSessionInvitePlatform(FString const& GameSessionID, FString const& UserID
+FAccelByteTaskWPtr Session::SendGameSessionInvitePlatform(FString const& GameSessionID
+	, FString const& UserID
 	, EAccelByteV2SessionPlatform const& Platform
 	, THandler<FAccelByteModelsV2SessionInvitePlatformResponse> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError)
+		|| !ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
+	{
+		return nullptr;
+	}
 
 	if (Platform == EAccelByteV2SessionPlatform::Unknown)
 	{
@@ -214,6 +253,13 @@ FAccelByteTaskWPtr Session::RejectGameSessionInvite(FString const& GameSessionID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/reject")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -227,6 +273,13 @@ FAccelByteTaskWPtr Session::JoinGameSession(FString const& GameSessionID
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/join")
 		, *SettingsRef.SessionServerUrl
@@ -258,6 +311,13 @@ FAccelByteTaskWPtr Session::GenerateNewGameSessionCode(FString const& GameSessio
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -272,6 +332,13 @@ FAccelByteTaskWPtr Session::RevokeGameSessionCode(FString const& GameSessionID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -285,6 +352,13 @@ FAccelByteTaskWPtr Session::LeaveGameSession(FString const& GameSessionID
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/leave")
 		, *SettingsRef.SessionServerUrl
@@ -314,10 +388,19 @@ FAccelByteTaskWPtr Session::GetMyGameSessions(THandler<FAccelByteModelsV2Paginat
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::PromoteGameSessionLeader(FString const& GameSessionID, FString const& NewLeaderID,
-	THandler<FAccelByteModelsV2GameSession> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Session::PromoteGameSessionLeader(FString const& GameSessionID
+	, FString const& NewLeaderID
+	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
 
 	FAccelByteModelsV2GameSessionLeaderPromotionRequest RequestBody;
 	RequestBody.LeaderID = NewLeaderID;
@@ -330,12 +413,17 @@ FAccelByteTaskWPtr Session::PromoteGameSessionLeader(FString const& GameSessionI
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::CancelGameSessionInvitation(FString const& GameSessionID, FString const& UserID,
-	FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Session::CancelGameSessionInvitation(FString const& GameSessionID
+	, FString const& UserID
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError)
+		|| !ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
 		, OnError))
 	{
@@ -351,19 +439,17 @@ FAccelByteTaskWPtr Session::CancelGameSessionInvitation(FString const& GameSessi
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::KickUserFromGameSession(FString const& GameSessionID, FString const& UserID
+FAccelByteTaskWPtr Session::KickUserFromGameSession(FString const& GameSessionID
+	, FString const& UserID
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (GameSessionID.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("GameSessionID is empty!"));
-		return nullptr;
-	}
-
-	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError)
+		|| !ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
 		, OnError))
 	{
@@ -412,6 +498,13 @@ FAccelByteTaskWPtr Session::GetPartyDetails(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -426,6 +519,13 @@ FAccelByteTaskWPtr Session::UpdateParty(FString const& PartyID
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
 
 	FString Content = TEXT("");
 	SerializeAndRemoveEmptyValues(UpdateRequest, Content);
@@ -445,6 +545,13 @@ FAccelByteTaskWPtr Session::PromotePartyLeader(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FAccelByteModelsV2PartyLeaderPromotionRequest RequestBody = {NewLeaderID};
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/leader")
 		, *SettingsRef.SessionServerUrl
@@ -454,12 +561,17 @@ FAccelByteTaskWPtr Session::PromotePartyLeader(FString const& PartyID
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::CancelPartyInvitation(FString const& PartyID, FString const& UserID
-	, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Session::CancelPartyInvitation(FString const& PartyID
+	, FString const& UserID
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError)
+		|| !ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
 		, OnError))
 	{
@@ -482,6 +594,13 @@ FAccelByteTaskWPtr Session::SendPartyInvite(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FAccelByteModelsV2SessionInviteRequest RequestBody = {InviteeID};
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/invite")
 		, *SettingsRef.SessionServerUrl
@@ -498,6 +617,16 @@ FAccelByteTaskWPtr Session::SendPartyInvitePlatform(FString const& PartyID
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError)
+		|| !ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
+	{
+		return nullptr;
+	}
 
 	if (Platform == EAccelByteV2SessionPlatform::Unknown)
 	{
@@ -525,6 +654,13 @@ FAccelByteTaskWPtr Session::RejectPartyInvite(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/me/reject")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -540,6 +676,13 @@ FAccelByteTaskWPtr Session::JoinParty(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/me/join")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -554,6 +697,13 @@ FAccelByteTaskWPtr Session::LeaveParty(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/me/leave")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -567,6 +717,12 @@ FAccelByteTaskWPtr Session::JoinPartyByCode(FString const& PartyCode
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (PartyCode.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid Request, Party code is empty"));
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/users/me/join/code")
 		, *SettingsRef.SessionServerUrl
@@ -584,6 +740,13 @@ FAccelByteTaskWPtr Session::GenerateNewPartyCode(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/code")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -597,6 +760,13 @@ FAccelByteTaskWPtr Session::RevokePartyCode(FString const& PartyID
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/code")
 		, *SettingsRef.SessionServerUrl
@@ -613,7 +783,10 @@ FAccelByteTaskWPtr Session::KickUserFromParty(FString const& PartyID
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError)
+		|| !ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
 		, OnError))
 	{
@@ -640,7 +813,7 @@ FAccelByteTaskWPtr Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPar
 		, *CredentialsRef->GetNamespace());
 
 	TMultiMap<FString, FString> QueryParams;
-	if(Status != EAccelByteV2SessionMemberStatus::EMPTY)
+	if (Status != EAccelByteV2SessionMemberStatus::EMPTY)
 	{
 		QueryParams.Add(TEXT("status"),
 			StaticEnum<EAccelByteV2SessionMemberStatus>()->GetNameStringByValue(static_cast<int64>(Status)));
@@ -649,7 +822,8 @@ FAccelByteTaskWPtr Session::GetMyParties(THandler<FAccelByteModelsV2PaginatedPar
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::GetPlayerAttributes(THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Session::GetPlayerAttributes(THandler<FAccelByteModelsV2PlayerAttributes> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -660,16 +834,23 @@ FAccelByteTaskWPtr Session::GetPlayerAttributes(THandler<FAccelByteModelsV2Playe
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::GetPartySessionStorage(FString const& PartySessionID
+FAccelByteTaskWPtr Session::GetPartySessionStorage(FString const& PartyID
 	, THandler<FAccelByteModelsV2PartySessionStorage> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/storage")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
-		, *PartySessionID
+		, *PartyID
 	);
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -691,17 +872,24 @@ FAccelByteTaskWPtr Session::StorePlayerAttributes(const FAccelByteModelsV2StoreP
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, JsonObject.ToSharedRef(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::StorePersonalDataToReservedPartySessionStorage(FString const& PartySessionID
+FAccelByteTaskWPtr Session::StorePersonalDataToReservedPartySessionStorage(FString const& PartyID
 	, FAccelByteModelsV2PartySessionStorageReservedData const& Data
 	, THandler<FAccelByteModelsV2PartySessionStorageReservedData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/storage/users/%s/reserved")
 		, *SettingsRef.SessionServerUrl
 		, *CredentialsRef->GetNamespace()
-		, *PartySessionID
+		, *PartyID
 		, *CredentialsRef->GetUserId());
 
 	TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(Data);
@@ -709,7 +897,8 @@ FAccelByteTaskWPtr Session::StorePersonalDataToReservedPartySessionStorage(FStri
 	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, JsonObject.ToSharedRef(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Session::DeletePlayerAttributes(FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+FAccelByteTaskWPtr Session::DeletePlayerAttributes(FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -726,14 +915,15 @@ FAccelByteTaskWPtr Session::UpdateLeaderStorage(FString const& SessionID
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
-	if(SessionID.IsEmpty())
+
+	if (!ValidateAccelByteId(SessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(SessionID)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("SessionID is empty!"));
 		return nullptr;
 	}
 	
-	if(!Data.JsonObject.IsValid())
+	if (!Data.JsonObject.IsValid())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Data has invalid json object!"));
 		return nullptr;
@@ -754,9 +944,10 @@ FAccelByteTaskWPtr Session::UpdateMemberStorage(FString const& SessionID
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (SessionID.IsEmpty())
+	if (!ValidateAccelByteId(SessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(SessionID)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("SessionID is empty!"));
 		return nullptr;
 	}
 	
@@ -796,7 +987,8 @@ FAccelByteTaskWPtr Session::GetRecentPlayers(THandler<FAccelByteModelsV2SessionR
 }
 
 FAccelByteTaskWPtr Session::GetRecentTeamPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess,
-	FErrorHandler const& OnError, const int32 Limit)
+	FErrorHandler const& OnError
+	, const int32 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -821,9 +1013,10 @@ FAccelByteTaskWPtr Session::GetSessionSecret(FString const& SessionID
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if (SessionID.IsEmpty())
+	if (!ValidateAccelByteId(SessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(SessionID)
+		, OnError))
 	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("SessionID is empty!"));
 		return nullptr;
 	}
 

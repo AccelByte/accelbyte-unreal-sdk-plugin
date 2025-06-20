@@ -4,6 +4,7 @@
 
 #include "Core/AccelByteDataStorageBinaryFile.h"
 #include "Core/AccelByteUtilities.h"
+#include "Core/AccelByteTypeConverter.h"
 #include "JsonUtilities.h"
 #include "Misc/FileHelper.h"
 #include "Containers/UnrealString.h"
@@ -398,7 +399,7 @@ TSharedPtr<FABBinaryFileStructure> DataStorageBinaryFile::ParseStructureOnly(con
 	for (int i = 0; i < Count; i++)
 	{
 		FBinaryContentIndependentSegment Segment{};
-		if (FJsonObjectConverter::JsonObjectStringToUStruct<FBinaryContentIndependentSegment>(ParsedAsArray[i], &Segment, 0, 0))
+		if (FAccelByteJsonConverter::JsonObjectStringToUStruct<FBinaryContentIndependentSegment>(ParsedAsArray[i], &Segment))
 		{
 			Collection->Add(Segment);
 		}
@@ -416,7 +417,7 @@ FABBinaryFileStructure DataStorageBinaryFile::ConvertOldCacheToNewFormat(const F
 {
 	FABBinaryFileStructure NewFormat{};
 	FAccelByteBinaryFileStructureObsolete TemporaryOldCacheContainer{};
-	bool bDeserializationSuccess = FJsonObjectConverter::JsonObjectStringToUStruct<FAccelByteBinaryFileStructureObsolete>(Input, &TemporaryOldCacheContainer);
+	bool bDeserializationSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct<FAccelByteBinaryFileStructureObsolete>(Input, &TemporaryOldCacheContainer);
 	if (!bDeserializationSuccess)
 	{
 		return NewFormat;

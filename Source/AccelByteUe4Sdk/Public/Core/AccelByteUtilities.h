@@ -514,6 +514,12 @@ public:
 	 */
 	static FString GetDevModeDeviceId(FString const& Default);
 
+	/* Obtain the version of the AccelByte SDK plugin. */
+	static FString GetPluginVersionAccelByteSDK();
+
+	/* Obtain the version of the OnlineSubsystemAccelByte plugin. */
+	static FString GetPluginVersionOnlineSubsystemAccelByte();
+
 private:
 	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);
 

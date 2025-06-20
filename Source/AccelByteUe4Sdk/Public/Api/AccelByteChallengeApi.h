@@ -51,25 +51,6 @@ public:
 		, TArray<FString> const& Tags = {});
 
 	/**
-	 * @brief Send a request to get all scheduled goals for a specific challenge
-	 *
-	 * @param ChallengeCode String code for the challenge to check scheduled goals for
-	 * @param OnSuccess Delegate executed when request succeeds
-	 * @param OnError Delegate excecuted when request fails
-	 * @param Tags Array of tag strings used to filter resulting goals list
-	 * @param Offset Number of scheduled goals to skip when returning goals list, defaults to 0
-	 * @param Limit Number of scheduled goals that should be included in the goals list, defaults to 20
-	 * 
-	 * @return AccelByteTask object to track and cancel the ongoing API operation.
-	 */
-	FAccelByteTaskWPtr GetScheduledChallengeGoals(FString const& ChallengeCode
-		, THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse> const& OnSuccess
-		, FErrorHandler const& OnError
-		, TArray<FString> const& Tags = {}
-		, uint64 Offset = 0
-		, uint64 Limit = 20);
-
-	/**
 	 * @brief Send a request to get previous challenge progresses
 	 *
 	 * @param ChallengeCode String code for the challenge to check progress for

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2025 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -24,6 +24,15 @@ enum class EAccelByteStatisticStatus : uint8
 };
 
 UENUM(BlueprintType)
+enum class EAccelByteStatisticStatCycleStatus : uint8
+{
+	NONE = 0,
+	INIT,
+	ACTIVE,
+	STOPPED
+};
+
+UENUM(BlueprintType)
 enum class EAccelByteStatisticUpdateStrategy : uint8
 {
 	OVERRIDE = 0,
@@ -46,6 +55,36 @@ enum class EAccelByteStatisticSortBy : uint8
 	UPDATED_AT,
 	UPDATED_AT_ASC,
 	UPDATED_AT_DESC
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteStatisticStatCycleSortBy : uint8
+{
+	NONE = 0,
+	START,
+	START_ASC,
+	START_DESC,
+	CREATED_AT,
+	CREATED_AT_ASC,
+	CREATED_AT_DESC,
+	UPDATED_AT,
+	UPDATED_AT_ASC,
+	UPDATED_AT_DESC
+};
+
+// Unable to use Blueprint since TOptional is not supported
+struct ACCELBYTEUE4SDK_API FAccelByteModelsStatGetListStatCycleQueryRequest
+{
+	TOptional<FString> Name;
+	TOptional<EAccelByteCycle> CycleType;
+	TOptional<EAccelByteStatisticStatCycleStatus> Status;
+	TArray<EAccelByteStatisticStatCycleSortBy> SortBy;
+
+	/*
+	 * Generate a query param based on each of these fields.
+	 * SortBy field requires a special handling since it can be combined.
+	 */
+	TMultiMap<FString, FString> GenerateQueryParam();
 };
 
 USTRUCT(BlueprintType)
@@ -319,6 +358,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalStatItemValueResponse
 	FDateTime CreatedAt {0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemValueResponse")
 	FDateTime UpdatedAt {0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGlobalStatItemPagingSlicedResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemPagingSlicedResult")
+	TArray<FAccelByteModelsGlobalStatItemValueResponse> Data{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemPagingSlicedResult")
+	FAccelByteModelsPaging Paging{}; 
 };
 
 USTRUCT(BlueprintType)

@@ -15,8 +15,6 @@
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGetChallengesResponse, FAccelByteModelsGetChallengesResponse, Response);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGetScheduledChallengeGoalsResponse, FAccelByteModelsGetScheduledChallengeGoalsResponse, Response);
-
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsChallengeProgressResponse, FAccelByteModelsChallengeProgressResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsChallengeGetRewardStatusResponse, FAccelByteModelsChallengeGetRewardStatusResponse, Response);
@@ -55,16 +53,6 @@ public:
 		int64 Offset = 0,
 		int64 Limit = 20,
 		FString Keyword = TEXT("")
-	);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Challenge | Api")
-	void GetScheduledChallengeGoals(
-		FString const& ChallengeCode,
-		FDModelsGetScheduledChallengeGoalsResponse const& OnSuccess,
-		FDErrorHandler const& OnError,
-		TArray<FString> const& OptionalTags, // Note: This is supposed to be optional, but the blueprint can't parse an array when a default value is provided.
-		int64 Offset = 0,
-		int64 Limit = 20
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Challenge | Api")

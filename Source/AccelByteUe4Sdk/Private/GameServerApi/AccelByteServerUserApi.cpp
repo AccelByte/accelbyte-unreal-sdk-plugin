@@ -81,6 +81,48 @@ FAccelByteTaskWPtr ServerUser::SearchUserOtherPlatformUserId(FString const& Plat
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr ServerUser::GetUserPlatformLinks(FString const& UserID
+	, THandler<FPagedPlatformLinks> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/platforms")
+		, *ServerSettingsRef.IamServerUrl
+		, *ServerCredentialsRef->GetNamespace()
+		, *UserID);
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerUser::GetUserPublicInfoByUserId(FString const& UserID
+	, THandler<FUserPublicInfoResponseV4> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(UserID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s")
+		, *ServerSettingsRef.IamServerUrl
+		, *ServerCredentialsRef->GetClientNamespace()
+		, *UserID);
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr ServerUser::BanSingleUser(FString const& UserId
 	, FBanUserRequest const& BanUser
 	, THandler<FBanUserResponse> const& OnSuccess
@@ -164,50 +206,6 @@ FAccelByteTaskWPtr ServerUser::ListUserByUserId(FListUserDataRequest const& Requ
 		, *ServerCredentialsRef->GetClientNamespace() );
  
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
-}
-
-FAccelByteTaskWPtr ServerUser::BulkGetUserInfo(TArray<FString> const& UserIds
-	, THandler<FListBulkUserInfo> const& OnSuccess
-	, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("BulkGetUserInfo is deprecated & might be removed without notice - please use GetUsersInfoByEmails instead!!"));
-
-	TArray<FString> CopyUserIds = UserIds;
-	if (CopyUserIds.Num() <= 0)
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
-		return nullptr;
-	}
-	if (CopyUserIds.Num() > 100)
-	{
-		UE_LOG(LogAccelByte, Warning, TEXT("The requested UserIds information list exceed max size 100. UserIds index 0-99 will be sent, and the rest will be truncated."));
-
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 5
-		// AllowShrinking as a boolean is deprecated in 5.5, enum is used instead
-		CopyUserIds.SetNum(100, EAllowShrinking::Yes);
-#else
-		CopyUserIds.SetNum(100, true);
-#endif // ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 5
-	}
-
-	const FListBulkUserInfoRequest UserList{ CopyUserIds };
-
-	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/bulk/basic")
-		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
-
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(UserList, Content);
-
-	TMap<FString, FString> Headers = {
-		{TEXT("Content-Type"), TEXT("application/json")},
-		{TEXT("Accept"), TEXT("application/json")}
-	};
-
-	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr ServerUser::GetUsersInfoByEmails(FUsersEmailsRequest const& Request

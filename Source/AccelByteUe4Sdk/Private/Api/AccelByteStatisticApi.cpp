@@ -1,4 +1,4 @@
-// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2025 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -45,6 +45,33 @@ FString Statistic::ConvertUserStatisticSortByToString(EAccelByteStatisticSortBy 
 	case EAccelByteStatisticSortBy::UPDATED_AT_ASC:
 		return TEXT("updatedAt:asc");
 	case EAccelByteStatisticSortBy::UPDATED_AT_DESC:
+		return TEXT("updatedAt:desc");
+	default:
+		return TEXT("");
+	}
+}
+
+FString Statistic::ConvertStatCycleStatisticSortByToString(EAccelByteStatisticStatCycleSortBy SortBy)
+{
+	switch (SortBy)
+	{
+	case EAccelByteStatisticStatCycleSortBy::START:
+		return TEXT("start");
+	case EAccelByteStatisticStatCycleSortBy::START_ASC:
+		return TEXT("start:asc");
+	case EAccelByteStatisticStatCycleSortBy::START_DESC:
+		return TEXT("start:desc");
+	case EAccelByteStatisticStatCycleSortBy::CREATED_AT:
+		return TEXT("createdAt");
+	case EAccelByteStatisticStatCycleSortBy::CREATED_AT_ASC:
+		return TEXT("createdAt:asc");
+	case EAccelByteStatisticStatCycleSortBy::CREATED_AT_DESC:
+		return TEXT("createdAt:desc");
+	case EAccelByteStatisticStatCycleSortBy::UPDATED_AT:
+		return TEXT("updatedAt");
+	case EAccelByteStatisticStatCycleSortBy::UPDATED_AT_ASC:
+		return TEXT("updatedAt:asc");
+	case EAccelByteStatisticStatCycleSortBy::UPDATED_AT_DESC:
 		return TEXT("updatedAt:desc");
 	default:
 		return TEXT("");
@@ -326,6 +353,33 @@ FAccelByteTaskWPtr Statistic::GetGlobalStatItemsByStatCode(FString const& StatCo
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Statistic::ListGlobalStatItems(THandler<FAccelByteModelsGlobalStatItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, TArray<FString> const& StatCodes
+	, int32 Limit
+	, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/globalstatitems")
+		, *SettingsRef.StatisticServerUrl
+		, *CredentialsRef->GetNamespace());
+
+	TMultiMap<FString, FString> QueryParams {
+		{ TEXT("limit"), FString::FromInt(Limit) },
+		{ TEXT("offset"), FString::FromInt(Offset) },
+	};
+	if(StatCodes.Num() > 0)
+	{
+		QueryParams.Emplace(TEXT("statCodes"), FString::Join(StatCodes, TEXT(",")));
+	}
+	else
+	{
+		// Don't add statCodes into the QueryParams
+	}
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Statistic::GetUserStatCycleItems(FString const& CycleId
 	, THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult> const& OnSuccess
 	, FErrorHandler const& OnError
@@ -386,6 +440,29 @@ FAccelByteTaskWPtr Statistic::GetListStatCycleConfigs(EAccelByteCycle CycleType
 	{
 		QueryParams.Add(TEXT("cycleType"), EnumText.ToUpper());
 	}
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+
+FAccelByteTaskWPtr Statistic::GetListStatCycleConfigs(FAccelByteModelsStatGetListStatCycleQueryRequest OptionalParams
+	, THandler<FAccelByteModelsStatCycleConfigPagingResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statCycles")
+		, *SettingsRef.StatisticServerUrl
+		, *CredentialsRef->GetNamespace());
+
+	TMultiMap<FString, FString> QueryParams = {
+		{TEXT("limit"), FString::FromInt(Limit)},
+		{TEXT("offset"), FString::FromInt(Offset)},
+	};
+
+	QueryParams.Append(OptionalParams.GenerateQueryParam());
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }

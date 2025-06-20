@@ -2256,7 +2256,7 @@ void Lobby::OnConnected()
 					if (LobbyApi.IsValid())
 					{
 						FOauth2Token Token;
-						FJsonObjectConverter::JsonObjectStringToUStruct(Message, &Token);
+						FAccelByteJsonConverter::JsonObjectStringToUStruct(Message, &Token);
 						LobbyApi->RefreshToken(Token.Access_token);
 					}
 				}));
@@ -2925,6 +2925,7 @@ void Lobby::DispatchV2SessionMessageByTopic(FString const& Topic, FString const&
 		case EV2SessionNotifTopic::OnPartyCreated:
 		{
 			DispatchMulticastV2JsonNotif<FAccelByteModelsV2PartyCreatedEvent>(Payload, V2PartyCreatedNotif);
+			break;
 		}
 		case EV2SessionNotifTopic::OnSessionInvited:
 		{
@@ -3956,7 +3957,7 @@ void Lobby::OnReceivedQosLatencies(FString const& Payload)
 		return;
 	}
 
-	FJsonObjectConverter::JsonObjectStringToUStruct(Payload, &RegionLatencies);
+	FAccelByteJsonConverter::JsonObjectStringToUStruct(Payload, &RegionLatencies);
 
 	const FString ClosestRegion = RegionLatencies.GetClosestRegion();
 

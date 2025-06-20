@@ -25,9 +25,11 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserStatItemPagingSlicedResultResponse
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDArrayModelsBulkStatItemOperationResultResponse, FArrayModelsBulkStatItemOperationResultResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsStatItemValueResponses, TArray<FAccelByteModelsStatItemValueResponse>, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGlobalStatItemDelegate, FAccelByteModelsGlobalStatItemValueResponse, Response);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsStatItemValueResponses, TArray<FAccelByteModelsStatItemValueResponse>, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGlobalStatItemPagingSlicedResultResponse, FAccelByteModelsGlobalStatItemPagingSlicedResult, Response);
 
 #pragma endregion
 
@@ -78,6 +80,23 @@ public:
 		FString const& StatCode, 
 		FDModelsGlobalStatItemDelegate const& OnSuccess,
 		FDErrorHandler const& OnError
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
+	void ListGlobalStatItemsWithFilter(
+		FDModelsGlobalStatItemPagingSlicedResultResponse const& OnSuccess,
+		FDErrorHandler const& OnError, 
+		TArray<FString> const& StatCodesFilter,
+		int32 Limit = 20,
+		int32 Offset = 0
+	);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
+	void ListGlobalStatItems(
+		FDModelsGlobalStatItemPagingSlicedResultResponse const& OnSuccess,
+		FDErrorHandler const& OnError,
+		int32 Limit = 20,
+		int32 Offset = 0
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")

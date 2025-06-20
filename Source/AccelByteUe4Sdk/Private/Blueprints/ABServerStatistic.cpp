@@ -165,3 +165,30 @@ void UABServerStatistic::GetGlobalStatItemsByStatCode(
 				OnError.ExecuteIfBound(Code, Message);
 			}));
 }
+
+void UABServerStatistic::ListGlobalStatItemsWithFilter(FDGlobalStatItemPagingSlicedDelegate OnSuccess
+	, FDErrorHandler OnError
+	, TArray<FString> const& StatCodes
+	, int32 Limit
+	, int32 Offset)
+{
+	ApiClientPtr->ServerStatistic.ListGlobalStatItems(
+		THandler<FAccelByteModelsGlobalStatItemPagingSlicedResult>::CreateLambda(
+			[OnSuccess](FAccelByteModelsGlobalStatItemPagingSlicedResult const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}), StatCodes, Limit, Offset);
+}
+
+void UABServerStatistic::ListGlobalStatItems(FDGlobalStatItemPagingSlicedDelegate OnSuccess
+	, FDErrorHandler OnError
+	, int32 Limit
+	, int32 Offset)
+{
+	ListGlobalStatItemsWithFilter(OnSuccess, OnError, TArray<FString>(), Limit, Offset);
+}

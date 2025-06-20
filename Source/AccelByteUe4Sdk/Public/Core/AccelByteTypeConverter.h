@@ -16,7 +16,7 @@ public:
 	/// <param name="Bytes"></param>
 	/// <param name="bIsFromString"> Is the byte represent string? else raw byte</param>
 	/// <returns></returns>
-	static FString BytesToFString(const TArray<uint8>& Bytes, bool bIsFromString)
+	static FString BytesToFString(TArray<uint8> const& Bytes, bool bIsFromString)
 	{
 		int32 Count = Bytes.Num();
 		const uint8* In = &Bytes[0];
@@ -37,7 +37,7 @@ public:
 		return Result;
 	}
 
-	static TArray<uint8> FStringToBytes(const FString& String)
+	static TArray<uint8> FStringToBytes(FString const& String)
 	{
 		TArray<uint8> Output;
 		Output.AddUninitialized(String.Len());
@@ -50,38 +50,45 @@ class ACCELBYTEUE4SDK_API FAccelByteJsonConverter
 {
 public:
 	template<typename OutStructType>
-	static bool JsonObjectStringToUStruct(const FString& JsonString, OutStructType* OutStruct)
+	static bool JsonObjectStringToUStruct(FString const& JsonString, OutStructType * OutStruct)
 	{
 		TSharedPtr<FJsonObject> JsonObject;
-		TSharedRef<TJsonReader<> > JsonReader = TJsonReaderFactory<>::Create(JsonString);
+		TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonString);
+
 		if (!FJsonSerializer::Deserialize(JsonReader, JsonObject) || !JsonObject.IsValid())
 		{
 			UE_LOG(LogJson, Warning, TEXT("JsonObjectStringToUStruct - Unable to parse json=[%s]"), *JsonString);
 			return false;
 		}
+
 		HandleUnidentifiedEnum(JsonObject, OutStructType::StaticStruct());
-		bool bSuccess = FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), OutStruct, 0, 0);
-		if (!bSuccess)
+
+		if (!FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), OutStruct, 0, 0))
 		{
 			UE_LOG(LogJson, Warning, TEXT("JsonObjectStringToUStruct - Unable to deserialize. json=[%s]"), *JsonString);
+			return false;
 		}
-		return bSuccess;
+
+		return true;
 	}
 
 	template<typename OutStructType>
-	static bool JsonArrayStringToUStruct(const FString& JsonString, TArray<OutStructType>* OutStructArray)
+	static bool JsonArrayStringToUStruct(FString const& JsonString, TArray<OutStructType> * OutStructArray)
 	{
-		TArray<TSharedPtr<FJsonValue> > JsonArray;
-		TSharedRef<TJsonReader<> > JsonReader = TJsonReaderFactory<>::Create(JsonString);
+		TArray<TSharedPtr<FJsonValue>> JsonArray;
+		TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonString);
+
 		if (!FJsonSerializer::Deserialize(JsonReader, JsonArray))
 		{
 			UE_LOG(LogJson, Warning, TEXT("JsonArrayStringToUStruct - Unable to parse. json=[%s]"), *JsonString);
 			return false;
 		}
+		
 		for (const auto& Value : JsonArray)
 		{
 			HandleUnidentifiedEnum(Value->AsObject(), OutStructType::StaticStruct());
 		}
+
 		if (!FJsonObjectConverter::JsonArrayToUStruct(JsonArray, OutStructArray, 0, 0))
 		{
 			UE_LOG(LogJson, Warning, TEXT("JsonArrayStringToUStruct - Error parsing one of the elements. json=[%s]"), *JsonString);
@@ -90,9 +97,9 @@ public:
 		return true;
 	}
 
-	static void HandleUnidentifiedEnum(const TSharedPtr<FJsonObject>& JsonObject, const UStruct* Definition)
+	static void HandleUnidentifiedEnum(TSharedPtr<FJsonObject> const& JsonObject, UStruct const* Definition)
 	{
-		const TMap< FString, TSharedPtr<FJsonValue> > JsonAttributes = JsonObject->Values;
+		const TMap<FString, TSharedPtr<FJsonValue>> JsonAttributes = JsonObject->Values;
 		for (TFieldIterator<FProperty> PropertyIt(Definition); PropertyIt; ++PropertyIt)
 		{
 			FProperty* Property = *PropertyIt;
@@ -158,7 +165,7 @@ public:
 		}
 	}
 
-	static int64 EnumJsonValueToInt64(const UEnum* Enum, const TSharedPtr<FJsonValue>& Value)
+	static int64 EnumJsonValueToInt64(UEnum const* Enum, TSharedPtr<FJsonValue> const& Value)
 	{
 		if (Enum == nullptr)
 		{

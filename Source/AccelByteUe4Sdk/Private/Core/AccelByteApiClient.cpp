@@ -54,7 +54,6 @@ FApiClient::FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr I
 	, SessionBrowserPtr(MakeShared<AccelByte::Api::SessionBrowser, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, TurnManagerPtr(MakeShared<AccelByte::Api::TurnManager, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, SessionPtr(MakeShared<AccelByte::Api::Session, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
-	, SessionHistoryPtr(MakeShared<AccelByte::Api::SessionHistory, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, MatchmakingV2Ptr(MakeShared<AccelByte::Api::MatchmakingV2, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, AmsPtr(MakeShared<AccelByte::Api::AMS, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, GameTelemetryPtr(MakeShared<AccelByte::Api::GameTelemetry, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
@@ -142,7 +141,6 @@ void FApiClient::Init()
 	SessionBrowserPtr->SetApiClient(AsShared());
 	TurnManagerPtr->SetApiClient(AsShared());
 	SessionPtr->SetApiClient(AsShared());
-	SessionHistoryPtr->SetApiClient(AsShared());
 	MatchmakingV2Ptr->SetApiClient(AsShared());
 	AmsPtr->SetApiClient(AsShared());
 	GameTelemetryPtr->SetApiClient(AsShared());
@@ -232,11 +230,6 @@ Api::TurnManagerWPtr FApiClient::GetTurnManagerApi() const
 Api::SessionWPtr FApiClient::GetSessionApi() const
 {
 	return SessionPtr;
-}
-
-Api::SessionHistoryWPtr FApiClient::GetSessionHistoryApi() const
-{
-	return SessionHistoryPtr;
 }
 
 Api::MatchmakingV2WPtr FApiClient::GetMatchmakingV2Api() const

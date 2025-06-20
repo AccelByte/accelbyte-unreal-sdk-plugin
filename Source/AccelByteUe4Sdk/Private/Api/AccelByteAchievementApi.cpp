@@ -252,7 +252,7 @@ FAccelByteTaskWPtr Achievement::UnlockAchievement(const FString& AchievementCode
 
 	if (AchievementCode.IsEmpty())
 	{
-		OnError.ExecuteIfBound(404, TEXT("Url is invalid. Achievement Code is empty."));
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Url is invalid. Achievement Code is empty."));
 		return nullptr;
 	}
 

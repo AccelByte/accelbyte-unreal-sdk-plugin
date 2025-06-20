@@ -107,8 +107,6 @@ void Settings::LoadSettings(const FString& SectionPath)
 	ReportingServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("ReportingServerUrl"), BaseUrl, TEXT("reporting"));
 
 	SessionServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SessionServerUrl"), BaseUrl, TEXT("session"));
-
-	SessionHistoryServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("SessionHistoryServerUrl"), BaseUrl, TEXT("sessionhistory"));
 	
 	MatchmakingV2ServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("MatchmakingV2ServerUrl"), BaseUrl, TEXT("match2"));
 

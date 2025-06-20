@@ -61,43 +61,6 @@ FAccelByteTaskWPtr Challenge::GetChallenges(THandler<FAccelByteModelsGetChalleng
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr Challenge::GetScheduledChallengeGoals(FString const& ChallengeCode
-	, THandler<FAccelByteModelsGetScheduledChallengeGoalsResponse> const& OnSuccess
-	, FErrorHandler const& OnError
-	, TArray<FString> const& Tags
-	, uint64 Offset
-	, uint64 Limit)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(TEXT("FAccelByteModelsChallengeGoal::Schedule"),
-		TEXT("Response FAccelByteModelsChallengeGoal::Schedule is deprecated - please use Challenge::ListSchedules or Challenge::ListScheduleByGoal to get schedule information"));
-
-	if (ChallengeCode.IsEmpty())
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("ChallengeCode cannot be empty."));
-		return nullptr;
-	}
-
-	TMap<FString, FString> QueryParams{
-		{ TEXT("offset"), FString::FromInt(Offset) },
-		{ TEXT("limit"), FString::FromInt(Limit) },
-	};
-
-	if (Tags.Num() > 0)
-	{
-		FString TagsString = CreateTagsString(Tags);
-		QueryParams.Emplace(TEXT("tags"), TagsString);
-	}
-
-	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/challenges/%s/goals")
-		, *SettingsRef.ChallengeServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ChallengeCode);
-
-	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
-}
-
 FAccelByteTaskWPtr Challenge::GetPreviousChallengeProgresses(FString const& ChallengeCode
 	, int32 Index
 	, THandler<FAccelByteModelsChallengeProgressResponse> const& OnSuccess

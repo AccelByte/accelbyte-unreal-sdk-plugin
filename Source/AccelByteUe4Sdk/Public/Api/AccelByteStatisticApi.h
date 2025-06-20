@@ -1,4 +1,4 @@
-// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2025 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -210,6 +210,20 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief List global stat items. 
+	 * 
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsGlobalStatItemValueResponse.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr ListGlobalStatItems(THandler<FAccelByteModelsGlobalStatItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, TArray<FString> const& StatCodes = {}
+	, int32 Limit = 20
+	, int32 Offset = 0);
+
+	/**
 	 * @brief Get user stat items with cycle
 	 *
 	 * @param CycleId the CycleId where the stat items belong to
@@ -253,6 +267,23 @@ public:
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr GetListStatCycleConfigs(EAccelByteCycle CycleType
+		, THandler<FAccelByteModelsStatCycleConfigPagingResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0);
+
+	/**
+	 * @brief Get List of Statistic Cycle Config
+	 * 
+	 * @param OptionalParams Optional parameter to do the query
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsStatCycleConfig
+	 * @param OnError This will be called when the operation failed
+	 * @param Limit Page size, default value is 20.
+	 * @param Offset Page number, default value is 0
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetListStatCycleConfigs(FAccelByteModelsStatGetListStatCycleQueryRequest OptionalParams
 		, THandler<FAccelByteModelsStatCycleConfigPagingResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20
@@ -333,12 +364,13 @@ public:
 		, FErrorHandler const& OnError);
 #endif // !UE_BUILD_SHIPPING
 	
+	static FString ConvertUserStatisticSortByToString(EAccelByteStatisticSortBy SortBy);
+	static FString ConvertStatCycleStatisticSortByToString(EAccelByteStatisticStatCycleSortBy SortBy);
+	
 private:
 	Statistic() = delete;
 	Statistic(Statistic const&) = delete;
 	Statistic(Statistic&&) = delete;
-	
-	static FString ConvertUserStatisticSortByToString(EAccelByteStatisticSortBy SortBy);
 };
 
 typedef TSharedRef<Statistic, ESPMode::ThreadSafe> StatisticRef;

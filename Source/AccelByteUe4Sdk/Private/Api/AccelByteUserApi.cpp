@@ -16,6 +16,7 @@
 #include "Core/AccelByteOauth2Api.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/IAccelByteDataStorage.h"
+#include "Core/AccelByteTypeConverter.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUser, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUser);
@@ -1086,7 +1087,7 @@ FAccelByteTaskWPtr User::TryRelogin(FString const& PlatformUserID
 
 				const auto Decoded = FAccelByteUtilities::XOR(Pair.Value, AccelByteInstancePtr->GetDeviceId());
 				FRefreshInfo RefreshInfo;
-				if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
+				if (!FAccelByteJsonConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo))
 				{
 					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."), FErrorOAuthInfo{});
 					return;
@@ -1148,7 +1149,7 @@ FAccelByteTaskWPtr User::TryReloginV4(FString const& PlatformUserID
 
 				auto Decoded = FAccelByteUtilities::XOR(Pair.Value, AccelByteInstancePtr->GetDeviceId());
 				FRefreshInfo RefreshInfo;
-				if (!FJsonObjectConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo, 0, 0))
+				if (!FAccelByteJsonConverter::JsonObjectStringToUStruct<FRefreshInfo>(Decoded, &RefreshInfo))
 				{
 					OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::UnableToSerializeCachedToken), TEXT("The cached token can't be parsed. Cannot continue the previous login session. Please login again."), FErrorOAuthInfo{});
 					return;
@@ -2526,30 +2527,6 @@ FAccelByteTaskWPtr User::GetUserPublicInfoByUserId(FString const& UserID
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType
-	, FString const& OtherPlatformUserId
-	, THandler<FAccountUserData> const& OnSuccess
-	, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Get user by other platform user id V3 is deprecated & might be removed without notice - please use GetUserPublicInfoByOtherPlatformUserId (V4) instead!!"));
-
-	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
-
-	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s")
-		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId
-		, *OtherPlatformUserId);
-
-	TMap<FString, FString> Headers = {
-		{TEXT("Accept"), TEXT("application/json")}
-	};
-
-	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), Headers, OnSuccess, OnError);
-}
-
 FAccelByteTaskWPtr User::GetUserPublicInfoByOtherPlatformUserId(EAccelBytePlatformType PlatformType
 	, FString const& OtherPlatformUserId
 	, THandler<FAccountUserData> const& OnSuccess
@@ -2635,38 +2612,6 @@ FAccelByteTaskWPtr User::GetUserEligibleToPlay(THandler<bool> const& OnSuccess
 			{
 				OnError.ExecuteIfBound(ErrorCode, ErrorMsg);
 			}));
-}
-
-FAccelByteTaskWPtr User::BulkGetUserInfo(TArray<FString> const& UserIds
-	, THandler<FListBulkUserInfo> const& OnSuccess
-	, FErrorHandler const& OnError) 
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("BulkGetUserInfo is deprecated & might be removed without notice - please use GetUserOtherPlatformBasicPublicInfo instead!!"));
-
-	if (UserIds.Num() <= 0)
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("UserIds cannot be empty!"));
-		return nullptr;
-	}
-
-	const FListBulkUserInfoRequest UserList{ UserIds };
-
-	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/bulk/basic")
-		, *SettingsRef.IamServerUrl
-		, *SettingsRef.Namespace);
-
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(UserList, Content);
-
-	TMap<FString, FString> Headers = {
-		{TEXT("Content-Type"), TEXT("application/json")},
-		{TEXT("Accept"), TEXT("application/json")}
-	};
-
-	return HttpClient.Request(TEXT("POST"), Url, Content, Headers, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr User::GetInputValidations(FString const& LanguageCode
