@@ -79,7 +79,11 @@ DerivedDataCache/*
 Content/StarterContent/*
 
 # Doxygen generated files
-Doxygen/*
+Doxygen/build
+Doxygen/Doxyfile
+Documentation
 
 # Config
 Config/*
+
+.vscode
