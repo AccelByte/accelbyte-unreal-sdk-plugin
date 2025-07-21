@@ -505,7 +505,7 @@ FAccelByteTaskWPtr ServerInventory::BulkSaveInventoryItems(FString const& UserId
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, SaveItemsRequests is empty."));
 		return nullptr;
 	}
-	else if (SaveItemsRequests.Num() >= MaxSaveInventoryItems)
+	else if (SaveItemsRequests.Num() > MaxSaveInventoryItems)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Maximum SaveItemsRequests is 10 for each call."));
 		return nullptr;
@@ -541,7 +541,7 @@ FAccelByteTaskWPtr ServerInventory::BulkSaveInventoryItemsByInventoryId(FString 
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, SaveItemsRequests is empty."));
 		return nullptr;
 	}
-	else if (SaveItemsRequests.Num() >= MaxSaveInventoryItems)
+	else if (SaveItemsRequests.Num() > MaxSaveInventoryItems)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, Maximum SaveItemsRequests is 10 for each call."));
 		return nullptr;

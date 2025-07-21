@@ -61,15 +61,18 @@ public:
 #if !UE_BUILD_SHIPPING
 	const int32 GetExpireTime()
 	{
+		FReadScopeLock ReadLock(CredentialAccessLock);
 		return ExpireTime;
 	}
 	void SetExpireTime(double InExpireTime)
 	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
 		ExpireTime = InExpireTime;
 	}
 
 	void SetClientId(const FString& InClientId)
 	{
+		FWriteScopeLock WriteLock(CredentialAccessLock);
 		ClientId = InClientId;
 	}
 #endif

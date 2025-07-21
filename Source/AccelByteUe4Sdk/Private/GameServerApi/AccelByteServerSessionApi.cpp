@@ -119,29 +119,6 @@ FAccelByteTaskWPtr ServerSession::DeleteGameSession(FString const& GameSessionID
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 
-FAccelByteTaskWPtr ServerSession::SendGameSessionInvite(FString const& GameSessionID
-	, FString const& UserID
-	, FVoidHandler const& OnSuccess
-	, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/invite")
-		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *GameSessionID);
-
-	const FAccelByteModelsV2SessionInviteRequest Invite = {UserID};
-	FString Content{};
-	if (!FJsonObjectConverter::UStructToJsonObjectString(Invite, Content))
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to convert request JSON into a string"));
-		return nullptr;
-	}
-
-	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
-}
-
 FAccelByteTaskWPtr ServerSession::UpdateMemberStatus(FString const& GameSessionID
 	, FString const& MemberID
 	, EAccelByteV2SessionMemberStatus Status

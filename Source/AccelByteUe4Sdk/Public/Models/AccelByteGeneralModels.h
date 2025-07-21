@@ -228,15 +228,32 @@ public:
 		return FString(TCHARData.Length(), TCHARData.Get());
 	}
 
+	// Need to override this function for engines starting from UE 5.6.
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 6
+	virtual FUtf8StringView GetContentAsUtf8StringView() const override
+	{
+		FUtf8StringView Data(reinterpret_cast<const UTF8CHAR*>(RawContent.GetData()), RawContent.Num());
+		return Data;
+	}
+#endif
+
 	void SetPayload(const TArray<uint8>& Input)
 	{
 		RawContent = Input;
 	}
 
+	// For engines below UE 5.6, we need to use FString GetURL() to return the URL, otherwise use FString& GetURL().
+#if ENGINE_MAJOR_VERSION <= 5 && ENGINE_MINOR_VERSION < 6 || ENGINE_MAJOR_VERSION == 4
 	virtual FString GetURL() const override
 	{
 		return URL;
 	}
+#else
+	virtual const FString& GetURL() const override
+	{
+		return URL;
+	}
+#endif
 
 	void SetURL(const FString& Input)
 	{

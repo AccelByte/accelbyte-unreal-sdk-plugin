@@ -39,8 +39,7 @@ void ServerCredentials::ForgetAll()
 
 void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environment)
 {
-	//Only read ClietId & ClientSecret at the end of scope
-	FReadScopeLock ReadLock(CredentialAccessLock);
+	//Synchronization is handled by BaseCredentials::SetClientCredentials() member method
 
 	FString SectionPath;
 	switch (Environment)
@@ -69,15 +68,18 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 		break;
 	}
 
-	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientId, GEngineIni))
+	FString ClientIdFromConfig;
+	FString ClientSecretFromCConfig;
+	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientIdFromConfig, GEngineIni))
 	{
-		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecretFromCConfig, GEngineIni);
 	}
 	else
 	{
-		GConfig->GetString(DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
-		GConfig->GetString(DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+		GConfig->GetString(DefaultSection, TEXT("ClientId"), ClientIdFromConfig, GEngineIni);
+		GConfig->GetString(DefaultSection, TEXT("ClientSecret"), ClientSecretFromCConfig, GEngineIni);
 	}
+	SetClientCredentials(ClientIdFromConfig, ClientSecretFromCConfig);
 }
 
 void ServerCredentials::SetClientToken(const FString& InAccessToken, double ExpiresIn, const FString& InNamespace)

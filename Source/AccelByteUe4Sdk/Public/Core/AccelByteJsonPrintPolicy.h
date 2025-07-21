@@ -45,8 +45,17 @@ struct TAccelBytePrettyJsonPrintPolicy
 	{
 		TempString = String.GetData();
 		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
-		TempAnsiStringView = TCHAR_TO_ANSI(*TempString);
+		TempAnsiStringView = StringCast<ANSICHAR>(*TempString);
 		auto Conv = StringCast<CharType>(TempAnsiStringView.GetData(), TempAnsiStringView.Len());
+		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
+	}
+
+	static void WriteString(FArchive* Stream, FUtf8StringView String)
+	{
+		TempString = String.GetData();
+		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
+		TempUtf8StringView = StringCast<UTF8CHAR>(*TempString);
+		auto Conv = StringCast<CharType>(TempUtf8StringView.GetData(), TempUtf8StringView.Len());
 		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
 	}
 
@@ -54,6 +63,8 @@ private:
 	inline static FString TempString{};
 	inline static FStringView TempStringView{};
 	inline static FAnsiStringView TempAnsiStringView{};
+	inline static FUtf8StringView TempUtf8StringView{};
+
 #endif
 #else
 	static void WriteString(FArchive* Stream, const FString& String)
@@ -109,8 +120,17 @@ struct TAccelByteCondensedJsonPrintPolicy
 	{
 		TempString = String.GetData();
 		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
-		TempAnsiStringView = TCHAR_TO_ANSI(*TempString);
+		TempAnsiStringView = StringCast<ANSICHAR>(*TempString);
 		auto Conv = StringCast<CharType>(TempAnsiStringView.GetData(), TempAnsiStringView.Len());
+		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
+	}
+
+	static void WriteString(FArchive* Stream, FUtf8StringView String)
+	{
+		TempString = String.GetData();
+		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
+		TempUtf8StringView = StringCast<UTF8CHAR>(*TempString);
+		auto Conv = StringCast<CharType>(TempUtf8StringView.GetData(), TempUtf8StringView.Len());
 		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
 	}
 
@@ -118,6 +138,8 @@ private:
 	inline static FString TempString{};
 	inline static FStringView TempStringView{};
 	inline static FAnsiStringView TempAnsiStringView{};
+	inline static FUtf8StringView TempUtf8StringView{};
+
 #endif
 #else
 	static void WriteString(FArchive* Stream, const FString& String)

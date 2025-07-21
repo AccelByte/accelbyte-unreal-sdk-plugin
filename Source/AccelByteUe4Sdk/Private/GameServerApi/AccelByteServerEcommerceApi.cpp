@@ -744,7 +744,10 @@ FAccelByteTaskWPtr ServerEcommerce::FulfillRewards(FString const& UserId
 		, *ServerCredentialsRef->GetClientNamespace()
 		, *UserId);
 
-	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FulfillRewardsRequest, OnSuccess, OnError);
+	// Remove NONE value from Origin & Source 
+	auto FilteredJsonObject = FulfillRewardsRequest.GenerateFilteredJsonObject();
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FilteredJsonObject, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr ServerEcommerce::BulkGetItemsById(TArray<FString> const& ItemIds

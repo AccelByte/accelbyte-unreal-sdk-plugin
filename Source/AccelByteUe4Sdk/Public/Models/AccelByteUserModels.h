@@ -1031,6 +1031,9 @@ struct FUserInputValidationRequest
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserInputValidationRequest")
 	FString Username{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserInputValidationRequest")
+	FString Password{};
 };
 
 USTRUCT(BlueprintType)

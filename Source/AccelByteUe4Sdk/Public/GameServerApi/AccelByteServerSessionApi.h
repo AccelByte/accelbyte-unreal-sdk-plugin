@@ -82,21 +82,6 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Send an invite to a game session by ID.
-	 *
-	 * @param GameSessionID The ID of the session.
-	 * @param UserID The ID of the user to invite.
-	 * @param OnSuccess This will be called if the operation succeeded.
-	 * @param OnError This will be called if the operation failed.
-	 * 
-	 * @return AccelByteTask object to track and cancel the ongoing API operation.
-	 */
-	FAccelByteTaskWPtr SendGameSessionInvite(FString const& GameSessionID
-		, FString const& UserID
-		, FVoidHandler const& OnSuccess
-		, FErrorHandler const& OnError);
-
-	/**
 	 * @brief Update a member of this session's status with the one provided. Requires permission
 	 * 'ADMIN:NAMESPACE:{namespace}:SESSION:GAME' to be set with the 'UPDATE' action.
 	 *

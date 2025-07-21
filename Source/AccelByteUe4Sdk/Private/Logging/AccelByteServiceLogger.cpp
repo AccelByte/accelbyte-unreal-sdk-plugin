@@ -50,7 +50,7 @@ FString GenerateHttpHeaderString(const FHttpRequestPtr& Request)
 			header_key = header_key.Left(16);
 		}
 
-		headerJsonStr.Append(FString::Printf(TEXT(R"LOG(%s"%s":"%s")LOG"), i > 0 ? "," : "", *header_key, *header_value));
+		headerJsonStr.Append(FString::Printf(TEXT(R"LOG(%s"%s":"%s")LOG"), (i > 0 ? TEXT(",") : TEXT("")), *header_key, *header_value));
 	}
 
 	return headerJsonStr;

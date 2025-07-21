@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.1.0] (2025-07-21)
+
+
+### Features
+
+* add missing entitlement status enum 
+* **InputValidation:** add Password field to the request of input validation 
+* support for ue5.6 
+
+
+### Bug Fixes
+
+* add missing header in EcommerceModels 
+* **commerce:** filter non-existing enum when server sends FulfillRewards request 
+* fix thread safety weakness in AccelByteCredentials and AccelByteServerCredentials classes 
+* One off error in BulkSaveInventoryItems methods 
+* **WebSocket:** Refresh token caused Websocket unable to reconnect 
+
+
+### Documentations
+
+* update supported engine versions 
+
 ## [28.0.0] (2025-06-20)
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2019 - 2022 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2025 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -80,7 +80,8 @@ enum class EAccelByteEntitlementStatus : uint8
 	ACTIVE,
 	INACTIVE,
 	CONSUMED,
-	REVOKED
+	REVOKED,
+	SOLD
 };
 
 UENUM(BlueprintType)
@@ -3421,6 +3422,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFulfillRewards
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | FulfillRewards")
 	FJsonObjectWrapper Metadata{};
+
+	/* Convert to JSON objectd and remove Source::NONE & Origin::NONE value.
+	 * Because backend doesn't recognize NONE value.
+	 */ 
+	TSharedPtr<FJsonObject> GenerateFilteredJsonObject() const;
 };
 
 USTRUCT(BlueprintType)

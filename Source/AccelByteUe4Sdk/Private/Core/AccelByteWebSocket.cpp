@@ -78,9 +78,13 @@ void AccelByteWebSocket::SetupWebSocket()
 	TMap<FString, FString> Headers = UpgradeHeaders;
 
 	auto CredentialsPtr = CredentialsWPtr.Pin();
-	if (CredentialsPtr.IsValid() && CredentialsPtr->GetSessionState() == BaseCredentials::ESessionState::Valid)
+	if (CredentialsPtr.IsValid() && !CredentialsPtr->GetAccessToken().IsEmpty())
 	{
 		Headers.Add("Authorization", "Bearer " + CredentialsPtr->GetAccessToken());
+	}
+	else
+	{
+		UE_LOG(LogAccelByteWebsocket, VeryVerbose, TEXT("Setup Websocket with empty Authorization header"));
 	}
 	WebSocket = WebSocketFactory->CreateWebSocket(Url, Protocol, Headers);
 
@@ -192,7 +196,7 @@ void AccelByteWebSocket::Connect(bool ForceConnect)
 		return;
 	}
 
-	if (bWasWsConnectionError)
+	if (bWasWsConnectionError || WsState == EWebSocketState::WaitingReconnect)
 	{
 		SetupWebSocket();
 	}
@@ -201,7 +205,8 @@ void AccelByteWebSocket::Connect(bool ForceConnect)
 
 	TeardownTicker();
 
-	if (!TickerDelegate.IsBound()) {
+	if (!TickerDelegate.IsBound()) 
+	{
         TickerDelegate = FTickerDelegate::CreateThreadSafeSP(AsShared(), &AccelByteWebSocket::Tick);
 	}
 	TickerDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(TickerDelegate, TickPeriod);
