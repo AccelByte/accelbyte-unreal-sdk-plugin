@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024 AccelByte, Inc. All rights reserved.
+// Copyright (c) 2024 AccelByte, Inc. All rights reserved.
 // This is licensed software from Accelbyte Inc, for limitations
 // and restrictions contact your company contract manager
 

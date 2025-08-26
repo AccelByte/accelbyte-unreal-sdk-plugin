@@ -1,4 +1,4 @@
-﻿#include "Blueprints/AccelByteBPLobby.h"
+#include "Blueprints/AccelByteBPLobby.h"
 
 using namespace AccelByte;
 
