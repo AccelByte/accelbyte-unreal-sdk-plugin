@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #pragma once
-
+#if 1 // MMv1 Deprecation
 #include "CoreMinimal.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "Models/AccelByteMatchmakingModels.h"
@@ -225,3 +225,4 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserJoinSessionRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | SessionBrowserGetResult")
 	FString Password{};
 };
+#endif

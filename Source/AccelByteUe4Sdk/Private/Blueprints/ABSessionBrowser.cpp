@@ -2,6 +2,7 @@
 // This is licensed software from Accelbyte Inc, for limitations
 // and restrictions contact your company contract manager
 
+#if 1 // MMv1 Deprecation
 #include "Blueprints/ABSessionBrowser.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteSessionBrowser, Log, All);
@@ -764,3 +765,5 @@ void UABSessionBrowser::GetGameSession(
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("SessionBrowser API already destroyed!"));
 	}
 }
+
+#endif

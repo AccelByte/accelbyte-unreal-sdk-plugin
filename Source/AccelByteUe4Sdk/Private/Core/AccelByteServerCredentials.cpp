@@ -20,9 +20,7 @@ namespace AccelByte
 {
 
 ServerCredentials::ServerCredentials(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl)
-	: AccessToken()
-	, Namespace()
-	, UserId()
+	: BaseCredentials()
 	, IamServerUrl(InIamServerUrl)
 	, Oauth(InHttpRef, InIamServerUrl)
 {
@@ -32,9 +30,7 @@ TCHAR const* ServerCredentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.A
 
 void ServerCredentials::ForgetAll()
 {
-	FWriteScopeLock WriteLock(CredentialAccessLock);
 	BaseCredentials::ForgetAll();
-	AccessToken = FString();
 }
 
 void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environment)
@@ -84,144 +80,49 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 
 void ServerCredentials::SetClientToken(const FString& InAccessToken, double ExpiresIn, const FString& InNamespace)
 {
-	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
-		AccessToken = InAccessToken;
-		ExpireTime = ExpiresIn;
-		Namespace = InNamespace;
-		SessionState = ESessionState::Valid;
-	}
+	FOauth2Token NewAuthToken;
+	NewAuthToken.Access_token = InAccessToken;
+	NewAuthToken.Expires_in = ExpiresIn;
+	NewAuthToken.Namespace = InNamespace;
 
-	if (ExpiresIn > MaxBackoffTime)
-	{
-		ScheduleRefreshToken(ExpireTime - MaxBackoffTime);
-	}
-	else
-	{
-		ScheduleRefreshToken(ExpireTime*BackoffRatio);
-	}
-
-	{
-		FWriteScopeLock WriteLock(DelegateLock);
-		BackoffCount.Reset();
-		if (!PollRefreshTokenHandle.IsValid()) {
-			PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
-				FTickerDelegate::CreateThreadSafeSP(AsShared(), &ServerCredentials::Tick),
-				0.2f);
-		}
-	}
+	SetAuthToken(NewAuthToken, FPlatformTime::Seconds());
 }
 
 void ServerCredentials::Startup()
 {
+	BaseCredentials::Startup();
+	
+	SetTickerDelegate(FTickerDelegate::CreateThreadSafeSP(AsShared(), &ServerCredentials::Tick));
 	IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 	SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 }
 
-void ServerCredentials::Shutdown()
+void ServerCredentials::SendRefreshToken()
 {
-	// Required because this function is accessing PollRefreshTokenHandle
-	FWriteScopeLock WriteLock(DelegateLock);
-	RemoveFromTicker(PollRefreshTokenHandle);
-}
+	FString TempClientId = GetOAuthClientId();
+	FString TempClientSecret = GetOAuthClientSecret();
 
-void ServerCredentials::RemoveFromTicker(FDelegateHandleAlias& handle)
-{
-	if (handle.IsValid())
-	{
-		FTickerAlias::GetCoreTicker().RemoveTicker(handle);
-		handle.Reset();
-	}
-}
-void ServerCredentials::PollRefreshToken(double CurrentTime)
-{
-	FWriteScopeLock WriteLock(CredentialAccessLock);
-
-#ifdef ACCELBYTE_ACTIVATE_PROFILER
-	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteServerPollRefreshToken"));
-#endif
-	switch (SessionState)
-	{
-		case ESessionState::Expired:
-		case ESessionState::Valid:
-			if (RefreshTime <= CurrentTime)
-			{
-				Oauth.GetTokenWithClientCredentials(ClientId
-					, ClientSecret
-					, THandler<FOauth2Token>::CreateThreadSafeSP(this, &ServerCredentials::OnPollRefreshTokenResponseSuccess)
-					, FErrorHandler::CreateThreadSafeSP(this, &ServerCredentials::OnPollRefreshTokenResponseError)
-					, IamServerUrl);
-
-				SessionState = ESessionState::Refreshing;
-			}
-
-			break;
-		case ESessionState::Refreshing:
-		case ESessionState::Invalid:
-			break;
-	}
+	Oauth.GetTokenWithClientCredentials(TempClientId
+		, TempClientSecret
+		, THandler<FOauth2Token>::CreateThreadSafeSP(this, &ServerCredentials::OnPollRefreshTokenResponseSuccess)
+		, FErrorHandler::CreateThreadSafeSP(this, &ServerCredentials::OnPollRefreshTokenResponseError)
+		, IamServerUrl);
 }
 
 void ServerCredentials::OnPollRefreshTokenResponseSuccess(const FOauth2Token& Result)
 {
-	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
-		SessionState = ESessionState::Valid;
-	}
+	SetAuthToken(Result, FPlatformTime::Seconds());
 
-	SetClientToken(Result.Access_token, Result.Expires_in, Result.Namespace);
-
-	{
-		FWriteScopeLock WriteLock(DelegateLock);
-		TokenRefreshedEvent.Broadcast(true); 
-	}
+	auto RefreshedEvent = OnTokenRefreshed();
+	RefreshedEvent.Broadcast(true);
 }
 
 void ServerCredentials::OnPollRefreshTokenResponseError(int32 Code, const FString& Message)
 {
-	BackoffCount.Increment();
+	CalculateNextRefreshToken();
 
-	if (BackoffCount.GetValue() < MaxBackoffCount)
-	{
-		{
-			// Separate scope to avoid locking with ScheduleRefreshToken
-			FWriteScopeLock WriteLock(CredentialAccessLock);
-
-			if (ExpireTime > MaxBackoffTime)
-			{
-				ExpireTime = MaxBackoffTime;
-			}
-			else if (ExpireTime <= MinBackoffTime)
-			{
-				ExpireTime = MinBackoffTime;
-			}
-			else
-			{
-				ExpireTime = ExpireTime * BackoffRatio;
-			}
-
-			RefreshBackoff = ExpireTime * BackoffRatio;
-			SessionState = ESessionState::Expired;
-		}
-
-		ScheduleRefreshToken(RefreshBackoff);
-	}
-	else
-	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
-		SessionState = ESessionState::Invalid;
-	}
-
-	{
-		FWriteScopeLock WriteLock(DelegateLock);
-		TokenRefreshedEvent.Broadcast(false);
-	}
-}
-
-void ServerCredentials::ScheduleRefreshToken(double NextRefreshTime)
-{
-	FWriteScopeLock WriteLock(CredentialAccessLock);
-	RefreshTime = FPlatformTime::Seconds() + NextRefreshTime;
+	auto RefreshedEvent = OnTokenRefreshed();
+	RefreshedEvent.Broadcast(false);
 }
 
 void ServerCredentials::SetMatchId(const FString& GivenMatchId)
@@ -235,45 +136,15 @@ const FString& ServerCredentials::GetClientAccessToken() const
 	return GetAccessToken();
 }
 
-const FString& ServerCredentials::GetAccessToken() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AccessToken;
-}
-
 const FString& ServerCredentials::GetClientNamespace() const
 {
 	return GetNamespace();
-}
-
-const FString& ServerCredentials::GetNamespace() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return Namespace;
-}
-
-const double ServerCredentials::GetExpireTime() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return ExpireTime;
-}
-
-const double ServerCredentials::GetRefreshTime() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return RefreshTime;
 }
 
 const FString& ServerCredentials::GetMatchId() const
 {
 	FReadScopeLock ReadLock(CredentialAccessLock);
 	return MatchId;
-}
-
-const FString& ServerCredentials::GetUserId() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return UserId;
 }
 
 } // Namespace AccelByte

@@ -40,11 +40,13 @@ namespace AccelByte
 		ServerGameTelemetry.SetServerApiClient(AsShared());
 		ServerLobby.SetServerApiClient(AsShared());
 		ServerChat.SetServerApiClient(AsShared());
+#if 1 // MMv1 Deprecation
 		ServerMatchmaking.SetServerApiClient(AsShared());
+		ServerSessionBrowser.SetServerApiClient(AsShared());
+#endif
 		ServerOauth2.SetServerApiClient(AsShared());
 		ServerQosManager.SetServerApiClient(AsShared());
 		ServerSeasonPass.SetServerApiClient(AsShared());
-		ServerSessionBrowser.SetServerApiClient(AsShared());
 		ServerStatistic.SetServerApiClient(AsShared());
 		ServerUGC.SetServerApiClient(AsShared());
 		ServerUser.SetServerApiClient(AsShared());

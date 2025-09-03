@@ -238,4 +238,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLoginQueueTicketInfo
 struct ACCELBYTEUE4SDK_API FAccelByteLoginWithOtherPlatformOptionalParameters
 {
 	FString ServiceLabelForPSN = "";
+
+	/* If need to skip set cookie. Default is false. */
+	bool bSkipSetCookie = false;
 };

@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #pragma once
-
+#if 1 // MMv1 Deprecation
 #include "CoreMinimal.h"
 #include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteError.h"
@@ -18,7 +18,6 @@ class Credentials;
 class Settings;
 namespace Api
 {
-
 /**
  * @brief SessionBrowser API to handle custom game session.
  */
@@ -419,6 +418,6 @@ private:
 typedef TSharedRef<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserRef;
 typedef TSharedPtr<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserPtr;
 typedef TWeakPtr<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserWPtr;
-
 } // Namespace Api
 } // Namespace AccelByte
+#endif 

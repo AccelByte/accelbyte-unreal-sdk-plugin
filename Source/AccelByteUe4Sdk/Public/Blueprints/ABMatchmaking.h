@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #pragma once
-
+#if 1 // MMv1 Deprecation
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteLobbyModels.h"
@@ -124,3 +124,4 @@ public:
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;
 };
+#endif

@@ -38,7 +38,7 @@ public:
 	using BaseCredentials::SetClientCredentials;
 
 	Credentials(FHttpRetryScheduler& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& IamServerUrl);
-	virtual ~Credentials() override;
+	virtual ~Credentials();
 	
 	/** @brief The user was just authed: At this point, Credential auth tokens are already set. */
 	FOnLoginSuccessDelegate& OnLoginSuccess();
@@ -49,43 +49,27 @@ public:
 	/** @brief Forgets post-auth info, but pre-auth (such as setting email) will remain. */
 	virtual void ForgetAll() override;
 	virtual void SetClientCredentials(const ESettingsEnvironment Environment) override;
-	void SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime);
+	virtual bool SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime) override;
 	void SetUserEmailAddress(const FString& EmailAddress);
 	void SetUserName(const FString& UserName); // DEPRECATED
 	void SetUserDisplayName(const FString& UserDisplayName);
-	virtual void PollRefreshToken(double CurrentTime) override;
-	virtual void ScheduleRefreshToken(double NextRefreshTime) override;
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
-	void SetErrorOAuth(const FErrorOAuthInfo& ErrorOAuthInfo);
 	void SetAccountUserData(const FAccountUserData& InAccountUserData);
 	void SetThridPartyPlatformTokenData(const FString& PlatformId, const FThirdPartyPlatformTokenData& ThirdPartyPlatformTokenData);
 	void ClearThridPartyPlatformTokenData();
 		
-	const FOauth2Token& GetAuthToken() const;
-	const FString& GetRefreshToken() const;
-	virtual const FString& GetAccessToken() const override;
-	virtual const FString& GetUserId() const override;
-	const FString& GetPlatformUserId() const;
-	const FString& GetSimultaneousPlatformId() const;
-	const FString& GetSimultaneousPlatformUserId() const;
-	FString GetSimultaneousPlatformUserIdByPlatformName(const FString& PlatformName) const;
-	const FString& GetUserDisplayName() const;
-	virtual const FString& GetNamespace() const override;
-	const FString& GetUserEmailAddress() const;
-	const FString& GetUserName() const; // DEPRECATED
-	const FString& GetUniqueDisplayName() const;
-	const FString& GetLinkingToken() const;
-	const FAccountUserData& GetAccountUserData() const;
+	FString GetUserDisplayName() const;
+	FString GetUserEmailAddress() const;
+	FString GetUserName() const; // DEPRECATED
+	FAccountUserData GetAccountUserData() const;
 	const TMap<FString, FThirdPartyPlatformTokenData>& GetThridPartyPlatformTokenData() const;
 
 	bool IsSessionValid() const;
 	bool IsComply() const;
 
 	virtual void Startup() override;
-	virtual void Shutdown() override;
 
-private:
-	FOauth2Token AuthToken;
+protected:
 	Api::Oauth2 Oauth;
 	
 	FString UserName; // DEPRECATED
@@ -106,6 +90,7 @@ private:
 	void OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr);
 	void OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPtr HttpWPtr);
 
+	virtual void SendRefreshToken() override;
 	void OnRefreshTokenSuccessful(FOauth2TokenV4 const& Token);
 	void OnRefreshTokenFailed(int32 ErrorCode
 		, FString const& ErrorMessage

@@ -460,6 +460,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMoveUserItemDataResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Move User Item Data")
 	FString SourceItemId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Inventory | Models | Move User Item Data")
+	FString Id{};
 };
 
 USTRUCT(BlueprintType)

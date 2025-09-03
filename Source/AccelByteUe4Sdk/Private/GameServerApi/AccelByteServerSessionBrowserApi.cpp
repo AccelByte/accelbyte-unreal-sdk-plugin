@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
-
+#if 1 // MMv1 Deprecation
 #include "GameServerApi/AccelByteServerSessionBrowserApi.h"
 
 #include "Core/AccelByteReport.h"
@@ -18,7 +18,10 @@ ServerSessionBrowser::ServerSessionBrowser(ServerCredentials const& InCredential
 	, FHttpRetryScheduler& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
-{}
+{
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+}
 
 ServerSessionBrowser::~ServerSessionBrowser()
 {}
@@ -135,7 +138,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::CreateGameSession(FAccelByteModelsSessi
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	EAccelByteSessionType SessionType = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteSessionType>(CreateSessionRequest.Session_type);
 	
 	if (SessionType == EAccelByteSessionType::NONE)
@@ -193,6 +197,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::UpdateGameSession(FString const& Sessio
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	if(UpdateSessionRequest.Game_current_player != 0)
 	{
 		FReport::LogDeprecated(FString(__FUNCTION__),
@@ -223,7 +229,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::RemoveGameSession(FString const& Sessio
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
@@ -297,7 +304,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::GetGameSessions(EAccelByteSessionType S
 	, uint32 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	if (SessionType == EAccelByteSessionType::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Wrong session type"));
@@ -334,7 +342,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::GetGameSessionBySessionId(FString const
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
 		, *ServerCredentialsRef->GetClientNamespace()
@@ -350,7 +359,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::RegisterPlayer(FString const& SessionId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
@@ -375,7 +385,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::UnregisterPlayer(FString const& Session
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
@@ -398,7 +409,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::GetRecentPlayer(FString const& UserId
 	, uint32 Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
@@ -430,7 +442,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::JoinSession(FString const& SessionId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
@@ -453,3 +466,5 @@ FAccelByteTaskWPtr ServerSessionBrowser::JoinSession(FString const& SessionId
 
 } // Namespace GameServerApi
 } // Namespace AccelByte
+
+#endif

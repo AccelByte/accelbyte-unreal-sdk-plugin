@@ -2,6 +2,7 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
+#if 1 // MMv1 Deprecation
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "Core/AccelByteReport.h"
 
@@ -20,6 +21,8 @@ ServerMatchmaking::ServerMatchmaking(ServerCredentials const& InCredentialsRef
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 	, bStatusPollingActive{false}
 {
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	StatusPollingDelegate = FTickerDelegate::CreateRaw(this, &ServerMatchmaking::StatusPollingTick);
 	OnStatusPollingResponse.BindLambda(
 		[this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
@@ -43,7 +46,6 @@ FAccelByteTaskWPtr ServerMatchmaking::QuerySessionStatus(FString const& MatchId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/%s/status")
 		, *ServerSettingsRef.MatchmakingServerUrl
 		, *ServerCredentialsRef->GetClientNamespace()
@@ -57,7 +59,8 @@ FAccelByteTaskWPtr ServerMatchmaking::EnqueueJoinableSession(FAccelByteModelsMat
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions")
 		, *ServerSettingsRef.MatchmakingServerUrl
 		, *ServerCredentialsRef->GetClientNamespace());
@@ -70,7 +73,8 @@ FAccelByteTaskWPtr ServerMatchmaking::DequeueJoinableSession(FString const& Matc
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/dequeue")
 		, *ServerSettingsRef.MatchmakingServerUrl
 		, *ServerCredentialsRef->GetClientNamespace());
@@ -88,7 +92,8 @@ FAccelByteTaskWPtr ServerMatchmaking::AddUserToSession(FString const& ChannelNam
 	, FString const& PartyId)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	const FAccelByteModelsAddUserIntoSessionRequest Body = FAccelByteModelsAddUserIntoSessionRequest
 	{
 		UserId,
@@ -112,7 +117,8 @@ FAccelByteTaskWPtr ServerMatchmaking::RemoveUserFromSession(FString const& Chann
 	, FAccelByteModelsMatchmakingResult const& Body)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
@@ -135,7 +141,8 @@ FAccelByteTaskWPtr ServerMatchmaking::RebalanceMatchmakingBasedOnMMR(FString con
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/rebalance")
 		, *ServerSettingsRef.MatchmakingServerUrl
 		, *ServerCredentialsRef->GetClientNamespace());
@@ -150,6 +157,8 @@ void ServerMatchmaking::ActivateSessionStatusPolling(FString const& MatchId
 	, FErrorHandler const& OnError
 	, uint32 IntervalSec)
 {
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	if (!bStatusPollingActive)
 	{
 		StatusPollingMatchId = MatchId;
@@ -162,6 +171,8 @@ void ServerMatchmaking::ActivateSessionStatusPolling(FString const& MatchId
 
 void ServerMatchmaking::DeactivateStatusPolling()
 {
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	if (UObjectInitialized() && (bStatusPollingActive || StatusPollingDelegateHandle.IsValid()))
 	{
 		FTickerAlias::GetCoreTicker().RemoveTicker(StatusPollingDelegateHandle);
@@ -190,3 +201,4 @@ ServerMatchmaking::~ServerMatchmaking()
 
 } // Namespace Api
 } // Namespace AccelByte
+#endif

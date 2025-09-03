@@ -222,6 +222,16 @@ public:
 	explicit FLobbySequenceNumber(const FString& Other) : FLobbySequence(Other) {}
 };
 
+// Lobby Disconnect Notice
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDisconnectNotif
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | General | DisconnectNotif")
+	FString Message{};
+};
+
 // Emulate namespace with long class names
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyType
@@ -895,6 +905,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletNotificationPayload
 	FString Payload{};
 };
 
+#if 1 // MMv1 Deprecation
 // ------------------------------------------------------------------------------------------------
 // Matchmaking
 // ------------------------------------------------------------------------------------------------
@@ -1069,16 +1080,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRematchmakingNotice
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Lobby")
 	int32 BanDuration{};
 };
-
-// Lobby Disconnect Notice
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsDisconnectNotif
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Lobby | Models | General | DisconnectNotif")
-	FString Message{};
-};
+#endif
 
 // ------------------------------------------------------------------------------------------------
 // Friends

@@ -1,7 +1,7 @@
 // Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
-
+#if 1 // MMv1 Deprecation
 #include "Blueprints/ABServerMatchmaking.h"
 
 using namespace AccelByte;
@@ -159,3 +159,4 @@ void UABServerMatchmaking::DeactivateStatusPolling()
 {
 	ApiClientPtr->ServerMatchmaking.DeactivateStatusPolling();
 }
+#endif

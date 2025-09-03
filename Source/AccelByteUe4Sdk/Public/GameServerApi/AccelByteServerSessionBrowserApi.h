@@ -4,7 +4,7 @@
 
 
 #pragma once
-
+#if 1 // MMv1 Deprecation
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteSessionBrowserModels.h"
@@ -379,3 +379,4 @@ private:
 
 }
 }
+#endif

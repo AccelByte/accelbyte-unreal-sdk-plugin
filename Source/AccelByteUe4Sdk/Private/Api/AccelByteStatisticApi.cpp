@@ -389,10 +389,23 @@ FAccelByteTaskWPtr Statistic::GetUserStatCycleItems(FString const& CycleId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	return GetUserStatCycleItems(CycleId, *CredentialsRef->GetUserId(), OnSuccess, OnError, Limit, Offset, StatCodes);
+}
+
+FAccelByteTaskWPtr Statistic::GetUserStatCycleItems(FString const& CycleId
+	, FString const& TargetUserId
+	, THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 Limit
+	, int32 Offset
+	, TArray<FString> const& StatCodes)
+{
+	FReport::Log(FString(__FUNCTION__));
+
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statCycles/%s/statCycleitems")
 		, *SettingsRef.StatisticServerUrl
 		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
+		, *TargetUserId
 		, *CycleId);
 
 	TMultiMap<FString, FString> QueryParams {

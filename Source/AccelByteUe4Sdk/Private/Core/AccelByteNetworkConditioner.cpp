@@ -94,7 +94,7 @@ namespace AccelByte
 
 	bool FAccelByteNetworkConditioner::CalculateFail(const FString& MessageType)
 	{
-#if !UE_EDITOR && !UE_BUILD_DEVELOPMENT
+#if !UE_EDITOR && (!UE_BUILD_DEVELOPMENT && !UE_BUILD_DEBUG)
 		return false;
 #else
 		if(!bEnabled)

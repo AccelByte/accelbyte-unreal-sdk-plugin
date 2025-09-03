@@ -172,6 +172,7 @@ public:
 
 //Request-Response
 public: 
+#if 1 // MMv1 Deprecation
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
 	void PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError);
 
@@ -207,6 +208,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
 	void PartyPromoteLeader(FPartyPromoteLeaderRequest const& Request, FDPartyPromoteLeaderResponse OnResponse, FDErrorHandler OnError);
+#endif
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
 	void SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FDHandler& OnSuccess, FDErrorHandler OnError);
@@ -223,9 +225,12 @@ public:
 
 //Notification
 public:
+#if 1 // MMv1 Deprecation
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif);
-
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
+	void SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif);
 
@@ -258,9 +263,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyInvite(FDPartyInviteNotif OnNotif);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif);
-
 	/**
 	 * @brief Set a trigger function when a party member reconnecting to the lobby
 	 * @param OnNotif return models called FAccelByteModelsPartyMemberConnectionNotice
@@ -274,6 +276,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
 	void SetOnPartyMemberDisconnect(FDPartyMemberDisconnectNotif OnNotif);
+#endif
 
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;

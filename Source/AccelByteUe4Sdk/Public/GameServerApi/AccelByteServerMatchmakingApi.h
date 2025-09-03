@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #pragma once
-
+#if 1 // MMv1 Deprecation
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -158,3 +158,4 @@ private:
 
 } // Namespace Api
 } // Namespace AccelByte
+#endif

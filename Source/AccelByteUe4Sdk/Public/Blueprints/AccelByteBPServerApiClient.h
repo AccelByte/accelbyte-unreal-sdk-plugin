@@ -51,11 +51,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerLobby* ServerLobby;
 
+#if 1 // MMv1 Deprecation
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerMatchmaking* ServerMatchmaking;
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerSessionBrowser* ServerSessionBrowser;
+#endif
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerAchievement* ServerAchievement;

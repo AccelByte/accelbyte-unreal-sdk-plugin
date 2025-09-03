@@ -96,6 +96,14 @@ enum class EAccelByteV2SessionPlatform : uint8
 	PS4,
 	PS5
 };
+
+UENUM(BlueprintType)
+enum class EAccelByteV2QueryGameSessionAvailability : uint8
+{
+	AvailableSessionOnly = 0,
+	FullSessionOnly,
+	AllSession // Full and available session
+};
 #pragma endregion
 
 #pragma region Game Session Struct Models
@@ -196,6 +204,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2BaseSession
 		EAccelByteV2SessionType SessionType{};
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | BaseSession")
 		FAccelbyteModelsV2SessionStorage Storage{};
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Session | Models | BaseSession")
+		bool IsFull{ false };
 	
 	FAccelByteModelsV2BaseSession(EAccelByteV2SessionType Type) : SessionType(Type) {}
 	FAccelByteModelsV2BaseSession() : SessionType(EAccelByteV2SessionType::Unknown) {}
@@ -710,6 +720,14 @@ struct FAccelByteModelsV2GameSessionUserRejectedEvent
 		TArray<FAccelByteModelsV2SessionUser> Members{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionUserRejectedEvent")
 		FString RejectedID{};
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsV2GameSessionQueryFilter
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionQueryFilter")
+	EAccelByteV2QueryGameSessionAvailability GameSessionAvailability{ EAccelByteV2QueryGameSessionAvailability::AvailableSessionOnly };
 };
 
 USTRUCT(BlueprintType)

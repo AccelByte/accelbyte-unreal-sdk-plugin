@@ -113,8 +113,6 @@ UABApiClient::UABApiClient()
 	Credentials = NewObject<UABCredentials>();
 	User = NewObject<UABUser>();
 	Lobby = NewObject<UABLobby>();
-	Party = NewObject<UABParty>();
-	Matchmaking = NewObject<UABMatchmaking>();
 	Friends = NewObject<UABFriends>();
 	Catalog = NewObject<UABCatalog>();
 	Order = NewObject<UABOrder>();
@@ -129,7 +127,6 @@ UABApiClient::UABApiClient()
 	Statistic = NewObject<UABStatistic>();
 	Leaderboard = NewObject<UABLeaderboard>();
 	Achievement = NewObject<UABAchievement>();
-	SessionBrowser = NewObject<UABSessionBrowser>();
 	UGC = NewObject<UABUGC>();
 	Presence = NewObject<UABPresence>();
 	Block = NewObject<UABBlock>();
@@ -137,6 +134,11 @@ UABApiClient::UABApiClient()
 	SessionAttribute = NewObject<UABSessionAttribute>();
 	Signaling = NewObject<UABSignaling>();
 	Group = NewObject<UABGroup>();
+#if 1 // MMv1 Deprecation
+	Matchmaking = NewObject<UABMatchmaking>();
+	Party = NewObject<UABParty>();
+	SessionBrowser = NewObject<UABSessionBrowser>();
+#endif
 }
 
 void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
@@ -145,8 +147,6 @@ void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	Credentials->SetApiClient(ApiClientPtr);
 	User->SetApiClient(ApiClientPtr);
 	Lobby->SetApiClient(ApiClientPtr);
-	Party->SetApiClient(ApiClientPtr);
-	Matchmaking->SetApiClient(ApiClientPtr);
 	Friends->SetApiClient(ApiClientPtr);
 	Catalog->SetApiClient(ApiClientPtr);
 	Order->SetApiClient(ApiClientPtr);
@@ -161,7 +161,6 @@ void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	Statistic->SetApiClient(ApiClientPtr);
 	Leaderboard->SetApiClient(ApiClientPtr);
 	Achievement->SetApiClient(ApiClientPtr);
-	SessionBrowser->SetApiClient(ApiClientPtr);
 	UGC->SetApiClient(ApiClientPtr);
 	Presence->SetApiClient(ApiClientPtr);
 	Block->SetApiClient(ApiClientPtr);
@@ -169,4 +168,9 @@ void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	SessionAttribute->SetApiClient(ApiClientPtr);
 	Signaling->SetApiClient(ApiClientPtr);
 	Group->SetApiClient(ApiClientPtr);
+#if 1 // MMv1 Deprecation
+	Matchmaking->SetApiClient(ApiClientPtr);
+	Party->SetApiClient(ApiClientPtr);
+	SessionBrowser->SetApiClient(ApiClientPtr);
+#endif
 }

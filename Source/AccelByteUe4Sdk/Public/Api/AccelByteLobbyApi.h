@@ -326,46 +326,6 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FUserUnbannedNotification, FAccelByteModelsUserBannedNotification const&); //Passive
 
-	// Matchmaking
-	/**
-	 * @brief delegate for handling matchmaking response
-	 */
-	DECLARE_DELEGATE_OneParam(FMatchmakingResponse, FAccelByteModelsMatchmakingResponse const&);
-
-	/**
-	 * @brief delegate for handling ready consent response
-	 */
-	DECLARE_DELEGATE_OneParam(FReadyConsentResponse, FAccelByteModelsReadyConsentRequest const&);
-
-	/**
-	 * @brief delegate for handling reject consent response
-	 */
-	DECLARE_DELEGATE_OneParam(FRejectConsentResponse, FAccelByteModelsRejectConsentRequest const&);
-	
-	/**
-	 * @brief delegate for handling matchmaking notification
-	 */
-	DECLARE_DELEGATE_OneParam(FMatchmakingNotif, FAccelByteModelsMatchmakingNotice const&);
-
-	/*
-	 * @brief delegate for handling ready consent notification
-	 */
-	DECLARE_DELEGATE_OneParam(FReadyConsentNotif, FAccelByteModelsReadyConsentNotice const&);
-
-	/**
-	 * @brief delegate for handling reject consent notification
-	 */
-	DECLARE_DELEGATE_OneParam(FRejectConsentNotif, FAccelByteModelsRejectConsentNotice const&);
-
-	/**
-	 * @brief delegate for handling rematchmaking notification
-	 */
-	DECLARE_DELEGATE_OneParam(FRematchmakingNotif, FAccelByteModelsRematchmakingNotice const&);
-
-	/**
-	 * @brief delegate for handling DS notification
-	 */
-	DECLARE_DELEGATE_OneParam(FDsNotif, FAccelByteModelsDsNotice const&);
 
 	// Friends
 	/**
@@ -732,6 +692,7 @@ public:
 	 */
 	FString SendChannelMessage(FString const& Message);
 
+#if 1 // MMv1 Deprecation
 	//------------------------
 	// Party
 	//------------------------
@@ -759,14 +720,6 @@ public:
 	 * @param UserId The target user ID to be invited.
 	 */
 	FString SendInviteToPartyRequest(FString const& UserId);
-
-	/**
-	 * @brief Set presence status on lobby service
-	 *
-	 * @param Availability Presence state that you want to use. State is EAvailability type
-	 * @param Activity User's custom activity. It will be escaped and unescaped automatically, can handle JSON.
-	 */
-	FString SendSetPresenceStatus(EAvailability Availability, FString const& Activity);
 
 	/**
 	 * @brief Accept a party invitation.
@@ -817,16 +770,6 @@ public:
 	FString SendPartyJoinViaCodeRequest(FString const& partyCode);
 
 	/**
-	 * @brief (Obsolete) the function name is misleading, please use SendGetOnlineFriendPresenceRequest().
-	 */
-	FString SendGetOnlineUsersRequest();
-
-	/**
-	 * @brief Get list of online friends in the lobby server.
-	 */
-	FString SendGetOnlineFriendPresenceRequest();
-
-	/**
 	 * @brief Promote party member to party leader.
 	 * 
 	 * @param UserId The target user ID to be promoted.
@@ -840,6 +783,7 @@ public:
 	 * @param Payload The Payload of the request. Can be JSON string
 	 */
 	FString SendNotificationToPartyMember(FString const& Topic, FString const& Payload);
+#endif
 
 	/**
 	 * @brief Set the party's member limit.
@@ -863,145 +807,6 @@ public:
 	 * @brief Get all pending notification(s) that is sent to user when user is not connected to lobby. Please call this function after user connected to lobby.
 	 */
 	void GetAllAsyncNotification();
-
-	// Matchmaking
-	/**
-	 * @brief start the matchmaking
-	 *
-	 * @param GameMode The mode that party member want to play.
-	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
-	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
-	 * @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
-	 * @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
-	 * @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
-	 * @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
-	 */
-	FString SendStartMatchmaking(FString const& GameMode
-		, FString const& ServerName
-		, FString const& ClientVersion = TEXT("")
-		, TArray<TPair<FString, float>> const& Latencies = {}
-		, TMap<FString, FString> const& PartyAttributes = {}
-		, TArray<FString> const& TempPartyUserIds = {}
-		, TArray<FString> const& ExtraAttributes = {});
-
-	/**
-	 * @brief start the matchmaking
-	 *
-	 * @param GameMode The mode that party member want to play.
-	 * @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
-	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
-	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
-	 * @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
-	 * @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
-	 * @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
-	 */
-	FString SendStartMatchmaking(FString const& GameMode
-		, TArray<FString> const& TempPartyUserIds
-		, FString const& ServerName = TEXT("")
-		, FString const& ClientVersion = TEXT("")
-		, TArray<TPair<FString, float>> const& Latencies = {}
-		, TMap<FString, FString> const& PartyAttributes = {}
-		, TArray<FString> const& ExtraAttributes = {});
-
-	/**
-	 * @brief start the matchmaking
-	 *
-	 * @param GameMode The mode that party member want to play.
-	 * @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
-	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
-	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
-	 * @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
-	 * @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
-	 * @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
-	 */
-	FString SendStartMatchmaking(FString const& GameMode
-		, TMap<FString, FString> const& PartyAttributes
-		, FString const& ServerName = TEXT("")
-		, FString const& ClientVersion = TEXT("")
-		, TArray<TPair<FString, float>> const& Latencies = {}
-		, TArray<FString> const& TempPartyUserIds = {}
-		, TArray<FString> const& ExtraAttributes = {});
-
-	/**
-	 * @brief start the matchmaking
-	 *
-	 * @param GameMode The mode that party member want to play.
-	 * @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
-	 * @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
-	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
-	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
-	 * @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
-	 * @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
-	 */
-	FString SendStartMatchmaking(FString const& GameMode
-		, TMap<FString, FString> const& PartyAttributes
-		, TArray<FString> const& TempPartyUserIds
-		, FString const& ServerName = TEXT("")
-		, FString const& ClientVersion = TEXT("")
-		, TArray<TPair<FString, float>> const& Latencies = {}
-		, TArray<FString> const& ExtraAttributes = {});
-
-	/**
-	 * @brief Serialize the Qos Latencies obj into a stringified json object.
-	 * - Multiple regions are possible (hence the TArray).
-	 * @param SelectedLatencies Array of latencies pair, key is region name and value is latency in ms.
-	 * @return 
-	 */
-	static FString GetServerLatenciesJsonStr(TArray<TPair<FString, float>> const& SelectedLatencies);
-
-	/**
-	 * @brief On success, we poll Latencies (if Settings allows us to).
-	 */
-	void SetOnMatchmakingSuccessInitQosScheduler();
-	
-	/**
-	 * @brief start the matchmaking
-	 *
-	 * @param GameMode The mode that party member want to play.
-	 * @param OptionalParams Optional parameters to be considered while matchmaking.
-	 */
-	FString SendStartMatchmaking(FString const& GameMode
-		, FMatchmakingOptionalParams const& OptionalParams = {});
-
-	/**
-	 * @brief cancel the currently running matchmaking process
-	 *
-	 * @param GameMode The mode that party member want to cancel.
-	 * @param IsTempParty Is canceling matchmaking that was started using temporary party.
-	 */
-	FString SendCancelMatchmaking(FString const& GameMode
-		, bool IsTempParty = false);
-
-	/**
-	 * @brief send ready consent request
-	 *
-	 * @param MatchId The id of a match user ready to play.
-	 */
-	FString SendReadyConsentRequest(FString const& MatchId);
-
-	/**
-	 * @brief send reject consent request
-	 *
-	 * @param MatchId The id of a match user ready to play.
-	 */
-	FString SendRejectConsentRequest(FString const& MatchId);
-
-	/**
-	 * @brief Request Dedicated custom server
-	 *
-	 * @param SessionID Session ID of the game session.
-	 * @param GameMode The mode that party member want to play.
-	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
-	 * @param Region The region where the party member want to play.
-	 * @param Deployment The deployment mode where the party member requested
-	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
-	 */
-	FString RequestDS(FString const& SessionID
-		, FString const& GameMode
-		, FString const& ClientVersion
-		, FString const& Region
-		, FString const& Deployment
-		, FString const& ServerName = TEXT(""));
 
 	// Friends
 	/**
@@ -1335,7 +1140,7 @@ public:
 	 * @brief Unbind all delegates set previously.
 	 */
 	void UnbindEvent();
-
+#if 1 // MMv1 Deprecation
 	/**
 	 * @brief Unbind all party notif delegates set previously.
 	 */
@@ -1345,7 +1150,7 @@ public:
 	 * @brief Unbind all party response delegates set previously.
 	 */
 	void UnbindPartyResponseEvents();
-
+#endif
 	/**
 	 * @brief Unbind all friend notif delegates set previously.
 	 */
@@ -1355,16 +1160,6 @@ public:
 	 * @brief Unbind all friend response delegates set previously.
 	 */
 	void UnbindFriendResponseEvents();
-
-	/**
-	 * @brief Unbind all matchmaking notif delegates set previously.
-	 */
-	void UnbindMatchmakingNotifEvents();
-
-	/**
-	 * @brief Unbind all matchmaking response delegates set previously.
-	 */
-	void UnbindMatchmakingResponseEvents();
 
 	/**
 	 * @brief Unbind all chat notif delegates set previously.
@@ -1889,7 +1684,7 @@ public:
 	{
 		ParsingError = OnParsingError;
 	}
-
+#if 1 // MMv1 Deprecation
 	// Party
 	/**
 	 * @brief set info party response
@@ -2078,7 +1873,7 @@ public:
 		PartySendNotifResponse = OnPartySendNotifResponse;
 		OnPartySendNotifError = OnError;
 	}
-
+#endif
 	// Chat
 	/**
 	 * @brief set private message delegate
@@ -2144,6 +1939,14 @@ public:
 
 	// Presence
 	/**
+	 * @brief Set presence status on lobby service
+	 *
+	 * @param Availability Presence state that you want to use. State is EAvailability type
+	 * @param Activity User's custom activity. It will be escaped and unescaped automatically, can handle JSON.
+	 */
+	FString SendSetPresenceStatus(EAvailability Availability, FString const& Activity);
+
+	/**
 	 * @brief set user presence response
 	 *
 	 * @param OnSetUserPresenceResponse set delegate .
@@ -2182,123 +1985,17 @@ public:
 		OnGetAllFriendsStatusError = OnError;
 	}
 
+	/**
+	 * @brief (Obsolete) the function name is misleading, please use SendGetOnlineFriendPresenceRequest().
+	 */
+	FString SendGetOnlineUsersRequest();
+
+	/**
+	 * @brief Get list of online friends in the lobby server.
+	 */
+	FString SendGetOnlineFriendPresenceRequest();
+
 	// Notification
-
-	// Matchmaking
-	/**
-	 * @brief set start matchmaking response
-	 *
-	 * @param OnMatchmakingStart set delegate .
-	 * @param OnError Delegate that will be called when operation failed.
-	 */
-	void SetStartMatchmakingResponseDelegate(FMatchmakingResponse const& OnMatchmakingStart
-		, FErrorHandler const& OnError = nullptr)
-	{
-		MatchmakingStartResponse = OnMatchmakingStart;
-		OnMatchmakingStartError = OnError;
-	}
-
-	/**
-	 * @brief set cancel matchmaking notification
-	 *
-	 * @param OnMatchmakingCancel set delegate .
-	 * @param OnError Delegate that will be called when operation failed.
-	 */
-	void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse const& OnMatchmakingCancel
-		, FErrorHandler const& OnError = nullptr)
-	{
-		MatchmakingCancelResponse = OnMatchmakingCancel;
-		OnMatchmakingCancelError = OnError;
-	}
-
-	/**
-	 * @brief set ready consent response notification
-	 *
-	 * @param OnReadyConsentResponse set delegate .
-	 * @param OnError Delegate that will be called when operation failed.
-	 */
-	void SetReadyConsentResponseDelegate(FReadyConsentResponse const& OnReadyConsentResponse
-		, FErrorHandler const& OnError = nullptr)
-	{
-		ReadyConsentResponse = OnReadyConsentResponse;
-		OnReadyConsentError = OnError;
-	}
-
-	/**
-	 * @brief set reject consent response notification
-	 *
-	 * @param OnRejectConsentResponse set delegate .
-	 * @param OnError Delegate that will be called when operation failed.
-	 */
-	void SetRejectConsentResponseDelegate(FRejectConsentResponse const& OnRejectConsentResponse
-		, FErrorHandler const& OnError = nullptr)
-	{
-		RejectConsentResponse = OnRejectConsentResponse;
-		OnRejectConsentError = OnError;
-	}
-
-	/**
-	 * @brief set matchmaking notification
-	 *
-	 * @param OnMatchmakingNotification set delegate .
-	 */
-	void SetMatchmakingNotifDelegate(FMatchmakingNotif const& OnMatchmakingNotification)
-	{
-		MatchmakingNotif = OnMatchmakingNotification;
-	}
-
-	/**
-	 * @brief set ready consent notification
-	 *
-	 * @param OnReadyConsentNotification set delegate .
-	 */
-	void SetReadyConsentNotifDelegate(FReadyConsentNotif const& OnReadyConsentNotification)
-	{
-		ReadyConsentNotif = OnReadyConsentNotification;
-	}
-
-	/**
-	 * @brief set reject consent notification
-	 *
-	 * @param OnRejectConsentNotification set delegate .
-	 */
-	void SetRejectConsentNotifDelegate(FRejectConsentNotif const& OnRejectConsentNotification)
-	{
-		RejectConsentNotif = OnRejectConsentNotification;
-	};
-
-	/**
-	 * @brief set rematchmaking notification
-	 *
-	 * @param OnRematchmakingNotification set delegate .
-	 */
-	void SetRematchmakingNotifDelegate(FRematchmakingNotif const& OnRematchmakingNotification)
-	{
-		RematchmakingNotif = OnRematchmakingNotification;
-	}
-
-	/**
-	* @brief set ready consent notification
-	*
-	* @param OnDsNotification set delegate.
-	*/
-	void SetDsNotifDelegate(FDsNotif const& OnDsNotification)
-	{
-		DsNotif = OnDsNotification;
-	}
-
-	/**
-	 * @brief set create DS response delegate
-	 *
-	 * @param OnCreateDSResponse Delegate to set.
-	 * @param OnError Delegate that will be called when operation failed.
-	 * */
-	void SetCreateDSDelegate(FBaseResponse const& OnCreateDSResponse
-		, FErrorHandler const& OnError = nullptr)
-	{
-		CreateDSResponse = OnCreateDSResponse;
-		OnCreateDSError = OnError;
-	}
 
 	// Friends
 	/**
@@ -2964,6 +2661,7 @@ private:
 #pragma endregion
 
 #pragma region Message Parsing
+
 	void HandleMessageResponse(FString const& ReceivedMessageType
 		, FString const& ParsedJsonString
 		, TSharedPtr<FJsonObject> const& ParsedJsonObj
@@ -2976,7 +2674,7 @@ private:
 	void SetUnbanSchedule(FAccelByteModelsUserBannedNotification const& Result);
 
 	void RemoveUnbanSchedule(FAccelByteModelsUserBannedNotification const& Result);
-	
+
 	void HandleMessageNotif(FString const& ReceivedMessageType
 		, FString const& ParsedJsonString
 		, TSharedPtr<FJsonObject> const& ParsedJsonObj
@@ -3000,6 +2698,7 @@ private:
 	
 	static TMap<FString, Response> ResponseStringEnumMap;
 	static TMap<FString, Notif> NotifStringEnumMap;
+
 #pragma endregion
 
 	static TMap<FString, FString> LobbyErrorMessages;
@@ -3071,15 +2770,6 @@ private:
 	TMap<FString, FSetUserPresenceResponse> MessageIdSetUserPresenceResponseMap;
 	TMap<FString, FGetAllFriendsStatusResponse> MessageIdGetAllFriendsStatusResponseMap;
 
-	// Matchmaking
-	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingStartResponseMap;
-	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingCancelResponseMap;
-	TMap<FString, FReadyConsentResponse> MessageIdReadyConsentResponseMap;
-	TMap<FString, FRejectConsentResponse> MessageIdRejectConsentResponseMap;
-
-	// Custom Game
-	TMap<FString, FBaseResponse> MessageIdCreateDSResponseMap;
-
 	// Friends
 	TMap<FString, FRequestFriendsResponse> MessageIdRequestFriendsResponseMap;
 	TMap<FString, FRequestFriendsResponse> MessageIdRequestFriendsByPublicIdResponseMap;
@@ -3111,6 +2801,7 @@ private:
 #pragma endregion
 
 #pragma region Response/Notif Delegates
+#if 1 // MMv1 Deprecation
 	// Party 
 	FPartyInfoResponse PartyInfoResponse;
 	FPartyCreateResponse PartyCreateResponse;
@@ -3136,7 +2827,7 @@ private:
 	FPartyPromoteLeaderResponse PartyPromoteLeaderResponse;
 	FPartySendNotifResponse PartySendNotifResponse;
 	FPartyNotif PartyNotif;
-
+#endif
 	// Chat
 	FPersonalChatResponse PersonalChatResponse;
 	FPersonalChatNotif PersonalChatNotif;
@@ -3191,17 +2882,6 @@ private:
 	FV2MatchmakingExpiredNotif V2MatchmakingExpiredNotif;
 	FV2MatchmakingCanceledNotif V2MatchmakingCanceledNotif;
 	FV2NativeSessionSyncNotif V2NativeSessionSyncNotif;
-
-	// Matchmaking
-	FMatchmakingResponse MatchmakingStartResponse;
-	FMatchmakingResponse MatchmakingCancelResponse;
-	FReadyConsentResponse ReadyConsentResponse;
-	FRejectConsentResponse RejectConsentResponse;
-	FMatchmakingNotif MatchmakingNotif;
-	FReadyConsentNotif ReadyConsentNotif;
-	FRejectConsentNotif RejectConsentNotif;
-	FRematchmakingNotif RematchmakingNotif;
-	FDsNotif DsNotif;
 
 	// Custom Game
 	FBaseResponse CreateDSResponse;
@@ -3273,6 +2953,7 @@ private:
 	FAccelByteTaskWPtr WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> const& DataWrapper);
 
 	// Error Handler
+#if 1 // MMv1 Deprecation
 	FErrorHandler OnPartyInfoError;
 	FErrorHandler OnPartyCreateError;
 	FErrorHandler OnPartyLeaveError;
@@ -3286,16 +2967,13 @@ private:
 	FErrorHandler OnPartyJoinViaCodeError;
 	FErrorHandler OnPartyPromoteLeaderError;
 	FErrorHandler OnPartySendNotifError;
+#endif
 	FErrorHandler OnPersonalChatError;
 	FErrorHandler OnPartyChatError;
 	FErrorHandler OnJoinDefaultChannelChatError;
 	FErrorHandler OnChannelChatError;
 	FErrorHandler OnSetUserPresenceError;
 	FErrorHandler OnGetAllFriendsStatusError;
-	FErrorHandler OnMatchmakingStartError;
-	FErrorHandler OnMatchmakingCancelError;
-	FErrorHandler OnReadyConsentError;
-	FErrorHandler OnRejectConsentError;
 	FErrorHandler OnRequestFriendsError;
 	FErrorHandler OnRequestFriendsByPublicIdError;
 	FErrorHandler OnUnfriendError;
@@ -3314,8 +2992,8 @@ private:
 	FErrorHandler OnGetSessionAttributeError;
 	FErrorHandler OnGetAllSessionAttributeError;
 	FErrorHandler OnRefreshTokenError;
-	FErrorHandler OnCreateDSError;
 	FErrorHandler OnChangeUserRegionError;
+
 
 #pragma region Messaging System
 private:
@@ -3337,6 +3015,367 @@ private:
 	FDelegateHandle LobbyLoginSuccessDelegateHandle{};
 
 	void OnLoginSuccess(const FOauth2Token& AuthToken);
+
+#if 1 // MMv1 Deprecation
+// MATCHMAKING V1 DEPRECATION START
+public:
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	// Matchmaking
+	/**
+	 * @brief delegate for handling matchmaking response
+	 */
+	DECLARE_DELEGATE_OneParam(FMatchmakingResponse, FAccelByteModelsMatchmakingResponse const&);
+
+	/**
+	 * @brief delegate for handling ready consent response
+	 */
+	DECLARE_DELEGATE_OneParam(FReadyConsentResponse, FAccelByteModelsReadyConsentRequest const&);
+
+	/**
+	 * @brief delegate for handling reject consent response
+	 */
+	DECLARE_DELEGATE_OneParam(FRejectConsentResponse, FAccelByteModelsRejectConsentRequest const&);
+	
+	/**
+	 * @brief delegate for handling matchmaking notification
+	 */
+	DECLARE_DELEGATE_OneParam(FMatchmakingNotif, FAccelByteModelsMatchmakingNotice const&);
+
+	/*
+	 * @brief delegate for handling ready consent notification
+	 */
+	DECLARE_DELEGATE_OneParam(FReadyConsentNotif, FAccelByteModelsReadyConsentNotice const&);
+
+	/**
+	 * @brief delegate for handling reject consent notification
+	 */
+	DECLARE_DELEGATE_OneParam(FRejectConsentNotif, FAccelByteModelsRejectConsentNotice const&);
+
+	/**
+	 * @brief delegate for handling rematchmaking notification
+	 */
+	DECLARE_DELEGATE_OneParam(FRematchmakingNotif, FAccelByteModelsRematchmakingNotice const&);
+
+	/**
+	 * @brief delegate for handling DS notification
+	 */
+	DECLARE_DELEGATE_OneParam(FDsNotif, FAccelByteModelsDsNotice const&);
+
+public:
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	// Matchmaking
+	/**
+	 * @brief start the matchmaking
+	 *
+	 * @param GameMode The mode that party member want to play.
+	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
+	 * @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	 * @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	 * @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	 * @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
+	 */
+	FString SendStartMatchmaking(FString const& GameMode
+		, FString const& ServerName
+		, FString const& ClientVersion = TEXT("")
+		, TArray<TPair<FString, float>> const& Latencies = {}
+		, TMap<FString, FString> const& PartyAttributes = {}
+		, TArray<FString> const& TempPartyUserIds = {}
+		, TArray<FString> const& ExtraAttributes = {});
+
+	/**
+	 * @brief start the matchmaking
+	 *
+	 * @param GameMode The mode that party member want to play.
+	 * @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
+	 * @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	 * @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	 * @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
+	 */
+	FString SendStartMatchmaking(FString const& GameMode
+		, TArray<FString> const& TempPartyUserIds
+		, FString const& ServerName = TEXT("")
+		, FString const& ClientVersion = TEXT("")
+		, TArray<TPair<FString, float>> const& Latencies = {}
+		, TMap<FString, FString> const& PartyAttributes = {}
+		, TArray<FString> const& ExtraAttributes = {});
+
+	/**
+	 * @brief start the matchmaking
+	 *
+	 * @param GameMode The mode that party member want to play.
+	 * @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
+	 * @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	 * @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	 * @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
+	 */
+	FString SendStartMatchmaking(FString const& GameMode
+		, TMap<FString, FString> const& PartyAttributes
+		, FString const& ServerName = TEXT("")
+		, FString const& ClientVersion = TEXT("")
+		, TArray<TPair<FString, float>> const& Latencies = {}
+		, TArray<FString> const& TempPartyUserIds = {}
+		, TArray<FString> const& ExtraAttributes = {});
+
+	/**
+	 * @brief start the matchmaking
+	 *
+	 * @param GameMode The mode that party member want to play.
+	 * @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	 * @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
+	 * @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	 * @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
+	 */
+	FString SendStartMatchmaking(FString const& GameMode
+		, TMap<FString, FString> const& PartyAttributes
+		, TArray<FString> const& TempPartyUserIds
+		, FString const& ServerName = TEXT("")
+		, FString const& ClientVersion = TEXT("")
+		, TArray<TPair<FString, float>> const& Latencies = {}
+		, TArray<FString> const& ExtraAttributes = {});
+
+	/**
+	 * @brief Serialize the Qos Latencies obj into a stringified json object.
+	 * - Multiple regions are possible (hence the TArray).
+	 * @param SelectedLatencies Array of latencies pair, key is region name and value is latency in ms.
+	 * @return 
+	 */
+	static FString GetServerLatenciesJsonStr(TArray<TPair<FString, float>> const& SelectedLatencies);
+
+	/**
+	 * @brief On success, we poll Latencies (if Settings allows us to).
+	 */
+	void SetOnMatchmakingSuccessInitQosScheduler();
+	
+	/**
+	 * @brief start the matchmaking
+	 *
+	 * @param GameMode The mode that party member want to play.
+	 * @param OptionalParams Optional parameters to be considered while matchmaking.
+	 */
+	FString SendStartMatchmaking(FString const& GameMode
+		, FMatchmakingOptionalParams const& OptionalParams = {});
+
+	/**
+	 * @brief cancel the currently running matchmaking process
+	 *
+	 * @param GameMode The mode that party member want to cancel.
+	 * @param IsTempParty Is canceling matchmaking that was started using temporary party.
+	 */
+	FString SendCancelMatchmaking(FString const& GameMode
+		, bool IsTempParty = false);
+
+	/**
+	 * @brief send ready consent request
+	 *
+	 * @param MatchId The id of a match user ready to play.
+	 */
+	FString SendReadyConsentRequest(FString const& MatchId);
+
+	/**
+	 * @brief send reject consent request
+	 *
+	 * @param MatchId The id of a match user ready to play.
+	 */
+	FString SendRejectConsentRequest(FString const& MatchId);
+
+	/**
+	 * @brief Request Dedicated custom server
+	 *
+	 * @param SessionID Session ID of the game session.
+	 * @param GameMode The mode that party member want to play.
+	 * @param ClientVersion The version of DS, fill it blank to choose the default version.
+	 * @param Region The region where the party member want to play.
+	 * @param Deployment The deployment mode where the party member requested
+	 * @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	 */
+	FString RequestDS(FString const& SessionID
+		, FString const& GameMode
+		, FString const& ClientVersion
+		, FString const& Region
+		, FString const& Deployment
+		, FString const& ServerName = TEXT(""));
+
+	/**
+	 * @brief Unbind all matchmaking notif delegates set previously.
+	 */
+	void UnbindMatchmakingNotifEvents();
+
+	/**
+	 * @brief Unbind all matchmaking response delegates set previously.
+	 */
+	void UnbindMatchmakingResponseEvents();
+
+public:
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	// Matchmaking
+	/**
+	 * @brief set start matchmaking response
+	 *
+	 * @param OnMatchmakingStart set delegate .
+	 * @param OnError Delegate that will be called when operation failed.
+	 */
+	void SetStartMatchmakingResponseDelegate(FMatchmakingResponse const& OnMatchmakingStart
+		, FErrorHandler const& OnError = nullptr)
+	{
+		MatchmakingStartResponse = OnMatchmakingStart;
+		OnMatchmakingStartError = OnError;
+	}
+
+	/**
+	 * @brief set cancel matchmaking notification
+	 *
+	 * @param OnMatchmakingCancel set delegate .
+	 * @param OnError Delegate that will be called when operation failed.
+	 */
+	void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse const& OnMatchmakingCancel
+		, FErrorHandler const& OnError = nullptr)
+	{
+		MatchmakingCancelResponse = OnMatchmakingCancel;
+		OnMatchmakingCancelError = OnError;
+	}
+
+	/**
+	 * @brief set ready consent response notification
+	 *
+	 * @param OnReadyConsentResponse set delegate .
+	 * @param OnError Delegate that will be called when operation failed.
+	 */
+	void SetReadyConsentResponseDelegate(FReadyConsentResponse const& OnReadyConsentResponse
+		, FErrorHandler const& OnError = nullptr)
+	{
+		ReadyConsentResponse = OnReadyConsentResponse;
+		OnReadyConsentError = OnError;
+	}
+
+	/**
+	 * @brief set reject consent response notification
+	 *
+	 * @param OnRejectConsentResponse set delegate .
+	 * @param OnError Delegate that will be called when operation failed.
+	 */
+	void SetRejectConsentResponseDelegate(FRejectConsentResponse const& OnRejectConsentResponse
+		, FErrorHandler const& OnError = nullptr)
+	{
+		RejectConsentResponse = OnRejectConsentResponse;
+		OnRejectConsentError = OnError;
+	}
+
+	/**
+	 * @brief set matchmaking notification
+	 *
+	 * @param OnMatchmakingNotification set delegate .
+	 */
+	void SetMatchmakingNotifDelegate(FMatchmakingNotif const& OnMatchmakingNotification)
+	{
+		MatchmakingNotif = OnMatchmakingNotification;
+	}
+
+	/**
+	 * @brief set ready consent notification
+	 *
+	 * @param OnReadyConsentNotification set delegate .
+	 */
+	void SetReadyConsentNotifDelegate(FReadyConsentNotif const& OnReadyConsentNotification)
+	{
+		ReadyConsentNotif = OnReadyConsentNotification;
+	}
+
+	/**
+	 * @brief set reject consent notification
+	 *
+	 * @param OnRejectConsentNotification set delegate .
+	 */
+	void SetRejectConsentNotifDelegate(FRejectConsentNotif const& OnRejectConsentNotification)
+	{
+		RejectConsentNotif = OnRejectConsentNotification;
+	};
+
+	/**
+	 * @brief set rematchmaking notification
+	 *
+	 * @param OnRematchmakingNotification set delegate .
+	 */
+	void SetRematchmakingNotifDelegate(FRematchmakingNotif const& OnRematchmakingNotification)
+	{
+		RematchmakingNotif = OnRematchmakingNotification;
+	}
+
+	/**
+	* @brief set ready consent notification
+	*
+	* @param OnDsNotification set delegate.
+	*/
+	void SetDsNotifDelegate(FDsNotif const& OnDsNotification)
+	{
+		DsNotif = OnDsNotification;
+	}
+
+	/**
+	 * @brief set create DS response delegate
+	 *
+	 * @param OnCreateDSResponse Delegate to set.
+	 * @param OnError Delegate that will be called when operation failed.
+	 * */
+	void SetCreateDSDelegate(FBaseResponse const& OnCreateDSResponse
+		, FErrorHandler const& OnError = nullptr)
+	{
+		CreateDSResponse = OnCreateDSResponse;
+		OnCreateDSError = OnError;
+	}
+private:
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	auto HandleMatchmakingV1MessageResponse(FString const& ReceivedMessageType
+		, FString const& ParsedJsonString
+		, TSharedPtr<FJsonObject> const& ParsedJsonObj
+		, TSharedPtr<FLobbyMessageMetaData> const& MessageMeta = nullptr) -> bool;
+
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	auto HandleMatchmakingV1MessageNotif(FString const& ReceivedMessageType
+		, FString const& ParsedJsonString
+		, TSharedPtr<FJsonObject> const& ParsedJsonObj
+		, bool bSkipConditioner) -> bool;
+private:
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	static TMap<FString, Response> MatchmakingV1ResponseStringEnumMap;
+	static TMap<FString, Notif> MatchmakingV1NotifStringEnumMap;
+
+private:
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	// Matchmaking
+	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingStartResponseMap;
+	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingCancelResponseMap;
+	TMap<FString, FReadyConsentResponse> MessageIdReadyConsentResponseMap;
+	TMap<FString, FRejectConsentResponse> MessageIdRejectConsentResponseMap;
+	TMap<FString, FBaseResponse> MessageIdCreateDSResponseMap;
+private:
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	// Matchmaking
+	FMatchmakingResponse MatchmakingStartResponse;
+	FMatchmakingResponse MatchmakingCancelResponse;
+	FReadyConsentResponse ReadyConsentResponse;
+	FRejectConsentResponse RejectConsentResponse;
+	FMatchmakingNotif MatchmakingNotif;
+	FReadyConsentNotif ReadyConsentNotif;
+	FRejectConsentNotif RejectConsentNotif;
+	FRematchmakingNotif RematchmakingNotif;
+	FDsNotif DsNotif;
+
+private:
+	// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
+	FErrorHandler OnMatchmakingStartError;
+	FErrorHandler OnMatchmakingCancelError;
+	FErrorHandler OnReadyConsentError;
+	FErrorHandler OnRejectConsentError;
+	FErrorHandler OnCreateDSError;
+// MATCHMAKING V1 DEPRECATION END
+#endif // Matchmaking V1 deprecation
 };
 
 typedef TSharedRef<Lobby, ESPMode::ThreadSafe> LobbyRef;

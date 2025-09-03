@@ -66,7 +66,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	void SetAccountUserData(FAccountUserData InAccountUserData);
 
-
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	FOauth2Token GetAuthToken();
 
@@ -97,7 +96,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	FAccountUserData GetAccountUserData();
 
-
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	bool IsSessionValid();
 
@@ -126,12 +124,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABLobby* Lobby;
-
-	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
-	UABParty* Party;
-	
-	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
-	UABMatchmaking* Matchmaking;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABFriends* Friends;
@@ -174,10 +166,16 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABAchievement* Achievement;
+#if 1 // MMv1 Deprecation
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
+	UABMatchmaking* Matchmaking;
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABSessionBrowser* SessionBrowser;
 
+	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
+	UABParty* Party;
+#endif
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABUGC* UGC;
 

@@ -12,7 +12,7 @@ void UABParty::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
 }
-
+#if 1 // MMv1 Deprecation
 void UABParty::PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError) 
 {
 	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
@@ -327,6 +327,35 @@ void UABParty::PartyPromoteLeader(
 	}
 }
 
+void UABParty::SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) 
+{
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyDataUpdateNotifDelegate(
+			Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
+}
+
+void UABParty::SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) 
+{
+	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
+	if (LobbyPtr.IsValid())
+	{
+		LobbyPtr->SetPartyDataUpdateNotifDelegate(
+			Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
+				[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
+				{
+					OnNotif.ExecuteIfBound(Notif);
+				}));
+	}
+}
+
+#endif
 void UABParty::SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FDHandler& OnSuccess,
 	FDErrorHandler OnError)
 {
@@ -428,21 +457,7 @@ void UABParty::WritePartyStorage(
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
 	}
 }
-
-void UABParty::SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) 
-{
-	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
-	if (LobbyPtr.IsValid())
-	{
-		LobbyPtr->SetPartyDataUpdateNotifDelegate(
-			Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
-				[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
-				{
-					OnNotif.ExecuteIfBound(Notif);
-				}));
-	}
-}
-
+#if 1 // MMv1 Deprecation
 void UABParty::SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif) 
 {
 	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
@@ -554,19 +569,6 @@ void UABParty::SetOnPartyInvite(FDPartyInviteNotif OnNotif)
 	}
 }
 
-void UABParty::SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) 
-{
-	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
-	if (LobbyPtr.IsValid())
-	{
-		LobbyPtr->SetPartyDataUpdateNotifDelegate(
-			Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
-				[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
-				{
-					OnNotif.ExecuteIfBound(Notif);
-				}));
-	}
-}
 
 void UABParty::SetOnPartyMemberConnect(FDPartyMemberConnectNotif OnNotif) 
 {
@@ -595,3 +597,4 @@ void UABParty::SetOnPartyMemberDisconnect(FDPartyMemberDisconnectNotif OnNotif)
 				}));
 	}
 }
+#endif

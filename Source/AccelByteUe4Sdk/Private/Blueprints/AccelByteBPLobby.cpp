@@ -159,6 +159,7 @@ void UABLobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGener
 	}
 }
 
+#if 1 // MMv1 Deprecation
 FString UABLobby::RequestDS(FRequestDSModel const& Request) 
 {
 	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
@@ -174,3 +175,4 @@ FString UABLobby::RequestDS(FRequestDSModel const& Request)
 	}
 	return TEXT("");
 }
+#endif

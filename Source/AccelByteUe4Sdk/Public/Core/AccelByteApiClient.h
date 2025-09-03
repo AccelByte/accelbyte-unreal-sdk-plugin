@@ -132,7 +132,9 @@ private:
 	const AccelByte::Api::QosPtr QosPtr;
 	const AccelByte::Api::LobbyPtr LobbyPtr;
 	const AccelByte::Api::ChatPtr ChatPtr;
+#if 1 // MMv1 Deprecation
 	const AccelByte::Api::SessionBrowserPtr SessionBrowserPtr;
+#endif
 	const AccelByte::Api::TurnManagerPtr TurnManagerPtr;
 	const AccelByte::Api::SessionPtr SessionPtr;
 	const AccelByte::Api::MatchmakingV2Ptr MatchmakingV2Ptr;
@@ -195,7 +197,9 @@ public:
 	Api::QosManagerWPtr GetQosManagerApi() const;
 	Api::LobbyWPtr GetLobbyApi() const;
 	Api::ChatWPtr GetChatApi() const;
+#if 1 // MMv1 Deprecation
 	Api::SessionBrowserWPtr GetSessionBrowserApi() const;
+#endif
 	Api::TurnManagerWPtr GetTurnManagerApi() const;
 	Api::SessionWPtr GetSessionApi() const;
 	Api::MatchmakingV2WPtr GetMatchmakingV2Api() const;

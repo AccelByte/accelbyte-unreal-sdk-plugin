@@ -2,24 +2,28 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
+#if 1 // MMv1 Deprecation
 #include "Api/AccelByteSessionBrowserApi.h"
 
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteUtilities.h"
+#include "Core/AccelByteReport.h"
 
 namespace AccelByte
 {
 namespace Api
 {
-
 SessionBrowser::SessionBrowser(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetryScheduler& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-{}
+{
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+}
 
 SessionBrowser::~SessionBrowser()
 {}
@@ -137,6 +141,8 @@ FAccelByteTaskWPtr SessionBrowser::CreateGameSession(FAccelByteModelsSessionBrow
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 
 	const EAccelByteSessionType SessionType = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteSessionType>(CreateSessionRequest.Session_type);
 	
@@ -195,6 +201,9 @@ FAccelByteTaskWPtr SessionBrowser::UpdateGameSession(FString const& SessionId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+
 	if (UpdateSessionRequest.Game_current_player != 0)
 	{
 		FReport::LogDeprecated(FString(__FUNCTION__),
@@ -240,6 +249,9 @@ FAccelByteTaskWPtr SessionBrowser::UpdateGameSettings(FString const& SessionId
 	, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/settings")
 		, *SettingsRef.SessionBrowserServerUrl
 		, *CredentialsRef->GetNamespace()
@@ -257,7 +269,8 @@ FAccelByteTaskWPtr SessionBrowser::RemoveGameSession(FString const& SessionId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
@@ -332,6 +345,9 @@ FAccelByteTaskWPtr SessionBrowser::GetGameSessions(EAccelByteSessionType Session
 {
 	FReport::Log(FString(__FUNCTION__));
 	
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+	
 	if (SessionType == EAccelByteSessionType::NONE)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Wrong session type"));
@@ -357,7 +373,9 @@ FAccelByteTaskWPtr SessionBrowser::GetGameSessionsByUserIds(const TArray<FString
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+
 	if (UserIds.Num() == 0)
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Empty userIds"));
@@ -382,6 +400,8 @@ FAccelByteTaskWPtr SessionBrowser::RegisterPlayer(FString const& SessionId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 
 	if (!ValidateAccelByteId(PlayerToAdd, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(PlayerToAdd)
@@ -415,6 +435,9 @@ FAccelByteTaskWPtr SessionBrowser::UnregisterPlayer(FString const& SessionId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+	
 	if (!ValidateAccelByteId(PlayerToRemove, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(PlayerToRemove)
 		, OnError))
@@ -445,6 +468,9 @@ FAccelByteTaskWPtr SessionBrowser::GetRecentPlayer(FString const& UserId
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+
 	if (!ValidateAccelByteId(UserId, EAccelByteIdHypensRule::NO_HYPENS
 		, FAccelByteIdValidator::GetUserIdInvalidMessage(UserId)
 		, OnError))
@@ -468,6 +494,9 @@ FAccelByteTaskWPtr SessionBrowser::JoinSession(FString const& SessionId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 
 	if (SessionId.IsEmpty())
 	{
@@ -494,7 +523,9 @@ FAccelByteTaskWPtr SessionBrowser::GetGameSession(FString const& SessionId
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+	
 	if (SessionId.IsEmpty())
 	{
 		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Session id is empty"));
@@ -508,6 +539,6 @@ FAccelByteTaskWPtr SessionBrowser::GetGameSession(FString const& SessionId
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
-
 } // Namespace Api
 } // Namespace AccelByte
+#endif

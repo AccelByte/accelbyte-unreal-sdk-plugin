@@ -13,6 +13,12 @@ namespace AccelByte
 {
 namespace Api
 {
+static constexpr float AccelByteMaxPing = 9999.0f;
+
+FRWLock Qos::QosServersMtx;
+FRWLock Qos::LatenciesMtx;
+FRWLock Qos::ResolvedAddressesMtx;
+FRWLock Qos::PollLatenciesHandleMtx;
 FAccelByteModelsQosServerList Qos::QosServers = {};
 TArray<TPair<FString, float>> Qos::Latencies = {};
 TMap<FString, TSharedPtr<FInternetAddr>> Qos::ResolvedAddresses = {};
@@ -40,10 +46,13 @@ Qos::~Qos()
 	if (MessagingSystemPtr.IsValid())
 	{
 		MessagingSystemPtr->UnsubscribeFromTopic(EAccelByteMessagingTopic::LobbyConnected, LobbyConnectedDelegateHandle);
+		LobbyConnectedDelegateHandle.Reset();
 	}
 	OnLobbyConnectedHandle.Unbind();
 
 	FTickerAlias::GetCoreTicker().RemoveTicker(QosUpdateCheckerHandle);
+	QosUpdateCheckerHandle.Reset();
+	QosUpdateCheckerTickerDelegate.Unbind();
 }
 
 void Qos::SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
@@ -113,18 +122,22 @@ void Qos::CallGetQosServers(const bool bPingRegionsOnSuccess
 			const auto QosApi = QosWeak.Pin();
 			if (QosApi.IsValid())
 			{
-				Qos::QosServers = Result; // Cache for the session
-				for (FAccelByteModelsQosServer& Server : Qos::QosServers.Servers)
 				{
-					QosApi->ResolveQosServerAddress(Server);
+					FWriteScopeLock WriteLock(Qos::QosServersMtx);
+					Qos::QosServers = Result; // Cache for the session
+					for (FAccelByteModelsQosServer& Server : Qos::QosServers.Servers)
+					{
+						QosApi->ResolveQosServerAddress(Server);
+					}
 				}
-
 				if (bPingRegionsOnSuccess)
 				{
+					FReadScopeLock ReadLock(Qos::QosServersMtx);
 					QosApi->PingRegionsSetLatencies(Qos::QosServers, OnPingRegionsSuccess, OnError);
 				}
 				else
 				{
+					FReadScopeLock ReadLock(Qos::LatenciesMtx);
 					OnPingRegionsSuccess.ExecuteIfBound(Qos::Latencies); // Latencies == Nullable until PingRegionsSetLatencies called once+.
 				}
 			}
@@ -138,59 +151,68 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 #ifdef ACCELBYTE_ACTIVATE_PROFILER
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelByteQosPing"));
 #endif
-	TSharedRef<TArray<TPair<FString, float>>> SuccessLatencies = MakeShared<TArray<TPair<FString, float>>>();
-	TSharedRef<TArray<FString>> FailedLatencies = MakeShared<TArray<FString>>();
 
+	TSharedPtr<FRWLock, ESPMode::ThreadSafe> PingResultMtx = MakeShared<FRWLock, ESPMode::ThreadSafe>();
+	TSharedPtr<TArray<TPair<FString, float>>, ESPMode::ThreadSafe> PingResult = MakeShared<TArray<TPair<FString, float>>, ESPMode::ThreadSafe>();
 	TArray<FAccelByteModelsQosServer> Servers = QosServerList.Servers;
 	
-	Servers.RemoveAllSwap([](const FAccelByteModelsQosServer& Server) 
+	Servers.RemoveAllSwap([this](const FAccelByteModelsQosServer& Server) 
 		{
-			return !ResolvedAddresses.Contains(Server.Ip) || Server.ResolvedIp.IsEmpty();
+			bool ResolvedAddrPresent = false;
+			{
+				FReadScopeLock Lock(ResolvedAddressesMtx);
+				ResolvedAddrPresent = Qos::ResolvedAddresses.Contains(Server.Ip);
+			}
+			return !ResolvedAddrPresent || Server.ResolvedIp.IsEmpty();
 		});
-	const int32 Count = Servers.Num();
+	const int32 ServersCount = Servers.Num();
 
-	if (Count > 0)
+	if (ServersCount <= 0)
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to ping because no QoS server"));
+	}
+	else
 	{
 		// For each server, ping them and record add to Latency TArray.
-		for (auto& Server : Servers)
+		for (const auto& Server : Servers)
 		{
-			FString Region = Server.Region;
-
 			// Ping -> Get the latencies on pong.
+			// Must be launched from the main thread
 			QosWPtr QosWeak = AsShared();
 			FAccelBytePing::SendUdpPing(Server.ResolvedIp, Server.Port, SettingsRef.QosPingTimeout, FPingCompleteDelegate::CreateLambda(
-				[Count, SuccessLatencies, FailedLatencies, Region, OnSuccess, OnError, QosWeak](const FPingResult& PingResult)
+				[ServersCount, PingResult, PingResultMtx, Region = Server.Region, QosWeak, OnSuccess, OnError](const FPingResult& Result)
 				{
-					if (PingResult.Status == FPingResultStatus::Success)
 					{
-						float PingDelay = PingResult.AverageRoundTrip * 1000; // convert to milliseconds
-						SuccessLatencies->Add(TPair<FString, float>(Region, PingDelay));
-					}
-					else
-					{
-						FailedLatencies->Add(Region);
-					}
-
-					int TotalLatencies = SuccessLatencies->Num() + FailedLatencies->Num();
-					if (Count == TotalLatencies)
-					{
-						TSharedRef<TArray<TPair<FString, float>>> ResultLatencies = MakeShared<TArray<TPair<FString, float>>>();
-						ResultLatencies->Append(*SuccessLatencies);
-						for (const FString& FailedLatency : *FailedLatencies)
+						FWriteScopeLock Lock(*PingResultMtx);
+						// Mutex here
+						if (Result.Status == FPingResultStatus::Success)
 						{
-							ResultLatencies->Emplace(FailedLatency, ACCELBYTE_MAX_PING);
+							float PingDelay = Result.AverageRoundTrip * 1000; // convert to milliseconds
+							PingResult->Emplace(TPair<FString, float>(Region, PingDelay));
 						}
-						
-						Qos::Latencies.Empty();
-						Qos::Latencies.Append(*ResultLatencies);
-
-						if (ResultLatencies->Num() > 0)
+						else
 						{
-							OnSuccess.ExecuteIfBound(*ResultLatencies);
-							const auto QosApi = QosWeak.Pin();
-							if (QosApi.IsValid())
+							PingResult->Emplace(TPair<FString, float>(Region, AccelByteMaxPing));
+						}
+					}
+					if(PingResult->Num() == ServersCount)
+					{
+						// When all server pinged
+						{
+							FWriteScopeLock WriteLock(Qos::LatenciesMtx);
+							Qos::Latencies = *PingResult;
+						}
+						// If the lowest ping == AccelByteMaxPing, that means all ping attempts failed
+						PingResult->Sort([](const auto& A, const auto& B){
+							return A.Value > B.Value;
+						});
+						if (PingResult->Num() > 0 && PingResult->Last().Value != AccelByteMaxPing)
+						{
+							OnSuccess.ExecuteIfBound(*PingResult);
+							auto Qos = QosWeak.Pin();
+							if(Qos.IsValid())
 							{
-								QosApi->bQosUpdated = true;
+								Qos->bQosUpdated.store(true, std::memory_order_release);
 							}
 						}
 						else
@@ -201,23 +223,16 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 				}));
 		}
 	}
-	else
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to ping because no QoS server"));
-	}
 }
 
 void Qos::InitGetLatenciesScheduler(float LatencyPollIntervalSecs)
 {
 	const bool bActivateScheduler = LatencyPollIntervalSecs > 0;
 
-	if (Qos::PollLatenciesHandle.IsValid())
-	{
-		RemoveFromTicker(Qos::PollLatenciesHandle);
-	}
-
+	// Always try to clean up poller first
+	RemovePollerFromCoreTicker();
 	if (!bActivateScheduler)
-	{
+	{	
 		return;
 	}
 
@@ -230,12 +245,14 @@ void Qos::InitGetLatenciesScheduler(float LatencyPollIntervalSecs)
 	// Schedule a Latencies refresh poller
 	// Loop infinitely, every x seconds, until we tell the delegate to stop via RemoveFromTicker()
 	QosWPtr QosWeak = AsShared();
+	FWriteScopeLock Lock(PollLatenciesHandleMtx);
 	Qos::PollLatenciesHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
 		[QosWeak](float DeltaTime)
 		{
 			const auto QosApi = QosWeak.Pin();
 			if (QosApi.IsValid())
 			{
+				FReadScopeLock ReadLock(Qos::QosServersMtx);
 				QosApi->PingRegionsSetLatencies(Qos::QosServers, nullptr, nullptr);
 			}
 			return true;
@@ -243,13 +260,12 @@ void Qos::InitGetLatenciesScheduler(float LatencyPollIntervalSecs)
 		}), AdjustedSecondsPerTick);
 }
 
-void Qos::RemoveFromTicker(FDelegateHandleAlias& Handle)
+void Qos::RemovePollerFromCoreTicker()
 {
-	if (!Handle.IsValid())
-		return;
-	
-	FTickerAlias::GetCoreTicker().RemoveTicker(Handle);
-	Handle.Reset();
+	// Put lock here, we cannot have dangling tickers
+	FWriteScopeLock Lock(PollLatenciesHandleMtx);
+	FTickerAlias::GetCoreTicker().RemoveTicker(Qos::PollLatenciesHandle);
+	Qos::PollLatenciesHandle.Reset();
 }
 
 void Qos::StartLatencyPollers()
@@ -260,22 +276,26 @@ void Qos::StartLatencyPollers()
 
 void Qos::StopLatencyPollers()
 {
-	RemoveFromTicker(Qos::PollLatenciesHandle);
+	RemovePollerFromCoreTicker();
+	FWriteScopeLock Lock(Qos::LatenciesMtx);
 	Qos::Latencies.Empty();
 }
 
-bool Qos::AreLatencyPollersActive()
+bool Qos::AreLatencyPollersActive() const noexcept
 {
+	FReadScopeLock Lock(PollLatenciesHandleMtx);
 	return PollLatenciesHandle.IsValid();
 }
 
 const TArray<TPair<FString, float>>& Qos::GetCachedLatencies()
 {
+	FReadScopeLock Lock(Qos::LatenciesMtx);
 	return Qos::Latencies;
 }
 
 void Qos::Startup()
 {
+	FScopeLock Lock(&StartupMtx);
 	if (!bIsStarted)
 	{
 		OnLobbyConnectedHandle = FOnMessagingSystemReceivedMessage::CreateThreadSafeSP(AsShared(), &Qos::OnLobbyConnected);
@@ -293,22 +313,22 @@ void Qos::Startup()
 
 void Qos::SendQosLatenciesMessage()
 {
-	if (Latencies.Num() <= 0)
-	{
-		return;
-	}
-
 	FAccelByteModelsQosRegionLatencies RegionLatencies;
-
-	for (const auto& Latency : Latencies)
 	{
-		FAccelByteModelsQosRegionLatency RegionLatency;
-		RegionLatency.Region = Latency.Key;
-		RegionLatency.Latency = Latency.Value;
+		FReadScopeLock ReadLock(Qos::LatenciesMtx);
+		if (Qos::Latencies.Num() <= 0)
+		{
+			return;
+		}
+		for (const auto& Latency : Qos::Latencies)
+		{
+			FAccelByteModelsQosRegionLatency RegionLatency;
+			RegionLatency.Region = Latency.Key;
+			RegionLatency.Latency = Latency.Value;
 
-		RegionLatencies.Data.Add(RegionLatency);
+			RegionLatencies.Data.Add(RegionLatency);
+		}
 	}
-
 	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 	if (MessagingSystemPtr.IsValid())
 	{
@@ -323,10 +343,10 @@ void Qos::OnLobbyConnected(const FString& Payload)
 
 bool Qos::CheckQosUpdate(float DeltaTime)
 {
-	if (bQosUpdated)
+	if (bQosUpdated.load(std::memory_order_acquire))
 	{
 		SendQosLatenciesMessage();
-		bQosUpdated = false;
+		bQosUpdated.store(false, std::memory_order_release);
 	}
 
 	return true;
@@ -345,45 +365,49 @@ bool Qos::ResolveQosServerAddress(FAccelByteModelsQosServer& OutServer)
 		return false;
 	}
 	
-	if (!ResolvedAddresses.Contains(OutServer.Ip))
 	{
-		TSharedPtr<FInternetAddr> ServerAddress = SocketSubsystem->CreateInternetAddr();
-		if (!ServerAddress.IsValid())
+		FWriteScopeLock WriteLock(ResolvedAddressesMtx);
+		if (!Qos::ResolvedAddresses.Contains(OutServer.Ip))
 		{
-			return false;
-		}
-
-		bool bIsAddressValid = false;
-		ServerAddress->SetIp(*OutServer.Ip, bIsAddressValid);
-		if (!bIsAddressValid)
-		{
-			FAddressInfoResult AddressInfo = SocketSubsystem->GetAddressInfo(*OutServer.Ip // 'Ip' field is actually the domain name in AMS
-				, nullptr
-				, EAddressInfoFlags::Default
-				, NAME_None);
-
-			if (AddressInfo.Results.Num() < 1)
+			TSharedPtr<FInternetAddr> ServerAddress = SocketSubsystem->CreateInternetAddr();
+			if (!ServerAddress.IsValid())
 			{
 				return false;
 			}
 
-			// Retrieve the IP string from the address result and return success
-			FString ResolvedIp = AddressInfo.Results[0].Address->ToString(false);
-			if (ResolvedIp.IsEmpty())
-			{
-				return false;
-			}
-
-			ServerAddress->SetIp(*ResolvedIp, bIsAddressValid);
+			bool bIsAddressValid = false;
+			ServerAddress->SetIp(*OutServer.Ip, bIsAddressValid);
 			if (!bIsAddressValid)
 			{
-				return false;
+				FAddressInfoResult AddressInfo = SocketSubsystem->GetAddressInfo(*OutServer.Ip // 'Ip' field is actually the domain name in AMS
+					, nullptr
+					, EAddressInfoFlags::Default
+					, NAME_None);
+
+				if (AddressInfo.Results.Num() < 1)
+				{
+					return false;
+				}
+
+				// Retrieve the IP string from the address result and return success
+				FString ResolvedIp = AddressInfo.Results[0].Address->ToString(false);
+				if (ResolvedIp.IsEmpty())
+				{
+					return false;
+				}
+
+				ServerAddress->SetIp(*ResolvedIp, bIsAddressValid);
+				if (!bIsAddressValid)
+				{
+					return false;
+				}
 			}
+			ServerAddress->SetPort(OutServer.Port);
+			Qos::ResolvedAddresses.Emplace(OutServer.Ip, ServerAddress);
 		}
-		ServerAddress->SetPort(OutServer.Port);
-		ResolvedAddresses.Emplace(OutServer.Ip, ServerAddress);
 	}
-	OutServer.ResolvedIp = ResolvedAddresses[OutServer.Ip]->ToString(false);
+	FReadScopeLock ReadLock(ResolvedAddressesMtx);
+	OutServer.ResolvedIp = Qos::ResolvedAddresses[OutServer.Ip]->ToString(false);
 	
 	return true;
 }

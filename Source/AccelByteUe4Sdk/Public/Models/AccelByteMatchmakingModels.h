@@ -25,30 +25,8 @@ enum class EAccelByteMatchmakingSessionStatus : uint8
 	SessionTimeout	UMETA(DisplayName = "sessionTimeout"), // when joinable session is timed out, and removed from queue
 };
 
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchTicketOptionalParams
-{
-	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
-	FString SessionId{};
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
-	FJsonObjectWrapper Attributes{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
-	FJsonObjectWrapper Storage{};
-	
-	// Cannot expose this field as UPROPERTY as TPair is not a blueprint type
-	TArray<TPair<FString, float>> Latencies{};
-
-	/* 
-	 * Configuration to exclude game sessions from matchmaking backfill.
-	 * Cannot expose this field as UPROPERTY because this field won't be serialized & it is not a blueprint type
-	 */
-	TArray<FString> ExcludedGameSessionIDs{};
-};
-
+#if 1 // MMv1 Deprecation
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResult
 {
@@ -113,6 +91,31 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDequeueRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | DequeueRequest")
 	FString Match_id{};
+};
+#endif
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2MatchTicketOptionalParams
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
+	FString SessionId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
+	FJsonObjectWrapper Attributes{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchTicketOptionalParams")
+	FJsonObjectWrapper Storage{};
+	
+	// Cannot expose this field as UPROPERTY as TPair is not a blueprint type
+	TArray<TPair<FString, float>> Latencies{};
+
+	/* 
+	 * Configuration to exclude game sessions from matchmaking backfill.
+	 * Cannot expose this field as UPROPERTY because this field won't be serialized & it is not a blueprint type
+	 */
+	TArray<FString> ExcludedGameSessionIDs{};
 };
 
 USTRUCT(BlueprintType)

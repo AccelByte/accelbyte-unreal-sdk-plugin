@@ -679,6 +679,7 @@ void Chat::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
 		MessageIdQuerySystemMessageResponseMap.Empty();
 		MessageIdGetSystemMessageStatsResponseMap.Empty();
 		MessageIdGetUserChatConfigurationResponseMap.Empty();
+		MessageIdSetUserChatConfigurationResponseMap.Empty();
 	}
 
 	void Chat::ClearResponseHandlers()
@@ -696,10 +697,15 @@ void Chat::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
 		RemoveUserFromTopicResponse.Unbind();
 		JoinTopicResponse.Unbind();
 		QuitTopicResponse.Unbind();
+		RefreshTokenResponse.Unbind();
 		BlockUserResponse.Unbind();
 		UnblockUserResponse.Unbind();
 		UpdateSystemMessagesResponse.Unbind();
 		DeleteSystemMessagesResponse.Unbind();
+		QuerySystemMessageResponse.Unbind();
+		GetSystemMessageStatsResponse.Unbind();
+		GetUserChatConfigurationResponse.Unbind();
+		SetUserChatConfigurationResponse.Unbind();
 	}
 
 	void Chat::ClearErrorHandlers()
@@ -709,6 +715,7 @@ void Chat::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
 		OnQueryTopicError.Unbind();
 		OnQueryPersonalTopicError.Unbind();
 		OnQueryGroupTopicError.Unbind();
+		OnQueryPublicTopicError.Unbind();
 		OnQueryChatError.Unbind();
 		OnReadChatError.Unbind();
 		OnUpdateTopicError.Unbind();
@@ -717,10 +724,15 @@ void Chat::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
 		OnRemoveUserFromTopicError.Unbind();
 		OnJoinTopicError.Unbind();
 		OnQuitTopicError.Unbind();
+		OnRefreshTokenError.Unbind();
 		OnBlockUserError.Unbind();
 		OnUnblockUserError.Unbind();
 		OnUpdateSystemMessagesError.Unbind();
 		OnDeleteSystemMessagesError.Unbind();
+		OnQuerySystemMessageError.Unbind();
+		OnGetSystemMessageStatsError.Unbind();
+		OnGetUserChatConfigurationError.Unbind();
+		OnSetUserChatConfigurationError.Unbind();
 	}
 
 	void Chat::ClearNotificationHandlers()
@@ -732,6 +744,10 @@ void Chat::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
 		DeleteTopicNotif.Unbind();
 		UpdateTopicNotif.Unbind();
 		SystemMessageNotif.Unbind();
+		UserMutedNotif.Unbind();
+		UserUnmutedNotif.Unbind();
+		UserBanNotif.Unbind();
+		UserUnbanNotif.Unbind();
 	}
 #pragma endregion DELEGATE HANDLERS
 
@@ -772,7 +788,7 @@ void Chat::OnMassiveOutage(FMassiveOutageInfo const& MassiveOutageInfo)
 		}
 		else
 		{
-			UE_LOG(LogAccelByteChat, Error, TEXT("Incoming Message Id [%s] has no designated callback"), *MessageId);
+			UE_LOG(LogAccelByteChat, Warning, TEXT("Incoming Message Id [%s] has no designated callback"), *MessageId);
 		}
 	}
 

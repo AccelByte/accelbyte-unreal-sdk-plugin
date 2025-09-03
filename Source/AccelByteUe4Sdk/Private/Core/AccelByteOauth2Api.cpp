@@ -297,6 +297,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{TEXT("platform_token"), FGenericPlatformHttp::UrlEncode(PlatformToken)},
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
+		{TEXT("skipSetCookie"), OptionalParams.bSkipSetCookie ? TEXT("true") : TEXT("false")},
 		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(EncodedMacAddress) },
 		{TEXT("additionalData"), ConstructAdditionalData()},
 		{TEXT("serviceLabel"), OptionalParams.ServiceLabelForPSN},
@@ -905,6 +906,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformTokenV4(FString const& Clien
 	FString Content = FAccelByteUtilities::CreateQueryParams({
 		{TEXT("platform_token"), FGenericPlatformHttp::UrlEncode(PlatformToken)},
 		{TEXT("createHeadless"), bCreateHeadless ? TEXT("true") : TEXT("false")},
+		{TEXT("skipSetCookie"), OptionalParams.bSkipSetCookie ? TEXT("true") : TEXT("false")},
 		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(EncodedMacAddress) },
 		{TEXT("additionalData"), ConstructAdditionalData()},
 		{TEXT("serviceLabel"), OptionalParams.ServiceLabelForPSN},

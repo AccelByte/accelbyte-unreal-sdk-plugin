@@ -15,8 +15,6 @@
 #include "Models/AccelByteQosModels.h"
 #include "Templates/SharedPointer.h"
 
-#define ACCELBYTE_MAX_PING 9999.0
-
 namespace AccelByte
 {
 namespace Api
@@ -30,6 +28,12 @@ class ACCELBYTEUE4SDK_API Qos : public TSharedFromThis<Qos, ESPMode::ThreadSafe>
 public:
 	Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef, FAccelByteMessagingSystem& InMessagingSystemRef, const QosManagerWPtr QosManagerWeak, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Qos();
+
+	// Uncopyable and unmovable class
+	Qos(Qos const&) = delete;
+	Qos(Qos&&) = delete;
+	Qos& operator=(Qos const&) = delete;
+	Qos& operator=(Qos&&) = delete;
 
 	void SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
 
@@ -68,7 +72,7 @@ public:
 	/**
 	 * @brief Check whether latency polling schedulers are active
 	 */
-	bool AreLatencyPollersActive();
+	bool AreLatencyPollersActive() const noexcept;
 
 	/**
 	 * @brief Get cached latencies data
@@ -79,29 +83,10 @@ public:
 	* @brief Startup module
 	*/
 	void Startup();
-	
+
 private:
-	// Constructor
-	FCredentialsRef CredentialsRef;
-	const Settings& SettingsRef;
-	QosManagerWPtr QosManagerWeak;
-	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
-	TWeakPtr<FApiClient, ESPMode::ThreadSafe> ApiClient;
-
-	static FAccelByteModelsQosServerList QosServers;
-	static TArray<TPair<FString, float>> Latencies;
-	static TMap<FString, TSharedPtr<FInternetAddr>> ResolvedAddresses;
-
-	static constexpr float ResolveServerAddressDelay = 0.5;//in seconds
-	
-	/**
-	 * @brief Get Latencies from cached regions, every x seconds.
-	 * - Default 0 (off).
-	 */
-	static FDelegateHandleAlias PollLatenciesHandle;
-
-	/** @brief Static cleanup handler for Tickers (Latencies Pollers) */
-	static void RemoveFromTicker(FDelegateHandleAlias& Handle);
+	/** @brief cleanup Latencies Poller handler from Unreal Core Ticker */
+	void RemovePollerFromCoreTicker();
 
 	/**
 	 * @brief For each server, ping them and record add to Latency TArray.
@@ -147,11 +132,33 @@ private:
 	 */
 	bool ResolveQosServerAddress(FAccelByteModelsQosServer& OutServer);
 
+private:
+	// Constructor
+	FCredentialsRef CredentialsRef;
+	const Settings& SettingsRef;
+	QosManagerWPtr QosManagerWeak;
+	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
+	TWeakPtr<FApiClient, ESPMode::ThreadSafe> ApiClient;
+
+	static FRWLock QosServersMtx;
+	static FAccelByteModelsQosServerList QosServers;
+	static FRWLock LatenciesMtx;
+	static TArray<TPair<FString, float>> Latencies;
+	static FRWLock ResolvedAddressesMtx;
+	static TMap<FString, TSharedPtr<FInternetAddr>> ResolvedAddresses;
+	
+	static FRWLock PollLatenciesHandleMtx;
+	/**
+	 * @brief Get Latencies from cached regions, every x seconds.
+	 * - Default 0 (off).
+	 */
+	static FDelegateHandleAlias PollLatenciesHandle;
+
+	std::atomic<bool> bQosUpdated{false};
+	bool bIsStarted{false};
+
 #pragma region MessagingSystem
 private:
-	FDelegateHandle LobbyConnectedDelegateHandle;
-	FOnMessagingSystemReceivedMessage OnLobbyConnectedHandle;
-
 	/**
 	 * @brief Send cached latencies to messaging system to notify the latencies is updated.
 	 */
@@ -164,19 +171,16 @@ private:
 	 */
 	void OnLobbyConnected(const FString& Payload);
 
-	bool bQosUpdated{false};
+	bool CheckQosUpdate(float DeltaTime);
 
-	const float QosUpdateCheckerIntervalSecs = 60.0f;
+private:
+	FCriticalSection StartupMtx;
+	FDelegateHandle LobbyConnectedDelegateHandle;
+	FOnMessagingSystemReceivedMessage OnLobbyConnectedHandle;
 	FTickerDelegate QosUpdateCheckerTickerDelegate{};
 	FDelegateHandleAlias QosUpdateCheckerHandle{};
-
-	bool bIsStarted = false;
-
-	bool CheckQosUpdate(float DeltaTime);
+	const float QosUpdateCheckerIntervalSecs = 60.0f;
 #pragma endregion
-
-	Qos(Qos const&) = delete;
-	Qos(Qos&&) = delete;
 };
 
 typedef TSharedRef<Qos, ESPMode::ThreadSafe> QosRef;

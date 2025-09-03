@@ -51,7 +51,9 @@ FApiClient::FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr I
 	, QosPtr(MakeShared<Api::Qos, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *MessagingSystem.Get(), QosManagerPtr))
 	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
 	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner))
+#if 1 // MMv1 Deprecation
 	, SessionBrowserPtr(MakeShared<AccelByte::Api::SessionBrowser, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
+#endif
 	, TurnManagerPtr(MakeShared<AccelByte::Api::TurnManager, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, SessionPtr(MakeShared<AccelByte::Api::Session, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
 	, MatchmakingV2Ptr(MakeShared<AccelByte::Api::MatchmakingV2, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef))
@@ -138,7 +140,6 @@ void FApiClient::Init()
 	QosPtr->SetApiClient(AsShared());
 	LobbyPtr->SetApiClient(AsShared());
 	ChatPtr->SetApiClient(AsShared());
-	SessionBrowserPtr->SetApiClient(AsShared());
 	TurnManagerPtr->SetApiClient(AsShared());
 	SessionPtr->SetApiClient(AsShared());
 	MatchmakingV2Ptr->SetApiClient(AsShared());
@@ -147,6 +148,9 @@ void FApiClient::Init()
 	PredefinedEventPtr->SetApiClient(AsShared());
 	GameStandardEventPtr->SetApiClient(AsShared());
 	PresenceBroadcastEventPtr->SetApiClient(AsShared());
+#if 1 // MMv1 Deprecation
+	SessionBrowserPtr->SetApiClient(AsShared());
+#endif
 }
 
 #pragma region Access
@@ -216,12 +220,12 @@ Api::QosManagerWPtr FApiClient::GetQosManagerApi() const
 {
 	return QosManagerPtr;
 }
-
+#if 1 // MMv1 Deprecation
 Api::SessionBrowserWPtr FApiClient::GetSessionBrowserApi() const
 {
 	return SessionBrowserPtr;
 }
-
+#endif
 Api::TurnManagerWPtr FApiClient::GetTurnManagerApi() const
 {
 	return TurnManagerPtr;

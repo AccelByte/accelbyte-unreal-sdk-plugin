@@ -224,7 +224,7 @@ public:
 	, int32 Offset = 0);
 
 	/**
-	 * @brief Get user stat items with cycle
+	 * @brief Get current user stat items within the cycle
 	 *
 	 * @param CycleId the CycleId where the stat items belong to
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserStatCycleItemPagingSlicedResult
@@ -236,6 +236,27 @@ public:
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr GetUserStatCycleItems(FString const& CycleId
+		, THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0
+        , TArray<FString> const& StatCodes = {});
+
+	/**
+	 * @brief Get current user stat items within the cycle
+	 *
+	 * @param CycleId the CycleId where the stat items belong to
+	 * @param TargetUserId the user Id to be queried
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserStatCycleItemPagingSlicedResult
+	 * @param OnError This will be called when the operation failed
+	 * @param Limit Page size, default value is 20.
+	 * @param Offset Page number, default value is 0.
+	 * @param StatCodes Optional. the StatCode of the user stat item. Determine which stat code to get with the cycle id.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserStatCycleItems(FString const& CycleId
+		, FString const& TargetUserId
 		, THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult> const& OnSuccess
 		, FErrorHandler const& OnError
 		, int32 Limit = 20

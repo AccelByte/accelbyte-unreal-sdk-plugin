@@ -16,12 +16,11 @@ using namespace AccelByte::Api;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCredentials, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteCredentials);
 
-
 namespace AccelByte
 {
 
 Credentials::Credentials(FHttpRetryScheduler& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& InIamServerUrl)
-	: AuthToken()
+	: BaseCredentials()
 	, Oauth(InHttpRef, InIamServerUrl)
 #if ENGINE_MAJOR_VERSION < 5
 	, MessagingSystemWPtr(MessagingRef.AsShared())
@@ -58,7 +57,6 @@ void Credentials::ForgetAll()
 {
 	FWriteScopeLock WriteLock(CredentialAccessLock);
 	BaseCredentials::ForgetAll();
-	AuthToken = {};
 }
 
 void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
@@ -106,16 +104,13 @@ void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 	SetClientCredentials(ClientIdFromConfig, ClientSecretFromCConfig);
 }
 
-void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTime)
+bool Credentials::SetAuthToken(const FOauth2Token& InAuthToken, float CurrentTime)
 {
-	FWriteScopeLock WriteLock(CredentialAccessLock);
-
-	ExpireTime = NewAuthToken.Expires_in;
-	UserSessionExpire = CurrentTime + (NewAuthToken.Expires_in * FMath::FRandRange(0.7, 0.9));
+	bool IsSuccess = BaseCredentials::SetAuthToken(InAuthToken, CurrentTime);
 	
-	double BanExpire = DBL_MAX;
+	double BanDuration = DBL_MAX;
 	const int64 UtcNowTimestamp = FDateTime::UtcNow().ToUnixTimestamp();
-	for (auto& Ban : NewAuthToken.Bans)
+	for (auto& Ban : InAuthToken.Bans)
 	{
 		const int64 BanEndTimestamp = Ban.EndDate.ToUnixTimestamp();
 		if (!Ban.Enabled || BanEndTimestamp < UtcNowTimestamp)
@@ -123,190 +118,87 @@ void Credentials::SetAuthToken(const FOauth2Token& NewAuthToken, float CurrentTi
 			continue;
 		}
 		
-		const double BanDuration = CurrentTime + (BanEndTimestamp - UtcNowTimestamp);
-		if (BanDuration < BanExpire)
+		const double TempBanDuration = BanEndTimestamp - UtcNowTimestamp;
+		if (TempBanDuration < BanDuration)
 		{
-			BanExpire = BanDuration;
+			BanDuration = TempBanDuration;
 		}
 	}
 	
-	if (UserSessionExpire >= BanExpire)
+	if (GetExpireDuration() >= BanDuration)
 	{
-		const double BanSpanTime = BanExpire - CurrentTime;
-		ExpireTime = BanSpanTime;
+		SetExpireDuration(BanDuration);
 	}
 
-	if (ExpireTime > MaxBackoffTime)
-	{
-		RefreshTime = CurrentTime + (ExpireTime - MaxBackoffTime);
-	}
-	else
-	{
-		RefreshTime = CurrentTime + (ExpireTime * BackoffRatio);
-	}
-
-	AuthToken = NewAuthToken;
-	BackoffCount.Reset();
-	SessionState = ESessionState::Valid;
+	CalculateBackoffRetry(CurrentTime);
 
 	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 
 	if (MessagingSystemPtr.IsValid())
 	{
-		MessagingSystemPtr->SendMessage<FOauth2Token>(EAccelByteMessagingTopic::AuthTokenSet, NewAuthToken);
+		MessagingSystemPtr->SendMessage<FOauth2Token>(EAccelByteMessagingTopic::AuthTokenSet, GetAuthToken());
 	}
+
+	return IsSuccess;
 }
 
 void Credentials::SetUserEmailAddress(const FString& EmailAddress)
 {
 	AccelByte::FReport::LogDeprecated( FString(__FUNCTION__),
-		TEXT("Deprecated, this method could not be used to set email address, use GetData instead."));
+		TEXT("Deprecated, this method is planned to be decomissioned. Please use UpdateUser method in UserAPI class to modify the email address"));
 }
 
 void Credentials::SetUserName(const FString& Name)
 {
 	AccelByte::FReport::LogDeprecated( FString(__FUNCTION__),
-		TEXT("Deprecated, please use email address instead"));
-	UserName = Name;
+		TEXT("Deprecated, this method is planned to be decomissioned. User name is not available anymore, please use User display name."));
 }
 
 void Credentials::SetUserDisplayName(const FString& UserDisplayName)
 {
-	FWriteScopeLock WriteLock(CredentialAccessLock);
-	AuthToken.Display_name = UserDisplayName;
-}
-
-const FString& Credentials::GetAccessToken() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.Access_token;
-}
-
-const FString& Credentials::GetRefreshToken() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.Refresh_token;
-}
-
-const FString& Credentials::GetNamespace() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.Namespace;
-}
-
-const FString& Credentials::GetPlatformUserId() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.Platform_user_id;
-}
-
-const FString& Credentials::GetSimultaneousPlatformId() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.Simultaneous_platform_id;
-}
-
-const FString& Credentials::GetSimultaneousPlatformUserId() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.Simultaneous_platform_user_id;
-}
-
-FString Credentials::GetSimultaneousPlatformUserIdByPlatformName(const FString& PlatformName) const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	if (AuthToken.Simultaneous_platform_id.Contains(PlatformName))
-	{
-		return AuthToken.Simultaneous_platform_user_id;
-	}
-	else
-	{
-		return TEXT("");
-	}
+	AccelByte::FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("Deprecated, this method is planned to be decomissioned. Please use UpdateUser method in UserAPI class to modify the display name."));
 }
 
 bool Credentials::IsSessionValid() const
 {
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return SessionState == ESessionState::Valid;
+	return GetSessionState() == ESessionState::Valid;
 }
 
 bool Credentials::IsComply() const
 {
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.Is_comply;
+	FOauth2Token TempToken = GetAuthToken();
+	return TempToken.Is_comply;
 }
 
 void Credentials::Startup()
 {
-	{
-		FWriteScopeLock WriteLock(DelegateLock);
-		PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
-			FTickerDelegate::CreateThreadSafeSP(AsShared(), &Credentials::Tick),
-			0.2f);
-	}
+	BaseCredentials::Startup();
 
+	SetTickerDelegate(FTickerDelegate::CreateThreadSafeSP(AsShared(), &Credentials::Tick));
 	IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 	SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 }
 
-void Credentials::Shutdown()
+FString Credentials::GetUserDisplayName() const
 {
-	FWriteScopeLock WriteLock(DelegateLock);
-
-	if (PollRefreshTokenHandle.IsValid())
-	{
-		// Core ticker by this point in engine shutdown has already been torn down - only remove ticker if this is not an engine shutdown
-		if (!IsEngineExitRequested())
-		{
-			FTickerAlias::GetCoreTicker().RemoveTicker(PollRefreshTokenHandle);
-		}
-		PollRefreshTokenHandle.Reset();
-	}
+	return GetDisplayName();
 }
 
-const FString& Credentials::GetUserId() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.User_id;
-}
-
-const FString& Credentials::GetUserDisplayName() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken.Display_name;
-}
-
-const FString& Credentials::GetUserEmailAddress() const
+FString Credentials::GetUserEmailAddress() const
 {
 	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AccountUserData.EmailAddress;
 }
 
-const FString& Credentials::GetUserName() const
+FString Credentials::GetUserName() const
 {
 	AccelByte::FReport::LogDeprecated( FString(__FUNCTION__),
 		TEXT("Deprecated, please use email address instead"));
 	return UserName;
 }
 
-const FString& Credentials::GetUniqueDisplayName() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	if (!AuthToken.Unique_display_name.IsEmpty())
-	{
-		return AuthToken.Unique_display_name;
-	}
-	return AuthToken.Display_name;
-}
-
-const FString& Credentials::GetLinkingToken() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return ErrorOAuth.LinkingToken;
-}
-
-const FAccountUserData& Credentials::GetAccountUserData() const
+FAccountUserData Credentials::GetAccountUserData() const
 {
 	FReadScopeLock ReadLock(CredentialAccessLock);
 	return AccountUserData;
@@ -318,49 +210,19 @@ const TMap<FString, FThirdPartyPlatformTokenData>& Credentials::GetThridPartyPla
 	return ThirdPartyPlatformTokenData;
 }
 
-void Credentials::PollRefreshToken(double CurrentTime)
+void Credentials::SendRefreshToken()
 {
-	FWriteScopeLock WriteLock(CredentialAccessLock);
-
-#ifdef ACCELBYTE_ACTIVATE_PROFILER
-	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelBytePollRefreshToken"));
-#endif
-	switch (SessionState)
-	{
-	case ESessionState::Expired:
-	case ESessionState::Rejected:
-	case ESessionState::Valid:
-		if (RefreshTime <= CurrentTime)
-		{
-			RefreshTokenTask = Oauth.GetTokenWithRefreshTokenV4(ClientId
-				, ClientSecret
-				, AuthToken.Refresh_token
-				, THandler<FOauth2TokenV4>::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenSuccessful)
-				, FOAuthErrorHandler::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenFailed)
-				, IamServerUrl
-			);
-
-			SessionState = ESessionState::Refreshing;
-		}
-
-		break;
-	case ESessionState::Refreshing:
-	case ESessionState::Invalid:
-	default:
-		break;
-	}
-}
-
-void Credentials::ScheduleRefreshToken(double LRefreshTime)
-{
-	FWriteScopeLock WriteLock(CredentialAccessLock);
-	RefreshTime = LRefreshTime;
-}
-
-const FOauth2Token& Credentials::GetAuthToken() const
-{
-	FReadScopeLock ReadLock(CredentialAccessLock);
-	return AuthToken;
+	FString TempClientId = GetOAuthClientId();
+	FString TempClientSecret = GetOAuthClientSecret();
+	FOauth2Token TempToken = GetAuthToken();
+	FWriteScopeLock WriteLock(DelegateLock);
+	RefreshTokenTask = Oauth.GetTokenWithRefreshTokenV4(TempClientId
+		, TempClientSecret
+		, TempToken.Refresh_token
+		, THandler<FOauth2TokenV4>::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenSuccessful)
+		, FOAuthErrorHandler::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenFailed)
+		, IamServerUrl
+	);
 }
 
 void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
@@ -375,12 +237,6 @@ void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 	FHttpRetrySchedulerWPtr HttpWPtr = HttpRef.AsShared();
 	BearerAuthRejectedHandle = HttpRef.AddBearerAuthRejectedDelegate(
 		FHttpRetryScheduler::FBearerAuthRejected::CreateThreadSafeSP(AsShared(), &Credentials::OnBearerAuthRejected, HttpWPtr));
-}
-
-void Credentials::SetErrorOAuth(const FErrorOAuthInfo& NewErrorOAuthInfo)
-{
-	FWriteScopeLock WriteLock(CredentialAccessLock);
-	ErrorOAuth = NewErrorOAuthInfo;
 }
 
 void Credentials::SetAccountUserData(const FAccountUserData& InAccountUserData)
@@ -435,10 +291,7 @@ void Credentials::OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr)
 	UE_LOG(LogAccelByteCredentials, Verbose, TEXT("OnBearerAuthRejected triggered"));
 	HttpPtr->PauseBearerAuthRequest();
 
-	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
-		SessionState = ESessionState::Rejected;
-	}
+	SetSessionState(ESessionState::Rejected);
 
 	RefreshTokenAdditionalActions.AddThreadSafeSP(AsShared(), &Credentials::OnBearerAuthRefreshed, HttpWPtr);
 
@@ -475,45 +328,16 @@ void Credentials::OnRefreshTokenSuccessful(FOauth2TokenV4 const& Token)
 		RefreshTokenAdditionalActions.Broadcast(true);
 		RefreshTokenAdditionalActions.Clear();
 	}
-	TokenRefreshedEvent.Broadcast(true);
+
+	auto RefreshedEvent = OnTokenRefreshed();
+	RefreshedEvent.Broadcast(true);
 }
 
 void Credentials::OnRefreshTokenFailed(int32 ErrorCode
 	, FString const& ErrorMessage
 	, FErrorOAuthInfo const& OAuthError)
 {
-	BackoffCount.Increment();
-
-	if (BackoffCount.GetValue() < MaxBackoffCount)
-	{
-		{
-			// Separate scope to avoid locking with ScheduleRefreshToken
-			FWriteScopeLock WriteLock(CredentialAccessLock);
-
-			if (ExpireTime > MaxBackoffTime)
-			{
-				ExpireTime = MaxBackoffTime;
-			}
-			else if (ExpireTime <= MinBackoffTime)
-			{
-				ExpireTime = MinBackoffTime;
-			}
-			else
-			{
-				ExpireTime = ExpireTime * BackoffRatio;
-			}
-
-			RefreshBackoff = ExpireTime * BackoffRatio;
-			SessionState = ESessionState::Expired;
-		}
-
-		ScheduleRefreshToken(FPlatformTime::Seconds() + RefreshBackoff);
-	}
-	else
-	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
-		SessionState = ESessionState::Invalid;
-	}
+	CalculateNextRefreshToken();
 
 	{
 		FWriteScopeLock WriteLock(DelegateLock);
@@ -524,7 +348,8 @@ void Credentials::OnRefreshTokenFailed(int32 ErrorCode
 			RefreshTokenAdditionalActions.Clear();
 		}
 
-		TokenRefreshedEvent.Broadcast(false);
+		auto RefreshedEvent = OnTokenRefreshed();
+		RefreshedEvent.Broadcast(false);
 	}
 }
 

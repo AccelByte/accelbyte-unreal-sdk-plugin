@@ -32,26 +32,15 @@ public:
 	void SetMatchId(const FString& GivenMatchId);
 
 	virtual void SetClientCredentials(const ESettingsEnvironment Environment) override;
-	virtual void ScheduleRefreshToken(double RefreshTime) override;
-	virtual void PollRefreshToken(double CurrentTime) override;
 
 	virtual void Startup() override;
-	virtual void Shutdown() override;
 
 	const FString& GetClientAccessToken() const;
-	virtual const FString& GetAccessToken() const override;
 	const FString& GetClientNamespace() const;
-	virtual const FString& GetNamespace() const override;
-	const double GetExpireTime() const;
-	const double GetRefreshTime() const;
 	const FString& GetMatchId() const;
-	virtual const FString& GetUserId() const override;
 
-private:
-	FString AccessToken;
-	FString Namespace;
+protected:
 	FString MatchId;
-	FString UserId;
 	
 	FString IamServerUrl;
 
@@ -59,7 +48,7 @@ private:
 
 	static TCHAR const* DefaultSection;
 
-	void RemoveFromTicker(FDelegateHandleAlias& handle);
+	virtual void SendRefreshToken() override;
 	void OnPollRefreshTokenResponseSuccess(const FOauth2Token& Result);
 	void OnPollRefreshTokenResponseError(int32 Code, const FString& Message);
 };

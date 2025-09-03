@@ -94,9 +94,10 @@ public:
 	// Can not test this through lua yet, removing the UFUNCTION for now
 	void SetTokenGenerator(TSharedPtr<AccelByte::IAccelByteTokenGenerator> TokenGenerator);
 
+#if 1 // MMv1 Deprecation
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	FString RequestDS(FRequestDSModel const& Request);
-
+#endif
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	void UnbindEvent();
 

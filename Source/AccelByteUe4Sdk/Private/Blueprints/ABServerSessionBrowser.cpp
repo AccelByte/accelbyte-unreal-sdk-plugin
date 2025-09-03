@@ -2,6 +2,7 @@
 // This is licensed software from Accelbyte Inc, for limitations
 // and restrictions contact your company contract manager
 
+#if 1 // MMv1 Deprecation
 #include "Blueprints/ABServerSessionBrowser.h"
 
 using namespace AccelByte;
@@ -486,3 +487,4 @@ void UABServerSessionBrowser::JoinSession(
 		)
 	);
 }
+#endif

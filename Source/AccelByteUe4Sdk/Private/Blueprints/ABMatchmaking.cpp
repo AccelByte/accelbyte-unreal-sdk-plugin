@@ -2,6 +2,7 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
+#if 1 // MMv1 Deprecation
 #include "Blueprints/ABMatchmaking.h"
 #include "Api/AccelByteLobbyApi.h"
 
@@ -190,3 +191,4 @@ void UABMatchmaking::SetOnDs(FDDsNotif OnNotif)
 				}));
 	}
 }
+#endif

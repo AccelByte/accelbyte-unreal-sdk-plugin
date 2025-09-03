@@ -66,11 +66,13 @@ public:
 	GameServerApi::ServerGameTelemetry ServerGameTelemetry{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
 	GameServerApi::ServerLobby ServerLobby{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
 	GameServerApi::ServerChat ServerChat{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
+#if 1 // MMv1 Deprecation
 	GameServerApi::ServerMatchmaking ServerMatchmaking{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
+	GameServerApi::ServerSessionBrowser ServerSessionBrowser{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
+#endif
 	GameServerApi::ServerOauth2 ServerOauth2{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
 	GameServerApi::ServerQosManager ServerQosManager{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
 	GameServerApi::ServerSeasonPass ServerSeasonPass{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
-	GameServerApi::ServerSessionBrowser ServerSessionBrowser{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
 	GameServerApi::ServerStatistic ServerStatistic{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
 	GameServerApi::ServerUGC ServerUGC{ *ServerCredentialsRef, *ServerSettings, *HttpRef};
 	GameServerApi::ServerUser ServerUser{ *ServerCredentialsRef, *ServerSettings, *HttpRef};

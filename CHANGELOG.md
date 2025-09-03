@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.2.0] (2025-09-02)
+
+
+### Features
+
+* add GetUserStatCycleItems with TargetUserId parameter 
+* add id field for item in MoveItemsBetweenInventories 
+* **Login:** expose skipSetCookie optional param for GetTokenWithOtherPlatformToken (v3 & v4) 
+
+
+### Bug Fixes
+
+* a chance of data race when setting RefreshTokenTask 
+* compile error in UE4.27 
+* Fix concurrency issues when accessing AuthToken in the Credentials class 
+* Fix missing steps during cleanup process in ChatApi class 
+* improve thread safety of AccelByteQos class 
+* revert PingRegionsSetLatencies method on getting ping 
+* **Session:** adding IsFull member to the FAccelByteModelsV2BaseSession 
+
+
+### Refactors
+
+* implement flexible refresh token mechanism based on the dynamic expiry duration 
+* mmv1 and partyv1 deprecation 
+
 ## [28.1.0] (2025-07-21)
 
 
