@@ -18,7 +18,7 @@ namespace Api
 	
 StoreDisplay::StoreDisplay(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {
@@ -36,8 +36,8 @@ FAccelByteTaskWPtr StoreDisplay::GetAllViews(FString const& StoreId
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/views")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), StoreId },
@@ -60,8 +60,8 @@ FAccelByteTaskWPtr StoreDisplay::ListActiveSectionContents(FString const& StoreI
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/sections")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("storeId"), StoreId },

@@ -76,7 +76,7 @@ public:
 	bool bUseSharedCredentials;
 	TWeakPtr<FAccelByteInstance, ESPMode::ThreadSafe> AccelByteInstanceWeak;
 	FAccelByteMessagingSystemPtr MessagingSystem{};
-	FHttpRetrySchedulerRef HttpRef{};
+	FHttpRetrySchedulerRef HttpRef{MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>()};
 	SettingsPtr Settings{};
 	FCredentialsRef CredentialsRef;
 	FAccelByteNotificationSender NotificationSender{ *MessagingSystem.Get() };

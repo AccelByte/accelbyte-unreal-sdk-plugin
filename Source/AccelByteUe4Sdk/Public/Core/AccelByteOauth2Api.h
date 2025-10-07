@@ -29,8 +29,8 @@ namespace Api
 class ACCELBYTEUE4SDK_API Oauth2
 {
 public:
-	Oauth2(FHttpRetryScheduler& InHttpRef);
-	Oauth2(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl);
+	Oauth2(FHttpRetrySchedulerBase& InHttpRef);
+	Oauth2(FHttpRetrySchedulerBase& InHttpRef, FString const& InIamServerUrl);
 	
 	/**
 	 * @brief Get access token using authorization code from AccelByte Launcher.
@@ -1026,7 +1026,7 @@ private:
 	, TMap<FString, FString> const& AdditionalHeaders);
 
 	FString ConstructAdditionalData();
-	FHttpRetryScheduler& HttpRef;
+	FHttpRetrySchedulerBase& HttpRef;
 	FString IamServerUrl;
 };
 

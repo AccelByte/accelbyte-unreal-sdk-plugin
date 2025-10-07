@@ -420,7 +420,7 @@ namespace IncomingMessage
 
 	Chat::Chat(Credentials & InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler & InHttpRef
+		, FHttpRetrySchedulerBase & InHttpRef
 		, FAccelByteMessagingSystem & InMessagingSystemRef
 		, FAccelByteNetworkConditioner & InNetworkConditionerRef
 		, float InPingDelay
@@ -447,7 +447,7 @@ namespace IncomingMessage
 
 	Chat::Chat(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, FAccelByteMessagingSystem& InMessagingSystemRef
 		, FAccelByteNetworkConditioner& InNetworkConditionerRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
@@ -554,6 +554,11 @@ namespace IncomingMessage
 	bool Chat::IsConnected() const
 	{
 		return WebSocket.IsValid() && WebSocket->IsConnected();
+	}
+
+	bool Chat::IsReconnecting() const
+	{
+		return WebSocket.IsValid() && WebSocket->IsReconnecting();
 	}
 
 	void Chat::SendPing()

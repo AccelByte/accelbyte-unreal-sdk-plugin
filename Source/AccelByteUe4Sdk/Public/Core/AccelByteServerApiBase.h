@@ -21,7 +21,7 @@ class ACCELBYTEUE4SDK_API FServerApiBase
 public:
 	FServerApiBase(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRe
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient);
 
 	void SetServerApiClient(TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient);
@@ -39,7 +39,7 @@ protected:
 	}
 	TSharedRef<ServerCredentials const, ESPMode::ThreadSafe> ServerCredentialsRef;
 	ServerSettings const& ServerSettingsRef;
-	FHttpRetryScheduler& HttpRef;
+	FHttpRetrySchedulerBase& HttpRef;
 	FHttpClient HttpClient;
 	TWeakPtr<FServerApiClient, ESPMode::ThreadSafe> ServerApiClient;
 };

@@ -44,7 +44,7 @@ class ACCELBYTEUE4SDK_API ServerDSHub : public FServerApiBase, public IWebsocket
 public:
 	ServerDSHub(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, float InPingDelay = 30.f
 		, float InInitialBackoffDelay = 1.f
 		, float InMaxBackoffDelay = 30.f
@@ -52,7 +52,7 @@ public:
 
 	explicit ServerDSHub(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient
 		, float InPingDelay = 30.f
 		, float InInitialBackoffDelay = 1.f

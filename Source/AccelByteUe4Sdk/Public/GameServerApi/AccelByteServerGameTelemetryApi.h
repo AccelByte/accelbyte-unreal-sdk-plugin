@@ -29,7 +29,7 @@ class ACCELBYTEUE4SDK_API ServerGameTelemetry : public FServerApiBase
 public:
 	ServerGameTelemetry(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	virtual ~ServerGameTelemetry();
 

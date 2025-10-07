@@ -26,7 +26,7 @@ class ACCELBYTEUE4SDK_API ServerLobby : public FServerApiBase
 public:
 	ServerLobby(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient  = nullptr);
 	~ServerLobby();
 

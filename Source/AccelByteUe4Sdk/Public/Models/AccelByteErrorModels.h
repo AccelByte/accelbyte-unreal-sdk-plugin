@@ -35,6 +35,7 @@ struct ACCELBYTEUE4SDK_API FUserBan
 	EBanReason Reason{EBanReason::EMPTY};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserBan")
 	FString EndDate{};
+	FDateTime EndDateTime() const {return FDateTime::FromUnixTimestamp(FCString::Atoi(*EndDate));}
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserBan")
 	FString Comment{};
 };

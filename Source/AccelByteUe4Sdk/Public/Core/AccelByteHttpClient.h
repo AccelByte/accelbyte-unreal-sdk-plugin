@@ -42,7 +42,7 @@ namespace AccelByte
 	public:
 		FHttpClient(BaseCredentials const& InCredentialsRef
 			, BaseSettings const& InSettingsRef
-			, FHttpRetryScheduler & InHttpRef);
+			, FHttpRetrySchedulerBase & InHttpRef);
 		~FHttpClient();
 
 		/**
@@ -822,7 +822,7 @@ namespace AccelByte
 		}
 
 	private:
-		FHttpRetryScheduler& HttpRef;
+		FHttpRetrySchedulerBase& HttpRef;
 		BaseCredentials const& CredentialsRef;
 		BaseSettings const& SettingsRef;
 

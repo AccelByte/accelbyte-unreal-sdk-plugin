@@ -17,7 +17,7 @@ namespace Api
 
 Currency::Currency(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -34,7 +34,7 @@ FAccelByteTaskWPtr Currency::GetCurrencyList(FString const& Namespace
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/currencies")
 		, *SettingsRef.PlatformServerUrl
-		, *Namespace);
+		, *FGenericPlatformHttp::UrlEncode(Namespace));
 
 	TMultiMap<FString, FString> QueryParams = {};
 	if (CurrencyType != EAccelByteCurrencyType::NONE)

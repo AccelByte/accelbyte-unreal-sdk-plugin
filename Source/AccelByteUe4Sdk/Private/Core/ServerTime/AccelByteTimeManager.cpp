@@ -14,7 +14,7 @@
 namespace AccelByte
 {
 	
-FAccelByteTimeManager::FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& Http, const FString& InBasicServerUrl)
+FAccelByteTimeManager::FAccelByteTimeManager(AccelByte::FHttpRetrySchedulerBase& Http, const FString& InBasicServerUrl)
 	: bUseSharedResources(true)
 	, HttpRef(Http.AsShared())
 	, BasicServerUrl(InBasicServerUrl)

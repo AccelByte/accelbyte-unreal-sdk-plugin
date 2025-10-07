@@ -82,7 +82,7 @@ class ACCELBYTEUE4SDK_API Lobby
 public:
 	Lobby(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, FAccelByteMessagingSystem& InMessagingSystemRef
 		, FAccelByteNetworkConditioner& InNetworkConditionerRef
 		, float InPingDelay = 30.f
@@ -92,7 +92,7 @@ public:
 
 	Lobby(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, FAccelByteMessagingSystem& InMessagingSystemRef
 		, FAccelByteNetworkConditioner& InNetworkConditionerRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
@@ -661,6 +661,13 @@ public:
 	 * @return true if it's connected, false otherwise.
 	 */
 	bool IsConnected() const;
+
+	/**
+	 * @brief Check whether the websocket is currently trying to reconnect to the Lobby server.
+	 *
+	 * @return true if it's connected, false otherwise.
+	 */
+	bool IsReconnecting() const;
 	
 	/**
 	 * @brief Send ping

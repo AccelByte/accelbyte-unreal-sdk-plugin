@@ -26,7 +26,7 @@ class ACCELBYTEUE4SDK_API CloudSave : public FApiBase, public TSharedFromThis<Cl
 #define RESPONSE_MAX_LIMIT_COUNT 100
 	
 public:
-	CloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	CloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~CloudSave();
 	
 	/**

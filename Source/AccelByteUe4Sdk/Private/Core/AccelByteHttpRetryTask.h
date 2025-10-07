@@ -43,6 +43,7 @@ namespace AccelByte
 
 	private:
 		FHttpRequestPtr Request{ nullptr };
+		FHttpResponsePtr Response{ nullptr };
 		const FHttpRequestCompleteDelegate CompleteDelegate{};
 		const double RequestTime{ 0.0f };
 		double PauseTime{ 0.0f };

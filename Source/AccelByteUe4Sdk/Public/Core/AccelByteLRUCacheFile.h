@@ -290,19 +290,7 @@ inline TSharedPtr<FString> FAccelByteLRUCacheFile<FString>::FromFString(const FS
 template<>
 inline const TArray<uint8> FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>::ToArrayByte(FAccelByteHttpCacheItem& CacheItem)
 {
-	FHttpRequestPtr RequestPtr = CacheItem.Request;
 	TArray<uint8> Output;
-
-	if (!RequestPtr.IsValid()) { return Output; }
-
-	FAccelByteLRUHttpStruct Struct;
-	Struct.SetMember(
-		RequestPtr->GetAllHeaders(),
-		RequestPtr->GetResponse()->GetAllHeaders(),
-		RequestPtr->GetResponse()->GetResponseCode(),
-		RequestPtr->GetURL(),
-		RequestPtr->GetResponse()->GetContent(),
-		CacheItem.ExpireTime);
 
 	//TODO
 	//switch (headers[mime-type)):
@@ -310,7 +298,7 @@ inline const TArray<uint8> FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>::ToAr
 	//...
 
 	FString SerializedText;
-	if (!FJsonObjectConverter::UStructToJsonObjectString<FAccelByteLRUHttpStruct>(Struct, SerializedText))
+	if (!FJsonObjectConverter::UStructToJsonObjectString<FAccelByteLRUHttpStruct>(CacheItem.SerializableRequestAndResponse, SerializedText))
 	{
 		return Output;
 	}
@@ -352,7 +340,6 @@ inline TSharedPtr<FAccelByteHttpCacheItem> FAccelByteLRUCacheFile<FAccelByteHttp
 
 	TSharedPtr<FAccelByteHttpCacheItem> Output = MakeShareable<FAccelByteHttpCacheItem>(new FAccelByteHttpCacheItem);
 	Output->SerializableRequestAndResponse = SerializeableHttpStruct;
-	Output->Request = Request;
 	Output->ExpireTime = double(FCString::Atof(*SerializeableHttpStruct.ExpireTime));
 
 	return Output;

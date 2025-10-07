@@ -16,7 +16,7 @@ namespace Api
 
 Statistic::Statistic(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -86,8 +86,8 @@ FAccelByteTaskWPtr Statistic::CreateUserStatItems(TArray<FString> const& StatCod
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/bulk")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FString Contents = "[";
 	FString Content;
@@ -161,8 +161,8 @@ FAccelByteTaskWPtr Statistic::GetUserStatItems(FString const& UserId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	FString StatCodesValue = FString::Join(StatCodes, TEXT(","));
 	FString TagsValue = FString::Join(Tags, TEXT(","));
@@ -189,8 +189,8 @@ FAccelByteTaskWPtr Statistic::IncrementUserStatItems(TArray<FAccelByteModelsBulk
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/value/bulk")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FString Contents = "[";
 	FString Content;
@@ -221,8 +221,9 @@ FAccelByteTaskWPtr Statistic::ListUserStatItems(TArray<FString> const& StatCodes
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/statitems/value/bulk")
-		, *SettingsRef.StatisticServerUrl, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *SettingsRef.StatisticServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("additionalKey"), AdditionalKey }
@@ -250,8 +251,8 @@ FAccelByteTaskWPtr Statistic::BulkUpdateUserStatItemsValue(FString const& Additi
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/statitems/value/bulk")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FString Content = TEXT("");
 	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsUpdateUserStatItemWithStatCode>(BulkUpdateUserStatItems, Content);
@@ -273,9 +274,9 @@ FAccelByteTaskWPtr Statistic::UpdateUserStatItemsValue(FString const& StatCode
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/stats/%s/statitems/value")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *StatCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(StatCode));
 
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(UpdateUserStatItem, Content); 
@@ -307,7 +308,7 @@ FAccelByteTaskWPtr Statistic::BulkFetchStatItemsValue(FString const& StatCode
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statitems/bulk")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 
 	TMultiMap<FString, FString> QueryParams {
@@ -326,9 +327,9 @@ FAccelByteTaskWPtr Statistic::ResetUserStatItemValue(FString const& StatCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/stats/%s/statitems/value/reset")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *StatCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(StatCode));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -347,8 +348,8 @@ FAccelByteTaskWPtr Statistic::GetGlobalStatItemsByStatCode(FString const& StatCo
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/globalstatitems/%s")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *StatCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(StatCode));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -362,7 +363,7 @@ FAccelByteTaskWPtr Statistic::ListGlobalStatItems(THandler<FAccelByteModelsGloba
 	FReport::Log(FString(__FUNCTION__));
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/globalstatitems")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("limit"), FString::FromInt(Limit) },
@@ -389,7 +390,7 @@ FAccelByteTaskWPtr Statistic::GetUserStatCycleItems(FString const& CycleId
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	return GetUserStatCycleItems(CycleId, *CredentialsRef->GetUserId(), OnSuccess, OnError, Limit, Offset, StatCodes);
+	return GetUserStatCycleItems(CycleId, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()), OnSuccess, OnError, Limit, Offset, StatCodes);
 }
 
 FAccelByteTaskWPtr Statistic::GetUserStatCycleItems(FString const& CycleId
@@ -404,9 +405,9 @@ FAccelByteTaskWPtr Statistic::GetUserStatCycleItems(FString const& CycleId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statCycles/%s/statCycleitems")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *TargetUserId
-		, *CycleId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(TargetUserId)
+		, *FGenericPlatformHttp::UrlEncode(CycleId));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("statCodes"), FString::Join(StatCodes, TEXT(",")) },
@@ -425,8 +426,8 @@ FAccelByteTaskWPtr Statistic::GetStatCycleConfig(FString const& CycleId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statCycles/%s")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CycleId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CycleId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -441,7 +442,7 @@ FAccelByteTaskWPtr Statistic::GetListStatCycleConfigs(EAccelByteCycle CycleType
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statCycles")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams = {
 		{TEXT("limit"), FString::FromInt(Limit)},
@@ -468,7 +469,7 @@ FAccelByteTaskWPtr Statistic::GetListStatCycleConfigs(FAccelByteModelsStatGetLis
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statCycles")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams = {
 		{TEXT("limit"), FString::FromInt(Limit)},
@@ -492,7 +493,7 @@ FAccelByteTaskWPtr Statistic::GetMyStatItems(TArray<FString> const& StatCodes
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/statitems")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FString StatCodesValue = FString::Join(StatCodes, TEXT("&statCodes="));
 	FString TagsValue = FString::Join(Tags, TEXT("&tags="));
@@ -526,7 +527,7 @@ FAccelByteTaskWPtr Statistic::GetMyStatItemValues(TArray<FString> const& StatCod
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/statitems/value/bulk")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("additionalKey"), AdditionalKey }
@@ -557,8 +558,8 @@ FAccelByteTaskWPtr Statistic::GetMyStatCycleItems(FString const& CycleId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/statCycles/%s/statCycleitems")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CycleId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CycleId));
 
 	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
@@ -583,8 +584,8 @@ FAccelByteTaskWPtr Statistic::BulkResetMultipleUserStatItemsValue(TArray<FAccelB
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statitems/value/reset/bulk")
 		, *SettingsRef.StatisticServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 	FString Verb = TEXT("PUT");
 	FString Content = TEXT(""); 
 	FAccelByteUtilities::TArrayUStructToJsonString(UserStatItemValue, Content);

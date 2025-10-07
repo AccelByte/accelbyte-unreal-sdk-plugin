@@ -27,7 +27,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API GameProfile : public FApiBase, public TSharedFromThis<GameProfile, ESPMode::ThreadSafe>
 {
 public:
-	GameProfile(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	GameProfile(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~GameProfile();
 
 	/**

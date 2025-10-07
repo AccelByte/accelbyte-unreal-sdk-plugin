@@ -16,7 +16,7 @@ namespace GameServerApi
 
 ServerQosManager::ServerQosManager(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
@@ -42,7 +42,7 @@ void ServerQosManager::GetActiveQosServers(const THandler<FAccelByteModelsQosSer
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespace/%s/qos")
 		, *ServerSettingsRef.QosManagerServerUrl
-		, *ServerCredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace()));
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }

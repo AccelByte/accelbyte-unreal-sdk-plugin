@@ -247,3 +247,58 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRetrieveUserEligibilitiesResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
 	bool IsHiddenPublic{false};
 };
+
+/** @brief Data Model for retrieve Agreement Response */
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRetrieveAcceptedAgreementResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString Id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString PolicyId{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString PolicyType{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString PolicyName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString CountryType{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString CountryGroupName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	TArray<FString> Tags{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString DisplayVersion{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString Namespace{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString CountryCode{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FString Description{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	TArray<FAccelByteModelsLocalizedPolicyVersionObject> LocalizedPolicyVersions{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	FDateTime SigningDate{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | FAccelByteModelsRetrieveAcceptedAgreementResponse")
+	bool IsAccepted{false};
+};

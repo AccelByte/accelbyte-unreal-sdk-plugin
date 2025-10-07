@@ -31,7 +31,7 @@ const FString MMV2BackfillTicketExpiredTopic = TEXT("BACKFILL_TICKET_EXPIRE");
 ServerDSHub::ServerDSHub(
 	ServerCredentials const& InCredentialsRef,
 	ServerSettings const& InSettingsRef,
-	FHttpRetryScheduler& InHttpRef,
+	FHttpRetrySchedulerBase& InHttpRef,
 	float InPingDelay,
 	float InInitialBackoffDelay,
 	float InMaxBackoffDelay,
@@ -48,7 +48,7 @@ ServerDSHub::ServerDSHub(
 
 ServerDSHub::ServerDSHub(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient
 	, float InPingDelay
 	, float InInitialBackoffDelay

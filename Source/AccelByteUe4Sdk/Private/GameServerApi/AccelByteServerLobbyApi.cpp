@@ -16,7 +16,7 @@ namespace GameServerApi
 
 ServerLobby::ServerLobby(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
@@ -39,8 +39,8 @@ FAccelByteTaskWPtr ServerLobby::GetPartyDataByUserId(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/users/%s/party")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -69,8 +69,8 @@ FAccelByteTaskWPtr ServerLobby::GetPartyStorage(FString const& PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *PartyId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -85,8 +85,8 @@ FAccelByteTaskWPtr ServerLobby::RequestWritePartyStorage(FString const& PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s/attributes")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *PartyId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyId));
 
 	FString Contents = "{\n";
 	FString CustomAttribute;
@@ -157,8 +157,8 @@ FAccelByteTaskWPtr ServerLobby::GetSessionAttributeAll(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -185,9 +185,9 @@ FAccelByteTaskWPtr ServerLobby::GetSessionAttribute(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes/%s")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -217,8 +217,8 @@ FAccelByteTaskWPtr ServerLobby::SetSessionAttribute(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes")
 		, *ServerSettingsRef.LobbyServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Body, OnSuccess, OnError);
 }
@@ -255,8 +255,8 @@ FAccelByteTaskWPtr ServerLobby::GetListOfBlockedUsers(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked")
 		, *ServerSettingsRef.BaseUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -276,8 +276,8 @@ FAccelByteTaskWPtr ServerLobby::GetListOfBlockers(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by")
 		, *ServerSettingsRef.BaseUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }

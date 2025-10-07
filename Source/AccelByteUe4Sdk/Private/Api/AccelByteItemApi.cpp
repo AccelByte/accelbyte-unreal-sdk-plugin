@@ -17,7 +17,7 @@ namespace Api
 {
 Item::Item(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {
@@ -51,8 +51,8 @@ FAccelByteTaskWPtr Item::GetItemById(FString const& ItemId
 	const FString Verb            = TEXT("GET");
 	const FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ItemId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ItemId));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("region"), Region },
@@ -88,7 +88,7 @@ FAccelByteTaskWPtr Item::GetItemByAppId(FString const& AppId
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byAppId")
 		, *SettingsRef.PlatformServerUrl
-		, *SettingsRef.PublisherNamespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.PublisherNamespace));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("region"), Region },
@@ -119,7 +119,7 @@ FAccelByteTaskWPtr Item::GetItemsByCriteria(FAccelByteModelsItemCriteria const& 
 	const FString Verb = TEXT("GET");
     const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria")
     	, *SettingsRef.PlatformServerUrl
-    	, *CredentialsRef->GetNamespace());
+    	, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TArray<FString> SortByStringArray = {};
 	if (SortBy.Num() > 0 )
@@ -180,7 +180,7 @@ FAccelByteTaskWPtr Item::SearchItem(FString const& Language
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/search")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 	
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("region"), Region },
@@ -218,7 +218,7 @@ FAccelByteTaskWPtr Item::GetItemBySku(FString const& Sku
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/bySku")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("sku"), Sku },
@@ -255,7 +255,7 @@ FAccelByteTaskWPtr Item::BulkGetLocaleItems(TArray<FString> const& ItemIds
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/locale/byIds")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
@@ -289,8 +289,8 @@ FAccelByteTaskWPtr Item::GetItemDynamicData(FString const& ItemId
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/dynamic")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ItemId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ItemId));
 
 	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
@@ -309,7 +309,7 @@ FAccelByteTaskWPtr Item::GetListAllStores(THandler<TArray<FAccelByteModelsPlatfo
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/stores")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
@@ -345,7 +345,7 @@ FAccelByteTaskWPtr Item::GetEstimatedPrice(const TArray<FString>& ItemIds
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/estimatedPrice")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(Verb, Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -356,9 +356,9 @@ FAccelByteTaskWPtr Item::GetItemMappings(EAccelBytePlatformMapping Platform
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(
-		TEXT("%s/public/namespaces/%s/iap/item/mapping"), *SettingsRef.PlatformServerUrl,
-		*CredentialsRef->GetNamespace());
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/iap/item/mapping")
+		, *SettingsRef.PlatformServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 	if(Platform != EAccelBytePlatformMapping::NONE)

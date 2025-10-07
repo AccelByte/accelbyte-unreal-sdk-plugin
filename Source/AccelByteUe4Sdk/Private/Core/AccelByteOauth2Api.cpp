@@ -16,11 +16,11 @@ namespace AccelByte
 namespace Api
 {
 
-Oauth2::Oauth2(FHttpRetryScheduler& InHttpRef)
+Oauth2::Oauth2(FHttpRetrySchedulerBase& InHttpRef)
 : HttpRef{InHttpRef}
 {}
 
-Oauth2::Oauth2(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl)
+Oauth2::Oauth2(FHttpRetrySchedulerBase& InHttpRef, FString const& InIamServerUrl)
 	: HttpRef(InHttpRef)
 	, IamServerUrl(InIamServerUrl)
 {}
@@ -783,9 +783,9 @@ FAccelByteTaskWPtr Oauth2::RetrieveUserThirdPartyPlatformToken(FString const& Na
 
 	const FString Url = FString::Printf(TEXT("%s/v3/oauth/namespaces/%s/users/%s/platforms/%s/platformToken")
 		, IamUrl.IsEmpty() ? *IamServerUrl : *IamUrl
-		, *Namespace 
-		, *UserId
-		, *PlatformId);
+		, *FGenericPlatformHttp::UrlEncode(Namespace )
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("GET"));

@@ -37,7 +37,7 @@ class ACCELBYTEUE4SDK_API ServerDSM : public FServerApiBase
 public:
 	ServerDSM(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerDSM();
 

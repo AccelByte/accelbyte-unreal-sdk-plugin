@@ -16,7 +16,7 @@ namespace Api
 
 SeasonPass::SeasonPass(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -32,7 +32,7 @@ FAccelByteTaskWPtr SeasonPass::GetCurrentSeason(FString const& Language
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/seasons/current")
 		, *SettingsRef.SeasonPassServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("language"), *Language}
@@ -90,9 +90,9 @@ FAccelByteTaskWPtr SeasonPass::GetUserSeason(FString const& SeasonId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/seasons/%s/data")
 		, *SettingsRef.SeasonPassServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *SeasonId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(SeasonId));
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject>::CreateLambda(
 		[OnSuccess](FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject const& Response)
@@ -146,8 +146,8 @@ FAccelByteTaskWPtr SeasonPass::GetCurrentUserSeason(THandler<FAccelByteModelsUse
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/seasons/current/data")
 		, *SettingsRef.SeasonPassServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject>::CreateLambda(
 		[OnSuccess](FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject const& Response)
@@ -202,8 +202,8 @@ FAccelByteTaskWPtr SeasonPass::ClaimRewards(FAccelByteModelsSeasonClaimRewardReq
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/seasons/current/rewards")
 		, *SettingsRef.SeasonPassServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsSeasonClaimRewardResponseJsonWrapper>::CreateLambda(
 		[OnSuccess](FAccelByteModelsSeasonClaimRewardResponseJsonWrapper const& Response)
@@ -243,8 +243,8 @@ FAccelByteTaskWPtr SeasonPass::BulkClaimRewards(THandler<FAccelByteModelsSeasonC
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/seasons/current/rewards/bulk")
 		, *SettingsRef.SeasonPassServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	auto OnSuccessHttpClient = THandler<FAccelByteModelsSeasonClaimRewardResponseJsonWrapper>::CreateLambda(
 		[OnSuccess](FAccelByteModelsSeasonClaimRewardResponseJsonWrapper const& Response)

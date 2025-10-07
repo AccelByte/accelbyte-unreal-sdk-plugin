@@ -21,9 +21,9 @@ namespace Api
 class ACCELBYTEUE4SDK_API BaseAnalytics : public GameTelemetry
 {
 protected:
-	BaseAnalytics(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, FString const& InEventName, bool bInCacheEvent, bool bInRetryOnFailed = false);
+	BaseAnalytics(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, FString const& InEventName, bool bInCacheEvent, bool bInRetryOnFailed = false);
 
-	BaseAnalytics(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient, FString const& InEventName, bool bInCacheEvent, bool bInRetryOnFailed = false);
+	BaseAnalytics(Credentials& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient, FString const& InEventName, bool bInCacheEvent, bool bInRetryOnFailed = false);
 
 	void SendEventData(const TSharedPtr<FJsonObject>& Payload,
 		FVoidHandler const& OnSuccess,

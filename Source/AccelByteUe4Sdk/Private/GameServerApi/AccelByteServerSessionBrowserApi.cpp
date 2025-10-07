@@ -15,7 +15,7 @@ namespace GameServerApi
 
 ServerSessionBrowser::ServerSessionBrowser(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
@@ -162,7 +162,7 @@ FAccelByteTaskWPtr ServerSessionBrowser::CreateGameSession(FAccelByteModelsSessi
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, CreateSessionRequest, OnSuccess, OnError);
 }
@@ -218,8 +218,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::UpdateGameSession(FString const& Sessio
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *SessionId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(SessionId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateSessionRequest, OnSuccess, OnError);
 }
@@ -239,8 +239,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::RemoveGameSession(FString const& Sessio
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *SessionId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(SessionId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -316,7 +316,7 @@ FAccelByteTaskWPtr ServerSessionBrowser::GetGameSessions(EAccelByteSessionType S
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("session_type"), *SessionTypeString },
@@ -346,8 +346,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::GetGameSessionBySessionId(FString const
 		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *SessionId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(SessionId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -369,8 +369,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::RegisterPlayer(FString const& SessionId
 
     const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player")
     	, *ServerSettingsRef.SessionBrowserServerUrl
-    	, *ServerCredentialsRef->GetClientNamespace()
-    	, *SessionId);
+    	, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+    	, *FGenericPlatformHttp::UrlEncode(SessionId));
 
 	FAccelByteModelsSessionBrowserAddPlayerRequest AddPlayerRequest;
 	AddPlayerRequest.User_id = PlayerToAdd;
@@ -395,9 +395,9 @@ FAccelByteTaskWPtr ServerSessionBrowser::UnregisterPlayer(FString const& Session
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *SessionId
-		, *PlayerToRemove);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(SessionId)
+		, *FGenericPlatformHttp::UrlEncode(PlayerToRemove));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -420,8 +420,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::GetRecentPlayer(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/recentplayer/%s")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Limit > 0)
@@ -452,8 +452,8 @@ FAccelByteTaskWPtr ServerSessionBrowser::JoinSession(FString const& SessionId
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/join")
 		, *ServerSettingsRef.SessionBrowserServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *SessionId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(SessionId));
 
 	FAccelByteModelsSessionBrowserJoinSessionRequest JoinRequest;
 	if(!Password.IsEmpty())

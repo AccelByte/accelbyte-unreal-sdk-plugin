@@ -19,7 +19,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteCredentials);
 namespace AccelByte
 {
 
-Credentials::Credentials(FHttpRetryScheduler& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& InIamServerUrl)
+Credentials::Credentials(FHttpRetrySchedulerBase& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& InIamServerUrl)
 	: BaseCredentials()
 	, Oauth(InHttpRef, InIamServerUrl)
 #if ENGINE_MAJOR_VERSION < 5
@@ -225,7 +225,7 @@ void Credentials::SendRefreshToken()
 	);
 }
 
-void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
+void Credentials::SetBearerAuthRejectedHandler(FHttpRetrySchedulerBase& HttpRef)
 {
 	FWriteScopeLock WriteLock(DelegateLock);
 

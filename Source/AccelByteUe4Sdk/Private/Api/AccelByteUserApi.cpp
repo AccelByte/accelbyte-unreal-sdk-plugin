@@ -30,7 +30,7 @@ namespace Api
 
 User::User(Credentials& InCredentialsRef
 	, Settings& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, EntitlementWPtr InEntitlementWeak
 	, ItemWPtr InItemWeak
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
@@ -1591,7 +1591,7 @@ FAccelByteTaskWPtr User::Register(FString const& Username
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users")
 		, *SettingsRef.IamServerUrl
-		, *SettingsRef.Namespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	FRegisterRequest NewUserRequest;
 	NewUserRequest.DisplayName  = DisplayName;
@@ -1697,7 +1697,7 @@ FAccelByteTaskWPtr User::Registerv3(FRegisterRequestv3 const& RegisterRequest
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users")
 		, *SettingsRef.IamServerUrl
-		, *SettingsRef.Namespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(RegisterRequest, Content);
@@ -1753,7 +1753,7 @@ FAccelByteTaskWPtr User::UpdateUser(FUserUpdateRequest const& UpdateRequest
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UpdateRequest, OnSuccess, OnError);
 }
@@ -1778,7 +1778,7 @@ FAccelByteTaskWPtr User::UpdateEmail(FUpdateEmailRequest const& UpdateEmailReque
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/email")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateEmailRequest, OnSuccess, OnError);
 }
@@ -1797,8 +1797,8 @@ FAccelByteTaskWPtr User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformTyp
 		const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType);
 		const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users")
 			, *SettingsRef.IamServerUrl
-			, *CredentialsRef->GetNamespace()
-			, *PlatformString);
+			, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+			, *FGenericPlatformHttp::UrlEncode(PlatformString));
 
 		TMultiMap<FString, FString> QueryParams;
 		if (bRawPuid)
@@ -1838,8 +1838,8 @@ FAccelByteTaskWPtr User::BulkGetUserByOtherPlatformUserIdsV4(EAccelBytePlatformT
 	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType);
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/platforms/%s/users")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformString);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformString));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (bRawPuid)
@@ -1950,7 +1950,7 @@ FAccelByteTaskWPtr User::UpgradeAndVerify(FString const& Username
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
 	JsonObject->SetStringField("code", VerificationCode);
@@ -1994,7 +1994,7 @@ FAccelByteTaskWPtr User::UpgradeAndVerify2(FUpgradeAndVerifyRequest const& Upgra
 	
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/code/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 	
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, UpgradeAndVerifyRequest, OnSuccess, OnError);
 }
@@ -2026,7 +2026,7 @@ FAccelByteTaskWPtr User::Upgrade(FString const& Username
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const FString Content = FString::Printf(TEXT("{ \"EmailAddress\": \"%s\", \"Password\": \"%s\"}")
 		, *Username
@@ -2066,7 +2066,7 @@ FAccelByteTaskWPtr User::Upgradev2(FString const& EmailAddress
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const FString Content = FString::Printf(TEXT("{ \"emailAddress\": \"%s\", \"password\": \"%s\", \"username\": \"%s\"}")
 		, *EmailAddress
@@ -2090,7 +2090,7 @@ FAccelByteTaskWPtr User::Verify(FString const& VerificationCode
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const FString Content = FString::Printf(TEXT("{ \"Code\": \"%s\",\"ContactType\":\"%s\"}")
 		, *VerificationCode
@@ -2113,7 +2113,7 @@ FAccelByteTaskWPtr User::SendResetPasswordCode(FString const& EmailAddress
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/forgot")
 		, *SettingsRef.IamServerUrl
-		, *SettingsRef.Namespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	const FString Content= FString::Printf(TEXT("{\"emailAddress\": \"%s\"}"), *EmailAddress);
 	
@@ -2153,7 +2153,7 @@ FAccelByteTaskWPtr User::ResetPassword(FString const& VerificationCode
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/reset")
 		, *SettingsRef.IamServerUrl
-		, *SettingsRef.Namespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	FResetPasswordRequest ResetPasswordRequest;
 	ResetPasswordRequest.Code           = VerificationCode;
@@ -2177,8 +2177,8 @@ FAccelByteTaskWPtr User::GetPlatformLinks(THandler<FPagedPlatformLinks> const& O
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -2215,8 +2215,8 @@ FAccelByteTaskWPtr User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
 	const FString Content = FString::Printf(TEXT("ticket=%s"), *FGenericPlatformHttp::UrlEncode(*Ticket));
 
@@ -2237,8 +2237,8 @@ FAccelByteTaskWPtr User::LinkOtherPlatformId(FString const& PlatformId
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
 	const FString Content = FString::Printf(TEXT("ticket=%s"), *FGenericPlatformHttp::UrlEncode(*Ticket));
 	
@@ -2280,8 +2280,8 @@ FAccelByteTaskWPtr User::ForcedLinkOtherPlatform(EAccelBytePlatformType Platform
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms/link")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	auto PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
@@ -2302,8 +2302,8 @@ FAccelByteTaskWPtr User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -2318,8 +2318,8 @@ FAccelByteTaskWPtr User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -2332,8 +2332,8 @@ FAccelByteTaskWPtr User::UnlinkOtherPlatformId(FString const& PlatformId
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -2348,8 +2348,8 @@ FAccelByteTaskWPtr User::UnlinkAllOtherPlatform(EAccelBytePlatformType PlatformT
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -2362,8 +2362,8 @@ FAccelByteTaskWPtr User::UnlinkAllOtherPlatformId(FString const& PlatformId
 	
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/all")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -2376,7 +2376,7 @@ FAccelByteTaskWPtr User::SendVerificationCode(FVerificationCodeRequest const& Ve
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/request")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, VerificationCodeRequest, OnSuccess, OnError);
 }
@@ -2394,7 +2394,7 @@ FAccelByteTaskWPtr User::SearchUsers(FString const& Query
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FString SearchId;
 	if (By != EAccelByteSearchType::ALL)
@@ -2500,8 +2500,8 @@ FAccelByteTaskWPtr User::GetUserByUserId(FString const& UserID
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserID);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserID));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -2521,8 +2521,8 @@ FAccelByteTaskWPtr User::GetUserPublicInfoByUserId(FString const& UserID
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserID);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserID));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -2538,9 +2538,9 @@ FAccelByteTaskWPtr User::GetUserPublicInfoByOtherPlatformUserId(EAccelBytePlatfo
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/platforms/%s/users/%s")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *PlatformId
-		, *OtherPlatformUserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId)
+		, *FGenericPlatformHttp::UrlEncode(OtherPlatformUserId));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2644,7 +2644,7 @@ FAccelByteTaskWPtr User::ValidateUserInput(FUserInputValidationRequest const& Us
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/input/validation")
 		, *SettingsRef.IamServerUrl
-		, *SettingsRef.Namespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	const TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/json")},
@@ -2667,7 +2667,7 @@ FAccelByteTaskWPtr User::Enable2FaBackupCode(THandler<FUser2FaBackupCode> const&
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode/enable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2684,7 +2684,7 @@ FAccelByteTaskWPtr User::Disable2FaBackupCode(FVoidHandler const& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode/disable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2700,7 +2700,7 @@ FAccelByteTaskWPtr User::GenerateBackupCode(THandler<FUser2FaBackupCode> const& 
 
 	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2716,7 +2716,7 @@ FAccelByteTaskWPtr User::GetBackupCode(THandler<FUser2FaBackupCode> const& OnSuc
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2733,7 +2733,7 @@ FAccelByteTaskWPtr User::Enable2FaAuthenticator(FVoidHandler const& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/enable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMap<FString, FString> Data = {
 		{TEXT("code"), Code}
@@ -2750,7 +2750,7 @@ FAccelByteTaskWPtr User::Disable2FaAuthenticator(FVoidHandler const& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/disable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2766,7 +2766,7 @@ FAccelByteTaskWPtr User::GenerateSecretKeyFor2FaAuthenticator(THandler<FUser2FaS
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/key")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2782,7 +2782,7 @@ FAccelByteTaskWPtr User::GetEnabled2FaFactors(THandler<FUser2FaMethod> const& On
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/factor")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2801,7 +2801,7 @@ FAccelByteTaskWPtr User::MakeDefault2FaFactors(EAccelByteLoginAuthFactorType Aut
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/factor")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const FString Content = FString::Printf(TEXT("factor=%s"), *Factor);
 
@@ -2829,7 +2829,7 @@ FAccelByteTaskWPtr User::UpdateUserV3(FUserUpdateRequest const& UpdateRequest
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UpdateRequest, OnSuccess, OnError);
 }
@@ -2849,8 +2849,8 @@ FAccelByteTaskWPtr User::GetPublisherUser(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/publisher")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -2896,8 +2896,8 @@ FAccelByteTaskWPtr User::GetUserInformation(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/information")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -3032,7 +3032,7 @@ FAccelByteTaskWPtr User::CheckUserAccountAvailability(FString const& DisplayName
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/availability")
 	   , *SettingsRef.IamServerUrl
-	   , *CredentialsRef->GetNamespace());
+	   , *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const FString Field = bIsCheckUniqueDisplayName ? TEXT("uniqueDisplayName") : TEXT("displayName");
 	const TMultiMap<FString, FString> QueryParams ({
@@ -3105,7 +3105,7 @@ FAccelByteTaskWPtr User::GetUserOtherPlatformBasicPublicInfo(FPlatformAccountInf
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/platforms")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TSharedPtr<FJsonObject> JsonObj = FJsonObjectConverter::UStructToJsonObject(Request);
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObj, FAccelByteUtilities::FieldRemovalFlagAll, { TEXT("userIds") });
@@ -3160,8 +3160,8 @@ FAccelByteTaskWPtr User::GetAccountConfigurationValue(EAccountConfiguration Conf
 	FReport::Log(FString(__FUNCTION__));   
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/config/%s")
 	   , *SettingsRef.IamServerUrl
-	   , *SettingsRef.PublisherNamespace
-	   , *Config);
+	   , *FGenericPlatformHttp::UrlEncode(SettingsRef.PublisherNamespace)
+	   , *FGenericPlatformHttp::UrlEncode(Config));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/json")},
@@ -3191,7 +3191,7 @@ FAccelByteTaskWPtr User::UpdatePassword(FUpdatePasswordRequest const& Request
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/password")
 		, *SettingsRef.IamServerUrl
-		, *SettingsRef.Namespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
 }
@@ -3210,7 +3210,7 @@ FAccelByteTaskWPtr User::EnableMfaEmail(FString const& Code
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/email/enable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMap<FString, FString> Data = {
 		{TEXT("code"), Code}
@@ -3227,7 +3227,7 @@ FAccelByteTaskWPtr User::DisableMfaEmail(FVoidHandler const& OnSuccess
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/email/disable")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
@@ -3240,7 +3240,7 @@ FAccelByteTaskWPtr User::SendMfaCodeToEmail(const EAccelByteSendMfaEmailAction A
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/email/code")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const FString Request = FString::Printf(TEXT("action=%s"), *FAccelByteUtilities::GetUEnumValueAsString<EAccelByteSendMfaEmailAction>(Action));
 
@@ -3253,7 +3253,7 @@ FAccelByteTaskWPtr User::GetMfaStatus(THandler<FMfaStatusResponse> const& OnSucc
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/status")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -3277,7 +3277,7 @@ FAccelByteTaskWPtr User::VerifyMfaCode(EAccelByteLoginAuthFactorType const& Fact
 
 	const FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/challenge/verify")
 		, *SettingsRef.IamServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMap<FString, FString> Data = {
 		{TEXT("factor"), FAccelByteUtilities::GetAuthenticatorString(Factor)},
@@ -3301,7 +3301,7 @@ FAccelByteTaskWPtr User::SendVerificationCodeToNewUser(FSendVerificationCodeToNe
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/code/request")
 	   , *SettingsRef.IamServerUrl
-	   , *SettingsRef.PublisherNamespace);
+	   , *FGenericPlatformHttp::UrlEncode(SettingsRef.PublisherNamespace));
 
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(Request, Content);

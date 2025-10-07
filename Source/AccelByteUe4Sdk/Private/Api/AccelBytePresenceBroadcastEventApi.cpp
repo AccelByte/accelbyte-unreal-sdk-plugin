@@ -14,7 +14,7 @@ namespace Api
 
 PresenceBroadcastEvent::PresenceBroadcastEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, CredentialsRef{ InCredentialsRef.AsShared() }

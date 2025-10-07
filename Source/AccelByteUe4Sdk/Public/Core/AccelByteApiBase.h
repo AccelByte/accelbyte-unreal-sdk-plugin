@@ -21,7 +21,7 @@ class ACCELBYTEUE4SDK_API FApiBase
 public:
 	FApiBase(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
 
 	void SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
@@ -40,7 +40,7 @@ protected:
 
 	TSharedRef<Credentials const, ESPMode::ThreadSafe> CredentialsRef;
 	Settings const& SettingsRef;
-	FHttpRetryScheduler& HttpRef;
+	FHttpRetrySchedulerBase& HttpRef;
 	FHttpClient HttpClient;
 	TWeakPtr<FApiClient, ESPMode::ThreadSafe> ApiClient;
 };

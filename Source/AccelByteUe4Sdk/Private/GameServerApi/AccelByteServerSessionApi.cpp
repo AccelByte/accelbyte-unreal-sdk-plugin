@@ -18,7 +18,7 @@ namespace GameServerApi
 
 ServerSession::ServerSession(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
@@ -34,7 +34,7 @@ FAccelByteTaskWPtr ServerSession::CreateGameSession(FAccelByteModelsV2GameSessio
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesession")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const bool bIncludeTeams = CreateRequest.Teams.Num() > 0 &&
 		(CreateRequest.Teams.Num() > 1 || CreateRequest.Teams[0].UserIDs.Num() > 0);
@@ -67,8 +67,8 @@ FAccelByteTaskWPtr ServerSession::GetGameSessionDetails(FString const& GameSessi
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *GameSessionID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -82,8 +82,8 @@ FAccelByteTaskWPtr ServerSession::UpdateGameSession(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *GameSessionID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
 
 	FAccelByteModelsV2GameSessionUpdateRequest RequestToSend = UpdateRequest;
 
@@ -113,8 +113,8 @@ FAccelByteTaskWPtr ServerSession::DeleteGameSession(FString const& GameSessionID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *GameSessionID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -131,10 +131,10 @@ FAccelByteTaskWPtr ServerSession::UpdateMemberStatus(FString const& GameSessionI
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions/%s/members/%s/status/%s")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *GameSessionID
-		, *MemberID
-		, *StatusString);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID)
+		, *FGenericPlatformHttp::UrlEncode(MemberID)
+		, *FGenericPlatformHttp::UrlEncode(StatusString));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -149,8 +149,9 @@ FAccelByteTaskWPtr ServerSession::QueryPartySessions(FAccelByteModelsV2QueryPart
 
 	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *ServerCredentialsRef->GetClientAccessToken());
 
-	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/parties"),
-								  *ServerSettingsRef.SessionServerUrl, *ServerCredentialsRef->GetClientNamespace());
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/parties")
+		, *ServerSettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	FString ContentBody = TEXT("");
 	const TSharedPtr<FJsonObject> QueryRequestJsonObject = FJsonObjectConverter::UStructToJsonObject(RequestContent);
@@ -238,8 +239,10 @@ FAccelByteTaskWPtr ServerSession::GetPartyDetails(FString const& PartyID
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *ServerCredentialsRef->GetClientAccessToken());
-	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s"),
-		*ServerSettingsRef.SessionServerUrl, *ServerCredentialsRef->GetClientNamespace(), *PartyID);
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s")
+		, *ServerSettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyID));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -252,7 +255,7 @@ FAccelByteTaskWPtr ServerSession::BulkGetPlayerAttributes(TArray<FString> const&
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/attributes")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	TMultiMap<FString, FString> QueryParams{
 		{ TEXT("users"), FString::Join(UserIds, TEXT(",")) }
@@ -276,8 +279,8 @@ FAccelByteTaskWPtr ServerSession::GetPlayerAttributes(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/attributes")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -290,8 +293,9 @@ FAccelByteTaskWPtr ServerSession::QueryGameSessions(FAccelByteModelsV2ServerQuer
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions"),
-								  *ServerSettingsRef.SessionServerUrl, *ServerCredentialsRef->GetClientNamespace());
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions")
+		, *ServerSettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const TSharedPtr<FJsonObject> QueryRequestJsonObject = FJsonObjectConverter::UStructToJsonObject(RequestContent);
 	FAccelByteUtilities::RemoveEmptyStrings(QueryRequestJsonObject);
@@ -367,8 +371,8 @@ FAccelByteTaskWPtr ServerSession::PromoteGameSessionLeader(FString const& GameSe
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/leader")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *GameSessionID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestBody, OnSuccess, OnError);
 }
@@ -381,8 +385,8 @@ FAccelByteTaskWPtr ServerSession::GenerateNewGameSessionCode(FString const& Game
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *GameSessionID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -395,8 +399,8 @@ FAccelByteTaskWPtr ServerSession::RevokeGameSessionCode(FString const& GameSessi
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/code")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *GameSessionID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -423,9 +427,9 @@ FAccelByteTaskWPtr ServerSession::KickUserFromGameSession(FString const& GameSes
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions/%s/members/%s/kick")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *GameSessionID
-		, *UserID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID)
+		, *FGenericPlatformHttp::UrlEncode(UserID));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -439,8 +443,8 @@ FAccelByteTaskWPtr ServerSession::SendDSSessionReady(FString const& GameSessionI
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions/%s/ds")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *GameSessionID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
 
 	FAccelByteModelsV2DSSessionReadyRequest Request;
 	Request.Ready = bDSSessionReady;
@@ -462,7 +466,7 @@ FAccelByteTaskWPtr ServerSession::GetRecentPlayers(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/recent-player")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> QueryParam;
 	QueryParam.Emplace(TEXT("userId"), UserId);
@@ -485,7 +489,7 @@ FAccelByteTaskWPtr ServerSession::GetRecentTeamPlayers(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/recent-team-player")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace()));
 
 	TMap<FString, FString> QueryParam;
 	QueryParam.Emplace(TEXT("userId"), UserId);
@@ -503,8 +507,8 @@ FAccelByteTaskWPtr ServerSession::UpdateDSInformation(FString const& GameSession
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/gamesessions/%s/dsinformation")
 		, *ServerSettingsRef.SessionServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *GameSessionID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DSInformation, OnSuccess, OnError);
 }

@@ -31,7 +31,7 @@ namespace AccelByte
 			/// </summary>
 			void Initialize();
 
-			bool TryRetrieving(FHttpRequestPtr& Out, FHttpResponsePtr& OutCachedResponse);
+			bool TryRetrieving(const FHttpRequestPtr& Request, FHttpResponsePtr& OutCachedResponse);
 			bool TryStoring(const FHttpRequestPtr& Request);
 
 			/// <summary>

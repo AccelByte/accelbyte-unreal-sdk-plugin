@@ -28,7 +28,7 @@ class ACCELBYTEUE4SDK_API ServerQosManager : public FServerApiBase
 public:
 	ServerQosManager(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerQosManager();
 

@@ -21,7 +21,7 @@ namespace GameServerApi
 
 ServerSeasonPass::ServerSeasonPass(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
@@ -49,8 +49,8 @@ FAccelByteTaskWPtr ServerSeasonPass::GrantExpToUser(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/exp")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	FString Content{};
 	FJsonObject DataJson;
@@ -87,8 +87,8 @@ FAccelByteTaskWPtr ServerSeasonPass::GrantTierToUser(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/tiers")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	FString Content{};
 	FJsonObject DataJson;
@@ -122,8 +122,8 @@ FAccelByteTaskWPtr ServerSeasonPass::GetCurrentUserSeasonProgression(FString con
 	
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -144,9 +144,9 @@ FAccelByteTaskWPtr ServerSeasonPass::GetUserSeasonData(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/%s/data")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *SeasonId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(SeasonId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -166,8 +166,8 @@ FAccelByteTaskWPtr ServerSeasonPass::GetCurrentUserSeasonHistory(FString const& 
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/exp/history")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess](FJsonObject const& JsonObject)
@@ -225,8 +225,8 @@ FAccelByteTaskWPtr ServerSeasonPass::QueryUserSeasonExp(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/exp/history/tags")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -239,7 +239,7 @@ FAccelByteTaskWPtr ServerSeasonPass::BulkGetUserSessionProgression(TArray<FStrin
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/seasons/current/users/bulk/progression")
 		, *ServerSettingsRef.SeasonPassServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	FString Content{};
 	FJsonObject DataJson; 

@@ -17,7 +17,7 @@ namespace Api
 
 UserProfile::UserProfile(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {
@@ -32,7 +32,7 @@ FAccelByteTaskWPtr UserProfile::GetUserProfile(THandler<FAccelByteModelsUserProf
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -52,8 +52,8 @@ FAccelByteTaskWPtr UserProfile::GetPublicUserProfileInfo(FString const& UserID
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/public")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserID);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserID));
 
 	const TMap<FString, FString> Headers = {
 		{TEXT("Accept"), TEXT("application/json")}
@@ -72,7 +72,7 @@ FAccelByteTaskWPtr UserProfile::BatchGetPublicUserProfileInfos(FString const& Us
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("userIds"), UserIds}
@@ -93,7 +93,7 @@ FAccelByteTaskWPtr UserProfile::BulkGetPublicUserProfileInfos(TArray<FString> co
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("userIds"), FString::Join(UserIds, TEXT(","))}
@@ -113,7 +113,7 @@ FAccelByteTaskWPtr UserProfile::BulkGetPublicUserProfileInfosV2(TArray<FString> 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 	
 	if (UserIds.Num() <= 0)
 	{
@@ -168,8 +168,8 @@ FAccelByteTaskWPtr UserProfile::GetCustomAttributes(THandler<FJsonObject> const&
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -195,7 +195,7 @@ FAccelByteTaskWPtr UserProfile::UpdateUserProfile(FAccelByteModelsUserProfileUpd
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
 }
@@ -208,8 +208,8 @@ FAccelByteTaskWPtr UserProfile::UpdateCustomAttributes(FJsonObject const& Custom
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FString Content;
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(CustomAttributesUpdateRequest);
@@ -227,7 +227,7 @@ FAccelByteTaskWPtr UserProfile::CreateUserProfile(FAccelByteModelsUserProfileCre
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FString Content;
 	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(ProfileCreateRequest);
@@ -246,7 +246,7 @@ FAccelByteTaskWPtr UserProfile::GetUserProfilePublicInfoByPublicId(FString const
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public/byPublicId")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("publicId"), *PublicId}
@@ -275,8 +275,8 @@ FAccelByteTaskWPtr UserProfile::CreateUserProfile(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	FString Content;
 	const TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(ProfileCreateRequest);
@@ -303,8 +303,8 @@ FAccelByteTaskWPtr UserProfile::UpdateUserProfile(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ProfileUpdateRequest, OnSuccess, OnError, true);
 }
@@ -324,8 +324,8 @@ FAccelByteTaskWPtr UserProfile::GetUserProfile(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -339,8 +339,8 @@ FAccelByteTaskWPtr UserProfile::GenerateUploadURL(FString const& Folder
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/folders/%s/files")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *Folder);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Folder));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()}
@@ -366,8 +366,8 @@ FAccelByteTaskWPtr UserProfile::GenerateUploadURLForUserContent(FString const& U
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/files")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("fileType"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower()},
@@ -384,7 +384,7 @@ FAccelByteTaskWPtr UserProfile::GetPrivateCustomAttributes(THandler<FJsonObjectW
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles/privateCustomAttributes")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -397,7 +397,7 @@ FAccelByteTaskWPtr UserProfile::UpdatePrivateCustomAttributes(FJsonObject const&
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles/privateCustomAttributes")
 		, *SettingsRef.BasicServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FString Content;
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(PrivateCustomAttributesUpdateRequest);

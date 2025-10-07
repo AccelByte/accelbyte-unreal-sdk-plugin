@@ -17,7 +17,7 @@ namespace Api
 
 Category::Category(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -34,7 +34,7 @@ FAccelByteTaskWPtr Category::GetRootCategories(FString const& Language
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories?language=%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -49,7 +49,7 @@ FAccelByteTaskWPtr Category::GetCategory(FString const& CategoryPath
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s?language=%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
@@ -65,7 +65,7 @@ FAccelByteTaskWPtr Category::GetChildCategories(FString const& Language
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/children?language=%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 
@@ -81,7 +81,7 @@ FAccelByteTaskWPtr Category::GetDescendantCategories(FString const& Language
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/descendants?language=%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
 		, *FGenericPlatformHttp::UrlEncode(CategoryPath)
 		, *FGenericPlatformHttp::UrlEncode(Language));
 

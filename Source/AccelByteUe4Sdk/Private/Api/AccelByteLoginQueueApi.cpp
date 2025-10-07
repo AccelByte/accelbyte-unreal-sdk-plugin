@@ -22,7 +22,7 @@ namespace Api
 
 LoginQueue::LoginQueue(Credentials& InCredentialsRef
 	, Settings& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, UserCredentialsRef{InCredentialsRef.AsShared()}
@@ -41,7 +41,7 @@ FAccelByteTaskWPtr LoginQueue::RefreshTicket(FString const& Ticket
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/ticket")
 		, *SettingsRef.LoginQueueServerUrl
-		, Namespace.IsEmpty() ? *SettingsRef.Namespace : *Namespace);
+		, Namespace.IsEmpty() ? *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace) : *FGenericPlatformHttp::UrlEncode(Namespace));
 
 	TMap<FString, FString> Headers{};
 	Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *Ticket));
@@ -66,7 +66,7 @@ FAccelByteTaskWPtr LoginQueue::CancelTicket(FString const& Ticket
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/ticket")
 		, *SettingsRef.LoginQueueServerUrl
-		, Namespace.IsEmpty() ? *SettingsRef.Namespace : *Namespace);
+		, Namespace.IsEmpty() ? *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace) : *FGenericPlatformHttp::UrlEncode(Namespace));
 
 	TMap<FString, FString> Headers{};
 	Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *Ticket));

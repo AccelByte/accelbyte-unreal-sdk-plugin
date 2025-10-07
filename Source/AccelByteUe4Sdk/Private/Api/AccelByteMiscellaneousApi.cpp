@@ -15,7 +15,7 @@ namespace Api
 
 Miscellaneous::Miscellaneous(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler & InHttpRef
+	, FHttpRetrySchedulerBase & InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, TimeManager(InHttpRef, InSettingsRef.BasicServerUrl)

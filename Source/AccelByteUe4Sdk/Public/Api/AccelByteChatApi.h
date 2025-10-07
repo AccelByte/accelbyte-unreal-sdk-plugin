@@ -45,7 +45,7 @@ class ACCELBYTEUE4SDK_API Chat
 public:
 	Chat(Credentials & InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler & InHttpRef
+		, FHttpRetrySchedulerBase & InHttpRef
 		, FAccelByteMessagingSystem & InMessagingSystemRef
 		, FAccelByteNetworkConditioner & InNetworkConditionerRef
 		, float InPingDelay = 30.f
@@ -55,7 +55,7 @@ public:
 
 	Chat(Credentials & InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler & InHttpRef
+		, FHttpRetrySchedulerBase & InHttpRef
 		, FAccelByteMessagingSystem & InMessagingSystemRef
 		, FAccelByteNetworkConditioner & InNetworkConditionerRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
@@ -238,6 +238,13 @@ public:
 	 * @return true if it's connected, false otherwise.
 	 */
 	bool IsConnected() const;
+
+	/**
+	 * @brief Check whether the websocket is currently trying to reconnect to the Chat server.
+	 *
+	 * @return true if it's connected, false otherwise.
+	 */
+	bool IsReconnecting() const;
 
 	/**
 	 * @brief Send and empty string through the web socket connection

@@ -125,8 +125,11 @@ public:
 	void Connect(bool ForceConnect = false);
 	void Disconnect(bool ForceCleanup = false);
 	bool IsConnected() const;
+	bool IsReconnecting() const;
 	void SendPing() const;
 	void Send(const FString& Message) const;
+
+	EWebSocketState GetState() const;
 
 private:
 	bool bConnectTriggered {false};

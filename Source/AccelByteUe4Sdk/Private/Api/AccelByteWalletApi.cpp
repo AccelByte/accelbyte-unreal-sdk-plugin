@@ -16,7 +16,7 @@ namespace Api
 
 Wallet::Wallet(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -33,9 +33,9 @@ FAccelByteTaskWPtr Wallet::GetWalletInfoByCurrencyCode(FString const& CurrencyCo
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	const TDelegate<void(const FAccelByteModelsWalletInfoResponse&)> OnSuccessHttpClient =
 		THandler<FAccelByteModelsWalletInfoResponse>::CreateLambda(
@@ -71,9 +71,9 @@ FAccelByteTaskWPtr Wallet::GetWalletInfoByCurrencyCodeV2(FString const& Currency
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	const TDelegate<void(const FAccelByteModelsWalletInfoResponse&)> OnSuccessHttpClient =
 		THandler<FAccelByteModelsWalletInfoResponse>::CreateLambda(
@@ -100,9 +100,9 @@ FAccelByteTaskWPtr Wallet::ListWalletTransactionsByCurrencyCode(FString const& C
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s/transactions?offset=%d&limit=%d")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *CurrencyCode
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode)
 		, Offset
 		, Limit);
 

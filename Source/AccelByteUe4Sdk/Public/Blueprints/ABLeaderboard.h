@@ -17,6 +17,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsLeaderboardRankingResultResponse, FAcc
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRankingDataResponse, FAccelByteModelsUserRankingData, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsBaseLeaderboardData, FAccelByteModelsBaseLeaderboardData, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsPaginatedLeaderboardData, FAccelByteModelsPaginatedLeaderboardData, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsLeaderboardRankingResultV3, FAccelByteModelsLeaderboardRankingResultV3, Response);
@@ -36,56 +38,72 @@ public:
 	void SetApiClient(AccelByte::FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
-	void GetRankings(
-		FString const& LeaderboardCode,
-		EAccelByteLeaderboardTimeFrame const& TimeFrame,
-		int32 Offset,
-		int32 Limit,
-		FDModelsLeaderboardRankingResultResponse const& OnSuccess,
-		FDErrorHandler const& OnError
+	void GetRankings(FString const& LeaderboardCode
+		, EAccelByteLeaderboardTimeFrame const& TimeFrame
+		, int32 Offset
+		, int32 Limit
+		, FDModelsLeaderboardRankingResultResponse const& OnSuccess
+		, FDErrorHandler const& OnError
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
-	void GetUserRanking(
-		FString const& UserId,
-		FString const& LeaderboardCode,
-		FDModelsUserRankingDataResponse const& OnSuccess,
-		FDErrorHandler const& OnError
+	void GetUserRanking(FString const& UserId
+		, FString const& LeaderboardCode
+		, FDModelsUserRankingDataResponse const& OnSuccess
+		, FDErrorHandler const& OnError
 	);
 
 	UFUNCTION(BlueprintCallable, Category= "AccelByte | Leaderboard | Api")
-	void GetLeaderboards(
-		int32 Offset,
-		int32 Limit,
-		FDModelsPaginatedLeaderboardData const& OnSuccess,
-		FDErrorHandler const& OnError);
+	void GetLeaderboards(int32 Offset
+		, int32 Limit
+		, FDModelsPaginatedLeaderboardData const& OnSuccess
+		, FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
+	void GetRankingByCycle(FString const& LeaderboardCode
+		, FString const& CycleId
+		, int32 Offset
+		, int32 Limit
+		, FDModelsLeaderboardRankingResultV3 const& OnSuccess
+		, FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
+	void GetLeaderboardsV3(FDModelsPaginatedLeaderboardData const& OnSuccess
+		, FDErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
+	void GetLeaderboardV3(FString const& LeaderboardCode
+		, FDModelsBaseLeaderboardData const& OnSuccess
+		, FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category= "AccelByte | Leaderboard | Api")
-	void GetRankingsV3(FString const& LeaderboardCode,
-		int32 Offset,
-		int32 Limit,
-		FDModelsLeaderboardRankingResultV3 const& OnSuccess,
-		FDErrorHandler const& OnError);
+	void GetRankingsV3(FString const& LeaderboardCode
+		, int32 Offset
+		, int32 Limit
+		, FDModelsLeaderboardRankingResultV3 const& OnSuccess
+		, FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Leaderboard | Api")
+	void GetRankingByCycleV3(FString const& LeaderboardCode
+		, FString const& CycleId
+		, FDModelsLeaderboardRankingResultV3 const& OnSuccess
+		, FDErrorHandler const& OnError
+		, int32 Limit = 20
+		, int32 Offset = 0);
 
 	UFUNCTION(BlueprintCallable, Category= "AccelByte | Leaderboard | Api")
-	void GetRankingByCycle(FString const& LeaderboardCode,
-		FString const& CycleId,
-		int32 Offset,
-		int32 Limit,
-		FDModelsLeaderboardRankingResultV3 const& OnSuccess,
-		FDErrorHandler const& OnError);
+	void GetUserRankingV3(FString const& UserId
+		, FString const& LeaderboardCode
+		, FDModelsUserRankingDataV3 const& OnSuccess
+		, FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category= "AccelByte | Leaderboard | Api")
-	void GetUserRankingV3(FString const& UserId,
-		FString const& LeaderboardCode,
-		FDModelsUserRankingDataV3 const& OnSuccess,
-		FDErrorHandler const& OnError);
-
-	UFUNCTION(BlueprintCallable, Category= "AccelByte | Leaderboard | Api")
-	void GetBulkUserRankingV3(TArray<FString> const& UserIds,
-		FString const& LeaderboardCode,
-		FDModelsBulkUserRankingDataV3 const& OnSuccess,
-		FDErrorHandler const& OnError);
+	void GetBulkUserRankingV3(TArray<FString> const& UserIds
+		, FString const& LeaderboardCode
+		, FDModelsBulkUserRankingDataV3 const& OnSuccess
+		, FDErrorHandler const& OnError);
 
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;

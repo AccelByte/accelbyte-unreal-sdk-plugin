@@ -20,7 +20,7 @@ class ACCELBYTEUE4SDK_API HeartBeat : public FApiBase
 public:
 	DECLARE_DELEGATE(FHeartBeatResponse);
 
-	HeartBeat(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	HeartBeat(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~HeartBeat();
 
 	/**

@@ -15,7 +15,7 @@ namespace Api
 {
 Agreement::Agreement(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -28,7 +28,7 @@ FAccelByteTaskWPtr Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType con
 	, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
-	return GetLegalPolicies(*CredentialsRef->GetNamespace(), AgreementPolicyType, DefaultOnEmpty, OnSuccess, OnError);
+	return GetLegalPolicies(*FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()), AgreementPolicyType, DefaultOnEmpty, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr Agreement::GetLegalPolicies(FString const& Namespace
@@ -43,8 +43,8 @@ FAccelByteTaskWPtr Agreement::GetLegalPolicies(FString const& Namespace
 
 	const FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&defaultOnEmpty=%s")
 		, *SettingsRef.AgreementServerUrl
-		, *Namespace
-		, *AgreementPolicyTypeString
+		, *FGenericPlatformHttp::UrlEncode(Namespace)
+		, *FGenericPlatformHttp::UrlEncode(AgreementPolicyTypeString)
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -64,9 +64,9 @@ FAccelByteTaskWPtr Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType con
 
 	const FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&tags=%s&defaultOnEmpty=%s")
 		, *SettingsRef.AgreementServerUrl 
-		, *CredentialsRef->GetNamespace() 
-		, *AgreementPolicyTypeString
-		, *TagsString
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()) 
+		, *FGenericPlatformHttp::UrlEncode(AgreementPolicyTypeString)
+		, *FGenericPlatformHttp::UrlEncode(TagsString)
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
@@ -84,7 +84,7 @@ FAccelByteTaskWPtr Agreement::GetLegalPoliciesByCountry(FString const& CountryCo
 
 	const FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?policyType=%s&defaultOnEmpty=%s")
 		, *SettingsRef.AgreementServerUrl 
-		, *CountryCode
+		, *FGenericPlatformHttp::UrlEncode(CountryCode)
 		, *AgreementPolicyTypeString
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
@@ -106,9 +106,55 @@ FAccelByteTaskWPtr Agreement::GetLegalPoliciesByCountry(FString const& CountryCo
 
 	const FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?policyType=%s&tags=%s&defaultOnEmpty=%s")
 		, *SettingsRef.AgreementServerUrl 
-		, *CountryCode
+		, *FGenericPlatformHttp::UrlEncode(CountryCode)
 		, *AgreementPolicyTypeString
 		, *TagsString
+		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
+
+	return HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Agreement::GetLegalPoliciesByNamespaceAndCountry(FString const& Namespace
+	, FString const& CountryCode
+	, EAccelByteAgreementPolicyType const& AgreementPolicyType
+	, bool DefaultOnEmpty
+	, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
+	, FErrorHandler const& OnError) 
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString AgreementPolicyTypeString = ConvertAgreementPolicyType(AgreementPolicyType);
+
+	const FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s/countries/%s?policyType=%s&defaultOnEmpty=%s")
+		, *SettingsRef.AgreementServerUrl 
+		, *FGenericPlatformHttp::UrlEncode(Namespace)
+		, *FGenericPlatformHttp::UrlEncode(CountryCode)
+		, *FGenericPlatformHttp::UrlEncode(AgreementPolicyTypeString)
+		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
+
+	return HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Agreement::GetLegalPoliciesByNamespaceAndCountry(FString const& Namespace
+	, FString const& CountryCode
+	, EAccelByteAgreementPolicyType const& AgreementPolicyType
+	, TArray<FString> const& Tags
+	, bool DefaultOnEmpty
+	, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
+	, FErrorHandler const& OnError) 
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString AgreementPolicyTypeString = ConvertAgreementPolicyType(AgreementPolicyType);
+
+	const FString TagsString = FAccelByteUtilities::CreateQueryParamValueUrlEncodedFromArray(Tags);
+
+	const FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s/countries/%s?policyType=%s&tags=%s&defaultOnEmpty=%s")
+		, *SettingsRef.AgreementServerUrl 
+		, *FGenericPlatformHttp::UrlEncode(Namespace)
+		, *FGenericPlatformHttp::UrlEncode(CountryCode)
+		, *FGenericPlatformHttp::UrlEncode(AgreementPolicyTypeString)
+		, *FGenericPlatformHttp::UrlEncode(TagsString)
 		, DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 
 	return HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
@@ -127,6 +173,21 @@ FAccelByteTaskWPtr Agreement::BulkAcceptPolicyVersions(TArray<FAccelByteModelsAc
 	FAccelByteUtilities::TArrayUStructToJsonString(AgreementRequests, Content);
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
+
+
+FAccelByteTaskWPtr Agreement::RetrieveAcceptedPolicies(THandler<TArray<FAccelByteModelsRetrieveAcceptedAgreementResponse>> const& OnSuccess
+	, FErrorHandler const& OnError) 
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/public/agreements/policies")
+		, *SettingsRef.AgreementServerUrl);
+
+	FString Content{};
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, Content, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr Agreement::AcceptPolicyVersion(FString const& LocalizedPolicyVersionId
@@ -186,7 +247,7 @@ FAccelByteTaskWPtr Agreement::QueryLegalEligibilities(FString const& Namespace
 
 	const FString Url = FString::Printf(TEXT("%s/public/eligibilities/namespaces/%s")
 		, *SettingsRef.AgreementServerUrl
-		, *Namespace);
+		, *FGenericPlatformHttp::UrlEncode(Namespace));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }

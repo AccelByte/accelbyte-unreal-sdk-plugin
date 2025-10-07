@@ -23,7 +23,7 @@ class ACCELBYTEUE4SDK_API GameStandardEvent : public BaseAnalytics
 public:
 	GameStandardEvent(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 
 	bool SendMissionStartedEventData(FAccelByteId const& UserId

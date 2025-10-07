@@ -61,9 +61,22 @@ namespace AccelByte
 		}
 #endif
 
-		if (Request.IsValid() && Request->OnProcessRequestComplete().IsBound())
+		if (Request.IsValid())
 		{
-			Request->OnProcessRequestComplete().Unbind();
+			if (Request->OnProcessRequestComplete().IsBound())
+			{
+				Request->OnProcessRequestComplete().Unbind();
+			}
+
+			if (Request->OnRequestWillRetry().IsBound())
+			{
+				Request->OnRequestWillRetry().Unbind();
+			}
+
+			if (Request->GetStatus() != EHttpRequestStatus::Succeeded)
+			{
+				Request->CancelRequest();
+			}
 		}
 	}
 
@@ -75,16 +88,25 @@ namespace AccelByte
 			return false;
 		}
 
+		if (Response.IsValid())
+		{
+			Response.Reset();
+		}
+
 		if (Request->OnProcessRequestComplete().IsBound())
 		{
 			Request->OnProcessRequestComplete().Unbind();
 		}
 		Request->OnProcessRequestComplete().BindThreadSafeSP(this, &FHttpRetryTask::OnProcessRequestComplete);
 
-
 		auto HttpRetrySchedulerPtr = HttpRetrySchedulerWPtr.Pin();
 		if (HttpRetrySchedulerPtr.IsValid())
 		{
+			if (BearerAuthRejectedHandle.IsValid())
+			{
+				HttpRetrySchedulerPtr->RemoveBearerAuthRejectedDelegate(BearerAuthRejectedHandle);
+				BearerAuthRejectedHandle.Reset();
+			}
 			BearerAuthRejectedHandle = HttpRetrySchedulerPtr->AddBearerAuthRejectedDelegate(
 				FHttpRetryScheduler::FBearerAuthRejected::CreateThreadSafeSP(AsShared(), &FHttpRetryTask::OnBearerAuthRejected));
 		}
@@ -123,13 +145,7 @@ namespace AccelByte
 	{
 		TMap<FString, FString> Result;
 
-		if(!Request.IsValid())
-		{
-			return Result;
-		}
-
-		const FHttpResponsePtr Response = Request->GetResponse();
-		if(!Response.IsValid())
+		if(!Request.IsValid() || !Response.IsValid())
 		{
 			return Result;
 		}
@@ -216,7 +232,6 @@ namespace AccelByte
 		case EHttpRequestStatus::Succeeded: //got response
 		{
 			NextState = EAccelByteTaskState::Completed;
-			const FHttpResponsePtr Response = Request->GetResponse();
 			if (Response.IsValid())
 			{
 				const int32 ResponseCode = Response->GetResponseCode();
@@ -271,7 +286,6 @@ namespace AccelByte
 
 		if (TaskState == EAccelByteTaskState::Completed || TaskState == EAccelByteTaskState::Cancelled || TaskState == EAccelByteTaskState::Failed)
 		{
-			auto Response = Request->GetResponse();
 			FReport::LogHttpResponse(Request, Response);
 			CompleteDelegate.ExecuteIfBound(Request, Response, IsFinished());
 		}
@@ -279,12 +293,12 @@ namespace AccelByte
 		return FAccelByteTask::Finish();
 	}
 
-	bool FHttpRetryTask::FinishFromCached(const FHttpResponsePtr& Response)
+	bool FHttpRetryTask::FinishFromCached(const FHttpResponsePtr& InResponse)
 	{
 		TaskState = EAccelByteTaskState::Completed;
 	
-		FReport::LogHttpResponse(Request, Response);
-		CompleteDelegate.ExecuteIfBound(Request, Response, true /*IsFinished()*/);
+		FReport::LogHttpResponse(Request, InResponse);
+		CompleteDelegate.ExecuteIfBound(Request, InResponse, true /*IsFinished()*/);
 
 		bIsResponseFromCache = true;
 
@@ -438,7 +452,7 @@ namespace AccelByte
 			NextRetryTime = RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeoutIncludingRetries;
 		}
 
-		Request->OnRequestWillRetry().ExecuteIfBound(Request, Request->GetResponse(), NextRetryTime);
+		Request->OnRequestWillRetry().ExecuteIfBound(Request, Response, NextRetryTime);
 
 		return EAccelByteTaskState::Retrying;
 	}
@@ -473,17 +487,34 @@ namespace AccelByte
 		return TaskTime >= RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeoutIncludingRetries;
 	}
 
-	void FHttpRetryTask::OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse,
-		bool bConnectedSuccessfully)
+	void FHttpRetryTask::OnProcessRequestComplete(FHttpRequestPtr InRequest
+		, FHttpResponsePtr InResponse
+		, bool bConnectedSuccessfully)
 	{
-		if (InRequest.IsValid() && InResponse.IsValid())
+		if (InRequest.IsValid())
 		{
-			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Got %s %s HTTP Request to: %s; Response: HTTP %d"), (bConnectedSuccessfully ? TEXT("SUCCESSFUL") : TEXT("FAILED")), *InRequest->GetVerb(), *InRequest->GetURL(), InResponse->GetResponseCode());
+			if (InResponse.IsValid())
+			{
+				Response = InResponse;
+				UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Got %s %s HTTP Request to: %s; Response: HTTP %d")
+					, (bConnectedSuccessfully ? TEXT("SUCCESSFUL") : TEXT("FAILED"))
+					, *InRequest->GetVerb()
+					, *InRequest->GetURL()
+					, InResponse->GetResponseCode());
+
+			}
+			else
+			{
+				UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Got %s %s HTTP Request to: %s; Response: INVALID HTTP RESPONSE")
+					, (bConnectedSuccessfully ? TEXT("SUCCESSFUL") : TEXT("FAILED"))
+					, *InRequest->GetVerb()
+					, *InRequest->GetURL());
+			}
 		}
-		else if (InResponse.IsValid()) {
-			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Got %s %s HTTP Request to: %s; Response: INVALID HTTP RESPONSE"), (bConnectedSuccessfully ? TEXT("SUCCESSFUL") : TEXT("FAILED")), *InRequest->GetVerb(), *InRequest->GetURL());
-		}
-		else {
+		else 
+		{
+			UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Got %s HTTP Request due to Invalid Request and Response")
+				, (bConnectedSuccessfully ? TEXT("SUCCESSFUL") : TEXT("FAILED")));
 		}
 		SetResponseTime(FDateTime::UtcNow());
 	}

@@ -23,7 +23,7 @@ class ACCELBYTEUE4SDK_API ServerSession : public FServerApiBase
 public:
 	ServerSession(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerSession();
 

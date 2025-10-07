@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Agreement : public FApiBase, public TSharedFromThis<Agreement, ESPMode::ThreadSafe>
 {
 public:
-	Agreement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	Agreement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Agreement();
 
 	/**
@@ -124,6 +124,50 @@ public:
 		, FErrorHandler const& OnError);
 	
 	/**
+	 * @brief Retrieve all active latest policies based on a country and namespace.
+	 *
+	 * @param Namespace Requested namespace.
+	 * @param CountryCode Requested policy country code.
+	 * @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY 
+	 *			if you want to be responded with all policy type.
+	 * @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your 
+	 *			requested country is not exist.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetLegalPoliciesByNamespaceAndCountry(FString const& Namespace
+		, FString const& CountryCode
+		, EAccelByteAgreementPolicyType const& AgreementPolicyType
+		, bool DefaultOnEmpty
+		, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
+		, FErrorHandler const& OnError);
+	
+	/**
+	 * @brief Retrieve all active latest policies based on a country and namespace.
+	 *
+	 * @param Namespace Requested namespace.
+	 * @param CountryCode Requested policy country code.
+	 * @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY 
+	 *			if you want to be responded with all policy type.
+	 * @param Tags Filter the responded policy by tags.
+	 * @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your 
+	 *			requested country is not exist.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetLegalPoliciesByNamespaceAndCountry(FString const& Namespace
+		, FString const& CountryCode
+		, EAccelByteAgreementPolicyType const& AgreementPolicyType
+		, TArray<FString> const& Tags
+		, bool DefaultOnEmpty
+		, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess
+		, FErrorHandler const& OnError);
+	
+	/**
 	 * @brief Accepts many legal policy versions all at once. Supply with localized version policy id to accept an agreement.
 	 *
 	 * @param AgreementRequests List of localized policy versions to accept.
@@ -134,6 +178,17 @@ public:
 	 */
 	FAccelByteTaskWPtr BulkAcceptPolicyVersions(TArray<FAccelByteModelsAcceptAgreementRequest> const& AgreementRequests
 		, THandler<FAccelByteModelsAcceptAgreementResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+	
+	/**
+	 * @brief Retrieve accepted Legal Agreements.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsAcceptAgreementResponse.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr RetrieveAcceptedPolicies(THandler<TArray<FAccelByteModelsRetrieveAcceptedAgreementResponse>> const& OnSuccess
 		, FErrorHandler const& OnError);
 	
 	/**

@@ -10,7 +10,7 @@ namespace Api
 {
 MatchmakingV2::MatchmakingV2(Credentials const& InCredentialsRef
 	, Settings const& InSettingRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingRef, InHttpRef, InApiClient)
 {
@@ -64,7 +64,7 @@ FAccelByteTaskWPtr MatchmakingV2::CreateMatchTicket(FString const& MatchPool
 	const FString Verb = TEXT("POST");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets")
 		, *SettingsRef.MatchmakingV2ServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsV2MatchmakingCreateTicketRequest Request;
 	Request.MatchPool = MatchPool;
@@ -94,8 +94,8 @@ FAccelByteTaskWPtr MatchmakingV2::GetMatchTicketDetails(FString const& TicketId
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/%s")
 		, *SettingsRef.MatchmakingV2ServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *TicketId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(TicketId));
 
 	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
@@ -113,8 +113,8 @@ FAccelByteTaskWPtr MatchmakingV2::DeleteMatchTicket(FString const& TicketId
 	const FString Verb = TEXT("DELETE");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/%s"),
 		*SettingsRef.MatchmakingV2ServerUrl,
-		*CredentialsRef->GetNamespace(),
-		*TicketId);
+		*FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()),
+		*FGenericPlatformHttp::UrlEncode(TicketId));
 
 	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
@@ -132,8 +132,8 @@ FAccelByteTaskWPtr MatchmakingV2::GetMatchmakingMetrics(FString const& MatchPool
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-pools/%s/metrics")
 		, *SettingsRef.MatchmakingV2ServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *MatchPool);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(MatchPool));
 
 	return HttpClient.ApiRequest(Verb, Url, {}, FString(), OnSuccess, OnError);
 }
@@ -147,7 +147,7 @@ FAccelByteTaskWPtr MatchmakingV2::GetMyMatchTickets(THandler<FAccelByteModelsV2M
 	const FString Verb = TEXT("GET");
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/match-tickets/me")
 		, *SettingsRef.MatchmakingV2ServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 	if(!MatchPool.IsEmpty())

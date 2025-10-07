@@ -16,7 +16,7 @@ namespace GameServerApi
 
 ServerEcommerce::ServerEcommerce(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
@@ -48,8 +48,8 @@ FAccelByteTaskWPtr ServerEcommerce::QueryUserEntitlements(FString const& UserId
 	FString Verb = TEXT("GET");
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 		
 	TMultiMap<FString, FString> QueryParams{};
 	QueryParams.Add( TEXT("activeOnly"), bActiveOnly ? TEXT("true") : TEXT("false") );
@@ -106,8 +106,8 @@ FAccelByteTaskWPtr ServerEcommerce::GetUserEntitlementById(FString const& Entitl
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/entitlements/%s")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Entitlementid);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Entitlementid));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -128,9 +128,9 @@ FAccelByteTaskWPtr ServerEcommerce::GetUserEntitlementById(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *EntitlementId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(EntitlementId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -156,8 +156,8 @@ FAccelByteTaskWPtr ServerEcommerce::GrantUserEntitlements(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TArray<TSharedPtr<FJsonValue>> JsonArray;
 	for (const FAccelByteModelsEntitlementGrant& Entitlement : EntitlementGrant)
@@ -192,9 +192,9 @@ FAccelByteTaskWPtr ServerEcommerce::CreditUserWallet(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, CreditUserWalletRequest, OnSuccess, OnError);
 }
@@ -216,9 +216,9 @@ FAccelByteTaskWPtr ServerEcommerce::CreditUserWalletV2(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	const TDelegate<void(const FAccelByteModelsWalletCreditResponse&)> OnSuccessHttpClient =
 		THandler<FAccelByteModelsWalletCreditResponse>::CreateLambda(
@@ -251,8 +251,8 @@ FAccelByteTaskWPtr ServerEcommerce::RevokeUserEntitlements(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	const TMultiMap<FString, FString> QueryParams= {
 		{TEXT("entitlementIds"), FString::Join(EntitlementIds, TEXT(","))}
@@ -277,9 +277,9 @@ FAccelByteTaskWPtr ServerEcommerce::RevokeUserEntitlement(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *EntitlementId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(EntitlementId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -303,9 +303,9 @@ FAccelByteTaskWPtr ServerEcommerce::ConsumeUserEntitlement(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *EntitlementId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(EntitlementId));
 
 	FAccelByteModelsConsumeUserEntitlementRequest ConsumeUserEntitlementRequest;
 	ConsumeUserEntitlementRequest.UseCount = UseCount;
@@ -337,9 +337,9 @@ FAccelByteTaskWPtr ServerEcommerce::DisableUserEntitlement(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *EntitlementId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(EntitlementId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -360,9 +360,9 @@ FAccelByteTaskWPtr ServerEcommerce::EnableUserEntitlement(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *EntitlementId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(EntitlementId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -390,9 +390,9 @@ FAccelByteTaskWPtr ServerEcommerce::GetUserEntitlementHistory(FString const& Use
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/history")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *EntitlementId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(EntitlementId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -408,9 +408,9 @@ FAccelByteTaskWPtr ServerEcommerce::DebitUserWallet(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debit")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *WalletId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(WalletId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DebitUserWalletRequest, OnSuccess, OnError);
 }
@@ -450,9 +450,9 @@ FAccelByteTaskWPtr ServerEcommerce::DebitUserWalletV2(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/currencies/%s/debit")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, DebitUserWalletRequest, OnSuccess, OnError);
 }
@@ -492,9 +492,9 @@ FAccelByteTaskWPtr ServerEcommerce::PaymentWithUserWallet(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/payment")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	const TDelegate<void(const FAccelByteModelsPlatformWallet&)> OnSuccessHttpClient =
 		THandler<FAccelByteModelsPlatformWallet>::CreateLambda(
@@ -537,8 +537,8 @@ FAccelByteTaskWPtr ServerEcommerce::FulfillUserItem(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	FString Content;
 	TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(FulfillmentRequest);
@@ -589,7 +589,7 @@ FAccelByteTaskWPtr ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Sk
 
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/itemId/bySkus")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	TMultiMap<FString, FString> QueryParams{};
 	
@@ -611,7 +611,7 @@ FAccelByteTaskWPtr ServerEcommerce::ListStores(THandler<TArray<FAccelByteModelsP
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/stores")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -624,7 +624,7 @@ FAccelByteTaskWPtr ServerEcommerce::QueryItemsByCriteria(FAccelByteModelsItemCri
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/byCriteria")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	TArray<FString> SortByStringArray = {};
 	if (ItemCriteria.SortBy.Num() > 0 )
@@ -678,7 +678,7 @@ FAccelByteTaskWPtr ServerEcommerce::QueryItemsByCriteriaV2(FAccelByteModelsItemC
 
 	const FString Url = FString::Printf(TEXT("%s/v2/admin/namespaces/%s/items/byCriteria")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	TArray<FString> SortByStringArray = {};
 	if (ItemCriteria.SortBy.Num() > 0 )
@@ -741,8 +741,8 @@ FAccelByteTaskWPtr ServerEcommerce::FulfillRewards(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment/rewards")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	// Remove NONE value from Origin & Source 
 	auto FilteredJsonObject = FulfillRewardsRequest.GenerateFilteredJsonObject();
@@ -758,7 +758,9 @@ FAccelByteTaskWPtr ServerEcommerce::BulkGetItemsById(TArray<FString> const& Item
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/byIds"), *ServerSettingsRef.PlatformServerUrl, *ServerCredentialsRef->GetNamespace());
+	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/byIds")
+		, *ServerSettingsRef.PlatformServerUrl
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 	{ TEXT("itemIds"), FString::Join(ItemIds, TEXT(",")) },
@@ -784,8 +786,8 @@ FAccelByteTaskWPtr ServerEcommerce::QueryUserCurrencyWallets(FString const& User
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/currencies/summary")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET")
 		, Url
@@ -819,9 +821,9 @@ FAccelByteTaskWPtr ServerEcommerce::DebitByWalletPlatform(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debitByWalletPlatform")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *UserId
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	return HttpClient.ApiRequest(TEXT("PUT")
 		, Url
@@ -866,9 +868,9 @@ FAccelByteTaskWPtr ServerEcommerce::ListUserCurrencyTransactions(FString const& 
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/currencies/%s/transactions")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *UserId
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	TMap<FString, FString> QueryParams {
 		{ TEXT("offset"), FString::FromInt(Offset) },
@@ -898,7 +900,7 @@ FAccelByteTaskWPtr ServerEcommerce::GetPlatformWalletConfig(EAccelByteWalletPlat
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/platforms/%s/wallet/config")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace()
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
 		, *FAccelByteUtilities::GetUEnumValueAsString(Platform).ToLower());
 
 	return HttpClient.ApiRequest(TEXT("GET")
@@ -940,7 +942,7 @@ FAccelByteTaskWPtr ServerEcommerce::UpdatePlatformWalletConfig(EAccelByteWalletP
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/platforms/%s/wallet/config")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace()
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
 		, *FAccelByteUtilities::GetUEnumValueAsString(Platform).ToLower());
 
 	return HttpClient.ApiRequest(TEXT("PUT")
@@ -967,7 +969,7 @@ FAccelByteTaskWPtr ServerEcommerce::ResetPlatformWalletConfig(EAccelByteWalletPl
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/platforms/%s/wallet/config/reset")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace()
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
 		, *FAccelByteUtilities::GetUEnumValueAsString(Platform).ToLower());
 
 	return HttpClient.ApiRequest(TEXT("PUT")
@@ -985,7 +987,7 @@ FAccelByteTaskWPtr ServerEcommerce::GetWalletConfig(THandler<FAccelByteModelsWal
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/wallet/config")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("GET")
 		, Url
@@ -1003,7 +1005,7 @@ FAccelByteTaskWPtr ServerEcommerce::UpdateWalletConfig(FAccelByteModelsUpdateWal
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/wallet/config")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("PUT")
 		, Url
@@ -1037,9 +1039,9 @@ FAccelByteTaskWPtr ServerEcommerce::CheckBalance(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/balanceCheck")
 		, *ServerSettingsRef.PlatformServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *UserId
-		, *CurrencyCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(CurrencyCode));
 
 	return HttpClient.ApiRequest(TEXT("POST")
 		, Url

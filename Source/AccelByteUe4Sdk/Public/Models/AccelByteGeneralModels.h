@@ -135,14 +135,43 @@ struct ACCELBYTEUE4SDK_API FAccelByteLRUHttpStruct
 	GENERATED_BODY()
 
 	// UObject can't have a constructor with args
-	void SetMember(const TArray<FString>& RequestHeaders_, const TArray<FString>& ResponseHeaders_, int ResponseCode_, const FString& RequestURL_, const TArray<uint8>& ResponsePayload_, double ExpireTime_)
+	bool Serialize(const FHttpRequestPtr& RequestPtr
+		, double InExpireTime)
 	{
-		RequestHeaders = RequestHeaders_;
-		ResponseHeaders = ResponseHeaders_;
-		ResponseCode = ResponseCode_;
-		RequestURL = RequestURL_;
-		ResponsePayload = ResponsePayload_;
-		ExpireTime = FString::SanitizeFloat( ExpireTime_);
+		if (!RequestPtr.IsValid())
+		{
+			return false;
+		}
+
+		auto ResponsePtr = RequestPtr->GetResponse();
+
+		if (!ResponsePtr.IsValid())
+		{
+			return false;
+		}
+
+		SetMember(RequestPtr->GetAllHeaders()
+			, ResponsePtr->GetAllHeaders()
+			, ResponsePtr->GetResponseCode()
+			, RequestPtr->GetURL()
+			, ResponsePtr->GetContent()
+			, InExpireTime);
+		return true;
+	}
+	
+	void SetMember(const TArray<FString>& InRequestHeaders
+		, const TArray<FString>& InResponseHeaders
+		, int InResponseCode
+		, const FString& InRequestURL
+		, const TArray<uint8>& InResponsePayload
+		, double InExpireTime)
+	{
+		RequestHeaders = InRequestHeaders;
+		ResponseHeaders = InResponseHeaders;
+		ResponseCode = InResponseCode;
+		RequestURL = InRequestURL;
+		ResponsePayload = InResponsePayload;
+		ExpireTime = FString::SanitizeFloat(InExpireTime);
 	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | LRUCache")
@@ -169,9 +198,6 @@ struct FAccelByteHttpCacheItem
 {
 	/** @brief Platform time until cached response is stale (in seconds). */
 	double ExpireTime{ 0.0f };
-
-	/** @brief Completed request with valid response. */
-	FHttpRequestPtr Request{nullptr};
 
 	/** @brief The raw request and response serialized. */
 	FAccelByteLRUHttpStruct SerializableRequestAndResponse{};

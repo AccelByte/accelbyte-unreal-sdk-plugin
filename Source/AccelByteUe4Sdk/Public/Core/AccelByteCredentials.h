@@ -37,7 +37,7 @@ private:
 public:
 	using BaseCredentials::SetClientCredentials;
 
-	Credentials(FHttpRetryScheduler& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& IamServerUrl);
+	Credentials(FHttpRetrySchedulerBase& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& IamServerUrl);
 	virtual ~Credentials();
 	
 	/** @brief The user was just authed: At this point, Credential auth tokens are already set. */
@@ -53,7 +53,7 @@ public:
 	void SetUserEmailAddress(const FString& EmailAddress);
 	void SetUserName(const FString& UserName); // DEPRECATED
 	void SetUserDisplayName(const FString& UserDisplayName);
-	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
+	void SetBearerAuthRejectedHandler(FHttpRetrySchedulerBase& InHttpRef);
 	void SetAccountUserData(const FAccountUserData& InAccountUserData);
 	void SetThridPartyPlatformTokenData(const FString& PlatformId, const FThirdPartyPlatformTokenData& ThirdPartyPlatformTokenData);
 	void ClearThridPartyPlatformTokenData();

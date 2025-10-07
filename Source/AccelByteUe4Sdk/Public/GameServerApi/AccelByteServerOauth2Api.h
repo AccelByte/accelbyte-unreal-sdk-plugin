@@ -33,7 +33,7 @@ class ACCELBYTEUE4SDK_API ServerOauth2 : public FServerApiBase
 public:
 	ServerOauth2(ServerCredentials& InCredentialsRef
 		, ServerSettings& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerOauth2();
 

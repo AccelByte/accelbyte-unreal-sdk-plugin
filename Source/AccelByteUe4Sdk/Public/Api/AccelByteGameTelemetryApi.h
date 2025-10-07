@@ -29,13 +29,13 @@ class ACCELBYTEUE4SDK_API GameTelemetry : public FApiBase, public TSharedFromThi
 public:
 	GameTelemetry(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, bool bInCacheEvent = true
 		, bool bInRetryOnFailed = false);
 
 	GameTelemetry(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
 		, bool bInCacheEvent = true
 		, bool bInRetryOnFailed = false);

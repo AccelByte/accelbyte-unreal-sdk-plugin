@@ -15,7 +15,7 @@ namespace Api
 
 Leaderboard::Leaderboard(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -57,9 +57,9 @@ void Leaderboard::GetRankings(FString const& LeaderboardCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/%s")
 		, *SettingsRef.LeaderboardServerUrl
-		, *SettingsRef.Namespace
-		, *LeaderboardCode
-		, *TimeFrameString);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace)
+		, *FGenericPlatformHttp::UrlEncode(LeaderboardCode)
+		, *FGenericPlatformHttp::UrlEncode(TimeFrameString));
 
 	TMultiMap<FString, FString> QueryParams;
 
@@ -96,23 +96,31 @@ void Leaderboard::GetUserRanking(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *LeaderboardCode
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(LeaderboardCode)
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
 
 void Leaderboard::GetLeaderboards(uint32 Offset
 	, uint32 Limit
-	,THandler<FAccelByteModelsPaginatedLeaderboardData> const& OnSuccess
-	,FErrorHandler const& OnError )
+	, THandler<FAccelByteModelsPaginatedLeaderboardData> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	GetLeaderboardsV3(OnSuccess, OnError, Limit, Offset);
+}
+
+void Leaderboard::GetLeaderboardsV3(THandler<FAccelByteModelsPaginatedLeaderboardData> const& OnSuccess
+	, FErrorHandler const& OnError
+	, uint32 Limit
+	, uint32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 
@@ -128,14 +136,32 @@ void Leaderboard::GetLeaderboards(uint32 Offset
 	HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Leaderboard::GetRankingsV3(FString const& LeaderboardCode, uint32 Offset, uint32 Limit, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess, FErrorHandler const& OnError)
+void Leaderboard::GetLeaderboardV3(FString const& LeaderboardCode
+	, THandler<FAccelByteModelsBaseLeaderboardData> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s")
+		, *SettingsRef.LeaderboardServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(LeaderboardCode));
+
+	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+void Leaderboard::GetRankingsV3(FString const& LeaderboardCode
+	, uint32 Offset
+	, uint32 Limit
+	, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
+	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/alltime")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *LeaderboardCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(LeaderboardCode));
 
 	TMultiMap<FString, FString> QueryParams;
 
@@ -158,13 +184,23 @@ void Leaderboard::GetRankingByCycle(FString const& LeaderboardCode
 	, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
 	, FErrorHandler const& OnError)
 {
+	GetRankingByCycleV3(LeaderboardCode, CycleId, OnSuccess, OnError, Limit, Offset);
+}
+
+void Leaderboard::GetRankingByCycleV3(FString const& LeaderboardCode
+	, FString const& CycleId
+	, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
+	, FErrorHandler const& OnError
+	, uint32 Limit
+	, uint32 Offset)
+{
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/cycles/%s")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *LeaderboardCode
-		, *CycleId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(LeaderboardCode)
+		, *FGenericPlatformHttp::UrlEncode(CycleId));
 
 	TMultiMap<FString, FString> QueryParams;
 
@@ -196,9 +232,9 @@ void Leaderboard::GetUserRankingV3(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/users/%s")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *LeaderboardCode
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(LeaderboardCode)
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -230,8 +266,8 @@ void Leaderboard::GetBulkUserRankingV3(TArray<FString> const& UserIds
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/leaderboards/%s/users/bulk")
 		, *SettingsRef.LeaderboardServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *LeaderboardCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(LeaderboardCode));
 
 	FAccelByteModelsBulkUserRankingDataRequestV3 ContentRequest;
 	ContentRequest.UserIds = UserIds;

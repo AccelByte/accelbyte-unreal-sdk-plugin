@@ -53,8 +53,8 @@ public:
 	bool bUseSharedCredentials = true;
 
 	TWeakPtr<FAccelByteInstance, ESPMode::ThreadSafe> AccelByteInstanceWeak;
-
-	FHttpRetrySchedulerRef HttpRef{};
+	
+	FHttpRetrySchedulerRef HttpRef{MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>()};
 	FServerCredentialsRef ServerCredentialsRef;
 	ServerSettingsPtr ServerSettings{};
 	const FAccelByteTimeManagerPtr ServerTimeManager{};

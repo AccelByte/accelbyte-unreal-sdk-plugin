@@ -27,7 +27,7 @@ class ACCELBYTEUE4SDK_API ServerChallenge : public FServerApiBase
 public:
 	ServerChallenge(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerChallenge();
 
@@ -65,6 +65,21 @@ public:
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr EvaluateChallengeProgress(FAccelByteModelsChallengeServerEvaluateProgressRequest const& Request
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Send a request to attempt to evaluate many user's challenge progress
+	 *
+	 * @param Request Structure containing the IDs of the users to evaluate challenge progress for
+	 * @param OptionalParameter Struct containing optional parameters to specify the evaluation
+	 * @param OnSuccess Delegate executed when request succeeds
+	 * @param OnError Delegate executed when request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr EvaluateChallengeProgress(FAccelByteModelsChallengeServerEvaluateProgressRequest const& Request
+		, FAccelByteModelsChallengeEvaluateProgressOptionalParameter const& OptionalParameter
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 

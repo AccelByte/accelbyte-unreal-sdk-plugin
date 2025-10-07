@@ -97,7 +97,7 @@ namespace AccelByte
 	
 	FHttpClient::FHttpClient(BaseCredentials const& InCredentialsRef
 		, BaseSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef)
+		, FHttpRetrySchedulerBase& InHttpRef)
 		: HttpRef{InHttpRef}
 		, CredentialsRef{InCredentialsRef}
 		, SettingsRef{InSettingsRef}

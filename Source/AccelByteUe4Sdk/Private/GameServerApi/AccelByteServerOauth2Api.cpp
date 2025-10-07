@@ -97,7 +97,7 @@ void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess
 
 ServerOauth2::ServerOauth2(ServerCredentials& InCredentialsRef
 	, ServerSettings& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 	, ServerCredentialsRef{InCredentialsRef.AsShared()}

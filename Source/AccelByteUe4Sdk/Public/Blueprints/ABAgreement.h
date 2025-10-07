@@ -96,6 +96,25 @@ public:
 		FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
+	void GetLegalPoliciesByNamespaceAndCountry(
+		FString const& Namespace,
+		FString const& CountryCode,
+		EAccelByteAgreementPolicyType const& AgreementPolicyType,
+		bool DefaultOnEmpty,
+		FDArrayModelsPublicPolicyResponse const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
+	void GetLegalPoliciesByNamespaceCountryAndTags(
+		FString const& Namespace,
+		FString const& CountryCode,
+		EAccelByteAgreementPolicyType const& AgreementPolicyType,
+		TArray<FString> const& Tags,
+		bool DefaultOnEmpty,
+		FDArrayModelsPublicPolicyResponse const& OnSuccess,
+		FDErrorHandler const& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Agreement | Api")
 	void BulkAcceptPolicyVersions(
 		FArrayModelsAcceptAgreementRequest const& AgreementRequests,
 		FDModelsAcceptAgreementResponse const& OnSuccess,

@@ -16,7 +16,7 @@ namespace GameServerApi
 
 ServerUGC::ServerUGC(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
@@ -34,7 +34,7 @@ FAccelByteTaskWPtr ServerUGC::SearchContents(FAccelByteModelsUGCSearchContentsRe
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/contents/search")
 		, *ServerSettingsRef.UGCServerUrl
-		, *ServerCredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(Request.SortBy) },
@@ -81,8 +81,8 @@ FAccelByteTaskWPtr ServerUGC::SearchContentsSpecificToChannel(FString const& Cha
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/contents/search")
 		, *ServerSettingsRef.UGCServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(Request.SortBy) },
@@ -136,10 +136,10 @@ FAccelByteTaskWPtr ServerUGC::ModifyContentByShareCode(FString const& UserId
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/channels/%s/contents/s3/sharecodes/%s")
 		, *ServerSettingsRef.UGCServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *UserId
-		, *ChannelId
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	FAccelByteModelsUGCUpdateRequest Request = ModifyRequest;
 	if (Request.ContentType.IsEmpty())
@@ -179,10 +179,10 @@ FAccelByteTaskWPtr ServerUGC::DeleteContentByShareCode(FString const& UserId
 
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/channels/%s/contents/sharecodes/%s")
 		, *ServerSettingsRef.UGCServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *UserId
-		, *ChannelId
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -209,8 +209,8 @@ FAccelByteTaskWPtr ServerUGC::PublicGetContentByContentId(FString const& Content
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
@@ -223,8 +223,8 @@ FAccelByteTaskWPtr ServerUGC::PublicGetContentByShareCode(FString const& ShareCo
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
@@ -245,7 +245,7 @@ void ServerUGC::InternalSearchContents(FString const& Name
 {
 	OutUrl = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace()));
 
 	OutQueryParams = TMultiMap<FString, FString>{
 		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(SortBy) },
@@ -312,7 +312,7 @@ FAccelByteTaskWPtr ServerUGC::PublicGetContentBulk(TArray<FString> const& Conten
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/bulk")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace()));
 
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
@@ -340,8 +340,8 @@ FAccelByteTaskWPtr ServerUGC::PublicGetUserContent(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -379,8 +379,8 @@ FAccelByteTaskWPtr ServerUGC::PublicSearchContentsSpecificToChannelV2(FString co
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/channels/%s/contents")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -400,7 +400,7 @@ void ServerUGC::InternalSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 cons
 {
 	OutUrl = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace()));
 
 	FString TagValue = FString::Join(Filter.Tags, TEXT(","));
 
@@ -467,7 +467,7 @@ FAccelByteTaskWPtr ServerUGC::PublicGetContentBulkByIdsV2(TArray<FString> const&
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/bulk")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace()));
 
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
@@ -492,8 +492,8 @@ FAccelByteTaskWPtr ServerUGC::PublicGetContentByShareCodeV2(FString const& Share
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/%s")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
@@ -518,8 +518,8 @@ FAccelByteTaskWPtr ServerUGC::PublicGetContentByContentIdV2(FString const& Conte
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
@@ -547,8 +547,8 @@ FAccelByteTaskWPtr ServerUGC::PublicGetUserContentsV2(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents")
 		, *ServerSettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},

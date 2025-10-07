@@ -21,7 +21,7 @@ class ACCELBYTEUE4SDK_API FAccelByteApiUtilities : public TSharedFromThis<FAccel
 public:
 	FAccelByteApiUtilities(TSharedRef<BaseCredentials, ESPMode::ThreadSafe> const InCredentialsRef
 		, TSharedRef<BaseSettings, ESPMode::ThreadSafe> const InSettingsRef
-		, TSharedRef<FHttpRetryScheduler, ESPMode::ThreadSafe> const InHttpRef
+		, TSharedRef<FHttpRetrySchedulerBase, ESPMode::ThreadSafe> const InHttpRef
 		, TSharedPtr<FAccelByteTimeManager, ESPMode::ThreadSafe> InTimeManager);
 
 	/**
@@ -122,7 +122,7 @@ public:
 private:
 	TSharedRef<BaseCredentials, ESPMode::ThreadSafe> CredentialsRef;
 	TSharedRef<BaseSettings, ESPMode::ThreadSafe> SettingsRef;
-	TSharedRef<FHttpRetryScheduler, ESPMode::ThreadSafe> HttpRef;
+	TSharedRef<FHttpRetrySchedulerBase, ESPMode::ThreadSafe> HttpRef;
 	FHttpClient HttpClient;
 	TWeakPtr<FAccelByteTimeManager, ESPMode::ThreadSafe> TimeManager;
 	

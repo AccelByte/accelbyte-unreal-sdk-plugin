@@ -92,28 +92,41 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRankingData
 };
 
 USTRUCT(BlueprintType)
+struct FAccelByteModelsBaseLeaderboardData
+{
+	GENERATED_BODY();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BaseLeaderboardData")
+	bool AllTime{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BaseLeaderboardData")
+	TArray<FString> CyleIds{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BaseLeaderboardData")
+	FString IconUrl{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BaseLeaderboardData")
+	FString LeaderboardCode{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BaseLeaderboardData")
+	FString Name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | BaseLeaderboardData")
+	FString StatCode{};
+};
+
+USTRUCT(BlueprintType)
 struct FAccelByteModelsLeaderboardData
+	: public FAccelByteModelsBaseLeaderboardData
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
 	bool Descending{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
-	FString IconUrl{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
 	bool IsDeleted{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
-	FString LeaderboardCode{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
-	FString Name{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
 	FString Description{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
-	FString StatCode{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
-	TArray<FString> CyleIds{};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
-	bool AllTime{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")
 	FDateTime CreatedAt{0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | LeaderboardData")

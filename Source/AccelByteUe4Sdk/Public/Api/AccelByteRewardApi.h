@@ -22,7 +22,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Reward : public FApiBase, public TSharedFromThis<Reward, ESPMode::ThreadSafe>
 {
 public:
-	Reward(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	Reward(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Reward();
 
 	/**

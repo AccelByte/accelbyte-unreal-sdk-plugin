@@ -13,7 +13,7 @@ namespace Api
 {
 Reward::Reward(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -50,7 +50,7 @@ FAccelByteTaskWPtr Reward::GetRewardByRewardCode(FString const& RewardCode
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/byCode")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("rewardCode"), RewardCode }
@@ -67,8 +67,8 @@ FAccelByteTaskWPtr Reward::GetRewardByRewardId(FString const& RewardId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *RewardId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(RewardId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -84,7 +84,7 @@ FAccelByteTaskWPtr Reward::QueryRewards(FString const& EventTopic
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/rewards/byCriteria")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (!EventTopic.IsEmpty())

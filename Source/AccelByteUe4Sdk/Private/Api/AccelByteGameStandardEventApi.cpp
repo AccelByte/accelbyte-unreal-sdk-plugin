@@ -11,7 +11,7 @@ namespace Api
 	
 GameStandardEvent::GameStandardEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: BaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient, TEXT("GameStandardEvent"), true, true)
 {}
@@ -19,7 +19,7 @@ GameStandardEvent::GameStandardEvent(Credentials& InCredentialsRef
 FString GameStandardEvent::GetTelemetryKey()
 {
 	FString Environment = *SettingsRef.SettingsEnvironment;
-	FString UserId = *CredentialsRef->GetUserId();
+	FString UserId = *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId());
 	if (UserId.IsEmpty())
 	{
 		return UserId;

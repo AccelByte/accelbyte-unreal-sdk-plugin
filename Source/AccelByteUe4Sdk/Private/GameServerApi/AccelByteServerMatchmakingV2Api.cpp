@@ -12,7 +12,7 @@ namespace GameServerApi
 
 ServerMatchmakingV2::ServerMatchmakingV2(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingRef, InHttpRef, InServerApiClient)
 {
@@ -63,8 +63,8 @@ FAccelByteTaskWPtr ServerMatchmakingV2::AcceptBackfillProposal(FString const& Ba
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/backfill/%s/proposal/accept")
 		, *ServerSettingsRef.MatchmakingV2ServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *BackfillTicketId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(BackfillTicketId));
 
 	const TSharedRef<FJsonObject> RequestObject = MakeShared<FJsonObject>();
 	RequestObject->SetStringField(TEXT("proposalId"), ProposalId);
@@ -106,8 +106,8 @@ FAccelByteTaskWPtr ServerMatchmakingV2::RejectBackfillProposal(FString const& Ba
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/backfill/%s/proposal/reject")
 		, *ServerSettingsRef.MatchmakingV2ServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *BackfillTicketId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(BackfillTicketId));
 
 	const TSharedRef<FJsonObject> RequestObject = MakeShared<FJsonObject>();
 	RequestObject->SetBoolField(TEXT("stop"), bStopBackfilling);
@@ -145,7 +145,7 @@ FAccelByteTaskWPtr ServerMatchmakingV2::CreateBackfillTicket(FString const& Matc
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/backfill")
 		, *ServerSettingsRef.MatchmakingV2ServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const TSharedRef<FJsonObject> RequestObject = MakeShared<FJsonObject>();
 	RequestObject->SetStringField(TEXT("matchPool"), MatchPool);
@@ -176,8 +176,8 @@ FAccelByteTaskWPtr ServerMatchmakingV2::DeleteBackfillTicket(FString const& Back
 
 	const FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/backfill/%s")
 		, *ServerSettingsRef.MatchmakingV2ServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *BackfillTicketId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(BackfillTicketId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }

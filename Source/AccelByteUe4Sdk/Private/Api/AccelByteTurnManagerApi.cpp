@@ -20,7 +20,7 @@ TArray<TPair<FString, float>> TurnManager::Latencies = {};
 
 TurnManager::TurnManager(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, FastestPing{.0f}
@@ -248,9 +248,9 @@ FAccelByteTaskWPtr TurnManager::SendMetric(FString const& SelectedTurnServerRegi
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/metrics/namespaces/%s/connected"),
-		*GetTurnManagerServerUrl(),
-		*SettingsRef.Namespace);
+	const FString Url = FString::Printf(TEXT("%s/metrics/namespaces/%s/connected")
+		, *GetTurnManagerServerUrl()
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	FAccelByteModelsTurnManagerMetric Data;
 	Data.Region = SelectedTurnServerRegion;

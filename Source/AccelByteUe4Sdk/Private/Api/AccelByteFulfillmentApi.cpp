@@ -15,7 +15,7 @@ namespace Api
 {
 Fulfillment::Fulfillment(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -33,8 +33,8 @@ FAccelByteTaskWPtr Fulfillment::RedeemCode(FString const& Code
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FString Content;
 	FAccelByteModelsFulFillCodeRequest CodeRequest;

@@ -26,7 +26,7 @@ private:
 public:
 	using BaseCredentials::SetClientCredentials;
 
-	ServerCredentials(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl);
+	ServerCredentials(FHttpRetrySchedulerBase& InHttpRef, FString const& InIamServerUrl);
 	virtual void ForgetAll() override;
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
 	void SetMatchId(const FString& GivenMatchId);

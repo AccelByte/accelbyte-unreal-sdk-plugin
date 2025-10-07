@@ -17,7 +17,7 @@ namespace Api
 
 Order::Order(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -33,8 +33,8 @@ FAccelByteTaskWPtr Order::CreateNewOrder(FAccelByteModelsOrderCreate const& Orde
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FString Content;
 	const TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(OrderCreate);
@@ -54,9 +54,9 @@ FAccelByteTaskWPtr Order::CancelOrder(FString const& OrderNo
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/cancel")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *OrderNo);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(OrderNo));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -69,9 +69,9 @@ FAccelByteTaskWPtr Order::GetUserOrder(FString const& OrderNo
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *OrderNo);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(OrderNo));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -85,8 +85,8 @@ FAccelByteTaskWPtr Order::GetUserOrders(int32 Page
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("page"), FString::FromInt(Page)},
@@ -104,8 +104,8 @@ FAccelByteTaskWPtr Order::QueryUserOrders(FAccelByteModelsUserOrdersRequest cons
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FString Status = UserOrderRequest.Status != EAccelByteOrderStatus::NONE ? 
 		FAccelByteUtilities::GetUEnumValueAsString(UserOrderRequest.Status) : TEXT("");
@@ -127,9 +127,9 @@ FAccelByteTaskWPtr Order::GetUserOrderHistory(FString const& OrderNo
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *OrderNo);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(OrderNo));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -141,8 +141,8 @@ FAccelByteTaskWPtr Order::PreviewUserOrder(FAccelByteModelsUserPreviewOrderReque
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/discount/preview")
 		, *SettingsRef.PlatformServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, PreviewOrderRequest, OnSuccess, OnError);
 }

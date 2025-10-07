@@ -10,7 +10,7 @@ namespace AccelByte
 FApiBase::FApiBase(
 	Credentials const& InCredentialsRef,
 	Settings const& InSettingsRef,
-	FHttpRetryScheduler& InHttpRef,
+	FHttpRetrySchedulerBase& InHttpRef,
 	TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: CredentialsRef{InCredentialsRef.AsShared()}
 	, SettingsRef{InSettingsRef}

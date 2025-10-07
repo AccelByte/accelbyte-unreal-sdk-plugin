@@ -18,7 +18,7 @@ namespace Api
 
 UGC::UGC(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -42,9 +42,9 @@ FAccelByteTaskWPtr UGC::CreateContent(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	FAccelByteModelsUGCRequest Request = CreateRequest;
 	if (Request.ContentType.IsEmpty())
@@ -102,10 +102,10 @@ FAccelByteTaskWPtr UGC::ModifyContent(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	FAccelByteModelsUGCUpdateRequest Request = ModifyRequest;
 	if (Request.ContentType.IsEmpty())
@@ -214,10 +214,10 @@ FAccelByteTaskWPtr UGC::DeleteContent(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -238,8 +238,8 @@ FAccelByteTaskWPtr UGC::GetContentByContentId(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -260,8 +260,8 @@ FAccelByteTaskWPtr UGC::PublicGetContentByContentId(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
@@ -280,8 +280,8 @@ FAccelByteTaskWPtr UGC::GetContentByShareCode(FString const& ShareCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -300,8 +300,8 @@ FAccelByteTaskWPtr UGC::PublicGetContentByShareCode(FString const& ShareCode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
@@ -322,8 +322,8 @@ FAccelByteTaskWPtr UGC::GetContentPreview(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/preview")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -353,7 +353,7 @@ FAccelByteTaskWPtr UGC::GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 	
@@ -378,7 +378,7 @@ FAccelByteTaskWPtr UGC::GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/types")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -401,8 +401,8 @@ FAccelByteTaskWPtr UGC::CreateChannel(FString const& ChannelName
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	const FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
 
@@ -426,7 +426,9 @@ FAccelByteTaskWPtr UGC::UpdateChannel(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace(), *CredentialsRef->GetUserId(), *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	const FString Content = FString::Printf(TEXT("{\"name\": \"%s\"}"), *ChannelName);
 
@@ -463,8 +465,8 @@ FAccelByteTaskWPtr UGC::GetChannels(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMultiMap<FString, FString> QueryParams{
 		{ TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("") },
@@ -491,9 +493,9 @@ FAccelByteTaskWPtr UGC::DeleteChannel(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -514,7 +516,7 @@ void UGC::InternalSearchContents(FString const& Name
 {
 	OutUrl = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace()));
 
 	OutQueryParams = TMultiMap<FString, FString>{
 		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(SortBy) },
@@ -620,8 +622,8 @@ FAccelByteTaskWPtr UGC::UpdateLikeStatusToContent(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/like")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	const FString Content = FString::Printf(TEXT("{\"likeStatus\": %s}"), bLikeStatus ? TEXT("true") : TEXT("false"));
 
@@ -646,8 +648,8 @@ FAccelByteTaskWPtr UGC::GetListFollowers(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/followers")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -679,8 +681,8 @@ FAccelByteTaskWPtr UGC::UpdateFollowStatusToUser(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/follow")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	const FString Content = FString::Printf(TEXT("{\"followStatus\": %s}"), bFollowStatus ? TEXT("true") : TEXT("false"));
 
@@ -715,8 +717,8 @@ FAccelByteTaskWPtr UGC::SearchContentsSpecificToChannel(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(SortBy) },
@@ -758,8 +760,8 @@ FAccelByteTaskWPtr UGC::SearchContentsSpecificToChannel(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("sortby"), FAccelByteUGCUtilities::ConvertUGCSortByToString(Request.SortBy) },
@@ -791,7 +793,7 @@ FAccelByteTaskWPtr UGC::GetContentBulk(TArray<FString> const& ContentIds
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
@@ -807,7 +809,7 @@ FAccelByteTaskWPtr UGC::PublicGetContentBulk(TArray<FString> const& ContentIds
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace()));
 
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
@@ -836,8 +838,8 @@ FAccelByteTaskWPtr UGC::GetUserContent(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -870,8 +872,8 @@ FAccelByteTaskWPtr UGC::PublicGetUserContent(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -908,9 +910,9 @@ FAccelByteTaskWPtr UGC::UploadContentScreenshot(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/contents/%s/screenshots")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, ScreenshotsRequest, OnSuccess, OnError);
 }
@@ -924,7 +926,7 @@ FAccelByteTaskWPtr UGC::GetFollowedContent(THandler<FAccelByteModelsUGCContentPa
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/followed")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -948,7 +950,7 @@ FAccelByteTaskWPtr UGC::GetFollowedUsers(THandler<FAccelByteModelsUGCFollowedUse
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/followed")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -979,7 +981,7 @@ FAccelByteTaskWPtr UGC::GetLikedContent(TArray<FString> const& Tags
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/liked")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("name"), Name },
@@ -1016,7 +1018,7 @@ FAccelByteTaskWPtr UGC::GetLikedContent(TArray<FString> const& Tags
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/liked")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TMultiMap<FString, FString> QueryParams {
 		{ TEXT("name"), Name },
@@ -1053,8 +1055,8 @@ FAccelByteTaskWPtr UGC::GetCreator(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1077,8 +1079,8 @@ FAccelByteTaskWPtr UGC::GetGroups(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/groups")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TMultiMap<FString, FString> QueryParams;
 	if (Offset > 0)
@@ -1112,7 +1114,7 @@ FAccelByteTaskWPtr UGC::BulkGetContentByShareCode(TArray<FString> const& ShareCo
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsUGCBulkGetContentByShareCodeRequest ContentRequest;
 	ContentRequest.ShareCodes = ShareCodes;
@@ -1141,8 +1143,8 @@ FAccelByteTaskWPtr UGC::SearchContentsSpecificToChannelV2(FString const& Channel
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1172,8 +1174,8 @@ FAccelByteTaskWPtr UGC::PublicSearchContentsSpecificToChannelV2(FString const& C
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1193,7 +1195,7 @@ void UGC::InternalSearchContentsV2(FAccelByteModelsUGCFilterRequestV2 const& Fil
 {
 	OutUrl = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace()));
 
 	FString TagValue = FString::Join(Filter.Tags, TEXT(","));
 
@@ -1276,7 +1278,7 @@ FAccelByteTaskWPtr UGC::GetContentBulkByIdsV2(TArray<FString> const& ContentIds
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
@@ -1303,7 +1305,7 @@ FAccelByteTaskWPtr UGC::PublicGetContentBulkByIdsV2(TArray<FString> const& Conte
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace()));
 
 	FAccelByteModelsUGCGetContentBulkRequest ContentRequest;
 	ContentRequest.ContentIds = ContentIds;
@@ -1328,8 +1330,8 @@ FAccelByteTaskWPtr UGC::GetContentByShareCodeV2(FString const& ShareCode
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1348,8 +1350,8 @@ FAccelByteTaskWPtr UGC::PublicGetContentByShareCodeV2(FString const& ShareCode
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
@@ -1370,8 +1372,8 @@ FAccelByteTaskWPtr UGC::GetContentByContentIdV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1392,8 +1394,8 @@ FAccelByteTaskWPtr UGC::PublicGetContentByContentIdV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.Request(TEXT("GET"), Url, {}, FString(), GetDefaultHeaders(), OnSuccess, OnError);
 }
@@ -1419,9 +1421,9 @@ FAccelByteTaskWPtr UGC::CreateContentV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, CreateRequest, OnSuccess, OnError);
 }
@@ -1447,10 +1449,10 @@ FAccelByteTaskWPtr UGC::DeleteContentV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1477,10 +1479,10 @@ FAccelByteTaskWPtr UGC::ModifyContentV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, ModifyRequest, OnSuccess, OnError);
 }
@@ -1512,10 +1514,10 @@ FAccelByteTaskWPtr UGC::GenerateUploadContentURLV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s/uploadUrl")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, UploadRequest, OnSuccess, OnError);
 }
@@ -1554,10 +1556,10 @@ FAccelByteTaskWPtr UGC::UpdateContentFileLocationV2(FString const& ChannelId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s/fileLocation")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	FAccelByteModelsUGCUpdateContentFileLocationRequestV2 Request;
 	Request.FileExtension = FileExtension;
@@ -1585,8 +1587,8 @@ FAccelByteTaskWPtr UGC::GetUserContentsV2(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1616,8 +1618,8 @@ FAccelByteTaskWPtr UGC::PublicGetUserContentsV2(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents")
 		, *SettingsRef.UGCServerUrl
-		, *GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1645,9 +1647,9 @@ FAccelByteTaskWPtr UGC::UpdateContentScreenshotV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents/%s/screenshots")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, ScreenshotsRequest, OnSuccess, OnError);
 }
@@ -1681,9 +1683,9 @@ FAccelByteTaskWPtr UGC::UploadContentScreenshotV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents/%s/screenshots")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, ScreenshotsRequest, OnSuccess, OnError);
 }
@@ -1709,10 +1711,10 @@ FAccelByteTaskWPtr UGC::DeleteContentScreenshotV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/contents/%s/screenshots/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ContentId
-		, *ScreenshotId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ContentId)
+		, *FGenericPlatformHttp::UrlEncode(ScreenshotId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1741,10 +1743,10 @@ FAccelByteTaskWPtr UGC::ModifyContentByShareCode(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	FAccelByteModelsUGCUpdateRequest Request = ModifyRequest;
 	if (Request.ContentType.IsEmpty())
@@ -1789,10 +1791,10 @@ FAccelByteTaskWPtr UGC::ModifyContentShareCode(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s/sharecode")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, ModifyContentShareCodeRequest, OnSuccess, OnError);
 }	
@@ -1820,10 +1822,10 @@ FAccelByteTaskWPtr UGC::DeleteContentByShareCode(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/sharecodes/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ShareCode);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ShareCode));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1847,7 +1849,7 @@ FAccelByteTaskWPtr UGC::BulkGetContentByShareCodeV2(TArray<FString> const& Share
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/sharecodes/bulk")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsUGCBulkGetContentByShareCodeRequest ContentRequest;
 	ContentRequest.ShareCodes = ShareCodes;
@@ -1889,10 +1891,10 @@ FAccelByteTaskWPtr UGC::ModifyContentShareCodeV2(FString const& ChannelId
 
 	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/channels/%s/contents/%s/sharecode")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ChannelId
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ChannelId)
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, ModifyContentShareCodeRequest, OnSuccess, OnError);
 }	
@@ -1917,8 +1919,8 @@ FAccelByteTaskWPtr UGC::AddDownloadContentCountV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s/downloadcount")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1943,11 +1945,11 @@ FAccelByteTaskWPtr UGC::GetListContentDownloaderV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s/downloader")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	const TMap<FString, FString> QueryParams = {
-		{TEXT("userId"), UserId.IsEmpty() ? TEXT("") : *UserId},
+		{TEXT("userId"), UserId.IsEmpty() ? TEXT("") : *FGenericPlatformHttp::UrlEncode(UserId)},
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
 		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")},
 		{TEXT("sortBy"), SortBy == EAccelByteUGCContentUtilitiesSortByV2::NONE ? TEXT("") : FAccelByteUGCUtilities::ConvertUGCUtilitiesSortByToString(SortBy)}
@@ -1979,8 +1981,8 @@ FAccelByteTaskWPtr UGC::GetListContentLikerV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s/like")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -2008,8 +2010,8 @@ FAccelByteTaskWPtr UGC::UpdateLikeStatusToContentV2(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/contents/%s/like")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	const FString Content = FString::Printf(TEXT("{\"likeStatus\": %s}"), bLikeStatus ? TEXT("true") : TEXT("false"));
 
@@ -2031,8 +2033,8 @@ FAccelByteTaskWPtr UGC::GetStagingContents(EStagingContentRequestStatus Status
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	const TMap<FString, FString> QueryParams = {
 		{TEXT("status"), FAccelByteUtilities::GetUEnumValueAsString(Status)},
@@ -2059,9 +2061,9 @@ FAccelByteTaskWPtr UGC::GetStagingContentById(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
 }
@@ -2082,9 +2084,9 @@ FAccelByteTaskWPtr UGC::UpdateStagingContent(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, UpdateRequest, OnSuccess, OnError);
 }
@@ -2105,9 +2107,9 @@ FAccelByteTaskWPtr UGC::DeleteStagingContent(FString const& ContentId
 
 	const FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s/staging-contents/%s")
 		, *SettingsRef.UGCServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ContentId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ContentId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }

@@ -23,7 +23,7 @@ class ACCELBYTEUE4SDK_API PresenceBroadcastEvent : public FApiBase, public TShar
 public:
 	PresenceBroadcastEvent(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	
 	~PresenceBroadcastEvent();

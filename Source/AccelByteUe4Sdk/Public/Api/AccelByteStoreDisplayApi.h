@@ -20,7 +20,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API StoreDisplay : public FApiBase, public TSharedFromThis<StoreDisplay, ESPMode::ThreadSafe>
 {
 public:
-	StoreDisplay(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	StoreDisplay(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~StoreDisplay();
 	
 	/**

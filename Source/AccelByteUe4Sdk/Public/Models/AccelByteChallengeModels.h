@@ -666,6 +666,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeServerEvaluateProgressReques
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChallengeEvaluateProgressOptionalParameter
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Server | Progress | Optional")
+	TArray<FString> ChallengeCodesToEvaluate{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Challenges | Server | Progress | Optional", Meta=(DeprecatedProperty, DeprecationMessage="Use ChallengeCodesToEvaluate instead."))
+	TArray<FString> ChallengeCodesToEvalute{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsScheduleByGoalResponse
 {
 	GENERATED_BODY()

@@ -15,7 +15,7 @@ namespace Api
 
 QosManager::QosManager(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -38,7 +38,7 @@ void QosManager::GetQosServers(const THandler<FAccelByteModelsQosServerList>& On
 	{
 		Url = FString::Printf(TEXT("%s/public/namespaces/%s/qos")
 			, *SettingsRef.QosManagerServerUrl
-			, *SettingsRef.Namespace);
+			, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 	}
 
 	TMap<FString, FString> Headers = {
@@ -56,7 +56,7 @@ void QosManager::GetActiveQosServers(const THandler<FAccelByteModelsQosServerLis
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/qos?status=ACTIVE")
 		, *SettingsRef.QosManagerServerUrl
-		, *SettingsRef.Namespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/json")},

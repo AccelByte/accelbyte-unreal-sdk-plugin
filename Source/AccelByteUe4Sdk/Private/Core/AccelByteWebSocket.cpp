@@ -258,6 +258,11 @@ bool AccelByteWebSocket::IsConnected() const
 	return WebSocket.IsValid() && WebSocket->IsConnected() && bConnectedBroadcasted;
 }
 
+bool AccelByteWebSocket::IsReconnecting() const
+{
+	return WebSocket.IsValid() && (WsState == EWebSocketState::Reconnecting || WsState == EWebSocketState::WaitingReconnect);
+}
+
 void AccelByteWebSocket::SendPing() const
 {
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
@@ -270,6 +275,11 @@ void AccelByteWebSocket::Send(const FString& Message) const
 {
 	ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_REQUEST(Message);
 	WebSocket->Send(Message);
+}
+
+EWebSocketState AccelByteWebSocket::GetState() const
+{
+	return WsState;
 }
 
 void AccelByteWebSocket::OnConnectionConnected()

@@ -17,7 +17,7 @@ namespace Api
 
 Inventory::Inventory(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -104,7 +104,7 @@ FAccelByteTaskWPtr Inventory::GetInventoryConfigurations(THandler<FAccelByteMode
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/inventoryConfigurations")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), ConvertInventoryConfigurationSortByToString(SortBy) },
@@ -126,7 +126,7 @@ FAccelByteTaskWPtr Inventory::GetInventoryTags(THandler<FAccelByteModelsInventor
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), ConvertItemTypeSortByToString(SortBy) },
@@ -148,7 +148,7 @@ FAccelByteTaskWPtr Inventory::GetUserInventories(THandler<FAccelByteModelsUserIn
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), ConvertUserInventoriesSortByToString(SortBy) },
@@ -170,7 +170,7 @@ FAccelByteTaskWPtr Inventory::GetItemTypes(THandler<FAccelByteModelsItemTypePagi
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/itemtypes")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), ConvertItemTypeSortByToString(SortBy) },
@@ -200,8 +200,8 @@ FAccelByteTaskWPtr Inventory::GetUserInventoryAllItems(FString const& InventoryI
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *InventoryId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(InventoryId));
 
 	const TMultiMap<FString, FString> QueryParams{
 		{ TEXT("sortBy"), FAccelByteInventoryUtilities::ConvertUserItemsSortByToString(SortBy) },
@@ -240,10 +240,10 @@ FAccelByteTaskWPtr Inventory::GetUserInventoryItem(FString const& InventoryId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/slots/%s/sourceItems/%s")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *InventoryId
-		, *SlotId
-		, *SourceItemId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(InventoryId)
+		, *FGenericPlatformHttp::UrlEncode(SlotId)
+		, *FGenericPlatformHttp::UrlEncode(SourceItemId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -273,8 +273,8 @@ FAccelByteTaskWPtr Inventory::BulkUpdateInventoryItems(FString const& InventoryI
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *InventoryId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(InventoryId));
 
 	FString Content = TEXT("");
 	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsUpdateUserInventoryItemRequest>(UpdatedItemsRequest, Content);
@@ -307,8 +307,8 @@ FAccelByteTaskWPtr Inventory::BulkDeleteInventoryItems(FString const& InventoryI
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *InventoryId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(InventoryId));
 
 	FString Content = TEXT("");
 	FAccelByteUtilities::UStructArrayToJsonObjectString<FAccelByteModelsDeleteUserInventoryItemsRequest>(DeletedItemsRequest, Content);
@@ -346,8 +346,8 @@ FAccelByteTaskWPtr Inventory::MoveItemsBetweenInventories(FString const& TargetI
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/items/movement")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *TargetInventoryId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(TargetInventoryId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, MoveItemsRequest, OnSuccess, OnError);
 }
@@ -377,8 +377,8 @@ FAccelByteTaskWPtr Inventory::ConsumeUserInventoryItem(FString const& InventoryI
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/inventories/%s/consume")
 		, *SettingsRef.InventoryServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *InventoryId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(InventoryId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, ConsumedItemsRequest, OnSuccess, OnError);
 }

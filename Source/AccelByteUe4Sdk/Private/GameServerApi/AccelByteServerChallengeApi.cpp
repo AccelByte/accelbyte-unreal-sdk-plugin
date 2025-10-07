@@ -18,7 +18,7 @@ namespace GameServerApi
 
 ServerChallenge::ServerChallenge(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
@@ -76,9 +76,9 @@ FAccelByteTaskWPtr ServerChallenge::GetUserChallengeProgress(const FString& User
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/progress/%s")
 		, *ServerSettingsRef.ChallengeServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *UserId
-		, *ChallengeCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(ChallengeCode));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -87,13 +87,32 @@ FAccelByteTaskWPtr ServerChallenge::EvaluateChallengeProgress(FAccelByteModelsCh
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
+	return EvaluateChallengeProgress(Request, FAccelByteModelsChallengeEvaluateProgressOptionalParameter{}, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr ServerChallenge::EvaluateChallengeProgress(FAccelByteModelsChallengeServerEvaluateProgressRequest const& Request
+	, FAccelByteModelsChallengeEvaluateProgressOptionalParameter const& OptionalParameter
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
 	FReport::Log(FString(__FUNCTION__));
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/progress/evaluate")
 		, *ServerSettingsRef.ChallengeServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
-	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
+	TMap<FString, FString> QueryParams;
+	TArray<FString> CodesToEvaluate;
+	CodesToEvaluate.Append(OptionalParameter.ChallengeCodesToEvaluate);
+	CodesToEvaluate.Append(OptionalParameter.ChallengeCodesToEvalute);
+
+	if (CodesToEvaluate.Num() > 0)
+	{
+		FString CommaSeparatedChallengeCode = FString::Join(CodesToEvaluate, TEXT(","));
+		QueryParams.Emplace(TEXT("challengeCode"), CommaSeparatedChallengeCode);
+	}
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, QueryParams, Request, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr ServerChallenge::GetUserRewards(const FString& UserId
@@ -131,8 +150,8 @@ FAccelByteTaskWPtr ServerChallenge::GetUserRewards(const FString& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/rewards")
 		, *ServerSettingsRef.ChallengeServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
@@ -160,8 +179,8 @@ FAccelByteTaskWPtr ServerChallenge::ClaimReward( FAccelByteModelsChallengeReward
 	
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/rewards/claim")
 		, *ServerSettingsRef.ChallengeServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Request.UserID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Request.UserID));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
@@ -196,7 +215,7 @@ FAccelByteTaskWPtr ServerChallenge::ClaimReward(TArray<FAccelByteModelsChallenge
 	
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/rewards/claim")
 		, *ServerSettingsRef.ChallengeServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, ItemsString, OnSuccess, OnError);
 }

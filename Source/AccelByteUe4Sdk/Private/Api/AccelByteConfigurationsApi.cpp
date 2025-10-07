@@ -12,7 +12,7 @@ namespace Api
 
 Configurations::Configurations(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -27,7 +27,7 @@ FAccelByteTaskWPtr Configurations::GetAll(THandler<TArray<FAccelByteModelsConfig
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/configs")
 		, *SettingsRef.ConfigServerUrl
-		, *SettingsRef.Namespace);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
 
 	return HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }
@@ -46,8 +46,8 @@ FAccelByteTaskWPtr Configurations::Get(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/configs/%s")
 		, *SettingsRef.ConfigServerUrl
-		, *SettingsRef.Namespace
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.Request(TEXT("GET"), Url, OnSuccess, OnError);
 }

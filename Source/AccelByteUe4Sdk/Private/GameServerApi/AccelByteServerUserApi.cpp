@@ -19,7 +19,7 @@ namespace GameServerApi
 
 ServerUser::ServerUser(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
@@ -49,14 +49,14 @@ FAccelByteTaskWPtr ServerUser::SearchUserOtherPlatformDisplayName(FString const&
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/search")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("by"), bIsSearchByUniqueDisplayName ? TEXT("uniqueDisplayName") : TEXT("thirdPartyPlatform") },
 		{ TEXT("offset"), Offset > 0 ? FString::FromInt(Offset) : TEXT("") },
 		{ TEXT("limit"), Limit > 0 ? FString::FromInt(Limit) : TEXT("") },
 		{ TEXT("platformBy"), TEXT("platformDisplayName") },
-		{ TEXT("platformId"), *PlatformId },
+		{ TEXT("platformId"), *FGenericPlatformHttp::UrlEncode(PlatformId) },
 		{ TEXT("query"), *DisplayName }
 	};
 
@@ -74,9 +74,9 @@ FAccelByteTaskWPtr ServerUser::SearchUserOtherPlatformUserId(FString const& Plat
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/platforms/%s/users/%s")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *PlatformId
-		, *PlatformUserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PlatformId)
+		, *FGenericPlatformHttp::UrlEncode(PlatformUserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -96,8 +96,8 @@ FAccelByteTaskWPtr ServerUser::GetUserPlatformLinks(FString const& UserID
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/platforms")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetNamespace()
-		, *UserID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserID));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -117,8 +117,8 @@ FAccelByteTaskWPtr ServerUser::GetUserPublicInfoByUserId(FString const& UserID
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserID);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserID));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -139,8 +139,8 @@ FAccelByteTaskWPtr ServerUser::BanSingleUser(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, BanUser, OnSuccess, OnError);
 }
@@ -162,8 +162,8 @@ FAccelByteTaskWPtr ServerUser::GetUserBans(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("activeOnly"), TEXT("true")},
@@ -189,8 +189,8 @@ FAccelByteTaskWPtr ServerUser::GetUserBanInfo(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans?activeOnly=true")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 	
 	return HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
 }
@@ -203,7 +203,7 @@ FAccelByteTaskWPtr ServerUser::ListUserByUserId(FListUserDataRequest const& Requ
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/bulk")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace() );
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()) );
  
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
@@ -222,7 +222,7 @@ FAccelByteTaskWPtr ServerUser::GetUsersInfoByEmails(FUsersEmailsRequest const& R
 
 	const FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/search/bulk")
 		, *ServerSettingsRef.IamServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }

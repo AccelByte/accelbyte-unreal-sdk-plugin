@@ -27,7 +27,7 @@ class ACCELBYTEUE4SDK_API ServerSeasonPass : public FServerApiBase
 public:
 	ServerSeasonPass(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerSeasonPass();
 

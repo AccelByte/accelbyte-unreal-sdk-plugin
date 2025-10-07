@@ -522,6 +522,13 @@ bool Lobby::IsConnected() const
 	return WebSocket.IsValid() && WebSocket->IsConnected();
 }
 
+bool Lobby::IsReconnecting() const
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	return WebSocket.IsValid() && WebSocket->IsReconnecting();
+}
+
 void Lobby::SendPing()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -569,7 +576,7 @@ FString Lobby::SendPrivateMessage(FString const& UserId
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PersonalChat
 		, Chat
-		, FString::Printf(TEXT("to: %s\npayload: %s\n"), *UserId, *Message));
+		, FString::Printf(TEXT("to: %s\npayload: %s\n"), *FGenericPlatformHttp::UrlEncode(UserId), *Message));
 }
 
 FString Lobby::SendPartyMessage(FString const& Message)
@@ -668,7 +675,7 @@ FString Lobby::SendInviteToPartyRequest(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyInvite
 		, Party
-		, FString::Printf(TEXT("friendID: %s"), *UserId))
+		, FString::Printf(TEXT("friendID: %s"), *FGenericPlatformHttp::UrlEncode(UserId)))
 }
 
 FString Lobby::SendAcceptInvitationRequest(FString const& PartyId
@@ -681,7 +688,7 @@ FString Lobby::SendAcceptInvitationRequest(FString const& PartyId
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyJoin
 		, Party
-		, FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken))
+		, FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *FGenericPlatformHttp::UrlEncode(PartyId), *InvitationToken))
 }
 
 FString Api::Lobby::SendRejectInvitationRequest(FString const& PartyId
@@ -694,7 +701,7 @@ FString Api::Lobby::SendRejectInvitationRequest(FString const& PartyId
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyReject
 		, Party
-		, FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken))
+		, FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *FGenericPlatformHttp::UrlEncode(PartyId), *InvitationToken))
 }
 
 FString Lobby::SendKickPartyMemberRequest(FString const& UserId)
@@ -706,7 +713,7 @@ FString Lobby::SendKickPartyMemberRequest(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyKick
 		, Party
-		, FString::Printf(TEXT("memberID: %s\n"), *UserId))
+		, FString::Printf(TEXT("memberID: %s\n"), *FGenericPlatformHttp::UrlEncode(UserId)))
 }
 
 FString Lobby::SendPartyGenerateCodeRequest()
@@ -762,7 +769,7 @@ FString Lobby::SendPartyPromoteLeaderRequest(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyPromoteLeader
 		, Party
-		, FString::Printf(TEXT("newLeaderUserId: %s\n"), *UserId))
+		, FString::Printf(TEXT("newLeaderUserId: %s\n"), *FGenericPlatformHttp::UrlEncode(UserId)))
 }
 
 FString Lobby::SendNotificationToPartyMember(FString const& Topic
@@ -793,8 +800,8 @@ FAccelByteTaskWPtr Lobby::SetPartySizeLimit(FString const& PartyId
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/limit")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *PartyId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyId));
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -864,7 +871,7 @@ void Lobby::RequestFriend(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(RequestFriends
 		, Friends
-		, FString::Printf(TEXT("friendId: %s"), *UserId));
+		, FString::Printf(TEXT("friendId: %s"), *FGenericPlatformHttp::UrlEncode(UserId)));
 }
 
 void Lobby::RequestFriendByPublicId(FString const& PublicId)
@@ -882,7 +889,7 @@ void Lobby::Unfriend(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(Unfriend
 		, Friends
-		, FString::Printf(TEXT("friendId: %s"), *UserId));
+		, FString::Printf(TEXT("friendId: %s"), *FGenericPlatformHttp::UrlEncode(UserId)));
 }
 
 void Lobby::ListOutgoingFriends()
@@ -909,7 +916,7 @@ void Lobby::CancelFriendRequest(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(CancelFriends
 		, Friends
-		, FString::Printf(TEXT("friendId: %s"), *UserId));
+		, FString::Printf(TEXT("friendId: %s"), *FGenericPlatformHttp::UrlEncode(UserId)));
 }
 
 void Lobby::ListIncomingFriends()
@@ -936,7 +943,7 @@ void Lobby::AcceptFriend(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(AcceptFriends
 		, Friends
-		, FString::Printf(TEXT("friendId: %s"), *UserId));
+		, FString::Printf(TEXT("friendId: %s"), *FGenericPlatformHttp::UrlEncode(UserId)));
 }
 
 void Lobby::RejectFriend(FString const& UserId)
@@ -945,7 +952,7 @@ void Lobby::RejectFriend(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(RejectFriends
 		, Friends
-		, FString::Printf(TEXT("friendId: %s"), *UserId));
+		, FString::Printf(TEXT("friendId: %s"), *FGenericPlatformHttp::UrlEncode(UserId)));
 }
 
 void Lobby::LoadFriendsList()
@@ -963,7 +970,7 @@ void Lobby::GetFriendshipStatus(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(GetFriendshipStatus
 		, Friends
-		, FString::Printf(TEXT("friendId: %s"), *UserId));
+		, FString::Printf(TEXT("friendId: %s"), *FGenericPlatformHttp::UrlEncode(UserId)));
 }
 
 FAccelByteTaskWPtr Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest const& UserIds
@@ -980,8 +987,8 @@ FAccelByteTaskWPtr Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest c
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, UserIds, OnSuccess, OnError);
 }
@@ -1027,7 +1034,7 @@ FAccelByteTaskWPtr Lobby::SyncThirdPartyFriends(FAccelByteModelsSyncThirdPartyFr
 
 	const FString Url = FString::Printf(TEXT("%s/friends/sync/namespaces/%s/me")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FString JSONString;
 	FAccelByteUtilities::TArrayUStructToJsonString(Request.FriendSyncDetails, JSONString);
@@ -1069,7 +1076,7 @@ FAccelByteTaskWPtr Lobby::SyncThirdPartyBlockList(FAccelByteModelsSyncThirdParty
 
 	const FString Url = FString::Printf(TEXT("%s/sync/namespaces/%s/me/block")
 		, *LobbyServerHttp
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FString JSONString{};
 	FAccelByteUtilities::TArrayUStructToJsonString(Request.BlockListSyncDetails, JSONString);
@@ -1086,7 +1093,7 @@ FAccelByteTaskWPtr Lobby::QueryFriendList(THandler<FAccelByteModelsQueryFriendLi
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1105,7 +1112,7 @@ FAccelByteTaskWPtr Lobby::QueryIncomingFriendRequest(THandler<FAccelByteModelsIn
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/incoming-time")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1124,7 +1131,7 @@ FAccelByteTaskWPtr Lobby::QueryOutgoingFriendRequest(THandler<FAccelByteModelsOu
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/outgoing-time")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
@@ -1149,7 +1156,7 @@ FAccelByteTaskWPtr Lobby::SendFriendRequest(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsFriendRequestByUserId Payload;
 	Payload.FriendId = UserId;
@@ -1165,7 +1172,7 @@ FAccelByteTaskWPtr Lobby::SendFriendRequestByPublicId(FString const& PublicId
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsFriendRequestByPublicId Payload;
 	Payload.FriendPublicId = PublicId;
@@ -1188,7 +1195,7 @@ FAccelByteTaskWPtr Lobby::CancelFriendRequest(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/cancel")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsCancelFriendRequest Payload;
 	Payload.FriendId = UserId;
@@ -1211,7 +1218,7 @@ FAccelByteTaskWPtr Lobby::AcceptFriendRequest(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/accept")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsAcceptFriendRequest Payload;
 	Payload.FriendId = UserId;
@@ -1234,7 +1241,7 @@ FAccelByteTaskWPtr Lobby::RejectFriendRequest(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/request/reject")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsRejectFriendRequest Payload;
 	Payload.FriendId = UserId;
@@ -1257,8 +1264,8 @@ FAccelByteTaskWPtr Lobby::GetFriendshipStatus(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/status/%s")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1278,7 +1285,7 @@ FAccelByteTaskWPtr Lobby::Unfriend(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/me/unfriend")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsUnfriendRequest Payload;
 	Payload.FriendId = UserId;
@@ -1301,7 +1308,7 @@ FAccelByteTaskWPtr Lobby::BlockPlayer(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/block")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsBlockUserRequest Payload;
 	Payload.BlockedUserId = UserId;
@@ -1324,7 +1331,7 @@ FAccelByteTaskWPtr Lobby::UnblockPlayer(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/unblock")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	FAccelByteModelsUnlockUserRequest Payload;
 	Payload.UserId = UserId;
@@ -1340,8 +1347,8 @@ FAccelByteTaskWPtr Lobby::GetPartyData(FString const& PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *PartyId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1379,7 +1386,7 @@ FAccelByteTaskWPtr Lobby::BulkGetUserPresence(TArray<FString> const& UserIds
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/presence/namespaces/%s/users/presence")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams
 		, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda(
@@ -1422,7 +1429,7 @@ FAccelByteTaskWPtr Lobby::BulkGetUserPresenceV2(TArray<FString> const& UserIds,
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/presence/namespaces/%s/users/presence")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	TArray<TSharedPtr<FJsonValue>> UserIdsJsonValues;
 	for (auto UserId : ProcessedUserIds)
@@ -1455,8 +1462,8 @@ FAccelByteTaskWPtr Lobby::GetPartyStorage(FString const& PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *PartyId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1472,8 +1479,8 @@ FAccelByteTaskWPtr Lobby::GetListOfBlockedUsers(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1485,7 +1492,7 @@ FAccelByteTaskWPtr Lobby::GetListOfBlockedUsers(THandler<FAccelByteModelsListBlo
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1501,8 +1508,8 @@ FAccelByteTaskWPtr Lobby::GetListOfBlockers(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1514,7 +1521,7 @@ FAccelByteTaskWPtr Lobby::GetListOfBlockers(THandler<FAccelByteModelsListBlocker
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked-by")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -1529,8 +1536,8 @@ FAccelByteTaskWPtr Lobby::SendNotificationToUser(FString const& SendToUserId
 
 	const FString Url = FString::Printf(TEXT("%s/notification/namespaces/%s/users/%s/freeform")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *SendToUserId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(SendToUserId));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("async"), bAsync ? TEXT("true") : TEXT("false")}
@@ -1563,7 +1570,7 @@ void Lobby::BlockPlayer(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(BlockPlayer
 		, Block
-		, FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *CredentialsRef->GetUserId(), *UserId, *CredentialsRef->GetNamespace()));
+		, FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()), *FGenericPlatformHttp::UrlEncode(UserId), *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())));
 }
 
 void Lobby::UnblockPlayer(FString const& UserId)
@@ -1572,7 +1579,7 @@ void Lobby::UnblockPlayer(FString const& UserId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(UnblockPlayer
 		, Friends
-		, FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *CredentialsRef->GetUserId(), *UserId, *CredentialsRef->GetNamespace()));
+		, FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()), *FGenericPlatformHttp::UrlEncode(UserId), *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1585,7 +1592,7 @@ FString Lobby::SendSignalingMessage(FString const& UserId
 
 	return SendRawRequest(LobbyRequest::SignalingP2PNotif
 		, Prefix::Signaling
-		, FString::Printf(TEXT("destinationId: %s\nmessage: %s\n"), *UserId, *Message));
+		, FString::Printf(TEXT("destinationId: %s\nmessage: %s\n"), *FGenericPlatformHttp::UrlEncode(UserId), *Message));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1598,7 +1605,7 @@ FString Lobby::SetSessionAttribute(FString const& Key
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(SetSessionAttribute
 		, Attribute
-		, FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *CredentialsRef->GetNamespace(), *Key, *Value));
+		, FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()), *Key, *Value));
 }
 
 FString Lobby::GetSessionAttribute(FString const& Key)
@@ -1607,7 +1614,7 @@ FString Lobby::GetSessionAttribute(FString const& Key)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(GetSessionAttribute
 		, Attribute
-		, FString::Printf(TEXT("namespace: %s\nkey: %s"), *CredentialsRef->GetNamespace(), *Key));
+		, FString::Printf(TEXT("namespace: %s\nkey: %s"), *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()), *Key));
 }
 
 FString Lobby::GetAllSessionAttribute()
@@ -1616,7 +1623,7 @@ FString Lobby::GetAllSessionAttribute()
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(GetAllSessionAttribute
 		, Attribute
-		, FString::Printf(TEXT("namespace: %s"), *CredentialsRef->GetNamespace()));
+		, FString::Printf(TEXT("namespace: %s"), *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -3351,8 +3358,8 @@ FAccelByteTaskWPtr Lobby::RequestWritePartyStorage(FString const& PartyId
 
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes")
 		, *SettingsRef.BaseUrl
-		, *CredentialsRef->GetNamespace()
-		, *PartyId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyId));
 
 	FString Contents = "{\n";
 	FString CustomAttribute;
@@ -3497,7 +3504,7 @@ void Lobby::InitializeMessaging()
 
 Lobby::Lobby(Credentials & InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, FAccelByteMessagingSystem& InMessagingSystemRef
 	, FAccelByteNetworkConditioner& InNetworkConditionerRef
 	, float InPingDelay
@@ -3529,7 +3536,7 @@ Lobby::Lobby(Credentials & InCredentialsRef
 
 Lobby::Lobby(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, FAccelByteMessagingSystem& InMessagingSystemRef
 	, FAccelByteNetworkConditioner& InNetworkConditionerRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient

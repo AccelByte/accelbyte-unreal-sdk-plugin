@@ -22,7 +22,7 @@ class ACCELBYTEUE4SDK_API Challenge : public FApiBase, public TSharedFromThis<Ch
 public:
 	Challenge(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 
 	~Challenge();
@@ -159,6 +159,19 @@ public:
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr EvaluateChallengeProgress(FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Send a request to attempt to evaluate current progress toward all active challenges
+	 *
+	 * @param OptionalParameter Struct containing optional parameters to specify the evaluation
+	 * @param OnSuccess Delegate executed when request succeeds
+	 * @param OnError Delegate executed when request fails
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr EvaluateChallengeProgress(FAccelByteModelsChallengeEvaluateProgressOptionalParameter const& OptionalParameter
+		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
 	/**

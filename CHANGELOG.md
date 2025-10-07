@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.3.0] (2025-10-07)
+
+
+### Features
+
+* addind a to date time method that do the right conversion 
+* adding endpoint access 
+* **challenge:** add optional parameter to evaluate specific challenge codes 
+* creating a base class for http retry scheduler 
+* **HttpRetryTask:** add extra cleanup process to unbind delegates and cancel Http Request 
+* **Leaderboard:** add V3 APIs to LeaderboardApi class 
+* **Statistic:** server GetUserStatCycleItems 
+* **Websocket:** Add isReconnecting method to check on going reconnection 
+
+
+### Bug Fixes
+
+* add migration path for the typo fix 
+* encode all parameters when constructing HTTP request URL 
+* Fix concurrency issues when accessing AuthToken in the Credentials class 
+* **HttpRetryScheduler:** add cached HTTP response to temporarily prevent the object being deleted by the HttpModule 
+* linux don't like the fact that the ref is initialised with virtual class 
+* using vs typedef convention 
+
+
+### Refactors
+
+* **HttpCache:** remove FHttpRequestPtr from the cache and use LRUHttpStruct as the payload container 
+
 ## [28.2.0] (2025-09-02)
 
 

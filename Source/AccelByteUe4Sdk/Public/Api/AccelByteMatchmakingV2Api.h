@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API MatchmakingV2 : public FApiBase, public TSharedFromThis<MatchmakingV2, ESPMode::ThreadSafe>
 {
 public:
-	MatchmakingV2(Credentials const& InCredentialsRef, Settings const& InSettingRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	MatchmakingV2(Credentials const& InCredentialsRef, Settings const& InSettingRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~MatchmakingV2();
 
 	/**

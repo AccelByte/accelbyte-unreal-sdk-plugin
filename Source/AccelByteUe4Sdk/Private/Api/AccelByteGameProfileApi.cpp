@@ -15,7 +15,7 @@ namespace Api
 
 GameProfile::GameProfile(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -40,7 +40,7 @@ FAccelByteTaskWPtr GameProfile::BatchGetPublicGameProfiles(TArray<FString> const
 	{
 		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/profiles")
 			, *SettingsRef.GameProfileServerUrl
-			, *CredentialsRef->GetNamespace());
+			, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 		for (int i = 0 ; i < UserIds.Num() ; i++)
 		{
@@ -62,8 +62,8 @@ FAccelByteTaskWPtr GameProfile::GetAllGameProfiles(THandler<TArray<FAccelByteMod
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -79,8 +79,8 @@ FAccelByteTaskWPtr GameProfile::CreateGameProfile(FAccelByteModelsGameProfileReq
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, GameProfileRequest, OnSuccess, OnError);
 }
@@ -96,9 +96,9 @@ FAccelByteTaskWPtr GameProfile::GetGameProfile(FString const& ProfileId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ProfileId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ProfileId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -115,9 +115,9 @@ FAccelByteTaskWPtr GameProfile::UpdateGameProfile(FString const& ProfileId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ProfileId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ProfileId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, GameProfileRequest, OnSuccess, OnError);
 }
@@ -133,9 +133,9 @@ FAccelByteTaskWPtr GameProfile::DeleteGameProfile(FString const& ProfileId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ProfileId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ProfileId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -152,9 +152,10 @@ FAccelByteTaskWPtr GameProfile::GetGameProfileAttribute(FString const& ProfileId
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ProfileId, *AttributeName);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ProfileId)
+		, *FGenericPlatformHttp::UrlEncode(AttributeName));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -171,10 +172,10 @@ FAccelByteTaskWPtr GameProfile::UpdateGameProfileAttribute(FString const& Profil
 	
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s")
 		, *SettingsRef.GameProfileServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *ProfileId
-		, *Attribute.name);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(ProfileId)
+		, *FGenericPlatformHttp::UrlEncode(Attribute.name));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Attribute, OnSuccess, OnError);
 }

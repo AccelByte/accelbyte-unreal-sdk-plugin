@@ -16,7 +16,7 @@ namespace GameServerApi
 {
 ServerBinaryCloudSave::ServerBinaryCloudSave(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
@@ -40,7 +40,7 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::QueryGameBinaryRecords(FString const& 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{TEXT("query"), *Query},
@@ -83,7 +83,7 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 	
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("key", Key);
@@ -116,8 +116,8 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::GetGameBinaryRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess, this](FJsonObject const& JSONObject)
@@ -157,8 +157,8 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("content_type", FAccelByteUtilities::GetContentType(ContentType));
@@ -189,8 +189,8 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::DeleteGameBinaryRecord(FString const& 
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 	
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -208,8 +208,8 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::DeleteGameBinaryRecordTTLConfig(FStrin
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s/ttl")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 	
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -236,8 +236,8 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s/metadata")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("set_by", FAccelByteUtilities::GetUEnumValueAsString(SetBy));
@@ -285,8 +285,8 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FS
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/binaries/%s/presigned")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
 	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());

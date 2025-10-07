@@ -25,7 +25,7 @@ class ACCELBYTEUE4SDK_API Leaderboard : public FApiBase, public TSharedFromThis<
 	static constexpr int32 LeaderboardUserIdsURLLimit = 20;
 
 public:
-	Leaderboard(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	Leaderboard(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Leaderboard();
 
 	/**
@@ -72,21 +72,6 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Get the list of all time user ranking data in a leaderboard
-	 * 
-	 * @param LeaderboardCode The leaderboard code
-	 * @param Offset The offset of leaderboard data result
-	 * @param Limit The limit of leaderboard data result
-	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsLeaderboardRankingResultV3
-	 * @param OnError This will be called when the operation failed
-	 */
-	void GetRankingsV3(FString const& LeaderboardCode
-		, uint32 Offset
-		, uint32 Limit
-		, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
-		, FErrorHandler const& OnError);
-
-	/**
 	 * @brief Get the list of user ranking data in a leaderboard in a specific cycle
 	 * 
 	 * @param LeaderboardCode 
@@ -102,6 +87,62 @@ public:
 		, uint32 Limit
 		, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
 		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief List all leaderboards in the current namespace
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPaginatedLeaderboardData
+	 * @param OnError This will be called when the operation failed.
+	 * @param Limit The limit of leaderboard data result
+	 * @param Offset The offset of leaderboard data result
+	 */
+	void GetLeaderboardsV3(THandler<FAccelByteModelsPaginatedLeaderboardData> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint32 Limit = 20
+		, uint32 Offset = 0);
+
+	/**
+	 * @brief Retrieve Leaderboard data for specific LeaderboardCode
+	 *
+	 * @param LeaderboardCode specified Leaderboard code to query
+	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPaginatedLeaderboardData
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetLeaderboardV3(FString const& LeaderboardCode
+		, THandler<FAccelByteModelsBaseLeaderboardData> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get the list of all time user ranking data in a leaderboard
+	 *
+	 * @param LeaderboardCode The leaderboard code
+	 * @param Offset The offset of leaderboard data result
+	 * @param Limit The limit of leaderboard data result
+	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsLeaderboardRankingResultV3
+	 * @param OnError This will be called when the operation failed
+	 */
+	void GetRankingsV3(FString const& LeaderboardCode
+		, uint32 Offset
+		, uint32 Limit
+		, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get the list of user ranking data in a leaderboard in a specific cycle
+	 *
+	 * @param LeaderboardCode
+	 * @param CycleId
+	 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsLeaderboardRankingResultV3
+	 * @param OnError This will be called when the operation failed
+	 * @param Limit The limit of leaderboard data result
+	 * @param Offset The offset of leaderboard data result
+	 */
+	void GetRankingByCycleV3(FString const& LeaderboardCode
+		, FString const& CycleId
+		, THandler<FAccelByteModelsLeaderboardRankingResultV3> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint32 Limit = 20
+		, uint32 Offset = 0);
 
 	/**
 	 * @brief Get all time and cycles user ranking data in a leaderboard. 

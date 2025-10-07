@@ -16,7 +16,7 @@ namespace GameServerApi
 
 ServerMatchmaking::ServerMatchmaking(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 	, bStatusPollingActive{false}
@@ -48,8 +48,8 @@ FAccelByteTaskWPtr ServerMatchmaking::QuerySessionStatus(FString const& MatchId
 	FReport::Log(FString(__FUNCTION__));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/%s/status")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *MatchId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(MatchId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -63,7 +63,7 @@ FAccelByteTaskWPtr ServerMatchmaking::EnqueueJoinableSession(FAccelByteModelsMat
 		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, MatchmakingResult, OnSuccess, OnError);
 }
@@ -77,9 +77,9 @@ FAccelByteTaskWPtr ServerMatchmaking::DequeueJoinableSession(FString const& Matc
 		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/dequeue")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
-	const FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *MatchId);
+	const FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *FGenericPlatformHttp::UrlEncode(MatchId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }
@@ -102,9 +102,9 @@ FAccelByteTaskWPtr ServerMatchmaking::AddUserToSession(FString const& ChannelNam
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *ChannelName
-		, *MatchId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ChannelName)
+		, *FGenericPlatformHttp::UrlEncode(MatchId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Body, OnSuccess, OnError);
 }
@@ -128,10 +128,10 @@ FAccelByteTaskWPtr ServerMatchmaking::RemoveUserFromSession(FString const& Chann
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s/users/%s")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *ChannelName
-		, *MatchId
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ChannelName)
+		, *FGenericPlatformHttp::UrlEncode(MatchId)
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, Body, OnSuccess, OnError);
 }
@@ -145,9 +145,9 @@ FAccelByteTaskWPtr ServerMatchmaking::RebalanceMatchmakingBasedOnMMR(FString con
 		TEXT("Matchmaking V1 is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/rebalance")
 		, *ServerSettingsRef.MatchmakingServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
-	FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *MatchId);
+	FString Contents = FString::Printf(TEXT("{\"match_id\":\"%s\"}"), *FGenericPlatformHttp::UrlEncode(MatchId));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Contents, OnSuccess, OnError);
 }

@@ -26,7 +26,7 @@ class ACCELBYTEUE4SDK_API PredefinedEvent : public BaseAnalytics
 public:
 	PredefinedEvent(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 
 	/**

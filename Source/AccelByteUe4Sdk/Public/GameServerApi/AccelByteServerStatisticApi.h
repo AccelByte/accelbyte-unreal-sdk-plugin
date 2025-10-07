@@ -28,7 +28,7 @@ class ACCELBYTEUE4SDK_API ServerStatistic : public FServerApiBase
 public:
 	ServerStatistic(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerStatistic();
 
@@ -89,6 +89,28 @@ public:
 		, int32 Limit = 20
 		, int32 Offset = 0
 		, EAccelByteStatisticSortBy SortBy = EAccelByteStatisticSortBy::UPDATED_AT_ASC );
+
+	/**
+	 * @brief Get a user stat items within the cycle
+	 *
+	 * @param CycleId the CycleId where the stat items belong to
+	 * @param TargetUserId the user Id to be queried
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserStatCycleItemPagingSlicedResult
+	 * @param OnError This will be called when the operation failed
+	 * @param StatCodes Optional. the StatCode of the user stat item. Determine which stat code to get with the cycle id.
+	 * @param Limit Page size, default value is 20.
+	 * @param Offset Page number, default value is 0.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetUserStatCycleItems(FString const& CycleId
+		, FString const& TargetUserId
+		, THandler<FAccelByteModelsUserStatCycleItemPagingSlicedResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, TArray<FString> const& StatCodes = {}
+		, int32 Limit = 20
+		, int32 Offset = 0
+	);
 
 	/**
 	 * @brief Bulk add stat item(s) value from specified user id(s) by stat code(s).

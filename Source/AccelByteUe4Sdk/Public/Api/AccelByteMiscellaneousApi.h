@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Miscellaneous : public FApiBase, public TSharedFromThis<Miscellaneous, ESPMode::ThreadSafe>
 {
 public:
-	Miscellaneous(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	Miscellaneous(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~Miscellaneous();
 
 	/**

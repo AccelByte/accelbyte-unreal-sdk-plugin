@@ -16,7 +16,7 @@ namespace GameServerApi
 {
 ServerCloudSave::ServerCloudSave(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
@@ -34,7 +34,7 @@ FAccelByteTaskWPtr ServerCloudSave::RetrieveGameRecordsKey(THandler<FAccelByteMo
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	TMultiMap<FString, FString> QueryParams;
 	if(!Query.IsEmpty())
@@ -75,8 +75,8 @@ FAccelByteTaskWPtr ServerCloudSave::SaveGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FString Content = TEXT("");
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(RecordRequest);
@@ -94,8 +94,8 @@ FAccelByteTaskWPtr ServerCloudSave::GetGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient =
 		THandler<FJsonObject>::CreateLambda([OnSuccess](FJsonObject const& jsonObject)
@@ -129,8 +129,8 @@ FAccelByteTaskWPtr ServerCloudSave::ReplaceGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FString Content = TEXT("");
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(RecordRequest);
@@ -148,8 +148,8 @@ FAccelByteTaskWPtr ServerCloudSave::DeleteGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -167,8 +167,8 @@ FAccelByteTaskWPtr ServerCloudSave::DeleteGameRecordTTLConfig(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s/ttl")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -211,9 +211,9 @@ FAccelByteTaskWPtr ServerCloudSave::SaveUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key );
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key) );
 
 	FString Content = TEXT("");
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(RecordRequest);
@@ -262,9 +262,9 @@ FAccelByteTaskWPtr ServerCloudSave::SaveUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key)
 		, (bIsPublic ? TEXT("/public") : TEXT("")));
 
 	FString Content = TEXT("");
@@ -291,9 +291,9 @@ FAccelByteTaskWPtr ServerCloudSave::GetUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess](FJsonObject const& jsonObject)
@@ -329,8 +329,8 @@ FAccelByteTaskWPtr ServerCloudSave::BulkGetUserRecord(FString const& Key, TArray
 	
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/records/%s/bulk")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	TArray<TSharedPtr<FJsonValue>> UserIdsJsonValues;
 	for (auto UserId : UserIds)
@@ -391,8 +391,8 @@ FAccelByteTaskWPtr ServerCloudSave::BulkGetUserRecordsByKeys(FString const& User
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/bulk")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	TArray<TSharedPtr<FJsonValue>> KeysJsonValues;
 	for (auto Key : Keys)
@@ -425,9 +425,9 @@ FAccelByteTaskWPtr ServerCloudSave::GetPublicUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s/public")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess](FJsonObject const& jsonObject)
@@ -477,9 +477,9 @@ FAccelByteTaskWPtr ServerCloudSave::ReplaceUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FString Content = TEXT("");
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(RecordRequest);
@@ -529,9 +529,9 @@ FAccelByteTaskWPtr ServerCloudSave::ReplaceUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key)
 		, (bIsPublic ? TEXT("/public") : TEXT("")));
 
 	FString Content = TEXT("");
@@ -566,8 +566,8 @@ FAccelByteTaskWPtr ServerCloudSave::BulkReplaceUserRecord(FString const& Key, FA
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/records/%s/bulk")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Request, OnSuccess, OnError);
 }
@@ -589,9 +589,9 @@ FAccelByteTaskWPtr ServerCloudSave::DeleteUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key)
 		, (bIsPublic ? TEXT("/public") : TEXT("")));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
@@ -605,7 +605,7 @@ FAccelByteTaskWPtr ServerCloudSave::BulkGetPlayerRecordSize(FAccelByteModelsBulk
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/bulk/records/size")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const TDelegate<void(FJsonObject const&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess](FJsonObject const& JsonObject)
@@ -652,8 +652,8 @@ FAccelByteTaskWPtr ServerCloudSave::CreateAdminGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject NewRecordRequest = RecordRequest;
 	const auto MetadataJson = MakeShared<FJsonObject>();
@@ -702,8 +702,8 @@ FAccelByteTaskWPtr ServerCloudSave::QueryAdminGameRecordsByKey(FString const& Ke
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
 		[OnSuccess, this](FJsonObject const& JSONObject)
@@ -734,7 +734,7 @@ FAccelByteTaskWPtr ServerCloudSave::QueryAdminGameRecordKeys(int Limit
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
@@ -755,8 +755,8 @@ FAccelByteTaskWPtr ServerCloudSave::ReplaceAdminGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject NewRecordRequest = RecordRequest;
 	const auto MetadataJson = MakeShared<FJsonObject>();
@@ -794,8 +794,8 @@ FAccelByteTaskWPtr ServerCloudSave::DeleteAdminGameRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -823,9 +823,9 @@ FAccelByteTaskWPtr ServerCloudSave::CreateAdminUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>(RecordRequest);
 
@@ -854,9 +854,9 @@ FAccelByteTaskWPtr ServerCloudSave::QueryAdminUserRecordsByKey(FString const& Ke
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, OnSuccess, OnError);
 }
@@ -894,8 +894,8 @@ FAccelByteTaskWPtr ServerCloudSave::QueryAdminUserRecordKeys(FString const& User
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, OnSuccess, OnError);
 }
@@ -923,9 +923,9 @@ FAccelByteTaskWPtr ServerCloudSave::ReplaceAdminUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>(RecordRequest);
 
@@ -954,9 +954,9 @@ FAccelByteTaskWPtr ServerCloudSave::DeleteAdminUserRecord(FString const& Key
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/adminrecords/%s")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -974,8 +974,8 @@ FAccelByteTaskWPtr ServerCloudSave::DeleteAdminGameRecordTTLConfig(FString const
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/adminrecords/%s/ttl")
 		, *ServerSettingsRef.CloudSaveServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *Key);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }

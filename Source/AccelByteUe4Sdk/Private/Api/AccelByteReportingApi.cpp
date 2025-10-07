@@ -14,7 +14,7 @@ namespace Api
 {
 Reporting::Reporting(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -80,7 +80,7 @@ FAccelByteTaskWPtr Reporting::SubmitReport(FAccelByteModelsReportingSubmitData c
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports")
 		, *SettingsRef.ReportingServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, ReportData, OnSuccess, OnError);
 }
@@ -121,7 +121,7 @@ FAccelByteTaskWPtr Reporting::SubmitChatReport(FAccelByteModelsReportingSubmitDa
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reports")
 		, *SettingsRef.ReportingServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }
@@ -137,7 +137,7 @@ FAccelByteTaskWPtr Reporting::GetReasons(FString const& ReasonGroup
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasons")
 		, *SettingsRef.ReportingServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("group"), ReasonGroup },
@@ -158,7 +158,7 @@ FAccelByteTaskWPtr Reporting::GetReasonGroups(int32 Offset
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasonGroups")
 		, *SettingsRef.ReportingServerUrl
-		, *CredentialsRef->GetNamespace());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TMultiMap<FString, FString> QueryParams = {
 		{ TEXT("offset"),FString::FromInt(Offset) },

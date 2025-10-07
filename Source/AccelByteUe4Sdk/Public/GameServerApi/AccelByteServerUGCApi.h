@@ -31,7 +31,7 @@ class ACCELBYTEUE4SDK_API ServerUGC : public FServerApiBase
 public:
 	ServerUGC(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler & InHttpRef
+		, FHttpRetrySchedulerBase & InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerUGC();
 

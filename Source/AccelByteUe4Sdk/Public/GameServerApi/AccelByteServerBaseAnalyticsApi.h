@@ -24,7 +24,7 @@ class ACCELBYTEUE4SDK_API ServerBaseAnalytics : public ServerGameTelemetry
 protected:
 	ServerBaseAnalytics(ServerCredentials& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, FString const& InEventName
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient);
 

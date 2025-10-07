@@ -15,7 +15,7 @@ namespace Api
 {
 CloudStorage::CloudStorage(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {}
@@ -33,8 +33,8 @@ FAccelByteTaskWPtr CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlo
 
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots")
 		, *SettingsRef.CloudStorageServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -56,8 +56,8 @@ FAccelByteTaskWPtr CloudStorage::CreateSlot(TArray<uint8> const& BinaryData
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots")
 		, *SettingsRef.CloudStorageServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId());
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	if (Tags.Num() != 0 || !Label.IsEmpty())
 	{
@@ -103,9 +103,9 @@ FAccelByteTaskWPtr CloudStorage::GetSlot(FString SlotID
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s")
 		, *SettingsRef.CloudStorageServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *SlotID);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(SlotID));
 
 	const TMap<FString, FString> Headers = {
 		{TEXT("Authorization"), Authorization},
@@ -134,9 +134,9 @@ FAccelByteTaskWPtr CloudStorage::UpdateSlot(FString const& SlotID
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());	
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s")
 		, *SettingsRef.CloudStorageServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *SlotID);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(SlotID));
 
 	if (Tags.Num() != 0 || !Label.IsEmpty())
 	{
@@ -202,9 +202,9 @@ FAccelByteTaskWPtr CloudStorage::UpdateSlotMetadata(FString const& SlotId
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef->GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata")
 		, *SettingsRef.CloudStorageServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *SlotId);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(SlotId));
 
 	FString Content;
 	FAccelByteModelsUpdateMetadataRequest UpdateMedataRequest;
@@ -233,9 +233,9 @@ FAccelByteTaskWPtr CloudStorage::DeleteSlot(FString const& SlotID
 
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s")
 		, *SettingsRef.CloudStorageServerUrl
-		, *CredentialsRef->GetNamespace()
-		, *CredentialsRef->GetUserId()
-		, *SlotID);
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(SlotID));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/json")},

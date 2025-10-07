@@ -541,7 +541,7 @@ namespace AccelByte
 	}
 
 	template<typename T>
-	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FErrorHandler& OnError, FHttpRetrySchedulerBase* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
@@ -582,7 +582,7 @@ namespace AccelByte
 	}
 
 	template<typename T>
-	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FCustomErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FCustomErrorHandler& OnError, FHttpRetrySchedulerBase* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
@@ -624,7 +624,7 @@ namespace AccelByte
 	}
 
 	template<typename T>
-	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FOAuthErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FOAuthErrorHandler& OnError, FHttpRetrySchedulerBase* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
@@ -666,7 +666,7 @@ namespace AccelByte
 	}
 
 	template<typename T, typename U>
-	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const U& OnError, FHttpRetryScheduler* Scheduler = nullptr)
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const U& OnError, FHttpRetrySchedulerBase* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler]
@@ -706,7 +706,7 @@ namespace AccelByte
 	}
 
 	template<typename T>
-	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FCreateMatchmakingTicketErrorHandler& OnError, FHttpRetryScheduler* Scheduler = nullptr)
+	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FCreateMatchmakingTicketErrorHandler& OnError, FHttpRetrySchedulerBase* Scheduler = nullptr)
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError, Scheduler](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)

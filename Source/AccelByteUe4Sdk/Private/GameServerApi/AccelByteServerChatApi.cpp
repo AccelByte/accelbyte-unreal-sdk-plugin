@@ -89,7 +89,7 @@ bool ConvertDateTimeFieldsFromUnixTimestamp(TSet<FString> const& InFieldNames
 
 ServerChat::ServerChat(ServerCredentials const& Credentials
 	, ServerSettings const& Settings
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(Credentials, Settings, InHttpRef, InServerApiClient)
 {}
@@ -118,7 +118,7 @@ FAccelByteTaskWPtr ServerChat::CreateChannelChat(TSet<FString> const& MemberUser
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic")
 		, *ServerSettingsRef.ChatServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	FString Content = TEXT("");
 	TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>> > JsonWriter = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&Content, 0);
@@ -148,8 +148,8 @@ FAccelByteTaskWPtr ServerChat::DeleteChannelChat(FString const& TopicId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic/%s")
 		, *ServerSettingsRef.ChatServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *TopicId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(TopicId));
 
 	// need to convert "processed" field from unix timestamp to FDateTime manually.
 	auto OnRequestSuccess{ THandler<FJsonObject>::CreateLambda(
@@ -183,9 +183,9 @@ FAccelByteTaskWPtr ServerChat::AddUserToChannelChat(FString const& TopicId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic/%s/user/%s")
 		, *ServerSettingsRef.ChatServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *TopicId
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(TopicId)
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	// need to convert "processed" field from unix timestamp to FDateTime manually.
 	auto OnRequestSuccess{ THandler<FJsonObject>::CreateLambda(
@@ -219,9 +219,9 @@ FAccelByteTaskWPtr ServerChat::RemoveUserFromChannelChat(FString const& TopicId
 
 	const FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/topic/%s/user/%s")
 		, *ServerSettingsRef.ChatServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *TopicId
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(TopicId)
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	// need to convert "processed" field from unix timestamp to FDateTime manually.
 	auto OnRequestSuccess{ THandler<FJsonObject>::CreateLambda(

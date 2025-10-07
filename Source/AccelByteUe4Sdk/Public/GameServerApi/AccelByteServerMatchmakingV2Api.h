@@ -24,7 +24,7 @@ class ACCELBYTEUE4SDK_API ServerMatchmakingV2 : public FServerApiBase
 public:
 	ServerMatchmakingV2(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingRef
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerMatchmakingV2();
 

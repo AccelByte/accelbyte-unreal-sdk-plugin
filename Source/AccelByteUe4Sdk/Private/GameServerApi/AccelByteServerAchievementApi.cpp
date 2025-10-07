@@ -15,7 +15,7 @@ namespace GameServerApi
 
 ServerAchievement::ServerAchievement(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {}
@@ -45,9 +45,9 @@ FAccelByteTaskWPtr ServerAchievement::UnlockAchievement(FString const& UserId
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/achievements/%s/unlock")
 		, *ServerSettingsRef.AchievementServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId
-		, *AchievementCode);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId)
+		, *FGenericPlatformHttp::UrlEncode(AchievementCode));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -67,8 +67,8 @@ FAccelByteTaskWPtr ServerAchievement::BulkUnlockAchievement(FString const& UserI
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/achievements/bulkUnlock")
 		, *ServerSettingsRef.AchievementServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *UserId);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(UserId));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, AchievementsToUnlock, UnlockResponses, OnError);
 }
@@ -103,7 +103,7 @@ FAccelByteTaskWPtr ServerAchievement::BulkCreatePSNEvent(FAccelByteModelsAchieve
 
 	const FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/platforms/psn/bulk")
 		, *ServerSettingsRef.AchievementServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Request, OnSuccess, OnError);
 }

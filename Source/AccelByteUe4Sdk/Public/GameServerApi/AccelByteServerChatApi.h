@@ -29,7 +29,7 @@ class ACCELBYTEUE4SDK_API ServerChat : public FServerApiBase
 public:
 	ServerChat(const ServerCredentials& Credentials
 		, const ServerSettings& Settings
-		, FHttpRetryScheduler& InHttpRef
+		, FHttpRetrySchedulerBase& InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient = nullptr);
 	~ServerChat();
 

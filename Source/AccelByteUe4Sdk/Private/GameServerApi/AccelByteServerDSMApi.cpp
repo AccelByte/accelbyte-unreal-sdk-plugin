@@ -39,7 +39,7 @@ FAccelByteTaskWPtr ServerDSM::RegisterServerToDSM(int32 Port
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const FAccelByteModelsRegisterServerRequest Register{
 		GameVersion,
@@ -97,7 +97,7 @@ FAccelByteTaskWPtr ServerDSM::RegisterServerToDSM(int32 Port
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const FAccelByteModelsRegisterServerRequest Register{
 		GameVersion,
@@ -151,7 +151,7 @@ FAccelByteTaskWPtr ServerDSM::SendShutdownToDSM(bool KillMe
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/shutdown")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const FAccelByteModelsShutdownServerRequest Shutdown{
 		KillMe,
@@ -185,7 +185,7 @@ FAccelByteTaskWPtr ServerDSM::RegisterLocalServerToDSM(FString const& IPAddress
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const FAccelByteModelsRegisterLocalServerRequest Register{
 		IPAddress,
@@ -270,7 +270,7 @@ FAccelByteTaskWPtr ServerDSM::DeregisterLocalServerFromDSM(FString const& Server
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/deregister")
 		, *ServerSettingsRef.DSMControllerServerUrl
-			, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	const FAccelByteModelsDeregisterLocalServerRequest Deregister{
 		ServerName_
@@ -334,7 +334,7 @@ FAccelByteTaskWPtr ServerDSM::RegisterServerGameSession(FAccelByteModelsServerCr
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, RequestContent, OnSuccess, OnError);
 }
@@ -366,8 +366,8 @@ FAccelByteTaskWPtr ServerDSM::GetSessionTimeout(THandler<FAccelByteModelsServerT
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/config/sessiontimeout")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *ServerName);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ServerName));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
 }
@@ -388,7 +388,7 @@ FAccelByteTaskWPtr ServerDSM::ServerHeartbeat(FVoidHandler const& OnSuccess
 	
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/heartbeat")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef->GetClientNamespace());
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
 	FString Content = TEXT("");
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
@@ -413,8 +413,8 @@ FAccelByteTaskWPtr ServerDSM::GetSessionId(THandler<FAccelByteModelsServerSessio
 
 	const FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session")
 		, *ServerSettingsRef.DSMControllerServerUrl
-		, *ServerCredentialsRef->GetClientNamespace()
-		, *ServerName);
+		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
+		, *FGenericPlatformHttp::UrlEncode(ServerName));
 
 	TDelegate<void(FAccelByteModelsServerSessionResponse const&)> OnSuccessHttpClient =
 		THandler<FAccelByteModelsServerSessionResponse>::CreateLambda(
@@ -553,7 +553,7 @@ int32 ServerDSM::GetPlayerNum()
 
 ServerDSM::ServerDSM(ServerCredentials const& InCredentialsRef
 	, ServerSettings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
     : FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {

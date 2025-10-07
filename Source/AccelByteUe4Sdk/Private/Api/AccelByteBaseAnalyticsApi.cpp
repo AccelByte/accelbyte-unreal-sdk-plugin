@@ -11,7 +11,7 @@ namespace Api
 	
 BaseAnalytics::BaseAnalytics(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, FString const& InEventName
 	, bool bInCacheEvent
 	, bool bInRetryOnFailed)
@@ -21,7 +21,7 @@ BaseAnalytics::BaseAnalytics(Credentials& InCredentialsRef
 
 BaseAnalytics::BaseAnalytics(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
 	, FString const& InEventName
 	, bool bInCacheEvent

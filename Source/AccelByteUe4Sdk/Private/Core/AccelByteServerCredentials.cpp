@@ -19,7 +19,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteServerCredentials);
 namespace AccelByte
 {
 
-ServerCredentials::ServerCredentials(FHttpRetryScheduler& InHttpRef, FString const& InIamServerUrl)
+ServerCredentials::ServerCredentials(FHttpRetrySchedulerBase& InHttpRef, FString const& InIamServerUrl)
 	: BaseCredentials()
 	, IamServerUrl(InIamServerUrl)
 	, Oauth(InHttpRef, InIamServerUrl)

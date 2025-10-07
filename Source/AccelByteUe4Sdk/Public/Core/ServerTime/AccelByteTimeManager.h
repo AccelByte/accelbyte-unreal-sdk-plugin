@@ -19,7 +19,7 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API FAccelByteTimeManager
 {
 public:
-	FAccelByteTimeManager(AccelByte::FHttpRetryScheduler& InHttpRef, FString const& InBasicServerUrl);
+	FAccelByteTimeManager(AccelByte::FHttpRetrySchedulerBase& InHttpRef, FString const& InBasicServerUrl);
 	FAccelByteTimeManager(const FString& InBasicServerUrl);
 	virtual ~FAccelByteTimeManager();
 
@@ -74,7 +74,7 @@ protected:
 
 private:
 	bool bUseSharedResources{ false };
-	FHttpRetrySchedulerRef HttpRef{};
+	FHttpRetrySchedulerRef HttpRef{MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>()};
 
 	/** Critical sections for thread safe operation of ServerTime */
 	mutable FCriticalSection ServerTimeLock;

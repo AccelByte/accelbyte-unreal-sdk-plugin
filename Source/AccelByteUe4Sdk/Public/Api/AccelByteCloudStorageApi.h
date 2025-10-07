@@ -24,7 +24,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API CloudStorage : public FApiBase, public TSharedFromThis<CloudStorage, ESPMode::ThreadSafe>
 {
 public:
-	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~CloudStorage();
 
 	/**

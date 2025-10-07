@@ -18,7 +18,7 @@ namespace Api
 	
 GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, bool bInCacheEvent
 	, bool bInRetryOnFailed)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, nullptr)
@@ -32,7 +32,7 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 
 GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
-	, FHttpRetryScheduler& InHttpRef
+	, FHttpRetrySchedulerBase& InHttpRef
 	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
 	, bool bInCacheEvent
 	, bool bInRetryOnFailed)
@@ -539,7 +539,7 @@ bool GameTelemetry::EventsJsonToArray(FString& InJsonString
 
 FString GameTelemetry::GetTelemetryKey()
 {
-	FString UserId = *CredentialsRef->GetUserId();
+	FString UserId = *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId());
 	if (UserId.IsEmpty())
 	{
 		return UserId;

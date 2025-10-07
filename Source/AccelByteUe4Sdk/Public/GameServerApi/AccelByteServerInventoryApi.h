@@ -27,7 +27,7 @@ class ACCELBYTEUE4SDK_API ServerInventory : public FServerApiBase
 public:
 	ServerInventory(ServerCredentials const& InCredentialsRef
 		, ServerSettings const& InSettingsRef
-		, FHttpRetryScheduler & InHttpRef
+		, FHttpRetrySchedulerBase & InHttpRef
 		, TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~ServerInventory();
 

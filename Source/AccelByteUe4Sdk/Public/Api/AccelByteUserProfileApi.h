@@ -24,7 +24,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API UserProfile : public FApiBase, public TSharedFromThis<UserProfile, ESPMode::ThreadSafe>
 {
 public:
-	UserProfile(Credentials const& Credentials, Settings const& Settings, FHttpRetryScheduler& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+	UserProfile(Credentials const& Credentials, Settings const& Settings, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
 	~UserProfile();
 
 	/**

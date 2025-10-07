@@ -11,26 +11,10 @@
 #include "Dom/JsonObject.h"
 #include <algorithm>
 
-DEFINE_LOG_CATEGORY(LogAccelByteHttpRetry);
-
 using namespace std;
 
 namespace AccelByte
 {
-
-int FHttpRetryScheduler::InitialDelay = 1;
-int FHttpRetryScheduler::MaximumDelay = 30;
-int FHttpRetryScheduler::TotalTimeout = 10;
-int FHttpRetryScheduler::TotalTimeoutIncludingRetries = 60;
-int FHttpRetryScheduler::PauseTimeout = 60;
-int FHttpRetryScheduler::RateLimit = FHttpRetryScheduler::DefaultRateLimit;
-
-FString FHttpRetryScheduler::HeaderNamespace = TEXT("");
-FString FHttpRetryScheduler::HeaderSDKVersion = TEXT("");
-FString FHttpRetryScheduler::HeaderOSSVersion = TEXT("");
-FString FHttpRetryScheduler::HeaderGameClientVersion = TEXT("");
-
-TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> FHttpRetryScheduler::ResponseCodeDelegates{};
 
 FHttpRetryScheduler::FHttpRetryScheduler()
 	: TaskQueue()
@@ -222,23 +206,6 @@ bool FHttpRetryScheduler::RemoveBearerAuthRefreshedDelegate(FDelegateHandle cons
 	return BearerAuthRefreshedMulticast.Remove(BearerAuthRefreshedHandle);
 }
 
-void FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode, FHttpResponseCodeHandler const& Handler)
-{
-	FHttpRetryScheduler::ResponseCodeDelegates.Emplace(StatusCode, Handler);
-}
-
-bool FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode)
-{
-	bool bResult = false;
-
-	if (FHttpRetryScheduler::ResponseCodeDelegates.Contains(StatusCode))
-	{
-		FHttpRetryScheduler::ResponseCodeDelegates.Remove(StatusCode);
-		bResult = true;
-	}
-	return bResult;
-}
-
 FString FHttpRetryScheduler::ParseUStructToJsonString(const TSharedPtr<FJsonObject>& JsonObject, bool bOmitBlankValues)
 {
 	FString JsonString;
@@ -395,8 +362,9 @@ void FHttpRetryScheduler::Startup()
 	
 	InitializeRateLimit();
 	
+	auto shared_this = StaticCastSharedRef<FHttpRetryScheduler, FHttpRetrySchedulerBase, ESPMode::ThreadSafe>(AsShared());
 	PollRetryHandle = FTickerAlias::GetCoreTicker().AddTicker(
-        FTickerDelegate::CreateThreadSafeSP(AsShared(), &FHttpRetryScheduler::Tick),
+        FTickerDelegate::CreateThreadSafeSP(shared_this, &FHttpRetryScheduler::Tick),
         0.2f);
 
 	State = EState::Initialized;

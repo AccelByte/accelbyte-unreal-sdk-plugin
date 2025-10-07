@@ -22,7 +22,7 @@ namespace GameServerApi
 ServerAMS::ServerAMS(
 	ServerCredentials const& InCredentialsRef,
 	ServerSettings const& InSettingsRef,
-	FHttpRetryScheduler& InHttpRef,
+	FHttpRetrySchedulerBase& InHttpRef,
 	TSharedPtr<FServerApiClient, ESPMode::ThreadSafe> InServerApiClient)
 	: FServerApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InServerApiClient)
 {
