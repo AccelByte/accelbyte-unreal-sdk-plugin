@@ -128,6 +128,7 @@ UABApiClient::UABApiClient()
 	Leaderboard = NewObject<UABLeaderboard>();
 	Achievement = NewObject<UABAchievement>();
 	UGC = NewObject<UABUGC>();
+	Inventory = NewObject<UABInventory>();
 	Presence = NewObject<UABPresence>();
 	Block = NewObject<UABBlock>();
 	Message = NewObject<UABMessage>();
@@ -162,6 +163,7 @@ void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	Leaderboard->SetApiClient(ApiClientPtr);
 	Achievement->SetApiClient(ApiClientPtr);
 	UGC->SetApiClient(ApiClientPtr);
+	Inventory->SetApiClient(ApiClientPtr);
 	Presence->SetApiClient(ApiClientPtr);
 	Block->SetApiClient(ApiClientPtr);
 	Message->SetApiClient(ApiClientPtr);

@@ -3,6 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteMatchmakingV2Api.h"
+#include "Core/AccelByteError.h"
+#include "Core/AccelByteReport.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 
 namespace AccelByte
 {
@@ -11,8 +17,16 @@ namespace Api
 MatchmakingV2::MatchmakingV2(Credentials const& InCredentialsRef
 	, Settings const& InSettingRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingRef, InHttpRef, InApiClient)
+{
+}
+
+MatchmakingV2::MatchmakingV2(Credentials const& InCredentialsRef
+	, Settings const& InSettingRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingRef, InHttpRef, InAccelBytePlatform)
 {
 }
 

@@ -3,11 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteUGCApi.h"
-
-
-#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteReport.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/AccelByteUtilities.h"
 #include "Misc/Base64.h"
 
@@ -19,11 +20,22 @@ namespace Api
 UGC::UGC(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-{}
+{
+}
 
-UGC::~UGC(){}
+UGC::UGC(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+{
+}
+
+UGC::~UGC()
+{
+}
 
 FAccelByteTaskWPtr UGC::CreateContent(FString const& ChannelId
 	, FAccelByteModelsUGCRequest const& CreateRequest

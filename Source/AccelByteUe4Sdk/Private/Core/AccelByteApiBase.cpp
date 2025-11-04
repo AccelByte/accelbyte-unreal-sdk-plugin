@@ -3,24 +3,46 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteApiBase.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 
 namespace AccelByte
 {
 	
-FApiBase::FApiBase(
-	Credentials const& InCredentialsRef,
-	Settings const& InSettingsRef,
-	FHttpRetrySchedulerBase& InHttpRef,
-	TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+FApiBase::FApiBase(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: CredentialsRef{InCredentialsRef.AsShared()}
 	, SettingsRef{InSettingsRef}
 	, HttpRef{InHttpRef}
 	, HttpClient(InCredentialsRef, InSettingsRef, InHttpRef)
-	, ApiClient(InApiClient)
-{}
-
-void FApiBase::SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
 {
-	ApiClient = InApiClient;
+	SetApiClient(InApiClient);
 }
+
+FApiBase::FApiBase(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase & InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: CredentialsRef{ InCredentialsRef.AsShared() }
+	, SettingsRef{ InSettingsRef }
+	, HttpRef{ InHttpRef }
+	, HttpClient(InCredentialsRef, InSettingsRef, InHttpRef)
+	, AccelBytePlatformPtr(InAccelBytePlatform)
+{
+}
+
+void FApiBase::SetApiClient(TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
+{
+	if (InApiClient.IsValid())
+	{
+		auto AccelByteInstance = InApiClient->GetAccelByteInstance().Pin();
+		if (AccelByteInstance.IsValid())
+		{
+			AccelBytePlatformPtr = AccelByteInstance->GetAccelBytePlatform();
+		}
+	}
+}
+
 }

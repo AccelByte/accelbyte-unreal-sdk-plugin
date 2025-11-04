@@ -91,13 +91,14 @@ void UABGroup::GetGroup(
 void UABGroup::UpdateGroup(
 	const FString& GroupId,
 	const bool bCompletelyReplace,
-	FAccelByteModelsGroupUpdatable& RequestContent,
+	const FAccelByteModelsGroupUpdatable& RequestContent,
 	const FUpdateGroupSuccess& OnSuccess,
-	const FDErrorHandler& OnError) 
+	const FDErrorHandler& OnError)
 {
-	if (!RequestContent.CustomAttributes.JsonObject.IsValid())
+	FAccelByteModelsGroupUpdatable RequestContentCopy = RequestContent;
+	if (!RequestContentCopy.CustomAttributes.JsonObject.IsValid())
 	{
-		RequestContent.CustomAttributes.JsonObjectFromString(RequestContent.CustomAttributes.JsonString);
+		RequestContentCopy.CustomAttributes.JsonObjectFromString(RequestContentCopy.CustomAttributes.JsonString);
 	}
 
 	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
@@ -106,7 +107,7 @@ void UABGroup::UpdateGroup(
 		GroupPtr->UpdateGroup(
 		GroupId,
 		bCompletelyReplace,
-		RequestContent,
+		RequestContentCopy,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGroupInformation Response)
 		{
@@ -125,13 +126,14 @@ void UABGroup::UpdateGroup(
 
 void UABGroup:: UpdateGroupCustomAttributes(
 	const FString& GroupId,
-	FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
+	const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
 	const FUpdateGroupCustomAttributesSuccess& OnSuccess,
-	const FDErrorHandler& OnError) 
+	const FDErrorHandler& OnError)
 {
-	if (!RequestContent.CustomAttributes.JsonObject.IsValid())
+	FAccelByteModelsUpdateGroupCustomAttributesRequest RequestContentCopy = RequestContent;
+	if (!RequestContentCopy.CustomAttributes.JsonObject.IsValid())
 	{
-		RequestContent.CustomAttributes.JsonObjectFromString(RequestContent.CustomAttributes.JsonString);
+		RequestContentCopy.CustomAttributes.JsonObjectFromString(RequestContentCopy.CustomAttributes.JsonString);
 	}
 
 	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
@@ -139,7 +141,7 @@ void UABGroup:: UpdateGroupCustomAttributes(
 	{
 		GroupPtr->UpdateGroupCustomAttributes(
 		GroupId,
-		RequestContent,
+		RequestContentCopy,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGroupInformation Response)
 		{
@@ -183,13 +185,14 @@ void UABGroup::DeleteGroup(
 
 void UABGroup::UpdateGroupCustomRule(
 	const FString& GroupId,
-	FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
+	const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
 	const FUpdateGroupCustomRuleSuccess& OnSuccess,
-	const FDErrorHandler& OnError) 
+	const FDErrorHandler& OnError)
 {
-	if (!RequestContent.GroupCustomRule.JsonObject.IsValid())
+	FAccelByteModelsUpdateCustomRulesRequest RequestContentCopy = RequestContent;
+	if (!RequestContentCopy.GroupCustomRule.JsonObject.IsValid())
 	{
-		RequestContent.GroupCustomRule.JsonObjectFromString(RequestContent.GroupCustomRule.JsonString);
+		RequestContentCopy.GroupCustomRule.JsonObjectFromString(RequestContentCopy.GroupCustomRule.JsonString);
 	}
 
 	const auto GroupPtr = ApiClientPtr->GetGroupApi().Pin();
@@ -197,7 +200,7 @@ void UABGroup::UpdateGroupCustomRule(
 	{
 		GroupPtr->UpdateGroupCustomRule(
 		GroupId,
-		RequestContent,
+		RequestContentCopy,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[OnSuccess](const FAccelByteModelsGroupInformation Response)
 		{
@@ -455,7 +458,7 @@ void UABGroup::GetUserGroupInfoByUserId(
 }
 
 void UABGroup::InviteUserToGroup(
-	const FString UserId,
+	const FString& UserId,
 	const FInviteUserToGroupSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
@@ -481,7 +484,7 @@ void UABGroup::InviteUserToGroup(
 }
 
 void UABGroup::AcceptGroupJoinRequest(
-	const FString UserId,
+	const FString& UserId,
 	const FAcceptGroupJoinRequestSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
@@ -507,7 +510,7 @@ void UABGroup::AcceptGroupJoinRequest(
 }
 
 void UABGroup::RejectGroupJoinRequest(
-	const FString UserId,
+	const FString& UserId,
 	const FRejectGroupJoinRequestSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
@@ -533,7 +536,7 @@ void UABGroup::RejectGroupJoinRequest(
 }
 
 void UABGroup::KickGroupMember(
-	const FString UserId,
+	const FString& UserId,
 	const FKickGroupMemberSuccess& OnSuccess,
 	const FDErrorHandler& OnError) 
 {
@@ -735,7 +738,7 @@ void UABGroup::CreateV2Group(
 }
 
 void UABGroup::GetGroupsByGroupIds(
-	const TArray<FString> GroupIds,
+	const TArray<FString>& GroupIds,
 	const FGetGroupsByGroupIdsSuccess& OnSuccess,
 	const FDErrorHandler& OnError)
 {

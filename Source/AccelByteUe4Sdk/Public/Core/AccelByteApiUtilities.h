@@ -16,13 +16,14 @@ namespace AccelByte
 {
 	class FAccelByteTimeManager;
 
-class ACCELBYTEUE4SDK_API FAccelByteApiUtilities : public TSharedFromThis<FAccelByteApiUtilities, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API FAccelByteApiUtilities 
+	: public TSharedFromThis<FAccelByteApiUtilities, ESPMode::ThreadSafe>
 {
 public:
-	FAccelByteApiUtilities(TSharedRef<BaseCredentials, ESPMode::ThreadSafe> const InCredentialsRef
-		, TSharedRef<BaseSettings, ESPMode::ThreadSafe> const InSettingsRef
-		, TSharedRef<FHttpRetrySchedulerBase, ESPMode::ThreadSafe> const InHttpRef
-		, TSharedPtr<FAccelByteTimeManager, ESPMode::ThreadSafe> InTimeManager);
+	FAccelByteApiUtilities(TSharedRef<BaseCredentials, ESPMode::ThreadSafe> const& InCredentialsRef
+		, TSharedRef<BaseSettings, ESPMode::ThreadSafe> const& InSettingsRef
+		, TSharedRef<FHttpRetrySchedulerBase, ESPMode::ThreadSafe> const& InHttpRef
+		, TWeakPtr<FAccelByteTimeManager, ESPMode::ThreadSafe> const& InTimeManager);
 
 	/**
 	 * @brief Get Public IP using api.ipify.org

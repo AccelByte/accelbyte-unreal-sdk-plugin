@@ -11,19 +11,32 @@
 
 namespace AccelByte
 {
+
 class Credentials;
 class Settings;
+
 namespace Api
 {
 
 /**
  * @brief Provide APIs to access Achievement service.
  */
-class ACCELBYTEUE4SDK_API Achievement : public FApiBase, public TSharedFromThis<Achievement, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Achievement 
+	: public FApiBase
+	, public TSharedFromThis<Achievement, ESPMode::ThreadSafe>
 {
 public:
-	Achievement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Achievement();
+	Achievement(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Achievement(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Achievement();
 
 	/**
 	 * @brief Query all achievements in the related namespace.
@@ -256,9 +269,9 @@ private:
 	static FString ConvertGlobalAchievementContributosSortByToString(EAccelByteGlobalAchievementContributorsSortBy const& SortBy);
 };
 
-typedef TSharedRef<Achievement, ESPMode::ThreadSafe> AchievementRef;
-typedef TSharedPtr<Achievement, ESPMode::ThreadSafe> AchievementPtr;
-typedef TWeakPtr<Achievement, ESPMode::ThreadSafe> AchievementWPtr;
+using AchievementRef = TSharedRef<Achievement, ESPMode::ThreadSafe>;
+using AchievementPtr = TSharedPtr<Achievement, ESPMode::ThreadSafe>;
+using AchievementWPtr = TWeakPtr<Achievement, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

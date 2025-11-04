@@ -20,11 +20,22 @@ namespace Api
 /**
  * @brief Agreement API to obtain and accept legal in a namespace.
  */
-class ACCELBYTEUE4SDK_API Agreement : public FApiBase, public TSharedFromThis<Agreement, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Agreement 
+	: public FApiBase
+	, public TSharedFromThis<Agreement, ESPMode::ThreadSafe>
 {
 public:
-	Agreement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Agreement();
+	Agreement(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Agreement(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Agreement();
 
 	/**
 	 * @brief Retrieve all active latest policies based on a namespace and country. The namespace is current client namespace. 
@@ -251,9 +262,9 @@ private:
 	static FString ConvertAgreementPolicyType(EAccelByteAgreementPolicyType const& AgreementPolicyType);
 };
 
-typedef TSharedRef<Agreement, ESPMode::ThreadSafe> AgreementRef;
-typedef TSharedPtr<Agreement, ESPMode::ThreadSafe> AgreementPtr;
-typedef TWeakPtr<Agreement, ESPMode::ThreadSafe> AgreementWPtr;
+using AgreementRef = TSharedRef<Agreement, ESPMode::ThreadSafe>;
+using AgreementPtr = TSharedPtr<Agreement, ESPMode::ThreadSafe>;
+using AgreementWPtr = TWeakPtr<Agreement, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

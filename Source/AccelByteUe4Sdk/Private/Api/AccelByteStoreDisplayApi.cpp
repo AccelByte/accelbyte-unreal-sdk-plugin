@@ -4,12 +4,13 @@
 
 #include "Api/AccelByteStoreDisplayApi.h"
 #include "Core/AccelByteError.h"
-#include "JsonUtilities.h"
-
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/AccelByteUtilities.h"
+#include "JsonUtilities.h"
 
 namespace AccelByte
 {
@@ -19,12 +20,22 @@ namespace Api
 StoreDisplay::StoreDisplay(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 {
 }
+
+StoreDisplay::StoreDisplay(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+{
+}
 	
-StoreDisplay::~StoreDisplay(){}
+StoreDisplay::~StoreDisplay()
+{
+}
 
 FAccelByteTaskWPtr StoreDisplay::GetAllViews(FString const& StoreId
 	, FString const& Language

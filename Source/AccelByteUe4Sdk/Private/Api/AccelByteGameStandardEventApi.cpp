@@ -3,6 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteGameStandardEventApi.h"
+#include "Core/AccelByteError.h"
+#include "Core/AccelByteReport.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 
 namespace AccelByte
 {
@@ -12,9 +18,18 @@ namespace Api
 GameStandardEvent::GameStandardEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: BaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient, TEXT("GameStandardEvent"), true, true)
-{}
+{
+}
+
+GameStandardEvent::GameStandardEvent(Credentials& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: BaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform, TEXT("GameStandardEvent"), true, true)
+{
+}
 
 FString GameStandardEvent::GetTelemetryKey()
 {

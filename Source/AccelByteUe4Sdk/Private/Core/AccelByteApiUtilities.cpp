@@ -14,10 +14,10 @@
 namespace AccelByte
 {
 
-FAccelByteApiUtilities::FAccelByteApiUtilities(TSharedRef<BaseCredentials, ESPMode::ThreadSafe> const InCredentialsRef
-	, TSharedRef<BaseSettings, ESPMode::ThreadSafe> const InSettingsRef
-	, TSharedRef<FHttpRetrySchedulerBase, ESPMode::ThreadSafe> const InHttpRef
-	, TSharedPtr<FAccelByteTimeManager, ESPMode::ThreadSafe> InTimeManager)
+FAccelByteApiUtilities::FAccelByteApiUtilities(TSharedRef<BaseCredentials, ESPMode::ThreadSafe> const& InCredentialsRef
+	, TSharedRef<BaseSettings, ESPMode::ThreadSafe> const& InSettingsRef
+	, TSharedRef<FHttpRetrySchedulerBase, ESPMode::ThreadSafe> const& InHttpRef
+	, TWeakPtr<FAccelByteTimeManager, ESPMode::ThreadSafe> const& InTimeManager)
 	: CredentialsRef(InCredentialsRef)
 	, SettingsRef(InSettingsRef)
 	, HttpRef(InHttpRef)

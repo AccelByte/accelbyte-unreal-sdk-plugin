@@ -19,15 +19,26 @@ namespace Api
 /**
  * @brief CloudSave API for storing records.
  */
-class ACCELBYTEUE4SDK_API CloudSave : public FApiBase, public TSharedFromThis<CloudSave, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API CloudSave 
+	: public FApiBase
+	, public TSharedFromThis<CloudSave, ESPMode::ThreadSafe>
 {
 	
 #define MAX_BULK_KEY_COUNT 20
 #define RESPONSE_MAX_LIMIT_COUNT 100
 	
 public:
-	CloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~CloudSave();
+	CloudSave(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	CloudSave(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~CloudSave();
 	
 	/**
 	 * @brief Save a user-level record with Metadata input value
@@ -435,9 +446,9 @@ private:
 	static FAccelByteModelsGameRecord ConvertJsonToGameRecord(FJsonObject const& JSONObject);
 };
 
-typedef TSharedRef<CloudSave, ESPMode::ThreadSafe> CloudSaveRef;
-typedef TSharedPtr<CloudSave, ESPMode::ThreadSafe> CloudSavePtr;
-typedef TWeakPtr<CloudSave, ESPMode::ThreadSafe> CloudSaveWPtr;
+using CloudSaveRef = TSharedRef<CloudSave, ESPMode::ThreadSafe>;
+using CloudSavePtr = TSharedPtr<CloudSave, ESPMode::ThreadSafe>;
+using CloudSaveWPtr = TWeakPtr<CloudSave, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

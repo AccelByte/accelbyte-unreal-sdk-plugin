@@ -6,13 +6,16 @@
 #include "Modules/ModuleManager.h"
 #include "IWebSocket.h"
 #include "Api/AccelByteQos.h"
+#include "Core/AccelByteError.h"
+#include "Core/AccelByteReport.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteNetworkConditioner.h"
 
-#include "Core/AccelByteReport.h"
-#include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteSettings.h"
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
 #include "Core/IAccelByteTokenGenerator.h"
@@ -2481,47 +2484,65 @@ FString Lobby::GenerateUnbanScheduleKey(FAccelByteModelsUserBannedNotification c
 
 void Lobby::SetUnbanSchedule(FAccelByteModelsUserBannedNotification const& Result)
 {
+	FString DetailedLog = FString::Printf(TEXT("%s\tBanType:%s\tReason:%s\tEndDate:%s\tUserID:%s")
+		, *FString(__FUNCTION__)
+		, *FAccelByteUtilities::GetUEnumValueAsString(Result.Ban)
+		, *FAccelByteUtilities::GetUEnumValueAsString(Result.Reason)
+		, *Result.EndDate
+		, *Result.UserId
+	);
+	UE_LOG(LogAccelByteLobby, Log, TEXT("%s"), *DetailedLog);
+
 	const int64 UtcNow = FDateTime::UtcNow().ToUnixTimestamp();
 	FDateTime BanEndDate{0};
 	FDateTime::ParseIso8601(*Result.EndDate, BanEndDate);
 	float BanDuration = BanEndDate.ToUnixTimestamp() - UtcNow;
-	double ScheduledTime = FPlatformTime::Seconds() + BanDuration;
+	double NewScheduledTime = FPlatformTime::Seconds() + BanDuration;
 
 	FString Key = GenerateUnbanScheduleKey(Result);
 
 	FScopeLock Lock(&UnbanScheduleLock);
 	FUnbanScheduleRef* Schedule = UnbanSchedules.Find(Key);
-	if (!Schedule || ScheduledTime < (*Schedule)->ScheduledTime)
-	{
-		if (Schedule)
-		{
-			FTickerAlias::GetCoreTicker().RemoveTicker((*Schedule)->DelegateHandle);
-			UnbanSchedules.Remove(Key);
-		}
 
-		LobbyWPtr LobbyWeak = AsShared();
-		TSharedRef<FAccelByteModelsUserBannedNotification> Data = MakeShared<FAccelByteModelsUserBannedNotification>(Result);
-		FUnbanScheduleRef NewSchedule = MakeShared<FUnbanSchedule>();
-		NewSchedule->DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
-			[LobbyWeak, Data, ScheduledTime](float DeltaTime)
-			{
-				auto LobbyApi = LobbyWeak.Pin();
-				double CurrentTime = FPlatformTime::Seconds();
-				if (!LobbyApi.IsValid() || CurrentTime >= ScheduledTime)
-				{
-					if (LobbyApi.IsValid())
-					{
-						Data->Enable = false;
-						LobbyApi->UserUnbannedNotification.ExecuteIfBound(*Data);
-					}
-					return false;
-				}
-				return true;
-			})
-			, 0.2f);
-		NewSchedule->ScheduledTime = ScheduledTime;
-		UnbanSchedules.Add(Key, NewSchedule);
+	if (Schedule)
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Existing unban schedule already exist! Will be replaced by the latest notification for UserID:%s"), *Result.UserId);
+		FTickerAlias::GetCoreTicker().RemoveTicker((*Schedule)->DelegateHandle);
+		UnbanSchedules.Remove(Key);
 	}
+
+	LobbyWPtr LobbyWeak = AsShared();
+	TSharedRef<FAccelByteModelsUserBannedNotification> Data = MakeShared<FAccelByteModelsUserBannedNotification>(Result);
+	FUnbanScheduleRef NewSchedule = MakeShared<FUnbanSchedule>();
+	NewSchedule->DelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda(
+		[LobbyWeak, Data, NewScheduledTime, UserID = Result.UserId](float DeltaTime)
+		{
+			double CurrentTime = FPlatformTime::Seconds();
+
+			// If current tick is not the schedule yet, continue ticking by return true
+			if (CurrentTime < NewScheduledTime)
+			{
+				return true;
+			}
+
+			auto LobbyApi = LobbyWeak.Pin();
+			if (!LobbyApi.IsValid())
+			{
+				UE_LOG(LogAccelByteLobby, Log, TEXT("LobbyApi is invalid. Unable to trigger the UserUnbannedNotification for UserID:%s"), *UserID);
+				return false;
+			}
+
+			Data->Enable = false;
+			LobbyApi->UserUnbannedNotification.ExecuteIfBound(*Data);
+			UE_LOG(LogAccelByteLobby, Log, TEXT("UserUnbannedNotification.ExecuteIfBound() for UserID:%s"), *UserID);
+			LobbyApi->RemoveUnbanSchedule(Data.Get());
+			return false;
+		})
+		, 0.2f);
+
+	NewSchedule->ScheduledTime = NewScheduledTime;
+	UnbanSchedules.Add(Key, NewSchedule);
+	UE_LOG(LogAccelByteLobby, Log, TEXT("Unban notification has been calculated and scheduled for UserID:%s"), *Result.UserId);
 }
 
 void Lobby::RemoveUnbanSchedule(FAccelByteModelsUserBannedNotification const& Result)
@@ -3502,16 +3523,17 @@ void Lobby::InitializeMessaging()
 	}
 }
 
-Lobby::Lobby(Credentials & InCredentialsRef
+Lobby::Lobby(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
 	, FAccelByteMessagingSystem& InMessagingSystemRef
 	, FAccelByteNetworkConditioner& InNetworkConditionerRef
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient
 	, float InPingDelay
 	, float InInitialBackoffDelay
 	, float InMaxBackoffDelay
 	, float InTotalTimeout)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, nullptr)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, LobbyCredentialsRef{InCredentialsRef.AsShared()}
 #if ENGINE_MAJOR_VERSION < 5
 	, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
@@ -3539,23 +3561,23 @@ Lobby::Lobby(Credentials& InCredentialsRef
 	, FHttpRetrySchedulerBase& InHttpRef
 	, FAccelByteMessagingSystem& InMessagingSystemRef
 	, FAccelByteNetworkConditioner& InNetworkConditionerRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+	, FAccelBytePlatformPtr const& InAccelBytePlatform
 	, float InPingDelay
 	, float InInitialBackoffDelay
 	, float InMaxBackoffDelay
 	, float InTotalTimeout)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-	, LobbyCredentialsRef{InCredentialsRef.AsShared()}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+	, LobbyCredentialsRef{ InCredentialsRef.AsShared() }
 #if ENGINE_MAJOR_VERSION < 5
-	, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
+	, MessagingSystemWPtr{ InMessagingSystemRef.AsShared() }
 #else
-	, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
+	, MessagingSystemWPtr{ InMessagingSystemRef.AsWeak() }
 #endif
-	, NetworkConditioner{InNetworkConditionerRef}
-	, PingDelay{InPingDelay}
-	, TimeSinceLastPing{.0f}
-	, TimeSinceLastReconnect{.0f}
-	, TimeSinceConnectionLost{.0f}
+	, NetworkConditioner{ InNetworkConditionerRef }
+	, PingDelay{ InPingDelay }
+	, TimeSinceLastPing{ .0f }
+	, TimeSinceLastReconnect{ .0f }
+	, TimeSinceConnectionLost{ .0f }
 {
 	InitializeV2MatchmakingNotifTopics();
 

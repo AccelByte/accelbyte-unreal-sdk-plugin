@@ -4,10 +4,12 @@
 
 #include "Api/AccelByteCloudStorageApi.h"
 #include "Core/AccelByteError.h"
-#include "JsonUtilities.h"
-
 #include "Core/AccelByteReport.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
+#include "JsonUtilities.h"
 
 namespace AccelByte
 {
@@ -16,12 +18,22 @@ namespace Api
 CloudStorage::CloudStorage(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-{}
+{
+}
+
+CloudStorage::CloudStorage(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+{
+}
 
 CloudStorage::~CloudStorage()
-{}
+{
+}
 
 FAccelByteTaskWPtr CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>> const& OnSuccess
 	, FErrorHandler const& OnError)

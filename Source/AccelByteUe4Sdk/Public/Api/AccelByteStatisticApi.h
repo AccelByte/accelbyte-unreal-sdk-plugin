@@ -21,11 +21,22 @@ namespace Api
 /**
  * @brief Statistic API to manage user's in-game profiles's statistic.
  */
-class ACCELBYTEUE4SDK_API Statistic : public FApiBase, public TSharedFromThis<Statistic, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Statistic 
+	: public FApiBase
+	, public TSharedFromThis<Statistic, ESPMode::ThreadSafe>
 {
 public:
-	Statistic(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Statistic();
+	Statistic(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Statistic(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Statistic();
 
 	/**
 	 * @brief Create a stat item.
@@ -394,9 +405,9 @@ private:
 	Statistic(Statistic&&) = delete;
 };
 
-typedef TSharedRef<Statistic, ESPMode::ThreadSafe> StatisticRef;
-typedef TSharedPtr<Statistic, ESPMode::ThreadSafe> StatisticPtr;
-typedef TWeakPtr<Statistic, ESPMode::ThreadSafe> StatisticWPtr;
+using StatisticRef = TSharedRef<Statistic, ESPMode::ThreadSafe>;
+using StatisticPtr = TSharedPtr<Statistic, ESPMode::ThreadSafe>;
+using StatisticWPtr = TWeakPtr<Statistic, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

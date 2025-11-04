@@ -116,7 +116,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Inventory | Api")
 	void BulkDeleteInventoryItems(FString const& InventoryId,
-		TArray<FAccelByteModelsDeleteUserInventoryItemsRequest> DeletedItemsRequest,
+		TArray<FAccelByteModelsDeleteUserInventoryItemsRequest> const& DeletedItemsRequest,
 		FDModelsDeleteUserItemsResponses const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -130,7 +130,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Inventory | Api")
 	void ConsumeUserInventoryItem(FString const& InventoryId,
-		FAccelByteModelsConsumeUserItemsRequest ConsumedItemsRequest,
+		FAccelByteModelsConsumeUserItemsRequest const& ConsumedItemsRequest,
 		FDModelsUserItemResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);

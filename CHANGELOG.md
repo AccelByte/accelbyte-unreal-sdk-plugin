@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.4.0] (2025-11-04)
+
+
+### Features
+
+* add get user ban history 
+* **IAM:** Add new API to get system config for IAM service 
+* **log:** add log for UnbanSchedule & unban notification ExecuteIfBound() 
+
+
+### Bug Fixes
+
+* ABinstance mutex re-entry problem when calling GetApiClient() and GetServerApiClient() 
+* AccelByteCredentials classes mutexes usage 
+* add lazy initialization to http cache 
+* fix get user history return delegate 
+* fix url encoding mechanism 
+* fixed blueprint implentation issue 
+* improve thread safety around ABTask and Http retry scheduler 
+* improve thread safety of http cache class 
+* make Finish() the only method to actually end an http task 
+* missing assignment to RefreshTime in ScheduleRefreshToken() 
+* **query:** set default value to prevent 0 query max length 
+* remove ToSharedPtr() call since TSharedRef will decay to TSharedPtr anyway 
+
+
+### Refactors
+
+* **QoS:** migrate QoS servers and latencies data to the AccelBytePlatform 
+
 ## [28.3.0] (2025-10-07)
 
 

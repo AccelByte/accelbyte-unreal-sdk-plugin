@@ -5,10 +5,12 @@
 #include "Api/AccelByteTurnManagerApi.h"
 
 #include "Icmp.h"
-
+#include "Core/AccelByteError.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
-#include "Core/AccelByteReport.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/Ping/AccelBytePing.h"
 
 namespace AccelByte
@@ -21,14 +23,26 @@ TArray<TPair<FString, float>> TurnManager::Latencies = {};
 TurnManager::TurnManager(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, FastestPing{.0f}
 	, Counter{0}
-{}
+{
+}
+
+TurnManager::TurnManager(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+	, FastestPing{ .0f }
+	, Counter{ 0 }
+{
+}
 
 TurnManager::~TurnManager()
-{}
+{
+}
 
 FAccelByteTaskWPtr TurnManager::GetTurnServers(THandler<FAccelByteModelsTurnServerList> const& OnSuccess
 	, FErrorHandler const& OnError)

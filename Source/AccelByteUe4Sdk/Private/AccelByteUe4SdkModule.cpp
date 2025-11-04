@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUe4SdkModule.h"
+#include "Core/AGS/AccelBytePlatform.h"
 #include "Core/Version.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteServerSettings.h"
@@ -25,7 +26,8 @@
 #include "ISettingsSection.h"
 #endif
 
-class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
+class FAccelByteUe4SdkModule 
+	: public IAccelByteUe4SdkModuleInterface
 {
 public:
 
@@ -39,20 +41,21 @@ public:
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() override;
 	virtual AccelByte::IAccelByteDataStorage * GetLocalDataStorage() override;
 	virtual AccelByte::FAccelBytePlatformHandler& GetPlatformHandler() override;
+	virtual AccelByte::FAccelBytePlatformPtr GetAccelBytePlatform(AccelByte::BaseSettingsPtr const& InSettings) override;
 
 private:
 	AccelByte::Settings GlobalClientSettings{};
 	AccelByte::ServerSettings GlobalServerSettings{};
 	ESettingsEnvironment SettingsEnvironment{ESettingsEnvironment::Default};
 	FEnvironmentChangedDelegate EnvironmentChangedDelegate{};
+	TMap<FString, AccelByte::FAccelBytePlatformPtr> AccelBytePlatforms;
 	TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage = nullptr;
 	AccelByte::FAccelBytePlatformHandler PlatformHandler;
 	FThreadSafeCounter GameInstanceCount {0};
 	TArray<uint32> InactiveIndexes;
 	uint32 HighestIndex = 0;
 	mutable FCriticalSection CreateAccelByteInstanceLock;
-
-    AccelByte::FAccelByteTimeManagerPtr TimeManager;
+	mutable FRWLock AccelBytePlatformLock;
 
     // For registering settings in UE4 editor
 	void RegisterSettings();
@@ -81,6 +84,8 @@ private:
 
 public:
 	virtual FAccelByteInstancePtr CreateAccelByteInstance() override;
+	virtual FAccelByteInstancePtr CreateAccelByteInstance(AccelByte::Settings & InSettings
+		, AccelByte::ServerSettings & InServerSettings) override;
 
 protected:
 };
@@ -105,7 +110,6 @@ void FAccelByteUe4SdkModule::StartupModule()
 	UE_LOG(LogAccelByte, Log, TEXT("AccelByteSDK version: %s"), *(FAccelByteUtilities::GetPluginVersionAccelByteSDK()));
 
 	LocalDataStorage = MakeShared<AccelByte::DataStorageBinaryFile>();
-	TimeManager = MakeShared<AccelByte::FAccelByteTimeManager, ESPMode::ThreadSafe>(GlobalClientSettings.BasicServerUrl);
 
 #ifdef TEMPORARY_ENABLE_COMPAT_CHECK
 #if UE_BUILD_DEVELOPMENT && TEMPORARY_ENABLE_COMPAT_CHECK
@@ -393,6 +397,32 @@ AccelByte::FAccelBytePlatformHandler& FAccelByteUe4SdkModule::GetPlatformHandler
 	return this->PlatformHandler;
 }
 
+AccelByte::FAccelBytePlatformPtr FAccelByteUe4SdkModule::GetAccelBytePlatform(AccelByte::BaseSettingsPtr const& InSettings)
+{
+	AccelByte::FAccelBytePlatformPtr SelectedPlatform = nullptr;
+
+	if (!InSettings.IsValid())
+	{
+		return SelectedPlatform;
+	}
+
+	{
+		FWriteScopeLock WriteLock(AccelBytePlatformLock);
+		if (!AccelBytePlatforms.Contains(InSettings->BaseUrl))
+		{
+			auto AccelBytePlatform = MakeShared<AccelByte::FAccelBytePlatform, ESPMode::ThreadSafe>(InSettings);
+			AccelBytePlatforms.Emplace(InSettings->BaseUrl, AccelBytePlatform);
+		}
+	}
+
+	{
+		FReadScopeLock ReadLock(AccelBytePlatformLock);
+		SelectedPlatform = AccelBytePlatforms[InSettings->BaseUrl];
+	}
+
+	return SelectedPlatform;
+}
+
 void FAccelByteUe4SdkModule::SetDefaultHttpCustomHeader(FString const& Namespace)
 {
 	AccelByte::FHttpRetryScheduler::SetHeaderNamespace(Namespace);
@@ -418,8 +448,6 @@ void FAccelByteUe4SdkModule::OnGameInstanceCreated(UGameInstance* GameInstance)
 	}
 
 	GameInstanceCount.Increment();
-	
-	TimeManager->GetServerTime({}, {});
 }
 
 void FAccelByteUe4SdkModule::OnPreExit()
@@ -443,32 +471,19 @@ FAccelByteInstancePtr FAccelByteUe4SdkModule::CreateAccelByteInstance()
 
 	if (InactiveIndexes.Num() == 0)
 	{
-		InstanceIndex = HighestIndex;
-
-		ABInstance = MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(
-			GlobalClientSettings,
-			GlobalServerSettings,
-			LocalDataStorage,
-			TimeManager,
-			InstanceIndex
-		);
-
-		HighestIndex++;
+		InstanceIndex = HighestIndex++;
 	}
 	else
 	{
 		InstanceIndex = InactiveIndexes[0];
-
 		InactiveIndexes.RemoveAt(0);
-
-		ABInstance = MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(
-			GlobalClientSettings,
-			GlobalServerSettings,
-			LocalDataStorage,
-			TimeManager,
-			InstanceIndex 
-		);
 	}
+
+	ABInstance = MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(GlobalClientSettings
+		, GlobalServerSettings
+		, LocalDataStorage
+		, nullptr
+		, InstanceIndex);
 
 	ABInstance->SetEnvironmentChangeDelegate();
 
@@ -480,4 +495,38 @@ FAccelByteInstancePtr FAccelByteUe4SdkModule::CreateAccelByteInstance()
 	return ABInstance;
 }
 
-IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)
+FAccelByteInstancePtr FAccelByteUe4SdkModule::CreateAccelByteInstance(AccelByte::Settings & InSettings
+	, AccelByte::ServerSettings & InServerSettings)
+{
+	FScopeLock Lock(&CreateAccelByteInstanceLock);
+
+	uint32 InstanceIndex;
+	FAccelByteInstancePtr ABInstance = nullptr;
+
+	if (InactiveIndexes.Num() == 0)
+	{
+		InstanceIndex = HighestIndex++;
+	}
+	else
+	{
+		InstanceIndex = InactiveIndexes[0];
+		InactiveIndexes.RemoveAt(0);
+	}
+
+	ABInstance = MakeShared<FAccelByteInstance, ESPMode::ThreadSafe>(InSettings
+		, InServerSettings
+		, LocalDataStorage
+		, nullptr
+		, InstanceIndex);
+
+	ABInstance->SetEnvironmentChangeDelegate();
+
+	ABInstance->AddOnDestroyedDelegate([](uint32 Index)
+		{
+			OnAccelByteModuleInstanceDestroyed(Index);
+		});
+
+	return ABInstance;
+}
+
+IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk);

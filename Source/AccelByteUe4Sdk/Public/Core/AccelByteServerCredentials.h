@@ -19,10 +19,6 @@ class ACCELBYTEUE4SDK_API ServerCredentials
 	: public BaseCredentials
 	, public TSharedFromThis<ServerCredentials, ESPMode::ThreadSafe>
 {
-private:
-	FRWLock mutable CredentialAccessLock{};
-	FRWLock mutable DelegateLock{};
-
 public:
 	using BaseCredentials::SetClientCredentials;
 
@@ -40,13 +36,12 @@ public:
 	const FString& GetMatchId() const;
 
 protected:
+	mutable FRWLock MatchIdMtx;
 	FString MatchId;
 	
 	FString IamServerUrl;
 
 	Api::Oauth2 Oauth;
-
-	static TCHAR const* DefaultSection;
 
 	virtual void SendRefreshToken() override;
 	void OnPollRefreshTokenResponseSuccess(const FOauth2Token& Result);

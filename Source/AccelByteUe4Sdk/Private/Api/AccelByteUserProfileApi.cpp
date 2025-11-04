@@ -3,12 +3,14 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteUserProfileApi.h"
-#include "JsonUtilities.h"
-
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/AccelByteUtilities.h"
+#include "JsonUtilities.h"
 
 namespace AccelByte
 {
@@ -18,8 +20,16 @@ namespace Api
 UserProfile::UserProfile(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
+{
+}
+
+UserProfile::UserProfile(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
 {
 }
 

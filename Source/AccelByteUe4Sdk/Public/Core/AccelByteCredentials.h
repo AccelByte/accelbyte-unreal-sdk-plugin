@@ -12,7 +12,7 @@
 #include "Models/AccelByteUserModels.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
+//#include "Kismet/BlueprintFunctionLibrary.h"
 
 namespace AccelByte
 {
@@ -27,12 +27,10 @@ class ACCELBYTEUE4SDK_API Credentials
 	: public BaseCredentials
 	, public TSharedFromThis<Credentials, ESPMode::ThreadSafe>
 {
-private:
+public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoginSuccessDelegate, const FOauth2Token& /*Response*/);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FRefreshTokenAdditionalActions, bool);
 	DECLARE_MULTICAST_DELEGATE(FOnLogoutSuccessDelegate);
-	FRWLock mutable CredentialAccessLock{};
-	FRWLock mutable DelegateLock{};
 
 public:
 	using BaseCredentials::SetClientCredentials;
@@ -73,19 +71,30 @@ protected:
 	Api::Oauth2 Oauth;
 	
 	FString UserName; // DEPRECATED
-	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
-	FOnLoginSuccessDelegate LoginSuccessDelegate{};
-	FOnLogoutSuccessDelegate LogoutSuccessDelegate{};
-	FAccountUserData AccountUserData;
-	TMap<FString, FThirdPartyPlatformTokenData> ThirdPartyPlatformTokenData;
-	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
-
-	FAccelByteTaskWPtr RefreshTokenTask;
-
-	FDelegateHandle BearerAuthRejectedHandle;
 	FString IamServerUrl;
 
-	static TCHAR const* DefaultSection;
+	FRWLock RefreshTokenAdditionalActionsMtx;
+	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
+
+	FRWLock LoginSuccessDelegateMtx;
+	FOnLoginSuccessDelegate LoginSuccessDelegate{};
+
+	FRWLock LogoutSuccessDelegateMtx;
+	FOnLogoutSuccessDelegate LogoutSuccessDelegate{};
+
+	mutable FRWLock AccountUserDataMtx;
+	FAccountUserData AccountUserData;
+
+	mutable FRWLock ThirdPartyPlatformTokenDataMtx;
+	TMap<FString, FThirdPartyPlatformTokenData> ThirdPartyPlatformTokenData;
+
+	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
+
+	FRWLock RefreshTokenTaskMtx;
+	FAccelByteTaskWPtr RefreshTokenTask;
+
+	FRWLock BearerAuthRejectedHandleMtx;
+	FDelegateHandle BearerAuthRejectedHandle;
 
 	void OnBearerAuthRejected(FHttpRetrySchedulerWPtr HttpWPtr);
 	void OnBearerAuthRefreshed(bool bSuccessful, FHttpRetrySchedulerWPtr HttpWPtr);

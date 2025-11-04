@@ -100,7 +100,7 @@ public:
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
-	void BulkFetchStatItemsValue(const FString StatCode,
+	void BulkFetchStatItemsValue(const FString& StatCode,
 		TArray<FString> const& UserIds,
 		FDModelsStatItemValueResponses const& OnSuccess,
 		FDErrorHandler const& OnError

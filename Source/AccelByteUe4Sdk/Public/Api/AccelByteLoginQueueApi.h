@@ -20,11 +20,22 @@ namespace Api
 /**
  * @brief Login Queue API for Login Ticket Management.
  */
-class ACCELBYTEUE4SDK_API LoginQueue : public FApiBase, public TSharedFromThis<LoginQueue, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API LoginQueue 
+	: public FApiBase
+	, public TSharedFromThis<LoginQueue, ESPMode::ThreadSafe>
 {
 public:
-	LoginQueue(Credentials& Credentials, Settings& Settings, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~LoginQueue();
+	LoginQueue(Credentials& Credentials
+		, Settings& Settings
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	LoginQueue(Credentials& Credentials
+		, Settings& Settings
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~LoginQueue();
 private:
 	TSharedRef<Credentials, ESPMode::ThreadSafe> UserCredentialsRef;
 public:
@@ -66,9 +77,9 @@ private:
 	 
 };
 
-typedef TSharedRef<LoginQueue, ESPMode::ThreadSafe> LoginQueueRef;
-typedef TSharedPtr<LoginQueue, ESPMode::ThreadSafe> LoginQueuePtr;
-typedef TWeakPtr<LoginQueue, ESPMode::ThreadSafe> LoginQueueWPtr;
+using LoginQueueRef = TSharedRef<LoginQueue, ESPMode::ThreadSafe>;
+using LoginQueuePtr = TSharedPtr<LoginQueue, ESPMode::ThreadSafe>;
+using LoginQueueWPtr = TWeakPtr<LoginQueue, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

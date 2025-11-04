@@ -6,7 +6,7 @@
 
 DEFINE_LOG_CATEGORY(LogAccelByteHttpRetry);
 
-using namespace std;
+//using namespace std;
 
 namespace AccelByte
 {
@@ -16,8 +16,7 @@ int FHttpRetrySchedulerBase::MaximumDelay = 30;
 int FHttpRetrySchedulerBase::TotalTimeout = 10;
 int FHttpRetrySchedulerBase::TotalTimeoutIncludingRetries = 60;
 int FHttpRetrySchedulerBase::PauseTimeout = 60;
-int FHttpRetrySchedulerBase::RateLimit =
-    FHttpRetrySchedulerBase::DefaultRateLimit;
+int FHttpRetrySchedulerBase::RateLimit = FHttpRetrySchedulerBase::DefaultRateLimit;
 
 FString FHttpRetrySchedulerBase::HeaderNamespace = TEXT("");
 FString FHttpRetrySchedulerBase::HeaderSDKVersion = TEXT("");
@@ -26,11 +25,15 @@ FString FHttpRetrySchedulerBase::HeaderGameClientVersion = TEXT("");
 
 TMap<EHttpResponseCodes::Type, FHttpRetrySchedulerBase::FHttpResponseCodeHandler> FHttpRetrySchedulerBase::ResponseCodeDelegates{};
 
+namespace {
+FRWLock ResponseCodeDelegatesMtx;
+}
 
 FHttpRetrySchedulerBase::~FHttpRetrySchedulerBase() {}
 
 void FHttpRetrySchedulerBase::SetHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode, FHttpResponseCodeHandler const& Handler)
 {
+	FWriteScopeLock WriteLock(ResponseCodeDelegatesMtx);
 	FHttpRetrySchedulerBase::ResponseCodeDelegates.Emplace(StatusCode, Handler);
 }
 
@@ -38,6 +41,7 @@ bool FHttpRetrySchedulerBase::RemoveHttpResponseCodeHandlerDelegate(EHttpRespons
 {
 	bool bResult = false;
 
+	FWriteScopeLock WriteLock(ResponseCodeDelegatesMtx);
 	if (FHttpRetrySchedulerBase::ResponseCodeDelegates.Contains(StatusCode))
 	{
 		FHttpRetrySchedulerBase::ResponseCodeDelegates.Remove(StatusCode);
@@ -46,4 +50,10 @@ bool FHttpRetrySchedulerBase::RemoveHttpResponseCodeHandlerDelegate(EHttpRespons
 	return bResult;
 }
 
+TMap<EHttpResponseCodes::Type, FHttpRetrySchedulerBase::FHttpResponseCodeHandler> FHttpRetrySchedulerBase::GetHttpResponseCodeHandlerDelegate() 
+{
+	FReadScopeLock ReadLock(ResponseCodeDelegatesMtx);
+	return FHttpRetrySchedulerBase::ResponseCodeDelegates;
 }
+
+} // namespace AccelByte

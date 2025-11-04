@@ -4,24 +4,27 @@
 
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "AccelByteUe4SdkModule.h"
-#include "Core/AccelByteSettings.h"
-#include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteReport.h"
-#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteInstance.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteUtilities.h"
 #include "JsonUtilities.h"
 
 namespace AccelByte
 {
 namespace Api
 {
-	
+
 GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient
 	, bool bInCacheEvent
 	, bool bInRetryOnFailed)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, nullptr)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, CredentialsRef{InCredentialsRef.AsShared()}
 	, ShuttingDown(false)
 	, bCacheEvent(bInCacheEvent)
@@ -33,11 +36,11 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+	, FAccelBytePlatformPtr const& InAccelBytePlatform
 	, bool bInCacheEvent
 	, bool bInRetryOnFailed)
-	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-	, CredentialsRef{InCredentialsRef.AsShared()}
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+	, CredentialsRef{ InCredentialsRef.AsShared() }
 	, ShuttingDown(false)
 	, bCacheEvent(bInCacheEvent)
 	, bRetryOnFailed(bInRetryOnFailed)
@@ -274,14 +277,10 @@ void GameTelemetry::SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 		, *SettingsRef.GameTelemetryServerUrl);
 
 	FString ClientTimestamp;
-	const FApiClientPtr ApiClientPtr = ApiClient.Pin();
-	if(ApiClientPtr.IsValid())
+	FAccelByteTimeManagerPtr TimeManagerPtr = AccelBytePlatformPtr->GetTimeManager();
+	if (TimeManagerPtr.IsValid())
 	{
-		FAccelByteTimeManagerPtr TimeManagerPtr = ApiClientPtr->GetTimeManager().Pin();
-		if(TimeManagerPtr.IsValid())
-		{
-			ClientTimestamp = TimeManagerPtr->GetCurrentServerTime().ToIso8601();
-		}
+		ClientTimestamp = TimeManagerPtr->GetCurrentServerTime().ToIso8601();
 	}
 
 	FString Content = TEXT("");

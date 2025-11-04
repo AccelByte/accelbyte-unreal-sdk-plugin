@@ -19,26 +19,30 @@ class Credentials;
 class Settings;
 namespace Api
 {
-typedef TSharedPtr< FAccelByteModelsTelemetryBody, ESPMode::ThreadSafe> TelemetryBodyPtr;
+using TelemetryBodyPtr = TSharedPtr< FAccelByteModelsTelemetryBody, ESPMode::ThreadSafe>;
 
 /**
  * @brief Send telemetry data securely and the user should be logged in first.
  */
-class ACCELBYTEUE4SDK_API GameTelemetry : public FApiBase, public TSharedFromThis<GameTelemetry, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API GameTelemetry 
+	: public FApiBase
+	, public TSharedFromThis<GameTelemetry, ESPMode::ThreadSafe>
 {
 public:
 	GameTelemetry(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr
 		, bool bInCacheEvent = true
 		, bool bInRetryOnFailed = false);
 
 	GameTelemetry(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+		, FAccelBytePlatformPtr const& InAccelBytePlatform
 		, bool bInCacheEvent = true
 		, bool bInRetryOnFailed = false);
+
 	virtual ~GameTelemetry();
 
 	/**
@@ -166,9 +170,9 @@ private:
 	FString EventNamespace;
 };
 
-typedef TSharedRef<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryRef;
-typedef TSharedPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryPtr;
-typedef TWeakPtr<GameTelemetry, ESPMode::ThreadSafe> GameTelemetryWPtr;
+using GameTelemetryRef = TSharedRef<GameTelemetry, ESPMode::ThreadSafe>;
+using GameTelemetryPtr = TSharedPtr<GameTelemetry, ESPMode::ThreadSafe>;
+using GameTelemetryWPtr = TWeakPtr<GameTelemetry, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

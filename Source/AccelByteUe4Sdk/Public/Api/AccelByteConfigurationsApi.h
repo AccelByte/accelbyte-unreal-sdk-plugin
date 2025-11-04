@@ -15,11 +15,22 @@ class Settings;
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API Configurations : public FApiBase, public TSharedFromThis<Configurations, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Configurations 
+	: public FApiBase
+	, public TSharedFromThis<Configurations, ESPMode::ThreadSafe>
 {
 public:
-	Configurations(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Configurations();
+	Configurations(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Configurations(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Configurations();
 
 	/**
 	 * @brief Get all public configurations for current namespace.
@@ -51,9 +62,9 @@ private:
 	Configurations(Configurations&&) = delete;
 };
 
-typedef TSharedRef<Configurations, ESPMode::ThreadSafe> ConfigurationsRef;
-typedef TSharedPtr<Configurations, ESPMode::ThreadSafe> ConfigurationsPtr;
-typedef TWeakPtr<Configurations, ESPMode::ThreadSafe> ConfigurationsWPtr;
+using ConfigurationsRef = TSharedRef<Configurations, ESPMode::ThreadSafe>;
+using ConfigurationsPtr = TSharedPtr<Configurations, ESPMode::ThreadSafe>;
+using ConfigurationsWPtr = TWeakPtr<Configurations, ESPMode::ThreadSafe>;
 
 }
 }

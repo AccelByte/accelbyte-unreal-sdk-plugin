@@ -87,7 +87,7 @@ void UABParty::PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnErro
 }
 
 void UABParty::PartyInvite(
-	FPartyInviteRequest Request,
+	FPartyInviteRequest const& Request,
 	FDPartyInviteResponse OnResponse,
 	FDErrorHandler OnError) 
 {
@@ -141,7 +141,7 @@ void UABParty::PartyJoin(
 }
 
 void UABParty::PartyReject(
-	FPartyRejectRequest Request,
+	FPartyRejectRequest const& Request,
 	FDPartyRejectResponse OnResponse,
 	FDErrorHandler OnError) 
 {

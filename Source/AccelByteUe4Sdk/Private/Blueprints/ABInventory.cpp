@@ -37,8 +37,8 @@ void UABInventory::GetInventoryConfigurations(
 			}
 		),
 		SortBy,
-		Offset,
 		Limit,
+		Offset,
 		InventoryConfigurationCode
 		);
 	}else
@@ -71,8 +71,8 @@ void UABInventory::GetInventoryTags(
 			}
 		),
 		SortBy,
-		Offset,
-		Limit
+		Limit,
+		Offset
 		);
 	}else
 	{
@@ -105,8 +105,8 @@ void UABInventory::GetUserInventories(
 			}
 		),
 		SortBy,
-		Offset,
 		Limit,
+		Offset,
 		InventoryConfigurationCode
 		);
 	}else
@@ -139,8 +139,8 @@ void UABInventory::GetItemTypes(
 			}
 		),
 		SortBy,
-		Offset,
-		Limit
+		Limit,
+		Offset
 		);
 	}else
 	{
@@ -176,8 +176,8 @@ void UABInventory::GetUserInventoryAllItems(
 			}
 		),
 		SortBy,
-		Offset,
 		Limit,
+		Offset,
 		SourceItemId,
 		Tags
 		);
@@ -252,8 +252,8 @@ void UABInventory::BulkUpdateInventoryItems(
 }
 
 void UABInventory::BulkDeleteInventoryItems(
-	FString const& InventoryId, 
-	TArray<FAccelByteModelsDeleteUserInventoryItemsRequest> DeletedItemsRequest,
+	FString const& InventoryId,
+	TArray<FAccelByteModelsDeleteUserInventoryItemsRequest> const& DeletedItemsRequest,
 	FDModelsDeleteUserItemsResponses const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
@@ -314,9 +314,9 @@ void UABInventory::MoveItemsBetweenInventories(
 }
 
 void UABInventory::ConsumeUserInventoryItem(
-	FString const& InventoryId, 
-	FAccelByteModelsConsumeUserItemsRequest ConsumedItemsRequest,
-	FDModelsUserItemResponse const& OnSuccess, 
+	FString const& InventoryId,
+	FAccelByteModelsConsumeUserItemsRequest const& ConsumedItemsRequest,
+	FDModelsUserItemResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
 	const auto InventoryPtr = ApiClientPtr->GetInventoryApi().Pin();

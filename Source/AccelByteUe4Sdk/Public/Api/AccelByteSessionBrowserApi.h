@@ -21,11 +21,22 @@ namespace Api
 /**
  * @brief SessionBrowser API to handle custom game session.
  */
-class ACCELBYTEUE4SDK_API SessionBrowser : public FApiBase, public TSharedFromThis<SessionBrowser, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API SessionBrowser 
+	: public FApiBase
+	, public TSharedFromThis<SessionBrowser, ESPMode::ThreadSafe>
 {
 public:
-	SessionBrowser(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~SessionBrowser();
+	SessionBrowser(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	SessionBrowser(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~SessionBrowser();
 
 	/**
 	* @brief Create public P2P game session to Session Browser.
@@ -415,9 +426,9 @@ private:
 	SessionBrowser(SessionBrowser&&) = delete;
 };
 
-typedef TSharedRef<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserRef;
-typedef TSharedPtr<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserPtr;
-typedef TWeakPtr<SessionBrowser, ESPMode::ThreadSafe> SessionBrowserWPtr;
+using SessionBrowserRef = TSharedRef<SessionBrowser, ESPMode::ThreadSafe>;
+using SessionBrowserPtr = TSharedPtr<SessionBrowser, ESPMode::ThreadSafe>;
+using SessionBrowserWPtr = TWeakPtr<SessionBrowser, ESPMode::ThreadSafe>;
 } // Namespace Api
 } // Namespace AccelByte
 #endif 

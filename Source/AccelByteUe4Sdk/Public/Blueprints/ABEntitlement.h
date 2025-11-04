@@ -90,7 +90,7 @@ public:
 	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
-	void SyncPlatformPurchaseSingleItem(FAccelByteModelsEntitlementSyncBase EntitlementSyncBase, EAccelBytePlatformSync PlatformType, FDHandler OnSuccess, FDErrorHandler OnError);
+	void SyncPlatformPurchaseSingleItem(FAccelByteModelsEntitlementSyncBase const& EntitlementSyncBase, EAccelBytePlatformSync PlatformType, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void SyncMobilePlatformPurchaseGoogle(const FAccelByteModelsPlatformSyncMobileGoogle& SyncRequest, FDHandler OnSuccess, FDErrorHandler OnError);

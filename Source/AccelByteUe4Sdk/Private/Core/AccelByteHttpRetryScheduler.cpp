@@ -18,7 +18,8 @@ namespace AccelByte
 
 FHttpRetryScheduler::FHttpRetryScheduler()
 	: TaskQueue()
-{}
+{
+}
 
 FHttpRetryScheduler::FHttpRetryScheduler(const SettingsWPtr InSettingsWeak)
 : TaskQueue()
@@ -80,7 +81,7 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
 		, RequestTime
 		, InitialDelay
 		, AsShared()
-		, FHttpRetryScheduler::ResponseCodeDelegates );
+		, FHttpRetryScheduler::GetHttpResponseCodeHandlerDelegate() );
 
 	FAccelByteHttpRetryTaskPtr HttpRetryTaskPtr(StaticCastSharedPtr< FHttpRetryTask >(Task));
 
@@ -192,6 +193,7 @@ FDelegateHandle FHttpRetryScheduler::AddBearerAuthRejectedDelegate(FBearerAuthRe
 
 bool FHttpRetryScheduler::RemoveBearerAuthRejectedDelegate(FDelegateHandle const& BearerAuthRejectedHandle)
 {
+	FScopeLock Lock(&LockBearerAuthRejected);
 	return BearerAuthRejectedMulticast.Remove(BearerAuthRejectedHandle);
 }
 
@@ -203,6 +205,7 @@ FDelegateHandle FHttpRetryScheduler::AddBearerAuthRefreshedDelegate(FBearerAuthR
 
 bool FHttpRetryScheduler::RemoveBearerAuthRefreshedDelegate(FDelegateHandle const& BearerAuthRefreshedHandle)
 {
+	FScopeLock Lock(&LockBearerAuthRefreshed);
 	return BearerAuthRefreshedMulticast.Remove(BearerAuthRefreshedHandle);
 }
 

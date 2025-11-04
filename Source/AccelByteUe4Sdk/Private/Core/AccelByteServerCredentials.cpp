@@ -16,17 +16,19 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteServerCredentials, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteServerCredentials);
 
 
+namespace 
+{
+	TCHAR const* const ServerSettingsDefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
+}
+
 namespace AccelByte
 {
-
 ServerCredentials::ServerCredentials(FHttpRetrySchedulerBase& InHttpRef, FString const& InIamServerUrl)
 	: BaseCredentials()
 	, IamServerUrl(InIamServerUrl)
 	, Oauth(InHttpRef, InIamServerUrl)
 {
 }
-
-TCHAR const* ServerCredentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
 
 void ServerCredentials::ForgetAll()
 {
@@ -72,8 +74,8 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 	}
 	else
 	{
-		GConfig->GetString(DefaultSection, TEXT("ClientId"), ClientIdFromConfig, GEngineIni);
-		GConfig->GetString(DefaultSection, TEXT("ClientSecret"), ClientSecretFromCConfig, GEngineIni);
+		GConfig->GetString(ServerSettingsDefaultSection, TEXT("ClientId"), ClientIdFromConfig, GEngineIni);
+		GConfig->GetString(ServerSettingsDefaultSection, TEXT("ClientSecret"), ClientSecretFromCConfig, GEngineIni);
 	}
 	SetClientCredentials(ClientIdFromConfig, ClientSecretFromCConfig);
 }
@@ -127,7 +129,7 @@ void ServerCredentials::OnPollRefreshTokenResponseError(int32 Code, const FStrin
 
 void ServerCredentials::SetMatchId(const FString& GivenMatchId)
 {
-	FWriteScopeLock WriteLock(CredentialAccessLock);
+	FWriteScopeLock WriteLock(MatchIdMtx);
 	MatchId = GivenMatchId;
 }
 
@@ -143,7 +145,7 @@ const FString& ServerCredentials::GetClientNamespace() const
 
 const FString& ServerCredentials::GetMatchId() const
 {
-	FReadScopeLock ReadLock(CredentialAccessLock);
+	FReadScopeLock ReadLock(MatchIdMtx);
 	return MatchId;
 }
 

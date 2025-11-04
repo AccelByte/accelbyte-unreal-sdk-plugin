@@ -15,437 +15,412 @@ DEFINE_LOG_CATEGORY(LogAccelByteHttpCache);
 
 namespace AccelByte
 {
-	namespace Core
+namespace Core
+{
+namespace HTTPHeader
+{
+namespace Cache
+{
+// The time, in seconds, that the object has been in a proxy cache
+const FString Age = TEXT("Age");
+
+// Directives for caching mechanisms in both requests and responses
+const FString Control = TEXT("Cache-Control");
+
+// Directives to identify unique version of a resource
+const FString ETag = TEXT("ETag");
+
+const FString ContentLocation = TEXT("Content-Location");
+
+const FString Date = TEXT("Date");
+
+const FString Expires = TEXT("Expires");
+
+// Directives to makes the request conditional
+const FString IfNoneMatch = TEXT("If-None-Match");
+
+namespace ControlDirective
+{
+// indicates that the response remains fresh until N seconds after the response is generated
+const FString MaxAge = TEXT("max-age");
+
+// allows caches to store a response, but requires them to revalidate it before reuse
+const FString NoCache = TEXT("no-cache");
+
+// The no-store response directive indicates that any caches of any kind (private or shared) should not store this response.
+const FString NoStore = TEXT("no-store");
+
+// The private response directive indicates that the response can be stored only in a private cache (e.g. local caches in browsers).
+const FString Private = TEXT("private");
+
+// Enables responses for requests with Authorization header fields to be stored in a shared cache.
+const FString Public = TEXT("public");
+
+// Static resources that are never modified
+const FString Immutable = TEXT("immutable");
+
+// the response can be stored in caches and can be reused while fresh. Once it becomes stale, it must be validated with the origin server before reuse
+const FString MustRevalidate = TEXT("must-revalidate");
+} // namespace ControlDirective
+} // namespace Cache
+
+namespace Verb
+{
+const FString Delete = TEXT("DELETE");
+} // namespace Verb
+} // namespace HTTPHeader
+
+int FAccelByteHttpCache::MaxAgeCacheLowerThreshold = 100;
+FAccelByteHttpCache::FAccelByteHttpCache()
+	: CachedItemsInternal{nullptr}
+{
+}
+
+FAccelByteHttpCache::~FAccelByteHttpCache()
+{
+	// empty
+};
+
+void FAccelByteHttpCache::Initialize()
+{
+	FWriteScopeLock WriteLock(CachedItemsInternalMtx);
+	if (CachedItemsInternal.IsValid())
 	{
-		int FAccelByteHttpCache::MaxAgeCacheThreshold = 100;
-		namespace HTTPHeader
+		return;
+	}
+	switch (CacheType)
+	{
+	case EHttpCacheType::MEMORY:
 		{
-			namespace Cache
-			{
-				// The time, in seconds, that the object has been in a proxy cache
-				const FString Age = TEXT("Age");
-
-				// Directives for caching mechanisms in both requests and responses
-				const FString Control = TEXT("Cache-Control");
-
-				// Directives to identify unique version of a resource
-				const FString ETag = TEXT("ETag");
-
-				const FString ContentLocation = TEXT("Content-Location");
-				const FString Date = TEXT("Date");
-				const FString Expires = TEXT("Expires");
-
-				// Directives to makes the request conditional
-				const FString IfNoneMatch = TEXT("If-None-Match");
-
-				namespace ControlDirective
-				{
-					
-					// indicates that the response remains fresh until N seconds after the response is generated
-					const FString MaxAge = TEXT("max-age");
-
-					// allows caches to store a response, but requires them to revalidate it before reuse
-					const FString NoCache = TEXT("no-cache");
-
-					// The no-store response directive indicates that any caches of any kind (private or shared) should not store this response.
-					const FString NoStore = TEXT("no-store");
-
-					// The private response directive indicates that the response can be stored only in a private cache (e.g. local caches in browsers).
-					const FString Private = TEXT("private");
-
-					// Enables responses for requests with Authorization header fields to be stored in a shared cache.
-					const FString Public = TEXT("public");
-
-					// Static resources that are never modified
-					const FString Immutable = TEXT("immutable");
-
-					// the response can be stored in caches and can be reused while fresh. Once it becomes stale, it must be validated with the origin server before reuse
-					const FString MustRevalidate = TEXT("must-revalidate");
-				}
-			}
-
-			namespace Verb
-			{
-				const FString Delete = TEXT("DELETE");
-			}
-
+			CachedItemsInternal = MakeShareable<FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>());
+			return;
 		}
-		
-		FAccelByteHttpCache::FAccelByteHttpCache()
-			: CachedItemsInternal{nullptr}
+	case EHttpCacheType::STORAGE:
+	default:
 		{
+			CachedItemsInternal = MakeShareable<FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>());
+			return;
 		}
+	}
+}
 
-		FAccelByteHttpCache::~FAccelByteHttpCache()
-		{
-			// empty
-		};
+TSharedPtr<FAccelByteHttpCacheItem> FAccelByteHttpCache::GetCachedItems(const FName& Key)
+{
+	Initialize();
 
-		void FAccelByteHttpCache::Initialize()
-		{
-			switch (CacheType)
-			{
-			case EHttpCacheType::MEMORY:
-				CachedItemsInternal = MakeShareable<FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheMemory<FAccelByteHttpCacheItem>());
-				return;
-			case EHttpCacheType::STORAGE:
-			default:
-				CachedItemsInternal = MakeShareable<FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>>(new FAccelByteLRUCacheFile<FAccelByteHttpCacheItem>());
-				return;
-			}
-		}
+	FWriteScopeLock WriteLock(CachedItemsInternalMtx);
+	return CachedItemsInternal->Find(Key);
+}
 
-		TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> FAccelByteHttpCache::GetCachedItems()
-		{
-			if (!CachedItemsInternal.IsValid())
-			{
-				Initialize();
-			}
+TSharedPtr<FAccelByteHttpCacheItem> FAccelByteHttpCache::GetSerializedHttpCache(const FHttpRequestPtr& Request)
+{
+	Initialize();
 
-			return CachedItemsInternal;
-		}
+	FWriteScopeLock WriteLock(CachedItemsInternalMtx);
+	auto CachedItem = CachedItemsInternal->Find(ConstructKey(Request));
+	if (CachedItem.IsValid())
+	{
+		return CachedItem;
+	}
+	else
+	{
+		return nullptr;
+	}
+}
 
-		FAccelByteHttpCacheItem* FAccelByteHttpCache::GetSerializedHttpCache(const FHttpRequestPtr& Request)
-		{
-			auto const& CachedItems = GetCachedItems();
-			FName const Key = ConstructKey(Request);
-			if (CachedItems->Contains(Key))
-			{
-				auto CachedItem = CachedItems->Find(Key);
-				if (CachedItem.IsValid())
-				{
-					return CachedItem.Get();
-				}
-			}
-			return nullptr;
-		}
+bool FAccelByteHttpCache::IsResponseCacheable(const FHttpRequestPtr& CompletedRequest)
+{
+	if (CompletedRequest->GetVerb() == HTTPHeader::Verb::Delete)
+	{
+		return false;
+	}
 
-		bool FAccelByteHttpCache::IsResponseCacheable(const FHttpRequestPtr& CompletedRequest)
-		{
-			if (CompletedRequest->GetVerb() == HTTPHeader::Verb::Delete)
-			{
-				return false;
-			}
+	const FHttpResponsePtr ResponsePtr = CompletedRequest->GetResponse();
+	if (!ResponsePtr.IsValid())
+	{
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Request has not receive response yet"));
+		return false;
+	}
 
-			const FHttpResponsePtr ResponsePtr = CompletedRequest->GetResponse();
-			if (ResponsePtr == nullptr)
-			{
-				UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Request has not receive response yet"));
-				return false;
-			}
+	//If http 304 or between http 200 - 204
+	auto ResponseCode = ResponsePtr->GetResponseCode();
+	if(ResponseCode != EHttpResponseCodes::NotModified && (ResponseCode < EHttpResponseCodes::Ok || ResponseCode > EHttpResponseCodes::NoContent))
+	{
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Request has an invalid response code"));
+		return false;
+	}
 
-			//IF 304 or between 200-204
-			auto ResponseCode = ResponsePtr->GetResponseCode();
-			if(ResponseCode != EHttpResponseCodes::NotModified && (ResponseCode < EHttpResponseCodes::Ok || ResponseCode > EHttpResponseCodes::NoContent))
-			{
-				UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Request has an invalid response code"));
-				return false;
-			}
+	const FString CacheControlHeader = ResponsePtr->GetHeader(HTTPHeader::Cache::Control);
+	if(CacheControlHeader.IsEmpty())
+	{
+		//@TODO atm default behavior is to cache, even without CacheControl directives, might be better to
+		// follow the convention only caching with valid cache control directive. so we dont need to handle valid verb manually
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response has empty CacheControlHeader"));
+		return false; 
+	}
+	UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response has valid CacheControlHeader: %s"),*CacheControlHeader);
+	FString MaxAge = ExtractControlDirective(CacheControlHeader, HTTPHeader::Cache::ControlDirective::MaxAge);
+	if(CacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::NoStore))
+	{
+		return false;
+	}
+	else if(!MaxAge.IsEmpty())
+	{
+		const int MaxAgeValue = FCString::Atoi(*MaxAge);
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Max Age %d; Lower Threshold %d; Should cache? %d"), MaxAgeValue, MaxAgeCacheLowerThreshold, MaxAgeValue > MaxAgeCacheLowerThreshold);
+		return MaxAgeValue > MaxAgeCacheLowerThreshold;
+	}
+	else // HTTPHeader::Cache::ControlDirective::Immutable and others
+	{
+		return true;
+	}
+}
 
-			bool bCacheable = true;
-			const FString CacheControlHeader = ResponsePtr->GetHeader(HTTPHeader::Cache::Control);
-			if (!CacheControlHeader.IsEmpty())
-			{
-				// check hard prevention (no-store)
-				bCacheable = !CacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::NoStore);
-				// re-check the requirement (immutable)
-				if (CacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::Immutable))
-				{
-					bCacheable = true;
-				}
-				if (bCacheable)
-				{
-					FString MaxAge = ExtractControlDirective(CacheControlHeader, HTTPHeader::Cache::ControlDirective::MaxAge);
+void FAccelByteHttpCache::SetCacheType(const EHttpCacheType InCacheType)
+{
+	CacheType = InCacheType;
+}
 
-					if (MaxAge.IsEmpty() == false)
-					{
-						const int MaxAgeValue = FCString::Atoi(*MaxAge);
-						bCacheable = bCacheable && MaxAgeValue > MaxAgeCacheThreshold;
-						UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Max Age %d > Threshold %d"), MaxAgeValue, MaxAgeCacheThreshold);
-					}
-				}
-				UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response has valid CacheControlHeader: %s"),*CacheControlHeader);
-			}
-			else 
-			{
-				//@TODO atm default behavior is to cache, even without CacheControl directives, might be better to
-				// follow the convention only caching with valid cache control directive. so we dont need to handle valid verb manually
-				bCacheable = false;
-				UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response has empty CacheControlHeader"));
-			}
-		
-			return bCacheable;
-		}
+bool FAccelByteHttpCache::TryRetrieving(const FHttpRequestPtr& Request, FHttpResponsePtr& OutCachedResponse)
+{
+	Initialize();
 
-		void FAccelByteHttpCache::SetCacheType(const EHttpCacheType InCacheType)
-		{
-			CacheType = InCacheType;
-		}
-
-		bool FAccelByteHttpCache::TryRetrieving(const FHttpRequestPtr& Request, FHttpResponsePtr& OutCachedResponse)
-		{
-			FScopeTryLock TryLock(&CacheCritSection);
-
-			bool bRetrieved = false;
-			auto const& CachedItems = GetCachedItems();
-
-			const FName Key = ConstructKey(Request);
-			if (CachedItems->Contains(Key))
-			{
-				auto CachedItem = CachedItems->Find(Key);
-				EHttpCacheFreshness FreshnessState = CheckCachedItemFreshness(Key);
-				FAccelByteHttpResponseConstructable Response;
-				Response.SetPayload(CachedItem->SerializableRequestAndResponse.ResponsePayload);
-				Response.SetResponseCode(CachedItem->SerializableRequestAndResponse.ResponseCode);
-				Response.SetHeaders(CachedItem->SerializableRequestAndResponse.ResponseHeaders);
-				Response.SetURL(CachedItem->SerializableRequestAndResponse.RequestURL);
-
-				if (FreshnessState == EHttpCacheFreshness::FRESH)
-				{
-					bRetrieved = true;
-					OutCachedResponse = MakeShared<FAccelByteHttpResponseConstructable, ESPMode::ThreadSafe>(Response);
-					UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Valid cached response found, will return that instead of sending request"));
-				}
-				else if (FreshnessState == EHttpCacheFreshness::WAITING_REFRESH)
-				{
-					if (CachedItem == nullptr) return bRetrieved;
-
-					FString ETagValue = Response.GetHeader(HTTPHeader::Cache::ETag);
-					if (ETagValue.IsEmpty()) return bRetrieved;
-
-					bRetrieved = true;
-					OutCachedResponse = MakeShared<FAccelByteHttpResponseConstructable, ESPMode::ThreadSafe>(Response);
-				}
+	if(!Request.IsValid())
+	{
+		return false;
+	}
+	const FName Key = ConstructKey(Request);
+	const auto CachedItem = GetCachedItems(Key);
+	if(!CachedItem.IsValid())
+	{
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("No Valid cached response found for request to: %s; Will continue sending the request."), *Request->GetURL());
+		return false;
+	}
 	
-			}
+	FAccelByteHttpResponseConstructable Response;
+	Response.SetPayload(CachedItem->SerializableRequestAndResponse.ResponsePayload);
+	Response.SetResponseCode(CachedItem->SerializableRequestAndResponse.ResponseCode);
+	Response.SetHeaders(CachedItem->SerializableRequestAndResponse.ResponseHeaders);
+	Response.SetURL(CachedItem->SerializableRequestAndResponse.RequestURL);
 
-			return bRetrieved;
-		}
-
-		bool FAccelByteHttpCache::TryStoring(const FHttpRequestPtr& Request)
+	EHttpCacheFreshness FreshnessState = CheckCachedItemFreshness(CachedItem);
+	if (FreshnessState == EHttpCacheFreshness::FRESH)
+	{
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Valid cached response found, will return that instead of sending request"));
+		OutCachedResponse = MakeShared<FAccelByteHttpResponseConstructable, ESPMode::ThreadSafe>(Response);
+		return true;
+	}
+	else if (FreshnessState == EHttpCacheFreshness::WAITING_REFRESH)
+	{
+		FString ETagValue = Response.GetHeader(HTTPHeader::Cache::ETag);
+		if (ETagValue.IsEmpty())
 		{
-			FScopeTryLock TryLock(&CacheCritSection);
-
-			const FHttpResponsePtr Response = Request.Get()->GetResponse();
-			if (Response != nullptr && IsResponseCacheable(Request))
-			{
-				const FName Key = ConstructKey(Request);
-
-				int TimeInProxyCache = 0;
-				const FString CacheAge = Response->GetHeader(HTTPHeader::Cache::Age);
-				if (!CacheAge.IsEmpty())
-				{
-					TimeInProxyCache = FCString::Atoi(*CacheAge);
-				}
-
-				double ResponseAgeThreshold = 0;
-				FString CacheControlHeader = Response->GetHeader(HTTPHeader::Cache::Control);
-				if (!CacheControlHeader.IsEmpty())
-				{
-					FString MaxAge = ExtractControlDirective(CacheControlHeader, HTTPHeader::Cache::ControlDirective::MaxAge);
-					if (!MaxAge.IsEmpty())
-					{
-						int ResponseAgeThresholdInt = FCString::Atoi(*MaxAge);
-						ResponseAgeThreshold = (double)ResponseAgeThresholdInt;
-					}
-				}
-
-				FAccelByteHttpCacheItem NewCacheItem;
-				const double TimeNow = FPlatformTime::Seconds();
-				NewCacheItem.ExpireTime = TimeNow + ResponseAgeThreshold - TimeInProxyCache;
-				NewCacheItem.SerializableRequestAndResponse.Serialize(Request, NewCacheItem.ExpireTime);
-				
-				auto const& CachedItems = GetCachedItems();
-
-				// IF the response from the online storage service return 304
-				// THEN we can reuse the old cache and extend the usage because the response should be same
-				if (Response->GetResponseCode() == EHttpResponseCodes::NotModified &&
-					CachedItems->Contains(Key))
-				{
-					auto CurrentCachedItem = CachedItems->Find(Key);
-					
-					TArray<FString> TransferredHeaders = {
-						HTTPHeader::Cache::Control,
-						HTTPHeader::Cache::ContentLocation,
-						HTTPHeader::Cache::Date,
-						HTTPHeader::Cache::ETag,
-						HTTPHeader::Cache::Expires
-					};
-
-					if (!CacheControlHeader.IsEmpty())
-					{
-						for (auto Header : TransferredHeaders)
-						{
-							FString Value = ExtractControlDirective(CacheControlHeader, Header);
-							if (!Value.IsEmpty())
-							{
-								CurrentCachedItem->SerializableRequestAndResponse.RequestHeaders.AddUnique(FString::Printf(TEXT("%s: %s"), *Header, *Value));
-							}
-						}
-					}
-					
-					CurrentCachedItem->ExpireTime = NewCacheItem.ExpireTime;
-					UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response for request [%s] is now extended using the same cached response"), *Response->GetURL());
-				}
-				else
-				{
-					CachedItems->Emplace(Key, NewCacheItem);
-					UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response for request [%s] is now cached"),*Response->GetURL());
-				}
-
-			}
-
+			UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Cached response to: %s doesn't have ETag; Will continue sending the request."), *Request->GetURL());
 			return false;
 		}
-
-		void FAccelByteHttpCache::ClearCache()
+		else
 		{
-			if (CachedItemsInternal.IsValid())
-			{
-				CachedItemsInternal->Empty();
-			}
+			OutCachedResponse = MakeShared<FAccelByteHttpResponseConstructable, ESPMode::ThreadSafe>(Response);
+			return true;
 		}
+	}
+	else // EHttpCacheFreshness::STALE
+	{
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Stale cached response found for request to: %s; Will delete the cached entry and continue sending the request."), *Request->GetURL());
+		FWriteScopeLock WriteLock(CachedItemsInternalMtx);
+		CachedItemsInternal->Remove(Key);
+		return false;
+	}
+}
 
-		bool FAccelByteHttpCache::RetrieveAndLoadCacheFileInfo()
+bool FAccelByteHttpCache::TryStoring(const FHttpRequestPtr& Request)
+{
+	Initialize();
+
+	if(!Request.IsValid())
+	{
+		return false;
+	}
+
+	const FHttpResponsePtr Response = Request->GetResponse();
+	if (!Response.IsValid() || !IsResponseCacheable(Request))
+	{
+		return false;
+	}
+
+	int TimeInProxyCache = 0;
+	const FString CacheAge = Response->GetHeader(HTTPHeader::Cache::Age);
+	if (!CacheAge.IsEmpty())
+	{
+		TimeInProxyCache = FCString::Atoi(*CacheAge);
+	}
+
+	double ResponseAgeThreshold = 0;
+	FString CacheControlHeader = Response->GetHeader(HTTPHeader::Cache::Control);
+	if (!CacheControlHeader.IsEmpty())
+	{
+		FString MaxAge = ExtractControlDirective(CacheControlHeader, HTTPHeader::Cache::ControlDirective::MaxAge);
+		if (!MaxAge.IsEmpty())
 		{
-			if (!CachedItemsInternal.IsValid())
-			{
-				return false;
-			}
-
-			return CachedItemsInternal->RetrieveAndLoadCacheFileInfo();
+			int ResponseAgeThresholdInt = FCString::Atoi(*MaxAge);
+			ResponseAgeThreshold = static_cast<double>(ResponseAgeThresholdInt);
 		}
+	}
 
-		FAccelByteHttpCache::EHttpCacheFreshness FAccelByteHttpCache::CheckCachedItemFreshness(const FName& Key)
-		{
-			auto const& CachedItems = GetCachedItems();
-			const TSharedPtr<FAccelByteHttpCacheItem> CachedItemPtr = (*CachedItems.Get())[Key];
-			if (!CachedItems->Contains(Key))
-			{
-				return EHttpCacheFreshness::STALE;
-			}
-			
-			if (!CachedItemPtr.IsValid())
-			{
-				return EHttpCacheFreshness::STALE;
-			}
-			const FAccelByteHttpCacheItem CachedItem = *CachedItemPtr;
+	FAccelByteHttpCacheItem NewCacheItem;
+	const double TimeNow = FPlatformTime::Seconds();
+	NewCacheItem.ExpireTime = TimeNow + ResponseAgeThreshold - TimeInProxyCache;
+	NewCacheItem.SerializableRequestAndResponse.Serialize(Request, NewCacheItem.ExpireTime);
 
-			const double TimeNow = FPlatformTime::Seconds();
-			bool bIsStaleResponse = false;
-			EHttpCacheFreshness Freshness = EHttpCacheFreshness::FRESH;
+	const FName Key = ConstructKey(Request);
+	auto const CachedItem = GetCachedItems(Key);
 
-			// check RESPONSE cache-control directive
-			FString ResponseCacheControlHeader = "";
-			for (int i = 0 ; i < CachedItem.SerializableRequestAndResponse.ResponseHeaders.Num() ; i ++)
-			{
-				const FString& Header = CachedItem.SerializableRequestAndResponse.ResponseHeaders[i];
-				if (Header.Contains(HTTPHeader::Cache::Control))
-				{
-					FString HeaderKey, Value;
-					Header.Split(":", &HeaderKey, &Value);
-					Value = Value.TrimStartAndEnd();
-
-					ResponseCacheControlHeader = Value;
-					break;
-				}
-			}
-
-			if (ResponseCacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::Immutable))
-			{
-				bIsStaleResponse = false;
-			} 
-			else if (CachedItem.ExpireTime < TimeNow) //Expired
-			{
-				bIsStaleResponse = true;
-			}
-			else // Fresh
-			{
-				if (!ResponseCacheControlHeader.IsEmpty())
-				{
-					//@TODO this needs to check for validation, for now we are dropping this as stale
-					if (ResponseCacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::NoCache))
-					{
-						bIsStaleResponse = true;
-						// no-cache 
-						//A cache will send the request to the origin server for validation before releasing a cached copy.
-
-					}
-					else if (ResponseCacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::MustRevalidate))
-					{
-						// must-revalidate
-						//When using the "must-revalidate" directive, the cache must verify the status of stale resources before using them
-
-						//TODO
-						//Revalidate(Key);
-						bIsStaleResponse = true;
-					}
-
-					//The "public" directive indicates that the response may be cached by any cache. 
-					// This can be useful if pages with HTTP authentication or response status codes that aren't normally cacheable should now be cached.
-					//On the other hand, "private" indicates that the response is intended for a single user only
-					//and must not be stored by a shared cache.A private browser cache may store the response in this case.
-				}
-			}
-
-			if (bIsStaleResponse)
-			{
-				FAccelByteHttpResponseConstructable Response;
-				Response.SetPayload(CachedItem.SerializableRequestAndResponse.ResponsePayload);
-				Response.SetResponseCode(CachedItem.SerializableRequestAndResponse.ResponseCode);
-				Response.SetHeaders(CachedItem.SerializableRequestAndResponse.ResponseHeaders);
-				Response.SetURL(CachedItem.SerializableRequestAndResponse.RequestURL);
-
-				// Don't remove the cached item for this KEY yet, it has an ETag an might be refreshed by the following request
-				if (!Response.GetHeader(HTTPHeader::Cache::ETag).IsEmpty())
-				{
-					Freshness = EHttpCacheFreshness::WAITING_REFRESH;
-					UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Cached item [%s] not removed yet, waiting for refresh"), *Key.ToString());
-				}
-				else
-				{
-					Freshness = EHttpCacheFreshness::STALE;
-					CachedItems->Remove(Key);
-					UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Removed stale cached item [%s]"), *Key.ToString());
-				}
-			}
-
-			return Freshness;
+	// IF the response from the online storage service return 304
+	// THEN we can reuse the old cache and extend the usage because the response should be same
+	if (Response->GetResponseCode() == EHttpResponseCodes::NotModified && CachedItem.IsValid())
+	{
+		TArray<FString> TransferredHeaders = {
+			HTTPHeader::Cache::Control,
+			HTTPHeader::Cache::ContentLocation,
+			HTTPHeader::Cache::Date,
+			HTTPHeader::Cache::ETag,
+			HTTPHeader::Cache::Expires
 		};
 
-		FName FAccelByteHttpCache::ConstructKey(const FHttpRequestPtr& Request)
+		if (!CacheControlHeader.IsEmpty())
 		{
-			const FString KeyString = FAccelByteUtilities::GenerateHashString(FString::Printf(TEXT("%s-%s")
-				, *Request->GetVerb()
-				, *Request->GetURL()
-			));
-
-			const FName Key = FName(*KeyString);
-
-			return Key;
-		}
-
-		FString FAccelByteHttpCache::ExtractControlDirective(const FString& CacheControlHeader, const FString& ControlDirective)
-		{
-			FString Result = "";
-			TArray<FString> Array;
-			CacheControlHeader.ParseIntoArray(Array, TEXT(","));
-			for (const FString& Directive : Array)
+			for (const auto& Header : TransferredHeaders)
 			{
-				FString Key, Value;
-				UGameplayStatics::GetKeyValue(CacheControlHeader, Key, Value);
-
-				if (Key == ControlDirective)
+				FString Value = ExtractControlDirective(CacheControlHeader, Header);
+				if (!Value.IsEmpty())
 				{
-					Result = Value;
-					break;
+					CachedItem->SerializableRequestAndResponse.RequestHeaders.AddUnique(FString::Printf(TEXT("%s: %s"), *Header, *Value));
 				}
-
 			}
-
-			return Result;
 		}
-	} // namespace Core
+		CachedItem->ExpireTime = NewCacheItem.ExpireTime;
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response for request [%s] is now extended using the same cached response"), *Response->GetURL());
+		return true;
+	}
+	else
+	{
+		FWriteScopeLock WriteLock(CachedItemsInternalMtx);
+		CachedItemsInternal->Emplace(Key, NewCacheItem);
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response for request [%s] is now cached"),*Response->GetURL());
+		return true;
+	}
+}
+
+void FAccelByteHttpCache::ClearCache()
+{
+	FWriteScopeLock WriteLock(CachedItemsInternalMtx);
+	if (CachedItemsInternal.IsValid())
+	{
+		CachedItemsInternal->Empty();
+	}
+}
+
+bool FAccelByteHttpCache::RetrieveAndLoadCacheFileInfo()
+{		
+	FWriteScopeLock WriteLock(CachedItemsInternalMtx);
+	if (!CachedItemsInternal.IsValid())
+	{
+		return false;
+	}
+	return CachedItemsInternal->RetrieveAndLoadCacheFileInfo();
+}
+
+FAccelByteHttpCache::EHttpCacheFreshness FAccelByteHttpCache::CheckCachedItemFreshness(const TSharedPtr<FAccelByteHttpCacheItem>& CachedItem)
+{
+	if(!CachedItem.IsValid())
+	{
+		return EHttpCacheFreshness::STALE;
+	}
+
+	// check cached response "cache-control" directive and "ETag"
+	FString ResponseCacheControlHeader = TEXT("");
+	FString ETag = TEXT("");
+	for (int i = 0 ; i < CachedItem->SerializableRequestAndResponse.ResponseHeaders.Num() ; i ++)
+	{
+		const FString& Header = CachedItem->SerializableRequestAndResponse.ResponseHeaders[i];
+		if (Header.Contains(HTTPHeader::Cache::Control))
+		{
+			FString HeaderKey, Value;
+			Header.Split(":", &HeaderKey, &Value);
+			Value = Value.TrimStartAndEnd();
+
+			ResponseCacheControlHeader = Value;
+		}
+		else if(Header.Contains(HTTPHeader::Cache::ETag))
+		{
+			FString HeaderKey, Value;
+			Header.Split(":", &HeaderKey, &Value);
+			Value = Value.TrimStartAndEnd();
+
+			ETag = Value;
+		}
+		// If both found, exit immediately
+		if(!ResponseCacheControlHeader.IsEmpty() && !ETag.IsEmpty())
+		{
+			break;
+		}
+	}
+	
+	const double TimeNow = FPlatformTime::Seconds();
+	if (ResponseCacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::Immutable))
+	{
+		return EHttpCacheFreshness::FRESH;
+	}
+	else if(ResponseCacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::NoCache) //@TODO this needs to check for validation, for now we are dropping this as stale
+		|| ResponseCacheControlHeader.Contains(HTTPHeader::Cache::ControlDirective::MustRevalidate) //When using the "must-revalidate" directive, the cache must verify the status of stale resources before using them
+		|| (CachedItem->ExpireTime < TimeNow)) // Expired
+	{
+		//The "public" directive indicates that the response may be cached by any cache. 
+		// This can be useful if pages with HTTP authentication or response status codes that aren't normally cacheable should now be cached.
+		//On the other hand, "private" indicates that the response is intended for a single user only
+		//and must not be stored by a shared cache.A private browser cache may store the response in this case.
+		return EHttpCacheFreshness::STALE;
+	}
+	else if (!ETag.IsEmpty())
+	{
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Cached item not removed yet, waiting for refresh"));
+		return EHttpCacheFreshness::WAITING_REFRESH;
+	}
+	else
+	{
+		return EHttpCacheFreshness::FRESH;
+	}
+};
+
+FName FAccelByteHttpCache::ConstructKey(const FHttpRequestPtr& Request)
+{
+	const FString KeyString = FAccelByteUtilities::GenerateHashString(FString::Printf(TEXT("%s-%s")
+		, *Request->GetVerb()
+		, *Request->GetURL()
+	));
+	return FName(*KeyString);
+}
+
+FString FAccelByteHttpCache::ExtractControlDirective(const FString& CacheControlHeader, const FString& ControlDirectiveToSearch)
+{
+	FString Result = TEXT("");
+	TArray<FString> Directives;
+	CacheControlHeader.ParseIntoArray(Directives, TEXT(","));
+
+	for (const auto& Directive : Directives)
+	{
+		FString Key, Value;
+		UGameplayStatics::GetKeyValue(Directive, Key, Value);
+
+		if (Key == ControlDirectiveToSearch)
+		{
+			Result = Value;
+			break;
+		}
+	}
+	return Result;
+}
+} // namespace Core
 
 } // namespace AccelByte
 

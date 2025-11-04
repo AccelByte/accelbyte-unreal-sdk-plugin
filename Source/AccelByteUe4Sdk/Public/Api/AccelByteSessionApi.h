@@ -26,11 +26,22 @@ namespace Api
 
 class ServerSessionApi;
 
-class ACCELBYTEUE4SDK_API Session : public FApiBase, public TSharedFromThis<Session, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Session 
+	: public FApiBase
+	, public TSharedFromThis<Session, ESPMode::ThreadSafe>
 {
 public:
-	Session(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Session();
+	Session(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Session(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Session();
 
 	/**
 	 * @brief Create a new game session.
@@ -663,9 +674,9 @@ private:
 	}
 };
 
-typedef TSharedRef<Session, ESPMode::ThreadSafe> SessionRef;
-typedef TSharedPtr<Session, ESPMode::ThreadSafe> SessionPtr;
-typedef TWeakPtr<Session, ESPMode::ThreadSafe> SessionWPtr;
+using SessionRef = TSharedRef<Session, ESPMode::ThreadSafe>;
+using SessionPtr = TSharedPtr<Session, ESPMode::ThreadSafe>;
+using SessionWPtr = TWeakPtr<Session, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

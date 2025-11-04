@@ -12,6 +12,7 @@
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteOauth2Api.h"
+#include "Models/AccelByteOauth2Models.h"
 #include "Models/AccelByteUserModels.h"
 
 namespace AccelByte
@@ -23,16 +24,35 @@ namespace Api
 /**
  * @brief User management API for creating user, verifying user, and resetting password.
  */
-class ACCELBYTEUE4SDK_API User : public FApiBase, public TSharedFromThis<User, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API User 
+	: public FApiBase
+	, public TSharedFromThis<User, ESPMode::ThreadSafe>
 {
 public:
-	User(Credentials& Credentials, Settings& Settings, FHttpRetrySchedulerBase& InHttpRef, const EntitlementWPtr InEntitlementWeak, const ItemWPtr InItemWeak, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~User();
+	User(Credentials& Credentials
+		, Settings& Settings
+		, FHttpRetrySchedulerBase& InHttpRef
+		, const EntitlementWPtr InEntitlementWeak
+		, const ItemWPtr InItemWeak
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	User(Credentials& Credentials
+		, Settings& Settings
+		, FHttpRetrySchedulerBase& InHttpRef
+		, const EntitlementWPtr InEntitlementWeak
+		, const ItemWPtr InItemWeak
+		, FAccelBytePlatformPtr const& InAccelBytePlatform
+		, FString const& InDeviceId = TEXT("")
+		, FString const& InMacAddress = TEXT(""));
+
+	virtual ~User();
 private:
 	TSharedRef<Credentials, ESPMode::ThreadSafe> UserCredentialsRef;
 	EntitlementWPtr EntitlementWeak;
 	ItemWPtr ItemWeak;
 	Oauth2 Oauth;
+	FString DeviceId;
+	FString MacAddress;
 
 public:
 	/**
@@ -736,6 +756,30 @@ public:
 	FAccelByteTaskWPtr GetData(THandler<FAccountUserData> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bIncludeAllPlatforms = false);
+
+	/**
+	* @brief This function will get the current user's ban history in detail
+	*
+	* @param OnSuccess This will be called when the operation succeeded. The result is FGetUserBansResponse 
+	* @param OnError This will be called when the operation failed.
+	*
+	* @return AccelByteTask object to track and cancel the ongoing API operation.
+	*/
+	FAccelByteTaskWPtr GetUserBanHistory(THandler<FGetUserBansResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	* @brief This function will get the current user's ban history in detail
+	*
+	* @param OptionalParameter Optional parameters that can be set.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FGetUserBansResponse 
+	* @param OnError This will be called when the operation failed.
+	*
+	* @return AccelByteTask object to track and cancel the ongoing API operation.
+	*/
+	FAccelByteTaskWPtr GetUserBanHistory(FGetUserBanHistoryOptionalParams const& OptionalParameter
+		, THandler<FGetUserBansResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
@@ -1621,6 +1665,17 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief A request to public system configuration values.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FIAMPublicSystemConfigResponse.
+	 * @param OnError This will be called when the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetPublicSystemConfigValue(THandler<FIAMPublicSystemConfigResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Update current user password.
 	 * 
 	 * @param Request Details for updating password including mfa token, new password and old password.
@@ -1766,13 +1821,11 @@ private:
 	 */
 	void TriggerInvalidRequestError(FString const& ErrorMessage
 		, FOAuthErrorHandler const& OnError);
-
-	FString GetDeviceId() const;
 };
 
-typedef TSharedRef<User, ESPMode::ThreadSafe> UserRef;
-typedef TSharedPtr<User, ESPMode::ThreadSafe> UserPtr;
-typedef TWeakPtr<User, ESPMode::ThreadSafe> UserWPtr;
+using UserRef = TSharedRef<User, ESPMode::ThreadSafe>;
+using UserPtr = TSharedPtr<User, ESPMode::ThreadSafe>;
+using UserWPtr = TWeakPtr<User, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

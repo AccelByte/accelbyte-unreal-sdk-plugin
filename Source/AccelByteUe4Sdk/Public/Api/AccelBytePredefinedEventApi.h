@@ -21,13 +21,19 @@ namespace Api
 /**
  * @brief Send predefined telemetry data securely and the user should be logged in first.
  */
-class ACCELBYTEUE4SDK_API PredefinedEvent : public BaseAnalytics
+class ACCELBYTEUE4SDK_API PredefinedEvent 
+	: public BaseAnalytics
 {
 public:
 	PredefinedEvent(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	PredefinedEvent(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
 
 	/**
 	 * @brief Send/enqueue a single authorized telemetry data of a predefined event.
@@ -74,9 +80,9 @@ private:
 
 };
 
-typedef TSharedRef<PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventRef;
-typedef TSharedPtr<PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventPtr;
-typedef TWeakPtr<PredefinedEvent, ESPMode::ThreadSafe> PredefinedEventWPtr;
+using PredefinedEventRef = TSharedRef<PredefinedEvent, ESPMode::ThreadSafe>;
+using PredefinedEventPtr = TSharedPtr<PredefinedEvent, ESPMode::ThreadSafe>;
+using PredefinedEventWPtr = TWeakPtr<PredefinedEvent, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

@@ -42,7 +42,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void SaveUserRecord(
 		FString const& Key,
-		FJsonObjectWrapper RecordRequest,
+		FJsonObjectWrapper const& RecordRequest,
 		bool IsPublic,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
@@ -63,7 +63,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceUserRecord(
 		FString const& Key,
-		FJsonObjectWrapper RecordRequest,
+		FJsonObjectWrapper const& RecordRequest,
 		bool IsPublic,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
@@ -71,8 +71,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceUserRecordCheckLatest(
 		FString const& Key,
-		FDateTime const LastUpdated,
-		FJsonObjectWrapper RecordRequest,
+		FDateTime const& LastUpdated,
+		FJsonObjectWrapper const& RecordRequest,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
@@ -80,7 +80,7 @@ public:
 	void ReplaceUserRecordCheckLatestRetry(
 		int TryAttempt,
 		FString const& Key,
-		FJsonObjectWrapper RecordRequest,
+		FJsonObjectWrapper const& RecordRequest,
 		FDPayloadJsonObject const& PayloadModifier,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
@@ -88,8 +88,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceUserRecordCheckLatestWithResponse(
 		FString const& Key,
-		FDateTime LastUpdated,
-		FJsonObjectWrapper RecordRequest,
+		FDateTime const& LastUpdated,
+		FJsonObjectWrapper const& RecordRequest,
 		FDModelsReplaceUserRecordResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
 
@@ -97,7 +97,7 @@ public:
 	void ReplaceUserRecordCheckLatestRetryWithResponse(
 		int TryAttempt,
 		FString const& Key,
-		FJsonObjectWrapper RecordRequest,
+		FJsonObjectWrapper const& RecordRequest,
 		FDPayloadJsonObject const& PayloadModifier,
 		FDModelsReplaceUserRecordResponse const& OnSuccess,
 		FDErrorHandler const& OnError);
@@ -111,7 +111,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void SaveGameRecord(
 		FString const& Key,
-		FJsonObjectWrapper RecordRequest,
+		FJsonObjectWrapper const& RecordRequest,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
@@ -124,15 +124,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceGameRecord(
 		FString const& Key,
-		FJsonObjectWrapper RecordRequest,
+		FJsonObjectWrapper const& RecordRequest,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudSave | Api")
 	void ReplaceGameRecordCheckLatest(
 		FString const& Key,
-		FDateTime const LastUpdated,
-		FJsonObjectWrapper RecordRequest,
+		FDateTime const& LastUpdated,
+		FJsonObjectWrapper const& RecordRequest,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);
 
@@ -140,7 +140,7 @@ public:
 	void ReplaceGameRecordCheckLatestRetry(
 		int TryAttempt,
 		FString const& Key,
-		FJsonObjectWrapper RecordRequest,
+		FJsonObjectWrapper const& RecordRequest,
 		FDPayloadJsonObject const& PayloadModifier,
 		FDHandler const& OnSuccess,
 		FDErrorHandler const& OnError);

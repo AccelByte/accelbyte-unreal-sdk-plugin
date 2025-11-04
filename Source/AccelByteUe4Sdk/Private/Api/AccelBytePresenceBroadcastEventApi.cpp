@@ -3,9 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelBytePresenceBroadcastEventApi.h"
-
-#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteReport.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteInstance.h"
+#include "Core/AccelByteApiClient.h"
 
 namespace AccelByte
 {
@@ -15,8 +18,18 @@ namespace Api
 PresenceBroadcastEvent::PresenceBroadcastEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
+	, CredentialsRef{ InCredentialsRef.AsShared() }
+{
+	SetHeartbeatInterval(FTimespan::FromSeconds(SettingsRef.PresenceBroadcastEventHeartbeatInterval));
+}
+
+PresenceBroadcastEvent::PresenceBroadcastEvent(Credentials& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
 	, CredentialsRef{ InCredentialsRef.AsShared() }
 {
 	SetHeartbeatInterval(FTimespan::FromSeconds(SettingsRef.PresenceBroadcastEventHeartbeatInterval));
@@ -215,15 +228,8 @@ void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadc
 		, *SettingsRef.GameTelemetryServerUrl);
 		
 	FString ClientTimestamp;
-	const FApiClientPtr ApiClientPtr = ApiClient.Pin();
-	if (!ApiClientPtr.IsValid())
-	{
-		StopHeartbeat();
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Invalid request, ApiClient is not valid."));
-		return;
-	}
 
-	auto TimeManager = ApiClientPtr->GetTimeManager().Pin();
+	auto TimeManager = AccelBytePlatformPtr->GetTimeManager();
 
 	if (!TimeManager.IsValid())
 	{

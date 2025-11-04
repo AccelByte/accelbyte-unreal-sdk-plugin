@@ -3,13 +3,13 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteSessionApi.h"
-
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteError.h"
-
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 
 namespace AccelByte
 {
@@ -50,12 +50,22 @@ void Session::RemoveEmptyEnumValuesFromChildren(TSharedPtr<FJsonObject> & JsonOb
 Session::Session(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-{}
+{
+}
+
+Session::Session(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+{
+}
 
 Session::~Session()
-{}
+{
+}
 
 FAccelByteTaskWPtr Session::CreateGameSession(FAccelByteModelsV2GameSessionCreateRequest const& CreateRequest
 	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess

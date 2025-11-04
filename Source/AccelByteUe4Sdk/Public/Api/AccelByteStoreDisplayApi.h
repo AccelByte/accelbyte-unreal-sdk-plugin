@@ -17,11 +17,22 @@ namespace Api
 /**
  * @brief StoreDisplayAPI its to display Items in Item Shop/Store and to configure items on the View
  */
-class ACCELBYTEUE4SDK_API StoreDisplay : public FApiBase, public TSharedFromThis<StoreDisplay, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API StoreDisplay 
+	: public FApiBase
+	, public TSharedFromThis<StoreDisplay, ESPMode::ThreadSafe>
 {
 public:
-	StoreDisplay(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~StoreDisplay();
+	StoreDisplay(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	StoreDisplay(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~StoreDisplay();
 	
 	/**
 	 * @brief Used to get all views.
@@ -66,9 +77,9 @@ private:
 	StoreDisplay(StoreDisplay&&) = delete; 
 };
 	
-typedef TSharedRef<StoreDisplay, ESPMode::ThreadSafe> StoreDisplayRef;
-typedef TSharedPtr<StoreDisplay, ESPMode::ThreadSafe> StoreDisplayPtr;
-typedef TWeakPtr<StoreDisplay, ESPMode::ThreadSafe> StoreDisplayWPtr;
+using StoreDisplayRef = TSharedRef<StoreDisplay, ESPMode::ThreadSafe>;
+using StoreDisplayPtr = TSharedPtr<StoreDisplay, ESPMode::ThreadSafe>;
+using StoreDisplayWPtr = TWeakPtr<StoreDisplay, ESPMode::ThreadSafe>;
 
 }// Namespace Api
 } // Namespace AccelByte

@@ -155,7 +155,7 @@ public:
 	void UpdateGroup(
 		const FString& GroupId,
 		const bool bCompletelyReplace,
-		FAccelByteModelsGroupUpdatable& RequestContent,
+		const FAccelByteModelsGroupUpdatable& RequestContent,
 		const FUpdateGroupSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
@@ -195,7 +195,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void UpdateGroupCustomAttributes(
 		const FString& GroupId,
-		FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
+		const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
 		const FUpdateGroupCustomAttributesSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
@@ -216,7 +216,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void UpdateGroupCustomRule(
 		const FString& GroupId,
-		FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
+		const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
 		const FUpdateGroupCustomRuleSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
@@ -424,7 +424,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void InviteUserToGroup(
-		const FString UserId,
+		const FString& UserId,
 		const FInviteUserToGroupSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
@@ -447,7 +447,7 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void AcceptGroupJoinRequest(
-		const FString UserId,
+		const FString& UserId,
 		const FAcceptGroupJoinRequestSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 	
@@ -470,7 +470,7 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void RejectGroupJoinRequest(
-		const FString UserId,
+		const FString& UserId,
 		const FRejectGroupJoinRequestSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 
@@ -489,7 +489,7 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
 	void KickGroupMember(
-		const FString UserId,
+		const FString& UserId,
 		const FKickGroupMemberSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 	#pragma endregion /Group Member (individuals)
@@ -621,7 +621,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category= "AccelByte | Group | Api")
 	void GetGroupsByGroupIds(
-		const TArray<FString> GroupIds,
+		const TArray<FString>& GroupIds,
 		const FGetGroupsByGroupIdsSuccess& OnSuccess,
 		const FDErrorHandler& OnError);
 

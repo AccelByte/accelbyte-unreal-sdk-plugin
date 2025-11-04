@@ -3,6 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelBytePredefinedEventApi.h"
+#include "Core/AccelByteError.h"
+#include "Core/AccelByteReport.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteInstance.h"
+#include "Core/AccelByteApiClient.h"
 
 namespace AccelByte
 {
@@ -12,7 +18,7 @@ namespace Api
 PredefinedEvent::PredefinedEvent(Credentials& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: BaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient, TEXT("PreDefinedEvent"), false)
 {
 	if (!SettingsRef.bSendPredefinedEvent)
@@ -21,10 +27,22 @@ PredefinedEvent::PredefinedEvent(Credentials& InCredentialsRef
 	}
 }
 
-void PredefinedEvent::SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedPredefinedEventPayload>& Payload, 
-												FVoidHandler const& OnSuccess, 
-												FErrorHandler const& OnError, 
-												FDateTime const& ClientTimestamp)
+PredefinedEvent::PredefinedEvent(Credentials& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: BaseAnalytics(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform, TEXT("PreDefinedEvent"), false)
+{
+	if (!SettingsRef.bSendPredefinedEvent)
+	{
+		Shutdown();
+	}
+}
+
+void PredefinedEvent::SendPredefinedEventData(const TSharedRef<FAccelByteModelsCachedPredefinedEventPayload>& Payload
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError
+	, FDateTime const& ClientTimestamp)
 {
 	if (!SettingsRef.bSendPredefinedEvent)
 	{

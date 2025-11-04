@@ -21,11 +21,22 @@ namespace Api
  * Each player has configurable slot(s) that controlled by admin.
  * The configuration affects the amount of slot that owned by user and the allowed size for each slot (byte).
  */
-class ACCELBYTEUE4SDK_API CloudStorage : public FApiBase, public TSharedFromThis<CloudStorage, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API CloudStorage 
+	: public FApiBase
+	, public TSharedFromThis<CloudStorage, ESPMode::ThreadSafe>
 {
 public:
-	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~CloudStorage();
+	CloudStorage(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	CloudStorage(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~CloudStorage();
 
 	/**
 	 * @brief DEPRECATED.This function gets list of slot(s) those owned by the player. Cloud Storage is DEPRECATED.
@@ -177,9 +188,9 @@ private:
 		, bool CloseFooter);
 };
 
-typedef TSharedRef<CloudStorage, ESPMode::ThreadSafe> CloudStorageRef;
-typedef TSharedPtr<CloudStorage, ESPMode::ThreadSafe> CloudStoragePtr;
-typedef TWeakPtr<CloudStorage, ESPMode::ThreadSafe> CloudStorageWPtr;
+using CloudStorageRef = TSharedRef<CloudStorage, ESPMode::ThreadSafe>;
+using CloudStoragePtr = TSharedPtr<CloudStorage, ESPMode::ThreadSafe>;
+using CloudStorageWPtr = TWeakPtr<CloudStorage, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

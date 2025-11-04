@@ -20,14 +20,20 @@ namespace Api
  * @brief Provide APIs to access Group [Management] service.
  * - While authed, Namespace is automatically passed to all Requests.
  */
-class ACCELBYTEUE4SDK_API Group : public FApiBase, public TSharedFromThis<Group, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Group 
+	: public FApiBase, public TSharedFromThis<Group, ESPMode::ThreadSafe>
 {
 public:
 	Group(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Group(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
 	~Group();
 
 #pragma region Group V1
@@ -1046,9 +1052,9 @@ private:
 	static FString ConvertGroupAllowedActionToString(const EAccelByteAllowedAction& AllowedAction);
 };
 
-typedef TSharedRef<Group, ESPMode::ThreadSafe> GroupRef;
-typedef TSharedPtr<Group, ESPMode::ThreadSafe> GroupPtr;
-typedef TWeakPtr<Group, ESPMode::ThreadSafe> GroupWPtr;
+using GroupRef = TSharedRef<Group, ESPMode::ThreadSafe>;
+using GroupPtr = TSharedPtr<Group, ESPMode::ThreadSafe>;
+using GroupWPtr = TWeakPtr<Group, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

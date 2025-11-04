@@ -4,22 +4,34 @@
 
 #if 1 // MMv1 Deprecation
 #include "Api/AccelByteSessionBrowserApi.h"
-
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteError.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 #include "Core/AccelByteUtilities.h"
-#include "Core/AccelByteReport.h"
 
 namespace AccelByte
 {
 namespace Api
 {
+
 SessionBrowser::SessionBrowser(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
+{
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));
+}
+
+SessionBrowser::SessionBrowser(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
 {
 	FReport::LogDeprecated(FString(__FUNCTION__),
 		TEXT("The session browser is deprecated and replaced by game sessions. For more information, see https://docs.accelbyte.io/gaming-services/services/play/peer-to-peer-via-relay-server/"));

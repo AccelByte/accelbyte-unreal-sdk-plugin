@@ -40,7 +40,7 @@ public:
 		FString const& GameVersion,
 		int32 BotCount,
 		int32 MaxPlayer,
-		FJsonObjectWrapper OtherSettings,
+		FJsonObjectWrapper const& OtherSettings,
 		FDModelsSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -54,7 +54,7 @@ public:
 		int32 MaxPlayer,
 		int32 MaxSpectator,
 		FString const& Password,
-		FJsonObjectWrapper OtherSettings,
+		FJsonObjectWrapper const& OtherSettings,
 		FDModelsSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -69,7 +69,7 @@ public:
 		int32 MaxPlayer,
 		int32 MaxSpectator,
 		FString const& Password,
-		FJsonObjectWrapper OtherSettings,
+		FJsonObjectWrapper const& OtherSettings,
 		FDModelsSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -84,14 +84,14 @@ public:
 		int32 MaxPlayer,
 		int32 MaxSpectator,
 		FString const& Password,
-		FJsonObjectWrapper OtherSettings,
+		FJsonObjectWrapper const& OtherSettings,
 		FDModelsSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser | Api")
 	void CreateGameSessionTypeSpecificByStruct(
-		FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequest,
+		FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequest,
 		FDModelsSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -116,7 +116,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser | Api")
 	void UpdateGameSettings(
 		FString const& SessionId,
-		TMap<FString, FString> Settings,
+		TMap<FString, FString> const& Settings,
 		FDModelsSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -124,7 +124,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser | Api")
 	void UpdateGameSettingsByJsonObject(
 		FString const& SessionId,
-		FJsonObjectWrapper Settings,
+		FJsonObjectWrapper const& Settings,
 		FDModelsSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -180,7 +180,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionBrowser | Api")
 	void GetGameSessionsByUserIds(
-		TArray<FString> UserIds,
+		TArray<FString> const& UserIds,
 		FDModelsSessionBrowserGetResultByUserIdsResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);

@@ -21,11 +21,22 @@ namespace Api
 /**
  * @brief Order is used to purchase something from the online store.
  */
-class ACCELBYTEUE4SDK_API Order : public FApiBase, public TSharedFromThis<Order, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Order 
+	: public FApiBase
+	, public TSharedFromThis<Order, ESPMode::ThreadSafe>
 {
 public:
-	Order(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Order();
+	Order(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Order(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Order();
 
 	/**
 	 * @brief Create order to purchase something from the store. 
@@ -130,9 +141,9 @@ private:
 	Order(Order&&) = delete;
 };
 
-typedef TSharedRef<Order, ESPMode::ThreadSafe> OrderRef;
-typedef TSharedPtr<Order, ESPMode::ThreadSafe> OrderPtr;
-typedef TWeakPtr<Order, ESPMode::ThreadSafe> OrderWPtr;
+using OrderRef = TSharedRef<Order, ESPMode::ThreadSafe>;
+using OrderPtr = TSharedPtr<Order, ESPMode::ThreadSafe>;
+using OrderWPtr = TWeakPtr<Order, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

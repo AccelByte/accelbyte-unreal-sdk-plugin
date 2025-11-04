@@ -157,7 +157,7 @@ void UABServerDSM::SetOnAutoShutdownErrorDelegate(FDErrorHandler OnShutdownError
 			}));
 }
 
-void UABServerDSM::SetServerName(const FString Name)
+void UABServerDSM::SetServerName(const FString& Name)
 {
 	ApiClientPtr->ServerDSM.SetServerName(Name);
 }

@@ -9,6 +9,9 @@
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteIdValidator.h"
+#include "Core/AGS/AccelBytePlatform.h"
+
+class FAccelByteInstance;
 
 namespace AccelByte
 {
@@ -22,9 +25,14 @@ public:
 	FApiBase(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient);
 
-	void SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
+	FApiBase(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	void SetApiClient(TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient);
 	
 protected:
 	template<typename T>
@@ -42,7 +50,7 @@ protected:
 	Settings const& SettingsRef;
 	FHttpRetrySchedulerBase& HttpRef;
 	FHttpClient HttpClient;
-	TWeakPtr<FApiClient, ESPMode::ThreadSafe> ApiClient;
+	FAccelBytePlatformPtr AccelBytePlatformPtr;
 };
 
 }

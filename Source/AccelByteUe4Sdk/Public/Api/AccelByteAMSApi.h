@@ -15,11 +15,22 @@ class Settings;
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API AMS : public FApiBase, public TSharedFromThis<AMS, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API AMS 
+	: public FApiBase
+	, public TSharedFromThis<AMS, ESPMode::ThreadSafe>
 {
 public:
-	AMS(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~AMS();
+	AMS(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	AMS(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~AMS();
 
 	/**
 	 * @brief Get the account associated with the namespace.
@@ -38,9 +49,9 @@ private:
 	AMS(AMS&&) = delete;
 };
 
-typedef TSharedRef<AMS, ESPMode::ThreadSafe> AMSRef;
-typedef TSharedPtr<AMS, ESPMode::ThreadSafe> AMSPtr;
-typedef TWeakPtr<AMS, ESPMode::ThreadSafe> AMSWPtr;
+using AMSRef = TSharedRef<AMS, ESPMode::ThreadSafe>;
+using AMSPtr = TSharedPtr<AMS, ESPMode::ThreadSafe>;
+using AMSWPtr = TWeakPtr<AMS, ESPMode::ThreadSafe>;
 
 }
 }

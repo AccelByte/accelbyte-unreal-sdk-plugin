@@ -48,23 +48,24 @@ public:
 		, FHttpRetrySchedulerBase & InHttpRef
 		, FAccelByteMessagingSystem & InMessagingSystemRef
 		, FAccelByteNetworkConditioner & InNetworkConditionerRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr
 		, float InPingDelay = 30.f
 		, float InInitialBackoffDelay = 1.f
 		, float InMaxBackoffDelay = 30.f
 		, float InTotalTimeout = 60.f);
 
-	Chat(Credentials & InCredentialsRef
+	Chat(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetrySchedulerBase & InHttpRef
-		, FAccelByteMessagingSystem & InMessagingSystemRef
-		, FAccelByteNetworkConditioner & InNetworkConditionerRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelByteMessagingSystem& InMessagingSystemRef
+		, FAccelByteNetworkConditioner& InNetworkConditionerRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform
 		, float InPingDelay = 30.f
 		, float InInitialBackoffDelay = 1.f
 		, float InMaxBackoffDelay = 30.f
 		, float InTotalTimeout = 60.f);
 
-	~Chat();
+	virtual ~Chat();
 private:
 	const FString ChatSessionHeaderName = TEXT("X-Ab-ChatSessionID");
 
@@ -1351,9 +1352,9 @@ public:
 #pragma  endregion CHAT CONFIGURATION
 };
 
-typedef TSharedRef<Chat, ESPMode::ThreadSafe> ChatRef;
-typedef TSharedPtr<Chat, ESPMode::ThreadSafe> ChatPtr;
-typedef TWeakPtr<Chat, ESPMode::ThreadSafe> ChatWPtr;
+using ChatRef = TSharedRef<Chat, ESPMode::ThreadSafe>;
+using ChatPtr = TSharedPtr<Chat, ESPMode::ThreadSafe>;
+using ChatWPtr = TWeakPtr<Chat, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

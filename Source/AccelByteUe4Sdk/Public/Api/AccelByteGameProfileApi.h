@@ -24,11 +24,22 @@ namespace Api
 /**
  * @brief GameProfile API to manage user's in-game profiles (character).
  */
-class ACCELBYTEUE4SDK_API GameProfile : public FApiBase, public TSharedFromThis<GameProfile, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API GameProfile 
+	: public FApiBase
+	, public TSharedFromThis<GameProfile, ESPMode::ThreadSafe>
 {
 public:
-	GameProfile(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~GameProfile();
+	GameProfile(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	GameProfile(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~GameProfile();
 
 	/**
 	 * @brief Get public game profiles from the specified user id(s).
@@ -144,9 +155,9 @@ private:
 	GameProfile(GameProfile&&) = delete;
 };
 
-typedef TSharedRef<GameProfile, ESPMode::ThreadSafe> GameProfileRef;
-typedef TSharedPtr<GameProfile, ESPMode::ThreadSafe> GameProfilePtr;
-typedef TWeakPtr<GameProfile, ESPMode::ThreadSafe> GameProfileWPtr;
+using GameProfileRef = TSharedRef<GameProfile, ESPMode::ThreadSafe>;
+using GameProfilePtr = TSharedPtr<GameProfile, ESPMode::ThreadSafe>;
+using GameProfileWPtr = TWeakPtr<GameProfile, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

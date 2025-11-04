@@ -8,13 +8,19 @@
 #include "Core/AccelByteServerApiClient.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/IAccelByteDataStorage.h"
+#include "Core/AGS/AccelBytePlatform.h"
 
-class ACCELBYTEUE4SDK_API FAccelByteInstance : public TSharedFromThis<FAccelByteInstance, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API FAccelByteInstance 
+	: public TSharedFromThis<FAccelByteInstance, ESPMode::ThreadSafe>
 {
 public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnInstanceDestroyed, uint32 /* InstanceIndex */);
 
-	FAccelByteInstance(AccelByte::Settings& InSettings, AccelByte::ServerSettings& InServerSettings, TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage, AccelByte::FAccelByteTimeManagerPtr TimeManager, int32 RegistryIndex = 0);
+	FAccelByteInstance(AccelByte::Settings& InSettings
+		, AccelByte::ServerSettings& InServerSettings
+		, TSharedPtr<AccelByte::IAccelByteDataStorage> LocalDataStorage
+		, AccelByte::FAccelByteTimeManagerPtr TimeManager = nullptr
+		, int32 RegistryIndex = 0);
 
 	FAccelByteInstance(FAccelByteInstance const&) = delete;
 	FAccelByteInstance& operator=(FAccelByteInstance const&) = delete;
@@ -48,6 +54,8 @@ public:
 
 	AccelByte::ServerSettingsPtr GetServerSettings() const;
 
+	AccelByte::FAccelBytePlatformPtr GetAccelBytePlatform() const;
+
 	AccelByte::FAccelByteTimeManagerWPtr GetTimeManager() const;
 
 	FString GetFlightId() const;
@@ -69,8 +77,7 @@ private:
 	mutable FRWLock SettingsMtx;
 	AccelByte::SettingsRef Settings;
 	AccelByte::ServerSettingsRef ServerSettings;
-	
-	AccelByte::FAccelByteTimeManagerPtr TimeManager;
+	AccelByte::FAccelBytePlatformPtr PlatformPtr;
 
 	FCriticalSection ApiClientMtx;
 	TMap<FString, AccelByte::FApiClientPtr> ApiClients;

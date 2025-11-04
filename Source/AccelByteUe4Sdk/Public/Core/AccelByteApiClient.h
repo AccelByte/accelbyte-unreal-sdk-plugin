@@ -60,15 +60,20 @@ class FAccelByteInstance;
 namespace AccelByte
 {
 
-class ACCELBYTEUE4SDK_API FApiClient final : public TSharedFromThis<FApiClient, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API FApiClient final 
+	: public TSharedFromThis<FApiClient, ESPMode::ThreadSafe>
 {
 public:
-	FApiClient();
-	FApiClient(const SettingsPtr& InSettings, FAccelByteTimeManagerPtr InTimeManager, TSharedRef<FAccelByteInstance, ESPMode::ThreadSafe> InAccelByteInstance);
-	FApiClient(AccelByte::Credentials& Credentials
-		, AccelByte::FHttpRetryScheduler& Http
-		, AccelByte::FAccelByteMessagingSystemPtr InMessagingSystemPtr = nullptr);
-	~FApiClient();
+	FApiClient() = delete;
+
+	FApiClient(SettingsPtr const& InSettings
+		, FAccelByteTimeManagerPtr const& InTimeManager
+		, TSharedRef<FAccelByteInstance, ESPMode::ThreadSafe> const& InAccelByteInstance);
+
+	FApiClient(SettingsPtr const& InSettings
+		, TSharedRef<FAccelByteInstance, ESPMode::ThreadSafe> const& InAccelByteInstance);
+
+	virtual ~FApiClient();
 	
 	void Init();
 
@@ -84,7 +89,7 @@ public:
 #pragma endregion
 
 private:
-	const FAccelByteTimeManagerPtr TimeManagerPtr;
+	const FAccelByteTimeManagerWPtr TimeManagerWPtr;
 
 #pragma region Commerce
 	const AccelByte::Api::CurrencyPtr CurrencyPtr;
@@ -212,6 +217,8 @@ public:
 	Api::GameStandardEventWPtr GetGameStandardEventApi() const;
 	Api::PresenceBroadcastEventWPtr GetPresenceBroadcastEventApi() const;
 #pragma endregion
+
+	TWeakPtr<FAccelByteInstance, ESPMode::ThreadSafe> GetAccelByteInstance() const;
 	
 	FAccelByteTimeManagerWPtr GetTimeManager() const;
 
@@ -242,8 +249,8 @@ public:
 	}
 };
 
-typedef TSharedRef<FApiClient, ESPMode::ThreadSafe> FApiClientRef;
-typedef TSharedPtr<FApiClient, ESPMode::ThreadSafe> FApiClientPtr;
-typedef TWeakPtr<FApiClient, ESPMode::ThreadSafe> FApiClientWPtr;
+using FApiClientRef = TSharedRef<FApiClient, ESPMode::ThreadSafe>;
+using FApiClientPtr = TSharedPtr<FApiClient, ESPMode::ThreadSafe>;
+using FApiClientWPtr = TWeakPtr<FApiClient, ESPMode::ThreadSafe>;
 
 }

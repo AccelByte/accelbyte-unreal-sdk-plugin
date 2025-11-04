@@ -28,11 +28,22 @@ namespace Api
 /**
  * @brief Provide APIs to access UGC service.
  */
-class ACCELBYTEUE4SDK_API UGC : public FApiBase, public TSharedFromThis<UGC, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API UGC 
+	: public FApiBase
+	, public TSharedFromThis<UGC, ESPMode::ThreadSafe>
 {
 public:
-	UGC(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~UGC();
+	UGC(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	UGC(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~UGC();
 
 #pragma region UGC V1
 
@@ -1353,9 +1364,9 @@ private:
 	const TMap<FString, FString> GetDefaultHeaders();
 };
 
-typedef TSharedRef<UGC, ESPMode::ThreadSafe> UGCRef;
-typedef TSharedPtr<UGC, ESPMode::ThreadSafe> UGCPtr;
-typedef TWeakPtr<UGC, ESPMode::ThreadSafe> UGCWPtr;
+using UGCRef = TSharedRef<UGC, ESPMode::ThreadSafe>;
+using UGCPtr = TSharedPtr<UGC, ESPMode::ThreadSafe>;
+using UGCWPtr = TWeakPtr<UGC, ESPMode::ThreadSafe>;
 
 }
 }

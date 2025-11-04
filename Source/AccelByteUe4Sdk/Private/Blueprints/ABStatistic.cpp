@@ -220,9 +220,9 @@ void UABStatistic::ListGlobalStatItems(FDModelsGlobalStatItemPagingSlicedResultR
 }
 
 void UABStatistic::BulkFetchStatItemsValue(
-	const FString StatCode, 
-	TArray<FString> const& UserIds, 
-	FDModelsStatItemValueResponses const& OnSuccess, 
+	const FString& StatCode,
+	TArray<FString> const& UserIds,
+	FDModelsStatItemValueResponses const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
 	const auto StatisticPtr = ApiClientPtr->GetStatisticApi().Pin();

@@ -17,11 +17,22 @@ namespace Api
 /**
  * @brief GDPR Api is used for managing the deletion of user data
  */
-class ACCELBYTEUE4SDK_API GDPR : public FApiBase, public TSharedFromThis<GDPR, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API GDPR 
+	: public FApiBase
+	, public TSharedFromThis<GDPR, ESPMode::ThreadSafe>
 {
 public:
-	GDPR(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~GDPR();
+	GDPR(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	GDPR(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~GDPR();
 		
 	/**
 	 * @brief Used to submit user's account deletion requests. Used when your account is full account
@@ -94,9 +105,9 @@ private:
 	GDPR(GDPR&&) = delete; 
 };
 	
-typedef TSharedRef<GDPR, ESPMode::ThreadSafe> GDPRRef;
-typedef TSharedPtr<GDPR, ESPMode::ThreadSafe> GDPRPtr;
-typedef TWeakPtr<GDPR, ESPMode::ThreadSafe> GDPRWPtr;
+using GDPRRef = TSharedRef<GDPR, ESPMode::ThreadSafe>;
+using GDPRPtr = TSharedPtr<GDPR, ESPMode::ThreadSafe>;
+using GDPRWPtr = TWeakPtr<GDPR, ESPMode::ThreadSafe>;
 
 }// Namespace Api
 }// Namespace AccelByte

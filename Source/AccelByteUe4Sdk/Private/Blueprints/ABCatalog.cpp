@@ -204,7 +204,7 @@ void UABCatalog::GetItemByAppId(FString const& AppId
 void UABCatalog::GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria
 	, int32 const& Offset
 	, int32 const& Limit
-	, TArray<EAccelByteItemListSortBy> SortBy
+	, TArray<EAccelByteItemListSortBy> const& SortBy
 	, FDModelsItemPagingSlicedResultResponse OnSuccess
 	, FDErrorHandler OnError)
 {

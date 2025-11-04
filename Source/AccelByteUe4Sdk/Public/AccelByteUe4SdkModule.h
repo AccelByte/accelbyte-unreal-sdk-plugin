@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteApiClient.h"
 #include "Modules/ModuleManager.h"
+#include "Core/AGS/AccelBytePlatform.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteServerApiClient.h"
@@ -26,7 +27,8 @@ namespace AccelByte
 // forward declaration
 class FAccelByteInstance;
 
-class IAccelByteUe4SdkModuleInterface : public IModuleInterface
+class IAccelByteUe4SdkModuleInterface 
+	: public IModuleInterface
 {
 	friend class FAccelByteModuleUtilities;
 
@@ -48,6 +50,9 @@ public:
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() = 0;
 	virtual AccelByte::IAccelByteDataStorage* GetLocalDataStorage() = 0;
 	virtual AccelByte::FAccelBytePlatformHandler& GetPlatformHandler() = 0;
+	virtual AccelByte::FAccelBytePlatformPtr GetAccelBytePlatform(AccelByte::BaseSettingsPtr const& InSettings) = 0;
 
 	virtual TSharedPtr<FAccelByteInstance, ESPMode::ThreadSafe> CreateAccelByteInstance() = 0;
+	virtual TSharedPtr<FAccelByteInstance, ESPMode::ThreadSafe> CreateAccelByteInstance(AccelByte::Settings & InSettings
+		, AccelByte::ServerSettings & InServerSettings) = 0;
 };

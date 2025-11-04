@@ -18,13 +18,19 @@ namespace Api
 /**
  * @brief Send game standard telemetry data securely and the user should be logged in first.
  */
-class ACCELBYTEUE4SDK_API GameStandardEvent : public BaseAnalytics
+class ACCELBYTEUE4SDK_API GameStandardEvent 
+	: public BaseAnalytics
 {
 public:
 	GameStandardEvent(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	GameStandardEvent(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
 
 	bool SendMissionStartedEventData(FAccelByteId const& UserId
 		, FMissionId const& MissionId
@@ -117,9 +123,9 @@ private:
 
 };
 
-typedef TSharedRef<GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventRef;
-typedef TSharedPtr<GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventPtr;
-typedef TWeakPtr<GameStandardEvent, ESPMode::ThreadSafe> GameStandardEventWPtr;
+using GameStandardEventRef = TSharedRef<GameStandardEvent, ESPMode::ThreadSafe>;
+using GameStandardEventPtr = TSharedPtr<GameStandardEvent, ESPMode::ThreadSafe>;
+using GameStandardEventWPtr = TWeakPtr<GameStandardEvent, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

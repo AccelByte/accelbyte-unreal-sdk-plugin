@@ -85,6 +85,7 @@ public:
 		, FHttpRetrySchedulerBase& InHttpRef
 		, FAccelByteMessagingSystem& InMessagingSystemRef
 		, FAccelByteNetworkConditioner& InNetworkConditionerRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr
 		, float InPingDelay = 30.f
 		, float InInitialBackoffDelay = 1.f
 		, float InMaxBackoffDelay = 30.f
@@ -95,12 +96,13 @@ public:
 		, FHttpRetrySchedulerBase& InHttpRef
 		, FAccelByteMessagingSystem& InMessagingSystemRef
 		, FAccelByteNetworkConditioner& InNetworkConditionerRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+		, FAccelBytePlatformPtr const& InAccelBytePlatform
 		, float InPingDelay = 30.f
 		, float InInitialBackoffDelay = 1.f
 		, float InMaxBackoffDelay = 30.f
 		, float InTotalTimeout = 60.f);
-	~Lobby();
+
+	virtual ~Lobby();
 private:
 	FCredentialsRef LobbyCredentialsRef;
 	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
@@ -2746,8 +2748,8 @@ private:
 		double ScheduledTime;
 	};
 
-	typedef TSharedRef<FUnbanSchedule> FUnbanScheduleRef;
-	typedef TSharedPtr<FUnbanSchedule> FUnbanSchedulePtr;
+	using FUnbanScheduleRef = TSharedRef<FUnbanSchedule>;
+	using FUnbanSchedulePtr = TSharedPtr<FUnbanSchedule>;
 	
 	TMap<FString, FUnbanScheduleRef> UnbanSchedules;
 #pragma endregion
@@ -3385,9 +3387,9 @@ private:
 #endif // Matchmaking V1 deprecation
 };
 
-typedef TSharedRef<Lobby, ESPMode::ThreadSafe> LobbyRef;
-typedef TSharedPtr<Lobby, ESPMode::ThreadSafe> LobbyPtr;
-typedef TWeakPtr<Lobby, ESPMode::ThreadSafe> LobbyWPtr;
+using LobbyRef = TSharedRef<Lobby, ESPMode::ThreadSafe>;
+using LobbyPtr = TSharedPtr<Lobby, ESPMode::ThreadSafe>;
+using LobbyWPtr = TWeakPtr<Lobby, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

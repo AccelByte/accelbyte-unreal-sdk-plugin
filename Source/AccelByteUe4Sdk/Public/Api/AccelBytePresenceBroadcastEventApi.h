@@ -18,15 +18,22 @@ namespace Api
 /**
  * @brief Send presence event securely and the user should be logged in first.
  */
-class ACCELBYTEUE4SDK_API PresenceBroadcastEvent : public FApiBase, public TSharedFromThis<PresenceBroadcastEvent, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API PresenceBroadcastEvent 
+	: public FApiBase
+	, public TSharedFromThis<PresenceBroadcastEvent, ESPMode::ThreadSafe>
 {
 public:
 	PresenceBroadcastEvent(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	
-	~PresenceBroadcastEvent();
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	PresenceBroadcastEvent(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~PresenceBroadcastEvent();
 
 	/**
 	 * @brief Get current flight Id.
@@ -157,9 +164,9 @@ private:
 
 };
 
-typedef TSharedRef<PresenceBroadcastEvent, ESPMode::ThreadSafe> PresenceBroadcastEventRef;
-typedef TSharedPtr<PresenceBroadcastEvent, ESPMode::ThreadSafe> PresenceBroadcastEventPtr;
-typedef TWeakPtr<PresenceBroadcastEvent, ESPMode::ThreadSafe> PresenceBroadcastEventWPtr;
+using PresenceBroadcastEventRef = TSharedRef<PresenceBroadcastEvent, ESPMode::ThreadSafe>;
+using PresenceBroadcastEventPtr = TSharedPtr<PresenceBroadcastEvent, ESPMode::ThreadSafe>;
+using PresenceBroadcastEventWPtr = TWeakPtr<PresenceBroadcastEvent, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

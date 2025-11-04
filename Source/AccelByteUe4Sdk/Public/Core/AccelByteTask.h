@@ -10,7 +10,6 @@
 namespace AccelByte 
 {
 
-
 class ACCELBYTEUE4SDK_API FAccelByteCancellationTokenSource
 {
 public:
@@ -22,24 +21,24 @@ public:
 	/**
 	 * @brief Return true if the state is CancelRequested.
 	 */
-	FORCENOINLINE bool IsCancelRequested() { return State == EState::CancelRequested; }
+	FORCENOINLINE bool IsCancelRequested() { return State.load(std::memory_order_relaxed) == EState::CancelRequested; }
 
 	/**
 	 * @brief Return true if the state is Cancelled.
 	 */
-	FORCENOINLINE bool IsCancelled() { return State == EState::Cancelled; }
+	FORCENOINLINE bool IsCancelled() { return State.load(std::memory_order_relaxed) == EState::Cancelled; }
 
 	/**
 	 * @brief Return true if the state is Done.
 	 */
-	FORCENOINLINE bool IsTaskDone() { return State == EState::Done; }
+	FORCENOINLINE bool IsTaskDone() { return State.load(std::memory_order_relaxed) == EState::Done; }
 
 	/**
 	 * @brief Request cancellation.
 	 */
 	FORCENOINLINE void Cancel()
 	{
-		switch (State)
+		switch (State.load(std::memory_order_relaxed))
 		{
 		case EState::Running: State = EState::CancelRequested;
 		case EState::CancelRequested:
@@ -54,10 +53,10 @@ public:
 	 */
 	FORCENOINLINE void MarkCancelled()
 	{
-		switch (State)
+		switch (State.load(std::memory_order_relaxed))
 		{
 		case EState::Running: break;
-		case EState::CancelRequested: State = EState::Cancelled;
+		case EState::CancelRequested: State.store(EState::Cancelled, std::memory_order_relaxed);
 		case EState::Cancelled:
 		case EState::Done:
 		default: break;
@@ -69,9 +68,9 @@ public:
 	 */
 	FORCENOINLINE void MarkDone()
 	{
-		switch (State)
+		switch (State.load(std::memory_order_relaxed))
 		{
-		case EState::Running: State = EState::Done;
+		case EState::Running: State.store(EState::Done, std::memory_order_relaxed);
 		case EState::CancelRequested:
 		case EState::Cancelled:
 		case EState::Done:
@@ -80,7 +79,7 @@ public:
 	}
 
 private:
-	enum class EState
+	enum class EState : int32
 	{
 		/** Task running normally. */
 		Running,
@@ -95,33 +94,38 @@ private:
 		Done
 	};
 
-	EState State;
-	
+	std::atomic<EState> State;
 };
 
-typedef TSharedPtr<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe> FAccelByteCancellationTokenPtr;
-typedef TSharedRef<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe> FAccelByteCancellationTokenRef;
-typedef TWeakPtr<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe> FAccelByteCancellationTokenWeakPtr;
+using FAccelByteCancellationTokenPtr = TSharedPtr<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe>;
+using FAccelByteCancellationTokenRef = TSharedRef<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe>;
+using FAccelByteCancellationTokenWeakPtr = TWeakPtr<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe>;
 
 class ACCELBYTEUE4SDK_API FAccelByteCancellationToken
 {
 private:
 	FAccelByteCancellationTokenWeakPtr Token;
+
 public:
-	FAccelByteCancellationToken(FAccelByteCancellationTokenWeakPtr Token = MakeShared<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe>())
+	FAccelByteCancellationToken(const FAccelByteCancellationTokenWeakPtr& Token)
 		: Token{ Token }
 	{}
-	~FAccelByteCancellationToken() {}
+
+	~FAccelByteCancellationToken() = default;
 
 	/**
 	 * @brief Request cancellation
 	 */
 	FORCENOINLINE void Cancel()
 	{ 
-		FAccelByteCancellationTokenPtr TokenPtr = Token.Pin();
-		if (Token.IsValid())
+		auto PinnedToken = Token.Pin();
+		if(PinnedToken.IsValid())
 		{
-			TokenPtr->Cancel();
+			PinnedToken->Cancel();
+		}
+		else
+		{
+			// Do nothing
 		}
 	}
 
@@ -129,21 +133,18 @@ public:
 	 * @brief Will return true when task is on cancellation or already cancelled.
 	 */
 	FORCENOINLINE bool IsCancelled()
-	{ 
-		FAccelByteCancellationTokenPtr TokenPtr = Token.Pin();
-		if (Token.IsValid())
+	{
+		auto PinnedToken = Token.Pin();
+		if(PinnedToken.IsValid())
 		{
-			return TokenPtr->IsCancelled() || TokenPtr->IsCancelRequested();
+			return PinnedToken->IsCancelled() || PinnedToken->IsCancelRequested();
 		}
-		return true;
+		else
+		{
+			return false;
+		}
 	}
 };
-
-class FAccelByteTask;
-
-typedef TSharedPtr<FAccelByteTask, ESPMode::ThreadSafe> FAccelByteTaskPtr;
-typedef TSharedRef<FAccelByteTask, ESPMode::ThreadSafe> FAccelByteTaskRef;
-typedef TWeakPtr<FAccelByteTask, ESPMode::ThreadSafe>	FAccelByteTaskWPtr;
 
 /**
  * Base class for AccelByte Task that can be used in one of the schedulers
@@ -193,7 +194,8 @@ public:
 	virtual bool Finish() 
 	{
 		Token->MarkDone();
-		return bIsFinished = true; 
+		bIsFinished.store(true, std::memory_order_release);
+		return true; 
 	}
 
 	/**
@@ -217,9 +219,13 @@ public:
 protected:
 	double TaskTime = 0.0;
 	EAccelByteTaskState TaskState = EAccelByteTaskState::Pending;
-	bool bIsFinished = false;
+	std::atomic<bool> bIsFinished{false};
 	FAccelByteCancellationTokenRef Token = MakeShared<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe>();
 };
+
+using FAccelByteTaskPtr = TSharedPtr<FAccelByteTask, ESPMode::ThreadSafe>;
+using FAccelByteTaskRef = TSharedRef<FAccelByteTask, ESPMode::ThreadSafe>;
+using FAccelByteTaskWPtr = TWeakPtr<FAccelByteTask, ESPMode::ThreadSafe>;
 
 FORCEINLINE FAccelByteTask::FAccelByteTask()
 {
@@ -228,7 +234,7 @@ FORCEINLINE FAccelByteTask::FAccelByteTask()
 
 FORCEINLINE FAccelByteTask::~FAccelByteTask()
 {
-	if (!bIsFinished)
+	if (!bIsFinished.load(std::memory_order_acquire))
 	{
 		Finish();
 	}

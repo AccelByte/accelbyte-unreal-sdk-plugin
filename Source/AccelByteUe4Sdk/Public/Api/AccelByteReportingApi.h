@@ -19,11 +19,22 @@ namespace Api
 /**
  * @brief Reporting API for Reporting content.
  */
-class ACCELBYTEUE4SDK_API Reporting : public FApiBase, public TSharedFromThis<Reporting, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Reporting 
+	: public FApiBase
+	, public TSharedFromThis<Reporting, ESPMode::ThreadSafe>
 {
 public:
-	Reporting(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Reporting();
+	Reporting(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Reporting(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Reporting();
 
 	/**
 	 * @brief Submit Report.
@@ -90,9 +101,9 @@ private:
 	static FString AdditionalValidationByCategory(FAccelByteModelsReportingSubmitData const& InReportData);
 };
 
-typedef TSharedRef<Reporting, ESPMode::ThreadSafe> ReportingRef;
-typedef TSharedPtr<Reporting, ESPMode::ThreadSafe> ReportingPtr;
-typedef TWeakPtr<Reporting, ESPMode::ThreadSafe> ReportingWPtr;
+using ReportingRef = TSharedRef<Reporting, ESPMode::ThreadSafe>;
+using ReportingPtr = TSharedPtr<Reporting, ESPMode::ThreadSafe>;
+using ReportingWPtr = TWeakPtr<Reporting, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

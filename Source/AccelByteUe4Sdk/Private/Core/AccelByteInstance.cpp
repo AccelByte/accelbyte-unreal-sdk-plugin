@@ -6,18 +6,25 @@
 
 #include "AccelByteUe4SdkModule.h"
 
-FAccelByteInstance::FAccelByteInstance(
-	class AccelByte::Settings& InSettings
+FAccelByteInstance::FAccelByteInstance(class AccelByte::Settings& InSettings
 	, class AccelByte::ServerSettings& InServerSettings
 	, TSharedPtr<AccelByte::IAccelByteDataStorage> InLocalDataStorage
 	, AccelByte::FAccelByteTimeManagerPtr InTimeManager
 	, int32 RegistryIndex)
 	: Settings(MakeShared<AccelByte::Settings, ESPMode::ThreadSafe>(InSettings))
 	, ServerSettings(MakeShared<AccelByte::ServerSettings, ESPMode::ThreadSafe>(InServerSettings))
-	, TimeManager(InTimeManager)
+	, PlatformPtr(nullptr)
 	, LocalDataStorage(InLocalDataStorage)
 	, Index(RegistryIndex)
 {
+	if (!InServerSettings.BaseUrl.IsEmpty())
+	{
+		PlatformPtr = IAccelByteUe4SdkModuleInterface::Get().GetAccelBytePlatform(ServerSettings);
+	}
+	else if (!InSettings.BaseUrl.IsEmpty())
+	{
+		PlatformPtr = IAccelByteUe4SdkModuleInterface::Get().GetAccelBytePlatform(Settings);
+	}
 	FlightId = FGuid::NewGuid().ToString().ToLower();
 	DeviceId = GenerateDeviceId(Index);
 	EncodedDeviceId = FAccelByteUtilities::EncodeHMACBase64(DeviceId, Settings->PublisherNamespace);
@@ -62,8 +69,12 @@ AccelByte::FApiClientPtr FAccelByteInstance::GetApiClient(FString const& Key, bo
 
 		AccelByte::FApiClientPtr NewClient = nullptr;
 		{
-			FReadScopeLock SettingsReadLock(SettingsMtx);
-			NewClient = MakeShared<AccelByte::FApiClient, ESPMode::ThreadSafe>(Settings, TimeManager, AsShared());
+			AccelByte::SettingsPtr SettingsBuf;
+			{
+				FReadScopeLock SettingsReadLock(SettingsMtx);
+				SettingsBuf = Settings;
+			}
+			NewClient = MakeShared<AccelByte::FApiClient, ESPMode::ThreadSafe>(SettingsBuf, PlatformPtr->GetTimeManager(), AsShared());
 		}
 		if(!NewClient.IsValid())
 		{
@@ -147,8 +158,12 @@ AccelByte::FServerApiClientPtr FAccelByteInstance::GetServerApiClient(FString co
 	{
 		AccelByte::FServerApiClientPtr NewClient = nullptr;
 		{
-			FReadScopeLock SettingsReadLock(SettingsMtx);
-			NewClient = MakeShared<AccelByte::FServerApiClient, ESPMode::ThreadSafe>(ServerSettings, TimeManager, AsShared());
+			AccelByte::ServerSettingsPtr ServerSettingsBuf;
+			{
+				FReadScopeLock SettingsReadLock(SettingsMtx);
+				ServerSettingsBuf = ServerSettings;
+			}
+			NewClient = MakeShared<AccelByte::FServerApiClient, ESPMode::ThreadSafe>(ServerSettingsBuf, PlatformPtr->GetTimeManager(), AsShared());
 		}
 		if(!NewClient.IsValid())
 		{
@@ -224,9 +239,14 @@ AccelByte::ServerSettingsPtr FAccelByteInstance::GetServerSettings() const
 	return ServerSettings;
 }
 
+AccelByte::FAccelBytePlatformPtr FAccelByteInstance::GetAccelBytePlatform() const
+{
+	return PlatformPtr;
+}
+
 TWeakPtr<AccelByte::FAccelByteTimeManager, ESPMode::ThreadSafe> FAccelByteInstance::GetTimeManager() const
 {
-	return TimeManager;
+	return PlatformPtr->GetTimeManager();
 }
 
 FString FAccelByteInstance::GetFlightId() const

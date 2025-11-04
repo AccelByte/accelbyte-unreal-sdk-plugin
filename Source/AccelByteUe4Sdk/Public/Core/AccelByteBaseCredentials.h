@@ -4,27 +4,25 @@
 
 #pragma once
 
-#include <atomic>
 #include "CoreMinimal.h"
 #include "Models/AccelByteErrorModels.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteDefines.h"
 
+// STL
+#include <atomic>
+
 namespace AccelByte
 {
-
 /**
  * @brief Singleton class for storing credentials.
  */
 class ACCELBYTEUE4SDK_API BaseCredentials
 {
-private:
-	DECLARE_EVENT_OneParam(Credentials, FTokenRefreshedEvent, bool);
-	FRWLock mutable CredentialAccessLock{};
-	FRWLock mutable DelegateLock{};
-
 public:
+	DECLARE_EVENT_OneParam(Credentials, FTokenRefreshedEvent, bool);
+
 	enum class ESessionState
 	{
 		Invalid,
@@ -93,21 +91,26 @@ public:
 	virtual double GetRefreshBackoffTime() const;
 
 #if !UE_BUILD_SHIPPING
-
 	void SetClientId(const FString& InClientId)
 	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
+		FWriteScopeLock WriteLock(ClientIdMtx);
 		ClientId = InClientId;
 	}
 #endif
 
 private:
+	mutable FRWLock ClientIdMtx;
 	FString ClientId;
+	mutable FRWLock ClientSecretMtx;
 	FString ClientSecret;
+
+	mutable FRWLock AuthTokenMtx;
 	FOauth2Token AuthToken;
+
+	mutable FRWLock ErrorOAuthMtx;
 	FErrorOAuthInfo ErrorOAuth; 
 	
-	ESessionState SessionState;
+	std::atomic<ESessionState> SessionState;
 
 	std::atomic<double> ExpireDuration;
 	std::atomic<double> RefreshTime;
@@ -119,7 +122,10 @@ private:
 	/** @brief RefreshBackoff time in seconds. */
 	std::atomic<double> RefreshBackoff;
 
+	FRWLock PollRefreshTokenHandleMtx;
 	FDelegateHandleAlias PollRefreshTokenHandle;
+
+	FRWLock TokenRefreshedEventMtx;
 	FTokenRefreshedEvent TokenRefreshedEvent;
 
 protected:

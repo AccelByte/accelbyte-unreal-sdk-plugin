@@ -6,8 +6,12 @@
 
 #include "Core/AccelByteMessageParser.h"
 
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteInstance.h"
+#include "Core/AccelByteApiClient.h"
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
 #include "EngineMinimal.h"
@@ -205,7 +209,8 @@ namespace IncomingMessage
 	 * 
 	 * @return Enum of message notif/response for switch case handler
 	 */
-	HandleType GetHandleType(TMap<FString, HandleType> const& HandlerStringEnumMap, TSharedPtr<FJsonObject> const& MessageAsJsonObj)
+	HandleType GetHandleType(TMap<FString, HandleType> const& HandlerStringEnumMap
+		, TSharedPtr<FJsonObject> const& MessageAsJsonObj)
 	{
 
 		FString StringKey = TEXT("");
@@ -242,7 +247,8 @@ namespace IncomingMessage
 	 * 
 	 * @return true if a date time field has been converted
 	 */
-	bool ConvertJsonFieldTimeUnixToIso8601(TSharedPtr<FJsonObject> JsonObject, FString const& DateTimeField)
+	bool ConvertJsonFieldTimeUnixToIso8601(TSharedPtr<FJsonObject> JsonObject
+		, FString const& DateTimeField)
 	{
 		bool bUpdatedObject = false;
 		if (JsonObject->HasField(DateTimeField))
@@ -418,16 +424,17 @@ namespace IncomingMessage
 
 #pragma endregion
 
-	Chat::Chat(Credentials & InCredentialsRef
+	Chat::Chat(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef
-		, FHttpRetrySchedulerBase & InHttpRef
-		, FAccelByteMessagingSystem & InMessagingSystemRef
-		, FAccelByteNetworkConditioner & InNetworkConditionerRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelByteMessagingSystem& InMessagingSystemRef
+		, FAccelByteNetworkConditioner& InNetworkConditionerRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient
 		, float InPingDelay
 		, float InInitialBackoffDelay
 		, float InMaxBackoffDelay
 		, float InTotalTimeout)
-		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, nullptr)
+		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 		, ChatCredentialsRef{InCredentialsRef.AsShared()}
 #if ENGINE_MAJOR_VERSION < 5
 		, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
@@ -450,28 +457,28 @@ namespace IncomingMessage
 		, FHttpRetrySchedulerBase& InHttpRef
 		, FAccelByteMessagingSystem& InMessagingSystemRef
 		, FAccelByteNetworkConditioner& InNetworkConditionerRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient
+		, FAccelBytePlatformPtr const& InAccelBytePlatform
 		, float InPingDelay
 		, float InInitialBackoffDelay
 		, float InMaxBackoffDelay
 		, float InTotalTimeout)
-		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-		, ChatCredentialsRef{InCredentialsRef.AsShared()}
-	#if ENGINE_MAJOR_VERSION < 5
-		, MessagingSystemWPtr{InMessagingSystemRef.AsShared()}
-	#else
-		, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
-	#endif
-		, NetworkConditioner{InNetworkConditionerRef}
-		, PingDelay{InPingDelay}
-		{
-			auto Strategy = FReconnectionStrategy::CreateBalancedStrategy(
-				FReconnectionStrategy::FBalancedMaxRetryInterval(FTimespan::FromSeconds(InMaxBackoffDelay)),
-				FReconnectionStrategy::FTotalTimeoutDuration(FTimespan::FromSeconds(InTotalTimeout)),
-				FReconnectionStrategy::FInitialBackoffDelay(FTimespan::FromSeconds(InInitialBackoffDelay))
-			);
-			IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
-		}
+		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+		, ChatCredentialsRef{ InCredentialsRef.AsShared() }
+#if ENGINE_MAJOR_VERSION < 5
+		, MessagingSystemWPtr{ InMessagingSystemRef.AsShared() }
+#else
+		, MessagingSystemWPtr{ InMessagingSystemRef.AsWeak() }
+#endif
+		, NetworkConditioner{ InNetworkConditionerRef }
+		, PingDelay{ InPingDelay }
+	{
+		auto Strategy = FReconnectionStrategy::CreateBalancedStrategy(
+			FReconnectionStrategy::FBalancedMaxRetryInterval(FTimespan::FromSeconds(InMaxBackoffDelay)),
+			FReconnectionStrategy::FTotalTimeoutDuration(FTimespan::FromSeconds(InTotalTimeout)),
+			FReconnectionStrategy::FInitialBackoffDelay(FTimespan::FromSeconds(InInitialBackoffDelay))
+		);
+		IWebsocketConfigurableReconnectStrategy::SetDefaultReconnectionStrategy(Strategy);
+	}
 
 	Chat::~Chat()
 	{

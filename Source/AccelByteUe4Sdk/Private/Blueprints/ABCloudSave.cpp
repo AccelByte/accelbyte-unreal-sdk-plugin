@@ -13,18 +13,19 @@ void UABCloudSave::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 
 void UABCloudSave::SaveUserRecord(
 	FString const& Key,
-	FJsonObjectWrapper RecordRequest,
+	FJsonObjectWrapper const& RecordRequest,
 	bool IsPublic,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->SaveUserRecord(
 			Key,
-			*RecordRequest.JsonObject,
+			*RecordRequestCopy.JsonObject,
 			IsPublic,
 			FVoidHandler::CreateLambda(
 				[OnSuccess]()
@@ -108,18 +109,19 @@ void UABCloudSave::GetPublicUserRecord(
 
 void UABCloudSave::ReplaceUserRecord(
 	FString const& Key,
-	FJsonObjectWrapper RecordRequest,
+	FJsonObjectWrapper const& RecordRequest,
 	bool IsPublic,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->ReplaceUserRecord(
 		Key,
-		*RecordRequest.JsonObject,
+		*RecordRequestCopy.JsonObject,
 		IsPublic,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -142,19 +144,20 @@ void UABCloudSave::ReplaceUserRecord(
 
 void UABCloudSave::ReplaceUserRecordCheckLatest(
 	FString const& Key,
-	FDateTime const LastUpdated,
-	FJsonObjectWrapper RecordRequest,
+	FDateTime const& LastUpdated,
+	FJsonObjectWrapper const& RecordRequest,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->ReplaceUserRecordCheckLatest(
 		Key,
 		LastUpdated,
-		RecordRequest,
+		RecordRequestCopy,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -177,19 +180,20 @@ void UABCloudSave::ReplaceUserRecordCheckLatest(
 void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 	int TryAttempt,
 	FString const& Key,
-	FJsonObjectWrapper RecordRequest,
+	FJsonObjectWrapper const& RecordRequest,
 	FDPayloadJsonObject const& PayloadModifier,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->ReplaceUserRecordCheckLatest(
 		TryAttempt,
 		Key,
-		RecordRequest,
+		RecordRequestCopy,
 		THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>::CreateLambda(
 			[PayloadModifier](FJsonObjectWrapper const& Response)
 			{
@@ -217,19 +221,20 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 
 void UABCloudSave::ReplaceUserRecordCheckLatestWithResponse(
 	FString const& Key,
-	FDateTime const LastUpdated,
-	FJsonObjectWrapper RecordRequest,
+	FDateTime const& LastUpdated,
+	FJsonObjectWrapper const& RecordRequest,
 	FDModelsReplaceUserRecordResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->ReplaceUserRecordCheckLatest(
 		Key,
 		LastUpdated,
-		RecordRequest,
+		RecordRequestCopy,
 		THandler<FAccelByteModelsReplaceUserRecordResponse>::CreateLambda(
 		[OnSuccess](FAccelByteModelsReplaceUserRecordResponse const& Response)
 			{
@@ -252,19 +257,20 @@ void UABCloudSave::ReplaceUserRecordCheckLatestWithResponse(
 void UABCloudSave::ReplaceUserRecordCheckLatestRetryWithResponse(
 	int TryAttempt,
 	FString const& Key,
-	FJsonObjectWrapper RecordRequest,
+	FJsonObjectWrapper const& RecordRequest,
 	FDPayloadJsonObject const& PayloadModifier,
 	FDModelsReplaceUserRecordResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->ReplaceUserRecordCheckLatest(
 		TryAttempt,
 		Key,
-		RecordRequest,
+		RecordRequestCopy,
 		THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>::CreateLambda(
 			[PayloadModifier](FJsonObjectWrapper const& Response)
 			{
@@ -321,17 +327,18 @@ void UABCloudSave::DeleteUserRecord(
 
 void UABCloudSave::SaveGameRecord(
 	FString const& Key,
-	FJsonObjectWrapper RecordRequest,
+	FJsonObjectWrapper const& RecordRequest,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->SaveGameRecord(
 		Key,
-		*RecordRequest.JsonObject,
+		*RecordRequestCopy.JsonObject,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -382,17 +389,18 @@ void UABCloudSave::GetGameRecord(
 
 void UABCloudSave::ReplaceGameRecord(
 	FString const& Key,
-	FJsonObjectWrapper RecordRequest,
+	FJsonObjectWrapper const& RecordRequest,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->ReplaceGameRecord(
 		Key,
-		*RecordRequest.JsonObject,
+		*RecordRequestCopy.JsonObject,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -414,19 +422,20 @@ void UABCloudSave::ReplaceGameRecord(
 
 void UABCloudSave::ReplaceGameRecordCheckLatest(
 	FString const& Key,
-	FDateTime const LastUpdated,
-	FJsonObjectWrapper RecordRequest,
+	FDateTime const& LastUpdated,
+	FJsonObjectWrapper const& RecordRequest,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->ReplaceGameRecordCheckLatest(
 		Key,
 		LastUpdated,
-		RecordRequest,
+		RecordRequestCopy,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -449,19 +458,20 @@ void UABCloudSave::ReplaceGameRecordCheckLatest(
 void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
 	int TryAttempt,
 	FString const& Key,
-	FJsonObjectWrapper RecordRequest,
+	FJsonObjectWrapper const& RecordRequest,
 	FDPayloadJsonObject const& PayloadModifier,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
-	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
+	FJsonObjectWrapper RecordRequestCopy = RecordRequest;
+	RecordRequestCopy.JsonObjectFromString(RecordRequestCopy.JsonString);
 	const auto CloudSavePtr = ApiClientPtr->GetCloudSaveApi().Pin();
 	if (CloudSavePtr.IsValid())
 	{
 		CloudSavePtr->ReplaceGameRecordCheckLatest(
 		TryAttempt,
 		Key,
-		RecordRequest,
+		RecordRequestCopy,
 		THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>::CreateLambda(
 			[PayloadModifier](FJsonObjectWrapper const& Response)
 			{ 

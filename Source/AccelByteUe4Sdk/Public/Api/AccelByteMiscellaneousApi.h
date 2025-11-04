@@ -18,11 +18,22 @@ class Settings;
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API Miscellaneous : public FApiBase, public TSharedFromThis<Miscellaneous, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Miscellaneous 
+	: public FApiBase
+	, public TSharedFromThis<Miscellaneous, ESPMode::ThreadSafe>
 {
 public:
-	Miscellaneous(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Miscellaneous();
+	Miscellaneous(Credentials const& CredentialsRef
+		, Settings const& SettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Miscellaneous(Credentials const& CredentialsRef
+		, Settings const& SettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Miscellaneous();
 
 	/**
 	 * @brief Get server current time.
@@ -39,13 +50,11 @@ private:
 	Miscellaneous() = delete;
 	Miscellaneous(Miscellaneous const&) = delete;
 	Miscellaneous(Miscellaneous&&) = delete;
-
-	AccelByte::FAccelByteTimeManager TimeManager;
 };
 
-typedef TSharedRef<Miscellaneous, ESPMode::ThreadSafe> MiscellaneousRef;
-typedef TSharedPtr<Miscellaneous, ESPMode::ThreadSafe> MiscellaneousPtr;
-typedef TWeakPtr<Miscellaneous, ESPMode::ThreadSafe> MiscellaneousWPtr;
+using MiscellaneousRef = TSharedRef<Miscellaneous, ESPMode::ThreadSafe>;
+using MiscellaneousPtr = TSharedPtr<Miscellaneous, ESPMode::ThreadSafe>;
+using MiscellaneousWPtr = TWeakPtr<Miscellaneous, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

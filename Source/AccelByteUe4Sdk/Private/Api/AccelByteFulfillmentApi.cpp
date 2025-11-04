@@ -4,10 +4,11 @@
 
 #include "Api/AccelByteFulfillmentApi.h"
 #include "Core/AccelByteError.h"
-
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 
 namespace AccelByte
 {
@@ -16,12 +17,22 @@ namespace Api
 Fulfillment::Fulfillment(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-{}
+{
+}
+
+Fulfillment::Fulfillment(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+{
+}
 
 Fulfillment::~Fulfillment()
-{}
+{
+}
 
 FAccelByteTaskWPtr Fulfillment::RedeemCode(FString const& Code
 	, FString const& Region

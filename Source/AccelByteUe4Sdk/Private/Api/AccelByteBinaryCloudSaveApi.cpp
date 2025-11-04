@@ -4,11 +4,12 @@
 
 #include "Api/AccelByteBinaryCloudSaveApi.h"
 #include "Core/AccelByteError.h"
-
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "JsonUtilities.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
+#include "JsonUtilities.h"
 #include "Core/AccelByteUtilities.h"
 
 constexpr int32 UserIdsRequestLimit = 20;
@@ -23,12 +24,22 @@ namespace Api
 BinaryCloudSave::BinaryCloudSave(Credentials const& InCredentialsRef
 	, Settings const& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-{}
+{
+}
+
+BinaryCloudSave::BinaryCloudSave(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+{
+}
 
 BinaryCloudSave::~BinaryCloudSave()
-{}
+{
+}
 	
 FAccelByteTaskWPtr BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 	, FString const& FileType

@@ -18,19 +18,20 @@ void UABServerSessionBrowser::CreateGameSessionPublic(
 	FString const& GameVersion,
 	int32 BotCount,
 	int32 MaxPlayer,
-	FJsonObjectWrapper OtherSettings,
+	FJsonObjectWrapper const& OtherSettings,
 	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
+	FJsonObjectWrapper OtherSettingsCopy = OtherSettings;
+	OtherSettingsCopy.JsonObjectFromString(OtherSettingsCopy.JsonString);
 	ApiClientPtr->ServerSessionBrowser.CreateGameSession(
 		GameMode,
 		GameMapName,
 		GameVersion,
 		BotCount,
 		MaxPlayer,
-		OtherSettings.JsonObject,
+		OtherSettingsCopy.JsonObject,
 		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 			{
@@ -54,12 +55,13 @@ void UABServerSessionBrowser::CreateGameSessionPrivate(
 	int32 MaxPlayer,
 	int32 MaxSpectator,
 	FString const& Password,
-	FJsonObjectWrapper OtherSettings,
+	FJsonObjectWrapper const& OtherSettings,
 	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
+	FJsonObjectWrapper OtherSettingsCopy = OtherSettings;
+	OtherSettingsCopy.JsonObjectFromString(OtherSettingsCopy.JsonString);
 	ApiClientPtr->ServerSessionBrowser.CreateGameSession(
 		GameMode,
 		GameMapName,
@@ -68,7 +70,7 @@ void UABServerSessionBrowser::CreateGameSessionPrivate(
 		MaxPlayer,
 		MaxSpectator,
 		Password,
-		OtherSettings.JsonObject,
+		OtherSettingsCopy.JsonObject,
 		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 			{
@@ -93,12 +95,13 @@ void UABServerSessionBrowser::CreateGameSessionTypeSpecifiedByString(
 	int32 MaxPlayer,
 	int32 MaxSpectator,
 	FString const& Password,
-	FJsonObjectWrapper OtherSettings,
+	FJsonObjectWrapper const& OtherSettings,
 	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
+	FJsonObjectWrapper OtherSettingsCopy = OtherSettings;
+	OtherSettingsCopy.JsonObjectFromString(OtherSettingsCopy.JsonString);
 	ApiClientPtr->ServerSessionBrowser.CreateGameSession(
 		SessionTypeString,
 		GameMode,
@@ -108,7 +111,7 @@ void UABServerSessionBrowser::CreateGameSessionTypeSpecifiedByString(
 		MaxPlayer,
 		MaxSpectator,
 		Password,
-		OtherSettings.JsonObject,
+		OtherSettingsCopy.JsonObject,
 		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 			{
@@ -133,12 +136,13 @@ void UABServerSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 	int32 MaxPlayer,
 	int32 MaxSpectator,
 	FString const& Password,
-	FJsonObjectWrapper OtherSettings,
+	FJsonObjectWrapper const& OtherSettings,
 	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
+	FJsonObjectWrapper OtherSettingsCopy = OtherSettings;
+	OtherSettingsCopy.JsonObjectFromString(OtherSettingsCopy.JsonString);
 	ApiClientPtr->ServerSessionBrowser.CreateGameSession(
 		SessionType,
 		GameMode,
@@ -148,7 +152,7 @@ void UABServerSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 		MaxPlayer,
 		MaxSpectator,
 		Password,
-		OtherSettings.JsonObject,
+		OtherSettingsCopy.JsonObject,
 		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 			[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 			{
@@ -165,13 +169,14 @@ void UABServerSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 }
 
 void UABServerSessionBrowser::CreateGameSessionTypeSpecificByStruct(
-	FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequest,
+	FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequest,
 	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	CreateSessionRequest.Game_session_setting.Settings.JsonObjectFromString(CreateSessionRequest.Game_session_setting.Settings.JsonString);
-	FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequestConst = CreateSessionRequest;
+	FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequestCopy = CreateSessionRequest;
+	CreateSessionRequestCopy.Game_session_setting.Settings.JsonObjectFromString(CreateSessionRequestCopy.Game_session_setting.Settings.JsonString);
+	FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequestConst = CreateSessionRequestCopy;
 	ApiClientPtr->ServerSessionBrowser.CreateGameSession(
 		CreateSessionRequestConst,
 		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(

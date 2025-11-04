@@ -39,7 +39,7 @@ public:
 		FString const& GameVersion,
 		int32 BotCount,
 		int32 MaxPlayer,
-		FJsonObjectWrapper OtherSettings,
+		FJsonObjectWrapper const& OtherSettings,
 		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -53,7 +53,7 @@ public:
 		int32 MaxPlayer,
 		int32 MaxSpectator,
 		FString const& Password,
-		FJsonObjectWrapper OtherSettings,
+		FJsonObjectWrapper const& OtherSettings,
 		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -68,7 +68,7 @@ public:
 		int32 MaxPlayer,
 		int32 MaxSpectator,
 		FString const& Password,
-		FJsonObjectWrapper OtherSettings,
+		FJsonObjectWrapper const& OtherSettings,
 		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
@@ -83,14 +83,14 @@ public:
 		int32 MaxPlayer,
 		int32 MaxSpectator,
 		FString const& Password,
-		FJsonObjectWrapper OtherSettings,
+		FJsonObjectWrapper const& OtherSettings,
 		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser | Api")
 	void CreateGameSessionTypeSpecificByStruct(
-		FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequest,
+		FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequest,
 		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);

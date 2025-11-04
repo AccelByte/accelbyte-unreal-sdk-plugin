@@ -19,13 +19,23 @@ namespace Api
 /**
  * @brief CloudSave API for storing binaries.
  */
-class ACCELBYTEUE4SDK_API BinaryCloudSave : public FApiBase, public TSharedFromThis<BinaryCloudSave, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API BinaryCloudSave 
+	: public FApiBase
+	, public TSharedFromThis<BinaryCloudSave, ESPMode::ThreadSafe>
 {
 public:
-	explicit BinaryCloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~BinaryCloudSave();
+	BinaryCloudSave(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
 
-	
+	BinaryCloudSave(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~BinaryCloudSave();
+		
 	/**
 	 * @brief Save a namespace-level user binary.
 	 * If the binary doesn't exist, it will create the binary save, if already exists, it will append to the existing one.
@@ -310,9 +320,9 @@ private:
 
 };
 
-typedef TSharedRef<BinaryCloudSave, ESPMode::ThreadSafe> BinaryCloudSaveRef;
-typedef TSharedPtr<BinaryCloudSave, ESPMode::ThreadSafe> BinaryCloudSavePtr;
-typedef TWeakPtr<BinaryCloudSave, ESPMode::ThreadSafe> BinaryCloudSaveWPtr;
+using BinaryCloudSaveRef = TSharedRef<BinaryCloudSave, ESPMode::ThreadSafe>;
+using BinaryCloudSavePtr = TSharedPtr<BinaryCloudSave, ESPMode::ThreadSafe>;
+using BinaryCloudSaveWPtr = TWeakPtr<BinaryCloudSave, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

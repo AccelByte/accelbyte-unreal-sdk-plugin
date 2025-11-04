@@ -25,11 +25,22 @@ class ServerSeasonPass;
 /**
  * @brief Season Pass APIs to access Season Pass service. User can obtaining season and claiming rewards.
  */
-class ACCELBYTEUE4SDK_API SeasonPass : public FApiBase, public TSharedFromThis<SeasonPass, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API SeasonPass 
+	: public FApiBase
+	, public TSharedFromThis<SeasonPass, ESPMode::ThreadSafe>
 {
 public:
-	SeasonPass(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~SeasonPass();
+	SeasonPass(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	SeasonPass(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~SeasonPass();
 
 	/**
 	 * @brief Get current active season.
@@ -106,9 +117,9 @@ private:
 	SeasonPass(SeasonPass&&) = delete;
 };
 
-typedef TSharedRef<SeasonPass, ESPMode::ThreadSafe> SeasonPassRef;
-typedef TSharedPtr<SeasonPass, ESPMode::ThreadSafe> SeasonPassPtr;
-typedef TWeakPtr<SeasonPass, ESPMode::ThreadSafe> SeasonPassWPtr;
+using SeasonPassRef = TSharedRef<SeasonPass, ESPMode::ThreadSafe>;
+using SeasonPassPtr = TSharedPtr<SeasonPass, ESPMode::ThreadSafe>;
+using SeasonPassWPtr = TWeakPtr<SeasonPass, ESPMode::ThreadSafe>;
 
 };
 }

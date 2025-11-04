@@ -58,7 +58,7 @@ void UABUser::LoginWithOtherPlatform(EAccelBytePlatformType const PlatformType
 				{
 					OnError.ExecuteIfBound(Code, Message);
 				})
-					, bCreateHeadless);
+			, bCreateHeadless);
 	}
 	else
 	{
@@ -87,7 +87,7 @@ void UABUser::LoginWithOtherPlatformId(FString const& PlatformId
 				{
 					OnError.ExecuteIfBound(Code, Message);
 				})
-					, bCreateHeadless);
+			, bCreateHeadless);
 	}
 	else
 	{
@@ -167,7 +167,7 @@ void UABUser::LoginWithRefreshToken(FDHandler OnSuccess
 	}
 }
 
-void UABUser::TryRelogin(FString PlatformUserID, FDHandler OnSuccess, FDErrorHandler OnError)
+void UABUser::TryRelogin(FString const& PlatformUserID, FDHandler OnSuccess, FDErrorHandler OnError)
 {
 	const auto UserPtr = ApiClientPtr->GetUserApi().Pin();
 	if (UserPtr.IsValid())
@@ -215,7 +215,7 @@ void UABUser::Logout(FDHandler OnSuccess
 	}
 }
 
-void UABUser::LoginByExchangeCodeForToken(FString Code, FDHandler OnSuccess, FDErrorHandler OnError)
+void UABUser::LoginByExchangeCodeForToken(FString const& Code, FDHandler OnSuccess, FDErrorHandler OnError)
 {
 	const auto UserPtr = ApiClientPtr->GetUserApi().Pin();
 	if (UserPtr.IsValid())
@@ -278,7 +278,8 @@ void UABUser::LoginWithOtherPlatformV4(EAccelBytePlatformType PlatformType, FStr
 				[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
 				{
 					OnError.ExecuteIfBound(Code, Message, ErrorInfo);
-				}));
+				})
+			, bCreateHeadless);
 	}
 	else
 	{
@@ -302,7 +303,8 @@ void UABUser::LoginWithOtherPlatformIdV4(FString const& PlatformId, FString cons
 				[OnError](int Code, FString const& Message, const FErrorOAuthInfo& ErrorInfo)
 				{
 					OnError.ExecuteIfBound(Code, Message, ErrorInfo);
-				}));
+				})
+			, bCreateHeadless);
 	}
 	else
 	{
@@ -376,7 +378,7 @@ void UABUser::LoginWithRefreshTokenV4(FDLoginQueueInfoResponse OnSuccess, FDOAut
 	}
 }
 
-void UABUser::TryReloginV4(FString PlatformUserID, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
+void UABUser::TryReloginV4(FString const& PlatformUserID, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
 {
 	const auto UserPtr = ApiClientPtr->GetUserApi().Pin();
 	if (UserPtr.IsValid())
@@ -400,7 +402,7 @@ void UABUser::TryReloginV4(FString PlatformUserID, FDLoginQueueInfoResponse OnSu
 	}
 }
 
-void UABUser::LoginByExchangeCodeForTokenV4(FString Code, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
+void UABUser::LoginByExchangeCodeForTokenV4(FString const& Code, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError)
 {
 	const auto UserPtr = ApiClientPtr->GetUserApi().Pin();
 	if (UserPtr.IsValid())
@@ -776,9 +778,9 @@ void UABUser::SendUpdateEmailVerificationCode(FDHandler OnSuccess
 	}
 }
 
-void UABUser::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest
+void UABUser::UpdateEmail(FUpdateEmailRequest const& UpdateEmailRequest
 	, FDHandler OnSuccess
-	, FDErrorHandler OnError) 
+	, FDErrorHandler OnError)
 {
 	const auto UserPtr = ApiClientPtr->GetUserApi().Pin();
 	if (UserPtr.IsValid())
@@ -801,9 +803,9 @@ void UABUser::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest
 	}
 }
 
-void UABUser::UpdateUser(FUserUpdateRequest UpdateRequest
+void UABUser::UpdateUser(FUserUpdateRequest const& UpdateRequest
 	, FDAccountUserDataResponse OnSuccess
-	, FDErrorHandler OnError) 
+	, FDErrorHandler OnError)
 {
 	const auto UserPtr = ApiClientPtr->GetUserApi().Pin();
 	if (UserPtr.IsValid())

@@ -14,6 +14,7 @@
 #include "Core/AccelByteMessagingSystem.h"
 #include "Models/AccelByteQosModels.h"
 #include "Templates/SharedPointer.h"
+#include "Core/AGS/AccelBytePlatform.h"
 
 namespace AccelByte
 {
@@ -23,11 +24,23 @@ namespace Api
 /**
  * @brief Qos to manage specific QoS (Latencies/Ping) Server(s).
  */
-class ACCELBYTEUE4SDK_API Qos : public TSharedFromThis<Qos, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Qos 
+	: public TSharedFromThis<Qos, ESPMode::ThreadSafe>
 {
 public:
-	Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef, FAccelByteMessagingSystem& InMessagingSystemRef, const QosManagerWPtr QosManagerWeak, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Qos();
+	Qos(Credentials& NewCredentialsRef
+		, const Settings& NewSettingsRef
+		, FAccelByteMessagingSystem& InMessagingSystemRef
+		, const QosManagerWPtr QosManagerWeak
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Qos(Credentials& NewCredentialsRef
+		, const Settings& NewSettingsRef
+		, FAccelByteMessagingSystem& InMessagingSystemRef
+		, const QosManagerWPtr QosManagerWeak
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Qos();
 
 	// Uncopyable and unmovable class
 	Qos(Qos const&) = delete;
@@ -35,7 +48,7 @@ public:
 	Qos& operator=(Qos const&) = delete;
 	Qos& operator=(Qos&&) = delete;
 
-	void SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient);
+	void SetApiClient(TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> InApiClient);
 
 	/**
 	 * @brief Check server latencies (ping) per-region, with optional polling.
@@ -77,7 +90,7 @@ public:
 	/**
 	 * @brief Get cached latencies data
 	 */
-	const TArray<TPair<FString, float>>& GetCachedLatencies();
+	TArray<TPair<FString, float>> GetCachedLatencies();
 
 	/**
 	* @brief Startup module
@@ -95,7 +108,7 @@ private:
 	 * @param OnSuccess
 	 * @param OnError
 	 */
-	void PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServerList
+	void PingRegionsSetLatencies(const TArray<FAccelByteModelsQosServer>& QosServers
 		, const THandler<TArray<TPair<FString, float>>>& OnSuccess
 		, FErrorHandler const& OnError);
 
@@ -138,14 +151,7 @@ private:
 	const Settings& SettingsRef;
 	QosManagerWPtr QosManagerWeak;
 	FAccelByteMessagingSystemWPtr MessagingSystemWPtr;
-	TWeakPtr<FApiClient, ESPMode::ThreadSafe> ApiClient;
-
-	static FRWLock QosServersMtx;
-	static FAccelByteModelsQosServerList QosServers;
-	static FRWLock LatenciesMtx;
-	static TArray<TPair<FString, float>> Latencies;
-	static FRWLock ResolvedAddressesMtx;
-	static TMap<FString, TSharedPtr<FInternetAddr>> ResolvedAddresses;
+	FAccelBytePlatformPtr AccelBytePlatformPtr;
 	
 	static FRWLock PollLatenciesHandleMtx;
 	/**
@@ -173,6 +179,8 @@ private:
 
 	bool CheckQosUpdate(float DeltaTime);
 
+	void ExtractPlatformInfo(TSharedPtr<FAccelByteInstance, ESPMode::ThreadSafe> const& InAccelByteInstance);
+
 private:
 	FCriticalSection StartupMtx;
 	FDelegateHandle LobbyConnectedDelegateHandle;
@@ -183,9 +191,9 @@ private:
 #pragma endregion
 };
 
-typedef TSharedRef<Qos, ESPMode::ThreadSafe> QosRef;
-typedef TSharedPtr<Qos, ESPMode::ThreadSafe> QosPtr;
-typedef TWeakPtr<Qos, ESPMode::ThreadSafe> QosWPtr;
+using QosRef = TSharedRef<Qos, ESPMode::ThreadSafe>;
+using QosPtr = TSharedPtr<Qos, ESPMode::ThreadSafe>;
+using QosWPtr = TWeakPtr<Qos, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

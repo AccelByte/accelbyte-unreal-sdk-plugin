@@ -20,11 +20,22 @@ namespace Api
 /**
  * @brief TurnManager API to manage Qos Server(s).
  */
-class ACCELBYTEUE4SDK_API TurnManager : public FApiBase, public TSharedFromThis<TurnManager, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API TurnManager 
+	: public FApiBase
+	, public TSharedFromThis<TurnManager, ESPMode::ThreadSafe>
 {
 public:
-	TurnManager(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~TurnManager();
+	TurnManager(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	TurnManager(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+	
+	virtual ~TurnManager();
 
 	/**
 	 * @brief Get List of TURN Server(s).
@@ -150,9 +161,9 @@ private:
 	static TArray<TPair<FString, float>> Latencies;
 };
 
-typedef TSharedRef<TurnManager, ESPMode::ThreadSafe> TurnManagerRef;
-typedef TSharedPtr<TurnManager, ESPMode::ThreadSafe> TurnManagerPtr;
-typedef TWeakPtr<TurnManager, ESPMode::ThreadSafe> TurnManagerWPtr;
+using TurnManagerRef = TSharedRef<TurnManager, ESPMode::ThreadSafe>;
+using TurnManagerPtr = TSharedPtr<TurnManager, ESPMode::ThreadSafe>;
+using TurnManagerWPtr = TWeakPtr<TurnManager, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

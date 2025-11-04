@@ -183,13 +183,13 @@ public:
 	void PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyInvite(FPartyInviteRequest Request, FDPartyInviteResponse OnResponse, FDErrorHandler OnError);
+	void PartyInvite(FPartyInviteRequest const& Request, FDPartyInviteResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
 	void PartyJoin(FPartyJoinRequest const& Request, FDPartyJoinResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyReject(FPartyRejectRequest Request, FDPartyRejectResponse OnResponse, FDErrorHandler OnError);
+	void PartyReject(FPartyRejectRequest const& Request, FDPartyRejectResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
 	void PartyKick(FPartyKickRequest const& Request, FDPartyKickResponse OnResponse, FDErrorHandler OnError);

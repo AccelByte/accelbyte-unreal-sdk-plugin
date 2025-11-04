@@ -61,10 +61,10 @@ public:
 	void LoginWithRefreshToken(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void TryRelogin(FString PlatformUserID, FDHandler OnSuccess, FDErrorHandler OnError);
+	void TryRelogin(FString const& PlatformUserID, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void LoginByExchangeCodeForToken(FString Code, FDHandler OnSuccess, FDErrorHandler OnError);
+	void LoginByExchangeCodeForToken(FString const& Code, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void LoginWithUsernameV4(FString const& Username, FString const& Password, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
@@ -85,10 +85,10 @@ public:
 	void LoginWithRefreshTokenV4(FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void TryReloginV4(FString PlatformUserID, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
+	void TryReloginV4(FString const& PlatformUserID, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void LoginByExchangeCodeForTokenV4(FString Code, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
+	void LoginByExchangeCodeForTokenV4(FString const& Code, FDLoginQueueInfoResponse OnSuccess, FDOAuthErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	void Logout(FDHandler OnSuccess, FDErrorHandler OnError);
@@ -141,10 +141,10 @@ public:
 	void SendUpdateEmailVerificationCode(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void UpdateEmail(FUpdateEmailRequest UpdateEmailRequest, FDHandler OnSuccess, FDErrorHandler OnError);
+	void UpdateEmail(FUpdateEmailRequest const& UpdateEmailRequest, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	void UpdateUser(FUserUpdateRequest UpdateRequest, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
+	void UpdateUser(FUserUpdateRequest const& UpdateRequest, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
 
 //Platform Link
 public:

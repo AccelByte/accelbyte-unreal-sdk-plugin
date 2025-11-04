@@ -20,11 +20,22 @@ namespace Api
 /**
  * @brief Provide APIs to access Inventory service.
  */
-class ACCELBYTEUE4SDK_API Inventory : public FApiBase, public TSharedFromThis<Inventory, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Inventory 
+	: public FApiBase
+	, public TSharedFromThis<Inventory, ESPMode::ThreadSafe>
 {
 public:
-	Inventory(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Inventory();
+	Inventory(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Inventory(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Inventory();
 
 #pragma region V1 Inventory
 
@@ -220,9 +231,9 @@ private:
 
 };
 
-typedef TSharedRef<Inventory, ESPMode::ThreadSafe> InventoryRef;
-typedef TSharedPtr<Inventory, ESPMode::ThreadSafe> InventoryPtr;
-typedef TWeakPtr<Inventory, ESPMode::ThreadSafe> InventoryWPtr;
+using InventoryRef = TSharedRef<Inventory, ESPMode::ThreadSafe>;
+using InventoryPtr = TSharedPtr<Inventory, ESPMode::ThreadSafe>;
+using InventoryWPtr = TWeakPtr<Inventory, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

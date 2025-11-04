@@ -1,4 +1,4 @@
-// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 - 2025 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -64,13 +64,45 @@ namespace AccelByte
 		return bIsSuccess;
 	}
 
+	// Helper to define safe URL characters (RFC 3986 unreserved set)
+	bool FHttpFormData::IsUrlSafeChar(uint8 Char)
+	{
+		return
+			(Char >= 'A' && Char <= 'Z') ||
+			(Char >= 'a' && Char <= 'z') ||
+			(Char >= '0' && Char <= '9') ||
+			(Char == '-') || (Char == '_') ||
+			(Char == '.') || (Char == '~');
+	}
+
 	FString FHttpFormData::CheckThenUrlEncode(FString const& InValue)
 	{
-		TArray<uint8> KeyBytes;
-		int32 const Length = InValue.Len();
-		KeyBytes.AddUninitialized(Length);
-		StringToBytes(InValue, KeyBytes.GetData(), Length);
-		return FGenericPlatformHttp::IsURLEncoded(KeyBytes) ? InValue : FGenericPlatformHttp::UrlEncode(InValue);
+		FTCHARToUTF8 UTF8Converter(*InValue);
+		const ANSICHAR* UTF8Ptr = UTF8Converter.Get();
+		int32 UTF8Length = UTF8Converter.Length();
+
+		TArray<uint8> UTF8Bytes;
+		UTF8Bytes.Append(reinterpret_cast<const uint8*>(UTF8Ptr), UTF8Length);
+
+		if (FGenericPlatformHttp::IsURLEncoded(UTF8Bytes))
+		{
+			return InValue;
+		}
+
+		FString Encoded;
+		for (uint8 Byte : UTF8Bytes)
+		{
+			if (FHttpFormData::IsUrlSafeChar(Byte))
+			{
+				Encoded += static_cast<TCHAR>(Byte);
+			}
+			else
+			{
+				Encoded += FString::Printf(TEXT("%%%02X"), Byte);
+			}
+		}
+
+		return Encoded;
 	}
 
 	FString FHttpFormData::Serialize(TMultiMap<FString, FString> const& InFormData, bool bShouldUrlEncode)

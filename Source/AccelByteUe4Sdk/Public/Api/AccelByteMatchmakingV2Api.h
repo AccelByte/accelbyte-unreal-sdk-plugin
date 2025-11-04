@@ -18,11 +18,22 @@ namespace AccelByte
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API MatchmakingV2 : public FApiBase, public TSharedFromThis<MatchmakingV2, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API MatchmakingV2 
+	: public FApiBase
+	, public TSharedFromThis<MatchmakingV2, ESPMode::ThreadSafe>
 {
 public:
-	MatchmakingV2(Credentials const& InCredentialsRef, Settings const& InSettingRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~MatchmakingV2();
+	MatchmakingV2(Credentials const& InCredentialsRef
+		, Settings const& InSettingRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	MatchmakingV2(Credentials const& InCredentialsRef
+		, Settings const& InSettingRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~MatchmakingV2();
 
 	/**
 	 * @brief [DEPRECATED] Create a matchmaking ticket, this will start matchmaking process.
@@ -119,9 +130,9 @@ private:
 	
 };
 
-typedef TSharedRef<MatchmakingV2, ESPMode::ThreadSafe> MatchmakingV2Ref;
-typedef TSharedPtr<MatchmakingV2, ESPMode::ThreadSafe> MatchmakingV2Ptr;
-typedef TWeakPtr<MatchmakingV2, ESPMode::ThreadSafe> MatchmakingV2WPtr;
+using MatchmakingV2Ref = TSharedRef<MatchmakingV2, ESPMode::ThreadSafe>;
+using MatchmakingV2Ptr = TSharedPtr<MatchmakingV2, ESPMode::ThreadSafe>;
+using MatchmakingV2WPtr = TWeakPtr<MatchmakingV2, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

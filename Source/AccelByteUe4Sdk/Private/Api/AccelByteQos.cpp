@@ -3,10 +3,15 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteQos.h"
+#include "Core/AccelByteError.h"
+#include "Core/AccelByteReport.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
 #include "Icmp.h"
 #include "Networking.h"
 #include "Api/AccelByteQosManagerApi.h"
-
 #include "Core/Ping/AccelBytePing.h"
 
 namespace AccelByte
@@ -15,20 +20,14 @@ namespace Api
 {
 static constexpr float AccelByteMaxPing = 9999.0f;
 
-FRWLock Qos::QosServersMtx;
-FRWLock Qos::LatenciesMtx;
-FRWLock Qos::ResolvedAddressesMtx;
 FRWLock Qos::PollLatenciesHandleMtx;
-FAccelByteModelsQosServerList Qos::QosServers = {};
-TArray<TPair<FString, float>> Qos::Latencies = {};
-TMap<FString, TSharedPtr<FInternetAddr>> Qos::ResolvedAddresses = {};
 FDelegateHandleAlias Qos::PollLatenciesHandle;
 
 Qos::Qos(Credentials& InCredentialsRef
 	, const Settings& InSettingsRef
 	, FAccelByteMessagingSystem& InMessagingSystemRef
 	, const QosManagerWPtr InQosManagerWeak
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: CredentialsRef{InCredentialsRef.AsShared()}
 	, SettingsRef{InSettingsRef}
 	, QosManagerWeak{InQosManagerWeak}
@@ -37,8 +36,30 @@ Qos::Qos(Credentials& InCredentialsRef
 #else
 	, MessagingSystemWPtr{InMessagingSystemRef.AsWeak()}
 #endif
-	, ApiClient(InApiClient)
-{}
+{
+	if (InApiClient.IsValid())
+	{
+		ExtractPlatformInfo(InApiClient->GetAccelByteInstance().Pin());
+	}
+}
+
+
+Qos::Qos(Credentials& InCredentialsRef
+	, const Settings& InSettingsRef
+	, FAccelByteMessagingSystem& InMessagingSystemRef
+	, const QosManagerWPtr InQosManagerWeak
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: CredentialsRef{ InCredentialsRef.AsShared() }
+	, SettingsRef{ InSettingsRef }
+	, QosManagerWeak{ InQosManagerWeak }
+#if ENGINE_MAJOR_VERSION < 5
+	, MessagingSystemWPtr{ InMessagingSystemRef.AsShared() }
+#else
+	, MessagingSystemWPtr{ InMessagingSystemRef.AsWeak() }
+#endif
+	, AccelBytePlatformPtr(InAccelBytePlatform)
+{
+}
 
 Qos::~Qos()
 {
@@ -55,9 +76,12 @@ Qos::~Qos()
 	QosUpdateCheckerTickerDelegate.Unbind();
 }
 
-void Qos::SetApiClient(TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+void Qos::SetApiClient(TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> InApiClient)
 {
-	ApiClient = InApiClient;
+	if (InApiClient.IsValid())
+	{
+		ExtractPlatformInfo(InApiClient->GetAccelByteInstance().Pin());
+	}
 }
 
 void Qos::GetServerLatencies(const THandler<TArray<TPair<FString, float>>>& OnSuccess
@@ -94,7 +118,7 @@ void Qos::GetActiveServerLatencies(const THandler<TArray<TPair<FString, float>>>
 
 			if (Result.Servers.Num() > 0)
 			{
-				QosApi->PingRegionsSetLatencies(ResolvedServerList, OnSuccess, OnError);
+				QosApi->PingRegionsSetLatencies(ResolvedServerList.Servers, OnSuccess, OnError);
 			}
 			else
 			{
@@ -117,34 +141,36 @@ void Qos::CallGetQosServers(const bool bPingRegionsOnSuccess
 	
 	QosWPtr QosWeak = AsShared();
 	QosManagerPtr->GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
-		[QosWeak, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError](const FAccelByteModelsQosServerList Result)
+		[QosWeak, bPingRegionsOnSuccess, OnPingRegionsSuccess, OnError](FAccelByteModelsQosServerList Result)
 		{
 			const auto QosApi = QosWeak.Pin();
 			if (QosApi.IsValid())
 			{
+				for (FAccelByteModelsQosServer& Server : Result.Servers)
 				{
-					FWriteScopeLock WriteLock(Qos::QosServersMtx);
-					Qos::QosServers = Result; // Cache for the session
-					for (FAccelByteModelsQosServer& Server : Qos::QosServers.Servers)
+					QosApi->ResolveQosServerAddress(Server);
+				}
+
+				if (QosApi->AccelBytePlatformPtr.IsValid())
+				{
+					QosApi->AccelBytePlatformPtr->SetQosServers(Result);
+
+					if (bPingRegionsOnSuccess)
 					{
-						QosApi->ResolveQosServerAddress(Server);
+						auto QosServers = QosApi->AccelBytePlatformPtr->GetQosServers();
+						QosApi->PingRegionsSetLatencies(QosServers, OnPingRegionsSuccess, OnError);
 					}
-				}
-				if (bPingRegionsOnSuccess)
-				{
-					FReadScopeLock ReadLock(Qos::QosServersMtx);
-					QosApi->PingRegionsSetLatencies(Qos::QosServers, OnPingRegionsSuccess, OnError);
-				}
-				else
-				{
-					FReadScopeLock ReadLock(Qos::LatenciesMtx);
-					OnPingRegionsSuccess.ExecuteIfBound(Qos::Latencies); // Latencies == Nullable until PingRegionsSetLatencies called once+.
+					else
+					{
+						auto Latencies = QosApi->AccelBytePlatformPtr->GetLatencies();
+						OnPingRegionsSuccess.ExecuteIfBound(Latencies); // Latencies == Nullable until PingRegionsSetLatencies called once+.
+					}
 				}
 			}
 		}), OnError);
 }
 
-void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServerList
+void Qos::PingRegionsSetLatencies(const TArray<FAccelByteModelsQosServer>& QosServers
 	, const THandler<TArray<TPair<FString, float>>>& OnSuccess
 	, const FErrorHandler& OnError)
 {
@@ -154,14 +180,14 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 
 	TSharedPtr<FRWLock, ESPMode::ThreadSafe> PingResultMtx = MakeShared<FRWLock, ESPMode::ThreadSafe>();
 	TSharedPtr<TArray<TPair<FString, float>>, ESPMode::ThreadSafe> PingResult = MakeShared<TArray<TPair<FString, float>>, ESPMode::ThreadSafe>();
-	TArray<FAccelByteModelsQosServer> Servers = QosServerList.Servers;
+	TArray<FAccelByteModelsQosServer> Servers = QosServers;
 	
 	Servers.RemoveAllSwap([this](const FAccelByteModelsQosServer& Server) 
 		{
 			bool ResolvedAddrPresent = false;
+			if (AccelBytePlatformPtr.IsValid())
 			{
-				FReadScopeLock Lock(ResolvedAddressesMtx);
-				ResolvedAddrPresent = Qos::ResolvedAddresses.Contains(Server.Ip);
+				ResolvedAddrPresent = AccelBytePlatformPtr->IsAddressResolved(Server.Ip);
 			}
 			return !ResolvedAddrPresent || Server.ResolvedIp.IsEmpty();
 		});
@@ -195,29 +221,33 @@ void Qos::PingRegionsSetLatencies(const FAccelByteModelsQosServerList& QosServer
 							PingResult->Emplace(TPair<FString, float>(Region, AccelByteMaxPing));
 						}
 					}
-					if(PingResult->Num() == ServersCount)
+
+					auto QosApi = QosWeak.Pin();
+					if (QosApi.IsValid() && PingResult->Num() == ServersCount)
 					{
-						// When all server pinged
+						if (QosApi->AccelBytePlatformPtr.IsValid())
 						{
-							FWriteScopeLock WriteLock(Qos::LatenciesMtx);
-							Qos::Latencies = *PingResult;
-						}
-						// If the lowest ping == AccelByteMaxPing, that means all ping attempts failed
-						PingResult->Sort([](const auto& A, const auto& B){
-							return A.Value > B.Value;
-						});
-						if (PingResult->Num() > 0 && PingResult->Last().Value != AccelByteMaxPing)
-						{
-							OnSuccess.ExecuteIfBound(*PingResult);
-							auto Qos = QosWeak.Pin();
-							if(Qos.IsValid())
+							// If the lowest ping == AccelByteMaxPing, that means all ping attempts failed
+							PingResult->Sort([](const auto& A, const auto& B) {
+									return A.Value > B.Value;
+								});
+
+							// When all server pinged
+							QosApi->AccelBytePlatformPtr->SetLatencies(*PingResult);
+
+							if (PingResult->Num() > 0 && PingResult->Last().Value != AccelByteMaxPing)
 							{
-								Qos->bQosUpdated.store(true, std::memory_order_release);
+								OnSuccess.ExecuteIfBound(*PingResult);
+								QosApi->bQosUpdated.store(true, std::memory_order_release);
+							}
+							else
+							{
+								OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to ping all servers"));
 							}
 						}
 						else
 						{
-							OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to ping all servers"));
+							OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Failed to ping due to invalid AccelBytePlatform"));
 						}
 					}
 				}));
@@ -250,10 +280,14 @@ void Qos::InitGetLatenciesScheduler(float LatencyPollIntervalSecs)
 		[QosWeak](float DeltaTime)
 		{
 			const auto QosApi = QosWeak.Pin();
+
 			if (QosApi.IsValid())
 			{
-				FReadScopeLock ReadLock(Qos::QosServersMtx);
-				QosApi->PingRegionsSetLatencies(Qos::QosServers, nullptr, nullptr);
+				if (QosApi->AccelBytePlatformPtr.IsValid())
+				{
+					auto QosServers = QosApi->AccelBytePlatformPtr->GetQosServers();
+					QosApi->PingRegionsSetLatencies(QosServers, nullptr, nullptr);
+				}
 			}
 			return true;
 			
@@ -277,8 +311,10 @@ void Qos::StartLatencyPollers()
 void Qos::StopLatencyPollers()
 {
 	RemovePollerFromCoreTicker();
-	FWriteScopeLock Lock(Qos::LatenciesMtx);
-	Qos::Latencies.Empty();
+	if (AccelBytePlatformPtr.IsValid())
+	{
+		AccelBytePlatformPtr->ClearLatencies();
+	}
 }
 
 bool Qos::AreLatencyPollersActive() const noexcept
@@ -287,10 +323,14 @@ bool Qos::AreLatencyPollersActive() const noexcept
 	return PollLatenciesHandle.IsValid();
 }
 
-const TArray<TPair<FString, float>>& Qos::GetCachedLatencies()
+TArray<TPair<FString, float>> Qos::GetCachedLatencies()
 {
-	FReadScopeLock Lock(Qos::LatenciesMtx);
-	return Qos::Latencies;
+	TArray<TPair<FString, float>> Latencies;
+	if (AccelBytePlatformPtr.IsValid())
+	{
+		Latencies = AccelBytePlatformPtr->GetLatencies();
+	}
+	return Latencies;
 }
 
 void Qos::Startup()
@@ -314,20 +354,18 @@ void Qos::Startup()
 void Qos::SendQosLatenciesMessage()
 {
 	FAccelByteModelsQosRegionLatencies RegionLatencies;
+	auto Latencies = GetCachedLatencies();
+	if (Latencies.Num() <= 0)
 	{
-		FReadScopeLock ReadLock(Qos::LatenciesMtx);
-		if (Qos::Latencies.Num() <= 0)
-		{
-			return;
-		}
-		for (const auto& Latency : Qos::Latencies)
-		{
-			FAccelByteModelsQosRegionLatency RegionLatency;
-			RegionLatency.Region = Latency.Key;
-			RegionLatency.Latency = Latency.Value;
+		return;
+	}
+	for (const auto& Latency : Latencies)
+	{
+		FAccelByteModelsQosRegionLatency RegionLatency;
+		RegionLatency.Region = Latency.Key;
+		RegionLatency.Latency = Latency.Value;
 
-			RegionLatencies.Data.Add(RegionLatency);
-		}
+		RegionLatencies.Data.Add(RegionLatency);
 	}
 	auto MessagingSystemPtr = MessagingSystemWPtr.Pin();
 	if (MessagingSystemPtr.IsValid())
@@ -364,10 +402,10 @@ bool Qos::ResolveQosServerAddress(FAccelByteModelsQosServer& OutServer)
 	{
 		return false;
 	}
-	
+
+	if (AccelBytePlatformPtr.IsValid())
 	{
-		FWriteScopeLock WriteLock(ResolvedAddressesMtx);
-		if (!Qos::ResolvedAddresses.Contains(OutServer.Ip))
+		if (!AccelBytePlatformPtr->IsAddressResolved(OutServer.Ip))
 		{
 			TSharedPtr<FInternetAddr> ServerAddress = SocketSubsystem->CreateInternetAddr();
 			if (!ServerAddress.IsValid())
@@ -403,13 +441,22 @@ bool Qos::ResolveQosServerAddress(FAccelByteModelsQosServer& OutServer)
 				}
 			}
 			ServerAddress->SetPort(OutServer.Port);
-			Qos::ResolvedAddresses.Emplace(OutServer.Ip, ServerAddress);
+			AccelBytePlatformPtr->SetResolvedAddress(OutServer.Ip, ServerAddress);
 		}
+
+		OutServer.ResolvedIp = AccelBytePlatformPtr->GetResolvedAddress(OutServer.Ip)->ToString(false);
+		return true;
 	}
-	FReadScopeLock ReadLock(ResolvedAddressesMtx);
-	OutServer.ResolvedIp = Qos::ResolvedAddresses[OutServer.Ip]->ToString(false);
 	
-	return true;
+	return false;
+}
+
+void Qos::ExtractPlatformInfo(TSharedPtr<FAccelByteInstance, ESPMode::ThreadSafe> const& InAccelByteInstance)
+{
+	if (InAccelByteInstance.IsValid())
+	{
+		AccelBytePlatformPtr = InAccelByteInstance->GetAccelBytePlatform();
+	}
 }
 } // Namespace Api
 } // Namespace AccelByte

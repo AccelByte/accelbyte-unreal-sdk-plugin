@@ -20,11 +20,22 @@ namespace Api
 /**
  * @brief Wallet API for buying things from the online store; a wallet can be a virtual or real currency.
  */
-class ACCELBYTEUE4SDK_API Wallet : public FApiBase, public TSharedFromThis<Wallet, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Wallet 
+	: public FApiBase
+	, public TSharedFromThis<Wallet, ESPMode::ThreadSafe>
 {
 public:
-	Wallet(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Wallet();
+	Wallet(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Wallet(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Wallet();
 
 	/**
 	 * @brief Get user's wallet information for a specific currency code.
@@ -75,9 +86,9 @@ private:
 	Wallet(Wallet&&) = delete;
 };
 
-typedef TSharedRef<Wallet, ESPMode::ThreadSafe> WalletRef;
-typedef TSharedPtr<Wallet, ESPMode::ThreadSafe> WalletPtr;
-typedef TWeakPtr<Wallet, ESPMode::ThreadSafe> WalletWPtr;
+using WalletRef = TSharedRef<Wallet, ESPMode::ThreadSafe>;
+using WalletPtr = TSharedPtr<Wallet, ESPMode::ThreadSafe>;
+using WalletWPtr = TWeakPtr<Wallet, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

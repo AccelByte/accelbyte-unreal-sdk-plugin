@@ -21,32 +21,39 @@ namespace AccelByte
 
 	BaseCredentials::~BaseCredentials()
 	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
+		FWriteScopeLock WriteLock(TokenRefreshedEventMtx);
 		TokenRefreshedEvent.Clear();
 	}
 
 	void BaseCredentials::ForgetAll()
 	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
-		AuthToken = {};
-		ExpireDuration = 0.0f;
-		RefreshTime = 0.0f;
-		ExpireTime = 0.0f;
-		RefreshWindow = 0.0f;
-		RefreshBackoff = 0.0f;
-		SessionState = ESessionState::Invalid;
+		{
+			FWriteScopeLock WriteLock(AuthTokenMtx);		
+			AuthToken = {};
+		}
+		ExpireDuration.store(0.0f, std::memory_order_release);
+		RefreshTime.store(0.0f, std::memory_order_release);
+		ExpireTime.store(0.0f, std::memory_order_release);
+		RefreshWindow.store(0.0f, std::memory_order_release);
+		RefreshBackoff.store(0.0f, std::memory_order_release);
+		SessionState.store(ESessionState::Invalid, std::memory_order_release);
 	}
 
 	void BaseCredentials::SetClientCredentials(const FString& InClientId, const FString& InClientSecret)
 	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
-		ClientId = InClientId;
-		ClientSecret = InClientSecret;
+		{
+			FWriteScopeLock WriteLock(ClientIdMtx);
+			ClientId = InClientId;
+		}
+		{
+			FWriteScopeLock WriteLock(ClientSecretMtx);
+			ClientSecret = InClientSecret;
+		}
 	}
 
 	BaseCredentials::FTokenRefreshedEvent& BaseCredentials::OnTokenRefreshed()
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(TokenRefreshedEventMtx);
 		return TokenRefreshedEvent;
 	}
 
@@ -57,8 +64,7 @@ namespace AccelByte
 
 	void BaseCredentials::Shutdown()
 	{
-		FWriteScopeLock WriteLock(DelegateLock);
-
+		FWriteScopeLock WriteLock(PollRefreshTokenHandleMtx);
 		if (PollRefreshTokenHandle.IsValid())
 		{
 			// Core ticker by this point in engine shutdown has already been torn down - only remove ticker if this is not an engine shutdown
@@ -72,43 +78,42 @@ namespace AccelByte
 
 	const FString& BaseCredentials::GetOAuthClientId() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(ClientIdMtx);
 		return ClientId;
 	}
 
 	const FString& BaseCredentials::GetOAuthClientSecret() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(ClientSecretMtx);
 		return ClientSecret;
 	}
 
 	const FOauth2Token& BaseCredentials::GetAuthToken() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken;
 	}
 
 	const FString& BaseCredentials::GetAccessToken() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Access_token;
 	}
 
 	const FString& BaseCredentials::GetNamespace() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Namespace;
 	}
 
 	BaseCredentials::ESessionState BaseCredentials::GetSessionState() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
-		return SessionState;
+		return SessionState.load(std::memory_order_acquire);
 	}
 
 	const FString& BaseCredentials::GetUserId() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.User_id;
 	}
 
@@ -116,8 +121,7 @@ namespace AccelByte
 	{
 		FString const AccessToken = GetAccessToken();
 		
-		FReadScopeLock ReadLock(CredentialAccessLock);
-		if (SessionState == ESessionState::Valid)
+		if (SessionState.load(std::memory_order_acquire) == ESessionState::Valid)
 		{
 			if(!AccessToken.IsEmpty())
 			{
@@ -131,43 +135,43 @@ namespace AccelByte
 
 	const FErrorOAuthInfo& BaseCredentials::GetErrorOAuth() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(ErrorOAuthMtx);
 		return ErrorOAuth;
 	}
 
 	void BaseCredentials::SetErrorOAuth(const FErrorOAuthInfo& NewErrorOAuthInfo)
 	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
+		FWriteScopeLock WriteLock(ErrorOAuthMtx);
 		ErrorOAuth = NewErrorOAuthInfo;
 	}
 
 	FString BaseCredentials::GetRefreshToken() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Refresh_token;
 	}
 
 	FString BaseCredentials::GetPlatformUserId() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Platform_user_id;
 	}
 
 	FString BaseCredentials::GetSimultaneousPlatformId() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Simultaneous_platform_id;
 	}
 
 	FString BaseCredentials::GetSimultaneousPlatformUserId() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Simultaneous_platform_user_id;
 	}
 
 	FString BaseCredentials::GetSimultaneousPlatformUserIdByPlatformName(const FString& PlatformName) const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		if (AuthToken.Simultaneous_platform_id.Contains(PlatformName))
 		{
 			return AuthToken.Simultaneous_platform_user_id;
@@ -180,13 +184,13 @@ namespace AccelByte
 
 	FString BaseCredentials::GetDisplayName() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Display_name;
 	}
 
 	FString BaseCredentials::GetUniqueDisplayName() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(AuthTokenMtx);
 		if (!AuthToken.Unique_display_name.IsEmpty())
 		{
 			return AuthToken.Unique_display_name;
@@ -196,7 +200,7 @@ namespace AccelByte
 
 	FString BaseCredentials::GetLinkingToken() const
 	{
-		FReadScopeLock ReadLock(CredentialAccessLock);
+		FReadScopeLock ReadLock(ErrorOAuthMtx);
 		return ErrorOAuth.LinkingToken;
 	}
 
@@ -214,10 +218,10 @@ namespace AccelByte
 		}
 
 		{
-			FWriteScopeLock WriteLock(CredentialAccessLock);
+			FWriteScopeLock WriteLock(AuthTokenMtx);
 			AuthToken = InAuthToken;
-			ExpireDuration = AuthToken.Expires_in;
 		}
+		ExpireDuration.store(AuthToken.Expires_in, std::memory_order_release);
 
 		SetSessionState(ESessionState::Valid);
 
@@ -227,31 +231,29 @@ namespace AccelByte
 
 	void BaseCredentials::CalculateBackoffRetry(float CurrentTime)
 	{
-		RefreshWindow = ExpireDuration * GetRefreshWindowPercentage();
+		double ExpireDurationBuf = ExpireDuration.load(std::memory_order_acquire); 
+		double RefreshWindowBuf = ExpireDurationBuf * GetRefreshWindowPercentage();
 
 		double MinWindowTime = GetMinRefreshWindow();
 		double MaxWindowTime = GetMaxRefreshWindow();
-		if (RefreshWindow <= MinWindowTime)
+		if (RefreshWindowBuf <= MinWindowTime)
 		{
-			RefreshWindow = MinWindowTime;
+			RefreshWindowBuf = MinWindowTime;
 		}
-		else if (RefreshWindow >= MaxWindowTime)
+		else if (RefreshWindowBuf >= MaxWindowTime)
 		{
-			RefreshWindow = MaxWindowTime;
+			RefreshWindowBuf = MaxWindowTime;
 		}
 
-		ExpireTime = CurrentTime + ExpireDuration;
-		RefreshTime = ExpireTime - RefreshWindow;
-		RefreshBackoff = RefreshWindow * InitialBackoffPercentage;
+		ExpireTime.store(CurrentTime + ExpireDurationBuf, std::memory_order_release);
+		RefreshTime.store(ExpireTime.load(std::memory_order_acquire) - RefreshWindowBuf, std::memory_order_release);
+		RefreshBackoff.store(RefreshWindowBuf * InitialBackoffPercentage, std::memory_order_release);
+		RefreshWindow.store(RefreshWindowBuf, std::memory_order_release);
 	}
 	
 	void BaseCredentials::PollRefreshToken(double CurrentTime)
 	{
-		ESessionState CurrentState;
-		{
-			FReadScopeLock ReadLock(CredentialAccessLock);
-			CurrentState = SessionState;
-		}
+		ESessionState CurrentState = SessionState.load(std::memory_order_acquire);
 #ifdef ACCELBYTE_ACTIVATE_PROFILER
 		TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("AccelBytePollRefreshToken"));
 #endif
@@ -260,7 +262,7 @@ namespace AccelByte
 		case ESessionState::Expired:
 		case ESessionState::Rejected:
 		case ESessionState::Valid:
-			if (RefreshTime <= CurrentTime)
+			if (RefreshTime.load(std::memory_order_acquire) <= CurrentTime)
 			{
 				SetSessionState(ESessionState::Refreshing);
 				SendRefreshToken();
@@ -275,25 +277,30 @@ namespace AccelByte
 
 	void BaseCredentials::ScheduleRefreshToken(double NextRefreshTime)
 	{
-		RefreshTime = NextRefreshTime;
+		double RefreshTimeBuf = NextRefreshTime;
+		double ExpireTimeBuf = ExpireTime.load(std::memory_order_acquire);
 
-		if (RefreshTime > ExpireTime)
+		if (RefreshTimeBuf > ExpireTimeBuf)
 		{
-			RefreshTime = ExpireTime.load();
+			RefreshTime.store(ExpireTimeBuf, std::memory_order_release);
 		}
-
+		else
+		{
+			RefreshTime.store(RefreshTimeBuf, std::memory_order_release);
+		}
 		SetSessionState(ESessionState::Expired);
 	}
 
 	void BaseCredentials::CalculateNextRefreshToken()
 	{
 		double CurrentTime = FPlatformTime::Seconds();
-		double NextRefreshTime = CurrentTime + RefreshBackoff;
-
-		if (NextRefreshTime < ExpireTime + GetExpireTimeBuffer())
+		double RefreshBackoffBuf = RefreshBackoff.load(std::memory_order_acquire);
+		double NextRefreshTime = CurrentTime + RefreshBackoffBuf;
+		if (NextRefreshTime < ExpireTime.load(std::memory_order_acquire) + GetExpireTimeBuffer())
 		{
 			ScheduleRefreshToken(NextRefreshTime);
-			RefreshBackoff = RefreshBackoff * BackoffMultiplier;
+			RefreshBackoffBuf = RefreshBackoffBuf * BackoffMultiplier;
+			RefreshBackoff.store(RefreshBackoffBuf, std::memory_order_release);
 		}
 		else
 		{
@@ -303,8 +310,7 @@ namespace AccelByte
 
 	void BaseCredentials::SetSessionState(ESessionState NewState)
 	{
-		FWriteScopeLock WriteLock(CredentialAccessLock);
-		SessionState = NewState;
+		SessionState.store(NewState, std::memory_order_release);
 	}
 
 	double BaseCredentials::GetMinExpireDuration() const
@@ -334,47 +340,47 @@ namespace AccelByte
 
 	double BaseCredentials::GetExpireTime() const
 	{
-		return ExpireTime;
+		return ExpireTime.load(std::memory_order_acquire);
 	}
 
 	void BaseCredentials::SetExpireTime(double InExpireTime)
 	{
-		ExpireTime = InExpireTime;
+		ExpireTime.store(InExpireTime, std::memory_order_release);
 	}
 
 	double BaseCredentials::GetRefreshTime() const
 	{
-		return RefreshTime;
+		return RefreshTime.load(std::memory_order_acquire);
 	}
 
 	void BaseCredentials::SetRefreshTime(double InRefreshTime)
 	{
-		RefreshTime = InRefreshTime;
+		RefreshTime.store(InRefreshTime, std::memory_order_release);
 	}
 
 	double BaseCredentials::GetExpireDuration() const
 	{
-		return ExpireDuration;
+		return ExpireDuration.load(std::memory_order_acquire);
 	}
 
 	void BaseCredentials::SetExpireDuration(double InExpireDuration)
 	{
-		ExpireDuration = InExpireDuration;
+		ExpireDuration.store(InExpireDuration, std::memory_order_release);
 	}
 
 	double BaseCredentials::GetRefreshWindow() const
 	{
-		return RefreshWindow;
+		return RefreshWindow.load(std::memory_order_acquire);
 	}
 
 	double BaseCredentials::GetRefreshBackoffTime() const
 	{
-		return RefreshBackoff;
+		return RefreshBackoff.load(std::memory_order_acquire);
 	}
 
 	void BaseCredentials::SetTickerDelegate(FTickerDelegate const& InDelegate)
 	{
-		FWriteScopeLock WriteLock(DelegateLock);
+		FWriteScopeLock WriteLock(PollRefreshTokenHandleMtx);
 		if (!PollRefreshTokenHandle.IsValid())
 		{
 			PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(InDelegate, 0.2f);

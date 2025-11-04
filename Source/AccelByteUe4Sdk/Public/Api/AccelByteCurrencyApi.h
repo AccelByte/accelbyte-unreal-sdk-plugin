@@ -20,12 +20,22 @@ namespace Api
 /**
  * @brief Currency API for getting information from Currency
  */
-class ACCELBYTEUE4SDK_API Currency : public FApiBase, public TSharedFromThis<Currency, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Currency 
+	: public FApiBase
+	, public TSharedFromThis<Currency, ESPMode::ThreadSafe>
 {
 public:
-	// Currency(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
-	Currency(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Currency();
+	Currency(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Currency(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Currency();
 
 	/**
 	 * @brief Get currency list information for a specific namespace.
@@ -48,9 +58,9 @@ private:
 	Currency(Currency&&) = delete;
 };
 
-typedef TSharedRef<Currency, ESPMode::ThreadSafe> CurrencyRef;
-typedef TSharedPtr<Currency, ESPMode::ThreadSafe> CurrencyPtr;
-typedef TWeakPtr<Currency, ESPMode::ThreadSafe> CurrencyWPtr;
+using CurrencyRef = TSharedRef<Currency, ESPMode::ThreadSafe>;
+using CurrencyPtr = TSharedPtr<Currency, ESPMode::ThreadSafe>;
+using CurrencyWPtr = TWeakPtr<Currency, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

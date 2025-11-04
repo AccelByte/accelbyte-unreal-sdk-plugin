@@ -296,10 +296,7 @@ namespace AccelByte
 	bool FHttpRetryTask::FinishFromCached(const FHttpResponsePtr& InResponse)
 	{
 		TaskState = EAccelByteTaskState::Completed;
-	
-		FReport::LogHttpResponse(Request, InResponse);
-		CompleteDelegate.ExecuteIfBound(Request, InResponse, true /*IsFinished()*/);
-
+		Response = InResponse;
 		bIsResponseFromCache = true;
 
 		return FAccelByteTask::Finish();

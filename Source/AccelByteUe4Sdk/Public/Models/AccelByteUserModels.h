@@ -442,6 +442,21 @@ struct ACCELBYTEUE4SDK_API FUserPublicInfoResponseV4
 	FString UniqueDisplayName{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FIAMPublicSystemConfigResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Config | Models | PublicSystemConfig")
+	int32 SearchQueryMaxLength = 2048;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Config | Models | PublicSystemConfig")
+	int32 SearchQueryMaxLengthForEmail = 2048;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Config | Models | PublicSystemConfig")
+	int32 SearchQueryMinLength{};
+};
+
 // backward compatibility with previous AccelByte SDK codes
 // remove this if you are using FUserData from Unreal PhysicsCore
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
@@ -1119,6 +1134,15 @@ struct ACCELBYTEUE4SDK_API FBannedBy
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BannedBy")
 	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FGetUserBanHistoryOptionalParams
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo | Optional")
+	bool bActiveOnly = false;
 };
 
 USTRUCT(BlueprintType)

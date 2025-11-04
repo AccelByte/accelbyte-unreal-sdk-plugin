@@ -20,13 +20,24 @@ namespace Api
 /**
  * @brief Leaderboard API to obtain player's ranking in a namespace.
  */
-class ACCELBYTEUE4SDK_API Leaderboard : public FApiBase, public TSharedFromThis<Leaderboard, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Leaderboard 
+	: public FApiBase
+	, public TSharedFromThis<Leaderboard, ESPMode::ThreadSafe>
 {
 	static constexpr int32 LeaderboardUserIdsURLLimit = 20;
 
 public:
-	Leaderboard(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Leaderboard();
+	Leaderboard(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Leaderboard(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Leaderboard();
 
 	/**
 	 * @brief Get leaderboard rankings in a specified timeframe.
@@ -176,9 +187,9 @@ private:
 	Leaderboard(Leaderboard&&) = delete;
 };
 
-typedef TSharedRef<Leaderboard, ESPMode::ThreadSafe> LeaderboardRef;
-typedef TSharedPtr<Leaderboard, ESPMode::ThreadSafe> LeaderboardPtr;
-typedef TWeakPtr<Leaderboard, ESPMode::ThreadSafe> LeaderboardWPtr;
+using LeaderboardRef = TSharedRef<Leaderboard, ESPMode::ThreadSafe>;
+using LeaderboardPtr = TSharedPtr<Leaderboard, ESPMode::ThreadSafe>;
+using LeaderboardWPtr = TWeakPtr<Leaderboard, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

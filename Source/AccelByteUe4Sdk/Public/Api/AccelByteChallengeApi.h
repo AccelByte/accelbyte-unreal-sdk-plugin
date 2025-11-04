@@ -17,15 +17,22 @@ namespace Api
 /**
  * @brief Interface for interacting with the AccelByte challenge service
  */	
-class ACCELBYTEUE4SDK_API Challenge : public FApiBase, public TSharedFromThis<Challenge, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Challenge 
+	: public FApiBase
+	, public TSharedFromThis<Challenge, ESPMode::ThreadSafe>
 {
 public:
 	Challenge(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
 
-	~Challenge();
+	Challenge(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Challenge();
 
 	/**
 	 * @brief Send a request to get all challenges.
@@ -216,9 +223,9 @@ private:
 	static FString CreateTagsString(const TArray<FString>& Tags);
 };
 	
-typedef TSharedRef<Challenge, ESPMode::ThreadSafe> ChallengeRef;
-typedef TSharedPtr<Challenge, ESPMode::ThreadSafe> ChallengePtr;
-typedef TWeakPtr<Challenge, ESPMode::ThreadSafe> ChallengeWPtr;
+using ChallengeRef = TSharedRef<Challenge, ESPMode::ThreadSafe>;
+using ChallengePtr = TSharedPtr<Challenge, ESPMode::ThreadSafe>;
+using ChallengeWPtr = TWeakPtr<Challenge, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

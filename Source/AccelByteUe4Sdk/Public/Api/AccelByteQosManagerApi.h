@@ -20,11 +20,22 @@ namespace Api
 /**
 * @brief QosManager API to manage Qos Server(s).
 */
-class ACCELBYTEUE4SDK_API QosManager : public FApiBase, public TSharedFromThis<QosManager, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API QosManager 
+	: public FApiBase
+	, public TSharedFromThis<QosManager, ESPMode::ThreadSafe>
 {
 public:
-	QosManager(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~QosManager();
+	QosManager(const Credentials& CredentialsRef
+		, const Settings& SettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	QosManager(const Credentials& CredentialsRef
+		, const Settings& SettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~QosManager();
 
 	/**
 	* @brief Get List of Qos Server(s). Returns the processed Request for optional polling later.
@@ -50,9 +61,9 @@ private:
 	QosManager(QosManager&&) = delete;
 };
 
-typedef TSharedRef<QosManager, ESPMode::ThreadSafe> QosManagerRef;
-typedef TSharedPtr<QosManager, ESPMode::ThreadSafe> QosManagerPtr;
-typedef TWeakPtr<QosManager, ESPMode::ThreadSafe> QosManagerWPtr;
+using QosManagerRef = TSharedRef<QosManager, ESPMode::ThreadSafe>;
+using QosManagerPtr = TSharedPtr<QosManager, ESPMode::ThreadSafe>;
+using QosManagerWPtr = TWeakPtr<QosManager, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

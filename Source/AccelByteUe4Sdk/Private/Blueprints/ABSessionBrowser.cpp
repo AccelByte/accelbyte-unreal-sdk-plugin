@@ -21,12 +21,13 @@ void UABSessionBrowser::CreateGameSessionPublic(
 	FString const& GameVersion,
 	int32 BotCount,
 	int32 MaxPlayer,
-	FJsonObjectWrapper OtherSettings,
+	FJsonObjectWrapper const& OtherSettings,
 	FDModelsSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
+	FJsonObjectWrapper OtherSettingsCopy = OtherSettings;
+	OtherSettingsCopy.JsonObjectFromString(OtherSettingsCopy.JsonString);
 	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
 	if (SessionBrowser.IsValid())
 	{
@@ -36,7 +37,7 @@ void UABSessionBrowser::CreateGameSessionPublic(
 			GameVersion,
 			BotCount,
 			MaxPlayer,
-			OtherSettings.JsonObject,
+			OtherSettingsCopy.JsonObject,
 			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 				{
@@ -66,12 +67,13 @@ void UABSessionBrowser::CreateGameSessionPrivate(
 	int32 MaxPlayer,
 	int32 MaxSpectator,
 	FString const& Password,
-	FJsonObjectWrapper OtherSettings,
+	FJsonObjectWrapper const& OtherSettings,
 	FDModelsSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
+	FJsonObjectWrapper OtherSettingsCopy = OtherSettings;
+	OtherSettingsCopy.JsonObjectFromString(OtherSettingsCopy.JsonString);
 	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
 	if (SessionBrowser.IsValid())
 	{
@@ -83,7 +85,7 @@ void UABSessionBrowser::CreateGameSessionPrivate(
 			MaxPlayer,
 			MaxSpectator,
 			Password,
-			OtherSettings.JsonObject,
+			OtherSettingsCopy.JsonObject,
 			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 				{
@@ -114,12 +116,13 @@ void UABSessionBrowser::CreateGameSessionTypeSpecifiedByString(
 	int32 MaxPlayer,
 	int32 MaxSpectator,
 	FString const& Password,
-	FJsonObjectWrapper OtherSettings,
+	FJsonObjectWrapper const& OtherSettings,
 	FDModelsSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
+	FJsonObjectWrapper OtherSettingsCopy = OtherSettings;
+	OtherSettingsCopy.JsonObjectFromString(OtherSettingsCopy.JsonString);
 	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
 	if (SessionBrowser.IsValid())
 	{
@@ -132,7 +135,7 @@ void UABSessionBrowser::CreateGameSessionTypeSpecifiedByString(
 			MaxPlayer,
 			MaxSpectator,
 			Password,
-			OtherSettings.JsonObject,
+			OtherSettingsCopy.JsonObject,
 			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 				{
@@ -163,12 +166,13 @@ void UABSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 	int32 MaxPlayer,
 	int32 MaxSpectator,
 	FString const& Password,
-	FJsonObjectWrapper OtherSettings,
+	FJsonObjectWrapper const& OtherSettings,
 	FDModelsSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
+	FJsonObjectWrapper OtherSettingsCopy = OtherSettings;
+	OtherSettingsCopy.JsonObjectFromString(OtherSettingsCopy.JsonString);
 	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
 	if (SessionBrowser.IsValid())
 	{
@@ -181,7 +185,7 @@ void UABSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 			MaxPlayer,
 			MaxSpectator,
 			Password,
-			OtherSettings.JsonObject,
+			OtherSettingsCopy.JsonObject,
 			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 				{
@@ -204,13 +208,14 @@ void UABSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 }
 
 void UABSessionBrowser::CreateGameSessionTypeSpecificByStruct(
-	FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequest,
+	FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequest,
 	FDModelsSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	CreateSessionRequest.Game_session_setting.Settings.JsonObjectFromString(CreateSessionRequest.Game_session_setting.Settings.JsonString);
-	FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequestConst = CreateSessionRequest;
+	FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequestCopy = CreateSessionRequest;
+	CreateSessionRequestCopy.Game_session_setting.Settings.JsonObjectFromString(CreateSessionRequestCopy.Game_session_setting.Settings.JsonString);
+	FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequestConst = CreateSessionRequestCopy;
 	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
 	if (SessionBrowser.IsValid())
 	{
@@ -309,7 +314,7 @@ void UABSessionBrowser::UpdateGameSessionByStruct(
 
 void UABSessionBrowser::UpdateGameSettings(
 	FString const& SessionId,
-	TMap<FString, FString> Settings,
+	TMap<FString, FString> const& Settings,
 	FDModelsSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
@@ -343,18 +348,19 @@ void UABSessionBrowser::UpdateGameSettings(
 
 void UABSessionBrowser::UpdateGameSettingsByJsonObject(
 	FString const& SessionId,
-	FJsonObjectWrapper Settings,
+	FJsonObjectWrapper const& Settings,
 	FDModelsSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
-	Settings.JsonObjectFromString(Settings.JsonString);
+	FJsonObjectWrapper SettingsCopy = Settings;
+	SettingsCopy.JsonObjectFromString(SettingsCopy.JsonString);
 	auto SessionBrowser = ApiClientPtr->GetSessionBrowserApi().Pin();
 	if (SessionBrowser.IsValid())
 	{
 		SessionBrowser->UpdateGameSettings(
 			SessionId,
-			Settings.JsonObject,
+			SettingsCopy.JsonObject,
 			THandler<FAccelByteModelsSessionBrowserData>::CreateLambda(
 				[OnSuccess](FAccelByteModelsSessionBrowserData const& Response)
 				{
@@ -564,7 +570,7 @@ void UABSessionBrowser::GetGameSessionsByTypeEnumAndMatchExist(
 	}
 }
 
-void UABSessionBrowser::GetGameSessionsByUserIds(TArray<FString> UserIds,
+void UABSessionBrowser::GetGameSessionsByUserIds(TArray<FString> const& UserIds,
 	FDModelsSessionBrowserGetResultByUserIdsResponse const& OnSuccess,
 	FDErrorHandler const& OnError)
 {

@@ -70,6 +70,8 @@ public:
 
 	static void SetHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode, const FHttpResponseCodeHandler& Handler);
 	static bool RemoveHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode);
+	static TMap<EHttpResponseCodes::Type, FHttpResponseCodeHandler> GetHttpResponseCodeHandlerDelegate();
+
 
 	static void SetHeaderNamespace(const FString& Value) { HeaderNamespace = Value; }
 	static void SetHeaderSDKVersion(const FString& Value) { HeaderSDKVersion = Value; }

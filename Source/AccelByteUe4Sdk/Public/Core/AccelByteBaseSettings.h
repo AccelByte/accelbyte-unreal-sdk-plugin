@@ -18,6 +18,7 @@ enum class EHttpCacheType : uint8
 namespace AccelByte
 {
 class ACCELBYTEUE4SDK_API BaseSettings
+	: public TSharedFromThis<BaseSettings, ESPMode::ThreadSafe>
 {
 public:
 	virtual ~BaseSettings() = default;
@@ -61,8 +62,9 @@ protected:
 	virtual void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value) = 0;
 };
 
-typedef TSharedRef<BaseSettings, ESPMode::ThreadSafe> BaseSettingsRef;
-typedef TSharedPtr<BaseSettings, ESPMode::ThreadSafe> BaseSettingsPtr;
+using BaseSettingsRef = TSharedRef<BaseSettings, ESPMode::ThreadSafe>;
+using BaseSettingsPtr = TSharedPtr<BaseSettings, ESPMode::ThreadSafe>;
+using BaseSettingsWPtr = TWeakPtr<BaseSettings, ESPMode::ThreadSafe>;
 
 } // Namespace AccelByte
 

@@ -5,10 +5,13 @@
 
 #include "Api/AccelByteLoginQueueApi.h"
 #include "AccelByteUe4SdkModule.h"
-
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteReport.h"
-#include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
+#include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteUtilities.h"
 
@@ -23,9 +26,18 @@ namespace Api
 LoginQueue::LoginQueue(Credentials& InCredentialsRef
 	, Settings& InSettingsRef
 	, FHttpRetrySchedulerBase& InHttpRef
-	, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+	, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
 	, UserCredentialsRef{InCredentialsRef.AsShared()}
+{
+}
+
+LoginQueue::LoginQueue(Credentials& InCredentialsRef
+	, Settings& InSettingsRef
+	, FHttpRetrySchedulerBase& InHttpRef
+	, FAccelBytePlatformPtr const& InAccelBytePlatform)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+	, UserCredentialsRef{ InCredentialsRef.AsShared() }
 {
 }
 

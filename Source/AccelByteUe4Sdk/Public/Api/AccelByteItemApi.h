@@ -17,11 +17,22 @@ namespace Api
 /**
  * @brief Item API for buying things from the online store. An item represents a single product sold in the online store. Each category has items inside it. You can get a list of items by criteria or by its ID.
  */
-class ACCELBYTEUE4SDK_API Item : public FApiBase, public TSharedFromThis<Item, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Item 
+	: public FApiBase
+	, public TSharedFromThis<Item, ESPMode::ThreadSafe>
 {
 public:
-	Item(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Item();
+	Item(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Item(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Item();
 	
 	/**
 	 * @brief Get one item information from an online store.
@@ -220,9 +231,9 @@ private:
 	static FString ConvertPlatformMappingToString(EAccelBytePlatformMapping Platform);
 };
 
-typedef TSharedRef<Item, ESPMode::ThreadSafe> ItemRef;
-typedef TSharedPtr<Item, ESPMode::ThreadSafe> ItemPtr;
-typedef TWeakPtr<Item, ESPMode::ThreadSafe> ItemWPtr;
+using ItemRef = TSharedRef<Item, ESPMode::ThreadSafe>;
+using ItemPtr = TSharedPtr<Item, ESPMode::ThreadSafe>;
+using ItemWPtr = TWeakPtr<Item, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

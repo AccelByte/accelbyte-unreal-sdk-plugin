@@ -565,8 +565,8 @@ namespace AccelByte
 				// If response is nullptr then search the actual response in the cache
 				if (!Response.IsValid() && Scheduler != nullptr)
 				{
-					FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
-					if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+					auto Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+					if (Cache.IsValid() && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
 					{
 						auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
 						HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
@@ -606,8 +606,8 @@ namespace AccelByte
 				// If response is nullptr then search the actual response in the cache
 				if (!Response.IsValid() && Scheduler != nullptr)
 				{
-					FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
-					if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+					auto Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+					if (Cache.IsValid() && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
 					{
 						auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
 						HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
@@ -649,8 +649,8 @@ namespace AccelByte
 				// If response is nullptr then search the actual response in the cache
 				if (!Response.IsValid() && Scheduler != nullptr)
 				{
-					FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
-					if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+					auto Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+					if (Cache.IsValid() && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
 					{
 						auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
 						HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
@@ -692,8 +692,8 @@ namespace AccelByte
 			// If response is nullptr then search the actual response in the cache
 			if (!Response.IsValid() && Scheduler != nullptr)
 			{
-				FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
-				if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+				auto Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+				if (Cache.IsValid() && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
 				{ 
 					auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
 					HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);
@@ -732,8 +732,8 @@ namespace AccelByte
 				// If response is nullptr then search the actual response in the cache
 				if (!Response.IsValid() && Scheduler != nullptr)
 				{
-					FAccelByteHttpCacheItem* Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
-					if (Cache != nullptr && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
+					auto Cache = Scheduler->GetHttpCache().GetSerializedHttpCache(Request);
+					if (Cache.IsValid() && EHttpResponseCodes::IsOk(Cache->SerializableRequestAndResponse.ResponseCode))
 					{
 						auto ResponsePayloadByte = Cache->SerializableRequestAndResponse.ResponsePayload;
 						HandleHttpResultOk(nullptr, ResponsePayloadByte, OnSuccess);

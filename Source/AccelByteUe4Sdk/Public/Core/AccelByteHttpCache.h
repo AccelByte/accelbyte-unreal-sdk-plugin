@@ -14,98 +14,91 @@
 
 namespace AccelByte
 {
+namespace Core
+{
 
-	namespace Core
+class ACCELBYTEUE4SDK_API FAccelByteHttpCache
+{
+public:
+
+	FAccelByteHttpCache();
+	virtual ~FAccelByteHttpCache();
+
+	/// <summary>
+	/// Obtain the value from configuration to determine which caching method is chosen.
+	/// We need to avoid access configuration (AccelByte::FRegistry.Settings) from a class constructor
+	/// Because FRegistry.Settings load the value when triggered by startup module phase
+	/// </summary>
+	void Initialize();
+
+	bool TryRetrieving(const FHttpRequestPtr& Request, FHttpResponsePtr& OutCachedResponse);
+
+	bool TryStoring(const FHttpRequestPtr& Request);
+
+	/// <summary>
+	/// Should not be called from destructor at all.
+	/// Call this from module shutdown only.
+	/// </summary>
+	void ClearCache();
+
+	/**
+	 * Find the cache & load it to memory. Please call it early when the game start to avoid heavy I/O in the middle of the game.
+	 */
+	bool RetrieveAndLoadCacheFileInfo();
+
+	/**
+	 * @brief To be called by CreateHttpResultHandler to obtain the CacheItem
+	 *
+	 * @param The CompletedRequest
+	 * @return Return pointer to the cache , else return nullpointer if invalid
+	 */
+	TSharedPtr<FAccelByteHttpCacheItem> GetSerializedHttpCache(const FHttpRequestPtr& Request);
+
+	/**
+	 * @brief Check whether a response fullfil the caching prerequisites from it's cache-control directives in header
+	 *
+	 * @param CompletedRequest - Request with completed response
+	 * @return true if cacheable (cache-directive, response code and request verb OK), false otherwise
+	 */
+	static bool IsResponseCacheable(const FHttpRequestPtr& CompletedRequest);
+
+	void SetCacheType(const EHttpCacheType InCacheType);
+
+private:
+	static FName ConstructKey(const FHttpRequestPtr& Request);
+
+	enum class EHttpCacheFreshness : uint8
 	{
-		class ACCELBYTEUE4SDK_API FAccelByteHttpCache
-		{
-		public:
+		STALE = 0,
+		FRESH,
+		WAITING_REFRESH //if the cached item has an ETag value and it still has a chance to get 304 response from the cloud storage provider
+	};
 
-			FAccelByteHttpCache();
-			virtual ~FAccelByteHttpCache();
+	TSharedPtr<FAccelByteHttpCacheItem> GetCachedItems(const FName& Key);
 
-			/// <summary>
-			/// Obtain the value from configuration to determine which caching method is chosen.
-			/// We need to avoid access configuration (AccelByte::FRegistry.Settings) from a class constructor
-			/// Because FRegistry.Settings load the value when triggered by startup module phase
-			/// </summary>
-			void Initialize();
-
-			bool TryRetrieving(const FHttpRequestPtr& Request, FHttpResponsePtr& OutCachedResponse);
-			bool TryStoring(const FHttpRequestPtr& Request);
-
-			/// <summary>
-			/// Should not be called from destructor at all.
-			/// Call this from module shutdown only.
-			/// </summary>
-			void ClearCache();
-
-			/*
-			 * Find the cache & load it to memory. Please call it early when the game start to avoid heavy I/O in the middle of the game.
-			 */
-			bool RetrieveAndLoadCacheFileInfo();
-
-			/**
-			 * @brief To be called by CreateHttpResultHandler to obtain the CacheItem
-			 *
-			 * @param The CompletedRequest
-			 * @return Return pointer to the cache , else return nullpointer if invalid
-			*/
-			FAccelByteHttpCacheItem* GetSerializedHttpCache(const FHttpRequestPtr& Request);
-
-		protected:
-
-			static int MaxAgeCacheThreshold;
+	/**
+		* @brief Check whether the cached response is not stale nor invalid
+		*
+		* @param CachedItem - The item to check
+		* @return EHttpCacheFreshness 
+	*/
+	FAccelByteHttpCache::EHttpCacheFreshness CheckCachedItemFreshness(const TSharedPtr<FAccelByteHttpCacheItem>& CachedItem);
 			
-			static FName ConstructKey(const FHttpRequestPtr& Request);
+	/**
+		* @brief Extract specific control directive value from a Cache-Control header
+		* 
+		* @param CacheControlHeader
+		* @param ControlDirective
+		* @return FString - Value of the control directive. Empty if not found
+	*/
+	static FString ExtractControlDirective(const FString& CacheControlHeader, const FString& ControlDirectiveToSearch);
 
-			enum class EHttpCacheFreshness : uint8
-			{
-				STALE = 0,
-				FRESH,
-				WAITING_REFRESH //if the cached item has an ETag value and it still has a chance to get 304 response from the cloud storage provider
-			};
+private:
+	static int MaxAgeCacheLowerThreshold;
+	FRWLock CachedItemsInternalMtx;		
+	TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> CachedItemsInternal;
+	EHttpCacheType CacheType {EHttpCacheType::STORAGE};
+};
 
-			FCriticalSection CacheCritSection;
-			
-			TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> CachedItemsInternal;
-			EHttpCacheType CacheType {EHttpCacheType::STORAGE};
-
-			TSharedPtr<FAccelByteLRUCache<FAccelByteHttpCacheItem>> GetCachedItems();
-
-		public:
-
-			/**
-			 * @brief Check whether a response fullfil the caching prerequisites from it's cache-control directives in header
-			 *
-			 * @param CompletedRequest - Request with completed response
-			 * @return true if cacheable (cache-directive, response code and request verb OK), false otherwise
-			*/
-			static bool IsResponseCacheable(const FHttpRequestPtr& CompletedRequest);
-
-			void SetCacheType(const EHttpCacheType InCacheType);
-
-		private:
-			/**
-			 * @brief Check whether the cached response is not stale nor invalid
-			 *
-			 * @param Key - Key for a HttpCache content
-			 * @return EHttpCacheFreshness 
-			*/
-			FAccelByteHttpCache::EHttpCacheFreshness CheckCachedItemFreshness(const FName& Key);
-			
-			/**
-			 * @brief Extract specific control directive value from a Cache-Control header
-			 * 
-			 * @param CacheControlHeader
-			 * @param ControlDirective
-			 * @return FString - Value of the control directive. Empty if not found
-			*/
-			static FString ExtractControlDirective(const FString& CacheControlHeader, const FString& ControlDirective);
-		};
-
-	} // namespace Core
-
+} // namespace Core
 } // namespace AccelByte
-
-

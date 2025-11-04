@@ -425,7 +425,7 @@ void UABEntitlement::SyncPlatformPurchase(
 }
 
 void UABEntitlement::SyncPlatformPurchaseSingleItem(
-	FAccelByteModelsEntitlementSyncBase EntitlementSyncBase,
+	FAccelByteModelsEntitlementSyncBase const& EntitlementSyncBase,
 	EAccelBytePlatformSync PlatformType,
 	FDHandler OnSuccess,
 	FDErrorHandler OnError)

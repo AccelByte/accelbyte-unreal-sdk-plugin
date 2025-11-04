@@ -58,7 +58,7 @@ public:
 	void SetOnAutoShutdownErrorDelegate(FDErrorHandler OnShutdownError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
-	void SetServerName(const FString Name);
+	void SetServerName(const FString& Name);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | DSMC | Api")
 	void SetServerType(UEnumServerType Type);

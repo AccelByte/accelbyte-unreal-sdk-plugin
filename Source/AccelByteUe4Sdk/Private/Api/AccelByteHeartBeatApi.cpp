@@ -2,15 +2,15 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 #include "Api/AccelByteHeartBeatApi.h"
-
 #include "Core/AccelByteError.h"
-
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "JsonUtilities.h"
 #include "Core/AccelByteSettings.h"
-#include <AccelByteUe4SdkModule.h>
-#include <Core/AccelByteUtilities.h>
+#include "Core/AccelByteApiClient.h"
+#include "Core/AccelByteInstance.h"
+#include "JsonUtilities.h"
+#include "AccelByteUe4SdkModule.h"
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
@@ -19,9 +19,18 @@ namespace Api
 	HeartBeat::HeartBeat(Credentials const& InCredentialsRef
 		, Settings const& InSettingsRef
 		, FHttpRetrySchedulerBase& InHttpRef
-		, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient)
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient)
 		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InApiClient)
-	{}
+	{
+	}
+
+	HeartBeat::HeartBeat(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform)
+		: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef, InAccelBytePlatform)
+	{
+	}
 
 	HeartBeat::~HeartBeat()
 	{

@@ -18,11 +18,22 @@ namespace Api
 /**
 * @brief Entitlement API for checking user's ownership. User can query a list of item that belongs to him/her.
 */
-class ACCELBYTEUE4SDK_API Entitlement : public FApiBase, public TSharedFromThis<Entitlement, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Entitlement 
+	: public FApiBase
+	, public TSharedFromThis<Entitlement, ESPMode::ThreadSafe>
 {
 public:
-	Entitlement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Entitlement();
+	Entitlement(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Entitlement(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Entitlement();
 
 public:
 
@@ -628,9 +639,9 @@ private:
 	Entitlement(Entitlement&&) = delete;
 };
 
-typedef TSharedRef<Entitlement, ESPMode::ThreadSafe> EntitlementRef;
-typedef TSharedPtr<Entitlement, ESPMode::ThreadSafe> EntitlementPtr;
-typedef TWeakPtr<Entitlement, ESPMode::ThreadSafe> EntitlementWPtr;
+using EntitlementRef = TSharedRef<Entitlement, ESPMode::ThreadSafe>;
+using EntitlementPtr = TSharedPtr<Entitlement, ESPMode::ThreadSafe>;
+using EntitlementWPtr = TWeakPtr<Entitlement, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 }

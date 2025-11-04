@@ -15,13 +15,23 @@ namespace AccelByte
 namespace Api
 {
 
-class ACCELBYTEUE4SDK_API HeartBeat : public FApiBase
+class ACCELBYTEUE4SDK_API HeartBeat 
+	: public FApiBase
 {
 public:
 	DECLARE_DELEGATE(FHeartBeatResponse);
 
-	HeartBeat(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~HeartBeat();
+	HeartBeat(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	HeartBeat(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~HeartBeat();
 
 	/**
 	* @brief Startup heart beat module

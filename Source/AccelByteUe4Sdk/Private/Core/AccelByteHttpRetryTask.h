@@ -28,18 +28,33 @@ namespace AccelByte
 		virtual bool Cancel() override;
 		virtual void Tick(double CurrentTime) override;
 		virtual bool Finish() override;
-		bool FinishFromCached(FHttpResponsePtr const& Response);
-
 		virtual EAccelByteTaskState Pause() override;
+
+		bool FinishFromCached(FHttpResponsePtr const& Response);
 
 		FHttpRequestPtr GetHttpRequest() const { return Request; };
 
 		void SetResponseTime(FDateTime InResponseTime) { ResponseTime = InResponseTime; };
+
 		FDateTime GetResponseTime() const { return ResponseTime; };
 
 		virtual TMap<FString, FString> GetResponseHeader();
 
 		bool IsResponseFromCache() { return bIsResponseFromCache; };
+
+	private:
+		void InitializeDefaultDelegates();
+		EAccelByteTaskState TriggerBearerAuthRejected();
+		void OnBearerAuthRejected();
+		void OnBearerAuthRefreshed(FString const& AccessToken);
+		EAccelByteTaskState HandleDefaultRetry(int32 StatusCode);
+		bool CheckRetry(EAccelByteTaskState& Out);
+		EAccelByteTaskState Retry();
+		EAccelByteTaskState ScheduleNextRetry();
+		bool IsFinished();
+		bool IsRefreshable();
+		bool IsTimedOut();
+		void OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse, bool bConnectedSuccessfully);
 
 	private:
 		FHttpRequestPtr Request{ nullptr };
@@ -57,23 +72,8 @@ namespace AccelByte
 		TMap<int32, FHttpRetryScheduler::FHttpResponseCodeHandler> ResponseCodeDelegates{};
 		FDateTime ResponseTime{ 0 };
 		bool bIsResponseFromCache{ false };
-
-		void InitializeDefaultDelegates();
-		EAccelByteTaskState TriggerBearerAuthRejected();
-		void OnBearerAuthRejected();
-		void OnBearerAuthRefreshed(FString const& AccessToken);
-		EAccelByteTaskState HandleDefaultRetry(int32 StatusCode);
-		bool CheckRetry(EAccelByteTaskState& Out);
-		EAccelByteTaskState Retry();
-		EAccelByteTaskState ScheduleNextRetry();
-		bool IsFinished();
-		bool IsRefreshable();
-		bool IsTimedOut();
-
-		void OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse, bool bConnectedSuccessfully);
 	};
 
 	typedef TSharedPtr<FHttpRetryTask, ESPMode::ThreadSafe> FAccelByteHttpRetryTaskPtr;
 	typedef TSharedRef<FHttpRetryTask, ESPMode::ThreadSafe> FAccelByteHttpRetryTaskRef;
-
-}
+} // namespace AccelByte

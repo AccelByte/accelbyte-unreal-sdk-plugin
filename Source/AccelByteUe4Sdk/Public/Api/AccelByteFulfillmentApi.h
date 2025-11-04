@@ -18,11 +18,22 @@ namespace Api
 /**
  * @brief Fulfillment API for user to fulfill an item to their entitlements.
  */
-class ACCELBYTEUE4SDK_API Fulfillment : public FApiBase, public TSharedFromThis<Fulfillment, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Fulfillment 
+	: public FApiBase
+	, public TSharedFromThis<Fulfillment, ESPMode::ThreadSafe>
 {
 public:
-	Fulfillment(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Fulfillment();
+	Fulfillment(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Fulfillment(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Fulfillment();
 
 	/**
 	 * @brief Redeem Campaign Code to Receive In Game Item.
@@ -47,9 +58,9 @@ private:
 	Fulfillment(Fulfillment&&) = delete;
 };
 
-typedef TSharedRef<Fulfillment, ESPMode::ThreadSafe> FulfillmentRef;
-typedef TSharedPtr<Fulfillment, ESPMode::ThreadSafe> FulfillmentPtr;
-typedef TWeakPtr<Fulfillment, ESPMode::ThreadSafe> FulfillmentWPtr;
+using FulfillmentRef = TSharedRef<Fulfillment, ESPMode::ThreadSafe>;
+using FulfillmentPtr = TSharedPtr<Fulfillment, ESPMode::ThreadSafe>;
+using FulfillmentWPtr = TWeakPtr<Fulfillment, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 }

@@ -14,7 +14,7 @@ void UABFriends::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 }
 
 void UABFriends::RequestFriend(
-	FString UserId,
+	FString const& UserId,
 	FDRequestFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
@@ -41,7 +41,7 @@ void UABFriends::RequestFriend(
 }
 
 void UABFriends::Unfriend(
-	FString UserId,
+	FString const& UserId,
 	FDUnfriendResponse OnResponse,
 	FDErrorHandler OnError) 
 {
@@ -94,7 +94,7 @@ void UABFriends::ListOutgoingFriends(
 }
 
 void UABFriends::CancelFriendRequest(
-	FString UserId,
+	FString const& UserId,
 	FDCancelFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
@@ -147,7 +147,7 @@ void UABFriends::ListIncomingFriends(
 }
 
 void UABFriends::AcceptFriend(
-	FString UserId,
+	FString const& UserId,
 	FDAcceptFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
@@ -174,7 +174,7 @@ void UABFriends::AcceptFriend(
 }
 
 void UABFriends::RejectFriend(
-	FString UserId,
+	FString const& UserId,
 	FDRejectFriendsResponse OnResponse,
 	FDErrorHandler OnError) 
 {
@@ -227,7 +227,7 @@ void UABFriends::LoadFriendsList(
 }
 
 void UABFriends::GetFriendshipStatus(
-	FString UserId,
+	FString const& UserId,
 	FDGetFriendshipStatusResponse OnResponse,
 	FDErrorHandler OnError) 
 {
@@ -254,7 +254,7 @@ void UABFriends::GetFriendshipStatus(
 }
 
 void UABFriends::BulkFriendRequest(
-	FAccelByteModelsBulkFriendsRequest UserIds,
+	FAccelByteModelsBulkFriendsRequest const& UserIds,
 	FDHandler OnSuccess,
 	FDErrorHandler OnError) 
 {

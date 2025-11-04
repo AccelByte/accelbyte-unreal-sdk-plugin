@@ -19,11 +19,22 @@ namespace Api
 /**
  * @brief Reward API for getting information about the reward
  */	
-class ACCELBYTEUE4SDK_API Reward : public FApiBase, public TSharedFromThis<Reward, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Reward 
+	: public FApiBase
+	, public TSharedFromThis<Reward, ESPMode::ThreadSafe>
 {
 public:
-	Reward(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Reward();
+	Reward(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Reward(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Reward();
 
 	/**
 	 * @brief Get Reward from a specific Reward Code
@@ -78,9 +89,9 @@ private:
 	static FString ConvertRewardSortByToString(EAccelByteRewardListSortBy SortBy);
 };
 	
-typedef TSharedRef<Reward, ESPMode::ThreadSafe> RewardRef;
-typedef TSharedPtr<Reward, ESPMode::ThreadSafe> RewardPtr;
-typedef TWeakPtr<Reward, ESPMode::ThreadSafe> RewardWPtr;
+using RewardRef = TSharedRef<Reward, ESPMode::ThreadSafe>;
+using RewardPtr = TSharedPtr<Reward, ESPMode::ThreadSafe>;
+using RewardWPtr = TWeakPtr<Reward, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

@@ -21,11 +21,22 @@ namespace Api
  * The category has tree data structure.
  * Each category has path, for example "/equipments/armor/legs". Items are grouped into a category. The root is equivalent to "/".
  */
-class ACCELBYTEUE4SDK_API Category : public FApiBase, public TSharedFromThis<Category, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API Category 
+	: public FApiBase
+	, public TSharedFromThis<Category, ESPMode::ThreadSafe>
 {
 public:
-	Category(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~Category();
+	Category(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	Category(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~Category();
 
 	/**
 	 * @brief This function gets root categories that exist in the specified namespace.
@@ -91,9 +102,9 @@ private:
 	Category(Category&&) = delete;
 };
 
-typedef TSharedRef<Category, ESPMode::ThreadSafe> CategoryRef;
-typedef TSharedPtr<Category, ESPMode::ThreadSafe> CategoryPtr;
-typedef TWeakPtr<Category, ESPMode::ThreadSafe> CategoryWPtr;
+using CategoryRef = TSharedRef<Category, ESPMode::ThreadSafe>;
+using CategoryPtr = TSharedPtr<Category, ESPMode::ThreadSafe>;
+using CategoryWPtr = TWeakPtr<Category, ESPMode::ThreadSafe>;
 
 } // Namespace Api
 } // Namespace AccelByte

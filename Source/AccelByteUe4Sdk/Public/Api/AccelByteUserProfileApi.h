@@ -21,11 +21,22 @@ namespace Api
 /**
  * @brief API to create, update, and get user's profile.
  */
-class ACCELBYTEUE4SDK_API UserProfile : public FApiBase, public TSharedFromThis<UserProfile, ESPMode::ThreadSafe>
+class ACCELBYTEUE4SDK_API UserProfile 
+	: public FApiBase
+	, public TSharedFromThis<UserProfile, ESPMode::ThreadSafe>
 {
 public:
-	UserProfile(Credentials const& Credentials, Settings const& Settings, FHttpRetrySchedulerBase& InHttpRef, TSharedPtr<FApiClient, ESPMode::ThreadSafe> InApiClient = nullptr);
-	~UserProfile();
+	UserProfile(Credentials const& Credentials
+		, Settings const& Settings
+		, FHttpRetrySchedulerBase& InHttpRef
+		, TSharedPtr<AccelByte::FApiClient, ESPMode::ThreadSafe> const& InApiClient = nullptr);
+
+	UserProfile(Credentials const& Credentials
+		, Settings const& Settings
+		, FHttpRetrySchedulerBase& InHttpRef
+		, FAccelBytePlatformPtr const& InAccelBytePlatform);
+
+	virtual ~UserProfile();
 
 	/**
 	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
@@ -275,9 +286,9 @@ private:
 	UserProfile(UserProfile&&) = delete;	
 };
 
-typedef TSharedRef<UserProfile, ESPMode::ThreadSafe> UserProfileRef;
-typedef TSharedPtr<UserProfile, ESPMode::ThreadSafe> UserProfilePtr;
-typedef TWeakPtr<UserProfile, ESPMode::ThreadSafe> UserProfileWPtr;
+using UserProfileRef = TSharedRef<UserProfile, ESPMode::ThreadSafe>;
+using UserProfilePtr = TSharedPtr<UserProfile, ESPMode::ThreadSafe>;
+using UserProfileWPtr = TWeakPtr<UserProfile, ESPMode::ThreadSafe>;
 
 } // Namespace Service
 } // Namespace AccelByte
