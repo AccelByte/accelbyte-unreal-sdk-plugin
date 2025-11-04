@@ -1,4 +1,4 @@
-﻿#include "Blueprints/ABGroup.h"
+#include "Blueprints/ABGroup.h"
 
 using namespace AccelByte;
 
