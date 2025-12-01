@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IPAddress.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 #include "Models/AccelByteQosModels.h"

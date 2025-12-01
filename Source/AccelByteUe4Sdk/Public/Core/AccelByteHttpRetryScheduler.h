@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <chrono>
-
 #include "AccelByteSettings.h"
 #include "AccelByteHttpRetrySchedulerBase.h"
 #include "Delegates/DelegateCombinations.h"
@@ -20,7 +18,6 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API FHttpRetryScheduler : public FHttpRetrySchedulerBase
 {
 public:
-
 	FHttpRetryScheduler();
 	explicit FHttpRetryScheduler(const SettingsWPtr InSettingsWeak);
 	virtual ~FHttpRetryScheduler() override;
@@ -48,27 +45,9 @@ public:
 	virtual Core::FAccelByteHttpCache &GetHttpCache() override { return HttpCache; } 
 
 protected:
-
 	FString ParseUStructToJsonString(const TSharedPtr<FJsonObject>& JsonObject, bool bOmitBlankValues = false);
 
 	bool Tick(float DeltaTime);
-
-	TMap<FString /*Endpoint*/, FRequestBucket> RequestsBucket;
-	mutable FCriticalSection RequestBucketLock;
-
-	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue{};
-	FDelegateHandleAlias PollRetryHandle{};
-
-	Core::FAccelByteHttpCache HttpCache{};
-
-	SettingsWPtr SettingsWeak;
-
-	FBearerAuthRejectedMulticast BearerAuthRejectedMulticast{};
-	FBearerAuthRefreshedMulticast BearerAuthRefreshedMulticast{};
-
-	//for mutex lock
-	FCriticalSection LockBearerAuthRejected;
-	FCriticalSection LockBearerAuthRefreshed;
 
 	enum class EState
 	{
@@ -78,6 +57,28 @@ protected:
 		ShuttingDown
 	};
 
-	EState State{EState::Uninitialized};
+	void SetState(EState NewState) noexcept;
+	EState GetState() const noexcept;
+
+	FRWLock TaskQueueMtx;
+	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue{};
+	
+	FDelegateHandleAlias PollRetryHandle{};
+
+private:
+	mutable FRWLock RequestBucketMtx;
+	TMap<FString /*Endpoint*/, FRequestBucket> RequestsBucket;
+
+	Core::FAccelByteHttpCache HttpCache{};
+
+	SettingsWPtr SettingsWeak;
+
+	FCriticalSection BearerAuthRejectedMtx;
+	FBearerAuthRejectedMulticast BearerAuthRejectedMulticast{};
+
+	FCriticalSection BearerAuthRefreshedMtx;
+	FBearerAuthRefreshedMulticast BearerAuthRefreshedMulticast{};
+
+	std::atomic<EState> State{EState::Uninitialized};
 };
-}
+} // namespace AccelByte

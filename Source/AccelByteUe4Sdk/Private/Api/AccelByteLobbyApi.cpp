@@ -2771,6 +2771,11 @@ void Lobby::DispatchV2SessionMessageByTopic(FString const& Topic, FString const&
 			DispatchV2JsonNotif<FAccelByteModelsV2SessionStorageChangedEvent>(Payload, V2SessionStorageChangedNotif);
 			break;
 		}
+		case EV2SessionNotifTopic::OnPartyStorageChanged:
+		{
+			DispatchV2JsonNotif<FAccelByteModelsV2PartyStorageChangedEvent>(Payload, V2PartyStorageChangedNotif);
+			break;
+		}
 		case EV2SessionNotifTopic::OnSessionEnded:
 		{
 			DispatchV2JsonNotif<FAccelByteModelsV2GameSessionEndedEvent>(Payload, V2GameSessionEndedNotif);

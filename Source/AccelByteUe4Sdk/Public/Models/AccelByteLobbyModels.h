@@ -68,7 +68,8 @@ enum class EV2SessionNotifTopic : uint8
 	OnSessionJoinedSecret,
 	OnSessionEnded,
 	OnGameSessionInviteCancelled,
-	OnPartyCancelled
+	OnPartyCancelled,
+	OnPartyStorageChanged
 };
 
 /** @brief Entitlements Notification types enums. */

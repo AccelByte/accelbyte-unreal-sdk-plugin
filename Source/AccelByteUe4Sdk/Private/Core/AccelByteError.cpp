@@ -310,27 +310,76 @@ namespace AccelByte
 		
 	};
 
+#if !UE_BUILD_SHIPPING
+	static FRWLock HttpErrorMessageSettingMtx;
+	static bool GetVerboseHttpErrorMessageSetting()
+	{
+		static TOptional<bool> Value;
+		FWriteScopeLock Lock(HttpErrorMessageSettingMtx);
+		if(Value.IsSet())
+		{
+			return Value.GetValue();
+		}
+		if(FParse::Param(FCommandLine::Get(), TEXT("AccelByteVerboseHttpErrorMessage")))
+		{
+			Value = true;
+		}
+		else
+		{
+			Value = false;
+		}
+		return Value.GetValue();
+	}
+#endif
+
 	void AddDebugMessage(FHttpRequestPtr Request, FHttpResponsePtr Response, FString& OutMessage)
 	{
-		OutMessage += "\n\nResponse";
-		OutMessage += "\nCode: " + FString::FromInt(Response->GetResponseCode());
-		OutMessage += "\nContent: \n" + Response->GetContentAsString();
+		OutMessage += "\n\nVerbose HTTP Error Message:";
+		// Request
+		OutMessage += "\n\n---";
+		if(Request.IsValid())
+		{
+			OutMessage += "\nREQUEST (with the first 100 bytes body if exist):";
+			OutMessage += "\n  Elapsed time (seconds): " + FString::SanitizeFloat(Request->GetElapsedTime());
+			OutMessage += "\n\n  HTTP " + Request->GetVerb() + " " + Request->GetURL();
+			OutMessage += "\n";
+			for (const auto& a : Request->GetAllHeaders())
+			{
+				OutMessage += "\n  " + a;
+			}
+			OutMessage += "\n\n  ";
+			auto ContentLength = Request->GetContentLength();
+			auto PrintLen = ContentLength > 100 ? 100 : ContentLength;
+			auto& RequestBody = Request->GetContent();
+			for (int i = 0; i < PrintLen; i++)
+			{
+				OutMessage += static_cast<char>(RequestBody[i]);
+			}
+		}
+		else
+		{
+			OutMessage += "\nError printing HTTP Request: Invalid Request pointer!";
+		}
+		OutMessage += "\n---";
+		// Response
 
-		OutMessage += " \n\nRequest";
-		OutMessage += "\nElapsed time (seconds): " + FString::SanitizeFloat(Request->GetElapsedTime());
-		OutMessage += "\nVerb: " + Request->GetVerb();
-		OutMessage += "\nURL: " + Request->GetURL();
-		OutMessage += "\nHeaders: \n";
-		for (auto a : Request->GetAllHeaders())
+		OutMessage += "\n\n---";
+		if(Request.IsValid())
 		{
-			OutMessage += a + "\n";
+			OutMessage += "\nRESPONSE:";
+			OutMessage += "\n  HTTP " + FString::FromInt(Response->GetResponseCode()) + " " + Response->GetURL();
+			OutMessage += "\n";
+			for (const auto& a : Response->GetAllHeaders())
+			{
+				OutMessage += "\n  " + a;
+			}
+			OutMessage += "\n\n  " + Response->GetContentAsString();
 		}
-		OutMessage += "\nContent: \n";
-		for (auto a : Request->GetContent())
+		else
 		{
-			OutMessage += static_cast<char>(a);
+			OutMessage += "\nError printing HTTP Response: Invalid Response pointer!";
 		}
-		OutMessage += "\n";
+		OutMessage += "\n---";
 	}
 
 	void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage)
@@ -343,9 +392,10 @@ namespace AccelByte
 		OutMessage = "";
 		if (Response.IsValid())
 		{
-			if (!Response->GetContentAsString().IsEmpty())
+			FString ResponseBody = Response->GetContentAsString();
+			if (!ResponseBody.IsEmpty())
 			{
-				if (FAccelByteJsonConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error))
+				if (FAccelByteJsonConverter::JsonObjectStringToUStruct(ResponseBody, &Error))
 				{
 					if (Error.NumericErrorCode != -1)
 					{
@@ -393,6 +443,12 @@ namespace AccelByte
 				OutMessage += ErrorMessages::Default.at(Code);
 			}
 		}
+#if !UE_BUILD_SHIPPING
+		if(GetVerboseHttpErrorMessageSetting())
+		{
+			AddDebugMessage(Request, Response, OutMessage);
+		}
+#endif
 	}
 
 	void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject)
@@ -497,6 +553,12 @@ namespace AccelByte
 				OutMessage += ErrorMessages::Default.at(Code);
 			}
 		}
+#if !UE_BUILD_SHIPPING
+		if(GetVerboseHttpErrorMessageSetting())
+		{
+			AddDebugMessage(Request, Response, OutMessage);
+		}
+#endif
 		
 		if (Response.IsValid())
 		{
@@ -565,6 +627,12 @@ namespace AccelByte
 				OutErrorInfo.ErrorMessage = OutMessage;
 			}
 		}
+#if !UE_BUILD_SHIPPING
+		if(GetVerboseHttpErrorMessageSetting())
+		{
+			AddDebugMessage(Request, Response, OutMessage);
+		}
+#endif
 	}
 
 	void HandleHttpCreateMatchmakingTicketError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorCreateMatchmakingTicketV2& OutErrorCreateMatchmakingV2)
@@ -618,6 +686,12 @@ namespace AccelByte
 				OutErrorCreateMatchmakingV2.ErrorMessage = OutMessage;
 			}
 		}
+#if !UE_BUILD_SHIPPING
+		if(GetVerboseHttpErrorMessageSetting())
+		{
+			AddDebugMessage(Request, Response, OutMessage);
+		}
+#endif
 
 		if (!OutErrorCreateMatchmakingV2.MessageVariables.TicketID.IsEmpty())
 		{

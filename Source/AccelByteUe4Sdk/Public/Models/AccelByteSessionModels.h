@@ -405,6 +405,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySessionStorage
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartySessionStorage")
 	TMap<FString /*UserID*/, FAccelByteModelsV2PartySessionStorageReservedData> Reserved{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartySessionStorage")
+	TMap<FString /*UserID*/, FJsonObjectWrapper> Member{};
 };
 
 USTRUCT(BlueprintType)
@@ -915,6 +918,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionStorageChangedEvent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionStorageChangedEvent")
 	bool IsLeader{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2SessionStorageChangedEvent")
+	FJsonObjectWrapper StorageChanges{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyStorageChangedEvent
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2PartyStorageChangedEvent")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2PartyStorageChangedEvent")
+	FString SessionID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2PartyStorageChangedEvent")
+	FString ActorUserID{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2PartyStorageChangedEvent")
+	bool IsLeader{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | FAccelByteModelsV2PartyStorageChangedEvent")
 	FJsonObjectWrapper StorageChanges{};
 };
 

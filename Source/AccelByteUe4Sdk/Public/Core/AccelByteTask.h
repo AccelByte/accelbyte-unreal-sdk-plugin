@@ -7,6 +7,9 @@
 #include "CoreMinimal.h"
 #include "Models/AccelByteGeneralModels.h"
 
+// STL
+#include <atomic>
+
 namespace AccelByte 
 {
 
@@ -185,7 +188,9 @@ public:
 		{
 			Cancel();
 		}
-		TaskTime += Time; 
+		double TaskTimeBuf = TaskTime.load(std::memory_order_acquire);
+		TaskTimeBuf += Time;
+		TaskTime.store(TaskTimeBuf, std::memory_order_release);
 	}
 
 	/**
@@ -206,7 +211,7 @@ public:
 	/**
 	 * @brief Get current Task Time.
 	 */
-	virtual double Time() const { return TaskTime; }
+	virtual double Time() const { return TaskTime.load(std::memory_order_acquire); }
 
 	/**
 	 * @brief Create Cancellation Token handler.
@@ -217,10 +222,26 @@ public:
 	}
 
 protected:
-	double TaskTime = 0.0;
-	EAccelByteTaskState TaskState = EAccelByteTaskState::Pending;
+	std::atomic<double> TaskTime{0.0};
 	std::atomic<bool> bIsFinished{false};
 	FAccelByteCancellationTokenRef Token = MakeShared<FAccelByteCancellationTokenSource, ESPMode::ThreadSafe>();
+
+protected:
+	void SetTaskState(EAccelByteTaskState NewState) noexcept
+	{
+		FWriteScopeLock Lock(TaskStateMtx);
+		TaskState = NewState;
+	}
+
+	EAccelByteTaskState GetTaskState() const noexcept
+	{
+		FReadScopeLock Lock(TaskStateMtx);
+		return TaskState;
+	}
+
+private:
+	mutable FRWLock TaskStateMtx;
+	EAccelByteTaskState TaskState = EAccelByteTaskState::Pending;
 };
 
 using FAccelByteTaskPtr = TSharedPtr<FAccelByteTask, ESPMode::ThreadSafe>;

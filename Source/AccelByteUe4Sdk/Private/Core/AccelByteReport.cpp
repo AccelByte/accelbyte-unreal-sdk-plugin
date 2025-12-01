@@ -10,6 +10,8 @@ DEFINE_LOG_CATEGORY(LogAccelByte);
 
 namespace AccelByte
 {
+	const int32 MaxLogLen = 10000;
+
 	bool ShouldLogHttpPayload(FHttpRequestPtr const& Request)
 	{
 		const FString LogLevelSquelch = Request->GetHeader(GHeaderABLogSquelch);
@@ -79,7 +81,7 @@ namespace AccelByte
 
 			LogMessage += Content;
 			LogMessage += "\n---\n";
-			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *LogMessage);
+			Log(LogMessage);
 		}
 	}
 
@@ -117,16 +119,20 @@ namespace AccelByte
 			}
 			LogMessage += "\n\n" + Response->GetContentAsString();
 			LogMessage += "\n---\n";
-
-			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *LogMessage);
+			Log(LogMessage);
 		}
 	}
 
 	void FReport::Log(const FString Message)
 	{
 		if (!UObjectInitialized()) return;
-
-		UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *Message);
+		if (Message.Len() > MaxLogLen)
+		{
+			Log(Message.Left(MaxLogLen));
+			Log(Message.Right(Message.Len() - MaxLogLen));
+		} else {
+			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *Message);
+		}
 	}
 
 	void FReport::LogDeprecated(FString FunctionName, FString Message)

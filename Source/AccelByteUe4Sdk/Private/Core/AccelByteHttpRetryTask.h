@@ -11,69 +11,79 @@
 
 namespace AccelByte
 {
-	class FHttpRetryTask 
-		: public FAccelByteTask, public TSharedFromThis<FHttpRetryTask, ESPMode::ThreadSafe>
-	{
-	public:
-		FHttpRetryTask(
-			FHttpRequestPtr& InRequest,
-			FHttpRequestCompleteDelegate const& InCompleteDelegate,
-			double InRequestTime,
-			double InNextDelay,
-			FHttpRetrySchedulerWPtr const& InHttpRetrySchedulerWPtr,
-			TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> HandlerDelegates = {});
-		virtual ~FHttpRetryTask() override;
+class ACCELBYTEUE4SDK_API FHttpRetryTask
+	: public FAccelByteTask, public TSharedFromThis<FHttpRetryTask, ESPMode::ThreadSafe>
+{
+public:
+	FHttpRetryTask(
+		FHttpRequestPtr& InRequest,
+		FHttpRequestCompleteDelegate const& InCompleteDelegate,
+		double InRequestTime,
+		double InNextDelay,
+		FHttpRetrySchedulerWPtr const& InHttpRetrySchedulerWPtr,
+		TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> HandlerDelegates = {});
+	virtual ~FHttpRetryTask() override;
 
-		virtual bool Start() override;
-		virtual bool Cancel() override;
-		virtual void Tick(double CurrentTime) override;
-		virtual bool Finish() override;
-		virtual EAccelByteTaskState Pause() override;
+	virtual bool Start() override;
+	virtual bool Cancel() override;
+	virtual void Tick(double CurrentTime) override;
+	virtual bool Finish() override;
+	virtual EAccelByteTaskState Pause() override;
 
-		bool FinishFromCached(FHttpResponsePtr const& Response);
+	virtual TMap<FString, FString> GetResponseHeader();
 
-		FHttpRequestPtr GetHttpRequest() const { return Request; };
+	bool FinishFromCached(FHttpResponsePtr const& Response);
 
-		void SetResponseTime(FDateTime InResponseTime) { ResponseTime = InResponseTime; };
+	FHttpRequestPtr GetHttpRequest() const { return Request; };
 
-		FDateTime GetResponseTime() const { return ResponseTime; };
+	void SetResponseTime(FDateTime InResponseTime);
 
-		virtual TMap<FString, FString> GetResponseHeader();
+	FDateTime GetResponseTime() const;
 
-		bool IsResponseFromCache() { return bIsResponseFromCache; };
+	bool IsResponseFromCache();
 
-	private:
-		void InitializeDefaultDelegates();
-		EAccelByteTaskState TriggerBearerAuthRejected();
-		void OnBearerAuthRejected();
-		void OnBearerAuthRefreshed(FString const& AccessToken);
-		EAccelByteTaskState HandleDefaultRetry(int32 StatusCode);
-		bool CheckRetry(EAccelByteTaskState& Out);
-		EAccelByteTaskState Retry();
-		EAccelByteTaskState ScheduleNextRetry();
-		bool IsFinished();
-		bool IsRefreshable();
-		bool IsTimedOut();
-		void OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse, bool bConnectedSuccessfully);
+private:
+	void InitializeDefaultDelegates();
+	EAccelByteTaskState TriggerBearerAuthRejected();
+	void OnBearerAuthRejected();
+	void OnBearerAuthRefreshed(FString const& AccessToken);
+	EAccelByteTaskState HandleDefaultRetry(int32 StatusCode);
+	bool CheckRetry(EAccelByteTaskState& Out);
+	EAccelByteTaskState Retry();
+	EAccelByteTaskState ScheduleNextRetry();
+	bool IsFinished();
+	bool IsRefreshable();
+	bool IsTimedOut();
+	void OnProcessRequestComplete(FHttpRequestPtr InRequest, FHttpResponsePtr InResponse, bool bConnectedSuccessfully);
 
-	private:
-		FHttpRequestPtr Request{ nullptr };
-		FHttpResponsePtr Response{ nullptr };
-		const FHttpRequestCompleteDelegate CompleteDelegate{};
-		const double RequestTime{ 0.0f };
-		double PauseTime{ 0.0f };
-		double PauseDuration{ 0.0f };
-		double NextRetryTime{ 0.0f };
-		double NextDelay{ 0.0f };
-		FHttpRetrySchedulerWPtr HttpRetrySchedulerWPtr{ nullptr };
-		FDelegateHandle BearerAuthRejectedHandle{};
-		FDelegateHandle BearerAuthRefreshedHandle{};
-		bool bIsBeenRunFromPause{ false };
-		TMap<int32, FHttpRetryScheduler::FHttpResponseCodeHandler> ResponseCodeDelegates{};
-		FDateTime ResponseTime{ 0 };
-		bool bIsResponseFromCache{ false };
-	};
+private:
+	// Never changed after class construction, mutexes are not needed for these
+	TMap<int32, FHttpRetryScheduler::FHttpResponseCodeHandler> ResponseCodeDelegates{};
+	const FHttpRequestCompleteDelegate CompleteDelegate{};
+	FHttpRetrySchedulerWPtr HttpRetrySchedulerWPtr{ nullptr };
+	FHttpRequestPtr Request{ nullptr };
 
-	typedef TSharedPtr<FHttpRetryTask, ESPMode::ThreadSafe> FAccelByteHttpRetryTaskPtr;
-	typedef TSharedRef<FHttpRetryTask, ESPMode::ThreadSafe> FAccelByteHttpRetryTaskRef;
+	FRWLock ResponseMtx;
+	FHttpResponsePtr Response{ nullptr };
+
+	FRWLock BearerAuthRejectedHandleMtx;
+	FDelegateHandle BearerAuthRejectedHandle{};
+
+	FRWLock BearerAuthRefreshedHandleMtx;
+	FDelegateHandle BearerAuthRefreshedHandle{};
+
+	mutable FRWLock ResponseTimeMtx;
+	FDateTime ResponseTime{ 0 };
+
+	const double RequestTime{ 0.0f };
+	std::atomic<double> PauseTime{ 0.0f };
+	std::atomic<double> PauseDuration{ 0.0f };
+	std::atomic<double> NextRetryTime{ 0.0f };
+	std::atomic<double> NextDelay{ 0.0f };
+	std::atomic<bool> bIsResponseFromCache{ false };
+	std::atomic<bool> bIsBeenRunFromPause{ false };
+};
+
+typedef TSharedPtr<FHttpRetryTask, ESPMode::ThreadSafe> FAccelByteHttpRetryTaskPtr;
+typedef TSharedRef<FHttpRetryTask, ESPMode::ThreadSafe> FAccelByteHttpRetryTaskRef;
 } // namespace AccelByte

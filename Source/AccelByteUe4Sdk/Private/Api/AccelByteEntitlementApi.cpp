@@ -993,6 +993,24 @@ FAccelByteTaskWPtr Entitlement::SyncOculusDLC(FVoidHandler const& OnSuccess
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {},  OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Entitlement::SyncOculusSubscription(FAccelByteModelsSyncOculusSubscriptionRequest const& SyncRequest
+	, THandler<TArray<FAccelByteModelsThirdPartySubscriptionTransactionInfo>> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/oculus/subscription/sync")
+		, *SettingsRef.PlatformServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
+
+	FString Content;
+	TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(SyncRequest);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Entitlement::SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDLCSync const& PlaystationModel
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)

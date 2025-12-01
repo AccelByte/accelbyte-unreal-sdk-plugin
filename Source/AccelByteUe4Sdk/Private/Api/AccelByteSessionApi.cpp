@@ -976,6 +976,32 @@ FAccelByteTaskWPtr Session::UpdateMemberStorage(FString const& SessionID
 	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Data.JsonObject.ToSharedRef(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Session::UpdatePartyStorage(FString const& PartyID, FJsonObjectWrapper const& Data, THandler<FJsonObjectWrapper> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	if (!Data.JsonObject.IsValid())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Data has invalid json object!"));
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/storage/users/%s")
+		, *SettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyID)
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
+
+	return HttpClient.ApiRequest(TEXT("PATCH"), Url, {}, Data.JsonObject.ToSharedRef(), OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Session::GetRecentPlayers(THandler<FAccelByteModelsV2SessionRecentPlayers> const& OnSuccess,
 	FErrorHandler const& OnError, const int32 Limit /* = 20 */)
 {

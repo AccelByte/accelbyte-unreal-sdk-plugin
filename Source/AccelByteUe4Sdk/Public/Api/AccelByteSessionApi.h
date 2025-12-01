@@ -585,6 +585,23 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Update current user's party session member storage data.
+	 * This allows users to update or insert their own party storage (non-immutable).
+	 * This will overwrite this user's party storage data. Can store generic JSON.
+	 *
+	 * @param PartyID The ID of the party session.
+	 * @param Data Generic JSON data to update party storage.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr UpdatePartyStorage(FString const& PartyID
+		, FJsonObjectWrapper const& Data
+		, THandler<FJsonObjectWrapper> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Query recently met users in a game session.
 	 *
 	 * @param OnSuccess This will be called if the operation succeeded.

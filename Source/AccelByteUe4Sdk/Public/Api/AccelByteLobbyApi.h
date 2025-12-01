@@ -535,6 +535,11 @@ public:
 	*/
 	DECLARE_MULTICAST_DELEGATE_OneParam(FV2PartyCreatedNotif, FAccelByteModelsV2PartyCreatedEvent);
 
+	/*
+	* @brief Delegate for party created event.
+	*/
+	DECLARE_DELEGATE_OneParam(FV2PartyStorageChangedNotif, FAccelByteModelsV2PartyStorageChangedEvent);
+
 	/**
 	 * @brief Delegate for user invited to game session event.
 	 */
@@ -1548,6 +1553,15 @@ public:
 	void SetV2SessionStorageChangedNotifDelegate(FV2SessionStorageChangedNotif const& OnSessionStorageChangedNotif)
 	{
 		V2SessionStorageChangedNotif = OnSessionStorageChangedNotif;
+	}
+
+	/**
+	 * @brief Set a trigger function when party storage content changes (v2)
+	 * @param OnPartyStorageChangedNotif return models called FAccelByteModelsV2PartyStorageChangedEvent
+	 */
+	void SetV2PartyStorageChangedNotifDelegate(FV2PartyStorageChangedNotif const& OnPartyStorageChangedNotif)
+	{
+		V2PartyStorageChangedNotif = OnPartyStorageChangedNotif;
 	}
 
 	/**
@@ -2870,6 +2884,7 @@ private:
 	FV2PartyUpdatedNotif V2PartyUpdatedNotif;
 	FV2PartyInviteCanceledNotif V2PartyInviteCanceledNotif;
 	FV2PartyCreatedNotif V2PartyCreatedNotif;
+	FV2PartyStorageChangedNotif V2PartyStorageChangedNotif;
 
 	FV2GameSessionInvitedNotif V2GameSessionInvitedNotif;
 	FV2GameSessionInviteTimeoutNotif V2GameSessionInviteTimeoutNotif;

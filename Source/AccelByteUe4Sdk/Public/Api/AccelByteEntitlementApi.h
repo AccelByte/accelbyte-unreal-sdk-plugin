@@ -565,6 +565,19 @@ public:
 	 */
 	FAccelByteTaskWPtr SyncOculusDLC(FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
+	
+	/**
+	 * @brief Synchronize Oculus Subscription.
+	 *
+	 * @param FAccelByteModelsSyncOculusSubscriptionRequest This is the request to specify the sync
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 * 
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SyncOculusSubscription(FAccelByteModelsSyncOculusSubscriptionRequest const& SyncRequest
+		, THandler<TArray<FAccelByteModelsThirdPartySubscriptionTransactionInfo>> const& OnSuccess
+		, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Synchronize with DLC entitlements in PSN Store with multiple service labels.

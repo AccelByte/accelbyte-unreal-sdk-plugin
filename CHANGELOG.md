@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.5.0] (2025-12-01)
+
+
+### Features
+
+* add update party storage 
+* **Meta:** meta subscription synchronization 
+
+
+### Bug Fixes
+
+* add workaround for std::atomic fetch_add for UE4.27 
+* compile error on pre UE5.4 as there's no GetEffectiveURL() method 
+* compile issue with unity build turned off 
+* correcting a crash when log message are too long 
+* improve thread safety of FHTTPRetryScheduler and FHTTPRetryTask 
+* mutex reentry problem when getting http 401 
+* naming convention 
+
 ## [28.4.0] (2025-11-04)
 
 

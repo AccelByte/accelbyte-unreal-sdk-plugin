@@ -3706,6 +3706,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSyncSteamIAPTransactionResponse
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSyncOculusSubscriptionRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | IAP | Models | AccelByteModelsSyncOculusSubscriptionRequest")
+	TArray<FString> SKUs;//Meta Quest Subscription, if it's empty, backend will fetch all of subscription sku which config in AGS subscription config.
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyWallet
 {
 	GENERATED_BODY()
