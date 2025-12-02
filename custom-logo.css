@@ -1,0 +1,20 @@
+/* Custom CSS to ensure AccelByte logo displays correctly */
+
+#projectlogo {
+    display: table-cell !important;
+    vertical-align: middle;
+    padding-right: 10px;
+}
+
+#projectlogo img {
+    display: block !important;
+    max-height: 55px !important;
+    max-width: 200px;
+    width: auto;
+    height: auto;
+}
+
+/* Ensure logo is visible in both light and dark modes */
+html.dark-mode #projectlogo img {
+    display: block !important;
+}

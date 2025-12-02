@@ -1,0 +1,26 @@
+var class_accel_byte_1_1_api_1_1_cloud_save =
+[
+    [ "BulkGetCurrentPlayerPublicRecordKeys", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#ab42a2e2314adb30b83b33595b3639078", null ],
+    [ "BulkGetGameRecords", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a68022670e426155da7ee8fba6a5600b2", null ],
+    [ "BulkGetOtherPlayerPublicRecordKeys", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#ad4952d34ba2da5fe259c65a1ea74be17", null ],
+    [ "BulkGetOtherPlayerPublicRecords", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#ac29cf8bf5c4c8614fa6e639acd28f128", null ],
+    [ "BulkGetPublicUserRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#aa1007f029af8963bc5aa9ae5e482c9ce", null ],
+    [ "BulkGetUserRecords", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#ad1ba298cb545992e29052610f1bfdbfc", null ],
+    [ "DeleteGameRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a0a576e29b343996ad5c95f151b195469", null ],
+    [ "DeleteUserRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a22f3714d7ee816858382c7976b91c60e", null ],
+    [ "GetGameRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a5f4ccd1fa483b627bc1f13d83975566e", null ],
+    [ "GetPublicUserRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#ad524b543f564b65327856a7f78225065", null ],
+    [ "GetUserRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a9106ab608494c6bf61f7b84596dc3b41", null ],
+    [ "ReplaceGameRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a1a8e006f96fa423205565244d5ddff92", null ],
+    [ "ReplaceGameRecordCheckLatest", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a9872316f5cac56e3e481f7c5b4de8e09", null ],
+    [ "ReplaceGameRecordCheckLatest", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a5c79775f9765761e270c217d828bfd5e", null ],
+    [ "ReplaceUserRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#aef797789ec84aa593145418b158741bc", null ],
+    [ "ReplaceUserRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a3877809323ff5cb935cc31c5ca0d245b", null ],
+    [ "ReplaceUserRecordCheckLatest", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#aa0a3d210c18e9c981517904ab8eb5b5b", null ],
+    [ "ReplaceUserRecordCheckLatest", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a3c299cc6b5c9a3f0cdec563b02934345", null ],
+    [ "ReplaceUserRecordCheckLatest", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#ae220c0a7de98cb44ab1b77cb9ee221a0", null ],
+    [ "ReplaceUserRecordCheckLatest", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a5e509fb5e4a8965616cfc04b89e53bb8", null ],
+    [ "SaveGameRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a9908cc394566385e962f271e8f4f156e", null ],
+    [ "SaveUserRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a40df3f82999248b942263e345369373a", null ],
+    [ "SaveUserRecord", "df/dcb/class_accel_byte_1_1_api_1_1_cloud_save.html#a8d5b5119bc48cae4dd33f030d28b4328", null ]
+];
