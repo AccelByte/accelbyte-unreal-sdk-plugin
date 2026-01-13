@@ -1,4 +1,4 @@
-﻿#include "Blueprints/AccelByteBPApiClient.h"
+#include "Blueprints/AccelByteBPApiClient.h"
 
 using namespace AccelByte;
 

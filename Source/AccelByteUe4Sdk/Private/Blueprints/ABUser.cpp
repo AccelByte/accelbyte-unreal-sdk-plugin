@@ -1,4 +1,4 @@
-﻿#include "Blueprints/ABUser.h"
+#include "Blueprints/ABUser.h"
 #include "JsonUtilities.h"
 
 using namespace AccelByte;
