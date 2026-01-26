@@ -364,7 +364,7 @@ namespace AccelByte
 		// Response
 
 		OutMessage += "\n\n---";
-		if(Request.IsValid())
+		if(Response.IsValid())
 		{
 			OutMessage += "\nRESPONSE:";
 			OutMessage += "\n  HTTP " + FString::FromInt(Response->GetResponseCode()) + " " + Response->GetURL();
@@ -382,7 +382,7 @@ namespace AccelByte
 		OutMessage += "\n---";
 	}
 
-	void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage)
+	void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, bool PrintAdditionalDebugMsg)
 	{
 		FErrorInfo Error;
 		Error.NumericErrorCode = -1;
@@ -444,14 +444,14 @@ namespace AccelByte
 			}
 		}
 #if !UE_BUILD_SHIPPING
-		if(GetVerboseHttpErrorMessageSetting())
+		if(PrintAdditionalDebugMsg && GetVerboseHttpErrorMessageSetting())
 		{
 			AddDebugMessage(Request, Response, OutMessage);
 		}
 #endif
 	}
 
-	void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject)
+	void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject, bool PrintAdditionalDebugMsg)
 	{
 		FErrorOAuthInfo Error;
 		Error.ErrorCode = -1;
@@ -554,7 +554,7 @@ namespace AccelByte
 			}
 		}
 #if !UE_BUILD_SHIPPING
-		if(GetVerboseHttpErrorMessageSetting())
+		if(PrintAdditionalDebugMsg && GetVerboseHttpErrorMessageSetting())
 		{
 			AddDebugMessage(Request, Response, OutMessage);
 		}
@@ -572,7 +572,7 @@ namespace AccelByte
 
 	}
 
-	void HandleHttpOAuthError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorOAuthInfo& OutErrorInfo)
+	void HandleHttpOAuthError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorOAuthInfo& OutErrorInfo, bool PrintAdditionalDebugMsg)
 	{
 		int32 Code = 0;
 		OutMessage = "";
@@ -628,14 +628,14 @@ namespace AccelByte
 			}
 		}
 #if !UE_BUILD_SHIPPING
-		if(GetVerboseHttpErrorMessageSetting())
+		if(PrintAdditionalDebugMsg && GetVerboseHttpErrorMessageSetting())
 		{
 			AddDebugMessage(Request, Response, OutMessage);
 		}
 #endif
 	}
 
-	void HandleHttpCreateMatchmakingTicketError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorCreateMatchmakingTicketV2& OutErrorCreateMatchmakingV2)
+	void HandleHttpCreateMatchmakingTicketError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorCreateMatchmakingTicketV2& OutErrorCreateMatchmakingV2, bool PrintAdditionalDebugMsg)
 	{
 		int32 Code = 0;
 		OutMessage = "";
@@ -687,7 +687,7 @@ namespace AccelByte
 			}
 		}
 #if !UE_BUILD_SHIPPING
-		if(GetVerboseHttpErrorMessageSetting())
+		if(PrintAdditionalDebugMsg && GetVerboseHttpErrorMessageSetting())
 		{
 			AddDebugMessage(Request, Response, OutMessage);
 		}

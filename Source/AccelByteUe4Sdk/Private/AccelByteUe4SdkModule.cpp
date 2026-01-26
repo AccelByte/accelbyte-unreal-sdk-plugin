@@ -86,8 +86,6 @@ public:
 	virtual FAccelByteInstancePtr CreateAccelByteInstance() override;
 	virtual FAccelByteInstancePtr CreateAccelByteInstance(AccelByte::Settings & InSettings
 		, AccelByte::ServerSettings & InServerSettings) override;
-
-protected:
 };
 
 void FAccelByteUe4SdkModule::StartupModule()

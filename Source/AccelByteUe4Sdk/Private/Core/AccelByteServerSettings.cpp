@@ -50,7 +50,10 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 		ClientSecret = TEXT("");
 	}
 	
-	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("BaseUrl"), BaseUrl, DefaultServerSection);
+	FString BaseUrlTemp;
+	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("BaseUrl"), BaseUrlTemp, DefaultServerSection);
+	BaseUrl = FAccelByteUtilities::SanitizeUrl(BaseUrlTemp);
+	
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("Namespace"), Namespace, DefaultServerSection);
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("PublisherNamespace"), PublisherNamespace, DefaultServerSection);
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("RedirectURI"), RedirectURI, DefaultServerSection);

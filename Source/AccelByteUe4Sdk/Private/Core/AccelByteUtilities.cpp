@@ -1,4 +1,4 @@
-// Copyright (c) 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2020 - 2025 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -21,6 +21,9 @@
 #include "Interfaces/IPluginManager.h"
 
 using namespace AccelByte;
+
+static const FString AccelByteConfigPrefix = TEXT("ab");
+static const int32 AccelByteConfigPrefixMinLength = 3; // Minimum length for "ab" + at least one character
 
 #if !PLATFORM_SWITCH
 // enclosing with namespace because of collision with Unreal types
@@ -298,6 +301,26 @@ bool FAccelByteUtilities::IsRunningDevMode()
 #else
 	return true;
 #endif
+}
+
+FString FAccelByteUtilities::SanitizeUrl(const FString& URL)
+{
+	FString Result = URL;
+	FRegexPattern UrlRegex(TEXT("^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$"));
+	FRegexMatcher Matcher(UrlRegex, Result);
+
+	if(Matcher.FindNext())
+	{
+		while (Result.EndsWith(TEXT("/")))
+		{
+			Result.RemoveAt(Result.Len() - 1);
+		}
+	}
+	else
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("Invalid URL: %s"), *Result);
+	}
+	return Result;
 }
 
 FString FAccelByteUtilities::AccelByteStorageFile()
@@ -963,16 +986,15 @@ bool FAccelByteUtilities::GetValueFromCommandLineSwitch(FString const& Key
 
 bool FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(FString const& Key
 	, FString& Value)
-{	
-	FString AccelByteDefaultKey = TEXT("ab");
+{
 	FString AccelByteKey = TEXT("");
 	if (ConfigSettings.IsSettingsMapExist(Key))
 	{
-		AccelByteKey.Append(AccelByteDefaultKey).Append(ConfigSettings.GetSettingsMapValue(Key));
+		AccelByteKey.Append(AccelByteConfigPrefix).Append(ConfigSettings.GetSettingsMapValue(Key));
 	}
 	else
 	{
-		AccelByteKey.Append(AccelByteDefaultKey).Append(Key);
+		AccelByteKey.Append(AccelByteConfigPrefix).Append(Key);
 	}
 
 	bool bFoundValue = FindAccelByteKeyFromTokens(AccelByteKey, Value);
@@ -981,7 +1003,8 @@ bool FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(FString const&
 		// If still not exist we just using key from the param
 		if (ConfigSettings.IsSettingsMapExist(Key))
 		{
-			AccelByteKey = AccelByteDefaultKey.Append(Key);
+			AccelByteKey = AccelByteConfigPrefix;
+			AccelByteKey.Append(Key);
 			bFoundValue = FindAccelByteKeyFromTokens(AccelByteKey, Value);
 		}
 	}
@@ -1012,12 +1035,13 @@ bool FAccelByteUtilities::FindAccelByteKeyFromTokens(const FString& AccelByteKey
 			// Check if there is an equals type here to pick the value out of it
 			if (Param.Contains("=", ESearchCase::IgnoreCase, ESearchDir::FromStart))
 			{
-				Value = Param;
-				TArray<FString> ValueParsed{};
-				Value.ParseIntoArray(ValueParsed, TEXT("=")); // Parse the value into an array to pick the value
-				Value = ValueParsed[1]; // Pick the right one for the value
-				Value = Value.Replace(TEXT("\""), TEXT(""), ESearchCase::Type::IgnoreCase); // Remove the double quotes
-				break; // If found the token then we just break the loop since we already found the Value from token
+				FString Left, Right;
+				if (Param.Split(TEXT("="), &Left, &Right))
+				{
+					Value = Right; // Get everything after the first '=' to handle values containing '='
+					Value = Value.Replace(TEXT("\""), TEXT(""), ESearchCase::Type::IgnoreCase); // Remove the double quotes
+					break; // If found the token then we just break the loop since we already found the Value from token
+				}
 			}
 		}
 	}
@@ -1051,40 +1075,94 @@ bool FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(const FString&
 	return true;
 }
 
-bool FAccelByteUtilities::LoadABConfigFallback(const FString& Section, const FString& Key, FString& Value, const FString& DefaultSectionPath)
+/**
+ * Private template helper for unified INI config fallback logic.
+ * Attempts to load from primary section first, then falls back to default section if provided.
+ *
+ * @param Section Primary INI section to check
+ * @param Key Configuration key name
+ * @param Value Reference to store the loaded value
+ * @param DefaultSectionPath Optional fallback section path
+ * @param GetConfigFunc Lambda/function to call GConfig->Get* method for specific type
+ * @return true if value was loaded successfully, false otherwise
+ */
+template<typename T>
+bool LoadConfigValueWithFallback(
+	const FString& Section,
+	const FString& Key,
+	T& Value,
+	const FString& DefaultSectionPath,
+	TFunction<bool(const FString&, const FString&, T&, const FString&)> GetConfigFunc)
 {
-	if (!GetAccelByteConfigFromCommandLineSwitch(Key, Value))
+	// Try primary section first
+	if (!GetConfigFunc(Section, Key, Value, GEngineIni))
 	{
-		if (!GConfig->GetString(*Section, *Key, Value, GEngineIni))
+		// Try default section if primary section failed
+		if (!DefaultSectionPath.IsEmpty())
 		{
-			return GConfig->GetString(*DefaultSectionPath, *Key, Value, GEngineIni);
+			return GetConfigFunc(DefaultSectionPath, Key, Value, GEngineIni);
 		}
+		// No default section provided, return false
+		return false;
 	}
 	return true;
+}
+
+bool FAccelByteUtilities::LoadABConfigFallback(const FString& Section, const FString& Key, FString& Value, const FString& DefaultSectionPath)
+{
+	bool bFoundInCommandLine = GetAccelByteConfigFromCommandLineSwitch(Key, Value);
+
+	if (bFoundInCommandLine)
+	{
+		// Check if the captured value is actually another AccelByte config key (pattern: "ab" + UppercaseLetter)
+		// This handles cases like "-abClientId -abClientSecret" where the value would be incorrectly captured as the next flag
+		bool bIsAccelByteConfigKey = Value.Len() >= AccelByteConfigPrefixMinLength &&
+		                              Value.StartsWith(AccelByteConfigPrefix, ESearchCase::IgnoreCase) &&
+		                              FChar::IsUpper(Value[AccelByteConfigPrefix.Len()]);
+
+		// If command-line value is valid (not empty, not a flag, not another config key), use it
+		if (!Value.IsEmpty() && !Value.StartsWith(TEXT("-")) && !bIsAccelByteConfigKey)
+		{
+			UE_LOG(LogAccelByte, Verbose, TEXT("Using config injection for %s"), *Key);
+			return true;
+		}
+
+		// Invalid command-line value found, clear it before falling back to INI
+		Value = TEXT("");
+	}
+
+	return LoadConfigValueWithFallback<FString>(Section, Key, Value, DefaultSectionPath,
+		[](const FString& Sec, const FString& K, FString& V, const FString& File) {
+			return GConfig->GetString(*Sec, *K, V, File);
+		});
 }
 
 bool FAccelByteUtilities::LoadABConfigFallback(const FString& Section, const FString& Key, bool& Value, const FString& DefaultSectionPath)
 {
-	if (!GetAccelByteConfigFromCommandLineSwitch(Key, Value))
+	if (GetAccelByteConfigFromCommandLineSwitch(Key, Value))
 	{
-		if (!GConfig->GetBool(*Section, *Key, Value, GEngineIni))
-		{
-			return GConfig->GetBool(*DefaultSectionPath, *Key, Value, GEngineIni);
-		}
+		UE_LOG(LogAccelByte, Verbose, TEXT("Using config injection for %s"), *Key);
+		return true;
 	}
-	return true;
+
+	return LoadConfigValueWithFallback<bool>(Section, Key, Value, DefaultSectionPath,
+		[](const FString& Sec, const FString& K, bool& V, const FString& File) {
+			return GConfig->GetBool(*Sec, *K, V, File);
+		});
 }
 
 bool FAccelByteUtilities::LoadABConfigFallback(const FString& Section, const FString& Key, int& Value, const FString& DefaultSectionPath)
 {
-	if (!GetAccelByteConfigFromCommandLineSwitch(Key, Value))
+	if (GetAccelByteConfigFromCommandLineSwitch(Key, Value))
 	{
-		if (!GConfig->GetInt(*Section, *Key, Value, GEngineIni))
-		{
-			return GConfig->GetInt(*DefaultSectionPath, *Key, Value, GEngineIni);
-		}
+		UE_LOG(LogAccelByte, Verbose, TEXT("Using config injection for %s"), *Key);
+		return true;
 	}
-	return true;
+
+	return LoadConfigValueWithFallback<int>(Section, Key, Value, DefaultSectionPath,
+		[](const FString& Sec, const FString& K, int& V, const FString& File) {
+			return GConfig->GetInt(*Sec, *K, V, File);
+		});
 }
 
 void FAccelByteUtilities::SetAuthTrustId(FString const& AuthTrustId)

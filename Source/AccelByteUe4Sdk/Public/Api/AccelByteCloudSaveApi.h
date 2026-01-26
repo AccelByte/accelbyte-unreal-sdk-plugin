@@ -41,10 +41,10 @@ public:
 	virtual ~CloudSave();
 	
 	/**
-	 * @brief Save a user-level record with Metadata input value
-	 * 
-	 * @param Key Key of record. 
-	 * @param SetPublic Metadata is_public value and set by client 
+	 * @brief Save a user-level record with Metadata input value. This method appends to existing records. To replace an existing record please use ReplaceUserRecord.
+	 *
+	 * @param Key Key of record.
+	 * @param SetPublic Metadata is_public value and set by client
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
@@ -58,8 +58,8 @@ public:
 		, const FErrorHandler& OnError);
 	
 	/**
-	 * @brief Save a user-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
-	 * @brief The end point of this method if bIsPublic is true (using suffix /public) will be deprecated in future   
+	 * @brief Save a user-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one. To replace an existing record please use ReplaceUserRecord.
+	 * @brief The end point of this method if bIsPublic is true (using suffix /public) will be deprecated in future
 	 *
 	 * @param Key Key of record.
 	 * @param RecordRequest The request of the record with JSON formatted.
@@ -132,9 +132,9 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
-	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
-	 * @param Key Key of record. 
-	 * @param SetPublic Metadata is_public value and set by client 
+	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one. To append an existing record please use SaveUserRecord.
+	 * @param Key Key of record.
+	 * @param SetPublic Metadata is_public value and set by client
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
@@ -148,8 +148,8 @@ public:
 		, const FErrorHandler& OnError);
 
 	/**
-	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
-	 * @brief The end point of this method if bIsPublic is true (using suffix /public) will be deprecated in future   
+	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one. To append an existing record please use SaveUserRecord.
+	 * @brief The end point of this method if bIsPublic is true (using suffix /public) will be deprecated in future
 	 * @param Key Key of record.
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param IsPublic Save the record as a public/private record.

@@ -54,7 +54,6 @@ public:
 protected:
 	virtual void LoadSettings(const FString& SectionPath) override;
 	virtual void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value) override;
-	void LoadBaseUrlFallback(const FString& SectionPath, FString& Value);
 };
 
 typedef TSharedRef<Settings, ESPMode::ThreadSafe> SettingsRef;

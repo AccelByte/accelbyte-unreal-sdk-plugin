@@ -519,6 +519,12 @@ public:
 
 	/* Obtain the version of the OnlineSubsystemAccelByte plugin. */
 	static FString GetPluginVersionOnlineSubsystemAccelByte();
+	
+	/**
+	 * @brief Try to sanitize the URL by removing trailing slashes
+	 * 
+	 */
+	static FString SanitizeUrl(const FString& URL);
 
 private:
 	static bool FindAccelByteKeyFromTokens(const FString& AccelByteKey, FString& Value);

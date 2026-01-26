@@ -55,7 +55,11 @@ void Settings::LoadSettings(const FString& SectionPath)
 	}
 
 	FAccelByteUtilities::LoadABConfigFallback(Section, TEXT("Namespace"), Namespace, DefaultSection);
-	LoadBaseUrlFallback(Section, BaseUrl);
+
+	FString BaseUrlTemp;
+	FAccelByteUtilities::LoadABConfigFallback(Section, TEXT("BaseUrl"), BaseUrlTemp, DefaultSection);
+	BaseUrl = FAccelByteUtilities::SanitizeUrl(BaseUrlTemp);
+
 	FAccelByteUtilities::LoadABConfigFallback(Section, TEXT("PublisherNamespace"), PublisherNamespace, DefaultSection);
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("RedirectURI"), RedirectURI, DefaultSection);
 
@@ -218,26 +222,6 @@ void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FStr
 		{
 			GConfig->GetString(DefaultSection, *Key, Value, GEngineIni);
 		}
-	}
-}
-
-void Settings::LoadBaseUrlFallback(const FString& SectionPath, FString& Value)
-{
-	FAccelByteUtilities::LoadABConfigFallback(*SectionPath, TEXT("BaseUrl"), Value, DefaultSection);
-
-	FRegexPattern UrlRegex(TEXT("^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$"));
-	FRegexMatcher Matcher(UrlRegex, Value);
-
-	if(Matcher.FindNext())
-	{
-		while (Value.EndsWith(TEXT("/")))
-		{
-			Value.RemoveAt(Value.Len() - 1);
-		}
-	}
-	else
-	{
-		UE_LOG(LogAccelByte, Warning, TEXT("Invalid Base URL: %s"), *Value);
 	}
 }
 

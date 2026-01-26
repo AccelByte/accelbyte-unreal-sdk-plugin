@@ -16,7 +16,8 @@ This documentation assumes that you are already familiar with modern C++, Unreal
 - [x] Unreal Engine 5.3.x
 - [x] Unreal Engine 5.4.x
 - [x] Unreal Engine 5.5.x
-- [x] Unreal Engine 5.6.x (Beta)
+- [x] Unreal Engine 5.6.x
+- [x] Unreal Engine 5.7.x (Beta)
 
 ## Documentation
 The setup and implementation guideline are available in [our portal](https://docs.accelbyte.io/gaming-services/getting-started/setup-game-sdk/unreal-sdk/).

@@ -435,13 +435,13 @@ namespace AccelByte
 		const static std::unordered_map<std::underlying_type<ErrorCodes>::type, FString> Default;
 	};
 
-	ACCELBYTEUE4SDK_API void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage);
+	ACCELBYTEUE4SDK_API void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, bool PrintAdditionalDebugMsg = true);
 
-	ACCELBYTEUE4SDK_API void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject);
+	ACCELBYTEUE4SDK_API void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject, bool PrintAdditionalDebugMsg = true);
 	
-	ACCELBYTEUE4SDK_API void HandleHttpOAuthError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorOAuthInfo& OutErrorInfo);
+	ACCELBYTEUE4SDK_API void HandleHttpOAuthError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorOAuthInfo& OutErrorInfo, bool PrintAdditionalDebugMsg = true);
 
-	ACCELBYTEUE4SDK_API void HandleHttpCreateMatchmakingTicketError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorCreateMatchmakingTicketV2& OutErrorCreateMatchmakingV2);
+	ACCELBYTEUE4SDK_API void HandleHttpCreateMatchmakingTicketError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FErrorCreateMatchmakingTicketV2& OutErrorCreateMatchmakingV2, bool PrintAdditionalDebugMsg = true);
 
 	inline bool HandleHttpResultOk(FHttpResponsePtr Response, TArray<uint8> Payload, const FVoidHandler& OnSuccess)
 	{

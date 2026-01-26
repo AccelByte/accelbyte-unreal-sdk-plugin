@@ -1,10 +1,11 @@
-// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2025 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteOauth2Api.h"
+#include "Core/AccelByteUtilities.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "AccelByteUe4SdkModule.h"
 #include "Core/AccelByteReport.h"
@@ -103,15 +104,16 @@ void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 	
 	FString ClientIdFromConfig;
 	FString ClientSecretFromCConfig;
-	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientIdFromConfig, GEngineIni))
+
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("ClientId"), ClientIdFromConfig, SettingsDefaultSection))
 	{
-		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecretFromCConfig, GEngineIni);
+		ClientIdFromConfig = TEXT("");
 	}
-	else
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("ClientSecret"), ClientSecretFromCConfig, SettingsDefaultSection))
 	{
-		GConfig->GetString(SettingsDefaultSection, TEXT("ClientId"), ClientIdFromConfig, GEngineIni);
-		GConfig->GetString(SettingsDefaultSection, TEXT("ClientSecret"), ClientSecretFromCConfig, GEngineIni);
+		ClientSecretFromCConfig = TEXT("");
 	}
+
 	SetClientCredentials(ClientIdFromConfig, ClientSecretFromCConfig);
 }
 

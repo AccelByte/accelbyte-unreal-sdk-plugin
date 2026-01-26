@@ -63,7 +63,8 @@ FHttpRetryTask::~FHttpRetryTask()
 		return;
 	}
 
-	const bool bIsTaskStateFinishProperly = (TaskState != EAccelByteTaskState::Completed) && (TaskState != EAccelByteTaskState::Failed) && (TaskState != EAccelByteTaskState::Cancelled);
+	const EAccelByteTaskState CurrentTaskState = GetTaskState();
+	const bool bIsTaskStateFinishProperly = (CurrentTaskState != EAccelByteTaskState::Completed) && (CurrentTaskState != EAccelByteTaskState::Failed) && (CurrentTaskState != EAccelByteTaskState::Cancelled);
 	if (ensure(bIsTaskStateFinishProperly))
 	{
 		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Error during HTTP Retry Task Destructor: Task state is not ready to proceed"));

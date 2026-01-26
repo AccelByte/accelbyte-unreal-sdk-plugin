@@ -1,10 +1,11 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2025 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteServerCredentials.h"
 
 #include "Core/AccelByteOauth2Api.h"
+#include "Core/AccelByteUtilities.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "AccelByteUe4SdkModule.h"
 
@@ -68,6 +69,18 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 
 	FString ClientIdFromConfig;
 	FString ClientSecretFromCConfig;
+#if !UE_BUILD_SHIPPING
+	// Check AccelByte command line if exist. For example "GameExecutable -abKey=Value" and fetch the ab value of the key
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("ClientId"), ClientIdFromConfig, ServerSettingsDefaultSection))
+	{
+		ClientIdFromConfig = TEXT("");
+	}
+	if (!FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("ClientSecret"), ClientSecretFromCConfig, ServerSettingsDefaultSection))
+	{
+		ClientSecretFromCConfig = TEXT("");
+	}
+#else
+	// Production builds: read directly from INI without command-line override for security
 	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientIdFromConfig, GEngineIni))
 	{
 		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecretFromCConfig, GEngineIni);
@@ -77,6 +90,7 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 		GConfig->GetString(ServerSettingsDefaultSection, TEXT("ClientId"), ClientIdFromConfig, GEngineIni);
 		GConfig->GetString(ServerSettingsDefaultSection, TEXT("ClientSecret"), ClientSecretFromCConfig, GEngineIni);
 	}
+#endif
 	SetClientCredentials(ClientIdFromConfig, ClientSecretFromCConfig);
 }
 

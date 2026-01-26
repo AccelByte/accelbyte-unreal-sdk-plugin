@@ -14,7 +14,53 @@
 #include "Core/IAccelByteDataStorage.h"
 #include "Core/Platform/AccelBytePlatformHandler.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FEnvironmentChangedDelegate, const ESettingsEnvironment);
+class FEnvironmentChangedDelegate
+{
+public:
+
+	bool IsBound()
+	{
+		FReadScopeLock Lk{Mtx};
+		return ProxyDelegate.IsBound();
+	}
+
+	void Broadcast(const ESettingsEnvironment Environment)
+	{
+		FWriteScopeLock Lk{Mtx};
+		ProxyDelegate.Broadcast(Environment);
+	}
+
+	template <typename UserClass, typename... VarTypes>
+	inline FDelegateHandle AddThreadSafeSP(const TSharedRef<UserClass, ESPMode::ThreadSafe>& InUserObjectRef, typename TMemFunPtrType<false, UserClass, void (const ESettingsEnvironment, std::decay_t<VarTypes>...)>::Type InFunc, VarTypes&&... Vars)
+	{
+		FWriteScopeLock Lk{Mtx};
+		return ProxyDelegate.AddThreadSafeSP(InUserObjectRef, InFunc, Forward<VarTypes>(Vars)...);
+	}
+
+	template <typename UserClass, typename... VarTypes>
+	inline FDelegateHandle AddThreadSafeSP(const TSharedRef<UserClass, ESPMode::ThreadSafe>& InUserObjectRef, typename TMemFunPtrType<true, UserClass, void (const ESettingsEnvironment, std::decay_t<VarTypes>...)>::Type InFunc, VarTypes&&... Vars)
+	{
+		FWriteScopeLock Lk{Mtx};
+		return ProxyDelegate.AddThreadSafeSP(InUserObjectRef, InFunc, Forward<VarTypes>(Vars)...);
+	}
+
+	template<typename FunctorType, typename... VarTypes>
+	FDelegateHandle AddLambda(FunctorType&& InFunctor, VarTypes&&... Vars)
+	{
+		FWriteScopeLock Lk{Mtx};
+		return ProxyDelegate.AddLambda(MoveTemp(InFunctor), Forward<VarTypes>(Vars)...);
+	}
+
+	bool Remove(FDelegateHandle Handle)
+	{
+		FWriteScopeLock Lk{Mtx};
+		return ProxyDelegate.Remove(Handle);
+	}
+
+private:
+	TMulticastDelegate<void(const ESettingsEnvironment)> ProxyDelegate;
+	FRWLock Mtx;
+};
 
 namespace AccelByte
 {

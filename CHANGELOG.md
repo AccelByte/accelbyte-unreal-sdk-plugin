@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+### [28.5.1] (2026-01-26)
+
+
+### Bug Fixes
+
+* fix inaccessible variable in httpRetryTask 
+* fix logical error on parsing accelbyte value as argument 
+* logic error in AddDebugMessage() 
+* sanitize trailing slashes in urls 
+* thread safety issue when accessing FEnvironmentChangedDelegate 
+
+
+### Documentations
+
+* update supported engine to 5.7 as beta support 
+
 ## [28.5.0] (2025-12-01)
 
 
