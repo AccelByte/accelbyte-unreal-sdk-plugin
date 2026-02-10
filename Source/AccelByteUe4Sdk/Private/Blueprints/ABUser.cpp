@@ -1,4 +1,8 @@
-﻿#include "Blueprints/ABUser.h"
+﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
+
+#include "Blueprints/ABUser.h"
 #include "JsonUtilities.h"
 
 using namespace AccelByte;

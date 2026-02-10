@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+### [28.5.2] (2026-02-10)
+
 ### [28.5.1] (2026-01-26)
 
 

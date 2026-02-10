@@ -1,7 +1,6 @@
-﻿// Copyright (c) 2024 AccelByte, Inc. All rights reserved.
-// This is licensed software from Accelbyte Inc, for limitations
-// and restrictions contact your company contract manager
-
+﻿// Copyright (c) 2024 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
 #pragma once
 
 #include "Blueprints/AccelByteBPApiClient.h"

@@ -1,7 +1,8 @@
 {
   "FileVersion": 3,
+  "EngineVersion": "4.27",
   "Version": 77,
-  "VersionName": "28.5.1",
+  "VersionName": "28.5.2",
   "FriendlyName": "AccelByte Unreal Engine SDK",
   "Description": "Official AccelByte SDK for Unreal Engine 4",
   "Category": "Online Platform",
@@ -17,7 +18,18 @@
     {
       "Name": "AccelByteUe4Sdk",
       "Type": "Runtime",
-      "LoadingPhase": "PreDefault"
+      "LoadingPhase": "PreDefault",
+      "PlatformAllowList": [
+        "Win64",
+        "Linux",
+        "PS4",
+        "PS5",
+        "XboxOneGDK",
+        "XSX",
+        "Switch",
+        "Mac",
+        "iOS"
+      ]
     }
   ],
   "Plugins": [
