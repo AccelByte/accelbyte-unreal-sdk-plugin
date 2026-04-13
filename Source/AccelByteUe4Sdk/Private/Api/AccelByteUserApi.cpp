@@ -2623,13 +2623,40 @@ FAccelByteTaskWPtr User::GetInputValidations(FString const& LanguageCode
 	, bool bDefaultOnEmpty)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__),
+		TEXT("This endpoint is deprecated and will be removed in 2026.5 - please use GetInputValidationsByNamespace instead."));
 
 	const FString Url = FString::Printf(TEXT("%s/v3/public/inputValidations")
 		, *SettingsRef.IamServerUrl);
 
-	const TMultiMap<FString, FString> QueryParams ({
-		{"languageCode", *LanguageCode},
-		{"defaultOnEmpty", bDefaultOnEmpty ? TEXT("true") : TEXT("false")}
+	const TMultiMap<FString, FString> QueryParams({
+		{TEXT("languageCode"), LanguageCode},
+		{TEXT("defaultOnEmpty"), bDefaultOnEmpty ? TEXT("true") : TEXT("false")}
+	});
+
+	FHttpFormData QueryData(QueryParams);
+
+	const TMap<FString, FString> Headers = {
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.Request(TEXT("GET"), Url, QueryData, Headers, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::GetInputValidationsByNamespace(FString const& LanguageCode
+	, THandler<FInputValidation> const& OnSuccess
+	, FErrorHandler const& OnError
+	, bool bDefaultOnEmpty)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/inputValidations")
+		, *SettingsRef.IamServerUrl
+		, *FGenericPlatformHttp::UrlEncode(SettingsRef.Namespace));
+
+	const TMultiMap<FString, FString> QueryParams({
+		{TEXT("languageCode"), LanguageCode},
+		{TEXT("defaultOnEmpty"), bDefaultOnEmpty ? TEXT("true") : TEXT("false")}
 	});
 
 	FHttpFormData QueryData(QueryParams);

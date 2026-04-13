@@ -1326,16 +1326,36 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
-	 * @brief This function will get user input validation
+	 * @brief [DEPRECATED - Will be removed in 2026.5] This function will get user input validation.
+	 * Please use GetInputValidationsByNamespace instead.
 	 *
 	 * @param  LanguageCode Targeted Language Code, using ISO-639
 	 * @param  OnSuccess This will be called when the operation succeeded. The result is FInputUserValidation.
 	 * @param  OnError This will be called when the operation failed.
 	 * @param  bDefaultOnEmpty Targeted DefaultOnEmpty.
-	 * 
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 *
+	 * @deprecated Use GetInputValidationsByNamespace instead. Will be removed in version 2026.5.
+	 */
+	[[deprecated("Use GetInputValidationsByNamespace instead. Will be removed in 2026.5")]]
+	FAccelByteTaskWPtr GetInputValidations(FString const& LanguageCode
+		, THandler<FInputValidation> const& OnSuccess
+		, FErrorHandler const& OnError
+		, bool bDefaultOnEmpty = true);
+
+	/**
+	 * @brief This function will get user input validation for the configured namespace.
+	 * The namespace is automatically retrieved from SDK settings (DefaultEngine.ini).
+	 *
+	 * @param  LanguageCode Targeted Language Code, using ISO-639.
+	 * @param  OnSuccess This will be called when the operation succeeded. The result is FInputValidation.
+	 * @param  OnError This will be called when the operation failed.
+	 * @param  bDefaultOnEmpty If true, returns default input validation when no custom rules are found.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
-	FAccelByteTaskWPtr GetInputValidations(FString const& LanguageCode
+	FAccelByteTaskWPtr GetInputValidationsByNamespace(FString const& LanguageCode
 		, THandler<FInputValidation> const& OnSuccess
 		, FErrorHandler const& OnError
 		, bool bDefaultOnEmpty = true);
@@ -1343,7 +1363,7 @@ public:
 	/**
 	 * @brief This function will validate user's input
 	 * This endpoint will check the input validation with profanity filter service
-	 * Call this endpoint GetInputValidations To check the profanity filter enablement
+	 * Call this endpoint GetInputValidationsByNamespace to check the profanity filter enablement
 	 *
 	 * @param  UserInputValidationRequest List of user input validation request
 	 * @param  OnSuccess This will be called when the operation succeeded. The result is FUserInputValidationResponse.

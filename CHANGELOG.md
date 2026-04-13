@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.6.0] (2026-04-13)
+
+
+### Features
+
+* **iam:** add GetInputValidationsByNamespace and deprecate GetInputValidations 
+
+
+### Bug Fixes
+
+* add drop down menu button to add pre and post build step 
+* caching behaviour adherence to RFC-9111 
+
 ### [28.5.2] (2026-02-10)
 
 ### [28.5.1] (2026-01-26)

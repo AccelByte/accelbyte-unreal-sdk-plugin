@@ -24,6 +24,8 @@
 #if WITH_EDITOR
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"
+#include "AccelByteEditorMenu.h"
+#include "ToolMenus.h"
 #endif
 
 class FAccelByteUe4SdkModule 
@@ -102,6 +104,9 @@ void FAccelByteUe4SdkModule::StartupModule()
 	SettingsEnvironment = ESettingsEnvironment::Default;
 
 	RegisterSettings();
+#if WITH_EDITOR
+	AccelByte::Editor::RegisterMenu(this);
+#endif
 	LoadSettingsFromConfigUObject();
 	LoadServerSettingsFromConfigUObject();
 
@@ -151,6 +156,10 @@ void FAccelByteUe4SdkModule::PostStartup()
 void FAccelByteUe4SdkModule::ShutdownModule()
 {
 	UnregisterSettings();
+#if WITH_EDITOR
+	UToolMenus::UnRegisterStartupCallback(this);
+	UToolMenus::UnregisterOwner(this);
+#endif
 
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceStartHandle);
 

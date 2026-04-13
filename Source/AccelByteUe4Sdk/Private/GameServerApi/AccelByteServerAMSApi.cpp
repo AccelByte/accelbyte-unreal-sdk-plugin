@@ -246,6 +246,18 @@ void ServerAMS::SendReadyMessage()
 	}
 }
 
+void ServerAMS::SendClaimMessage(FString const &SessionId) {
+	if (!IsConnected()) {
+		UE_LOG(LogAccelByteAMS, Warning, TEXT("DS is not connected to AMS yet!"));
+		return;
+	}
+
+	FString ClaimMessage = FString::Format(TEXT("{\"claim\":{\"sessionId\":\"{0}\"}}"), {SessionId});
+
+	UE_LOG(LogAccelByteAMS, Log, TEXT("Send claim message to AMS\n%s"), *ClaimMessage);
+	WebSocket->Send(ClaimMessage);
+}
+
 void ServerAMS::SendHeartbeat()
 {
 	if (!IsConnected())

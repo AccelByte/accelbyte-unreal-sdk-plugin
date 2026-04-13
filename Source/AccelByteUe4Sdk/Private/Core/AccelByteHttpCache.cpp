@@ -142,7 +142,7 @@ bool FAccelByteHttpCache::IsResponseCacheable(const FHttpRequestPtr& CompletedRe
 		return false;
 	}
 
-	//If http 304 or between http 200 - 204
+	//If http status is below 200 or above 204 or 304
 	auto ResponseCode = ResponsePtr->GetResponseCode();
 	if(ResponseCode != EHttpResponseCodes::NotModified && (ResponseCode < EHttpResponseCodes::Ok || ResponseCode > EHttpResponseCodes::NoContent))
 	{
@@ -153,10 +153,11 @@ bool FAccelByteHttpCache::IsResponseCacheable(const FHttpRequestPtr& CompletedRe
 	const FString CacheControlHeader = ResponsePtr->GetHeader(HTTPHeader::Cache::Control);
 	if(CacheControlHeader.IsEmpty())
 	{
-		//@TODO atm default behavior is to cache, even without CacheControl directives, might be better to
-		// follow the convention only caching with valid cache control directive. so we dont need to handle valid verb manually
-		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response has empty CacheControlHeader"));
-		return false; 
+		// RFC-9111 mandated that the default behaviour is to cache https://www.rfc-editor.org/rfc/rfc9111.html
+		// RFC-9111 4.2.2: in the absence of an explicit expiration time, a cache MAY
+		// use a heuristic to determine freshness. Default to caching with a short TTL.
+		UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response has no Cache-Control header; applying default caching behaviour"));
+		return true;
 	}
 	UE_LOG(LogAccelByteHttpCache, VeryVerbose, TEXT("Response has valid CacheControlHeader: %s"),*CacheControlHeader);
 	FString MaxAge = ExtractControlDirective(CacheControlHeader, HTTPHeader::Cache::ControlDirective::MaxAge);
@@ -255,7 +256,7 @@ bool FAccelByteHttpCache::TryStoring(const FHttpRequestPtr& Request)
 		TimeInProxyCache = FCString::Atoi(*CacheAge);
 	}
 
-	double ResponseAgeThreshold = 0;
+	int ResponseAgeThreshold = 0;
 	FString CacheControlHeader = Response->GetHeader(HTTPHeader::Cache::Control);
 	if (!CacheControlHeader.IsEmpty())
 	{
@@ -263,13 +264,18 @@ bool FAccelByteHttpCache::TryStoring(const FHttpRequestPtr& Request)
 		if (!MaxAge.IsEmpty())
 		{
 			int ResponseAgeThresholdInt = FCString::Atoi(*MaxAge);
-			ResponseAgeThreshold = static_cast<double>(ResponseAgeThresholdInt);
+			ResponseAgeThreshold = ResponseAgeThresholdInt;
 		}
 	}
-
+	else
+	{
+		ResponseAgeThreshold = MaxAgeCacheLowerThreshold; // If there's no cache-control header then use the lowerthreshold
+	}
+	// If time in proxy is longer than age threshold then use the threshold
+	int ExpireTimeRemaining = (ResponseAgeThreshold - TimeInProxyCache) < 0 ? ResponseAgeThreshold : (ResponseAgeThreshold - TimeInProxyCache);
 	FAccelByteHttpCacheItem NewCacheItem;
 	const double TimeNow = FPlatformTime::Seconds();
-	NewCacheItem.ExpireTime = TimeNow + ResponseAgeThreshold - TimeInProxyCache;
+	NewCacheItem.ExpireTime = TimeNow + ExpireTimeRemaining;
 	NewCacheItem.SerializableRequestAndResponse.Serialize(Request, NewCacheItem.ExpireTime);
 
 	const FName Key = ConstructKey(Request);

@@ -90,6 +90,11 @@ public:
 	void SendReadyMessage();
 
 	/**
+	 * @brief signal AMS to mark this DS as claimed
+	 */
+	void SendClaimMessage(FString const& SessionId);
+
+	/**
 	 * @brief set delegate to be called when drain message is received. Only able to set one delegate.
 	 * For multiple delegate, please refer to AddOnAMSDrainReceivedMulticastDelegate.
 	 *
