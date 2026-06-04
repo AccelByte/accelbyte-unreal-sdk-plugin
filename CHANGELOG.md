@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.7.0] (2026-06-04)
+
+
+### Features
+
+* add data race guard 
+* add password_protected joinability 
+* **iam:** add force platform link v3 and deprecate ForcedLinkOtherPlatform (AAX-1876) 
+
+
+### Bug Fixes
+
+* adhere to PR review 
+* default bServerUseAMS to enabled 
+* default url of ams-qosm 
+* fix thread safety issue with reference returning methods in Credential classes 
+* **http:** guard retry scheduler shutdown against post-module teardown (ASP-13212) 
+* **openssl:** replace openssl namespace wrapper with UI typedef guard for Mac/Clang compatibility 
+* prevent replayed notif from being buffered 
+* **report:** mask camelCase password fields in log content (ASP-13073) 
+* thread safety issues in FAccelBytePlatformHandler 
+* **user:** skip ForgetAll when session is Valid or Refreshing (ASP-13260) 
+* wrong delegate assignments 
+
+
+### Documentations
+
+* added introduction doc 
+* remove support for UE5.0 - UE5.4 
+
 ## [28.6.0] (2026-04-13)
 
 

@@ -997,14 +997,17 @@ public:
 		, FCustomErrorHandler const& OnError);
 
 	/**
-	 * @brief This function forced links user's current account to their other account in other platform.
+	 * @brief [DEPRECATED] This function forced links user's current account to their other account in other platform.
 	 * Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
 	 *
 	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 	 * @param PlatformUserId The UserId from the other platfrom you want to link.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * 
+	 *
+	 * @deprecated This method uses a deprecated IAM endpoint and will be removed in a future release.
+	 * Please use ForcePlatformLinkV3() instead, which uses ticket-based authentication.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
@@ -1013,18 +1016,38 @@ public:
 		, FOAuthErrorHandler const& OnError);
 
 	/**
-	 * @brief This function forced links user's current account to their other account in other platform.
+	 * @brief [DEPRECATED] This function forced links user's current account to their other account in other platform.
 	 * Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
 	 *
 	 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 	 * @param PlatformUserId The UserId from the other platfrom you want to link.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * 
+	 *
+	 * @deprecated This method uses a deprecated IAM endpoint and will be removed in a future release.
+	 * Please use ForcePlatformLinkV3() instead, which uses ticket-based authentication.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, FString const& PlatformUserId
+		, FVoidHandler const& OnSuccess
+		, FCustomErrorHandler const& OnError);
+
+	/**
+	 * @brief Force link user's current account to their other account in other platform using a platform ticket.
+	 * This endpoint supports OIDC and uses platform ticket instead of platform user ID.
+	 * Ticket (Platform Token/Authorization Code) can be obtained from platform OSS or plugin.
+	 *
+	 * @param PlatformId Platform ID string (e.g., "steam", "psn", "live"). Supports OIDC platform IDs.
+	 * @param Ticket The Ticket/Token from platform authentication
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr ForcePlatformLinkV3(FString const& PlatformId
+		, FString const& Ticket
 		, FVoidHandler const& OnSuccess
 		, FCustomErrorHandler const& OnError);
 

@@ -46,28 +46,28 @@ void FRSAEncryptionOpenSSL::Empty()
 }
 
 #if !PLATFORM_SWITCH
-void FRSAEncryptionOpenSSL::LoadBinaryIntoBigNum(const TArray<uint8>& InData, openssl::BIGNUM* InBigNum)
+void FRSAEncryptionOpenSSL::LoadBinaryIntoBigNum(const TArray<uint8>& InData, ::BIGNUM* InBigNum)
 {
 #if USE_LEGACY_OPENSSL
 	TArray<uint8> Bytes(InData.GetData(), InData.Num());
 	Algo::Reverse(Bytes);
-	BN_bin2bn(Bytes.GetData(), Bytes.Num(), InBigNum);
+	::BN_bin2bn(Bytes.GetData(), Bytes.Num(), InBigNum);
 #else
-	BN_lebin2bn(InData.GetData(), InData.Num(), InBigNum);
+	::BN_lebin2bn(InData.GetData(), InData.Num(), InBigNum);
 #endif
 }
 
-void FRSAEncryptionOpenSSL::BigNumToArray(const openssl::BIGNUM* InNum, TArray<uint8>& OutBytes, int32 InKeySize)
+void FRSAEncryptionOpenSSL::BigNumToArray(const ::BIGNUM* InNum, TArray<uint8>& OutBytes, int32 InKeySize)
 {
 	int32 NumBytes = BN_num_bytes(InNum);
 	check(NumBytes <= InKeySize);
 	OutBytes.SetNumZeroed(NumBytes);
 
 #if USE_LEGACY_OPENSSL
-	openssl::BN_bn2bin(InNum, OutBytes.GetData());
+	::BN_bn2bin(InNum, OutBytes.GetData());
 	Algo::Reverse(OutBytes);
 #else
-	openssl::BN_bn2lebinpad(InNum, static_cast<unsigned char*>(OutBytes.GetData()), NumBytes);
+	::BN_bn2lebinpad(InNum, static_cast<unsigned char*>(OutBytes.GetData()), NumBytes);
 #endif
 }
 #endif // !PLATFORM_SWITCH
@@ -86,19 +86,26 @@ FRSAKeyHandle FRSAEncryptionOpenSSL::GenerateNewKey(int32 InKeySizeInBits)
 	}
 
 #if !PLATFORM_SWITCH
-	Key = openssl::RSA_new();
-	openssl::BIGNUM* E = openssl::BN_new();
-	openssl::BN_set_word(E, RSA_F4);
-	openssl::RSA_generate_key_ex((openssl::RSA*)Key, KeySizeInBits, E, nullptr);
+	Key = ::RSA_new();
+	::BIGNUM* E = ::BN_new();
+	::BN_set_word(E, RSA_F4);
+	int GenerateResult = ::RSA_generate_key_ex((::RSA*)Key, KeySizeInBits, E, nullptr);
+	::BN_free(E);
+	if (GenerateResult != 1)
+	{
+		::RSA_free((::RSA*)Key);
+		Key = nullptr;
+		return nullptr;
+	}
 
 #if USE_LEGACY_OPENSSL
-	const openssl::BIGNUM* localPublicModulus = Key->n;
-	const openssl::BIGNUM* localPublicExponent = Key->e;
-	const openssl::BIGNUM* localPrivateExponent = Key->d;
+	const ::BIGNUM* localPublicModulus = Key->n;
+	const ::BIGNUM* localPublicExponent = Key->e;
+	const ::BIGNUM* localPrivateExponent = Key->d;
 #else
-	const openssl::BIGNUM* localPublicModulus = openssl::RSA_get0_n((openssl::RSA*)Key);
-	const openssl::BIGNUM* localPublicExponent = openssl::RSA_get0_e((openssl::RSA*)Key);
-	const openssl::BIGNUM* localPrivateExponent = openssl::RSA_get0_d((openssl::RSA*)Key);
+	const ::BIGNUM* localPublicModulus = ::RSA_get0_n((::RSA*)Key);
+	const ::BIGNUM* localPublicExponent = ::RSA_get0_e((::RSA*)Key);
+	const ::BIGNUM* localPrivateExponent = ::RSA_get0_d((::RSA*)Key);
 #endif
 
 	BigNumToArray(localPublicModulus, Modulus, KeySizeInBytes);
@@ -124,11 +131,9 @@ FRSAKeyHandle FRSAEncryptionOpenSSL::CreateKey(const TArray<uint8>& InPublicExpo
 
 #if !PLATFORM_SWITCH
 
-	Key = openssl::RSA_new();
-
-	openssl::BIGNUM* BN_PublicExponent = PublicExponent.Num() > 0 ? openssl::BN_new() : nullptr;
-	openssl::BIGNUM* BN_PrivateExponent = PrivateExponent.Num() > 0 ? openssl::BN_new() : nullptr;
-	openssl::BIGNUM* BN_Modulus = openssl::BN_new();
+	::BIGNUM* BN_PublicExponent = PublicExponent.Num() > 0 ? ::BN_new() : nullptr;
+	::BIGNUM* BN_PrivateExponent = PrivateExponent.Num() > 0 ? ::BN_new() : nullptr;
+	::BIGNUM* BN_Modulus = ::BN_new();
 
 	if (PublicExponent.Num())
 	{
@@ -142,12 +147,21 @@ FRSAKeyHandle FRSAEncryptionOpenSSL::CreateKey(const TArray<uint8>& InPublicExpo
 
 	LoadBinaryIntoBigNum(Modulus, BN_Modulus);
 
+	Key = ::RSA_new();
+	if (Key == nullptr)
+	{
+		::BN_free(BN_Modulus);
+		::BN_free(BN_PublicExponent);
+		::BN_free(BN_PrivateExponent);
+		return nullptr;
+	}
+
 #if USE_LEGACY_OPENSSL
 	Key->n = BN_Modulus;
 	Key->e = BN_PublicExponent;
 	Key->d = BN_PrivateExponent;
 #else
-	openssl::RSA_set0_key((openssl::RSA*)Key, BN_Modulus, BN_PublicExponent, BN_PrivateExponent);
+	::RSA_set0_key((::RSA*)Key, BN_Modulus, BN_PublicExponent, BN_PrivateExponent);
 #endif
 
 #endif // !PLATFORM_SWITCH
@@ -165,34 +179,39 @@ bool FRSAEncryptionOpenSSL::OnSign(const FRSAKeyHandle InKey, const TArray<uint8
 	bool NeedSigning = true;
 	size_t OutLength = 0;
 
-	openssl::EVP_MD_CTX* RSASignCtx = openssl::EVP_MD_CTX_create();
+	::EVP_MD_CTX* RSASignCtx = ::EVP_MD_CTX_create();
 	if (RSASignCtx == nullptr)
 	{
 		return Result;
 	}
 
-	openssl::EVP_PKEY* RSAKeyPairSpec = openssl::EVP_PKEY_new();
+	::EVP_PKEY* RSAKeyPairSpec = ::EVP_PKEY_new();
+	if (RSAKeyPairSpec == nullptr)
+	{
+		::EVP_MD_CTX_destroy(RSASignCtx);
+		return Result;
+	}
 
-	openssl::EVP_PKEY_assign_RSA(RSAKeyPairSpec, InKey);
+	::EVP_PKEY_set1_RSA(RSAKeyPairSpec, (::RSA*)InKey);
 
-	NeedSigning &= openssl::EVP_DigestSignInit(RSASignCtx, nullptr, openssl::EVP_sha256(), nullptr, RSAKeyPairSpec) > 0;
-	NeedSigning &= openssl::EVP_DigestSignUpdate(RSASignCtx, InMsg.GetData(), InMsg.Num()) > 0;
-	NeedSigning &= openssl::EVP_DigestSignFinal(RSASignCtx, nullptr, &OutLength) > 0;
+	NeedSigning &= ::EVP_DigestSignInit(RSASignCtx, nullptr, ::EVP_sha256(), nullptr, RSAKeyPairSpec) > 0;
+	NeedSigning &= ::EVP_DigestSignUpdate(RSASignCtx, InMsg.GetData(), InMsg.Num()) > 0;
+	NeedSigning &= ::EVP_DigestSignFinal(RSASignCtx, nullptr, &OutLength) > 0;
 
 	if (NeedSigning)
 	{
 		Out.AddUninitialized(OutLength);
 		Out[Out.Num() - 1] = 0;
-		if (EVP_DigestSignFinal(RSASignCtx, Out.GetData(), &OutLength) > 0)
+		if (::EVP_DigestSignFinal(RSASignCtx, Out.GetData(), &OutLength) > 0)
 		{
 			Result = true;
 		}
 	}
 
-	openssl::EVP_MD_CTX_destroy(RSASignCtx);
+	::EVP_MD_CTX_destroy(RSASignCtx);
 	RSASignCtx = nullptr;
-
-
+	::EVP_PKEY_free(RSAKeyPairSpec);
+	RSAKeyPairSpec = nullptr;
 
 	return Result;
 }
@@ -203,29 +222,36 @@ bool FRSAEncryptionOpenSSL::OnVerifySignature(FRSAKeyHandle InKey, const TArray<
 
 	bool NeedVerify = true;
 
-	openssl::EVP_MD_CTX* m_RSAVerifyCtx = openssl::EVP_MD_CTX_create();
+	::EVP_MD_CTX* m_RSAVerifyCtx = ::EVP_MD_CTX_create();
 	if (m_RSAVerifyCtx == nullptr)
 	{
 		return Result;
 	}
 
-	openssl::EVP_PKEY* RSAKeyPairSpec = openssl::EVP_PKEY_new();
-	openssl::EVP_PKEY_assign_RSA(RSAKeyPairSpec, InKey);
+	::EVP_PKEY* RSAKeyPairSpec = ::EVP_PKEY_new();
+	if (RSAKeyPairSpec == nullptr)
+	{
+		::EVP_MD_CTX_destroy(m_RSAVerifyCtx);
+		return Result;
+	}
+	::EVP_PKEY_set1_RSA(RSAKeyPairSpec, (::RSA*)InKey);
 
-	NeedVerify &= openssl::EVP_DigestVerifyInit(m_RSAVerifyCtx, NULL, openssl::EVP_sha256(), NULL, RSAKeyPairSpec) > 0;
-	NeedVerify &= openssl::EVP_DigestVerifyUpdate(m_RSAVerifyCtx, InMsg.GetData(), InMsg.Num()) > 0;
+	NeedVerify &= ::EVP_DigestVerifyInit(m_RSAVerifyCtx, NULL, ::EVP_sha256(), NULL, RSAKeyPairSpec) > 0;
+	NeedVerify &= ::EVP_DigestVerifyUpdate(m_RSAVerifyCtx, InMsg.GetData(), InMsg.Num()) > 0;
 
 	if (NeedVerify)
 	{
-		int AuthStatus = openssl::EVP_DigestVerifyFinal(m_RSAVerifyCtx, Signature.GetData(), Signature.Num());
+		int AuthStatus = ::EVP_DigestVerifyFinal(m_RSAVerifyCtx, Signature.GetData(), Signature.Num());
 		if (AuthStatus == 1)
 		{
 			Result = true;
 		}
 	}
 
-	openssl::EVP_MD_CTX_destroy(m_RSAVerifyCtx);
+	::EVP_MD_CTX_destroy(m_RSAVerifyCtx);
 	m_RSAVerifyCtx = nullptr;
+	::EVP_PKEY_free(RSAKeyPairSpec);
+	RSAKeyPairSpec = nullptr;
 
 	return Result;
 }
@@ -302,7 +328,7 @@ int32 FRSAEncryptionOpenSSL::EncryptPublic(const TArrayView<const uint8> InSourc
 
 	OutDestination.SetNum(GetKeySizeInBytes());
 	int NumEncryptedBytes = -1;
-	NumEncryptedBytes = openssl::RSA_public_encrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (openssl::RSA*)Key, PaddingMode);
+	NumEncryptedBytes = ::RSA_public_encrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (::RSA*)Key, PaddingMode);
 	if (NumEncryptedBytes == -1)
 	{
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FRSAEncryptionOpenSSL::EncryptPublic: not supported PaddingMode."));
@@ -330,7 +356,7 @@ int32 FRSAEncryptionOpenSSL::DecryptPublic(const TArrayView<const uint8> InSourc
 	OutDestination.SetNum(GetMaxDataSize());
 
 	int NumDecryptedBytes = -1;
-	NumDecryptedBytes = openssl::RSA_public_decrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (openssl::RSA*)Key, PaddingMode);
+	NumDecryptedBytes = ::RSA_public_decrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (::RSA*)Key, PaddingMode);
 
 	if (NumDecryptedBytes == -1)
 	{
@@ -368,7 +394,7 @@ int32 FRSAEncryptionOpenSSL::EncryptPrivate(const TArrayView<const uint8> InSour
 	OutDestination.SetNum(GetKeySizeInBytes());
 
 	int NumEncryptedBytes = -1;
-	NumEncryptedBytes = RSA_private_encrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (openssl::RSA*)Key, PaddingMode);
+	NumEncryptedBytes = ::RSA_private_encrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (::RSA*)Key, PaddingMode);
 
 	if (NumEncryptedBytes == -1)
 	{
@@ -397,7 +423,7 @@ int32 FRSAEncryptionOpenSSL::DecryptPrivate(const TArrayView<const uint8> InSour
 	OutDestination.SetNum(GetMaxDataSize());
 
 	int NumDecryptedBytes = -1;
-	NumDecryptedBytes = RSA_private_decrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (openssl::RSA*)Key, PaddingMode);
+	NumDecryptedBytes = ::RSA_private_decrypt(InSource.Num(), InSource.GetData(), OutDestination.GetData(), (::RSA*)Key, PaddingMode);
 
 	if (NumDecryptedBytes == -1)
 	{
@@ -416,9 +442,16 @@ void FRSAEncryptionOpenSSL::DestroyKey(FRSAKeyHandle InKey)
 #if !PLATFORM_SWITCH
 	if (nullptr == InKey)
 	{
-		return openssl::RSA_free((openssl::RSA*)Key);
+		::RSA_free((::RSA*)Key);
+		Key = nullptr;
+		return;
 	}
-	openssl::RSA_free((openssl::RSA*)InKey);
+	::RSA_free((::RSA*)InKey);
+	if (InKey == Key)
+	{
+		Key = nullptr;
+		State = EState::Uninitialized;
+	}
 #endif // !PLATFORM_SWITCH
 }
 
@@ -432,7 +465,7 @@ int32 FRSAEncryptionOpenSSL::GetKeySizeInBytes(FRSAKeyHandle InKey)
 #if PLATFORM_SWITCH
 	return KeySizeInBytes;
 #else
-	return openssl::RSA_size((openssl::RSA*)InKey);
+	return ::RSA_size((::RSA*)InKey);
 #endif // PLATFORM_SWITCH
 }
 
@@ -448,11 +481,11 @@ void FAESEncryptionOpenSSL::Initialize()
 	/** Select encryption module based on cipher size (Bytes) */
 	switch (Key.Num())
 	{
-		case 16: Cipher = openssl::EVP_aes_128_cbc(); break;
-		case 24: Cipher = openssl::EVP_aes_192_cbc(); break;
-		//case 32: Cipher = openssl::EVP_aes_256_cbc(); break;
-		//case 32: Cipher = openssl::EVP_aes_256_cbc_hmac_sha1(); break;
-		case 32: Cipher = openssl::EVP_aes_256_cbc_hmac_sha256(); break;
+		case 16: Cipher = ::EVP_aes_128_cbc(); break;
+		case 24: Cipher = ::EVP_aes_192_cbc(); break;
+		//case 32: Cipher = ::EVP_aes_256_cbc(); break;
+		//case 32: Cipher = ::EVP_aes_256_cbc_hmac_sha1(); break;
+		case 32: Cipher = ::EVP_aes_256_cbc_hmac_sha256(); break;
 		default: return;
 	}
 #endif // !PLATFORM_SWITCH
@@ -484,7 +517,7 @@ bool FAESEncryptionOpenSSL::GenerateRandomBytes(TArray<uint8>& OutKey, uint32& I
 	OutKey.Empty(InSizeBytes);
 	OutKey.AddUninitialized(InSizeBytes);
 
-	bResult = !!openssl::RAND_bytes(&OutKey[0], InSizeBytes);
+	bResult = !!::RAND_bytes(&OutKey[0], InSizeBytes);
 	if (!bResult)
 	{
 		OutKey.Empty();
@@ -547,7 +580,7 @@ void FAESEncryptionOpenSSL::Decrypt(const TArrayView<const uint8>& InCiphertext,
 	const uint8* const KeyPtr = Key.GetData();
 	const uint8* const InitializationVectorPtr = IV.GetData();
 
-	int32 InitResult = openssl::EVP_DecryptInit_ex(CipherCtx.Get(), Cipher, nullptr, KeyPtr, InitializationVectorPtr);
+	int32 InitResult = ::EVP_DecryptInit_ex(CipherCtx.Get(), Cipher, nullptr, KeyPtr, InitializationVectorPtr);
 
 	if (InitResult != 1)
 	{
@@ -556,7 +589,7 @@ void FAESEncryptionOpenSSL::Decrypt(const TArrayView<const uint8>& InCiphertext,
 	}
 
 	int32 UpdateBytesWritten = 0;
-	const int UpdateResult = openssl::EVP_DecryptUpdate(CipherCtx.Get(), OutPlaintext.GetData(), &UpdateBytesWritten, InCiphertext.GetData(), InCiphertext.Num());
+	const int UpdateResult = ::EVP_DecryptUpdate(CipherCtx.Get(), OutPlaintext.GetData(), &UpdateBytesWritten, InCiphertext.GetData(), InCiphertext.Num());
 	if (UpdateResult != 1)
 	{
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Decrypt: EVP_DecryptUpdate failed. Result=[%d]"), UpdateResult);
@@ -569,7 +602,7 @@ void FAESEncryptionOpenSSL::Decrypt(const TArrayView<const uint8>& InCiphertext,
 	}
 
 	int32 FinalizeBytesWritten = 0;
-	const int FinalizeResult = openssl::EVP_DecryptFinal_ex(CipherCtx.Get(), OutPlaintext.GetData() + UpdateBytesWritten, &FinalizeBytesWritten);
+	const int FinalizeResult = ::EVP_DecryptFinal_ex(CipherCtx.Get(), OutPlaintext.GetData() + UpdateBytesWritten, &FinalizeBytesWritten);
 	if (FinalizeResult != 1)
 	{
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Decrypt: EVP_DecryptFinal_ex failed. Result=[%d]"), FinalizeResult);
@@ -602,7 +635,7 @@ void FAESEncryptionOpenSSL::Encrypt(const TArrayView<const uint8>& InPlaintext, 
 	const uint8* const KeyPtr = Key.GetData();
 	const uint8* const InitializationVectorPtr = IV.GetData();
 
-	int32 InitResult = openssl::EVP_EncryptInit_ex(CipherCtx.Get(), Cipher, nullptr, KeyPtr, InitializationVectorPtr);
+	int32 InitResult = ::EVP_EncryptInit_ex(CipherCtx.Get(), Cipher, nullptr, KeyPtr, InitializationVectorPtr);
 
 	if (InitResult != 1)
 	{
@@ -611,7 +644,7 @@ void FAESEncryptionOpenSSL::Encrypt(const TArrayView<const uint8>& InPlaintext, 
 	}
 
 	int32 UpdateBytesWritten = 0;
-	const int UpdateResult = openssl::EVP_EncryptUpdate(CipherCtx.Get(), OutCiphertext.GetData(), &UpdateBytesWritten, InPlaintext.GetData(), InPlaintext.Num());
+	const int UpdateResult = ::EVP_EncryptUpdate(CipherCtx.Get(), OutCiphertext.GetData(), &UpdateBytesWritten, InPlaintext.GetData(), InPlaintext.Num());
 	if (UpdateResult != 1)
 	{
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Encrypt: EVP_EncryptUpdate failed. Result=[%d]"), UpdateResult);
@@ -624,7 +657,7 @@ void FAESEncryptionOpenSSL::Encrypt(const TArrayView<const uint8>& InPlaintext, 
 	}
 
 	int32 FinalizeBytesWritten = 0;
-	const int FinalizeResult = openssl::EVP_EncryptFinal_ex(CipherCtx.Get(), OutCiphertext.GetData() + UpdateBytesWritten, &FinalizeBytesWritten);
+	const int FinalizeResult = ::EVP_EncryptFinal_ex(CipherCtx.Get(), OutCiphertext.GetData() + UpdateBytesWritten, &FinalizeBytesWritten);
 	if (FinalizeResult != 1)
 	{
 		UE_LOG(LogAccelByteOpenSSL, Warning, TEXT("FAESEncryptionOpenSSL::Encrypt: EVP_EncryptFinal_ex failed. Result=[%d]"), FinalizeResult);

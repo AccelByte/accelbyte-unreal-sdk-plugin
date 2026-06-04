@@ -171,12 +171,27 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Join a PASSWORD_PROTECTED game session by ID, supplying the required password.
+	 *
+	 * @param GameSessionID The ID of the session.
+	 * @param Password The password required to join the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr JoinGameSession(FString const& GameSessionID
+		, FString const& Password
+		, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Join a game session by Code.
 	 *
 	 * @param Code The session's code.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
-	 * 
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr JoinGameSessionByCode(FString const& Code
@@ -408,12 +423,27 @@ public:
 		, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Join a PASSWORD_PROTECTED party by ID, supplying the required password.
+	 *
+	 * @param PartyID The ID of the party session which will be joined.
+	 * @param Password The password required to join the party.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr JoinParty(FString const& PartyID
+		, FString const& Password
+		, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Leave a party on behalf of the user.
 	 *
 	 * @param PartyID The ID of the party session which will be joined.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
-	 * 
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr LeaveParty(FString const& PartyID
@@ -629,16 +659,76 @@ public:
 
 	/**
 	 * @brief  Used by game client to get a session secret that is saved in session service.
-	 * The secret will only return the secret value when the Enable Secret Validation option is set true (in the Admin Portal). 
+	 * The secret will only return the secret value when the Enable Secret Validation option is set true (in the Admin Portal).
 	 *
 	 * @param SessionID The ID of the game session.
 	 * @param OnSuccess This will be called if the operation succeeded.
 	 * @param OnError This will be called if the operation failed.
-	 * 
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr GetSessionSecret(FString const& SessionID
 		, THandler<FAccelByteModelsV2SessionJoinedSecret> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get the plaintext password of a PASSWORD_PROTECTED game session.
+	 * Only active members of the session (status JOINED or CONNECTED) may call this.
+	 *
+	 * @param GameSessionID The ID of the game session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetGameSessionPassword(FString const& GameSessionID
+		, THandler<FAccelByteModelsV2SessionPasswordResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Get the plaintext password of a PASSWORD_PROTECTED party.
+	 * Only active members of the party (status JOINED or CONNECTED) may call this.
+	 *
+	 * @param PartyID The ID of the party.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetPartyPassword(FString const& PartyID
+		, THandler<FAccelByteModelsV2SessionPasswordResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Update the password of a PASSWORD_PROTECTED game session.
+	 * Only the session leader may call this endpoint.
+	 *
+	 * @param GameSessionID The ID of the game session.
+	 * @param NewPassword The new password to set on the session.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr UpdateGameSessionPassword(FString const& GameSessionID
+		, FString const& NewPassword
+		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Update the password of a PASSWORD_PROTECTED party.
+	 * Only the party leader may call this endpoint.
+	 *
+	 * @param PartyID The ID of the party.
+	 * @param NewPassword The new password to set on the party.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr UpdatePartyPassword(FString const& PartyID
+		, FString const& NewPassword
+		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
 
 private:

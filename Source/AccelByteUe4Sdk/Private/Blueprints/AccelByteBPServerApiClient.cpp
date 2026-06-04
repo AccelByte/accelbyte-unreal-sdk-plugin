@@ -24,10 +24,6 @@ void UServerApiClient::SetServerApiClient(FServerApiClientPtr const& NewApiClien
 	ServerOauth2->SetServerApiClient(ApiClientPtr);
 	ServerDSM->SetServerApiClient(ApiClientPtr);
 	ServerLobby->SetServerApiClient(ApiClientPtr);
-#if 1 // MMv1 Deprecation
-	ServerMatchmaking->SetServerApiClient(ApiClientPtr);
-	ServerSessionBrowser->SetServerApiClient(ApiClientPtr);
-#endif
 	ServerAchievement->SetServerApiClient(ApiClientPtr);
 	ServerStatistic->SetServerApiClient(ApiClientPtr);
 }
@@ -38,10 +34,6 @@ UServerApiClient::UServerApiClient()
 	ServerOauth2 = NewObject<UABServerOauth2>();
 	ServerDSM = NewObject<UABServerDSM>();
 	ServerLobby = NewObject<UABServerLobby>();
-#if 1 // MMv1 Deprecation
-	ServerMatchmaking = NewObject<UABServerMatchmaking>();
-	ServerSessionBrowser = NewObject<UABServerSessionBrowser>();
-#endif
 	ServerAchievement = NewObject<UABServerAchievement>();
 	ServerStatistic = NewObject<UABServerStatistic>();
 }

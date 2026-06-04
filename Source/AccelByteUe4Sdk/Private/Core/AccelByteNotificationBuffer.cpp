@@ -111,7 +111,11 @@ bool AccelByte::FAccelByteNotificationBuffer::HasValidSequence(const FAccelByteM
 {
 	if (InNotification.SequenceNumber <= 0 || InNotification.SequenceID < 0)
 	{
-		UE_LOG(LogAccelByteNotificationBuffer, Warning, TEXT("Notification has invalid sequence, sequenceID: %d, sequenceNumber: %d"), InNotification.SequenceID, InNotification.SequenceNumber)
+		UE_LOG(LogAccelByteNotificationBuffer, Warning, TEXT("Notification has invalid sequence, Type: %s, Topic: %s, sequenceID: %d, sequenceNumber: %d"), 
+			*InNotification.Type, 
+			*InNotification.Topic, 
+			InNotification.SequenceID, 
+			InNotification.SequenceNumber);
 		return false;
 	}
 	return true;

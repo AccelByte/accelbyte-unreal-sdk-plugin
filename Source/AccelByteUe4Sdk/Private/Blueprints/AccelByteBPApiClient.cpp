@@ -139,11 +139,6 @@ UABApiClient::UABApiClient()
 	SessionAttribute = NewObject<UABSessionAttribute>();
 	Signaling = NewObject<UABSignaling>();
 	Group = NewObject<UABGroup>();
-#if 1 // MMv1 Deprecation
-	Matchmaking = NewObject<UABMatchmaking>();
-	Party = NewObject<UABParty>();
-	SessionBrowser = NewObject<UABSessionBrowser>();
-#endif
 }
 
 void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
@@ -174,9 +169,4 @@ void UABApiClient::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	SessionAttribute->SetApiClient(ApiClientPtr);
 	Signaling->SetApiClient(ApiClientPtr);
 	Group->SetApiClient(ApiClientPtr);
-#if 1 // MMv1 Deprecation
-	Matchmaking->SetApiClient(ApiClientPtr);
-	Party->SetApiClient(ApiClientPtr);
-	SessionBrowser->SetApiClient(ApiClientPtr);
-#endif
 }

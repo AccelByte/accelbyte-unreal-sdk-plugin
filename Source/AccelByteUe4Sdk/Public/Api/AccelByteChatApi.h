@@ -716,7 +716,7 @@ private:
 			, FErrorHandler const& OnError = nullptr)
 	{
 		QuerySystemMessageResponse = OnQuerySystemMessagesResponse;
-		OnUpdateSystemMessagesError = OnError;
+		OnQuerySystemMessageError = OnError;
 	}
 
 	void SetGetSystemMessageStatsResponseDelegate(FGetSystemMessageStatsResponse const& OnGetSystemMessageStatsResponse
@@ -991,7 +991,7 @@ private:
 		, FErrorHandler const& OnError = nullptr)
 	{
 		UnblockUserResponse = OnSuccess;
-		OnBlockUserError = OnError;
+		OnUnblockUserError = OnError;
 	}
 
 #pragma endregion BLOCK USER

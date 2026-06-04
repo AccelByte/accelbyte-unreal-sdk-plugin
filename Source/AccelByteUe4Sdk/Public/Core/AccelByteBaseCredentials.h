@@ -50,18 +50,18 @@ public:
 	virtual void Startup();
 	virtual void Shutdown();
 
-	const FString& GetOAuthClientId() const;
-	const FString& GetOAuthClientSecret() const;
+	FString GetOAuthClientId() const;
+	FString GetOAuthClientSecret() const;
 
 	virtual bool SetAuthToken(FOauth2Token const& InAuthToken, float CurrentTime);
-	virtual const FOauth2Token& GetAuthToken() const;
-	virtual const FString& GetAccessToken() const;
-	virtual const FString& GetNamespace() const;
+	virtual FOauth2Token GetAuthToken() const;
+	virtual FString GetAccessToken() const;
+	virtual FString GetNamespace() const;
 	ESessionState GetSessionState() const;
-	virtual const FString& GetUserId() const;
-	const TMap<FString, FString> GetAuthHeader() const;
+	virtual FString GetUserId() const;
+	TMap<FString, FString> GetAuthHeader() const;
 
-	virtual const FErrorOAuthInfo& GetErrorOAuth() const;
+	virtual FErrorOAuthInfo GetErrorOAuth() const;
 	virtual void SetErrorOAuth(const FErrorOAuthInfo& ErrorOAuthInfo);
 	virtual FString GetRefreshToken() const;
 	virtual FString GetPlatformUserId() const;

@@ -62,7 +62,7 @@ private:
     // For registering settings in UE4 editor
 	void RegisterSettings();
 	void UnregisterSettings();
-	
+
 	void PostStartup();
 	FDelegateHandle PostStartupDelegateHandle{};
 
@@ -90,8 +90,27 @@ public:
 		, AccelByte::ServerSettings & InServerSettings) override;
 };
 
+namespace AccelByte
+{
+namespace
+{
+	// File-scope storage so the flag outlives the FAccelByteUe4SdkModule object.
+	// Trivial destruction keeps it readable during CRT atexit, which is when
+	// destructor-driven Shutdown() paths that hold SDK state may still fire.
+	std::atomic<bool> GSdkPostShutdown{false};
+}
+
+bool IsSdkPostShutdown()
+{
+	return GSdkPostShutdown.load(std::memory_order_acquire);
+}
+}
+
 void FAccelByteUe4SdkModule::StartupModule()
 {
+	// Reset in case this is a hot-reload after a prior ShutdownModule flipped the flag.
+	AccelByte::GSdkPostShutdown.store(false, std::memory_order_release);
+
 #if WITH_EDITOR
 	FModuleManager::Get().LoadModuleChecked("Settings");
 #endif
@@ -155,6 +174,10 @@ void FAccelByteUe4SdkModule::PostStartup()
 
 void FAccelByteUe4SdkModule::ShutdownModule()
 {
+	// Flip first, before any teardown, so destructor-driven Shutdown() paths that race
+	// with module unload see the post-shutdown signal and bail out of unsafe engine-global access.
+	AccelByte::GSdkPostShutdown.store(true, std::memory_order_release);
+
 	UnregisterSettings();
 #if WITH_EDITOR
 	UToolMenus::UnRegisterStartupCallback(this);

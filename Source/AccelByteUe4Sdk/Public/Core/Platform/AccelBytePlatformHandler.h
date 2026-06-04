@@ -76,6 +76,7 @@ private:
 
 	static TMap<EAccelBytePlatformType, AccelBytePlatformWrapperPtr> PlatformWrappers;
 	static FAccelBytePlatformPresenceChanged OnPlatformPresenceChanged;
+	static FRWLock WrapperLock;
+	static FCriticalSection DelegateLock;
 };
-
-}
+} // AccelByte

@@ -55,6 +55,9 @@ AccelByteWebSocket::~AccelByteWebSocket()
 	}
 
 	TeardownTicker();
+
+	// PROPER THREAD-SAFE DESTRUCTION:
+	// Use the same thread-safe TeardownWebsocket() that handles LWS worker thread synchronization
 	TeardownWebsocket();
 }
 
@@ -62,15 +65,16 @@ void AccelByteWebSocket::SetupWebSocket()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	bWasWsConnectionError = false;
+	bWasWsConnectionError.store(false);
 
-	bConnectTriggered = false;
+	bConnectTriggered.store(false);
 	OnMessageQueue.Empty();
 	OnConnectionClosedQueue.Empty();
 	OnConnectionErrorQueue.Empty();
 	OnReconnectingAttemptQueue.Empty();
 	OnMassiveOutageQueue.Empty();
 
+	// Teardown old WebSocket before creating new one
 	TeardownWebsocket();
 
 	UpgradeHeaders.Add(TEXT("x-flight-id"), FAccelByteUtilities::GetFlightId());
@@ -88,10 +92,11 @@ void AccelByteWebSocket::SetupWebSocket()
 	}
 	WebSocket = WebSocketFactory->CreateWebSocket(Url, Protocol, Headers);
 
-	WebSocket->OnMessage().AddRaw(this, &AccelByteWebSocket::OnMessageReceived);
-	WebSocket->OnConnected().AddRaw(this, &AccelByteWebSocket::OnConnectionConnected);
-	WebSocket->OnConnectionError().AddRaw(this, &AccelByteWebSocket::OnConnectionError);
-	WebSocket->OnClosed().AddRaw(this, &AccelByteWebSocket::OnClosed);
+	// Use AddThreadSafeSP to prevent LibWebsockets worker thread race conditions
+	WebSocket->OnMessage().AddThreadSafeSP(AsShared(), &AccelByteWebSocket::OnMessageReceived);
+	WebSocket->OnConnected().AddThreadSafeSP(AsShared(), &AccelByteWebSocket::OnConnectionConnected);
+	WebSocket->OnConnectionError().AddThreadSafeSP(AsShared(), &AccelByteWebSocket::OnConnectionError);
+	WebSocket->OnClosed().AddThreadSafeSP(AsShared(), &AccelByteWebSocket::OnClosed);
 }
 
 void AccelByteWebSocket::UpdateUpgradeHeaders(const FString& Key, const FString& Value)
@@ -196,12 +201,12 @@ void AccelByteWebSocket::Connect(bool ForceConnect)
 		return;
 	}
 
-	if (bWasWsConnectionError || WsState == EWebSocketState::WaitingReconnect)
+	if (bWasWsConnectionError.load() || WsState == EWebSocketState::WaitingReconnect)
 	{
 		SetupWebSocket();
 	}
 
-	bConnectedBroadcasted = false;
+	bConnectedBroadcasted.store(false);
 
 	TeardownTicker();
 
@@ -220,23 +225,23 @@ void AccelByteWebSocket::Connect(bool ForceConnect)
 	
 	UE_LOG(LogAccelByteWebsocket, VeryVerbose, TEXT("Connecting websocket with header:\n%s"), *HeaderString);
 	WebSocket->Connect();
-	WsEvents |= EWebSocketEvent::Connect;
+	WsEvents.fetch_or(static_cast<uint32>(EWebSocketEvent::Connect));
 }
 
 void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 {
 	FReport::Log(FString(__FUNCTION__));
 	WsState = EWebSocketState::Closed;
-	WsEvents &= ~EWebSocketEvent::Connected; //Remove Connected event
-	WsEvents &= ~EWebSocketEvent::Connect; //Remove Connect event
+	WsEvents.fetch_and(~static_cast<uint32>(EWebSocketEvent::Connected)); //Remove Connected event
+	WsEvents.fetch_and(~static_cast<uint32>(EWebSocketEvent::Connect)); //Remove Connect event
 	
-	if(!ForceCleanup && (bConnectTriggered || !OnMessageQueue.IsEmpty() || !OnConnectionClosedQueue.IsEmpty() || !OnConnectionErrorQueue.IsEmpty() || !OnReconnectingAttemptQueue.IsEmpty() || !OnMassiveOutageQueue.IsEmpty()))
+	if(!ForceCleanup && (bConnectTriggered.load() || !OnMessageQueue.IsEmpty() || !OnConnectionClosedQueue.IsEmpty() || !OnConnectionErrorQueue.IsEmpty() || !OnReconnectingAttemptQueue.IsEmpty() || !OnMassiveOutageQueue.IsEmpty()))
 	{
 		bDisconnectOnNextTick = true;
 	}
 	else
 	{
-		bConnectedBroadcasted = false;
+		bConnectedBroadcasted.store(false);
 
 		bool bStillConnected = (WebSocket.IsValid() && WebSocket->IsConnected());
 		if(bStillConnected)
@@ -249,22 +254,25 @@ void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 			TeardownWebsocket();
 		}
 	}	
-	LatestWebsocketDisonnectionCode = 0;
+	LatestWebsocketDisonnectionCode.store(0);
 	MassiveOutageReminderCounter = 0;
 }
 
 bool AccelByteWebSocket::IsConnected() const
 {
-	return WebSocket.IsValid() && WebSocket->IsConnected() && bConnectedBroadcasted;
+	FScopeLock Lock(&WebSocketLock);
+	return WebSocket.IsValid() && WebSocket->IsConnected() && bConnectedBroadcasted.load();
 }
 
 bool AccelByteWebSocket::IsReconnecting() const
 {
+	FScopeLock Lock(&WebSocketLock);
 	return WebSocket.IsValid() && (WsState == EWebSocketState::Reconnecting || WsState == EWebSocketState::WaitingReconnect);
 }
 
 void AccelByteWebSocket::SendPing() const
 {
+	FScopeLock Lock(&WebSocketLock);
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
 		WebSocket->Send(FString());
@@ -274,7 +282,11 @@ void AccelByteWebSocket::SendPing() const
 void AccelByteWebSocket::Send(const FString& Message) const
 {
 	ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_REQUEST(Message);
-	WebSocket->Send(Message);
+	FScopeLock Lock(&WebSocketLock);
+	if (WebSocket.IsValid())
+	{
+		WebSocket->Send(Message);
+	}
 }
 
 EWebSocketState AccelByteWebSocket::GetState() const
@@ -285,10 +297,10 @@ EWebSocketState AccelByteWebSocket::GetState() const
 void AccelByteWebSocket::OnConnectionConnected()
 {
 	FReport::Log(FString(__FUNCTION__));
-	
-	WsEvents |= EWebSocketEvent::Connected;
-	bConnectTriggered = true;
-	LatestWebsocketDisonnectionCode = 0;
+
+	WsEvents.fetch_or(static_cast<uint32>(EWebSocketEvent::Connected));
+	bConnectTriggered.store(true);
+	LatestWebsocketDisonnectionCode.store(0);
 }
 
 void AccelByteWebSocket::OnConnectionError(const FString& Error)
@@ -296,8 +308,8 @@ void AccelByteWebSocket::OnConnectionError(const FString& Error)
 	FReport::Log(FString(__FUNCTION__));
 	FReport::Log(FString::Printf(TEXT("AccelByteWebSocket::OnConnectionError = %s"), *Error));
 
-	WsEvents |= EWebSocketEvent::ConnectionError;
-	bWasWsConnectionError = true;
+	WsEvents.fetch_or(static_cast<uint32>(EWebSocketEvent::ConnectionError));
+	bWasWsConnectionError.store(true);
 	OnConnectionErrorQueue.Enqueue(Error);
 }
 
@@ -306,26 +318,32 @@ void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool 
 	FReport::Log(FString(__FUNCTION__));
 	FReport::Log(FString::Printf(TEXT("AccelByteWebSocket::OnClosed = %d"), StatusCode));
 
-	// Broadcast message DisconnectNotif
-	OnMessageReceived(Reason);
-	
+	// Broadcast message DisconnectNotif - use helper to avoid deadlock
+	EnqueueMessage(Reason);
+
 	// trigger closed event, on prepare to reconnect on next StateTick
 	if(StatusCode <= 4000)
 	{
 		// Add event websocket closed so state tick can reconnect lobby.
-		WsEvents |= EWebSocketEvent::Closed;
+		WsEvents.fetch_or(static_cast<uint32>(EWebSocketEvent::Closed));
 	}
 
-	LatestWebsocketDisonnectionCode = StatusCode;
+	LatestWebsocketDisonnectionCode.store(StatusCode);
 
 	OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 }
 
+void AccelByteWebSocket::EnqueueMessage(const FString& Message)
+{
+	// Called from LWS worker thread. Queue uses EQueueMode::Mpsc for thread safety.
+	ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_RESPONSE(Message);
+	FReport::Log(FString(__FUNCTION__));
+	OnMessageQueue.Enqueue(Message);
+}
+
 void AccelByteWebSocket::OnMessageReceived(const FString& Message)
 {
-	ACCELBYTE_SERVICE_LOGGING_WEBSOCKET_RESPONSE(Message);
-	FReport::Log(FString(__FUNCTION__));	
-	OnMessageQueue.Enqueue(Message);
+	EnqueueMessage(Message);
 }
 
 void AccelByteWebSocket::Reconnect()
@@ -349,48 +367,52 @@ bool AccelByteWebSocket::Tick(float DeltaTime)
 
 bool AccelByteWebSocket::StateTick(float DeltaTime)
 {
+	// Atomically capture and clear events to prevent LWS worker thread events
+	// from being lost during state machine processing
+	const uint32 CapturedEvents = WsEvents.exchange(0);
+
 	auto& CurrentStrategy = GetCurrentReconnectionStrategy();
 
 	switch (WsState)
 	{
 	case EWebSocketState::Closed:
-		if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)
+		if ((WebSocket.IsValid() && WebSocket->IsConnected()) || (CapturedEvents & static_cast<uint32>(EWebSocketEvent::Connected)) != 0)
 		{
 			WsState = EWebSocketState::Connected;
 		}
-		else if ((WsEvents & EWebSocketEvent::Connect) != EWebSocketEvent::None)
+		else if ((CapturedEvents & static_cast<uint32>(EWebSocketEvent::Connect)) != 0)
 		{
 			WsState = EWebSocketState::Connecting;
 		}
 		ReconnectingAttemptCount = 0;
 		MassiveOutageReminderCounter = 0;
-		LatestWebsocketDisonnectionCode = 0;
+		LatestWebsocketDisonnectionCode.store(0);
 		break;
 	case EWebSocketState::Connecting:
-		if ((WsEvents & EWebSocketEvent::ConnectionError) != EWebSocketEvent::None)
+		if ((CapturedEvents & static_cast<uint32>(EWebSocketEvent::ConnectionError)) != 0)
 		{
 			WsState = EWebSocketState::Closed;
 		}
-		else if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)
+		else if ((WebSocket.IsValid() && WebSocket->IsConnected()) || (CapturedEvents & static_cast<uint32>(EWebSocketEvent::Connected)) != 0)
 		{
 			TimeSinceLastPing = FPlatformTime::Seconds();
 			WsState = EWebSocketState::Connected;
 		}
-		else if ((WsEvents & EWebSocketEvent::Close) != EWebSocketEvent::None)
+		else if ((CapturedEvents & static_cast<uint32>(EWebSocketEvent::Close)) != 0)
 		{
 			WsState = EWebSocketState::Closing;
 		}
-		else if (!WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Closed) != EWebSocketEvent::None)
+		else if ((!WebSocket.IsValid() || !WebSocket->IsConnected()) || (CapturedEvents & static_cast<uint32>(EWebSocketEvent::Closed)) != 0)
 		{
 			WsState = EWebSocketState::Closed;
 		}
 		break;
 	case EWebSocketState::Connected:
-		if ((WsEvents & EWebSocketEvent::Close) != EWebSocketEvent::None)
+		if ((CapturedEvents & static_cast<uint32>(EWebSocketEvent::Close)) != 0)
 		{
 			WsState = EWebSocketState::Closing;
 		}
-		else if (!WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Closed) != EWebSocketEvent::None)
+		else if ((!WebSocket.IsValid() || !WebSocket->IsConnected()) || (CapturedEvents & static_cast<uint32>(EWebSocketEvent::Closed)) != 0)
 		{
 			WsState = EWebSocketState::WaitingReconnect;
 		}
@@ -409,12 +431,12 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 		WsState = EWebSocketState::Reconnecting;
 		break;
 	case EWebSocketState::Reconnecting:
-		if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)
+		if ((WebSocket.IsValid() && WebSocket->IsConnected()) || (CapturedEvents & static_cast<uint32>(EWebSocketEvent::Connected)) != 0)
 		{
 			TimeSinceLastPing = FPlatformTime::Seconds();
 			WsState = EWebSocketState::Connected;
 		}
-		else if ((WsEvents & EWebSocketEvent::Close) != EWebSocketEvent::None)
+		else if ((CapturedEvents & static_cast<uint32>(EWebSocketEvent::Close)) != 0)
 		{
 			WsState = EWebSocketState::Closing;
 		}
@@ -458,7 +480,7 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 				break;
 			}
 
-			if (bWasWsConnectionError)
+			if (bWasWsConnectionError.load())
 			{
 				// websocket state is error can't be reconnect, need to create a new instance
 				UE_LOG(LogAccelByteWebsocket, Log, TEXT("Connecting from Reconnecting state, setting up websocket"));
@@ -486,24 +508,24 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 		}
 		break;
 	case EWebSocketState::Closing:
-		if ((WsEvents & EWebSocketEvent::Closed) != EWebSocketEvent::None)
+		if ((CapturedEvents & static_cast<uint32>(EWebSocketEvent::Closed)) != 0)
 		{
 			WsState = EWebSocketState::Closed;
 		}
 		break;
 	}
 
-	WsEvents = EWebSocketEvent::None;
+	// No need to clear WsEvents here - already cleared by exchange(0) at start
 
 	return true;
 }
 
 bool AccelByteWebSocket::MessageTick(float DeltaTime)
 {
-	if(bConnectTriggered)
+	if(bConnectTriggered.load())
 	{
-		bConnectTriggered = false;
-		bConnectedBroadcasted = true;
+		bConnectTriggered.store(false);
+		bConnectedBroadcasted.store(true);
 		ConnectDelegate.Broadcast();
 	}
 
@@ -567,12 +589,10 @@ void AccelByteWebSocket::TeardownTicker()
 
 void AccelByteWebSocket::TeardownWebsocket()
 {
+	FScopeLock Lock(&WebSocketLock);
 	if(WebSocket.IsValid())
 	{
-		WebSocket->OnMessage().Clear();
-		WebSocket->OnConnected().Clear();
-		WebSocket->OnConnectionError().Clear();
-		WebSocket->OnClosed().Clear();
+		// No need to manually clear delegates - AddThreadSafeSP uses TWeakPtr and auto-invalidates
 		WebSocket->Close();
 		WebSocket.Reset();
 	}
@@ -581,15 +601,15 @@ void AccelByteWebSocket::TeardownWebsocket()
 FReconnectionStrategy& AccelByteWebSocket::GetCurrentReconnectionStrategy()
 {
 	// When there is no closure code from a disconnection, return default strategy
-	if (LatestWebsocketDisonnectionCode == (int32)EWebsocketClosureCodeForSpecificRetry::None)
+	if (LatestWebsocketDisonnectionCode.load() == (int32)EWebsocketClosureCodeForSpecificRetry::None)
 	{
 		return ParentReconnectionStrategyRef.GetDefaultReconnectionStrategy();
 	}
 
 	// When there's a specific closure code
-	if (ParentReconnectionStrategyRef.GetReconnectionStrategyDictionary().Contains(LatestWebsocketDisonnectionCode))
+	if (ParentReconnectionStrategyRef.GetReconnectionStrategyDictionary().Contains(LatestWebsocketDisonnectionCode.load()))
 	{
-		auto& SpecificStrategy = ParentReconnectionStrategyRef.GetReconnectionStrategyDictionary()[LatestWebsocketDisonnectionCode];
+		auto& SpecificStrategy = ParentReconnectionStrategyRef.GetReconnectionStrategyDictionary()[LatestWebsocketDisonnectionCode.load()];
 		switch (SpecificStrategy.StrategyType)
 		{
 		case EReconnectionStrategyType::AGGRESSIVE:

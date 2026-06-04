@@ -58,7 +58,7 @@ namespace AccelByte
 				Content += static_cast<char>(a);
 			}
 
-			const FRegexPattern PasswordPattern(R"x(password=([^&]*)|"password"\s*:\s*"((\\"|[^"])*)")x");
+			const FRegexPattern PasswordPattern(R"x(password=([^&]*)|"[Pp]assword"\s*:\s*"((\\"|[^"])*)")x");
 			FRegexMatcher PasswordMatcher(PasswordPattern, Content);
 			while (PasswordMatcher.FindNext())
 			{

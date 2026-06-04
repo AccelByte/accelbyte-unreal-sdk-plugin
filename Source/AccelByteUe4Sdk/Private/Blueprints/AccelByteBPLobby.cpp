@@ -163,20 +163,3 @@ void UABLobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGener
 	}
 }
 
-#if 1 // MMv1 Deprecation
-FString UABLobby::RequestDS(FRequestDSModel const& Request) 
-{
-	const auto LobbyPtr = ApiClientPtr->GetLobbyApi().Pin();
-	if (LobbyPtr.IsValid())
-	{
-		return LobbyPtr->RequestDS(
-			Request.SessionID,
-			Request.GameMode,
-			Request.ClientVersion,
-			Request.Region,
-			Request.Deployment,
-			Request.ServerName);
-	}
-	return TEXT("");
-}
-#endif

@@ -50,32 +50,6 @@ namespace Api
 
 		// Notification
 
-#if 1 // MMv1 Deprecation
-		// Party
-		const FString PartyInfo = TEXT("partyInfoRequest");
-		const FString PartyCreate = TEXT("partyCreateRequest");
-		const FString PartyLeave = TEXT("partyLeaveRequest");
-		const FString PartyInvite = TEXT("partyInviteRequest");
-		const FString PartyJoin = TEXT("partyJoinRequest");
-		const FString PartyReject = TEXT("partyRejectRequest");
-		const FString PartyKick = TEXT("partyKickRequest");
-		const FString PartyGenerateCode = TEXT("partyGenerateCodeRequest");
-		const FString PartyGetCode = TEXT("partyGetCodeRequest");
-		const FString PartyDeleteCode = TEXT("partyDeleteCodeRequest");
-		const FString PartyJoinViaCode = TEXT("partyJoinViaCodeRequest");
-		const FString PartyPromoteLeader = TEXT("partyPromoteLeaderRequest");
-		const FString PartySendNotif = TEXT("partySendNotifRequest");
-#endif
-#if 1 // MMv1 Deprecation
-		// Matchmaking V1
-		const FString MatchmakingStart = TEXT("startMatchmakingRequest");
-		const FString MatchmakingCancel = TEXT("cancelMatchmakingRequest");
-		const FString ReadyConsent = TEXT("setReadyConsentRequest");
-		const FString RejectConsent = TEXT("setRejectConsentRequest");
-
-		// Custom Game Matchmaking V1
-		const FString CreateDS = TEXT("createDSRequest");
-#endif
 		// Friends
 		const FString RequestFriends = TEXT("requestFriendsRequest");
 		const FString RequestFriendsByPublicId = TEXT("requestFriendsByPublicIDRequest");
@@ -114,32 +88,6 @@ namespace Api
 		// default
 		const FString ConnectedNotif = TEXT("connectNotif");
 		const FString DisconnectNotif = TEXT("disconnectNotif");
-#if 1 // MMv1 Deprecation
-		// Party
-		const FString PartyInfo = TEXT("partyInfoResponse");
-		const FString PartyCreate = TEXT("partyCreateResponse");
-		const FString PartyLeave = TEXT("partyLeaveResponse");
-		const FString PartyMemberLeaveNotif = TEXT("partyLeaveNotif");
-		const FString PartyInvite = TEXT("partyInviteResponse");
-		const FString PartyInviteNotif = TEXT("partyInviteNotif");
-		const FString PartyGetInvitedNotif = TEXT("partyGetInvitedNotif");
-		const FString PartyJoin = TEXT("partyJoinResponse");
-		const FString PartyJoinNotif = TEXT("partyJoinNotif");
-		const FString PartyReject = TEXT("partyRejectResponse");
-		const FString PartyRejectNotif = TEXT("partyRejectNotif");
-		const FString PartyKick = TEXT("partyKickResponse");
-		const FString PartyKickNotif = TEXT("partyKickNotif");
-		const FString PartyDataUpdateNotif = TEXT("partyDataUpdateNotif");
-		const FString PartyMemberConnectNotif = TEXT("partyConnectNotif");
-		const FString PartyMemberDisconnectNotif = TEXT("partyDisconnectNotif");
-		const FString PartyGenerateCode = TEXT("partyGenerateCodeResponse");
-		const FString PartyGetCode = TEXT("partyGetCodeResponse");
-		const FString PartyDeleteCode = TEXT("partyDeleteCodeResponse");
-		const FString PartyJoinViaCode = TEXT("partyJoinViaCodeResponse");
-		const FString PartyPromoteLeader = TEXT("partyPromoteLeaderResponse");
-		const FString PartySendNotif = TEXT("partySendNotifResponse");
-		const FString PartyNotif = TEXT("partyNotif");
-#endif
 		// Chat
 		const FString PersonalChat = TEXT("personalChatResponse");
 		const FString PersonalChatNotif = TEXT("personalChatNotif");
@@ -159,21 +107,6 @@ namespace Api
 		const FString UserBannedNotification = TEXT("userBannedNotification");
 		const FString UserUnbannedNotification = TEXT("userUnbannedNotification");
 
-#if 1 // MMv1 Deprecation
-		// Matchmaking V1
-		const FString MatchmakingStart = TEXT("startMatchmakingResponse");
-		const FString MatchmakingCancel = TEXT("cancelMatchmakingResponse");
-		const FString ReadyConsent = TEXT("setReadyConsentResponse");
-		const FString RejectConsent = TEXT("setRejectConsentResponse");
-		const FString MatchmakingNotif = TEXT("matchmakingNotif");
-		const FString ReadyConsentNotif = TEXT("setReadyConsentNotif");
-		const FString RejectConsentNotif = TEXT("setRejectConsentNotif");
-		const FString RematchmakingNotif = TEXT("rematchmakingNotif");
-		const FString DsNotif = TEXT("dsNotif");
-
-		// Custom Game
-		const FString CreateDS = TEXT("createDSResponse");
-#endif
 		// Friends
 		const FString RequestFriends = TEXT("requestFriendsResponse");
 		const FString RequestFriendsByPublicId = TEXT("requestFriendsByPublicIDResponse");
@@ -248,22 +181,6 @@ namespace Api
 	{
 		Invalid_Response,
 
-#if 1 // MMv1 Deprecation
-		// Party
-		PartyInfo,
-		PartyCreate,
-		PartyLeave,
-		PartyInvite,
-		PartyJoin,
-		PartyReject,
-		PartyKick,
-		PartyGenerateCode,
-		PartyGetCode,
-		PartyDeleteCode,
-		PartyJoinViaCode,
-		PartyPromoteLeader,
-		PartySendNotif,
-#endif
 		// Chat
 		PersonalChat,
 		PartyChat,
@@ -274,16 +191,6 @@ namespace Api
 		SetUserPresence,
 		GetAllFriendsStatus,
 
-#if 1 // MMv1 Deprecation
-		// Matchmaking
-		MatchmakingStart,
-		MatchmakingCancel,
-		ReadyConsent,
-		RejectConsent,
-
-		// Custom Game
-		CreateDS,
-#endif
 		// Friends
 		RequestFriends,
 		RequestFriendsByPublicId,
@@ -324,19 +231,6 @@ namespace Api
 		ConnectedNotif,
 		DisconnectNotif,
 
-#if 1 // MMv1 Deprecation
-		// Party
-		PartyMemberLeaveNotif,
-		PartyInviteNotif,
-		PartyGetInvitedNotif,
-		PartyJoinNotif,
-		PartyRejectNotif,
-		PartyKickNotif,
-		PartyDataUpdateNotif,
-		PartyMemberConnectNotif,
-		PartyMemberDisconnectNotif,
-		PartyNotif,
-#endif
 		// Chat
 		PersonalChatNotif,
 		PartyChatNotif,
@@ -350,14 +244,6 @@ namespace Api
 		UserBannedNotification,
 		UserUnbannedNotification,
 
-#if 1 // MMv1 Deprecation
-		// Matchmaking
-		MatchmakingNotif,
-		ReadyConsentNotif,
-		RejectConsentNotif,
-		RematchmakingNotif,
-		DsNotif,
-#endif
 		// Friends
 		AcceptFriendsNotif,
 		RequestFriendsNotif,
@@ -385,21 +271,6 @@ namespace Api
 	{ LobbyResponse::MessageType, Type::MessageType } \
 
 	TMap<FString, Response> Lobby::ResponseStringEnumMap{
-#if 1 // MMv1 Deprecation
-		FORM_STRING_ENUM_PAIR(Response,PartyInfo),
-		FORM_STRING_ENUM_PAIR(Response,PartyCreate),
-		FORM_STRING_ENUM_PAIR(Response,PartyLeave),
-		FORM_STRING_ENUM_PAIR(Response,PartyInvite),
-		FORM_STRING_ENUM_PAIR(Response,PartyJoin),
-		FORM_STRING_ENUM_PAIR(Response,PartyReject),
-		FORM_STRING_ENUM_PAIR(Response,PartyKick),
-		FORM_STRING_ENUM_PAIR(Response,PartyGenerateCode),
-		FORM_STRING_ENUM_PAIR(Response,PartyGetCode),
-		FORM_STRING_ENUM_PAIR(Response,PartyDeleteCode),
-		FORM_STRING_ENUM_PAIR(Response,PartyJoinViaCode),
-		FORM_STRING_ENUM_PAIR(Response,PartyPromoteLeader),
-		FORM_STRING_ENUM_PAIR(Response,PartySendNotif),
-#endif
 		FORM_STRING_ENUM_PAIR(Response,PersonalChat),
 		FORM_STRING_ENUM_PAIR(Response,PartyChat),
 		FORM_STRING_ENUM_PAIR(Response,JoinChannelChat),
@@ -430,18 +301,6 @@ namespace Api
 	TMap<FString, Notif> Lobby::NotifStringEnumMap{
 		FORM_STRING_ENUM_PAIR(Notif,ConnectedNotif),
 		FORM_STRING_ENUM_PAIR(Notif,DisconnectNotif),
-#if 1 // MMv1 Deprecation
-		FORM_STRING_ENUM_PAIR(Notif,PartyMemberLeaveNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyInviteNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyGetInvitedNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyJoinNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyRejectNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyKickNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyDataUpdateNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyMemberConnectNotif),
-		FORM_STRING_ENUM_PAIR(Notif,PartyMemberDisconnectNotif),
-#endif
 		FORM_STRING_ENUM_PAIR(Notif,PersonalChatNotif),
 		FORM_STRING_ENUM_PAIR(Notif,PartyChatNotif),
 		FORM_STRING_ENUM_PAIR(Notif,ChannelChatNotif),
@@ -619,175 +478,6 @@ FString Lobby::SendChannelMessage(FString const& Message)
 	}
 }
 
-#if 1 // MMv1 Deprecation
-//-------------------------------------------------------------------------------------------------
-// Party
-//-------------------------------------------------------------------------------------------------
-FString Lobby::SendInfoPartyRequest()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyInfo
-		, Party
-		, {})
-}
-
-FString Lobby::SendInfoPartyRequest(FPartyInfoResponse const& OnInfoPartyResponse
-	, FErrorHandler const& OnError)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SetInfoPartyResponseDelegate(OnInfoPartyResponse, OnError);
-	return SendInfoPartyRequest();
-}
-
-FString Lobby::SendCreatePartyRequest()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyCreate
-		, Party
-		, {})
-}
-
-FString Lobby::SendLeavePartyRequest()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyLeave
-		, Party
-		, {})
-}
-
-FString Lobby::SendInviteToPartyRequest(FString const& UserId)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyInvite
-		, Party
-		, FString::Printf(TEXT("friendID: %s"), *FGenericPlatformHttp::UrlEncode(UserId)))
-}
-
-FString Lobby::SendAcceptInvitationRequest(FString const& PartyId
-	, FString const& InvitationToken)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyJoin
-		, Party
-		, FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *FGenericPlatformHttp::UrlEncode(PartyId), *InvitationToken))
-}
-
-FString Api::Lobby::SendRejectInvitationRequest(FString const& PartyId
-	, FString const& InvitationToken)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyReject
-		, Party
-		, FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *FGenericPlatformHttp::UrlEncode(PartyId), *InvitationToken))
-}
-
-FString Lobby::SendKickPartyMemberRequest(FString const& UserId)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyKick
-		, Party
-		, FString::Printf(TEXT("memberID: %s\n"), *FGenericPlatformHttp::UrlEncode(UserId)))
-}
-
-FString Lobby::SendPartyGenerateCodeRequest()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyGenerateCode
-		, Party
-		, {})
-}
-FString Lobby::SendPartyGetCodeRequest()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyGetCode
-		, Party
-		, {})
-}
-
-FString Lobby::SendPartyDeleteCodeRequest()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyDeleteCode
-		, Party
-		, {})
-}
-
-FString Lobby::SendPartyJoinViaCodeRequest(FString const& partyCode)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyJoinViaCode
-		, Party
-		, FString::Printf(TEXT("partyCode: %s\n"), *partyCode))
-}
-
-FString Lobby::SendPartyPromoteLeaderRequest(FString const& UserId)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyPromoteLeader
-		, Party
-		, FString::Printf(TEXT("newLeaderUserId: %s\n"), *FGenericPlatformHttp::UrlEncode(UserId)))
-}
-
-FString Lobby::SendNotificationToPartyMember(FString const& Topic
-	, FString const& Payload) 
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartySendNotif
-		, Party
-		, FString::Printf(TEXT("topic: %s\npayload: %s"), *Topic, *Payload));
-}
-#endif
 
 FAccelByteTaskWPtr Lobby::SetPartySizeLimit(FString const& PartyId
 	, int32 Limit
@@ -1783,13 +1473,6 @@ void Lobby::UnbindEvent()
 	UnbindFriendNotifEvents();
 	UnbindFriendResponseEvents();
 
-#if 1 // MMv1 Deprecation
-	PartyDataUpdateNotif.Unbind();
-	UnbindPartyNotifEvents();
-	UnbindPartyResponseEvents();
-	UnbindMatchmakingNotifEvents();
-	UnbindMatchmakingResponseEvents();
-#endif
 
 	UnbindChatNotifEvents();
 	UnbindChatResponseEvents();
@@ -1857,54 +1540,6 @@ void Lobby::UnbindFriendResponseEvents()
 	OnLoadFriendListError.Unbind();
 	OnGetFriendshipStatusError.Unbind();
 }
-#if 1 // MMv1 Deprecation
-void Lobby::UnbindPartyNotifEvents()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	PartyLeaveNotif.Unbind(); // This Unbind is DEPRECATED
-	PartyMemberLeaveNotif.Unbind();
-	PartyInviteNotif.Unbind();
-	PartyGetInvitedNotif.Unbind();
-	PartyJoinNotif.Unbind();
-	PartyRejectNotif.Unbind();
-	PartyKickNotif.Unbind();
-	PartyNotif.Unbind();
-	PartyMemberConnectNotif.Unbind();
-	PartyMemberDisconnectNotif.Unbind();
-}
-
-void Lobby::UnbindPartyResponseEvents()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	PartyInfoResponse.Unbind();
-	PartyCreateResponse.Unbind();
-	PartyLeaveResponse.Unbind();
-	PartyInviteResponse.Unbind();
-	PartyJoinResponse.Unbind();
-	PartyRejectResponse.Unbind();
-	PartyKickResponse.Unbind();
-	PartyGetCodeResponse.Unbind();
-	PartyGenerateCodeResponse.Unbind();
-	PartyDeleteCodeResponse.Unbind();
-	PartyJoinViaCodeResponse.Unbind();
-	PartyPromoteLeaderResponse.Unbind();
-
-	OnPartyInfoError.Unbind();
-	OnPartyCreateError.Unbind();
-	OnPartyLeaveError.Unbind();
-	OnPartyInviteError.Unbind();
-	OnPartyJoinError.Unbind();
-	OnPartyRejectError.Unbind();
-	OnPartyKickError.Unbind();
-	OnPartyGenerateCodeError.Unbind();
-	OnPartyGetCodeError.Unbind();
-	OnPartyDeleteCodeError.Unbind();
-	OnPartyJoinViaCodeError.Unbind();
-	OnPartyPromoteLeaderError.Unbind();
-}
-#endif
 void Lobby::UnbindChatNotifEvents()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -2390,22 +2025,6 @@ void Lobby::HandleMessageResponse(FString const& ReceivedMessageType
 
 	switch (ResponseEnum)
 	{
-#if 1 // MMv1 Deprecation
-		// Party
-		CASE_RESPONSE_MESSAGE_ID(PartyInfo			, FAccelByteModelsInfoPartyResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyCreate		, FAccelByteModelsCreatePartyResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyLeave			, FAccelByteModelsLeavePartyResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyInvite		, FAccelByteModelsPartyInviteResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyJoin			, FAccelByteModelsPartyJoinResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyReject		, FAccelByteModelsPartyRejectResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyKick			, FAccelByteModelsKickPartyMemberResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyGetCode		, FAccelByteModelsPartyGetCodeResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyGenerateCode	, FAccelByteModelsPartyGenerateCodeResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyDeleteCode	, FAccelByteModelsPartyDeleteCodeResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyJoinViaCode	, FAccelByteModelsPartyJoinResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyPromoteLeader	, FAccelByteModelsPartyPromoteLeaderResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartySendNotif		, FAccelByteModelsPartySendNotifResponse);
-#endif
 		// Chat
 		CASE_RESPONSE_MESSAGE_ID(PersonalChat	, FAccelByteModelsPersonalMessageResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyChat		, FAccelByteModelsPartyMessageResponse);
@@ -2463,15 +2082,7 @@ void Lobby::HandleMessageResponse(FString const& ReceivedMessageType
 		CASE_RESPONSE_MESSAGE_ID(ChangeUserRegion, FAccelByteModelsChangeUserRegionResponse);
 		default:
 		{
-#if 1 // MMv1 Deprecation
-			// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
-			auto handled = HandleMatchmakingV1MessageResponse(ReceivedMessageType, ParsedJsonString, ParsedJsonObj, MessageMeta);
-			if(!handled){
-#endif
 				ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error; Detected of type Response but no specific handler case assigned. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
-#if 1 // MMv1 Deprecation
-			}
-#endif
 			break;
 		}
 	}
@@ -2656,7 +2267,10 @@ void Lobby::HandleV2SessionNotif(FString const& ParsedJsonString, bool bSkipCond
 		return;
 	}
 
-	if (TryBufferNotification(ParsedJsonString))
+	// Replayed and synthetic notifications (bSkipConditioner=true) must not re-trigger gap
+	// detection.
+	// Gap detection is only meaningful for live WebSocket messages (bSkipConditioner=false).
+	if (!bSkipConditioner && TryBufferNotification(ParsedJsonString))
 	{
 		return;
 	}
@@ -2812,7 +2426,9 @@ void Lobby::HandleV2MatchmakingNotif(const FAccelByteModelsNotificationMessage& 
 
 	FString NotifJsonString;
 	FJsonObjectConverter::UStructToJsonObjectString(Message, NotifJsonString);
-	if (TryBufferNotification(NotifJsonString))
+	// Same reasoning as HandleV2SessionNotif: replayed/synthetic messages must not re-trigger
+	// gap detection 
+	if (!bSkipConditioner && TryBufferNotification(NotifJsonString))
 	{
 		return;
 	}
@@ -2964,58 +2580,6 @@ void Lobby::HandleMessageNotif(FString const& ReceivedMessageType
 			break;
 		}
 		CASE_NOTIF(DisconnectNotif, FAccelByteModelsDisconnectNotif);
-#if 1 // MMv1 Deprecation
-		case (Notif::PartyMemberLeaveNotif):
-		{
-				FAccelByteModelsLeavePartyNotice PartyLeaveResult;
-				bool bSuccess = FAccelByteJsonConverter::JsonObjectStringToUStruct(ParsedJsonString, &PartyLeaveResult);
-				if (bSuccess)
-				{
-					if (PartyLeaveNotif.IsBound())
-					{
-						PartyLeaveNotif.ExecuteIfBound(PartyLeaveResult);
-					}
-					else
-					{
-						PartyMemberLeaveNotif.ExecuteIfBound(PartyLeaveResult);
-					}
-				}
-				break;
-		}
-		CASE_NOTIF(PartyInviteNotif, FAccelByteModelsInvitationNotice);
-		CASE_NOTIF(PartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice);
-		CASE_NOTIF(PartyJoinNotif, FAccelByteModelsPartyJoinNotice);
-		CASE_NOTIF(PartyRejectNotif, FAccelByteModelsPartyRejectNotice);
-		CASE_NOTIF(PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice);
-		case Notif::PartyNotif:
-		{
-			const FString PayloadKey(TEXT("payload"));
-			const TSharedPtr<FJsonObject>* ObjectValue;
-			if (ParsedJsonObj->TryGetObjectField(PayloadKey, ObjectValue))
-			{
-				FString StringValue;
-				TSharedRef<TJsonWriter<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>> JsonWriter = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&StringValue, /*Indent=*/0);
-				if (!FJsonSerializer::Serialize(ObjectValue->ToSharedRef(), JsonWriter))
-				{
-					UE_LOG(LogAccelByteLobby, Log, TEXT("PartyNotif: unable to serialize payload as string: %s"), *ParsedJsonString);
-					return;
-				}
-				ParsedJsonObj->SetStringField(PayloadKey, StringValue);
-			}
-
-			FAccelByteModelsPartyNotif Notification;
-			if (!FJsonObjectConverter::JsonObjectToUStruct(ParsedJsonObj.ToSharedRef(), &Notification, 0, 0))
-			{
-				UE_LOG(LogAccelByteLobby, Log, TEXT("PartyNotif: unable to deserialize to struct: %s"), *ParsedJsonString);
-				return;
-			}
-			PartyNotif.ExecuteIfBound(Notification);
-			break;
-		}
-		CASE_NOTIF(PartyDataUpdateNotif, FAccelByteModelsPartyDataNotif);
-		CASE_NOTIF(PartyMemberConnectNotif, FAccelByteModelsPartyMemberConnectionNotice);
-		CASE_NOTIF(PartyMemberDisconnectNotif, FAccelByteModelsPartyMemberConnectionNotice);
-#endif
 		// Chat
 		CASE_NOTIF(PersonalChatNotif, FAccelByteModelsPersonalMessageNotice);
 		CASE_NOTIF(PartyChatNotif, FAccelByteModelsPartyMessageNotice);
@@ -3159,16 +2723,7 @@ void Lobby::HandleMessageNotif(FString const& ReceivedMessageType
 		}
 		default:
 		{
-#if 1 // MMv1 Deprecation
-			// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
-			auto handled = HandleMatchmakingV1MessageNotif(ReceivedMessageType, ParsedJsonString, ParsedJsonObj, bSkipConditioner);
-			if(!handled)
-			{
-#endif
 				ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error; Detected of type notif but no specific handler case assigned. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
-#if 1 // MMv1 Deprecation
-			}
-#endif
 			break;
 		}
 	}
@@ -3656,77 +3211,6 @@ Lobby::FMassiveOutage& Lobby::OnMassiveOutageMulticastDelegate()
 	return MassiveOutage;
 }
 
-#if 1 // MMv1 Deprecation
-void Lobby::SetPartyLeaveNotifDelegate(Lobby::FPartyLeaveNotif const& OnPartyLeaveNotice)
-{	
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyLeaveNotif = OnPartyLeaveNotice;
-}
-
-void Lobby::SetPartyMemberLeaveNotifDelegate(Lobby::FPartyMemberLeaveNotif const& OnPartyMemberLeaveNotice)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyMemberLeaveNotif = OnPartyMemberLeaveNotice;
-}
-
-void Lobby::SetPartyMemberConnectNotifDelegate(Lobby::FPartyMemberConnectNotif const& OnPartyMemberConnectNotif)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyMemberConnectNotif = OnPartyMemberConnectNotif;
-}
-
-void Lobby::SetPartyMemberDisconnectNotifDelegate(Lobby::FPartyMemberDisconnectNotif const& OnPartyMemberDisconnectNotif)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyMemberDisconnectNotif = OnPartyMemberDisconnectNotif;
-}
-
-void Lobby::SetPartyInviteNotifDelegate(Lobby::FPartyInviteNotif const& OnPartyInviteNotif)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyInviteNotif = OnPartyInviteNotif;
-}
-
-void Lobby::SetPartyGetInvitedNotifDelegate(Lobby::FPartyGetInvitedNotif const& OnInvitePartyGetInvitedNotice)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyGetInvitedNotif = OnInvitePartyGetInvitedNotice;
-}
-
-void Lobby::SetPartyJoinNotifDelegate(Lobby::FPartyJoinNotif const& OnInvitePartyJoinNotice)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyJoinNotif = OnInvitePartyJoinNotice;
-}
-
-void Lobby::SetPartyInvitationRejectedNotifDelegate(Lobby::FPartyRejectNotif const& OnInvitePartyRejectNotice)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyRejectNotif = OnInvitePartyRejectNotice;
-}
-
-void Lobby::SetPartyKickNotifDelegate(Lobby::FPartyKickNotif const& OnInvitePartyKickedNotice)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyKickNotif = OnInvitePartyKickedNotice;
-}
-
-void Lobby::SetPartyNotifDelegate(Lobby::FPartyNotif const& OnPartyNotif)
-{
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Party V1 functionality is deprecated and replaced by Party V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/party/"));
-	PartyNotif = OnPartyNotif;
-}
-#endif
 
 void Lobby::SetPrivateMessageNotifDelegate(Lobby::FPersonalChatNotif const& OnPersonalChatNotif)
 {
@@ -3849,379 +3333,6 @@ void Lobby::OnLoginSuccess(const FOauth2Token& AuthToken)
 	}
 }
 
-#if 1 // MMv1 Deprecation
-
-TMap<FString, Response> Lobby::MatchmakingV1ResponseStringEnumMap{
-	FORM_STRING_ENUM_PAIR(Response,MatchmakingStart),
-	FORM_STRING_ENUM_PAIR(Response,MatchmakingCancel),
-	FORM_STRING_ENUM_PAIR(Response,ReadyConsent),
-	FORM_STRING_ENUM_PAIR(Response,RejectConsent),
-	FORM_STRING_ENUM_PAIR(Response,CreateDS),
-};
-
-TMap<FString, Notif> Lobby::MatchmakingV1NotifStringEnumMap{
-	FORM_STRING_ENUM_PAIR(Notif,MatchmakingNotif),
-	FORM_STRING_ENUM_PAIR(Notif,ReadyConsentNotif),
-	FORM_STRING_ENUM_PAIR(Notif,RejectConsentNotif),
-	FORM_STRING_ENUM_PAIR(Notif,RematchmakingNotif),
-	FORM_STRING_ENUM_PAIR(Notif,DsNotif),
-};
-
-void Lobby::UnbindMatchmakingNotifEvents()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	MatchmakingNotif.Unbind();
-	ReadyConsentNotif.Unbind();
-	RejectConsentNotif.Unbind();
-	RematchmakingNotif.Unbind();
-	DsNotif.Unbind();
-}
-
-void Lobby::UnbindMatchmakingResponseEvents()
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	MatchmakingStartResponse.Unbind();
-	MatchmakingCancelResponse.Unbind();
-	ReadyConsentResponse.Unbind();
-	RejectConsentResponse.Unbind();
-
-	OnMatchmakingStartError.Unbind();
-	OnMatchmakingCancelError.Unbind();
-	OnReadyConsentError.Unbind();
-	OnRejectConsentError.Unbind();
-}
-
-//-------------------------------------------------------------------------------------------------
-// Matchmaking V1
-//-------------------------------------------------------------------------------------------------
-FString Lobby::SendStartMatchmaking(FString const& GameMode
-	, FString const& ServerName
-	, FString const& ClientVersion
-	, TArray<TPair<FString, float>> const& Latencies
-	, TMap<FString, FString> const& PartyAttributes
-	, TArray<FString> const& TempPartyUserIds
-	, TArray<FString> const& ExtraAttributes)
-{
-	FMatchmakingOptionalParams Params;
-	Params.ServerName = ServerName;
-	Params.ClientVersion = ClientVersion;
-	Params.Latencies = Latencies;
-	Params.PartyAttributes = PartyAttributes;
-	Params.TempPartyUserIds = TempPartyUserIds;
-	Params.ExtraAttributes = ExtraAttributes;
-
-	return SendStartMatchmaking(GameMode, Params);
-}
-
-FString Lobby::SendStartMatchmaking(FString const& GameMode
-	, TArray<FString> const& TempPartyUserIds
-	, FString const& ServerName
-	, FString const& ClientVersion
-	, TArray<TPair<FString, float>> const& Latencies
-	, TMap<FString, FString> const& PartyAttributes
-	, TArray<FString> const& ExtraAttributes)
-{
-	return SendStartMatchmaking(GameMode
-		, ServerName
-		, ClientVersion
-		, Latencies
-		, PartyAttributes
-		, TempPartyUserIds
-		, ExtraAttributes);
-}
-
-FString Lobby::SendStartMatchmaking(FString const& GameMode
-	, TMap<FString, FString> const& PartyAttributes
-	, FString const& ServerName
-	, FString const& ClientVersion
-	, TArray<TPair<FString, float>> const& Latencies
-	, TArray<FString> const& TempPartyUserIds
-	, TArray<FString> const& ExtraAttributes)
-{
-	return SendStartMatchmaking(GameMode
-		, ServerName
-		, ClientVersion
-		, Latencies
-		, PartyAttributes
-		, TempPartyUserIds
-		, ExtraAttributes);
-}
-
-FString Lobby::SendStartMatchmaking(FString const& GameMode
-	, TMap<FString, FString> const& PartyAttributes
-	, TArray<FString> const& TempPartyUserIds
-	, FString const& ServerName
-	, FString const& ClientVersion
-	, TArray<TPair<FString, float>> const& Latencies
-	, TArray<FString> const& ExtraAttributes)
-{
-	return SendStartMatchmaking(GameMode
-		, ServerName
-		, ClientVersion
-		, Latencies
-		, PartyAttributes
-		, TempPartyUserIds
-		, ExtraAttributes);
-}
-
-FString Lobby::GetServerLatenciesJsonStr(TArray<TPair<FString, float>> const& SelectedLatencies)
-{
-	FString ServerLatencies = TEXT("{");
-	for (int i = 0; i < SelectedLatencies.Num(); i++)
-	{
-		ServerLatencies.Append(FString::Printf(TEXT("\"%s\":%.0f"), *SelectedLatencies[i].Key, SelectedLatencies[i].Value));
-		if (i + 1 < SelectedLatencies.Num())
-		{
-			ServerLatencies.Append(TEXT(","));
-		}
-	}
-	ServerLatencies.Append(TEXT("}"));
-	return FString::Printf(TEXT("latencies: %s\n"), *ServerLatencies);	
-}
-
-FString Lobby::SendStartMatchmaking(FString const& GameMode
-	, FMatchmakingOptionalParams const& OptionalParams)
-{
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Matchmaking V1 functionality is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
-
-	FString Contents = FString::Printf(TEXT("gameMode: %s\n"), *GameMode);
-		
-	if (!OptionalParams.ServerName.IsEmpty())
-	{
-		Contents.Append(FString::Printf(TEXT("serverName: %s\n"), *OptionalParams.ServerName));
-	}
-		
-	if (!OptionalParams.ClientVersion.IsEmpty())
-	{
-		Contents.Append(FString::Printf(TEXT("clientVersion: %s\n"), *OptionalParams.ClientVersion));
-	}
-
-	// Use Qos cached Latencies, or were valid Latencies already provided?
-	const bool bUseCustomLatencies = OptionalParams.Latencies.Num() > 0;
-	const TArray<TPair<FString, float>> SelectedLatencies = bUseCustomLatencies
-		? OptionalParams.Latencies
-		: RegionLatencies.AsPairs();
-
-	// Validate Latencies (now initially set, immediately after login success): Important for multi-regioning.
-	if (SelectedLatencies.Num() == 0)
-	{
-		// There are reports of weirdness when !Latencies && Multi-Regioning: This should also already be set.
-		UE_LOG(LogAccelByteLobby, Warning, TEXT("No latencies data provided either from cached latencies or optional params. "
-			"Empty latencies will be passed to the server (possibly problematic, if multi-regioning)."));
-	}
-
-	// Latencies should be set: Convert to json str
-	if (SelectedLatencies.Num() > 0)
-		Contents.Append(GetServerLatenciesJsonStr(SelectedLatencies));
-
-	auto PartyAttribute = OptionalParams.PartyAttributes;
-	if (OptionalParams.NewSessionOnly)
-		PartyAttribute.Add("new_session_only", "true");
-
-	FString partyAttributeSerialized = "";
-	if (PartyAttribute.Num() > 0)
-	{
-		TArray<FString> keys;
-		PartyAttribute.GetKeys(keys);
-		for (int i = 0 ; i < keys.Num() ; i++)
-		{
-			FString key = keys[i];
-			FString value = PartyAttribute[keys[i]];
-			key = key.ReplaceCharWithEscapedChar();
-			value = value.ReplaceCharWithEscapedChar();
-
-			//Convert to this format [ "key":"value" ]
-			partyAttributeSerialized.Append(FString::Printf(TEXT("\"%s\":\"%s\""), *key, *value));
-
-			//If there's more attribute, append a delimiter
-			if (i < keys.Num() - 1)
-			{
-				partyAttributeSerialized.Append(", ");
-			}
-		}
-	}
-
-	if (OptionalParams.SubGameModes.Num() > 0)
-	{
-		// if there is party attribute already, prepend a comma
-		if (PartyAttribute.Num() > 0)
-		{
-			partyAttributeSerialized.Append(", ");
-		}
-
-		FString SubGameModeValue {"["};
-		for (int i = 0; i < OptionalParams.SubGameModes.Num(); i++)
-		{
-			if(i > 0)
-				SubGameModeValue.Append(", ");
-
-			SubGameModeValue.Append(FString::Printf(TEXT("\"%s\""), *OptionalParams.SubGameModes[i]));
-		}
-		SubGameModeValue.Append("]");
-
-		partyAttributeSerialized.Append(FString::Printf(TEXT("\"sub_game_mode\": %s"), *SubGameModeValue));
-	}
-
-	if (!partyAttributeSerialized.IsEmpty())
-	{
-		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}\n"), *partyAttributeSerialized));
-	}
-
-	if (OptionalParams.TempPartyUserIds.Num() > 0)
-	{
-		FString STempParty = TEXT("");
-		for (int i = 0; i < OptionalParams.TempPartyUserIds.Num(); i++)
-		{
-			STempParty.Append(FString::Printf(TEXT("%s"), *OptionalParams.TempPartyUserIds[i]));
-			if (i + 1 < OptionalParams.TempPartyUserIds.Num())
-			{
-				STempParty.Append(TEXT(","));
-			}
-		}
-		
-		Contents.Append(FString::Printf(TEXT("tempParty: %s\n"), *STempParty));
-	}
-
-	if (OptionalParams.ExtraAttributes.Num() > 0)
-	{
-		FString SExtraAttributes = TEXT("");
-		for (int i = 0; i < OptionalParams.ExtraAttributes.Num(); i++)
-		{
-			SExtraAttributes.Append(FString::Printf(TEXT("%s"), *OptionalParams.ExtraAttributes[i]));
-			if (i + 1 < OptionalParams.ExtraAttributes.Num())
-			{
-				SExtraAttributes.Append(TEXT(","));
-			}
-		}
-		Contents.Append(FString::Printf(TEXT("extraAttributes: %s\n"), *SExtraAttributes));
-	}
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(MatchmakingStart, Matchmaking, Contents)
-}
-
-
-FString Lobby::SendCancelMatchmaking(FString const& GameMode
-	, bool IsTempParty)
-{
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Matchmaking V1 functionality is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(MatchmakingCancel
-		, Matchmaking
-		, FString::Printf(TEXT("gameMode: %s\nisTempParty: %s"), *GameMode, (IsTempParty ? TEXT("true") : TEXT("false"))))
-}
-	
-FString Lobby::SendReadyConsentRequest(FString const& MatchId)
-{
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Matchmaking V1 functionality is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(ReadyConsent
-		, Matchmaking
-		, FString::Printf(TEXT("matchId: %s\n"), *MatchId));
-}
-
-FString Lobby::SendRejectConsentRequest(FString const& MatchId)
-{
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Matchmaking V1 functionality is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(RejectConsent
-		, Matchmaking
-		, FString::Printf(TEXT("matchId: %s\n"), *MatchId));
-}
-
-// Note: [Exper] part of MMv1
-FString Lobby::RequestDS(FString const& SessionID
-	, FString const& GameMode
-	, FString const& ClientVersion
-	, FString const& Region
-	, FString const& Deployment
-	, FString const& ServerName)
-{
-	FReport::Log(FString(__FUNCTION__));
-	FReport::LogDeprecated(FString(__FUNCTION__),
-		TEXT("Matchmaking V1 functionality is deprecated and replaced by Matchmaking V2. For more information, see https://docs.accelbyte.io/gaming-services/services/play/matchmaking/matchmaking-version-comparison/"));
-	return SendRawRequest(LobbyRequest::CreateDS
-		, Prefix::Matchmaking
-		, FString::Printf(TEXT("matchId: %s\ngameMode: %s\nserverName: %s\nclientVersion: %s\nregion: %s\ndeployment: %s\n"), *SessionID, *GameMode, *ServerName, *ClientVersion, *Region, *Deployment));
-}
-
-// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
-auto Lobby::HandleMatchmakingV1MessageResponse(FString const& ReceivedMessageType
-	, FString const& ParsedJsonString
-	, TSharedPtr<FJsonObject> const& ParsedJsonObj
-	, TSharedPtr<FLobbyMessageMetaData> const& MessageMeta) -> bool
-{
-	int lobbyResponseCode{0};
-	FString ReceivedMessageId{};
-
-	if(MessageMeta.IsValid())
-	{
-		lobbyResponseCode = FCString::Atoi(*MessageMeta->Code);
-		ReceivedMessageId = MessageMeta->Id;
-	}
-	else
-	{
-		lobbyResponseCode = ParsedJsonObj->GetIntegerField(TEXT("code"));
-		ReceivedMessageId = ParsedJsonObj->GetStringField(TEXT("id"));
-	}
-
-	Response ResponseEnum = Response::Invalid_Response;
-	Response* ResponseEnumPointer = MatchmakingV1ResponseStringEnumMap.Find(ReceivedMessageType);
-	if (ResponseEnumPointer)
-	{
-		ResponseEnum = *ResponseEnumPointer;
-	}
-
-	switch (ResponseEnum)
-	{
-		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MatchmakingStart	, FAccelByteModelsMatchmakingResponse, FMatchmakingResponse);
-		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MatchmakingCancel, FAccelByteModelsMatchmakingResponse, FMatchmakingResponse);
-		CASE_RESPONSE_MESSAGE_ID(ReadyConsent, FAccelByteModelsReadyConsentRequest);
-		CASE_RESPONSE_MESSAGE_ID(RejectConsent, FAccelByteModelsRejectConsentRequest);
-		// Custom Game
-		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(CreateDS			, FAccelByteModelsLobbyBaseResponse, FBaseResponse);
-		default:
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-// Note: [Exper] Part of MMv1 deprecation, delete when decommisioning Matchmaking V1
-auto Lobby::HandleMatchmakingV1MessageNotif(FString const& ReceivedMessageType
-	, FString const& ParsedJsonString
-	, TSharedPtr<FJsonObject> const& ParsedJsonObj
-	, bool bSkipConditioner) -> bool
-{
-	Notif NotifEnum = Notif::Invalid_Notif;
-	if (const Notif* NotifEnumPointer = MatchmakingV1NotifStringEnumMap.Find(ReceivedMessageType))
-	{
-		NotifEnum = *NotifEnumPointer;
-	}
-
-	switch (NotifEnum)
-	{
-		// Matchmaking
-		CASE_NOTIF(MatchmakingNotif		, FAccelByteModelsMatchmakingNotice);
-		CASE_NOTIF(ReadyConsentNotif	, FAccelByteModelsReadyConsentNotice);
-		CASE_NOTIF(RejectConsentNotif	, FAccelByteModelsRejectConsentNotice);
-		CASE_NOTIF(RematchmakingNotif	, FAccelByteModelsRematchmakingNotice);
-		CASE_NOTIF(DsNotif				, FAccelByteModelsDsNotice);
-		default:
-		{
-			return false;
-		}
-	}
-	return true;
-}
-#endif
 
 #undef MESSAGE_SUCCESS_HANDLER
 #undef MESSAGE_ERROR_HANDLER

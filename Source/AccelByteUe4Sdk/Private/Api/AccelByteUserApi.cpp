@@ -86,7 +86,8 @@ static FString SearchStrings[] =
 
 void User::FinalPreLoginEvents()
 {
-	if (UserCredentialsRef->GetSessionState() == Credentials::ESessionState::Valid)
+	if (UserCredentialsRef->GetSessionState() != Credentials::ESessionState::Valid &&
+		UserCredentialsRef->GetSessionState() != Credentials::ESessionState::Refreshing)
 	{
 		UserCredentialsRef->ForgetAll();
 	}
@@ -2245,6 +2246,7 @@ FAccelByteTaskWPtr User::LinkOtherPlatformId(FString const& PlatformId
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
+// DEPRECATED: Use ForcePlatformLinkV3() instead. This endpoint will be removed from IAM service.
 FAccelByteTaskWPtr User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
 	, FString const& PlatformUserId
 	, FVoidHandler const& OnSuccess
@@ -2266,6 +2268,7 @@ FAccelByteTaskWPtr User::ForcedLinkOtherPlatform(EAccelBytePlatformType Platform
 			}));
 }
 	
+// DEPRECATED: Use ForcePlatformLinkV3() instead. This endpoint will be removed from IAM service.
 FAccelByteTaskWPtr User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType
 	, FString const& PlatformUserId
 	, FVoidHandler const& OnSuccess
@@ -2285,6 +2288,30 @@ FAccelByteTaskWPtr User::ForcedLinkOtherPlatform(EAccelBytePlatformType Platform
 	LinkRequest.PlatformUserId = PlatformUserId;
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, LinkRequest, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr User::ForcePlatformLinkV3(
+	FString const& PlatformId,
+	FString const& Ticket,
+	FVoidHandler const& OnSuccess,
+	FCustomErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s/force"),
+		*SettingsRef.IamServerUrl,
+		*FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()),
+		*FGenericPlatformHttp::UrlEncode(PlatformId));
+
+	const FString Content = FString::Printf(TEXT("ticket=%s"),
+		*FGenericPlatformHttp::UrlEncode(*Ticket));
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType

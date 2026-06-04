@@ -4,19 +4,13 @@
 
 #pragma once
 
+// AccelByteOpenSSLIncludes.h must be included before CoreMinimal.h — see that file for the
+// full rationale and include-order requirements.
+#include "Core/AccelByteOpenSSLIncludes.h"
+
 #include "CoreMinimal.h"
 #include "Misc/IEngineCrypto.h"
 #include "Misc/Base64.h"
-
-namespace openssl
-{
-THIRD_PARTY_INCLUDES_START
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-#include <openssl/rand.h>
-#include <openssl/aes.h>
-THIRD_PARTY_INCLUDES_END
-}
 
 namespace AccelByte
 {
@@ -205,8 +199,8 @@ public:
 private:
 
 #if !PLATFORM_SWITCH
-	void LoadBinaryIntoBigNum(const TArray<uint8>& InData, openssl::BIGNUM* InBigNum);
-	void BigNumToArray(const openssl::BIGNUM* InNum, TArray<uint8>& OutBytes, int32 InKeySize);
+	void LoadBinaryIntoBigNum(const TArray<uint8>& InData, ::BIGNUM* InBigNum);
+	void BigNumToArray(const ::BIGNUM* InNum, TArray<uint8>& OutBytes, int32 InKeySize);
 
 	bool OnSign(const FRSAKeyHandle InKey, const TArray<uint8>& InMsg, TArray<uint8>& Out);
 	bool OnVerifySignature(FRSAKeyHandle InKey, const TArray<uint8>& MsgHash, const TArray<uint8>& InMsg);
@@ -262,20 +256,23 @@ public:
 	/**
 	 * Creates the OpenSSL Cipher Context on construction
 	 */
-	FCipherCtx() : Context(openssl::EVP_CIPHER_CTX_new()) {}
+	FCipherCtx() : Context(::EVP_CIPHER_CTX_new())
+	{
+		checkf(Context != nullptr, TEXT("EVP_CIPHER_CTX_new() returned nullptr"));
+	}
 
 	/**
 	 * Free the OpenSSL Cipher Context
 	 */
 	~FCipherCtx()
 	{
-		openssl::EVP_CIPHER_CTX_free(Context);
+		::EVP_CIPHER_CTX_free(Context);
 	}
 
 	/**
 	 * Get our OpenSSL Cipher Context
 	 */
-	openssl::EVP_CIPHER_CTX* Get() const { return Context; }
+	::EVP_CIPHER_CTX* Get() const { return Context; }
 
 private:
 	/** Disable copying/assigning */
@@ -283,7 +280,7 @@ private:
 	FCipherCtx& operator=(const FCipherCtx& Other) = delete;
 
 	/** the OpenSSL EVP Cipher context object */
-	openssl::EVP_CIPHER_CTX* Context;
+	::EVP_CIPHER_CTX* Context;
 };
 
 #endif // !PLATFORM_SWITCH
@@ -366,7 +363,7 @@ private:
 	/** RAII wrapper for the OpenSSL EVP Cipher context object */
 	FCipherCtx CipherCtx;
 
-	const openssl::EVP_CIPHER* Cipher;
+	const ::EVP_CIPHER* Cipher;
 #endif // !PLATFORM_SWITCH
 
 	/** The AES key */

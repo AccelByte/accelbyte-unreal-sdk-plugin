@@ -86,7 +86,7 @@ void Settings::LoadSettings(const FString& SectionPath)
 
 	FString ServerUseAMSString{};
 	FAccelByteUtilities::LoadABConfigFallback(SectionPath, TEXT("bServerUseAMS"), ServerUseAMSString, DefaultSection);
-	this->bServerUseAMS = ServerUseAMSString.IsEmpty() ? false : ServerUseAMSString.ToBool();
+	this->bServerUseAMS = ServerUseAMSString.IsEmpty() ? true : ServerUseAMSString.ToBool();
 	FString QoSMDefaultPrefix = this->bServerUseAMS ? TEXT("ams-qosm") : TEXT("qosm");
 	QosManagerServerUrl = GetClientConfigUrlValue(SectionPath, TEXT("QosManagerServerUrl"), BaseUrl, QoSMDefaultPrefix);
 

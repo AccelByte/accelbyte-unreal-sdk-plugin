@@ -59,9 +59,6 @@ FApiClient::FApiClient(SettingsPtr const& InSettings
 	, QosPtr(MakeShared<Api::Qos, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *MessagingSystem.Get(), QosManagerPtr, InAccelByteInstance->GetAccelBytePlatform()))
 	, LobbyPtr(MakeShared<AccelByte::Api::Lobby, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner, InAccelByteInstance->GetAccelBytePlatform()))
 	, ChatPtr(MakeShared<AccelByte::Api::Chat, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, *MessagingSystem.Get(), NetworkConditioner, InAccelByteInstance->GetAccelBytePlatform()))
-#if 1 // MMv1 Deprecation
-	, SessionBrowserPtr(MakeShared<AccelByte::Api::SessionBrowser, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, InAccelByteInstance->GetAccelBytePlatform()))
-#endif
 	, TurnManagerPtr(MakeShared<AccelByte::Api::TurnManager, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, InAccelByteInstance->GetAccelBytePlatform()))
 	, SessionPtr(MakeShared<AccelByte::Api::Session, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, InAccelByteInstance->GetAccelBytePlatform()))
 	, MatchmakingV2Ptr(MakeShared<AccelByte::Api::MatchmakingV2, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, InAccelByteInstance->GetAccelBytePlatform()))
@@ -186,12 +183,6 @@ Api::QosManagerWPtr FApiClient::GetQosManagerApi() const
 {
 	return QosManagerPtr;
 }
-#if 1 // MMv1 Deprecation
-Api::SessionBrowserWPtr FApiClient::GetSessionBrowserApi() const
-{
-	return SessionBrowserPtr;
-}
-#endif
 Api::TurnManagerWPtr FApiClient::GetTurnManagerApi() const
 {
 	return TurnManagerPtr;

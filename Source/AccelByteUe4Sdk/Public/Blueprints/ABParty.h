@@ -162,6 +162,14 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyMemberDisconnectNotif, FAccelByteModels
 
 #pragma endregion
 
+/**
+ * Blueprint API for AccelByte party-related operations.
+ *
+ * NOTE: V1 Party methods (create, leave, invite, join, kick, etc.) were removed 
+ * as part of Session V1 / MMv1 deprecation. For party management, use the V2 session interface
+ * (UABSessionV2 / FOnlineSessionV2AccelByte). The remaining methods in this class cover
+ * party storage and data access only.
+ */
 //Sub-API from AccelByte Lobby
 UCLASS(Blueprintable, BlueprintType)
 class UABParty : public UObject
@@ -172,43 +180,6 @@ public:
 
 //Request-Response
 public: 
-#if 1 // MMv1 Deprecation
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyInvite(FPartyInviteRequest const& Request, FDPartyInviteResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyJoin(FPartyJoinRequest const& Request, FDPartyJoinResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyReject(FPartyRejectRequest const& Request, FDPartyRejectResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyKick(FPartyKickRequest const& Request, FDPartyKickResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyGenerateCode(FDPartyGenerateCodeResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyGetCode(FDPartyGetCodeResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyDeleteCode(FDPartyDeleteCodeResponse OnResponse, FDErrorHandler OnError);
-	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyJoinViaCode(FPartyJoinViaCodeRequest const& Request, FDPartyJoinViaCodeResponse OnResponse, FDErrorHandler OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
-	void PartyPromoteLeader(FPartyPromoteLeaderRequest const& Request, FDPartyPromoteLeaderResponse OnResponse, FDErrorHandler OnError);
-#endif
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
 	void SetPartySizeLimit(const FString& PartyId, const int32 Limit, const FDHandler& OnSuccess, FDErrorHandler OnError);
@@ -222,61 +193,6 @@ public:
 	//Can not be run at the moment. Need to find a way to expose TFunction Json Modifier to lua
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Api")
 	void WritePartyStorage(FWritePartyStorageRequest const& Request, FDPartyWriteDataResponse OnResponse, FDErrorHandler OnError);
-
-//Notification
-public:
-#if 1 // MMv1 Deprecation
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif);
-	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif);
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyJoin(FDPartyJoinNotif OnNotif);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyReject(FDPartyRejectNotif OnNotif);
-
-	/**
-	 * @brief Set a trigger function when a party member leave from the party. This function is DEPRECATED
-	 * @param OnNotif delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
-	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyLeave(FDPartyLeaveNotif OnNotif);
-
-	/**
-	 * @brief Set a trigger function when a party member leave from the party
-	 * @param OnNotif delegate parameter with returned model called FAccelByteModelsLeavePartyNotice
-	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyMemberLeave(FDPartyMemberLeaveNotif OnNotif);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyKick(FDPartyKickNotif OnNotif);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyUpdate(FDPartyUpdateNotif OnNotif);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyInvite(FDPartyInviteNotif OnNotif);
-
-	/**
-	 * @brief Set a trigger function when a party member reconnecting to the lobby
-	 * @param OnNotif return models called FAccelByteModelsPartyMemberConnectionNotice
-	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyMemberConnect(FDPartyMemberConnectNotif OnNotif);
-
-	/**
-	 * @brief Set a trigger function when a party member disconnect from lobby
-	 * @param OnNotif return models called FAccelByteModelsPartyMemberConnectionNotice
-	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party | Delegate")
-	void SetOnPartyMemberDisconnect(FDPartyMemberDisconnectNotif OnNotif);
-#endif
 
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;

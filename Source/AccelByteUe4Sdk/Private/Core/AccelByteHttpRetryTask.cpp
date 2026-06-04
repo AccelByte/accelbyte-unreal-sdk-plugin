@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteHttpRetryTask.h"
+#include "AccelByteUe4SdkModule.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteReport.h"
 
@@ -34,6 +35,15 @@ FHttpRetryTask::FHttpRetryTask(
 
 FHttpRetryTask::~FHttpRetryTask()
 {
+	// Post-module-shutdown bail-out. Reached when the owning TaskQueue is drained during
+	// FApiClient destruction at CRT atexit. Calling Request->CancelRequest() here would
+	// touch FHttpManager, which may already be torn down. Leak Request/delegate bindings
+	// instead — OS reclaims process memory on exit.
+	if (AccelByte::IsSdkPostShutdown())
+	{
+		return;
+	}
+
 	auto HttpRetrySchedulerPtr = HttpRetrySchedulerWPtr.Pin();
 	if (HttpRetrySchedulerPtr.IsValid())
 	{

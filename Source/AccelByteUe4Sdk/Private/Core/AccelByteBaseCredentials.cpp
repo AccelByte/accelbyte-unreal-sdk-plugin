@@ -76,31 +76,31 @@ namespace AccelByte
 		}
 	}
 
-	const FString& BaseCredentials::GetOAuthClientId() const
+	FString BaseCredentials::GetOAuthClientId() const
 	{
 		FReadScopeLock ReadLock(ClientIdMtx);
 		return ClientId;
 	}
 
-	const FString& BaseCredentials::GetOAuthClientSecret() const
+	FString BaseCredentials::GetOAuthClientSecret() const
 	{
 		FReadScopeLock ReadLock(ClientSecretMtx);
 		return ClientSecret;
 	}
 
-	const FOauth2Token& BaseCredentials::GetAuthToken() const
+	FOauth2Token BaseCredentials::GetAuthToken() const
 	{
 		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken;
 	}
 
-	const FString& BaseCredentials::GetAccessToken() const
+	FString BaseCredentials::GetAccessToken() const
 	{
 		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Access_token;
 	}
 
-	const FString& BaseCredentials::GetNamespace() const
+	FString BaseCredentials::GetNamespace() const
 	{
 		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.Namespace;
@@ -111,13 +111,13 @@ namespace AccelByte
 		return SessionState.load(std::memory_order_acquire);
 	}
 
-	const FString& BaseCredentials::GetUserId() const
+	FString BaseCredentials::GetUserId() const
 	{
 		FReadScopeLock ReadLock(AuthTokenMtx);
 		return AuthToken.User_id;
 	}
 
-	const TMap<FString, FString> BaseCredentials::GetAuthHeader() const
+	TMap<FString, FString> BaseCredentials::GetAuthHeader() const
 	{
 		FString const AccessToken = GetAccessToken();
 		
@@ -133,7 +133,7 @@ namespace AccelByte
 		return TMap<FString, FString>{};
 	}
 
-	const FErrorOAuthInfo& BaseCredentials::GetErrorOAuth() const
+	FErrorOAuthInfo BaseCredentials::GetErrorOAuth() const
 	{
 		FReadScopeLock ReadLock(ErrorOAuthMtx);
 		return ErrorOAuth;

@@ -26,17 +26,16 @@ static const FString AccelByteConfigPrefix = TEXT("ab");
 static const int32 AccelByteConfigPrefixMinLength = 3; // Minimum length for "ab" + at least one character
 
 #if !PLATFORM_SWITCH
-// enclosing with namespace because of collision with Unreal types
-namespace openssl
-{
+// evp.h is included via the shared guard header (see AccelByteOpenSSLIncludes.h for rationale).
+// bio.h, ec.h, and pem.h are additional OpenSSL headers needed here; they use the same guard pattern.
+#include "Core/AccelByteOpenSSLIncludes.h"
+#define UI ACCELBYTE_OPENSSL_ST_UI
 THIRD_PARTY_INCLUDES_START
+#include <openssl/bio.h>  // BIO_new / BIO_write / BIO_free_all — used for reading PEM public keys in JWT verification
 #include <openssl/ec.h>
-#include <openssl/evp.h>
 #include <openssl/pem.h>
 THIRD_PARTY_INCLUDES_END
-}
-
-using namespace openssl;
+#undef UI
 
 class FScopedEVPMDContext
 {

@@ -68,7 +68,7 @@ void ServerSettings::LoadSettings(const FString& SectionPath)
 
 	PlatformServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("PlatformServerUrl"), BaseUrl, TEXT("platform"));
 
-	QosManagerServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("QosManagerServerUrl"), BaseUrl, TEXT("qosm"));
+	QosManagerServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("QosManagerServerUrl"), BaseUrl, TEXT("ams-qosm"));
 
 	GameTelemetryServerUrl = GetServerConfigUrlValue(SectionPath, TEXT("GameTelemetryServerUrl"), BaseUrl, TEXT("game-telemetry"));
 

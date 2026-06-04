@@ -10,11 +10,11 @@ This documentation assumes that you are already familiar with modern C++, Unreal
 - [ ] Unreal Engine 4.25
 - [ ] Unreal Engine 4.26
 - [x] Unreal Engine 4.27.x
-- [x] Unreal Engine 5.0.x
-- [x] Unreal Engine 5.1.x
-- [x] Unreal Engine 5.2.x
-- [x] Unreal Engine 5.3.x
-- [x] Unreal Engine 5.4.x
+- [ ] Unreal Engine 5.0.x
+- [ ] Unreal Engine 5.1.x
+- [ ] Unreal Engine 5.2.x
+- [ ] Unreal Engine 5.3.x
+- [ ] Unreal Engine 5.4.x
 - [x] Unreal Engine 5.5.x
 - [x] Unreal Engine 5.6.x
 - [x] Unreal Engine 5.7.x (Beta)

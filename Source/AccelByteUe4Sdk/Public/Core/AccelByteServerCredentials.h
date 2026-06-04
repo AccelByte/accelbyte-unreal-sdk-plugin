@@ -31,9 +31,9 @@ public:
 
 	virtual void Startup() override;
 
-	const FString& GetClientAccessToken() const;
-	const FString& GetClientNamespace() const;
-	const FString& GetMatchId() const;
+	FString GetClientAccessToken() const;
+	FString GetClientNamespace() const;
+	FString GetMatchId() const;
 
 protected:
 	mutable FRWLock MatchIdMtx;

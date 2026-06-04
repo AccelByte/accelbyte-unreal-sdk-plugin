@@ -8,7 +8,6 @@
 #include "ABUser.h"
 #include "AccelByteBPLobby.h"
 #include "ABParty.h"
-#include "ABMatchmaking.h"
 #include "ABFriends.h"
 #include "ABCatalog.h"
 #include "ABOrder.h"
@@ -23,7 +22,6 @@
 #include "ABStatistic.h"
 #include "ABLeaderboard.h"
 #include "ABAchievement.h"
-#include "ABSessionBrowser.h"
 #include "ABUGC.h"
 #include "ABInventory.h"
 #include "ABPresence.h"
@@ -170,16 +168,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABAchievement* Achievement;
-#if 1 // MMv1 Deprecation
-	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
-	UABMatchmaking* Matchmaking;
-
-	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
-	UABSessionBrowser* SessionBrowser;
-
-	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
-	UABParty* Party;
-#endif
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | ApiClient")
 	UABUGC* UGC;
 

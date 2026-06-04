@@ -10,6 +10,7 @@
 #include "Core/AccelByteWebSocketErrorTypes.h"
 #include "AccelByteWebSocketReconnection.h"
 #include "IWebSocket.h"
+#include <atomic>
 
 namespace AccelByte
 {
@@ -132,13 +133,19 @@ public:
 	EWebSocketState GetState() const;
 
 private:
-	bool bConnectTriggered {false};
-	TQueue<FString> OnMessageQueue;
-	TQueue<FConnectionClosedParams> OnConnectionClosedQueue;
-	TQueue<FString> OnConnectionErrorQueue;
-	TQueue<FReconnectAttemptInfo> OnReconnectingAttemptQueue;
-	TQueue<FMassiveOutageInfo> OnMassiveOutageQueue;
-	bool bConnectedBroadcasted {false};
+	// Thread-safe atomic fields (written by LWS worker thread, read by game thread)
+	std::atomic<bool> bConnectTriggered {false};
+	std::atomic<bool> bConnectedBroadcasted {false};
+	std::atomic<uint32> WsEvents {0};
+	std::atomic<bool> bWasWsConnectionError {false};
+	std::atomic<int32> LatestWebsocketDisonnectionCode {0};
+
+	// Multi-producer single-consumer queues (LWS worker thread → Game thread)
+	TQueue<FString, EQueueMode::Mpsc> OnMessageQueue;
+	TQueue<FConnectionClosedParams, EQueueMode::Mpsc> OnConnectionClosedQueue;
+	TQueue<FString, EQueueMode::Mpsc> OnConnectionErrorQueue;
+	TQueue<FReconnectAttemptInfo, EQueueMode::Mpsc> OnReconnectingAttemptQueue;
+	TQueue<FMassiveOutageInfo, EQueueMode::Mpsc> OnMassiveOutageQueue;
 
 	FConnectDelegate ConnectDelegate;
 	FMessageReceiveDelegate MessageReceiveDelegate;
@@ -149,7 +156,6 @@ private:
 
 #pragma region RECONNECTION_RELATED_MEMBERS
 	uint32 ReconnectingAttemptCount = 0;
-	int32 LatestWebsocketDisonnectionCode = 0;
 	FReconnectionStrategy& GetCurrentReconnectionStrategy();
 	uint32 MassiveOutageReminderCounter = 0; //MassiveOutage delegate shoulde be fired once every that duration recurring. i.e. each 5 minutes
 	IWebsocketConfigurableReconnectStrategy& ParentReconnectionStrategyRef;
@@ -162,7 +168,6 @@ private:
 	int BackoffDelay {0};
 	int32 RandomizedBackoffDelay {0};
 	float PingDelay {0.0f};
-	bool bWasWsConnectionError {false};
 	bool bDisconnectOnNextTick {false};
 	TSharedPtr<IWebSocketFactory> WebSocketFactory;
 
@@ -178,7 +183,6 @@ private:
 	TMap<FString, FString> UpgradeHeaders;
 
 	EWebSocketState WsState = EWebSocketState::Closed;
-	EWebSocketEvent WsEvents = EWebSocketEvent::None;
 
 	void SetupWebSocket();
 	bool Tick(float DeltaTime);
@@ -187,8 +191,14 @@ private:
 	void OnClosed(int32 StatusCode, const FString& Reason, bool WasClean);
 	void OnMessageReceived(const FString& Message);
 
+	// Thread-safe helper to enqueue messages from LibWebsockets callbacks for game thread processing
+	void EnqueueMessage(const FString& Message);
+
 	TSharedPtr<IWebSocket> WebSocket;
-	
+
+	// Thread synchronization for WebSocket access across game thread and LWS worker thread
+	mutable FCriticalSection WebSocketLock;
+
 	bool StateTick(float DeltaTime);
 	bool MessageTick(float DeltaTime);
 

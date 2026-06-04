@@ -299,6 +299,31 @@ FAccelByteTaskWPtr Session::JoinGameSession(FString const& GameSessionID
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Session::JoinGameSession(FString const& GameSessionID
+	, FString const& Password
+	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/join")
+		, *SettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
+	Content->SetStringField(TEXT("password"), Password);
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Session::JoinGameSessionByCode(FString const& Code
 	, THandler<FAccelByteModelsV2GameSession> const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -701,6 +726,31 @@ FAccelByteTaskWPtr Session::JoinParty(FString const& PartyID
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FString(), OnSuccess, OnError);
 }
 
+FAccelByteTaskWPtr Session::JoinParty(FString const& PartyID
+	, FString const& Password
+	, THandler<FAccelByteModelsV2PartySession> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/me/join")
+		, *SettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyID));
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
+	Content->SetStringField(TEXT("password"), Password);
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
+}
+
 FAccelByteTaskWPtr Session::LeaveParty(FString const& PartyID
 	, FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
@@ -1062,6 +1112,98 @@ FAccelByteTaskWPtr Session::GetSessionSecret(FString const& SessionID
 		, *FGenericPlatformHttp::UrlEncode(SessionID));
 
 	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Session::GetGameSessionPassword(FString const& GameSessionID
+	, THandler<FAccelByteModelsV2SessionPasswordResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/password")
+		, *SettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Session::GetPartyPassword(FString const& PartyID
+	, THandler<FAccelByteModelsV2SessionPasswordResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/password")
+		, *SettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyID));
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Session::UpdateGameSessionPassword(FString const& GameSessionID
+	, FString const& NewPassword
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(GameSessionID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetSessionIdInvalidMessage(GameSessionID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/gamesessions/%s/password")
+		, *SettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(GameSessionID));
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
+	Content->SetStringField(TEXT("newPassword"), NewPassword);
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Session::UpdatePartyPassword(FString const& PartyID
+	, FString const& NewPassword
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (!ValidateAccelByteId(PartyID, EAccelByteIdHypensRule::NO_HYPENS
+		, FAccelByteIdValidator::GetPartyIdInvalidMessage(PartyID)
+		, OnError))
+	{
+		return nullptr;
+	}
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/password")
+		, *SettingsRef.SessionServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(PartyID));
+
+	TSharedRef<FJsonObject> Content = MakeShared<FJsonObject>();
+	Content->SetStringField(TEXT("newPassword"), NewPassword);
+
+	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
 }
 
 } // Namespace Api

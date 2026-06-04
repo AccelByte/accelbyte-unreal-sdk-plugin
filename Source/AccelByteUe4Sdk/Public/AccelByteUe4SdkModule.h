@@ -102,3 +102,12 @@ public:
 	virtual TSharedPtr<FAccelByteInstance, ESPMode::ThreadSafe> CreateAccelByteInstance(AccelByte::Settings & InSettings
 		, AccelByte::ServerSettings & InServerSettings) = 0;
 };
+
+namespace AccelByte
+{
+	// True once FAccelByteUe4SdkModule::ShutdownModule() has run. Safe to call from any context
+	// including CRT atexit — backed by file-scope atomic with trivial destruction.
+	// Use this to guard destructor paths that touch engine globals (GConfig, FHttpModule,
+	// FTickerAlias, ...) which may already be torn down on late shutdown.
+	ACCELBYTEUE4SDK_API bool IsSdkPostShutdown();
+}

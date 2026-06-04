@@ -147,17 +147,17 @@ void ServerCredentials::SetMatchId(const FString& GivenMatchId)
 	MatchId = GivenMatchId;
 }
 
-const FString& ServerCredentials::GetClientAccessToken() const
+FString ServerCredentials::GetClientAccessToken() const
 {
 	return GetAccessToken();
 }
 
-const FString& ServerCredentials::GetClientNamespace() const
+FString ServerCredentials::GetClientNamespace() const
 {
 	return GetNamespace();
 }
 
-const FString& ServerCredentials::GetMatchId() const
+FString ServerCredentials::GetMatchId() const
 {
 	FReadScopeLock ReadLock(MatchIdMtx);
 	return MatchId;

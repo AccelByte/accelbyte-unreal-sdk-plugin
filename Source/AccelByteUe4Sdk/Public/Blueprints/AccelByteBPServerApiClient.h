@@ -7,8 +7,6 @@
 #include "ABServerOauth2.h"
 #include "ABServerDSM.h"
 #include "ABServerLobby.h"
-#include "ABServerMatchmaking.h"
-#include "ABServerSessionBrowser.h"
 #include "ABServerAchievement.h"
 #include "ABServerStatistic.h"
 #include "Core/AccelByteServerApiClient.h"
@@ -51,13 +49,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerLobby* ServerLobby;
 
-#if 1 // MMv1 Deprecation
-	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
-	UABServerMatchmaking* ServerMatchmaking;
-
-	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
-	UABServerSessionBrowser* ServerSessionBrowser;
-#endif
 
 	UPROPERTY(BlueprintReadOnly, Category = "AccelByte | Server | ApiClient")
 	UABServerAchievement* ServerAchievement;

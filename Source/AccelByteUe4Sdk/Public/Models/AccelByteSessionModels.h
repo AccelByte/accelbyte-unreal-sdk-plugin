@@ -22,7 +22,8 @@ enum class EAccelByteV2SessionJoinability : uint8
 	OPEN,
 	FRIENDS_OF_LEADER,
 	FRIENDS_OF_FRIENDS,
-	FRIENDS_OF_MEMBERS
+	FRIENDS_OF_MEMBERS,
+	PASSWORD_PROTECTED
 };
 
 UENUM(BlueprintType)
@@ -341,6 +342,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2GameSessionBaseRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
 		FString MatchPool{};
+
+	// Optional, required when Joinability is PASSWORD_PROTECTED. Sets the password players must supply to join.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | GameSessionCreateRequest")
+		FString Password{};
 };
 
 USTRUCT(BlueprintType)
@@ -446,6 +451,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyLeaderPromotionRequest
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionPasswordResponse
+{
+	GENERATED_BODY()
+	// Plaintext password returned by the get-password endpoint.
+	// Only active session/party members (status JOINED or CONNECTED) receive this.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionPasswordResponse")
+	FString Password{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyCreateRequest
 {
 	GENERATED_BODY()
@@ -469,6 +484,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyCreateRequest
 		EAccelByteV2SessionConfigurationServerType Type{EAccelByteV2SessionConfigurationServerType::EMPTY};
 
 		TOptional<bool> TextChat{};
+
+	// Optional, required when Joinability is PASSWORD_PROTECTED. Sets the password players must supply to join.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyCreateRequest")
+		FString Password{};
 };
 
 USTRUCT(BlueprintType)
@@ -491,6 +510,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartyUpdateRequest
 		int64 MinPlayers{TNumericLimits<int32>::Min()};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
 		int64 MaxPlayers{TNumericLimits<int32>::Min()};
+
+	// Optional, required when Joinability is PASSWORD_PROTECTED. Sets the password players must supply to join.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartyUpdateRequest")
+		FString Password{};
 };
 
 USTRUCT(BlueprintType)

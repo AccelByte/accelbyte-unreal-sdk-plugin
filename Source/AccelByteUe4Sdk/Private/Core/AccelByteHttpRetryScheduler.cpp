@@ -5,6 +5,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteReport.h"
 
+#include "AccelByteUe4SdkModule.h"
 #include "Core/AccelByteHttpRetryTask.h"
 #include "Core/AccelByteUtilities.h"
 
@@ -379,6 +380,20 @@ void FHttpRetryScheduler::Startup()
 
 void FHttpRetryScheduler::Shutdown()
 {
+	// Post-module-shutdown bail-out. Reached when FApiClient destructs after
+	// FAccelByteUe4SdkModule::ShutdownModule() — typically customer static-lifetime owners
+	// dying in CRT atexit. GConfig / FHttpModule / FTickerAlias may all be torn down by then.
+	// Distinct from IsEngineExitRequested(): that flag is true both while the engine is still
+	// running a graceful exit (where we DO want to flush) and after module shutdown (where we don't).
+	if (AccelByte::IsSdkPostShutdown())
+	{
+		SetState(EState::ShuttingDown);
+		FWriteScopeLock WriteLock(TaskQueueMtx);
+		TaskQueue.Empty();
+		PollRetryHandle.Reset();
+		return;
+	}
+
 	SetState(EState::ShuttingDown);
 
 	if (PollRetryHandle.IsValid())

@@ -60,7 +60,7 @@ public:
 	FString GetUserEmailAddress() const;
 	FString GetUserName() const; // DEPRECATED
 	FAccountUserData GetAccountUserData() const;
-	const TMap<FString, FThirdPartyPlatformTokenData>& GetThridPartyPlatformTokenData() const;
+	TMap<FString, FThirdPartyPlatformTokenData> GetThridPartyPlatformTokenData() const;
 
 	bool IsSessionValid() const;
 	bool IsComply() const;

@@ -217,7 +217,7 @@ FAccountUserData Credentials::GetAccountUserData() const
 	return AccountUserData;
 }
 
-const TMap<FString, FThirdPartyPlatformTokenData>& Credentials::GetThridPartyPlatformTokenData() const
+TMap<FString, FThirdPartyPlatformTokenData> Credentials::GetThridPartyPlatformTokenData() const
 {
 	FReadScopeLock ReadLock(ThirdPartyPlatformTokenDataMtx);
 	return ThirdPartyPlatformTokenData;
