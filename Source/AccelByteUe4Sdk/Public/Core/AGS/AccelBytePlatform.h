@@ -45,10 +45,38 @@ public:
 	int32 GetMinQueryLength();
 	int32 GetMaxQueryLength();
 	int32 GetMaxEmailQueryLength();
+
+	/**
+	 * @brief Attempts to sync the TimeManager with the AccelByte backend. On failure, schedules
+	 *        a retry with exponential backoff (2s, 4s, 8s, 16s, 32s) up to 5 attempts.
+	 *        Without this, a single transient failure would leave TimeManager unsynced for the
+	 *        entire process lifetime, causing TOTP generation/validation to silently fall back
+	 *        to the local OS clock.
+	 *
+	 *        Also callable post-construction (e.g. after SDK environment switch updates the
+	 *        TimeManager URL) to trigger a fresh round of sync attempts against the new URL.
+	 *
+	 * @param AttemptCount Pass 0 to start a fresh retry sequence.
+	 */
+	void AttemptTimeSyncWithRetry(int32 AttemptCount);
+
+	/**
+	 * @brief Force-restart the time-sync retry sequence even if one is already in flight.
+	 *        Clears the in-progress flag set by AttemptTimeSyncWithRetry and starts a new
+	 *        sequence. Intended for callers that need a fresh sync against new state - e.g.
+	 *        FAccelByteInstance::OnSettingsEnvironmentChanges after updating the TimeManager URL.
+	 */
+	void RestartTimeSync();
+
 private:
 	AccelByte::BaseSettingsPtr SettingsPtr;
 
 	AccelByte::FAccelByteTimeManagerPtr TimeManagerPtr;
+
+	// Guards against concurrent retry chains: a public AttemptTimeSyncWithRetry called from the
+	// constructor (deferred via FTSTicker) and again from environment-switch handlers can otherwise
+	// start parallel ticker chains, each making redundant GetServerTime requests.
+	FThreadSafeBool bSyncInProgress{ false };
 
 	FRWLock QosServersMtx;
 	FAccelByteModelsQosServerList QosServers;

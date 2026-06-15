@@ -8,6 +8,7 @@
 
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteServerSettings.h"
+#include "Core/AccelByteSettings.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/ServerTime/AccelByteTimeManager.h"
 
@@ -193,10 +194,90 @@ const FString FAccelByteApiUtilities::GenerateTOTP(const FString& SecretKey, int
 	else
 	{
 		CurrentTime = FDateTime::UtcNow().ToUnixTimestamp();
-		UE_LOG(LogAccelByte, Warning, TEXT("TimeManager is not in sync with server, generating TOTP using local time."))
+		UE_LOG(LogAccelByte, Warning,
+			TEXT("FAccelByteApiUtilities::GenerateTOTP: TimeManager is not in sync with server; falling back to local OS clock. The generated TOTP may be rejected by remote validators if the local clock is drifted. Prefer GenerateTOTPAsync() which ensures sync before generating."))
 	}
 
 	return GenerateTOTP(CurrentTime, SecretKey, CodeLength, TimeStep);
+}
+
+bool FAccelByteApiUtilities::IsTimeManagerInSync() const
+{
+	auto Pin = TimeManager.Pin();
+	return Pin.IsValid() && Pin->IsInSync();
+}
+
+void FAccelByteApiUtilities::GenerateTOTPAsync(const FString& SecretKey
+	, THandler<FString> const& OnReady
+	, FErrorHandler const& OnFailed
+	, int CodeLength
+	, int TimeStep)
+{
+	FAccelByteTimeManagerPtr TimeManagerPtr = TimeManager.Pin();
+	if (!TimeManagerPtr.IsValid())
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("FAccelByteApiUtilities::GenerateTOTPAsync: TimeManager is invalid"));
+		OnFailed.ExecuteIfBound(-1, TEXT("TimeManager is invalid"));
+		return;
+	}
+
+	// Already synced - skip the network round trip and generate immediately.
+	if (TimeManagerPtr->IsInSync())
+	{
+		const int64 CurrentTime = TimeManagerPtr->GetCurrentServerTime().ToUnixTimestamp();
+		OnReady.ExecuteIfBound(GenerateTOTP(CurrentTime, SecretKey, CodeLength, TimeStep));
+		return;
+	}
+
+	// DEFENSIVE: push the current Settings.BasicServerUrl into the TimeManager just-in-time
+	// before triggering sync. This self-heals the cached URL on every async TOTP generation
+	// without relying on the env-switch refresh chain to have fired correctly. Covers cases
+	// like:
+	//   - env was switched before this AccelByteInstance subscribed to OnEnvironmentChanged
+	//   - the event dispatch didn't fire in a packaged build
+	//   - Settings was resolved into a valid URL only after the TimeManager was constructed
+	//
+	// IMPORTANT: `Settings` (the client subclass) and `ServerSettings` BOTH shadow
+	// `BaseSettings::BasicServerUrl` with their own field. So reading via the BaseSettings
+	// type returns the always-empty base field, not the value that Settings::Reset writes.
+	// Cast down to the derived type to access the actually-populated URL.
+	//
+	// Guarded by IsRunningDedicatedServer(): FAccelByteApiUtilities is shared infrastructure
+	// also used by the server SDK path. If a server-side caller ever invokes GenerateTOTPAsync,
+	// SettingsRef would point at a ServerSettings - the StaticCastSharedRef<Settings> would
+	// produce a mismatched pointer and trigger UB on the next member access.
+	if (!IsRunningDedicatedServer())
+	{
+		// GenerateTOTPAsync is intended for client-side use; the underlying object behind
+		// SettingsRef is therefore an AccelByte::Settings.
+		const TSharedRef<Settings, ESPMode::ThreadSafe> ClientSettingsRef = StaticCastSharedRef<Settings>(SettingsRef);
+		TimeManagerPtr->SetBasicServerUrl(ClientSettingsRef->BasicServerUrl);
+	}
+
+	// Not synced yet. Trigger sync and complete after.
+	TWeakPtr<FAccelByteApiUtilities, ESPMode::ThreadSafe> SelfWeak = AsShared();
+
+	TimeManagerPtr->GetServerTime(
+		THandler<FTime>::CreateLambda(
+			[SelfWeak, SecretKey, CodeLength, TimeStep, OnReady, OnFailed](const FTime& ServerTime)
+			{
+				auto Self = SelfWeak.Pin();
+				if (!Self.IsValid())
+				{
+					OnFailed.ExecuteIfBound(-1, TEXT("ApiUtilities was destroyed during TimeManager sync"));
+					return;
+				}
+				const int64 CurrentTime = ServerTime.CurrentTime.ToUnixTimestamp();
+				OnReady.ExecuteIfBound(Self->GenerateTOTP(CurrentTime, SecretKey, CodeLength, TimeStep));
+			}),
+		FErrorHandler::CreateLambda(
+			[OnFailed](int32 Code, const FString& Msg)
+			{
+				UE_LOG(LogAccelByte, Warning,
+					TEXT("FAccelByteApiUtilities::GenerateTOTPAsync: TimeManager sync failed (error %d: %s). TOTP not generated. Caller should retry or surface this to the player."),
+					Code, *Msg);
+				OnFailed.ExecuteIfBound(Code, FString::Printf(TEXT("TimeManager sync failed: %s"), *Msg));
+			}));
 }
 
 // used in Session validation, server side
@@ -209,8 +290,31 @@ TArray<FString> FAccelByteApiUtilities::GenerateAcceptableTOTP(const FString& Se
 		return TArray<FString>();
 	}
 	
-	constexpr int32 AcceptableWindow{30};
+	// Accept buckets in both directions from the server's current time. Asymmetric on purpose:
+	//
+	//   - NumBackwardSteps (60s): tolerates travel + DS-processing latency between the moment
+	//     the client generates the TOTP and the moment the DS validates it. Normal traffic is
+	//     sub-second; 60s comfortably covers slow networks, mild retransmits, and bursty CPU
+	//     stalls on the DS side.
+	//
+	//   - NumForwardSteps (30s): RFC 6238 default. The previous patch series used 10 steps
+	//     (5 min) to absorb VR / Quest client-clock skew that ran AHEAD of server time. That
+	//     widening is no longer needed once consumers follow the canonical flow exposed by
+	//     this SDK - call GenerateTOTPAsync (which forces a fresh TimeManager sync before
+	//     producing the code) and pull the per-session secret immediately before DS travel.
+	//     VAIL (ASP-13243) confirmed adopting this flow; the wider window only enabled
+	//     latent drift bugs in consumers that bypassed it.
+	//
+	// Security note: any forward window directly extends the replay surface for an intercepted
+	// TOTP. Keeping forward at 1 step (~30s) caps the replay window. Primary mitigation against
+	// replay remains the per-(session, user) scoping of the underlying secret - an intercepted
+	// TOTP only authorises that specific user against that specific session, and the DS-side
+	// join logic typically rejects duplicate joins for an already-joined user. A future
+	// enhancement could add an explicit replay cache here for defence-in-depth.
 	constexpr int32 CodeLength{6};
+	constexpr int32 TimeStep{30};
+	constexpr int32 NumBackwardSteps{2};
+	constexpr int32 NumForwardSteps{1};
 	TArray<FString> AcceptableTOTP;
 	FString HashString = FAccelByteUtilities::GenerateHashString(ServerSecretKey + UserId);
 
@@ -223,12 +327,23 @@ TArray<FString> FAccelByteApiUtilities::GenerateAcceptableTOTP(const FString& Se
 	else
 	{
 		CurrentTime = FDateTime::UtcNow().ToUnixTimestamp();
-		UE_LOG(LogAccelByte, Warning, TEXT("TimeManager is not in sync with server, generating TOTP using local time."))
+		UE_LOG(LogAccelByte, Warning,
+			TEXT("FAccelByteApiUtilities::GenerateAcceptableTOTP: TimeManager is not in sync with server; the DS is falling back to its local OS clock for validation. If both client and DS are unsynced, they may disagree and reject valid TOTPs. Ensure the DS has network access to the AccelByte time endpoint."))
 	}
 
-	for (int32 i = 0; i < AcceptableWindow; i++)
+	// Current bucket + NumBackwardSteps previous buckets.
+	for (int32 i = 0; i <= NumBackwardSteps; i++)
 	{
-		const FString ServerGeneratedTOTP = GenerateTOTP(CurrentTime - i, HashString, CodeLength, AcceptableWindow);
+		const FString ServerGeneratedTOTP = GenerateTOTP(CurrentTime - i * TimeStep, HashString, CodeLength, TimeStep);
+		if (!AcceptableTOTP.Contains(ServerGeneratedTOTP))
+		{
+			AcceptableTOTP.Emplace(ServerGeneratedTOTP);
+		}
+	}
+	// NumForwardSteps future buckets.
+	for (int32 i = 1; i <= NumForwardSteps; i++)
+	{
+		const FString ServerGeneratedTOTP = GenerateTOTP(CurrentTime + i * TimeStep, HashString, CodeLength, TimeStep);
 		if (!AcceptableTOTP.Contains(ServerGeneratedTOTP))
 		{
 			AcceptableTOTP.Emplace(ServerGeneratedTOTP);

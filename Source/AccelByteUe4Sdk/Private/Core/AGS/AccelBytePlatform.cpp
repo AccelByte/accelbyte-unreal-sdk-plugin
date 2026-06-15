@@ -7,6 +7,7 @@
 #include "Core/AccelByteBaseSettings.h"
 
 #include "AccelByteUe4SdkModule.h"
+#include "Containers/Ticker.h"
 
 namespace AccelByte
 {
@@ -15,7 +16,94 @@ FAccelBytePlatform::FAccelBytePlatform(AccelByte::BaseSettingsPtr const& InSetti
 	: SettingsPtr(InSettings)
 {
 	TimeManagerPtr = MakeShared<AccelByte::FAccelByteTimeManager, ESPMode::ThreadSafe>(SettingsPtr->BasicServerUrl);
-	TimeManagerPtr->GetServerTime({}, {});
+
+	// AsShared() cannot be used inside the constructor (TSharedFromThis's internal weak self
+	// pointer is only initialized once MakeShared finishes wrapping this object). Defer the
+	// first sync attempt to the next tick so AttemptTimeSyncWithRetry can safely capture a
+	// weak self for its async retry callbacks.
+	FTSTicker::GetCoreTicker().AddTicker(
+		FTickerDelegate::CreateLambda([this](float /*DeltaTime*/) -> bool
+		{
+			AttemptTimeSyncWithRetry(0);
+			return false; // run once
+		}),
+		0.0f);
+}
+
+void FAccelBytePlatform::AttemptTimeSyncWithRetry(int32 AttemptCount)
+{
+	constexpr int32 MaxAttempts = 5;
+	constexpr float BaseDelaySec = 2.0f;
+
+	if (!TimeManagerPtr.IsValid())
+	{
+		return;
+	}
+
+	// Re-entry guard: only the AttemptCount == 0 entry-point checks the flag. Subsequent
+	// recursive calls (AttemptCount > 0) are continuations of the same chain and skip the check.
+	// AtomicSet returns the previous value, so a return of true means another chain is already
+	// running and this entry should bail out.
+	if (AttemptCount == 0 && bSyncInProgress.AtomicSet(true))
+	{
+		UE_LOG(LogAccelByte, Verbose,
+			TEXT("FAccelBytePlatform::AttemptTimeSyncWithRetry: another sync sequence is already in flight; skipping. Use RestartTimeSync() to force a fresh sequence."));
+		return;
+	}
+
+	TWeakPtr<FAccelBytePlatform, ESPMode::ThreadSafe> SelfWeak = AsShared();
+
+	TimeManagerPtr->GetServerTime(
+		THandler<FTime>::CreateLambda([SelfWeak, AttemptCount](const FTime& /*ServerTime*/)
+		{
+			UE_LOG(LogAccelByte, Log,
+				TEXT("FAccelBytePlatform: TimeManager initial sync successful after %d attempt(s). TOTP generation will use AccelByte server time."),
+				AttemptCount + 1);
+			if (auto Self = SelfWeak.Pin())
+			{
+				Self->bSyncInProgress.AtomicSet(false);
+			}
+		}),
+		FErrorHandler::CreateLambda([SelfWeak, AttemptCount](int32 Code, const FString& Msg)
+		{
+			const int32 NextAttempt = AttemptCount + 1;
+			if (NextAttempt >= MaxAttempts)
+			{
+				UE_LOG(LogAccelByte, Warning,
+					TEXT("FAccelBytePlatform: TimeManager initial sync failed after %d attempts (last error %d: %s). TOTP generation/validation will fall back to the local OS clock; on devices with drifted clocks this may cause TOTP rejections. To recover, call TimeManager->GetServerTime() manually when the network is available."),
+					NextAttempt, Code, *Msg);
+				if (auto Self = SelfWeak.Pin())
+				{
+					Self->bSyncInProgress.AtomicSet(false);
+				}
+				return;
+			}
+
+			const float DelaySec = BaseDelaySec * FMath::Pow(2.0f, static_cast<float>(AttemptCount));
+			UE_LOG(LogAccelByte, Warning,
+				TEXT("FAccelBytePlatform: TimeManager sync failed (attempt %d/%d, error %d: %s); retrying in %.1fs"),
+				NextAttempt, MaxAttempts, Code, *Msg, DelaySec);
+
+			FTSTicker::GetCoreTicker().AddTicker(
+				FTickerDelegate::CreateLambda([SelfWeak, NextAttempt](float /*DeltaTime*/) -> bool
+				{
+					if (auto Self = SelfWeak.Pin())
+					{
+						Self->AttemptTimeSyncWithRetry(NextAttempt);
+					}
+					return false; // run once
+				}),
+				DelaySec);
+		}));
+}
+
+void FAccelBytePlatform::RestartTimeSync()
+{
+	// Force-clear the in-progress flag so a new sequence can start even if one is mid-flight.
+	// The in-flight chain's network callback may still fire and clear the flag again - that's
+	// fine; once the new chain begins, it owns the flag.
+	bSyncInProgress.AtomicSet(false);
+	AttemptTimeSyncWithRetry(0);
 }
 
 FAccelBytePlatform::~FAccelBytePlatform()

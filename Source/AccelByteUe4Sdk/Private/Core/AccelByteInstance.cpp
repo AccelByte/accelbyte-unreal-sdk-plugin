@@ -216,9 +216,41 @@ void FAccelByteInstance::AddOnDestroyedDelegate(TFunction<void(uint32)> Fn)
 
 void FAccelByteInstance::OnSettingsEnvironmentChanges(ESettingsEnvironment SettingsEnvironment)
 {
-	FWriteScopeLock WriteLock(SettingsMtx);
-	Settings->Reset(SettingsEnvironment);
-	ServerSettings->Reset(SettingsEnvironment);
+	// Scope the write lock narrowly: TimeManager::GetServerTime (kicked off by the async
+	// platform ops below) may invoke ProcessRequest synchronously under certain HTTP scheduler
+	// configurations or in tests with a mocked transport. If any code reached from that callback
+	// re-acquires SettingsMtx (e.g. via GetSettings / GetServerSettings), the game thread would
+	// deadlock against the still-held write lock.
+	FString NewBasicServerUrl;
+	{
+		FWriteScopeLock WriteLock(SettingsMtx);
+		Settings->Reset(SettingsEnvironment);
+		ServerSettings->Reset(SettingsEnvironment);
+		// Copy out the freshly-resolved URL while we still hold the lock so the post-release
+		// read below isn't racing with another concurrent Reset.
+		NewBasicServerUrl = Settings->BasicServerUrl;
+	}
+
+	// The Platform's TimeManager caches BasicServerUrl at construction. If the environment
+	// switch happens AFTER FAccelByteInstance / FAccelBytePlatform are constructed (the
+	// common case in packaged builds where SDK init runs before the game's environment
+	// selection), the cached URL is stale or empty - every subsequent GetServerTime() call
+	// would fail with "BasicServerUrl is empty" and TOTP generation would silently fall back
+	// to the local OS clock. Push the freshly-resolved URL into the TimeManager and kick off
+	// a new sync attempt against it.
+	//
+	// RestartTimeSync() is used (not AttemptTimeSyncWithRetry directly): the constructor's
+	// deferred sync may still be in flight, in which case the re-entry guard inside
+	// AttemptTimeSyncWithRetry would skip this call. RestartTimeSync explicitly supersedes
+	// any in-flight chain so the URL we just pushed gets its own fresh attempt.
+	if (PlatformPtr.IsValid())
+	{
+		if (auto TimeManager = PlatformPtr->GetTimeManager())
+		{
+			TimeManager->SetBasicServerUrl(NewBasicServerUrl);
+		}
+		PlatformPtr->RestartTimeSync();
+	}
 }
 
 void FAccelByteInstance::SetEnvironmentChangeDelegate()

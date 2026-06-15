@@ -1035,12 +1035,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionRecentPlayers
 	TArray<FAccelByteModelsV2SessionRecentPlayer> Data{};
 };
 
-USTRUCT(BlueprintType) 
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsV2SessionJoinedSecret
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionJoinedSecret")
 	FString Secret{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | SessionJoinedSecret")
+	FString SessionID{};
 };
 
 #pragma endregion

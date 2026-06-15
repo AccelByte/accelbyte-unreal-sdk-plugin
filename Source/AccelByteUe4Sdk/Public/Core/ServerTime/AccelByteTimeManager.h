@@ -59,10 +59,21 @@ public:
 
 	/**
 	 * @brief Check whether the time manager is in sync with server time or not.
-	 * 
-	 * @return True if the time manager is in sync with server time. 
+	 *
+	 * @return True if the time manager is in sync with server time.
 	 */
 	virtual bool IsInSync();
+
+	/**
+	 * @brief Update the basic server URL the TimeManager will use for sync. Intended for cases
+	 *        where the SDK environment is switched (e.g. Default -> Production) AFTER this
+	 *        TimeManager was constructed - the original URL would otherwise stay cached and
+	 *        every sync attempt would fail with "BasicServerUrl is empty" (or with the wrong
+	 *        environment's URL).
+	 *
+	 * @param InBasicServerUrl New URL to use.
+	 */
+	virtual void SetBasicServerUrl(const FString& InBasicServerUrl);
 
 protected:
 	/**

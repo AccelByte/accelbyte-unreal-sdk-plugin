@@ -101,7 +101,12 @@ public:
 	EAccelByteCurrentServerManagementType GetCurrentServerManagementType() const;
 
 	/**
-	 * @brief Generate TOTP string
+	 * @brief Generate TOTP string using the AccelByte server clock if the TimeManager is synced,
+	 *        otherwise falls back to the local OS clock (logged as a warning).
+	 *
+	 * Prefer GenerateTOTPAsync() for TOTPs that will be validated by a remote server. The
+	 * fallback to local OS time can produce TOTPs that the server rejects when the local clock
+	 * is drifted from server time.
 	 *
 	 * @param SecretKey
 	 * @param CodeLength
@@ -109,6 +114,41 @@ public:
 	 * @return TOTP string, may be empty if failed to generate
 	 */
 	const FString GenerateTOTP(const FString& SecretKey, int CodeLength = 6, int TimeStep = 30);
+
+	/**
+	 * @brief Asynchronously generate a TOTP, ensuring the TimeManager is synced with the
+	 *        AccelByte server clock BEFORE generation.
+	 *
+	 * If the TimeManager is already in sync, OnReady is invoked immediately. Otherwise this
+	 * triggers a sync attempt and invokes OnReady once the sync completes successfully. If the
+	 * sync fails, OnFailed is invoked - the caller can then retry, surface an error to the
+	 * player, or otherwise handle the unsynced state.
+	 *
+	 * This is the recommended API for generating TOTPs that will be validated by a remote
+	 * server (e.g. dedicated-server join validation). The synchronous GenerateTOTP() above
+	 * silently falls back to the local OS clock when unsynced, which can produce rejected
+	 * TOTPs on devices with drifted clocks.
+	 *
+	 * @param SecretKey  HMAC key for TOTP generation.
+	 * @param OnReady    Called with the generated TOTP string after sync completes.
+	 * @param OnFailed   Called if the TimeManager sync ultimately fails.
+	 * @param CodeLength Number of decimal digits.
+	 * @param TimeStep   Bucket size in seconds.
+	 */
+	void GenerateTOTPAsync(const FString& SecretKey
+		, THandler<FString> const& OnReady
+		, FErrorHandler const& OnFailed
+		, int CodeLength = 6
+		, int TimeStep = 30);
+
+	/**
+	 * @brief Returns true if the underlying TimeManager has successfully synced with the
+	 *        AccelByte backend at least once.
+	 *
+	 * Useful for game code that wants to gate TOTP generation or display a "syncing..." state
+	 * to the user.
+	 */
+	bool IsTimeManagerInSync() const;
 
 	/**
 	 * @brief Validate a TOTP against a User.
@@ -120,23 +160,26 @@ public:
 	 */
 	bool ValidateTOTP(const FString& ServerSecretKey, const FString& TOTP, const FString& UserId);
 
+	/**
+	 * @brief Generate TOTP string for an explicit Unix timestamp.
+	 *
+	 * Exposed for testability. Production code should prefer the no-time-arg overload
+	 * above, which sources the current time from the AccelByte TimeManager.
+	 *
+	 * @param CurrentTime Unix seconds.
+	 * @param SecretKey HMAC key.
+	 * @param CodeLength Number of decimal digits in the output.
+	 * @param TimeStep Bucket size in seconds (30 per RFC 6238).
+	 * @return TOTP string.
+	 */
+	FString GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep);
+
 private:
 	TSharedRef<BaseCredentials, ESPMode::ThreadSafe> CredentialsRef;
 	TSharedRef<BaseSettings, ESPMode::ThreadSafe> SettingsRef;
 	TSharedRef<FHttpRetrySchedulerBase, ESPMode::ThreadSafe> HttpRef;
 	FHttpClient HttpClient;
 	TWeakPtr<FAccelByteTimeManager, ESPMode::ThreadSafe> TimeManager;
-	
-	/**
-	 * @brief Generate TOTP string
-	 *
-	 * @param CurrentTime
-	 * @param SecretKey
-	 * @param CodeLength
-	 * @param TimeStep
-	 * @return TOTP string
-	 */
-	FString GenerateTOTP(int64 CurrentTime, const FString& SecretKey, int32 CodeLength, int32 TimeStep);
 
 	/**
 	 * @brief Generate array of acceptable TOTPs

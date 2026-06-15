@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.8.0] (2026-06-15)
+
+
+### Features
+
+* **session:** expose SessionID on V2SessionJoinedSecret notif (ASP-13243) 
+
+
+### Bug Fixes
+
+* **totp:** add forward tolerance for VR client clock drift; expose timed overload (ASP-13243) 
+* **totp:** address 3 high-risk review findings (ASP-13243) 
+* **totp:** correct AcceptableWindow iteration; widen window (ASP-13243) 
+* **totp:** refresh TimeManager URL on environment switch (ASP-13243) 
+* **totp:** retry initial TimeManager sync; add GenerateTOTPAsync (ASP-13243) 
+* **totp:** self-heal TimeManager URL on each GenerateTOTPAsync, casting through Settings field shadow (ASP-13243) 
+* **totp:** tighten acceptance window + invalidate sync cache on URL change (ASP-13243) 
+
 ## [28.7.0] (2026-06-04)
 
 

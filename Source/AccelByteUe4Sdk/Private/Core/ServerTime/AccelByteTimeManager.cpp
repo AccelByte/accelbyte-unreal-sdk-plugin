@@ -142,6 +142,25 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 	}
 }
 
+void FAccelByteTimeManager::SetBasicServerUrl(const FString& InBasicServerUrl)
+{
+	FScopeLock ScopeLock(&ServerTimeLock);
+	if (BasicServerUrl == InBasicServerUrl)
+	{
+		// No-op when the URL is unchanged. GenerateTOTPAsync defensively pushes the URL on every
+		// async TOTP generation; without this guard, every call would invalidate the cache and
+		// force an HTTP round-trip for the next sync, defeating the whole point of the cache.
+		return;
+	}
+	BasicServerUrl = InBasicServerUrl;
+	// URL changed -> the cached server time was synced against the previous environment and is
+	// no longer trustworthy (clock skew between environments can be seconds to minutes). Reset
+	// so the next GetServerTime forces a fresh sync against the new URL. Without this, IsInSync()
+	// would remain a stale positive and TOTP generation could use staging-synced time against a
+	// production validator.
+	Reset();
+}
+
 FDateTime FAccelByteTimeManager::GetCachedServerTime() const
 {
 	return CachedServerTime;
