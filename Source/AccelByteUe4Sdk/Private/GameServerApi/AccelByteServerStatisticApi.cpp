@@ -183,19 +183,23 @@ FAccelByteTaskWPtr ServerStatistic::IncrementManyUsersStatItems(TArray<FAccelByt
 		, *ServerSettingsRef.StatisticServerUrl
 		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 
-	FString Contents = "[";
-	FString Content;
-	for (int i = 0; i < Data.Num(); i++)
+	// Built manually instead of FJsonObjectConverter::UStructToJsonObjectString(): the "inc"
+	// property's reflected FName can collide (case-insensitively) with an unrelated FName
+	// interned earlier elsewhere in the program, which silently corrupts the wire key to "inC" when WITH_CASE_PRESERVING_NAME is off.
+	TArray<TSharedPtr<FJsonValue>> JsonArray;
+	for (const auto& Item : Data)
 	{
-		FJsonObjectConverter::UStructToJsonObjectString(Data[i], Content);
-		Contents += Content;
-		if (i < Data.Num() - 1)
-		{
-			Contents += ",";
-		}
+		const TSharedRef<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+		JsonObject->SetNumberField(TEXT("inc"), Item.inc);
+		JsonObject->SetStringField(TEXT("userId"), Item.userId);
+		JsonObject->SetStringField(TEXT("statCode"), Item.statCode);
+		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));
 	}
-	Contents += "]";
-	
+
+	FString Contents;
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Contents);
+	FJsonSerializer::Serialize(JsonArray, Writer);
+
 	TMap<FString, FString> Headers;
 	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
@@ -221,19 +225,22 @@ FAccelByteTaskWPtr ServerStatistic::IncrementUserStatItems(FString const& UserId
 		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace())
 		, *FGenericPlatformHttp::UrlEncode(UserId));
 
-	FString Contents = "[";
-	FString Content;
-	for (int i = 0; i < Data.Num(); i++)
+	// Built manually instead of FJsonObjectConverter::UStructToJsonObjectString(): the "inc"
+	// property's reflected FName can collide (case-insensitively) with an unrelated FName
+	// interned earlier elsewhere in the program, which silently corrupts the wire key to "inC" when WITH_CASE_PRESERVING_NAME is off.
+	TArray<TSharedPtr<FJsonValue>> JsonArray;
+	for (const auto& Item : Data)
 	{
-		FJsonObjectConverter::UStructToJsonObjectString(Data[i], Content);
-		Contents += Content;
-		if (i < Data.Num() - 1)
-		{
-			Contents += ",";
-		}
+		const TSharedRef<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+		JsonObject->SetNumberField(TEXT("inc"), Item.inc);
+		JsonObject->SetStringField(TEXT("statCode"), Item.statCode);
+		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));
 	}
-	Contents += "]";
-	
+
+	FString Contents;
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Contents);
+	FJsonSerializer::Serialize(JsonArray, Writer);
+
 	TMap<FString, FString> Headers;
 	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 

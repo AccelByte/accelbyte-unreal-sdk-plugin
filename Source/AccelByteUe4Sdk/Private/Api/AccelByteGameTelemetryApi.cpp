@@ -288,12 +288,12 @@ void GameTelemetry::SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 	for (auto const& Event : Events)
 	{
 		TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
-		JsonObject->SetStringField("EventNamespace", Event->EventNamespace);
-		JsonObject->SetStringField("EventName", Event->EventName);
-		JsonObject->SetObjectField("Payload", Event->Payload);
-		JsonObject->SetStringField("ClientTimestamp", ClientTimestamp);
-		JsonObject->SetStringField("FlightId", FAccelByteUtilities::GetFlightId());
-		JsonObject->SetStringField("DeviceType", FAccelByteUtilities::GetPlatformName());
+		JsonObject->SetStringField(FString("EventNamespace"), Event->EventNamespace);
+		JsonObject->SetStringField(FString("EventName"), Event->EventName);
+		JsonObject->SetObjectField(FString("Payload"), Event->Payload);
+		JsonObject->SetStringField(FString("ClientTimestamp"), ClientTimestamp);
+		JsonObject->SetStringField(FString("FlightId"), FAccelByteUtilities::GetFlightId());
+		JsonObject->SetStringField(FString("DeviceType"), FAccelByteUtilities::GetPlatformName());
 
 		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));
 	}
@@ -401,10 +401,10 @@ void GameTelemetry::AppendEventToCache(TelemetryBodyPtr Telemetry)
 	
 		{
 			TSharedRef<FJsonObject> JsonObj = MakeShared<FJsonObject>();
-			JsonObj->SetStringField("EventName", EventPtrArray[AddedIndex]->EventName);
-			JsonObj->SetStringField("EventNamespace", EventPtrArray[AddedIndex]->EventNamespace);
-			JsonObj->SetObjectField("Payload", EventPtrArray[AddedIndex]->Payload);
-			JsonObj->SetNumberField("ClientTimestamp", EventPtrArray[AddedIndex]->ClientTimestamp.ToUnixTimestamp());
+			JsonObj->SetStringField(FString("EventName"), EventPtrArray[AddedIndex]->EventName);
+			JsonObj->SetStringField(FString("EventNamespace"), EventPtrArray[AddedIndex]->EventNamespace);
+			JsonObj->SetObjectField(FString("Payload"), EventPtrArray[AddedIndex]->Payload);
+			JsonObj->SetNumberField(FString("ClientTimestamp"), EventPtrArray[AddedIndex]->ClientTimestamp.ToUnixTimestamp());
 			TSharedRef<FJsonValueObject> JsonValue = MakeShared<FJsonValueObject>(JsonObj);
 			FString WrittenResult{};
 			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&WrittenResult);
@@ -472,15 +472,15 @@ bool GameTelemetry::JobArrayQueueAsJsonString(FString& OutJsonString)
 		if (EventPtr.IsValid())
 		{
 			TSharedPtr<FJsonObject> JsonObj = MakeShared<FJsonObject>();
-			JsonObj->SetStringField("EventName", EventPtr->EventName);
-			JsonObj->SetStringField("EventNamespace", EventPtr->EventNamespace);
-			JsonObj->SetObjectField("Payload", EventPtr->Payload);
-			JsonObj->SetNumberField("ClientTimestamp", EventPtr->ClientTimestamp.ToUnixTimestamp());
+			JsonObj->SetStringField(FString("EventName"), EventPtr->EventName);
+			JsonObj->SetStringField(FString("EventNamespace"), EventPtr->EventNamespace);
+			JsonObj->SetObjectField(FString("Payload"), EventPtr->Payload);
+			JsonObj->SetNumberField(FString("ClientTimestamp"), EventPtr->ClientTimestamp.ToUnixTimestamp());
 			TSharedRef<FJsonValueObject> JsonValue = MakeShared<FJsonValueObject>(JsonObj);
 			EventsObjArray.Add(JsonValue);
 		}
 	}
-	TelemetryObj->SetArrayField("telemetry", EventsObjArray);
+	TelemetryObj->SetArrayField(FString("telemetry"), EventsObjArray);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutJsonString);
 	if (!FJsonSerializer::Serialize(TelemetryObj, Writer))
 	{

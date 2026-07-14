@@ -318,8 +318,14 @@ void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool 
 	FReport::Log(FString(__FUNCTION__));
 	FReport::Log(FString::Printf(TEXT("AccelByteWebSocket::OnClosed = %d"), StatusCode));
 
-	// Broadcast message DisconnectNotif - use helper to avoid deadlock
-	EnqueueMessage(Reason);
+	// Some servers deliver a notification (e.g. the lobby disconnectNotif on logout/kick) inside the
+	// close-frame reason. Re-inject it so the notif dispatch fires, but only when the reason actually
+	// carries a framed message ("type:" present). A plain status string (e.g. "websocket client
+	// stopped") is not a message and must not go through the parser, or it logs deserialize warnings.
+	if (Reason.Contains(TEXT("type:")))
+	{
+		EnqueueMessage(Reason);
+	}
 
 	// trigger closed event, on prepare to reconnect on next StateTick
 	if(StatusCode <= 4000)

@@ -1130,7 +1130,7 @@ FAccelByteTaskWPtr Lobby::BulkGetUserPresenceV2(TArray<FString> const& UserIds,
 		UserIdsJsonValues.Add(MakeShareable(new FJsonValueString(UserId)));
 	}
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
-	JsonObject->SetArrayField("userIds", UserIdsJsonValues);
+	JsonObject->SetArrayField(FString("userIds"), UserIdsJsonValues);
 
 	FString Content = TEXT("");
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);

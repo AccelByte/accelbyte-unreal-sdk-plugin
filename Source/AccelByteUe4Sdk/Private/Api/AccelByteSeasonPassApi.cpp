@@ -292,7 +292,11 @@ FAccelByteTaskWPtr SeasonPass::BulkClaimRewards(THandler<FAccelByteModelsSeasonC
 TMap<FString, TArray<FString>> SeasonPass::FJsonObjectToPassRewards(TSharedPtr<FJsonObject> const& JsonObject)
 {
 	TMap<FString, TArray<FString>> PassAndRewardCode;
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >=8
+	for (TTuple<FString, TSharedPtr<FJsonValue>> const PassReward : JsonObject->Values)
+#else
 	for (TTuple<FString, TSharedPtr<FJsonValue>> const& PassReward : JsonObject->Values)
+#endif
 	{
 		TArray<FString> ClaimRewardCode;
 

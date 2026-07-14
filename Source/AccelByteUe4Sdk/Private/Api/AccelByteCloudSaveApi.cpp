@@ -287,8 +287,8 @@ FAccelByteTaskWPtr CloudSave::ReplaceUserRecord(int TryAttempt
 
 	FString Content = TEXT("");
 	FJsonObject DataJson;
-	DataJson.SetStringField("updatedAt", Data.UpdatedAt.ToIso8601());
-	DataJson.SetObjectField("value", Data.Value.JsonObject);
+	DataJson.SetStringField(FString("updatedAt"), Data.UpdatedAt.ToIso8601());
+	DataJson.SetObjectField(FString("value"), Data.Value.JsonObject);
 	const TSharedPtr<FJsonObject> JSONObject = MakeShared<FJsonObject>(DataJson);
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
@@ -438,8 +438,8 @@ FAccelByteTaskWPtr CloudSave::ReplaceUserRecord(int TryAttempt
 
 	FString Content = TEXT("");
 	FJsonObject DataJson;
-	DataJson.SetStringField("updatedAt", Data.UpdatedAt.ToIso8601());
-	DataJson.SetObjectField("value", Data.Value.JsonObject);
+	DataJson.SetStringField(FString("updatedAt"), Data.UpdatedAt.ToIso8601());
+	DataJson.SetObjectField(FString("value"), Data.Value.JsonObject);
 	const TSharedPtr<FJsonObject> JSONObject = MakeShared<FJsonObject>(DataJson);
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JSONObject.ToSharedRef(), Writer);
@@ -650,8 +650,8 @@ FAccelByteTaskWPtr CloudSave::ReplaceGameRecord(int TryAttempt
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject DataJson;
-	DataJson.SetStringField("updatedAt", Data.UpdatedAt.ToIso8601());
-	DataJson.SetObjectField("value", Data.Value.JsonObject);
+	DataJson.SetStringField(FString("updatedAt"), Data.UpdatedAt.ToIso8601());
+	DataJson.SetObjectField(FString("value"), Data.Value.JsonObject);
 
 	FString Content = TEXT("");
 	const TSharedPtr<FJsonObject> JSONObject = MakeShared<FJsonObject>(DataJson);
@@ -1001,7 +1001,7 @@ FJsonObject CloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy
 	
 	MetadataJson->SetStringField(TEXT("set_by"), SetByString);
 	MetadataJson->SetBoolField(TEXT("is_public"), bSetPublic);
-	NewRecordRequest.SetObjectField("__META", MetadataJson);
+	NewRecordRequest.SetObjectField(FString("__META"), MetadataJson);
 
 	return NewRecordRequest;
 }
@@ -1014,7 +1014,7 @@ FJsonObject CloudSave::CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy
 	const auto MetadataJson = MakeShared<FJsonObject>();
 	const FString SetByString = FAccelByteUtilities::GetUEnumValueAsString(SetBy);
 	MetadataJson->SetStringField(TEXT("set_by"), SetByString);
-	NewRecordRequest.SetObjectField("__META", MetadataJson);
+	NewRecordRequest.SetObjectField(FString("__META"), MetadataJson);
 
 	return NewRecordRequest;
 }

@@ -241,12 +241,12 @@ void PresenceBroadcastEvent::SendPresenceBroadcastEvent(FAccelBytePresenceBroadc
 	ClientTimestamp = TimeManager->GetCurrentServerTime().ToIso8601();
 
 	TSharedPtr<FJsonObject> JsonObjectPtr = MakeShared<FJsonObject>();
-	JsonObjectPtr->SetStringField("EventNamespace", EventNamespace);
-	JsonObjectPtr->SetStringField("EventName", EventName);
-	JsonObjectPtr->SetObjectField("Payload", FJsonObjectConverter::UStructToJsonObject(Events));
-	JsonObjectPtr->SetStringField("ClientTimestamp", ClientTimestamp);
-	JsonObjectPtr->SetStringField("flightId", FAccelByteUtilities::GetFlightId());
-	JsonObjectPtr->SetStringField("DeviceType", FAccelByteUtilities::GetPlatformName());
+	JsonObjectPtr->SetStringField(FString("EventNamespace"), EventNamespace);
+	JsonObjectPtr->SetStringField(FString("EventName"), EventName);
+	JsonObjectPtr->SetObjectField(FString("Payload"), FJsonObjectConverter::UStructToJsonObject(Events));
+	JsonObjectPtr->SetStringField(FString("ClientTimestamp"), ClientTimestamp);
+	JsonObjectPtr->SetStringField(FString("flightId"), FAccelByteUtilities::GetFlightId());
+	JsonObjectPtr->SetStringField(FString("DeviceType"), FAccelByteUtilities::GetPlatformName());
 	FAccelByteUtilities::RemoveEmptyFieldsFromJson(JsonObjectPtr, FAccelByteUtilities::FieldRemovalFlagAll);
 
 	HttpClient.ApiRequest(TEXT("POST"), Url, {}, JsonObjectPtr.ToSharedRef(), OnSuccess, OnError);

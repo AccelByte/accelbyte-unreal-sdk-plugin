@@ -760,8 +760,8 @@ FAccelByteTaskWPtr Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FJsonObject DataJson;
-	DataJson.SetStringField("steamId", platformUserId);
-	DataJson.SetStringField("appId", SettingsRef.AppId);
+	DataJson.SetStringField(FString("steamId"), platformUserId);
+	DataJson.SetStringField(FString("appId"), SettingsRef.AppId);
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -801,9 +801,9 @@ FAccelByteTaskWPtr Entitlement::SyncTwitchDropEntitlement(FAccelByteModelsTwitch
 	// Content Body 
 	FString Content = TEXT("");
 	FJsonObject DataJson;
-	DataJson.SetStringField("gameId", TwitchDropModel.GameId);
-	DataJson.SetStringField("region", TwitchDropModel.Region);
-	DataJson.SetStringField("language", TwitchDropModel.Language);
+	DataJson.SetStringField(FString("gameId"), TwitchDropModel.GameId);
+	DataJson.SetStringField(FString("region"), TwitchDropModel.Region);
+	DataJson.SetStringField(FString("language"), TwitchDropModel.Language);
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -826,7 +826,7 @@ FAccelByteTaskWPtr Entitlement::SyncEpicGameDurableItems(FString const& EpicGame
 	// Content Body 
 	FString Content = TEXT("");
 	FJsonObject DataJson;
-	DataJson.SetStringField("epicGamesJwtToken", EpicGamesJwtToken); 
+	DataJson.SetStringField(FString("epicGamesJwtToken"), EpicGamesJwtToken); 
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -854,7 +854,7 @@ FAccelByteTaskWPtr Entitlement::ValidateUserItemPurchaseCondition(TArray<FString
 	{
 		ItemArray.Add(MakeShareable(new FJsonValueString(Item)));
 	}
-	DataJson.SetArrayField("itemIds", ItemArray);
+	DataJson.SetArrayField(FString("itemIds"), ItemArray);
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer); 
@@ -906,7 +906,7 @@ FAccelByteTaskWPtr Entitlement::SyncWithDLCEntitlementInPSNStore(FAccelByteModel
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FJsonObject DataJson;
-	DataJson.SetStringField("serviceLabel", FString::FromInt(PSNModel.ServiceLabel));
+	DataJson.SetStringField(FString("serviceLabel"), FString::FromInt(PSNModel.ServiceLabel));
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -927,10 +927,10 @@ FAccelByteTaskWPtr Entitlement::SyncWithEntitlementInPSNStore(const FAccelByteMo
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FJsonObject DataJson;
-	DataJson.SetStringField("productId", PlaystationModel.ProductId);
-	DataJson.SetStringField("price", FString::FromInt(PlaystationModel.Price));
-	DataJson.SetStringField("currencyCode", PlaystationModel.CurrencyCode);
-	DataJson.SetStringField("serviceLabel", FString::FromInt(PlaystationModel.ServiceLabel));
+	DataJson.SetStringField(FString("productId"), PlaystationModel.ProductId);
+	DataJson.SetStringField(FString("price"), FString::FromInt(PlaystationModel.Price));
+	DataJson.SetStringField(FString("currencyCode"), PlaystationModel.CurrencyCode);
+	DataJson.SetStringField(FString("serviceLabel"), FString::FromInt(PlaystationModel.ServiceLabel));
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -1016,7 +1016,7 @@ FAccelByteTaskWPtr Entitlement::SyncDLCPSNMultipleService(FAccelByteModelsMultip
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+
 	FString Content = TEXT("");
 	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/psn/sync/multiServiceLabels")
 		, *SettingsRef.PlatformServerUrl
@@ -1029,6 +1029,24 @@ FAccelByteTaskWPtr Entitlement::SyncDLCPSNMultipleService(FAccelByteModelsMultip
 	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr Entitlement::GetDLCContent(EAccelByteDLCType DLCType
+	, bool bIncludeAllNamespaces
+	, THandler<FAccelByteModelsSimpleUserDLCRewardContentsResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/public/users/me/dlc/content")
+		, *SettingsRef.PlatformServerUrl);
+
+	const TMultiMap<FString, FString> QueryParams{
+		{ TEXT("type"), FAccelByteUtilities::GetUEnumValueAsString(DLCType) },
+		{ TEXT("includeAllNamespaces"), bIncludeAllNamespaces ? TEXT("true") : TEXT("false") }
+	};
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 FAccelByteTaskWPtr Entitlement::SyncEntitlementPSNMultipleService(FAccelByteModelsMultipleServicePSNIAPSync const& PlaystationModel

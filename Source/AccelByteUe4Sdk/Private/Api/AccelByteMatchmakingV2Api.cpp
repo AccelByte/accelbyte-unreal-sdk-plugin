@@ -9,6 +9,7 @@
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteApiClient.h"
 #include "Core/AccelByteInstance.h"
+#include "Core/AccelByteDefines.h"
 
 namespace AccelByte
 {
@@ -64,8 +65,7 @@ FAccelByteTaskWPtr MatchmakingV2::CreateMatchTicket(FString const& MatchPool
 
 	if(Optionals.Storage.JsonObject.IsValid())
 	{
-		const TMap<FString, TSharedPtr<FJsonValue>> StorageFields = Optionals.Storage.JsonObject->Values;
-		if(StorageFields.Num() > 5)
+		if(Optionals.Storage.JsonObject->Values.Num() > 5)
 		{
 			FErrorCreateMatchmakingTicketV2 CreateTicketError;
 			CreateTicketError.ErrorCode = static_cast<int32>(ErrorCodes::InvalidRequest);

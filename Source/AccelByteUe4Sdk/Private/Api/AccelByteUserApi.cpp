@@ -1947,12 +1947,12 @@ FAccelByteTaskWPtr User::UpgradeAndVerify(FString const& Username
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
-	JsonObject->SetStringField("code", VerificationCode);
-	JsonObject->SetStringField("emailAddress", Username);
-	JsonObject->SetStringField("password", Password);
+	JsonObject->SetStringField(FString("code"), VerificationCode);
+	JsonObject->SetStringField(FString("emailAddress"), Username);
+	JsonObject->SetStringField(FString("password"), Password);
 	if (!UniqueDisplayName.IsEmpty())
 	{
-		JsonObject->SetStringField("uniqueDisplayName", UniqueDisplayName);
+		JsonObject->SetStringField(FString("uniqueDisplayName"), UniqueDisplayName);
 	}
 
 	FString Content;

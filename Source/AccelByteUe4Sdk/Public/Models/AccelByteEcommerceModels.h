@@ -1631,6 +1631,67 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMultipleServicePSNDLCSync
 	TArray<int32> ServiceLabel{};
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteDLCType : uint8
+{
+	PSN = 0,
+	STEAM,
+	XBOX,
+	EPICGAMES,
+	OCULUS
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSimpleDLCRewardItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | DLC")
+	FString ItemName{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformRewardCurrency
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardCurrency")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardCurrency")
+	FString CurrencyCode{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSimpleUserDLCRewardContent
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | DLC")
+	EAccelBytePlatformRewardType Type{EAccelBytePlatformRewardType::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | DLC")
+	FAccelByteModelsSimpleDLCRewardItem Item{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | DLC")
+	FAccelByteModelsPlatformRewardCurrency Currency{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | DLC")
+	int32 Quantity{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | DLC")
+	FDateTime ObtainedAt{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSimpleUserDLCRewardContentsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Entitlements | Models | DLC")
+	TArray<FAccelByteModelsSimpleUserDLCRewardContent> Data{};
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMultipleServicePSNIAPSync
 {
@@ -3376,17 +3437,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformRewardItem
 	FString ItemSku{}; 
 };
 
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformRewardCurrency
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardCurrency")
-	FString Namespace{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PlatformRewardCurrency")
-	FString CurrencyCode{};
-};
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformReward

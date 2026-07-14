@@ -345,5 +345,10 @@ public:
 	{
 		return RawContent;
 	}
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 8
+	virtual TArray<uint8> TakeContent() override
+	{
+		return MoveTemp(RawContent);
+	}
+#endif
 };
-

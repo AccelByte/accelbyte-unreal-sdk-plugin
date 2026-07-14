@@ -591,7 +591,22 @@ public:
 	FAccelByteTaskWPtr SyncDLCPSNMultipleService(FAccelByteModelsMultipleServicePSNDLCSync const& PlaystationModel
 		, FVoidHandler const& OnSuccess
 		, FErrorHandler const& OnError);
-	
+
+	/**
+	 * @brief Get user DLC reward contents.
+	 *
+	 * @param DLCType Platform type: PSN, STEAM, XBOX, EPICGAMES, OCULUS
+	 * @param bIncludeAllNamespaces If false, only returns DLC synced from the current namespace
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GetDLCContent(EAccelByteDLCType DLCType
+		, bool bIncludeAllNamespaces
+		, THandler<FAccelByteModelsSimpleUserDLCRewardContentsResponse> const& OnSuccess
+		, FErrorHandler const& OnError);
+
 	/**
 	 * @brief Synchronize with IAP entitlements in PSN Store with multiple service labels.
 	 *

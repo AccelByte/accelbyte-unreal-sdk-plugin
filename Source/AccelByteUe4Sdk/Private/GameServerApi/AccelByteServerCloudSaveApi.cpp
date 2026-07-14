@@ -338,7 +338,7 @@ FAccelByteTaskWPtr ServerCloudSave::BulkGetUserRecord(FString const& Key, TArray
 		UserIdsJsonValues.Add(MakeShareable(new FJsonValueString(UserId)));
 	}
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
-	JsonObject->SetArrayField("userIds", UserIdsJsonValues);
+	JsonObject->SetArrayField(FString("userIds"), UserIdsJsonValues);
 
 	FString Content = TEXT("");
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
@@ -400,7 +400,7 @@ FAccelByteTaskWPtr ServerCloudSave::BulkGetUserRecordsByKeys(FString const& User
 		KeysJsonValues.Add(MakeShareable(new FJsonValueString(Key)));
 	}
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
-	JsonObject->SetArrayField("keys", KeysJsonValues);
+	JsonObject->SetArrayField(FString("keys"), KeysJsonValues);
 
 	FString Content = TEXT("");
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
@@ -670,7 +670,11 @@ FAccelByteTaskWPtr ServerCloudSave::CreateAdminGameRecord(FString const& Key
 		MetadataJson->SetArrayField(TEXT("tags"), JsonArray);
 	}
 
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 8
+	TArray<UE::FSharedString> JsonFieldKeys;
+#else
 	TArray<FString> JsonFieldKeys;
+#endif
 	if (MetadataJson->Values.GetKeys(JsonFieldKeys) > 0)
 	{
 		NewRecordRequest.SetObjectField(TEXT("__META"), MetadataJson);
@@ -762,7 +766,11 @@ FAccelByteTaskWPtr ServerCloudSave::ReplaceAdminGameRecord(FString const& Key
 	const auto MetadataJson = MakeShared<FJsonObject>();
 	AddTTLConfigToMetadata(TTLConfig, MetadataJson);
 
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 8
+	TArray<UE::FSharedString> JsonFieldKeys;
+#else
 	TArray<FString> JsonFieldKeys;
+#endif
 	if (MetadataJson->Values.GetKeys(JsonFieldKeys) > 0)
 	{
 		NewRecordRequest.SetObjectField(TEXT("__META"), MetadataJson);

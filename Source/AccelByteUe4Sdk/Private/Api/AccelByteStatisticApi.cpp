@@ -204,24 +204,27 @@ FAccelByteTaskWPtr Statistic::IncrementUserStatItems(TArray<FAccelByteModelsBulk
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
-	FString Contents = "[";
-	FString Content;
-	for (int i = 0; i < Data.Num(); i++)
+	// Built manually instead of FJsonObjectConverter::UStructToJsonObjectString(): the "inc"
+	// property's reflected FName can collide (case-insensitively) with an unrelated FName
+	// interned earlier elsewhere in the program, which silently corrupts the wire key to "inC" when WITH_CASE_PRESERVING_NAME is off.
+	TArray<TSharedPtr<FJsonValue>> JsonArray;
+	for (const auto& Item : Data)
 	{
-		FJsonObjectConverter::UStructToJsonObjectString(Data[i], Content);
-		Contents += Content;
-		if (i < Data.Num() - 1)
-		{
-			Contents += ",";
-		}
+		const TSharedRef<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+		JsonObject->SetNumberField(TEXT("inc"), Item.inc);
+		JsonObject->SetStringField(TEXT("statCode"), Item.statCode);
+		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));
 	}
-	Contents += "]";
+
+	FString Contents;
+	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Contents);
+	FJsonSerializer::Serialize(JsonArray, Writer);
 
 	TMap<FString, FString> Headers;
 	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Contents, Headers, OnSuccess, OnError);
-} 
+}
 
 FAccelByteTaskWPtr Statistic::ListUserStatItems(TArray<FString> const& StatCodes
 	, TArray<FString> const& Tags
@@ -596,8 +599,7 @@ FAccelByteTaskWPtr Statistic::BulkResetMultipleUserStatItemsValue(TArray<FAccelB
 
 	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statitems/value/reset/bulk")
 		, *SettingsRef.StatisticServerUrl
-		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
-		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()));
 	FString Verb = TEXT("PUT");
 	FString Content = TEXT(""); 
 	FAccelByteUtilities::TArrayUStructToJsonString(UserStatItemValue, Content);

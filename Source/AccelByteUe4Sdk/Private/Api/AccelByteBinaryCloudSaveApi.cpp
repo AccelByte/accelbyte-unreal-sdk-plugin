@@ -66,9 +66,9 @@ FAccelByteTaskWPtr BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("key", Key);
-	JsonObj.SetBoolField("is_public", bIsPublic);
-	JsonObj.SetStringField("file_type", FileType);
+	JsonObj.SetStringField(FString("key"), Key);
+	JsonObj.SetBoolField(FString("is_public"), bIsPublic);
+	JsonObj.SetStringField(FString("file_type"), FileType);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
@@ -103,9 +103,9 @@ FAccelByteTaskWPtr BinaryCloudSave::SaveUserBinaryRecord(FString const& Key
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("key", Key);
-	JsonObj.SetBoolField("is_public", bIsPublic);
-	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
+	JsonObj.SetStringField(FString("key"), Key);
+	JsonObj.SetBoolField(FString("is_public"), bIsPublic);
+	JsonObj.SetStringField(FString("file_type"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
@@ -340,8 +340,8 @@ FAccelByteTaskWPtr BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Ke
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("content_type", FileType);
-	JsonObj.SetStringField("file_location", FileLocation);
+	JsonObj.SetStringField(FString("content_type"), FileType);
+	JsonObj.SetStringField(FString("file_location"), FileLocation);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
@@ -383,8 +383,8 @@ FAccelByteTaskWPtr BinaryCloudSave::UpdateUserBinaryRecordFile(FString const& Ke
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("content_type", FAccelByteUtilities::GetContentType(ContentType));
-	JsonObj.SetStringField("file_location", FileLocation);
+	JsonObj.SetStringField(FString("content_type"), FAccelByteUtilities::GetContentType(ContentType));
+	JsonObj.SetStringField(FString("file_location"), FileLocation);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
@@ -410,7 +410,7 @@ FAccelByteTaskWPtr BinaryCloudSave::UpdateUserBinaryRecordMetadata(FString const
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetBoolField("is_public", bIsPublic);
+	JsonObj.SetBoolField(FString("is_public"), bIsPublic);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	return HttpClient.ApiRequest(TEXT("PUT"), Url, {}, Content, OnSuccess, OnError);
@@ -462,7 +462,7 @@ FAccelByteTaskWPtr BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString 
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("file_type", FileType);
+	JsonObj.SetStringField(FString("file_type"), FileType);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);
@@ -497,7 +497,7 @@ FAccelByteTaskWPtr BinaryCloudSave::RequestUserBinaryRecordPresignedUrl(FString 
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
+	JsonObj.SetStringField(FString("file_type"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);

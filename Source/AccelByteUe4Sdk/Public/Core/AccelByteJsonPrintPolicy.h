@@ -34,36 +34,29 @@ struct TAccelBytePrettyJsonPrintPolicy
 #if ENGINE_MINOR_VERSION >= 2
 	static void WriteString(FArchive* Stream, FStringView String)
 	{
-		TempString = String.GetData();
+		FString TempString(String.GetData());
 		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
-		TempStringView = TempString;
-		auto Conv = StringCast<CharType>(TempStringView.GetData(), TempStringView.Len());
+		auto Conv = StringCast<CharType>(*TempString, TempString.Len());
 		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
 	}
 
 	static void WriteString(FArchive* Stream, FAnsiStringView String)
 	{
-		TempString = String.GetData();
+		FString TempString(String.GetData());
 		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
-		TempAnsiStringView = StringCast<ANSICHAR>(*TempString);
-		auto Conv = StringCast<CharType>(TempAnsiStringView.GetData(), TempAnsiStringView.Len());
+		auto AnsiConv = StringCast<ANSICHAR>(*TempString);
+		auto Conv = StringCast<CharType>(AnsiConv.Get(), AnsiConv.Length());
 		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
 	}
 
 	static void WriteString(FArchive* Stream, FUtf8StringView String)
 	{
-		TempString = String.GetData();
+		FString TempString(String.GetData());
 		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
-		TempUtf8StringView = StringCast<UTF8CHAR>(*TempString);
-		auto Conv = StringCast<CharType>(TempUtf8StringView.GetData(), TempUtf8StringView.Len());
+		auto Utf8Conv = StringCast<UTF8CHAR>(*TempString);
+		auto Conv = StringCast<CharType>(Utf8Conv.Get(), Utf8Conv.Length());
 		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
 	}
-
-private:
-	inline static FString TempString{};
-	inline static FStringView TempStringView{};
-	inline static FAnsiStringView TempAnsiStringView{};
-	inline static FUtf8StringView TempUtf8StringView{};
 
 #endif
 #else
@@ -109,36 +102,29 @@ struct TAccelByteCondensedJsonPrintPolicy
 #if ENGINE_MINOR_VERSION >= 2
 	static void WriteString(FArchive* Stream, FStringView String)
 	{
-		TempString = String.GetData();
+		FString TempString(String.GetData());
 		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
-		TempStringView = TempString;
-		auto Conv = StringCast<CharType>(TempStringView.GetData(), TempStringView.Len());
+		auto Conv = StringCast<CharType>(*TempString, TempString.Len());
 		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
 	}
 
 	static void WriteString(FArchive* Stream, FAnsiStringView String)
 	{
-		TempString = String.GetData();
+		FString TempString(String.GetData());
 		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
-		TempAnsiStringView = StringCast<ANSICHAR>(*TempString);
-		auto Conv = StringCast<CharType>(TempAnsiStringView.GetData(), TempAnsiStringView.Len());
+		auto AnsiConv = StringCast<ANSICHAR>(*TempString);
+		auto Conv = StringCast<CharType>(AnsiConv.Get(), AnsiConv.Length());
 		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
 	}
 
 	static void WriteString(FArchive* Stream, FUtf8StringView String)
 	{
-		TempString = String.GetData();
+		FString TempString(String.GetData());
 		FAccelByteUtilities::ReplaceDecimalSeparator(TempString, TEXT(","), TEXT("."));
-		TempUtf8StringView = StringCast<UTF8CHAR>(*TempString);
-		auto Conv = StringCast<CharType>(TempUtf8StringView.GetData(), TempUtf8StringView.Len());
+		auto Utf8Conv = StringCast<UTF8CHAR>(*TempString);
+		auto Conv = StringCast<CharType>(Utf8Conv.Get(), Utf8Conv.Length());
 		Stream->Serialize((void*)Conv.Get(), Conv.Length() * sizeof(CharType));
 	}
-
-private:
-	inline static FString TempString{};
-	inline static FStringView TempStringView{};
-	inline static FAnsiStringView TempAnsiStringView{};
-	inline static FUtf8StringView TempUtf8StringView{};
 
 #endif
 #else

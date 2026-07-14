@@ -8,6 +8,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteIdValidator.h"
+#include "Core/AccelByteDefines.h"
 #include "Models/AccelByteUserModels.h"
 #include "Misc/CommandLine.h"
 #include "Misc/CString.h"
@@ -386,7 +387,7 @@ void FAccelByteUtilities::RemoveEmptyStrings(TSharedPtr<FJsonObject> JsonPtr)
 	{
 		if (Item.Value->Type == EJson::String && Item.Value->AsString() == "")
 		{
-			KeysToRemove.Add(Item.Key);
+			KeysToRemove.Add(FString(FStringView(Item.Key)));
 		}
 		else if (Item.Value->Type == EJson::Object)
 		{
@@ -438,7 +439,7 @@ void FAccelByteUtilities::FixupAllJsonKeys(TSharedPtr<FJsonObject>& JsonObject, 
 		return;
 	}
 
-	for (TPair<FString, TSharedPtr<FJsonValue>>& Pair : JsonObject->Values)
+	for (auto& Pair : JsonObject->Values)
 	{
 		if (Pair.Value->Type == EJson::Object)
 		{
@@ -466,7 +467,7 @@ void FAccelByteUtilities::FixupAllJsonKeys(TSharedPtr<FJsonObject>& JsonObject, 
 
 		if (const FString* FoundMatchingKeyName = JsonKeyToExpectedValue.Find(FName(Pair.Key)))
 		{
-			FString KeyName = *FoundMatchingKeyName;
+			FStringView KeyName = *FoundMatchingKeyName;
 			if (!KeyName.Equals(Pair.Key))
 			{
 				Pair.Key = KeyName;
@@ -591,7 +592,7 @@ void FAccelByteUtilities::RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject> cons
 	// Remove empty field so it doesn't get updated in BE
 	for(auto& KeyValuePair : JsonObjectPtr->Values)
 	{
-		if(!KeyValuePair.Value.IsValid() || ExcludedFieldNames.Contains(KeyValuePair.Key))
+		if(!KeyValuePair.Value.IsValid() || ExcludedFieldNames.Contains(FStringView(KeyValuePair.Key)))
 		{
 			continue;
 		}
@@ -635,7 +636,7 @@ void FAccelByteUtilities::RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject> cons
 				bRemoveField = true;
 				break;
 			}
-			FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueArray>(NewArray));
+			FieldsToReplace.Add(FString(FStringView(KeyValuePair.Key)), MakeShared<FJsonValueArray>(NewArray));
 
 			break;
 		}
@@ -656,7 +657,7 @@ void FAccelByteUtilities::RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject> cons
 				bRemoveField = true;
 				break;
 			}
-			FieldsToReplace.Add(KeyValuePair.Key, MakeShared<FJsonValueObject>(Object));
+			FieldsToReplace.Add(FString(FStringView(KeyValuePair.Key)), MakeShared<FJsonValueObject>(Object));
 
 			break;
 		}
@@ -700,11 +701,11 @@ void FAccelByteUtilities::RemoveEmptyFieldsFromJson(TSharedPtr<FJsonObject> cons
 
 		if(bRemoveField)
 		{
-			FieldsToRemove.Add(KeyValuePair.Key);
+			FieldsToRemove.Add(FString(FStringView(KeyValuePair.Key)));
 		}
 	}
 
-	for(const FString& Key : FieldsToRemove)
+	for(const auto& Key : FieldsToRemove)
 	{
 		JsonObjectPtr->RemoveField(Key);
 	}

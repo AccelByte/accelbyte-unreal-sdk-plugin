@@ -132,10 +132,10 @@ void Settings::LoadSettings(const FString& SectionPath)
 	}
 	
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
-	JsonObject->SetStringField("customer", CustomerName);
-	JsonObject->SetStringField("pn", PublisherNamespace);
-	JsonObject->SetStringField("environment", SettingsEnvironment);
-	JsonObject->SetStringField("game", Namespace);
+	JsonObject->SetStringField(FString("customer"), CustomerName);
+	JsonObject->SetStringField(FString("pn"), PublisherNamespace);
+	JsonObject->SetStringField(FString("environment"), SettingsEnvironment);
+	JsonObject->SetStringField(FString("game"), Namespace);
 
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&HeartBeatData);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);

@@ -514,7 +514,7 @@ FAccelByteTaskWPtr Session::CreateParty(FAccelByteModelsV2PartyCreateRequest con
 	// manually add TextChat field if value is set in request
 	if (CreateRequest.TextChat.IsSet())
 	{
-		ContentJsonObject->SetBoolField("textChat", CreateRequest.TextChat.GetValue());
+		ContentJsonObject->SetBoolField(FString("textChat"), CreateRequest.TextChat.GetValue());
 	}
 
 	auto Writer = TJsonWriterFactory<>::Create(&Content);

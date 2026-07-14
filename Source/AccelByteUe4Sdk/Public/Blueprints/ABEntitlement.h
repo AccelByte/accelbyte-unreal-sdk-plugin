@@ -37,7 +37,9 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsPlatformSyncMobileGoogleRespo
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsPlatformValidateUserItemPurchaseResponse, TArray<FAccelByteModelsPlatformValidateUserItemPurchaseResponse>, Response);
 
-#pragma endregion 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAccelByteModelsSimpleUserDLCRewardContentsResponse, FAccelByteModelsSimpleUserDLCRewardContentsResponse, Response);
+
+#pragma endregion
 
 UCLASS(Blueprintable, BlueprintType)
 class UABEntitlement : public UObject
@@ -103,6 +105,10 @@ public:
  
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
 	void SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, FDHandler OnSuccess, FDErrorHandler OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api")
+	void GetDLCContent(EAccelByteDLCType DLCType, bool bIncludeAllNamespaces,
+		FDAccelByteModelsSimpleUserDLCRewardContentsResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
 	void ValidateUserItemPurchaseCondition(TArray<FString> const& Items, FDAccelByteModelsPlatformValidateUserItemPurchaseResponse OnSuccess, FDErrorHandler OnError);

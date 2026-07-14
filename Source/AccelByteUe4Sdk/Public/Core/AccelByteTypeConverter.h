@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ReflectedTypeAccessors.h"
+#include "Core/AccelByteDefines.h"
 
 class ACCELBYTEUE4SDK_API FAccelByteArrayByteFStringConverter
 {
@@ -45,6 +46,7 @@ public:
 		return Output;
 	}
 };
+
 
 class ACCELBYTEUE4SDK_API FAccelByteJsonConverter
 {
@@ -99,12 +101,11 @@ public:
 
 	static void HandleUnidentifiedEnum(TSharedPtr<FJsonObject> const& JsonObject, UStruct const* Definition)
 	{
-		const TMap<FString, TSharedPtr<FJsonValue>> JsonAttributes = JsonObject->Values;
 		for (TFieldIterator<FProperty> PropertyIt(Definition); PropertyIt; ++PropertyIt)
 		{
 			FProperty* Property = *PropertyIt;
-			const TSharedPtr<FJsonValue>* JsonValue = JsonAttributes.Find(Property->GetName());
-			if (!JsonValue)
+			const TSharedPtr<FJsonValue> JsonValue = JsonObject->TryGetField(Property->GetName());
+			if (!JsonValue.IsValid())
 			{
 				continue;
 			}
@@ -117,9 +118,9 @@ public:
 				{
 					continue;
 				}
-				if (JsonValue->IsValid() && !(*JsonValue)->IsNull())
+				if (!JsonValue->IsNull())
 				{
-					IntValue = EnumJsonValueToInt64(Enum, *JsonValue);
+					IntValue = EnumJsonValueToInt64(Enum, JsonValue);
 				}
 				FString EnumPropertyName = FJsonObjectConverter::StandardizeCase(Property->GetName());
 				FString ValueAsString = Enum->GetNameByValue(IntValue).ToString();
@@ -127,13 +128,13 @@ public:
 			}
 			else if (FArrayProperty* ArrayProperty = CastField<FArrayProperty>(Property))
 			{
-				if ((*JsonValue)->Type != EJson::Array)
+				if (JsonValue->Type != EJson::Array)
 				{
 					continue;
 				}
 				if (FEnumProperty* ArrayEnumProperty = CastField<FEnumProperty>(ArrayProperty->Inner))
 				{
-					const TArray<TSharedPtr<FJsonValue>> ArrayValues = (*JsonValue)->AsArray();
+					const TArray<TSharedPtr<FJsonValue>> ArrayValues = JsonValue->AsArray();
 					int ArrayItem = ArrayValues.Num();
 					TArray<TSharedPtr<FJsonValue>> NewArrayValues;
 					for (int Index = 0; Index != ArrayItem; ++Index)
@@ -157,9 +158,9 @@ public:
 				}
 
 			}
-			else if (JsonValue->IsValid() && !(*JsonValue)->IsNull() && (*JsonValue)->Type == EJson::Object)
+			else if (!JsonValue->IsNull() && JsonValue->Type == EJson::Object)
 			{
-				const TSharedPtr<FJsonObject> Object = (*JsonValue)->AsObject();
+				const TSharedPtr<FJsonObject> Object = JsonValue->AsObject();
 				HandleUnidentifiedEnum(Object, Property->GetOwnerStruct());
 			}
 		}

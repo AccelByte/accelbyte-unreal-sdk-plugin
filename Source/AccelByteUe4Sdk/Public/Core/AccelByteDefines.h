@@ -22,3 +22,4 @@ using FDelegateHandleAlias = FDelegateHandle;
 static TCHAR const* LobbyMessageEnvelopeStartContent = TEXT("LbS");
 static TCHAR const* LobbyMessageEnvelopeEndContent = TEXT("LbE");
 static TCHAR const* HEADER_FEATURE_FLAG = TEXT("X-Ab-Feature-Flags");
+

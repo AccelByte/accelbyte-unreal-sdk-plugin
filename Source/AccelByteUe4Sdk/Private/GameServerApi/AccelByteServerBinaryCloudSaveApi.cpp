@@ -86,15 +86,15 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::CreateGameBinaryRecord(FString const& 
 		, *FGenericPlatformHttp::UrlEncode(ServerCredentialsRef->GetClientNamespace()));
 	
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("key", Key);
-	JsonObj.SetStringField("set_by", FAccelByteUtilities::GetUEnumValueAsString(SetBy));
-	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
+	JsonObj.SetStringField(FString("key"), Key);
+	JsonObj.SetStringField(FString("set_by"), FAccelByteUtilities::GetUEnumValueAsString(SetBy));
+	JsonObj.SetStringField(FString("file_type"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
 	if (TTLConfig.Action != EAccelByteTTLConfigAction::NONE)
 	{
 		const auto TTLConfigJson = MakeShared<FJsonObject>();
 		TTLConfigJson->SetStringField(TEXT("action"),
 			(TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD) ? TEXT("DELETE") : TEXT("NONE"));
-		TTLConfigJson->SetStringField("expires_at", TTLConfig.Expires_At.ToIso8601());
+		TTLConfigJson->SetStringField(FString("expires_at"), TTLConfig.Expires_At.ToIso8601());
 		JsonObj.SetObjectField(TEXT("ttl_config"), TTLConfigJson);
 	}
 	auto Content = MakeShared<FJsonObject>(JsonObj);
@@ -161,8 +161,8 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecord(FString const& 
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("content_type", FAccelByteUtilities::GetContentType(ContentType));
-	JsonObj.SetStringField("file_location", FileLocation);
+	JsonObj.SetStringField(FString("content_type"), FAccelByteUtilities::GetContentType(ContentType));
+	JsonObj.SetStringField(FString("file_location"), FileLocation);
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 
 	const TDelegate<void(const FJsonObject&)> OnSuccessHttpClient = THandler<FJsonObject>::CreateLambda(
@@ -240,13 +240,13 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::UpdateGameBinaryRecordMetadata(FString
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("set_by", FAccelByteUtilities::GetUEnumValueAsString(SetBy));
+	JsonObj.SetStringField(FString("set_by"), FAccelByteUtilities::GetUEnumValueAsString(SetBy));
 	if (TTLConfig.Action != EAccelByteTTLConfigAction::NONE)
 	{
 		const auto TTLConfigJson = MakeShared<FJsonObject>();
 		TTLConfigJson->SetStringField(TEXT("action"),
 			(TTLConfig.Action == EAccelByteTTLConfigAction::DELETE_RECORD) ? TEXT("DELETE") : TEXT("NONE"));
-		TTLConfigJson->SetStringField("expires_at", TTLConfig.Expires_At.ToIso8601());
+		TTLConfigJson->SetStringField(FString("expires_at"), TTLConfig.Expires_At.ToIso8601());
 		JsonObj.SetObjectField(TEXT("ttl_config"), TTLConfigJson);
 	}
 	auto Content = MakeShared<FJsonObject>(JsonObj);
@@ -289,7 +289,7 @@ FAccelByteTaskWPtr ServerBinaryCloudSave::RequestGameBinaryRecordPresignedUrl(FS
 		, *FGenericPlatformHttp::UrlEncode(Key));
 
 	FJsonObject JsonObj{};
-	JsonObj.SetStringField("file_type", FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
+	JsonObj.SetStringField(FString("file_type"), FAccelByteUtilities::GetUEnumValueAsString(FileType).ToLower());
 	auto Content = MakeShared<FJsonObject>(JsonObj);
 	
 	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, OnSuccess, OnError);

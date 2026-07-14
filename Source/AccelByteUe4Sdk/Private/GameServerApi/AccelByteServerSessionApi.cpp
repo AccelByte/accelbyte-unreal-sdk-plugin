@@ -158,7 +158,11 @@ FAccelByteTaskWPtr ServerSession::QueryPartySessions(FAccelByteModelsV2QueryPart
 	FAccelByteUtilities::RemoveEmptyStrings(QueryRequestJsonObject);
 
 	TMultiMap<FString, FString> QueryParams{};
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >=8
+	for (const TPair<FString, TSharedPtr<FJsonValue>> KV : QueryRequestJsonObject->Values)
+#else
 	for (const TPair<FString, TSharedPtr<FJsonValue>>& KV : QueryRequestJsonObject->Values)
+#endif
 	{
 		// Check if the value of this pair is a valid shared instance, if not bail
 		if (!KV.Value.IsValid())
@@ -301,8 +305,11 @@ FAccelByteTaskWPtr ServerSession::QueryGameSessions(FAccelByteModelsV2ServerQuer
 	FAccelByteUtilities::RemoveEmptyStrings(QueryRequestJsonObject);
 
 	TMap<FString, FString> QueryParams{};
-
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >=8
+	for (const TPair<FString, TSharedPtr<FJsonValue>> KV : QueryRequestJsonObject->Values)
+#else
 	for (const TPair<FString, TSharedPtr<FJsonValue>>& KV : QueryRequestJsonObject->Values)
+#endif
 	{
 		// Check if the value of this pair is a valid shared instance, if not bail
 		if (!KV.Value.IsValid())

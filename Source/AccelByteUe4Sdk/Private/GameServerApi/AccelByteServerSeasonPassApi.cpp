@@ -54,14 +54,14 @@ FAccelByteTaskWPtr ServerSeasonPass::GrantExpToUser(FString const& UserId
 
 	FString Content{};
 	FJsonObject DataJson;
-	DataJson.SetNumberField("exp", Exp);
-	DataJson.SetStringField("source", FAccelByteUtilities::GetUEnumValueAsString(Source));
+	DataJson.SetNumberField(FString("exp"), Exp);
+	DataJson.SetStringField(FString("source"), FAccelByteUtilities::GetUEnumValueAsString(Source));
 	TArray<TSharedPtr<FJsonValue>> TagArray{};
 	for (FString Tag : Tags)
 	{
 		TagArray.Add(MakeShareable(new FJsonValueString(Tag)));
 	}
-	DataJson.SetArrayField("tags", TagArray);
+	DataJson.SetArrayField(FString("tags"), TagArray);
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -92,14 +92,14 @@ FAccelByteTaskWPtr ServerSeasonPass::GrantTierToUser(FString const& UserId
 
 	FString Content{};
 	FJsonObject DataJson;
-	DataJson.SetNumberField("count", Count);
-	DataJson.SetStringField("source", FAccelByteUtilities::GetUEnumValueAsString(Source));
+	DataJson.SetNumberField(FString("count"), Count);
+	DataJson.SetStringField(FString("source"), FAccelByteUtilities::GetUEnumValueAsString(Source));
 	TArray<TSharedPtr<FJsonValue>> TagArray{};
 	for (FString Tag : Tags)
 	{
 		TagArray.Add(MakeShareable(new FJsonValueString(Tag)));
 	}
-	DataJson.SetArrayField("tags", TagArray);
+	DataJson.SetArrayField(FString("tags"), TagArray);
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -248,7 +248,7 @@ FAccelByteTaskWPtr ServerSeasonPass::BulkGetUserSessionProgression(TArray<FStrin
 	{
 		UserIdArray.Add(MakeShareable(new FJsonValueString(UserId)));
 	}
-	DataJson.SetArrayField("userIds", UserIdArray);
+	DataJson.SetArrayField(FString("userIds"), UserIdArray);
 	const TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);

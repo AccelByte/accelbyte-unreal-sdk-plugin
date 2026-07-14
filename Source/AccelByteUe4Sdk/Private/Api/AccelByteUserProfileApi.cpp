@@ -150,7 +150,7 @@ FAccelByteTaskWPtr UserProfile::BulkGetPublicUserProfileInfosV2(TArray<FString> 
 		UserIdsJsonValues.Add(MakeShareable(new FJsonValueString(UserId)));
 	}
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
-	JsonObject->SetArrayField("userIds", UserIdsJsonValues);
+	JsonObject->SetArrayField(FString("userIds"), UserIdsJsonValues);
 
 	FString Content = TEXT("");
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);

@@ -560,6 +560,35 @@ void UABEntitlement::SyncTwitchDropEntitlement(
 	}
 }
 
+void UABEntitlement::GetDLCContent(
+	EAccelByteDLCType DLCType,
+	bool bIncludeAllNamespaces,
+	FDAccelByteModelsSimpleUserDLCRewardContentsResponse OnSuccess,
+	FDErrorHandler OnError)
+{
+	const auto EntitlementPtr = ApiClientPtr->GetEntitlementApi().Pin();
+	if (EntitlementPtr.IsValid())
+	{
+		EntitlementPtr->GetDLCContent(
+		DLCType,
+		bIncludeAllNamespaces,
+		THandler<FAccelByteModelsSimpleUserDLCRewardContentsResponse>::CreateLambda(
+			[OnSuccess](FAccelByteModelsSimpleUserDLCRewardContentsResponse const& Response)
+			{
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+	}
+	else
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Api already destroyed!"));
+	}
+}
+
 void UABEntitlement::ValidateUserItemPurchaseCondition(TArray<FString> const& Items,
 	FDAccelByteModelsPlatformValidateUserItemPurchaseResponse OnSuccess, FDErrorHandler OnError)
 {

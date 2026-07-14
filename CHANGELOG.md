@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.9.0] (2026-07-14)
+
+
+### Features
+
+* add GetDLCContent API 
+* add unreal 5.8 preview support 
+
+
+### Bug Fixes
+
+* adjust all fjsonfield set methods for ue5.8 
+* compilation issue in FAccelBytePlatform for UE4.27 
+* **statistic:** build increment payload manually to avoid FName collision on UE 5.8 
+* **websocket:** only re-enqueue close-frame reason when it carries a framed notif 
+* **websocket:** stop enqueueing close-frame reason as a message 
+
+
+### Documentations
+
+* update readme 
+
 ## [28.8.0] (2026-06-15)
 
 

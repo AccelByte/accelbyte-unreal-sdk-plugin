@@ -392,7 +392,7 @@ FAccelByteTaskWPtr ServerDSM::ServerHeartbeat(FVoidHandler const& OnSuccess
 
 	FString Content = TEXT("");
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
-	JsonObject->SetStringField("podName", ServerName);
+	JsonObject->SetStringField(FString("podName"), ServerName);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 

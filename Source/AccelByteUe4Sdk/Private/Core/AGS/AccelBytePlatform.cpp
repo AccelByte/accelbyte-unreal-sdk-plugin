@@ -7,7 +7,7 @@
 #include "Core/AccelByteBaseSettings.h"
 
 #include "AccelByteUe4SdkModule.h"
-#include "Containers/Ticker.h"
+#include "Core/AccelByteDefines.h"
 
 namespace AccelByte
 {
@@ -21,7 +21,7 @@ FAccelBytePlatform::FAccelBytePlatform(AccelByte::BaseSettingsPtr const& InSetti
 	// pointer is only initialized once MakeShared finishes wrapping this object). Defer the
 	// first sync attempt to the next tick so AttemptTimeSyncWithRetry can safely capture a
 	// weak self for its async retry callbacks.
-	FTSTicker::GetCoreTicker().AddTicker(
+	FTickerAlias::GetCoreTicker().AddTicker(
 		FTickerDelegate::CreateLambda([this](float /*DeltaTime*/) -> bool
 		{
 			AttemptTimeSyncWithRetry(0);
@@ -64,7 +64,7 @@ void FAccelBytePlatform::AttemptTimeSyncWithRetry(int32 AttemptCount)
 				Self->bSyncInProgress.AtomicSet(false);
 			}
 		}),
-		FErrorHandler::CreateLambda([SelfWeak, AttemptCount](int32 Code, const FString& Msg)
+		FErrorHandler::CreateLambda([SelfWeak, AttemptCount, MaxAttempts, BaseDelaySec](int32 Code, const FString& Msg)
 		{
 			const int32 NextAttempt = AttemptCount + 1;
 			if (NextAttempt >= MaxAttempts)
@@ -84,7 +84,7 @@ void FAccelBytePlatform::AttemptTimeSyncWithRetry(int32 AttemptCount)
 				TEXT("FAccelBytePlatform: TimeManager sync failed (attempt %d/%d, error %d: %s); retrying in %.1fs"),
 				NextAttempt, MaxAttempts, Code, *Msg, DelaySec);
 
-			FTSTicker::GetCoreTicker().AddTicker(
+			FTickerAlias::GetCoreTicker().AddTicker(
 				FTickerDelegate::CreateLambda([SelfWeak, NextAttempt](float /*DeltaTime*/) -> bool
 				{
 					if (auto Self = SelfWeak.Pin())

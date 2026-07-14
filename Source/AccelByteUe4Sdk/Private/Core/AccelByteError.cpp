@@ -466,7 +466,7 @@ namespace AccelByte
 					if(Error.ErrorCode != -1)
 					{
 						Code = Error.ErrorCode;
-						OutErrorObject.SetNumberField("errorCode", Error.ErrorCode);
+						OutErrorObject.SetNumberField(FString("errorCode"), Error.ErrorCode);
 					}
 					else
 					{
@@ -475,17 +475,17 @@ namespace AccelByte
 					
 					if(!Error.Error_description.IsEmpty())
 					{
-						OutErrorObject.SetStringField("error_description", *Error.Error_description);
+						OutErrorObject.SetStringField(FString("error_description"), *Error.Error_description);
 					}
 
 					if(!Error.Error_uri.IsEmpty())
 					{
-						OutErrorObject.SetStringField("error_uri", *Error.Error_uri);
+						OutErrorObject.SetStringField(FString("error_uri"), *Error.Error_uri);
 					}
 						
 					if(!Error.Mfa_token.IsEmpty())
 					{
-						OutErrorObject.SetStringField("mfa_token", *Error.Mfa_token);
+						OutErrorObject.SetStringField(FString("mfa_token"), *Error.Mfa_token);
 					}
 						
 					if(Error.Factors.Num() > 0)
@@ -498,27 +498,27 @@ namespace AccelByte
 							ValueArray.Add(Value);
 						}
 						
-						OutErrorObject.SetArrayField("factors", ValueArray);
+						OutErrorObject.SetArrayField(FString("factors"), ValueArray);
 					}
 						
 					if(!Error.Default_factor.IsEmpty())
 					{
-						OutErrorObject.SetStringField("default_factor", *Error.Default_factor);
+						OutErrorObject.SetStringField(FString("default_factor"), *Error.Default_factor);
 					}
 
 					if(!Error.PlatformId.IsEmpty())
 					{
-						OutErrorObject.SetStringField("platformId", *Error.PlatformId);
+						OutErrorObject.SetStringField(FString("platformId"), *Error.PlatformId);
 					}
 
 					if(!Error.LinkingToken.IsEmpty())
 					{
-						OutErrorObject.SetStringField("linkingToken", *Error.LinkingToken);
+						OutErrorObject.SetStringField(FString("linkingToken"), *Error.LinkingToken);
 					}
 
 					if(!Error.ClientId.IsEmpty())
 					{
-						OutErrorObject.SetStringField("clientId", *Error.ClientId);
+						OutErrorObject.SetStringField(FString("clientId"), *Error.ClientId);
 					}
  
 				}
@@ -538,12 +538,12 @@ namespace AccelByte
 		if (!Error.ErrorMessage.IsEmpty())
 		{
 			OutMessage = Error.ErrorMessage;
-			OutErrorObject.SetStringField("errorMessage", *Error.ErrorMessage);
+			OutErrorObject.SetStringField(FString("errorMessage"), *Error.ErrorMessage);
 		}
 		else if (!Error.Error.IsEmpty())
 		{
 			OutMessage = Error.Error;
-			OutErrorObject.SetStringField("error", *Error.Error);
+			OutErrorObject.SetStringField(FString("error"), *Error.Error);
 		}
 		else
 		{
