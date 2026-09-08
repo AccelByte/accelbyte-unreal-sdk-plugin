@@ -15,8 +15,13 @@ namespace AccelByte
 
 /**
  * @brief Utility class to manage and synchronize Server Time from the Backend services.
+ *
+ * Derives from TSharedFromThis so GetServerTime's async HTTP callback can hold a weak self
+ * instead of a bare `this`: the callback fires on request completion and may race this
+ * object's destruction (owning platform/instance torn down mid-sync). Every instance is
+ * created via MakeShared (see FAccelBytePlatform), so AsShared() is always valid here.
  */
-class ACCELBYTEUE4SDK_API FAccelByteTimeManager
+class ACCELBYTEUE4SDK_API FAccelByteTimeManager : public TSharedFromThis<FAccelByteTimeManager, ESPMode::ThreadSafe>
 {
 public:
 	FAccelByteTimeManager(AccelByte::FHttpRetrySchedulerBase& InHttpRef, FString const& InBasicServerUrl);

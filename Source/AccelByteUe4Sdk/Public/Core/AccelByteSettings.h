@@ -16,15 +16,15 @@ class ACCELBYTEUE4SDK_API Settings : public BaseSettings
 public:
 	FString ChatServerWsUrl{};
 	FString ChatServerUrl{};
-	FString BasicServerUrl{};
+	// BasicServerUrl, UGCServerUrl, InventoryServerUrl removed — they are declared in BaseSettings.
+	// Re-declaring them here shadows the base members, causing any code that accesses settings
+	// through BaseSettingsPtr (e.g. FAccelBytePlatform) to always read empty values.
 	FString CloudStorageServerUrl{};
 	FString GameProfileServerUrl{};
 	FString GroupServerUrl{};
 	FString LeaderboardServerUrl{};
 	FString AgreementServerUrl{};
 	FString TurnManagerServerUrl{};
-	FString UGCServerUrl{};
-	FString InventoryServerUrl{};
 	FString ReportingServerUrl{};
 	FString LoginQueueServerUrl{};
 	FString AppId{};

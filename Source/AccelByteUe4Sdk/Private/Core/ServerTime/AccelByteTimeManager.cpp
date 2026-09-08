@@ -115,17 +115,27 @@ FAccelByteTaskWPtr FAccelByteTimeManager::GetServerTime(THandler<FTime> const& O
 		Request->SetURL(Url);
 		Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 
-		auto SuccessDelegate = THandler<FTime>::CreateLambda([OnSuccess, this](FTime const& ServerTime)
+		FAccelByteTimeManagerWPtr TimeManagerWeak = AsShared();
+		auto SuccessDelegate = THandler<FTime>::CreateLambda([OnSuccess, TimeManagerWeak](FTime const& ServerTime)
 		{
-			auto TaskPtr = AccelByteGetServerTimeTaskWPtr.Pin();
-			if (TaskPtr.IsValid())
+			// Pin a strong ref before touching any member. This callback runs from the HTTP
+			// scheduler on request completion, which can race this TimeManager's destruction
+			// (the owning platform/instance may be torn down while the /misc/time request is
+			// still in flight). Capturing a weak self instead of a bare `this` turns that
+			// use-after-free into a safe no-op when the manager is already gone; OnSuccess is
+			// still fired since it carries its own lifetime guard.
+			if (auto TimeManager = TimeManagerWeak.Pin())
 			{
-				auto RetryTaskPtr = StaticCastSharedPtr<FHttpRetryTask>(TaskPtr);
-				if (RetryTaskPtr.IsValid())
+				auto TaskPtr = TimeManager->AccelByteGetServerTimeTaskWPtr.Pin();
+				if (TaskPtr.IsValid())
 				{
-					FScopeLock ScopeLock(&ServerTimeLock);
-					ServerTimeLastUpdated = RetryTaskPtr->GetResponseTime();
-					CachedServerTime = ServerTime.CurrentTime;
+					auto RetryTaskPtr = StaticCastSharedPtr<FHttpRetryTask>(TaskPtr);
+					if (RetryTaskPtr.IsValid())
+					{
+						FScopeLock ScopeLock(&TimeManager->ServerTimeLock);
+						TimeManager->ServerTimeLastUpdated = RetryTaskPtr->GetResponseTime();
+						TimeManager->CachedServerTime = ServerTime.CurrentTime;
+					}
 				}
 			}
 			OnSuccess.ExecuteIfBound(ServerTime);

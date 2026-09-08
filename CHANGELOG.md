@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.10.0] (2026-09-08)
+
+
+### Features
+
+* **gdpr:** add headless personal data request methods and GAMEPLAY_BLOCKED ban type (AAX-3052) 
+
+
+### Bug Fixes
+
+* **gameTelemetry:** evict shutdown-flushed events from cache synchronously to stop duplicate resend on next login (ASP-13354) 
+* **lobby:** address review - scope notif warnings to malformed, guard test-friend, clarify buffering fast-path (ASP-13309) 
+* **lobby:** dispatch unsequenced notifications during gap recovery (ASP-13309) 
+* query param in RetrieveGameRecordsKey 
+* **settings:** de-shadow BasicServerUrl/UGC/Inventory + guard empty CDO values (ASP-13358) 
+* **settings:** guard LoadFallback against empty CDO values (client+server) — addresses PR [#1244] review (ASP-13358) 
+* **timemanager:** weak-capture self in GetServerTime to prevent use-after-free (AAX-3397) 
+
+
+### Documentations
+
+* replace engine checklist with per-release version matrix 
+
 ## [28.9.0] (2026-07-14)
 
 

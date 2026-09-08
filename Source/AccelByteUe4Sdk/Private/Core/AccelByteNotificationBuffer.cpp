@@ -9,8 +9,16 @@ DEFINE_LOG_CATEGORY(LogAccelByteNotificationBuffer);
 
 bool AccelByte::FAccelByteNotificationBuffer::TryAddBuffer(const FAccelByteModelsUserNotification& InNotification)
 {
-	if (!HasValidSequence(InNotification))
+	// Defensive fallback: Lobby::TryBufferNotification is the gatekeeper and already diverts
+	// unsequenced/malformed notifications (logging malformed ones) before they reach here, so this is
+	// not an error path - log at Verbose only to avoid false-positive warnings for normal traffic.
+	if (!IsValidSequence(InNotification))
 	{
+		UE_LOG(LogAccelByteNotificationBuffer, Verbose, TEXT("Skipping notification without a valid sequence, Type: %s, Topic: %s, sequenceID: %d, sequenceNumber: %d")
+			, *InNotification.Type
+			, *InNotification.Topic
+			, InNotification.SequenceID
+			, InNotification.SequenceNumber);
 		return false;
 	}
 
@@ -107,18 +115,9 @@ void AccelByte::FAccelByteNotificationBuffer::UpdateLastSequence(const FAccelByt
 	LastSentAt = InNotification.SentAt;
 }
 
-bool AccelByte::FAccelByteNotificationBuffer::HasValidSequence(const FAccelByteModelsUserNotification& InNotification) const
+bool AccelByte::FAccelByteNotificationBuffer::IsValidSequence(const FAccelByteModelsUserNotification& InNotification)
 {
-	if (InNotification.SequenceNumber <= 0 || InNotification.SequenceID < 0)
-	{
-		UE_LOG(LogAccelByteNotificationBuffer, Warning, TEXT("Notification has invalid sequence, Type: %s, Topic: %s, sequenceID: %d, sequenceNumber: %d"), 
-			*InNotification.Type, 
-			*InNotification.Topic, 
-			InNotification.SequenceID, 
-			InNotification.SequenceNumber);
-		return false;
-	}
-	return true;
+	return InNotification.SequenceNumber > 0 && InNotification.SequenceID >= 0;
 }
 
 bool AccelByte::FAccelByteNotificationBuffer::IsNotificationMissing(const FAccelByteModelsUserNotification& InNotification) const

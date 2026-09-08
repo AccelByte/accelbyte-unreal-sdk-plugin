@@ -64,6 +64,7 @@ public:
 
 	bool IsSessionValid() const;
 	bool IsComply() const;
+	bool IsBanned(EBanType BanType) const;
 
 	virtual void Startup() override;
 

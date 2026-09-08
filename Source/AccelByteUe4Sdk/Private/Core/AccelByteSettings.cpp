@@ -34,7 +34,8 @@ FString GetClientConfigUrlValue(const FString& SectionPath, const FString& Key, 
 	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(Key, Value))
 	{
 		// If not exist, then fetch from the game default engine ini section
-		if (GConfig->GetString(*SectionPath, *Key, Value, GEngineIni)) return Value;
+		// Skip empty values written by UE4's defaultConfig CDO serialization; fall through to BaseUrl derivation
+		if (GConfig->GetString(*SectionPath, *Key, Value, GEngineIni) && !Value.IsEmpty()) return Value;
 
 		return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultPrefix);
 	}
@@ -218,7 +219,8 @@ void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FStr
 {
 	if (!FAccelByteUtilities::GetAccelByteConfigFromCommandLineSwitch(Key, Value))
 	{
-		if (!GConfig->GetString(*SectionPath, *Key, Value, GEngineIni))
+		// Treat an empty value (e.g. written by UE4 defaultConfig CDO serialization) as "not set"; fall through to the default section.
+		if (!GConfig->GetString(*SectionPath, *Key, Value, GEngineIni) || Value.IsEmpty())
 		{
 			GConfig->GetString(DefaultSection, *Key, Value, GEngineIni);
 		}

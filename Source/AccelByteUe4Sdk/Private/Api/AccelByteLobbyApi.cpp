@@ -2811,9 +2811,33 @@ bool Lobby::TryBufferNotification(FString const& ParsedJsonString)
 
 	FScopeLock Lock(&NotificationBufferLock);
 
+	// Unsequenced notifications (sequenceNumber <= 0, e.g. OnSessionStorageChanged / OnPartyUpdated)
+	// are intentionally not part of the ordered stream and cannot be gap-recovered. They must never
+	// be buffered or consumed here - always let them fall through to be dispatched. Previously, while
+	// the buffer was in gap-recovery mode, these were swallowed (returned true) and the delegate
+	// silently never fired.
+	if (!FAccelByteNotificationBuffer::IsValidSequence(ReceivedNotification))
+	{
+		// Normal unsequenced notifications (sequenceNumber/sequenceID 0) are expected and dispatched
+		// quietly. Genuinely malformed values (negative) are not expected and are worth flagging.
+		if (ReceivedNotification.SequenceNumber < 0 || ReceivedNotification.SequenceID < 0)
+		{
+			UE_LOG(LogAccelByteLobby, Warning, TEXT("Notification has malformed sequence, Type: %s, Topic: %s, sequenceID: %d, sequenceNumber: %d")
+				, *ReceivedNotification.Type
+				, *ReceivedNotification.Topic
+				, ReceivedNotification.SequenceID
+				, ReceivedNotification.SequenceNumber);
+		}
+		return false;
+	}
+
 	if (NotificationBuffer.IsBuffering())
 	{
-		NotificationBuffer.TryAddBuffer(ReceivedNotification);
+		// Already gap-recovering: enqueue and return early so we do NOT trigger a second
+		// GetNotifications() fetch below. The result is intentionally ignored - while buffering,
+		// TryAddBuffer enqueues the notification (or drops a duplicate), and in either case it must
+		// not be dispatched now; it is flushed in order once the missing notifications arrive.
+		(void)NotificationBuffer.TryAddBuffer(ReceivedNotification);
 		return true;
 	}
 

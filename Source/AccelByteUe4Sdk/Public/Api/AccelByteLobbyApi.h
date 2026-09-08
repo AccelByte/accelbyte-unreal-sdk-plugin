@@ -79,6 +79,14 @@ class ACCELBYTEUE4SDK_API Lobby
 	, public IWebsocketConfigurableReconnectStrategy
 	, public TSharedFromThis<Lobby, ESPMode::ThreadSafe>
 {
+#if WITH_DEV_AUTOMATION_TESTS
+	// Test-only accessor that drives the private notification-buffering path deterministically.
+	// Defined in OSSDemo automation tests:
+	//   Source/OSSDemo/Tests/Automation/Ags Unit Tests/Multiplayer/NotificationBuffer/LobbyNotificationDispatchTest.h
+	// Guarded so it is stripped from shipping builds; has no effect on production behavior.
+	friend struct FLobbyNotificationBufferTestHelper;
+#endif
+
 public:
 	Lobby(Credentials& InCredentialsRef
 		, Settings const& InSettingsRef

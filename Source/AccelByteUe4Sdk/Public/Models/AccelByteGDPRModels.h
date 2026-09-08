@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Models/AccelByteGeneralModels.h"
 #include "AccelByteGDPRModels.generated.h"
 
 
@@ -42,4 +43,47 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGDPRAccountDeletionStatusResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
 	FString UserID{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGDPRSubmitPersonalDataRequestResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	FString UserID{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	FDateTime RequestDate{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGDPRPersonalDataRequest
+{
+	GENERATED_BODY()
+
+	// One of: "Pending", "In-Progress", "Completed", "Canceled", "Failed", "Expired".
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	FString Status{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	FDateTime RequestDate{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	FDateTime DataExpirationDate{0};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGDPRPersonalDataRequestsResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	TArray<FAccelByteModelsGDPRPersonalDataRequest> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	FAccelByteModelsPaging Paging{};
 };

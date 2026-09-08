@@ -184,6 +184,24 @@ bool Credentials::IsComply() const
 	return TempToken.Is_comply;
 }
 
+bool Credentials::IsBanned(EBanType BanType) const
+{
+	FOauth2Token TempToken = GetAuthToken();
+	const int64 UtcNowTimestamp = FDateTime::UtcNow().ToUnixTimestamp();
+	for (auto const& Ban : TempToken.Bans)
+	{
+		if (!Ban.Enabled || Ban.EndDate.ToUnixTimestamp() < UtcNowTimestamp)
+		{
+			continue;
+		}
+		if (FAccelByteUtilities::GetUEnumValueFromString<EBanType>(Ban.Ban) == BanType)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void Credentials::Startup()
 {
 	BaseCredentials::Startup();

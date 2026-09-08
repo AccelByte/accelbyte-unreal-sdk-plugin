@@ -103,6 +103,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	bool IsComply();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	bool IsBanned(EBanType BanType);
 private:
 	AccelByte::FApiClientPtr ApiClientPtr;
 };

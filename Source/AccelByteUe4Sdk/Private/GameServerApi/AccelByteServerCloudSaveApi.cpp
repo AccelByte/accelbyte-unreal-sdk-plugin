@@ -39,7 +39,7 @@ FAccelByteTaskWPtr ServerCloudSave::RetrieveGameRecordsKey(THandler<FAccelByteMo
 	TMultiMap<FString, FString> QueryParams;
 	if(!Query.IsEmpty())
 	{
-		QueryParams.Add(TEXT("query=%s"), *Query);
+		QueryParams.Add(TEXT("query"), *Query);
 	}
 	if (Offset >= 0)
 	{

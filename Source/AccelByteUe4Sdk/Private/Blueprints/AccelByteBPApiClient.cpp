@@ -112,6 +112,11 @@ bool UABCredentials::IsComply()
 	return ApiClientPtr->CredentialsRef->IsComply();
 }
 
+bool UABCredentials::IsBanned(EBanType BanType)
+{
+	return ApiClientPtr->CredentialsRef->IsBanned(BanType);
+}
+
 UABApiClient::UABApiClient()
 {
 	Credentials = NewObject<UABCredentials>();

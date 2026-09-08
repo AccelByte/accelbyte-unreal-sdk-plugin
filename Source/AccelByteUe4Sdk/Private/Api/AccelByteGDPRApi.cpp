@@ -118,10 +118,106 @@ FAccelByteTaskWPtr GDPR::CancelAccountDeletion(FVoidHandler const& OnSuccess
 	, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+
 	FString Url = FString::Printf(TEXT("%s/public/users/me/deletions")
 		, *SettingsRef.GDPRServerUrl);
-	
+
+	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr GDPR::SubmitMyPersonalDataRequest(EAccelBytePlatformType PlatformType
+	, FString const& PlatformToken
+	, THandler<FAccelByteModelsGDPRSubmitPersonalDataRequestResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& Email
+	, FString const& LanguageTag)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/public/users/me/requests")
+		, *SettingsRef.GDPRServerUrl);
+
+	const FString PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
+	TMap<FString, FString> FormFields;
+	FormFields.Add(TEXT("platformId"), PlatformId);
+	FormFields.Add(TEXT("platformToken"), PlatformToken);
+	if (!Email.IsEmpty())
+	{
+		FormFields.Add(TEXT("email"), Email);
+	}
+	if (!LanguageTag.IsEmpty())
+	{
+		FormFields.Add(TEXT("languageTag"), LanguageTag);
+	}
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr GDPR::SubmitMyPersonalDataRequestOtherPlatformId(FString const& PlatformId
+	, FString const& PlatformToken
+	, THandler<FAccelByteModelsGDPRSubmitPersonalDataRequestResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& Email
+	, FString const& LanguageTag)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/public/users/me/requests")
+		, *SettingsRef.GDPRServerUrl);
+
+	TMap<FString, FString> FormFields;
+	FormFields.Add(TEXT("platformId"), PlatformId);
+	FormFields.Add(TEXT("platformToken"), PlatformToken);
+	if (!Email.IsEmpty())
+	{
+		FormFields.Add(TEXT("email"), Email);
+	}
+	if (!LanguageTag.IsEmpty())
+	{
+		FormFields.Add(TEXT("languageTag"), LanguageTag);
+	}
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr GDPR::GetMyPersonalDataRequests(THandler<FAccelByteModelsGDPRPersonalDataRequestsResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, int32 const& Offset
+	, int32 const& Limit)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/public/users/me/requests")
+		, *SettingsRef.GDPRServerUrl);
+
+	const TMultiMap<FString, FString> QueryParams = {
+		{TEXT("offset"), Offset >= 0 ? FString::FromInt(Offset) : TEXT("")},
+		{TEXT("limit"), Limit >= 0 ? FString::FromInt(Limit) : TEXT("")}
+	};
+
+	return HttpClient.ApiRequest(TEXT("GET"), Url, QueryParams, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr GDPR::CancelMyPersonalDataRequest(FDateTime const& RequestDate
+	, FVoidHandler const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/public/users/me/requests/%s")
+		, *SettingsRef.GDPRServerUrl
+		, *FGenericPlatformHttp::UrlEncode(RequestDate.ToIso8601()));
+
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
 }
 

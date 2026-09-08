@@ -71,6 +71,19 @@ namespace AccelByte
 		 */
 		bool IsBuffering() const;
 
+		/**
+		 * @brief Check whether a notification carries a usable sequence for ordering/gap-detection.
+		 *	Some notifications (e.g. OnSessionStorageChanged, OnPartyUpdated) are intentionally sent
+		 *	without sequence metadata and arrive with sequenceNumber 0 / sequenceID 0. Those are not
+		 *	part of the ordered stream and must never be buffered.
+		 *
+		 * @param InNotification Incoming notification.
+		 * @return true only when sequenceNumber >= 1 (the sole meaningful discriminator). sequenceID >= 0
+		 *	is also required, but acts as a defensive guard against malformed negative IDs rather than a
+		 *	discriminator (a valid sequenced notification may legitimately carry sequenceID 0).
+		 */
+		static bool IsValidSequence(const FAccelByteModelsUserNotification& InNotification);
+
 	private:
 		bool bBuffering{false};
 
@@ -82,7 +95,6 @@ namespace AccelByte
 		TArray<FAccelByteModelsUserNotification> Buffer;
 
 		void UpdateLastSequence(const FAccelByteModelsUserNotification& InNotification);
-		bool HasValidSequence(const FAccelByteModelsUserNotification& InNotification) const;
 		bool IsNotificationMissing(const FAccelByteModelsUserNotification& InNotification) const;
 		bool IsDuplicateNotification(const FAccelByteModelsUserNotification& InNotification) const;
 		bool IsExistInBuffer(const FLobbySequenceID& InSequenceID, const FLobbySequenceNumber& InSequenceNumber) const;

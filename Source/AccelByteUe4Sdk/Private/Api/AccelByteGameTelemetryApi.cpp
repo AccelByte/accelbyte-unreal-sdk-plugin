@@ -303,11 +303,17 @@ void GameTelemetry::SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 	TMap<FString, FString> Headers;
 	Headers.Add(GHeaderABLogSquelch, TEXT("true"));
 
-	if (ShuttingDown && !bCacheEvent)
+	if (ShuttingDown)
 	{
 		if (CredentialsRef->IsSessionValid())
 		{
 			HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, FVoidHandler{}, FErrorHandler{});
+
+			if (bCacheEvent)
+			{
+				// Fire-and-forget on shutdown: this object won't survive to process the async response, so evict the cache now to avoid a duplicate resend via LoadCachedEvents on next login. Trade-off: if this request never reaches the server, these events are lost rather than retried - deliberately favoring duplicate-avoidance over guaranteed delivery here, since the object's imminent destruction rules out waiting for a real confirmation either way.
+				RemoveEventsFromCache(Events);
+			}
 		}
 	}
 	else
