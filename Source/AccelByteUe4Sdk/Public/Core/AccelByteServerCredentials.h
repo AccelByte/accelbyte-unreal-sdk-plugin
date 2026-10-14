@@ -7,6 +7,7 @@
 #include "AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteOauth2Api.h"
 #include "Core/AccelByteBaseCredentials.h"
+#include "Core/AccelByteServerSettings.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 
@@ -23,6 +24,8 @@ public:
 	using BaseCredentials::SetClientCredentials;
 
 	ServerCredentials(FHttpRetrySchedulerBase& InHttpRef, FString const& InIamServerUrl);
+	/** @brief Resolves the IAM URL from InServerSettings on every token refresh, so a later environment switch is honored. */
+	ServerCredentials(FHttpRetrySchedulerBase& InHttpRef, ServerSettingsPtr const& InServerSettings);
 	virtual void ForgetAll() override;
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
 	void SetMatchId(const FString& GivenMatchId);
@@ -35,11 +38,15 @@ public:
 	FString GetClientNamespace() const;
 	FString GetMatchId() const;
 
+	/** @brief IAM URL used for token refresh: the live ServerSettings value when bound, else the URL given at construction. */
+	FString GetIamServerUrl() const;
+
 protected:
 	mutable FRWLock MatchIdMtx;
 	FString MatchId;
-	
+
 	FString IamServerUrl;
+	TWeakPtr<ServerSettings, ESPMode::ThreadSafe> ServerSettingsWeak;
 
 	Api::Oauth2 Oauth;
 

@@ -31,6 +31,23 @@ ServerCredentials::ServerCredentials(FHttpRetrySchedulerBase& InHttpRef, FString
 {
 }
 
+ServerCredentials::ServerCredentials(FHttpRetrySchedulerBase& InHttpRef, ServerSettingsPtr const& InServerSettings)
+	: ServerCredentials(InHttpRef, InServerSettings.IsValid() ? InServerSettings->IamServerUrl : FString())
+{
+	ServerSettingsWeak = InServerSettings;
+}
+
+FString ServerCredentials::GetIamServerUrl() const
+{
+	// ServerSettings::Reset rewrites the shared ServerSettings in place on an environment switch, so read it live.
+	ServerSettingsPtr const ServerSettingsPin = ServerSettingsWeak.Pin();
+	if (ServerSettingsPin.IsValid() && !ServerSettingsPin->IamServerUrl.IsEmpty())
+	{
+		return ServerSettingsPin->IamServerUrl;
+	}
+	return IamServerUrl;
+}
+
 void ServerCredentials::ForgetAll()
 {
 	BaseCredentials::ForgetAll();
@@ -122,7 +139,7 @@ void ServerCredentials::SendRefreshToken()
 		, TempClientSecret
 		, THandler<FOauth2Token>::CreateThreadSafeSP(this, &ServerCredentials::OnPollRefreshTokenResponseSuccess)
 		, FErrorHandler::CreateThreadSafeSP(this, &ServerCredentials::OnPollRefreshTokenResponseError)
-		, IamServerUrl);
+		, GetIamServerUrl());
 }
 
 void ServerCredentials::OnPollRefreshTokenResponseSuccess(const FOauth2Token& Result)

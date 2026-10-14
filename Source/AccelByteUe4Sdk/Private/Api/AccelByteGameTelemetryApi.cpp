@@ -30,7 +30,8 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, bCacheEvent(bInCacheEvent)
 	, bRetryOnFailed(bInRetryOnFailed)
 {
-	bCacheEvent = SettingsRef.bEnableGameTelemetryCache;
+	// Honor a subclass opting out: PredefinedEvent shares this cache key, so letting it cache made every login resend the cache twice
+	bCacheEvent = bInCacheEvent && SettingsRef.bEnableGameTelemetryCache;
 }
 
 GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
@@ -45,7 +46,8 @@ GameTelemetry::GameTelemetry(Credentials& InCredentialsRef
 	, bCacheEvent(bInCacheEvent)
 	, bRetryOnFailed(bInRetryOnFailed)
 {
-	bCacheEvent = SettingsRef.bEnableGameTelemetryCache;
+	// Honor a subclass opting out: PredefinedEvent shares this cache key, so letting it cache made every login resend the cache twice
+	bCacheEvent = bInCacheEvent && SettingsRef.bEnableGameTelemetryCache;
 }
 
 GameTelemetry::~GameTelemetry()
@@ -71,8 +73,8 @@ void GameTelemetry::OnLoginSuccess(FOauth2Token const& Response)
 
 void GameTelemetry::OnLogoutSuccess()
 {
-	EventPtrArrayAccumulation.Empty();
 	FScopeLock ScopeLock(&EventPtrArrayLock);
+	EventPtrArrayAccumulation.Empty();
 	EventPtrArray.Empty();
 }
 
@@ -305,15 +307,11 @@ void GameTelemetry::SendProtectedEvents(TArray<TelemetryBodyPtr> const& Events
 
 	if (ShuttingDown)
 	{
-		if (CredentialsRef->IsSessionValid())
+		// A request sent here can't be confirmed, and the HTTP scheduler's own shutdown usually cancels it before it connects.
+		// With the cache on the batch is already on disk, so leave it there for the next login to deliver once.
+		if (!bCacheEvent && CredentialsRef->IsSessionValid())
 		{
 			HttpClient.ApiRequest(TEXT("POST"), Url, {}, Content, Headers, FVoidHandler{}, FErrorHandler{});
-
-			if (bCacheEvent)
-			{
-				// Fire-and-forget on shutdown: this object won't survive to process the async response, so evict the cache now to avoid a duplicate resend via LoadCachedEvents on next login. Trade-off: if this request never reaches the server, these events are lost rather than retried - deliberately favoring duplicate-avoidance over guaranteed delivery here, since the object's imminent destruction rules out waiting for a real confirmation either way.
-				RemoveEventsFromCache(Events);
-			}
 		}
 	}
 	else
@@ -444,15 +442,16 @@ void GameTelemetry::RemoveEventsFromCache(TArray<TelemetryBodyPtr> const& Events
 		return;
 	}
 
-	if (EventPtrArray.Num() != 0)
 	{
+		// AppendEventToCache grows EventPtrArrayAccumulation under this lock on other worker threads,
+		// so emptying it unlocked corrupts the heap
 		FScopeLock ScopeLock(&EventPtrArrayLock);
 		for (const auto& Event : Events)
 		{
 			EventPtrArray.Remove(Event);
 		}
+		EventPtrArrayAccumulation.Empty();
 	}
-	EventPtrArrayAccumulation.Empty();
 
 	FString TelemetryValues;
 	JobArrayQueueAsJsonString(TelemetryValues);

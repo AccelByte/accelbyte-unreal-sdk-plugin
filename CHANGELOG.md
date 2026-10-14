@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+### [28.10.1] (2026-10-14)
+
+
+### Bug Fixes
+
+* **credentials:** resolve the IAM URL from live settings on token refresh so an environment switch is honored (ASP-13437) 
+* **gameTelemetry:** empty the cached event string under EventPtrArrayLock to stop a heap-corrupting race with AppendEventToCache (AAX-3714) 
+* **gameTelemetry:** stop PredefinedEvent resending the telemetry cache and keep the batch cached on shutdown instead of evicting an unsent flush (ASP-13354) 
+
 ## [28.10.0] (2026-09-08)
 
 

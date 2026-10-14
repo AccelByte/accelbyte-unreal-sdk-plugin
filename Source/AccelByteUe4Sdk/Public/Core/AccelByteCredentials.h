@@ -12,6 +12,7 @@
 #include "Models/AccelByteUserModels.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
 //#include "Kismet/BlueprintFunctionLibrary.h"
 
 namespace AccelByte
@@ -36,6 +37,8 @@ public:
 	using BaseCredentials::SetClientCredentials;
 
 	Credentials(FHttpRetrySchedulerBase& InHttpRef, FAccelByteMessagingSystem& MessagingRef, FString const& IamServerUrl);
+	/** @brief Resolves the IAM URL from InSettings on every token refresh, so a later environment switch is honored. */
+	Credentials(FHttpRetrySchedulerBase& InHttpRef, FAccelByteMessagingSystem& MessagingRef, SettingsPtr const& InSettings);
 	virtual ~Credentials();
 	
 	/** @brief The user was just authed: At this point, Credential auth tokens are already set. */
@@ -62,6 +65,9 @@ public:
 	FAccountUserData GetAccountUserData() const;
 	TMap<FString, FThirdPartyPlatformTokenData> GetThridPartyPlatformTokenData() const;
 
+	/** @brief IAM URL used for token refresh: the live Settings value when bound, else the URL given at construction. */
+	FString GetIamServerUrl() const;
+
 	bool IsSessionValid() const;
 	bool IsComply() const;
 	bool IsBanned(EBanType BanType) const;
@@ -73,6 +79,7 @@ protected:
 	
 	FString UserName; // DEPRECATED
 	FString IamServerUrl;
+	SettingsWPtr SettingsWeak;
 
 	FRWLock RefreshTokenAdditionalActionsMtx;
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;

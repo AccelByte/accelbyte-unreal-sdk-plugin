@@ -24,7 +24,7 @@ FApiClient::FApiClient(SettingsPtr const& InSettings
 	, MessagingSystem(MakeShared<FAccelByteMessagingSystem, ESPMode::ThreadSafe>())
 	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
 	, Settings(InSettings)
-	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*HttpRef, *MessagingSystem.Get(), InSettings->IamServerUrl))
+	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>(*HttpRef, *MessagingSystem.Get(), InSettings))
 	, TimeManagerWPtr(InAccelByteInstance->GetTimeManager())
 	, CurrencyPtr(MakeShared<AccelByte::Api::Currency, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, InAccelByteInstance->GetAccelBytePlatform()))
 	, WalletPtr(MakeShared<AccelByte::Api::Wallet, ESPMode::ThreadSafe>(*CredentialsRef, *Settings, *HttpRef, InAccelByteInstance->GetAccelBytePlatform()))

@@ -13,7 +13,7 @@ namespace AccelByte
 		: bUseSharedCredentials(false)
 		, AccelByteInstanceWeak(InAccelByteInstance)
 		, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
-		, ServerCredentialsRef(MakeShared<AccelByte::ServerCredentials, ESPMode::ThreadSafe>(*HttpRef, InServerSettings->IamServerUrl))
+		, ServerCredentialsRef(MakeShared<AccelByte::ServerCredentials, ESPMode::ThreadSafe>(*HttpRef, InServerSettings))
 		, ServerSettings(InServerSettings)
 		, ServerTimeManager(InTimeManager)
 		, ServerApiUtilitiesPtr(MakeShared<FAccelByteApiUtilities, ESPMode::ThreadSafe>(ServerCredentialsRef, ServerSettings.ToSharedRef(), HttpRef, ServerTimeManager))

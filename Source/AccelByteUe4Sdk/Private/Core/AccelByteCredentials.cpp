@@ -38,6 +38,12 @@ Credentials::Credentials(FHttpRetrySchedulerBase& InHttpRef, FAccelByteMessaging
 {
 }
 
+Credentials::Credentials(FHttpRetrySchedulerBase& InHttpRef, FAccelByteMessagingSystem& MessagingRef, SettingsPtr const& InSettings)
+	: Credentials(InHttpRef, MessagingRef, InSettings.IsValid() ? InSettings->IamServerUrl : FString())
+{
+	SettingsWeak = InSettings;
+}
+
 Credentials::~Credentials()
 {
 	{
@@ -241,6 +247,18 @@ TMap<FString, FThirdPartyPlatformTokenData> Credentials::GetThridPartyPlatformTo
 	return ThirdPartyPlatformTokenData;
 }
 
+FString Credentials::GetIamServerUrl() const
+{
+	// Settings::Reset rewrites the shared Settings in place on an environment switch, so read it live;
+	// the copy taken at construction would keep refreshing against the previous environment.
+	SettingsPtr const SettingsPin = SettingsWeak.Pin();
+	if (SettingsPin.IsValid() && !SettingsPin->IamServerUrl.IsEmpty())
+	{
+		return SettingsPin->IamServerUrl;
+	}
+	return IamServerUrl;
+}
+
 void Credentials::SendRefreshToken()
 {
 	FString TempClientId = GetOAuthClientId();
@@ -252,7 +270,7 @@ void Credentials::SendRefreshToken()
 		, TempToken.Refresh_token
 		, THandler<FOauth2TokenV4>::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenSuccessful)
 		, FOAuthErrorHandler::CreateThreadSafeSP(AsShared(), &Credentials::OnRefreshTokenFailed)
-		, IamServerUrl
+		, GetIamServerUrl()
 	);
 }
 
