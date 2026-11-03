@@ -534,7 +534,8 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(EAccelBytePlatformType Na
 	, EAccelBytePlatformType SecondaryPlatform
 	, FString const& SecondaryPlatformToken
 	, FVoidHandler const& OnSuccess
-	, FOAuthErrorHandler const& OnError)
+	, FOAuthErrorHandler const& OnError
+	, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -543,7 +544,8 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(EAccelBytePlatformType Na
 		, FAccelByteUtilities::GetPlatformString(SecondaryPlatform)
 		, SecondaryPlatformToken
 		, OnSuccess
-		, OnError);
+		, OnError
+		, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(FString const& NativePlatform
@@ -551,7 +553,8 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(FString const& NativePlat
 	, FString const& SecondaryPlatform
 	, FString const& SecondaryPlatformToken
 	, FVoidHandler const& OnSuccess
-	, FOAuthErrorHandler const& OnError)
+	, FOAuthErrorHandler const& OnError
+	, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -611,7 +614,8 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatform(FString const& NativePlat
 			})
 		, SettingsRef.IamServerUrl
 		, {}
-		, DeviceId);
+		, DeviceId
+		, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(EAccelBytePlatformType NativePlatform
@@ -619,7 +623,8 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(EAccelBytePlatformType 
 	, EAccelBytePlatformType SecondaryPlatform
 	, FString const& SecondaryPlatformToken
 	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
-	, FOAuthErrorHandler const& OnError)
+	, FOAuthErrorHandler const& OnError
+	, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -628,7 +633,8 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(EAccelBytePlatformType 
 		, FAccelByteUtilities::GetPlatformString(SecondaryPlatform)
 		, SecondaryPlatformToken
 		, OnSuccess
-		, OnError);
+		, OnError
+		, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePlatform
@@ -636,7 +642,8 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePl
 	, FString const& SecondaryPlatform
 	, FString const& SecondaryPlatformToken
 	, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
-	, FOAuthErrorHandler const& OnError)
+	, FOAuthErrorHandler const& OnError
+	, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -703,7 +710,8 @@ FAccelByteTaskWPtr User::LoginWithSimultaneousPlatformV4(FString const& NativePl
 			})
 		, SettingsRef.IamServerUrl
 		, {}
-		, DeviceId);
+		, DeviceId
+		, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::VerifyLoginWithNewDevice2FAEnabled(FString const& MfaToken
@@ -979,20 +987,23 @@ FAccelByteTaskWPtr User::LoginWithRefreshTokenV4(THandler<FAccelByteModelsLoginQ
 FAccelByteTaskWPtr User::RefreshPlatformToken(EAccelBytePlatformType NativePlatform
 	, FString const& NativePlatformToken
 	, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
-	, FOAuthErrorHandler const& OnError)
+	, FOAuthErrorHandler const& OnError
+	, FAccelByteRefreshPlatformTokenOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	return RefreshPlatformToken(FAccelByteUtilities::GetPlatformString(NativePlatform)
 		, NativePlatformToken
 		, OnSuccess
-		, OnError);
+		, OnError
+		, OptionalParams);
 }
 
 FAccelByteTaskWPtr User::RefreshPlatformToken(FString const& NativePlatform
 	, FString const& NativePlatformToken
 	, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
-	, FOAuthErrorHandler const& OnError)
+	, FOAuthErrorHandler const& OnError
+	, FAccelByteRefreshPlatformTokenOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1014,7 +1025,9 @@ FAccelByteTaskWPtr User::RefreshPlatformToken(FString const& NativePlatform
 		, NativePlatformToken
 		, OnSuccess
 		, OnError
-		, SettingsRef.IamServerUrl);
+		, SettingsRef.IamServerUrl
+		, {}
+		, OptionalParams);
 }
 
 bool User::IsTokenExpired(FRefreshInfo RefreshInfo)
@@ -2182,7 +2195,8 @@ FAccelByteTaskWPtr User::GetPlatformLinks(THandler<FPagedPlatformLinks> const& O
 FAccelByteTaskWPtr User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 	, FString const& Ticket
 	, FVoidHandler const& OnSuccess
-	, FOAuthErrorHandler const& OnError)
+	, FOAuthErrorHandler const& OnError
+	, FAccelByteLinkOtherPlatformOptionalParameters OptionalParams)
 {
 	return LinkOtherPlatform(PlatformType
 		, Ticket
@@ -2197,13 +2211,15 @@ FAccelByteTaskWPtr User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 				FErrorOAuthInfo ErrorOauthInfo;
 				FAccelByteJsonConverter::JsonObjectStringToUStruct(JsonString, &ErrorOauthInfo);
 				OnError.ExecuteIfBound(ErrorCode, ErrorMessage,ErrorOauthInfo);
-			}));
+			})
+		, OptionalParams);
 }
 	
 FAccelByteTaskWPtr User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 	, FString const& Ticket
 	, FVoidHandler const& OnSuccess
-	, FCustomErrorHandler const& OnError)
+	, FCustomErrorHandler const& OnError
+	, FAccelByteLinkOtherPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2214,7 +2230,12 @@ FAccelByteTaskWPtr User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
 		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
-	const FString Content = FString::Printf(TEXT("ticket=%s"), *FGenericPlatformHttp::UrlEncode(*Ticket));
+	const FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("ticket"), FGenericPlatformHttp::UrlEncode(Ticket)},
+		{TEXT("codeVerifier"), FGenericPlatformHttp::UrlEncode(OptionalParams.CodeVerifier)},
+		{TEXT("redirectUri"), FGenericPlatformHttp::UrlEncode(OptionalParams.RedirectUri)},
+		{TEXT("appId"), FGenericPlatformHttp::UrlEncode(OptionalParams.AppId)},
+	}, TEXT(""));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
@@ -2227,7 +2248,8 @@ FAccelByteTaskWPtr User::LinkOtherPlatform(EAccelBytePlatformType PlatformType
 FAccelByteTaskWPtr User::LinkOtherPlatformId(FString const& PlatformId
 	, FString const& Ticket
 	, FVoidHandler const& OnSuccess
-	, FCustomErrorHandler const& OnError)
+	, FCustomErrorHandler const& OnError
+	, FAccelByteLinkOtherPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -2236,7 +2258,12 @@ FAccelByteTaskWPtr User::LinkOtherPlatformId(FString const& PlatformId
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
 		, *FGenericPlatformHttp::UrlEncode(PlatformId));
 
-	const FString Content = FString::Printf(TEXT("ticket=%s"), *FGenericPlatformHttp::UrlEncode(*Ticket));
+	const FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("ticket"), FGenericPlatformHttp::UrlEncode(Ticket)},
+		{TEXT("codeVerifier"), FGenericPlatformHttp::UrlEncode(OptionalParams.CodeVerifier)},
+		{TEXT("redirectUri"), FGenericPlatformHttp::UrlEncode(OptionalParams.RedirectUri)},
+		{TEXT("appId"), FGenericPlatformHttp::UrlEncode(OptionalParams.AppId)},
+	}, TEXT(""));
 	
 	TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
@@ -2294,7 +2321,8 @@ FAccelByteTaskWPtr User::ForcePlatformLinkV3(
 	FString const& PlatformId,
 	FString const& Ticket,
 	FVoidHandler const& OnSuccess,
-	FCustomErrorHandler const& OnError)
+	FCustomErrorHandler const& OnError,
+	FAccelByteLinkOtherPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -2303,8 +2331,12 @@ FAccelByteTaskWPtr User::ForcePlatformLinkV3(
 		*FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace()),
 		*FGenericPlatformHttp::UrlEncode(PlatformId));
 
-	const FString Content = FString::Printf(TEXT("ticket=%s"),
-		*FGenericPlatformHttp::UrlEncode(*Ticket));
+	const FString Content = FAccelByteUtilities::CreateQueryParams({
+		{TEXT("ticket"), FGenericPlatformHttp::UrlEncode(Ticket)},
+		{TEXT("codeVerifier"), FGenericPlatformHttp::UrlEncode(OptionalParams.CodeVerifier)},
+		{TEXT("redirectUri"), FGenericPlatformHttp::UrlEncode(OptionalParams.RedirectUri)},
+		{TEXT("appId"), FGenericPlatformHttp::UrlEncode(OptionalParams.AppId)},
+	}, TEXT(""));
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},

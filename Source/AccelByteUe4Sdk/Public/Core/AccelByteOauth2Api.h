@@ -334,7 +334,8 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
-	 * 
+	 * @param OptionalParams (optional) Optional form parameters, e.g. the platform App ID.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	 FAccelByteTaskWPtr RefreshPlatformToken(FString const& ClientID
@@ -344,7 +345,8 @@ public:
 		, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
-		, TMap<FString, FString> AdditionalHeaders = {});
+		, TMap<FString, FString> AdditionalHeaders = {}
+		, FAccelByteRefreshPlatformTokenOptionalParameters OptionalParams = {});
 
 	/**
      * @brief Revoke specified access token to make it invalid.
@@ -532,7 +534,8 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
-	 * 
+	 * @param OptionalParams (optional) Optional form parameters, e.g. the native platform App ID.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	 FAccelByteTaskWPtr GetTokenWithSimultaneousPlatformToken(FString const& ClientId
@@ -545,7 +548,8 @@ public:
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
 		, TMap<FString, FString> AdditionalHeaders = {}
-		, FString const& DeviceId = TEXT(""));
+		, FString const& DeviceId = TEXT("")
+		, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams = {});
 	
 	/**
 	 * @brief Verify and Remember new device when user enabled 2FA.
@@ -955,7 +959,8 @@ public:
 	 * @param IamUrl (optional) The IAM service URL used to call the API, if it's an empty string
 	 *			then the value from FRegistry is used instead.
 	 * @param AdditionalHeaders (optional) Additional headers that will be added to the HTTP Request.
-	 * 
+	 * @param OptionalParams (optional) Optional form parameters, e.g. the native platform App ID.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	 FAccelByteTaskWPtr GetTokenWithSimultaneousPlatformTokenV4(FString const& ClientId
@@ -968,7 +973,8 @@ public:
 		, FOAuthErrorHandler const& OnError
 		, FString const& IamUrl = TEXT("")
 		, TMap<FString, FString> AdditionalHeaders = {}
-		, FString const& DeviceId = TEXT(""));
+		, FString const& DeviceId = TEXT("")
+		, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Get access token using specified refresh token as long as the refresh token is still valid with 2FA enabled.

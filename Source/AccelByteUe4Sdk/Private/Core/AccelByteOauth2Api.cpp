@@ -301,6 +301,9 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformToken(FString const& ClientI
 		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(EncodedMacAddress) },
 		{TEXT("additionalData"), ConstructAdditionalData()},
 		{TEXT("serviceLabel"), OptionalParams.ServiceLabelForPSN},
+		{TEXT("code_verifier"), FGenericPlatformHttp::UrlEncode(OptionalParams.CodeVerifier)},
+		{TEXT("redirect_uri"), FGenericPlatformHttp::UrlEncode(OptionalParams.RedirectUri)},
+		{TEXT("appId"), FGenericPlatformHttp::UrlEncode(OptionalParams.AppId)},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
@@ -361,7 +364,8 @@ FAccelByteTaskWPtr Oauth2::RefreshPlatformToken(FString const& ClientID
 	, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
-	, TMap<FString, FString> AdditionalHeaders)
+	, TMap<FString, FString> AdditionalHeaders
+	, FAccelByteRefreshPlatformTokenOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -370,6 +374,10 @@ FAccelByteTaskWPtr Oauth2::RefreshPlatformToken(FString const& ClientID
 		*PlatformID);
 
 	FString Content = FString::Printf(TEXT("platform_token=%s"), *PlatformToken);
+	if (!OptionalParams.AppId.IsEmpty())
+	{
+		Content.Append(FString::Printf(TEXT("&appId=%s"), *FGenericPlatformHttp::UrlEncode(OptionalParams.AppId)));
+	}
 	FHttpRequestPtr Request = ConstructTokenRequest(Url, ClientID, ClientSecret, AdditionalHeaders);
 	Request->SetContentAsString(Content);
 
@@ -563,7 +571,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformToken(FString const& 
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
 	, TMap<FString, FString> AdditionalHeaders
-	, FString const& DeviceId)
+	, FString const& DeviceId
+	, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -580,6 +589,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformToken(FString const& 
 		{ TEXT("simultaneousPlatform"), FGenericPlatformHttp::UrlEncode(SecondaryPlatformName) },
 		{ TEXT("simultaneousTicket"), FGenericPlatformHttp::UrlEncode(SecondaryPlatformToken) },
 		{ TEXT("additionalData"), ConstructAdditionalData() },
+		{ TEXT("appId"), FGenericPlatformHttp::UrlEncode(OptionalParams.AppId) },
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
@@ -910,6 +920,9 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithOtherPlatformTokenV4(FString const& Clien
 		{TEXT("macAddress"), FGenericPlatformHttp::UrlEncode(EncodedMacAddress) },
 		{TEXT("additionalData"), ConstructAdditionalData()},
 		{TEXT("serviceLabel"), OptionalParams.ServiceLabelForPSN},
+		{TEXT("code_verifier"), FGenericPlatformHttp::UrlEncode(OptionalParams.CodeVerifier)},
+		{TEXT("redirect_uri"), FGenericPlatformHttp::UrlEncode(OptionalParams.RedirectUri)},
+		{TEXT("appId"), FGenericPlatformHttp::UrlEncode(OptionalParams.AppId)},
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 
@@ -1035,7 +1048,8 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformTokenV4(FString const
 	, FOAuthErrorHandler const& OnError
 	, FString const& IamUrl
 	, TMap<FString, FString> AdditionalHeaders
-	, FString const& DeviceId)
+	, FString const& DeviceId
+	, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -1052,6 +1066,7 @@ FAccelByteTaskWPtr Oauth2::GetTokenWithSimultaneousPlatformTokenV4(FString const
 		{ TEXT("simultaneousPlatform"), FGenericPlatformHttp::UrlEncode(SecondaryPlatformName) },
 		{ TEXT("simultaneousTicket"), FGenericPlatformHttp::UrlEncode(SecondaryPlatformToken) },
 		{ TEXT("additionalData"), ConstructAdditionalData() },
+		{ TEXT("appId"), FGenericPlatformHttp::UrlEncode(OptionalParams.AppId) },
 	}, TEXT(""));
 	Request->SetContentAsString(Content);
 

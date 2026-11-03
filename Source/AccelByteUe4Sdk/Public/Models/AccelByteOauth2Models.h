@@ -241,4 +241,50 @@ struct ACCELBYTEUE4SDK_API FAccelByteLoginWithOtherPlatformOptionalParameters
 
 	/* If need to skip set cookie. Default is false. */
 	bool bSkipSetCookie = false;
+
+	/* PKCE code verifier. Required when the platform issued the authorization code against a code challenge. Leave empty for non-PKCE flows. */
+	FString CodeVerifier = "";
+
+	/* The redirect URI the client requested the authorization code with. Sent whenever it is set;
+	   IAM only acts on it alongside CodeVerifier on this endpoint. */
+	FString RedirectUri = "";
+
+	/* The application ID on the platform that issued the ticket, e.g. the Steam App ID. Only Steam reads it today.
+	   Optional while the namespace has a single App ID; required once the namespace enables multiple App IDs. Leave empty to omit. */
+	FString AppId = "";
+};
+
+// This struct is not a blueprint type and it won't be serialized or deserialized.
+// Mirrors the login optional parameters so new optional form parameters on the platform link endpoints do not require new overloads.
+struct ACCELBYTEUE4SDK_API FAccelByteLinkOtherPlatformOptionalParameters
+{
+	/* PKCE code verifier. Required when the platform issued the authorization code against a code challenge. Leave empty for non-PKCE flows. */
+	FString CodeVerifier = "";
+
+	/* The redirect URI the client requested the authorization code with. Sent whenever it is set;
+	   the forced link endpoint only acts on it alongside CodeVerifier, while the plain link
+	   endpoint reads it regardless. */
+	FString RedirectUri = "";
+
+	/* The application ID on the platform that issued the ticket, e.g. the Steam App ID. Only Steam reads it today.
+	   Optional while the namespace has a single App ID; required once the namespace enables multiple App IDs. Leave empty to omit. */
+	FString AppId = "";
+};
+
+// This struct is not a blueprint type and it won't be serialized or deserialized.
+// Optional form parameters on the simultaneous login endpoint, so new ones do not require new overloads.
+struct ACCELBYTEUE4SDK_API FAccelByteLoginWithSimultaneousPlatformOptionalParameters
+{
+	/* The application ID on the platform that issued the native platform ticket, e.g. the Steam App ID. Only Steam reads it today.
+	   Optional while the namespace has a single App ID; required once the namespace enables multiple App IDs. Leave empty to omit. */
+	FString AppId = "";
+};
+
+// This struct is not a blueprint type and it won't be serialized or deserialized.
+// Optional form parameters on the platform token refresh endpoint, so new ones do not require new overloads.
+struct ACCELBYTEUE4SDK_API FAccelByteRefreshPlatformTokenOptionalParameters
+{
+	/* The application ID on the platform that issued the ticket, e.g. the Steam App ID. Only Steam reads it today.
+	   Optional while the namespace has a single App ID; required once the namespace enables multiple App IDs. Leave empty to omit. */
+	FString AppId = "";
 };

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.11.0] (2026-11-03)
+
+
+### Features
+
+* **user:** send optional Steam appId on platform login, link, simultaneous login and token refresh (AAX-3502) 
+* **user:** support PKCE code_verifier on Discord platform link and login (AAX-3627) 
+
 ### [28.10.1] (2026-10-14)
 
 

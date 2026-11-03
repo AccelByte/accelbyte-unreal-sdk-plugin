@@ -132,6 +132,10 @@ namespace AccelByte
 		SimultaneousLogin_AccountAlreadyLinkedButNativeTicketMismatch = 10221,
 		SimultaneousLogin_SecondaryPlatformAccountPreviouslyLinkedToAnotherAccount = 10218,
 
+		// Platform App ID
+		PlatformAppIdRequired = 10252,
+		PlatformAppIdNotAllowed = 10253,
+
 		// Platform error
 		PlatformInternalServerErrorException = 20000,
 		UnauthorizedException,

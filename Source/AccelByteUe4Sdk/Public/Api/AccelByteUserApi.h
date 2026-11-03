@@ -293,7 +293,8 @@ public:
 		, EAccelBytePlatformType SecondaryPlatform
 		, FString const& SecondaryPlatformToken
 		, FVoidHandler const& OnSuccess
-		, FOAuthErrorHandler const& OnError);
+		, FOAuthErrorHandler const& OnError
+		, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -312,7 +313,8 @@ public:
 		, FString const& SecondaryPlatform
 		, FString const& SecondaryPlatformToken
 		, FVoidHandler const& OnSuccess
-		, FOAuthErrorHandler const& OnError);
+		, FOAuthErrorHandler const& OnError
+		, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -331,7 +333,8 @@ public:
 		, EAccelBytePlatformType SecondaryPlatform
 		, FString const& SecondaryPlatformToken
 		, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
-		, FOAuthErrorHandler const& OnError);
+		, FOAuthErrorHandler const& OnError
+		, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Login with native platform and secondary platform. Currently support Windows only.
@@ -350,7 +353,8 @@ public:
 		, FString const& SecondaryPlatform
 		, FString const& SecondaryPlatformToken
 		, THandler<FAccelByteModelsLoginQueueTicketInfo> const& OnSuccess
-		, FOAuthErrorHandler const& OnError);
+		, FOAuthErrorHandler const& OnError
+		, FAccelByteLoginWithSimultaneousPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Verify log in with new device when user enabled 2FA.
@@ -492,7 +496,8 @@ public:
 	FAccelByteTaskWPtr RefreshPlatformToken(EAccelBytePlatformType NativePlatform
 		, FString const& NativePlatformToken
 		, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
-		, FOAuthErrorHandler const& OnError);
+		, FOAuthErrorHandler const& OnError
+		, FAccelByteRefreshPlatformTokenOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Refresh the platform token that is stored in the IAM backend.
@@ -509,7 +514,8 @@ public:
 	FAccelByteTaskWPtr RefreshPlatformToken(FString const& NativePlatform
 		, FString const& NativePlatformToken
 		, THandler<FPlatformTokenRefreshResponse> const& OnSuccess
-		, FOAuthErrorHandler const& OnError);
+		, FOAuthErrorHandler const& OnError
+		, FAccelByteRefreshPlatformTokenOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief Relogin using the previously logged-in platform account. WINDOWS ONLY
@@ -954,13 +960,15 @@ public:
 	 * @param Ticket The Ticket.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param OptionalParams Optional form parameters, e.g. the PKCE code verifier.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr LinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, FString const& Ticket
 		, FVoidHandler const& OnSuccess
-		, FOAuthErrorHandler const& OnError);
+		, FOAuthErrorHandler const& OnError
+		, FAccelByteLinkOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief This function links user's current account to their other account in other platform.
@@ -971,13 +979,15 @@ public:
 	 * @param Ticket The Ticket.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param OptionalParams Optional form parameters, e.g. the PKCE code verifier.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr LinkOtherPlatform(EAccelBytePlatformType PlatformType
 		, FString const& Ticket
 		, FVoidHandler const& OnSuccess
-		, FCustomErrorHandler const& OnError);
+		, FCustomErrorHandler const& OnError
+		, FAccelByteLinkOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief This function links user's current account to their other account in other platform, especially to support OIDC
@@ -988,13 +998,15 @@ public:
 	 * @param Ticket The Ticket.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param OptionalParams Optional form parameters, e.g. the PKCE code verifier.
 	 * 
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr LinkOtherPlatformId(FString const& PlatformId
 		, FString const& Ticket
 		, FVoidHandler const& OnSuccess
-		, FCustomErrorHandler const& OnError);
+		, FCustomErrorHandler const& OnError
+		, FAccelByteLinkOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief [DEPRECATED] This function forced links user's current account to their other account in other platform.
@@ -1043,13 +1055,15 @@ public:
 	 * @param Ticket The Ticket/Token from platform authentication
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param OptionalParams Optional form parameters, e.g. the PKCE code verifier.
 	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr ForcePlatformLinkV3(FString const& PlatformId
 		, FString const& Ticket
 		, FVoidHandler const& OnSuccess
-		, FCustomErrorHandler const& OnError);
+		, FCustomErrorHandler const& OnError
+		, FAccelByteLinkOtherPlatformOptionalParameters OptionalParams = {});
 
 	/**
 	 * @brief This function unlinks user's current account from their other account in other platform
