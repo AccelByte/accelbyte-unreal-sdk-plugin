@@ -36,16 +36,22 @@ public:
 		
 	/**
 	 * @brief Used to submit user's account deletion requests. Used when your account is full account
-	 * 
+	 *
+	 * A successful submission revokes every token the user holds, so the caller must log in again
+	 * before calling GetStatusAccountDeletion or CancelAccountDeletion.
+	 * For a headless account, use SubmitAccountDeletionOtherPlatform or SubmitAccountDeletionOtherPlatformId instead.
+	 *
 	 * @param Password IAM password of the user.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGDPRSubmitAccountDeletionResponse.
 	 * @param OnError This will be called when the operation failed.
-	 * 
+	 * @param LanguageTag Optional language tag for the notification email.
+	 *
 	 * @return AccelByteTask object to track and cancel the ongoing API operation.
 	 */
 	FAccelByteTaskWPtr SubmitAccountDeletion(FString const& Password
 		, THandler<FAccelByteModelsGDPRSubmitAccountDeletionResponse> const& OnSuccess
-		, FErrorHandler const& OnError);
+		, FErrorHandler const& OnError
+		, FString const& LanguageTag = TEXT(""));
 		
 	/**
 	 * @brief Used to submit account deletion requests. Used when your account is headless account
@@ -163,6 +169,44 @@ public:
 	 */
 	FAccelByteTaskWPtr CancelMyPersonalDataRequest(FDateTime const& RequestDate
 		, FVoidHandler const& OnSuccess
+		, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Used to submit a personal data request. Used when your account is a full account (password verification).
+	 *
+	 * List or cancel the submitted request with GetMyPersonalDataRequests / CancelMyPersonalDataRequest, and fetch its
+	 * download URL with GeneratePersonalDataDownloadUrl once it completes.
+	 * For a headless account, use SubmitMyPersonalDataRequest or SubmitMyPersonalDataRequestOtherPlatformId instead.
+	 *
+	 * @param Password IAM password of the user.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGDPRSubmitPersonalDataRequestResponse.
+	 * @param OnError This will be called when the operation failed.
+	 * @param LanguageTag Optional language tag for the notification email.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr SubmitPersonalDataRequest(FString const& Password
+		, THandler<FAccelByteModelsGDPRSubmitPersonalDataRequestResponse> const& OnSuccess
+		, FErrorHandler const& OnError
+		, FString const& LanguageTag = TEXT(""));
+
+	/**
+	 * @brief Used to generate the download URL of a completed personal data request. Used when your account is a full account (password verification).
+	 *
+	 * Succeeds only for a request whose status is "Completed". Otherwise the request fails: a request that is still
+	 * being processed returns error code 13261, a failed one 13283, an expired one 13279, an unknown one 13004, and a
+	 * wrong password 13122.
+	 *
+	 * @param RequestDate The request date identifying which request to download, as returned by SubmitPersonalDataRequest or GetMyPersonalDataRequests.
+	 * @param Password IAM password of the user.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGDPRPersonalDataDownloadUrlResponse.
+	 * @param OnError This will be called when the operation failed.
+	 *
+	 * @return AccelByteTask object to track and cancel the ongoing API operation.
+	 */
+	FAccelByteTaskWPtr GeneratePersonalDataDownloadUrl(FDateTime const& RequestDate
+		, FString const& Password
+		, THandler<FAccelByteModelsGDPRPersonalDataDownloadUrlResponse> const& OnSuccess
 		, FErrorHandler const& OnError);
 
 private:

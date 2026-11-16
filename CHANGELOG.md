@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version] for commit guidelines.
 
+## [28.12.0] (2026-11-16)
+
+
+### Features
+
+* **gdpr:** add full account personal data request and download url methods (AAX-3658) 
+
 ## [28.11.0] (2026-11-03)
 
 

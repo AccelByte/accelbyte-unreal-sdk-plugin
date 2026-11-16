@@ -38,10 +38,11 @@ GDPR::~GDPR(){}
 
 FAccelByteTaskWPtr GDPR::SubmitAccountDeletion(FString const& Password
 	, THandler<FAccelByteModelsGDPRSubmitAccountDeletionResponse> const& OnSuccess
-	, FErrorHandler const& OnError)
+	, FErrorHandler const& OnError
+	, FString const& LanguageTag)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/deletions")
 		, *SettingsRef.GDPRServerUrl
 		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
@@ -49,6 +50,10 @@ FAccelByteTaskWPtr GDPR::SubmitAccountDeletion(FString const& Password
 
 	TMap<FString, FString> FormFields;
 	FormFields.Add(TEXT("password"), Password);
+	if (!LanguageTag.IsEmpty())
+	{
+		FormFields.Add(TEXT("languageTag"), LanguageTag);
+	}
 
 	TMap<FString, FString> Headers = {
 		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
@@ -219,6 +224,57 @@ FAccelByteTaskWPtr GDPR::CancelMyPersonalDataRequest(FDateTime const& RequestDat
 		, *FGenericPlatformHttp::UrlEncode(RequestDate.ToIso8601()));
 
 	return HttpClient.ApiRequest(TEXT("DELETE"), Url, {}, FString(), OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr GDPR::SubmitPersonalDataRequest(FString const& Password
+	, THandler<FAccelByteModelsGDPRSubmitPersonalDataRequestResponse> const& OnSuccess
+	, FErrorHandler const& OnError
+	, FString const& LanguageTag)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/requests")
+		, *SettingsRef.GDPRServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId()));
+
+	TMap<FString, FString> FormFields;
+	FormFields.Add(TEXT("password"), Password);
+	if (!LanguageTag.IsEmpty())
+	{
+		FormFields.Add(TEXT("languageTag"), LanguageTag);
+	}
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
+}
+
+FAccelByteTaskWPtr GDPR::GeneratePersonalDataDownloadUrl(FDateTime const& RequestDate
+	, FString const& Password
+	, THandler<FAccelByteModelsGDPRPersonalDataDownloadUrlResponse> const& OnSuccess
+	, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/requests/%s/generate")
+		, *SettingsRef.GDPRServerUrl
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetNamespace())
+		, *FGenericPlatformHttp::UrlEncode(CredentialsRef->GetUserId())
+		, *FGenericPlatformHttp::UrlEncode(RequestDate.ToIso8601()));
+
+	TMap<FString, FString> FormFields;
+	FormFields.Add(TEXT("password"), Password);
+
+	TMap<FString, FString> Headers = {
+		{TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded")},
+		{TEXT("Accept"), TEXT("application/json")}
+	};
+
+	return HttpClient.ApiRequest(TEXT("POST"), Url, {}, FormFields, Headers, OnSuccess, OnError);
 }
 
 } // Namespace Api

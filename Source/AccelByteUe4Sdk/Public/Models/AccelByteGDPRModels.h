@@ -87,3 +87,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGDPRPersonalDataRequestsResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
 	FAccelByteModelsPaging Paging{};
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGDPRPersonalDataDownloadUrlResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | GDPR")
+	FString URL{};
+};
